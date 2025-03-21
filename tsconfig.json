@@ -1,0 +1,48 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "include": [".astro/types.d.ts", "src/**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "strictNullChecks": false,
+    "allowJs": true,
+    "plugins": [
+      {
+        "name": "@astrojs/tsplugin"
+      }
+    ],
+    "paths": {
+      "@basics/*": [
+        "./src/components/basics/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@visuals/*": [
+        "./src/assets/visuals/*"
+      ],
+      "@layouts/*": [
+        "./src/layouts/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@scripts/*": [
+        "./scripts/*"
+      ],
+      "@changelog--code/*": [
+        ".src/content/changelog-code/*"
+      ],
+      "@changelog--content/*": [
+        ".src/content/changelog-content/*"
+      ]
+    },
+    "types": ["astro/client"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "astro"
+  }
+}
+

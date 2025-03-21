@@ -1,0 +1,107 @@
+---
+import Layout from "@layouts/Layout.astro";
+import ToolCard from "@components/tool-components/ToolCard.astro";
+import TrademarkColumn from "@basics/TrademarkColumn.astro";
+import SimplestRibbon from "@basics/SimplestRibbon.astro";
+import { getCollection } from "astro:content";
+
+interface Tool {
+  site_name?: string;
+  title?: string;
+  url: string;
+  image?: string;
+  favicon?: string;
+  description?: string;
+  description_site_cp?: string;
+  zinger?: string;
+  tags?: string[];
+  og_screenshot_url?: string;
+  og_last_fetch?: string;
+}
+
+const toolEntries = await getCollection("tooling");
+const processedTools = toolEntries.map((entry) => {
+  // Get the frontmatter data
+  const frontmatter = entry.data;
+
+  // Create the tool object with all properties
+  const tool = {
+    site_name: frontmatter.site_name,
+    title: frontmatter.title,
+    url: frontmatter.url,
+    image: frontmatter.image,
+    favicon: frontmatter.favicon,
+    description: frontmatter.description || frontmatter.zinger || "",
+    description_site_cp: frontmatter.description_site_cp,
+    tags: frontmatter.tags || [],
+    filename: entry.id,
+    og_screenshot_url: frontmatter.og_screenshot_url,
+    og_last_fetch: frontmatter.og_last_fetch,
+  };
+
+  return tool;
+});
+
+// Trademark directories configuration
+const TRADEMARK_CONFIG = {
+  sourceDir: "src/assets/Visuals/Tooling-Trademarks",
+  destinationDir: "src/assets/Visuals/Tooling-Trademarks/usable--darkmode",
+};
+---
+
+<Layout title="Tools">
+  <main class="container">
+    <section>
+      <h2>Simplest Ribbon</h2>
+      <SimplestRibbon
+        sourceDir={TRADEMARK_CONFIG.sourceDir}
+        destinationDir={TRADEMARK_CONFIG.destinationDir}
+      />
+    </section>
+    <section class="trademarks-section">
+      <h2>Trademark Sorting</h2>
+      <TrademarkColumn
+        sourceDir={TRADEMARK_CONFIG.sourceDir}
+        destinationDir={TRADEMARK_CONFIG.destinationDir}
+      />
+    </section>
+
+    <!--     <section class="tools-section">
+      <h1>Tools</h1>
+      <div class="tools-grid">
+        {processedTools.map((tool: Tool) => <ToolCard tool={tool} />)}
+      </div>
+    </section> -->
+  </main>
+</Layout>
+
+<style>
+  .container {
+    max-width: 94%;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .trademarks-section {
+    margin-bottom: 4rem;
+  }
+
+  h1,
+  h2 {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .tools-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+  }
+</style>

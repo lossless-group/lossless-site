@@ -1,0 +1,76 @@
+---
+import TrademarkFragment from "@basics/TrademarkFragment.astro";
+import fs from "node:fs";
+import path from "node:path";
+
+const componentsDir = path.join(
+  process.cwd(),
+  "src/assets/visuals-as-components/tooling-trademarks/"
+);
+
+let trademarkFiles: string[] = [];
+try {
+  const files = fs.readdirSync(componentsDir);
+  trademarkFiles = files
+    .filter((file) => file.startsWith("trademark__") && file.endsWith(".astro"))
+    .map((file) => file.replace("trademark__", "").replace(".astro", ""));
+} catch (error) {
+  console.error("Error reading components directory:", error);
+}
+
+function shuffle(array: string[]): string[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+const shuffledTrademarks = shuffle(trademarkFiles);
+---
+
+<div class="trademark-ribbon">
+  <div class="ribbon">
+    {
+      shuffledTrademarks.map((trademark) => (
+        <div class="trademark">
+          <TrademarkFragment trademark={trademark} />
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .trademark-ribbon {
+    width: 100%;
+    height: 6vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .ribbon {
+    display: flex;
+    animation: scroll 320s linear infinite;
+    width: max-content;
+    max-height: 100%;
+  }
+
+  .trademark {
+    height: 100%;
+    width: auto;
+    margin: 0 1rem;
+    box-sizing: border-box;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+</style>

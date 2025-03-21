@@ -1,0 +1,277 @@
+---
+import { filterTitle, getEffectiveSiteName } from "@utils/toolUtils";
+import TagCloud from "./TagCloud.astro";
+
+interface Tool {
+  site_name?: string;
+  title?: string;
+  url: string;
+  image?: string;
+  favicon?: string;
+  description?: string;
+  description_site_cp?: string;
+  tags?: string[];
+  filename?: string;
+  og_screenshot_url?: string;
+}
+
+interface Props {
+  tool?: Tool;
+  // Support for direct properties
+  site_name?: string;
+  title?: string;
+  url?: string;
+  image?: string;
+  favicon?: string;
+  description?: string;
+  description_site_cp?: string;
+  tags?: string[];
+  filename?: string;
+  og_screenshot_url?: string;
+}
+
+const { tool, ...directProps } = Astro.props;
+
+// Use tool props if provided, otherwise use direct props
+const {
+  site_name = directProps.site_name,
+  title = directProps.title,
+  url = directProps.url,
+  image = directProps.image,
+  favicon = directProps.favicon,
+  description = directProps.description,
+  description_site_cp = directProps.description_site_cp,
+  tags = directProps.tags || [],
+  filename = directProps.filename,
+  og_screenshot_url = directProps.og_screenshot_url,
+} = tool || directProps;
+
+// Ensure tags is always an array
+const safeTags = tags || [];
+
+// Get the effective site name using the utility function
+const effectiveSiteName = getEffectiveSiteName(site_name, filename, url);
+
+// Only set displayTitle if title exists, otherwise leave it blank
+const displayTitle = title ? filterTitle(title, effectiveSiteName || "") : "";
+
+// More robust description handling
+const hasDescriptionSiteCp =
+  description_site_cp !== undefined &&
+  description_site_cp !== null &&
+  description_site_cp.trim() !== "";
+const hasDescription =
+  description !== undefined &&
+  description !== null &&
+  description.trim() !== "";
+
+/* console.log("Description availability:", {
+  hasDescriptionSiteCp,
+  hasDescription,
+  description_site_cp_type: typeof description_site_cp,
+  description_type: typeof description,
+  description_site_cp_value: description_site_cp,
+  description_value: description,
+}); */
+
+const effectiveDescription = hasDescriptionSiteCp
+  ? description_site_cp
+  : hasDescription
+    ? description
+    : "";
+
+// Log the final effective description
+/* console.log("Effective description:", {
+  value: effectiveDescription,
+  length: effectiveDescription.length,
+  isEmpty: effectiveDescription === "",
+}); */
+---
+
+<div class="tool-card">
+  <div class="content-wrapper">
+    {
+      (image || og_screenshot_url) && (
+        <div class="tool-card-image">
+          <img
+            src={image || og_screenshot_url}
+            alt={displayTitle}
+            data-primary-image={image}
+            data-screenshot-url={og_screenshot_url}
+          />
+        </div>
+      )
+    }
+    <div class="tool-card__header">
+      <div class="tool-card__site-name">
+        {favicon && <img class="tool-favicon" src={favicon} alt="" />}
+        <a href={url} target="_blank" rel="noopener noreferrer">
+          <h2>{effectiveSiteName}</h2>
+        </a>
+      </div>
+      <h4>{displayTitle}</h4>
+    </div>
+    {
+      effectiveDescription && (
+        <p class="tool-description">{effectiveDescription}</p>
+      )
+    }
+    <TagCloud tags={tags} />
+  </div>
+</div>
+
+<script>
+  // Handle image loading and fallback
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".tool-card-image img").forEach((img) => {
+      const imgElement = img as HTMLImageElement;
+      imgElement.addEventListener(
+        "error",
+        function () {
+          const imageElement = imgElement;
+          const primaryImage = imageElement.getAttribute("data-primary-image");
+          const screenshotUrl = imageElement.getAttribute(
+            "data-screenshot-url"
+          );
+
+          // If this is the primary image failing and we have a screenshot URL
+          if (imageElement.src === primaryImage && screenshotUrl) {
+            console.log(
+              "Primary image failed to load, falling back to screenshot URL"
+            );
+            imageElement.src = screenshotUrl;
+
+            // Set up error handler for the fallback image
+            imageElement.addEventListener(
+              "error",
+              function () {
+                console.log(
+                  "Screenshot image also failed to load, hiding image container"
+                );
+                const container = imageElement.closest(
+                  ".tool-card-image"
+                ) as HTMLElement;
+                if (container) container.style.display = "none";
+              },
+              { once: true }
+            );
+          } else {
+            // Either the fallback failed or we don't have a fallback
+            console.log(
+              "Image failed to load and no fallback available, hiding image container"
+            );
+            const container = imageElement.closest(
+              ".tool-card-image"
+            ) as HTMLElement;
+            if (container) container.style.display = "none";
+          }
+        },
+        { once: true }
+      );
+    });
+  });
+</script>
+
+<style>
+  .tool-card {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    color: aliceblue;
+    padding: 0.15em;
+    border-radius: 1em;
+    transition: all 0.2s ease-in-out;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    min-width: 310px;
+    max-height: 100%;
+    margin-bottom: 2px;
+    box-sizing: border-box;
+  }
+
+  .tool-card h2 {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25em;
+  }
+
+  .tool-card .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5em;
+  }
+
+  .tool-card:hover {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 20%
+    );
+    transform: translateY(-2px);
+    margin-bottom: 0;
+  }
+
+  .tool-card-image {
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    margin-bottom: 0.5em;
+  }
+
+  .tool-card-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 0.5em;
+  }
+
+  .tool-card__header {
+    display: block;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .tool-card__site-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .tool-card__site-name h2 {
+    margin: 0;
+    line-height: 1;
+  }
+
+  .tool-favicon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: block;
+  }
+
+  .tool-card h4 {
+    color: var(--clr-heading);
+    font-size: var(--fs-350);
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .tool-description {
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-300);
+    margin-bottom: 0.5em;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+</style>
