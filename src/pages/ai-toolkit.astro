@@ -1,0 +1,74 @@
+---
+import ToolkitLayout from "@layouts/ToolkitLayout.astro";
+import { getCollection } from "astro:content";
+import ToolCard from "@components/tool-components/ToolCard.astro";
+import TagColumn from "@components/tool-components/TagColumn.astro";
+
+// Get the tag from the URL parameters
+const tag = "AI-Toolkit"
+console.log("Current tag:", tag);
+
+// Get all tool entries
+const toolEntries = await getCollection("tooling");
+console.log("Tool entries:", toolEntries.length);
+
+interface Tool {
+  site_name?: string;
+  title?: string;
+  url: string;
+  image?: string;
+  favicon?: string;
+  description?: string;
+  description_site_cp?: string;
+  zinger?: string;
+  tags?: string[];
+  og_screenshot_url?: string;
+  og_last_fetch?: string;
+}
+
+// Filter tools by tag
+const aiToolKit = toolEntries
+  .filter((entry) => {
+    const frontmatter = entry.data;
+    return frontmatter.tags && frontmatter.tags.includes(tag);
+    console.log("Filtered toolkit:", aiToolKit.length);
+  })
+  .map((entry) => ({
+    site_name: entry.data.site_name,
+    title: entry.data.title,
+    url: entry.data.url,
+    image: entry.data.image,
+    favicon: entry.data.favicon,
+    description: entry.data.description || entry.data.zinger || "",
+    description_site_cp: entry.data.description_site_cp,
+    tags: entry.data.tags || [],
+    filename: entry.id,
+    og_screenshot_url: entry.data.og_screenshot_url,
+  }));
+
+const allTags = Array.from(
+  new Set(
+    aiToolKit.flatMap(tool => tool.tags)
+  )
+).sort()
+
+// Create a title for the page
+const pageTitle = `Tools tagged with "${tag}"`;
+const pageDescription = `A collection of tools and resources tagged with "${tag}"`;
+---
+
+<ToolkitLayout
+  title="AI Tools"
+  description="A curated collection of AI-powered tools and resources"
+  filterTag="AI-Toolkit"
+/>
+
+<style>
+  body {
+    background-color: var(--clr-primary-bg);
+  }
+  h1 {
+    font-family: "Poppins", sans-serif;
+    color: var(--clr-lossless-primary-light);
+  }
+</style>

@@ -1,0 +1,35 @@
+{
+  "name": "site",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "node ./scripts/fetchOpenGraphData.cjs && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "format-youtube": "tsx ./scripts/formatYouTubeLinks.ts"
+  },
+  "dependencies": {
+    "@astrojs/node": "^7.0.2",
+    "astro": "^4.16.18",
+    "astro-icon": "^1.1.5",
+    "dotenv": "^16.3.1",
+    "glob": "^10.3.10",
+    "gray-matter": "^4.0.3",
+    "undici": "^5.28.2"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.0.0",
+    "uuid": "^11.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  }
+}
