@@ -12,6 +12,21 @@ export default defineConfig({
   experimental: {
     contentLayer: true
   },
+  content: {
+    sources: [
+      // Default site-specific content
+      {
+        source: 'src/content',
+        baseUrl: '/'
+      },
+      // Root-level content repository
+      // Independently managed as a submodule
+      {
+        source: '../content',
+        baseUrl: '/content'
+      }
+    ]
+  },
   vite: {
     resolve: {
       alias: {

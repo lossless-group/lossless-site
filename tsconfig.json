@@ -37,7 +37,10 @@
         ".src/content/changelog-code/*"
       ],
       "@changelog--content/*": [
-        ".src/content/changelog-content/*"
+        "../content/changelog-content/*"
+      ],
+      "@lossless-content/*": [
+        "../content/*"
       ]
     },
     "types": ["astro/client"],
