@@ -1,6 +1,16 @@
 ---
 title: OpenGraph Data Fetch Report
 date: 2025-03-24
+datetime: 2025-03-24T00:56:37.103Z
+authors: 
+ - Michael Staton
+augmented_with: 'Windsurf on Claude 3.5 Sonnet'
+category: Data-Augmentation
+tags:
+- Data-Augmentation
+- OpenGraph
+- Content-Automation
+- Content-Processing
 ---
 
 ## Summary of Files Processed

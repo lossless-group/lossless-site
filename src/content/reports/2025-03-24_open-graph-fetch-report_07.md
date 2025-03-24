@@ -8,7 +8,7 @@ category: Data-Augmentation
 tags:
 - Data-Augmentation
 - OpenGraph
-- Automation
+- Content-Automation
 - Content-Processing
 ---
 
