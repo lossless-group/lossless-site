@@ -40,8 +40,8 @@ const { generateReportFilename } = require('./utils/addReportNamingConventions.c
 const { generateReportFrontmatter } = require('./utils/addReportFrontmatterTemplate.cjs');
 
 // User configuration
-const TARGET_DIR = process.env.TARGET_DIR || '../content/tooling/Data Utilities';
-const REPORT_OUTPUT_DIR = 'src/content/data_site';  
+const TARGET_DIR = process.env.TARGET_DIR || '../content/tooling/';
+const REPORT_OUTPUT_DIR = 'src/content/data_site/reports';  
 const REPORT_NAME = 'open-graph-fetch-report';
 
 // Load environment variables from .env file
@@ -764,10 +764,26 @@ function processMarkdownFile(filePath) {
 async function main() {
   console.log(`🔍 Processing Markdown files in: ${TARGET_DIR}`);
 
-  // Get all markdown files
-  const files = fs.readdirSync(TARGET_DIR)
-    .filter(file => file.endsWith('.md'))
-    .map(file => path.join(TARGET_DIR, file));
+  // Get all markdown files recursively
+  function findMarkdownFiles(dir) {
+    let results = [];
+    const items = fs.readdirSync(dir);
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        results = results.concat(findMarkdownFiles(fullPath));
+      } else if (item.endsWith('.md')) {
+        results.push(fullPath);
+      }
+    }
+    
+    return results;
+  }
+
+  const files = findMarkdownFiles(TARGET_DIR);
   console.log(`📁 Found ${files.length} Markdown files to process`);
 
   // Process each file

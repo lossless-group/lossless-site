@@ -19,7 +19,8 @@ Total Files with issues: 3
 Open Graph data fetches:
 - Skipped bc YAML inconsistency: 0
 - Skipped bc prior Open Graph Data: 17
-- New Successes: 3
+- New Open Graph data: 3
+- New Screenshots:
 - New Errors: 0
 
 ### Files with Issues that were skipped completely
