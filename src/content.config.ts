@@ -1,34 +1,39 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// Accept any content, no validation
+// Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
   type: 'data',
-  schema: z.any()
+  schema: z.object({
+    cards: z.array(z.any())
+  }).passthrough()
 });
 
 const changelogContentCollection = defineCollection({
-  schema: z.any()
+  schema: z.array(z.any())
 });
 
 const changelogCodeCollection = defineCollection({
-  schema: z.any()
+  schema: z.array(z.any())
 });
 
 const reportCollection = defineCollection({
-  schema: z.any()
+  schema: z.array(z.any())
 });
 
-// Accept any content, but ensure tags are always an array
-const toolCollection = defineCollection({
+// Pages collection for individual MDX files
+const pagesCollection = defineCollection({
+  type: 'content',
   schema: z.object({
-    // But ensure tags is always an array of strings
-    tags: z.union([
-      z.array(z.string()),
-      z.string().transform(tag => [tag]),
-      z.undefined().transform(() => [])
-    ]).default([])
-  }).passthrough(), // Allow any other fields with passthrough
+    title: z.string(),
+    // Other fields are optional and flexible
+    [z.string()]: z.any()
+  }).passthrough() // Allow unknown keys
+});
+
+// Individual markdown/mdx files
+const toolCollection = defineCollection({
+  schema: z.object({}).passthrough(), // Accept any object shape
   loader: glob({
     pattern: '**/*.{md,mdx}',
     base: '../content/tooling'
@@ -49,5 +54,6 @@ export const collections = {
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
   'reports': reportCollection,
+  'pages': pagesCollection,
   'tooling': toolCollection
 };

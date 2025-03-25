@@ -40,8 +40,8 @@ const { generateReportFilename } = require('./utils/addReportNamingConventions.c
 const { generateReportFrontmatter } = require('./utils/addReportFrontmatterTemplate.cjs');
 
 // User configuration
-const TARGET_DIR = process.env.TARGET_DIR || '../content/tooling/';
-const REPORT_OUTPUT_DIR = 'src/content/data_site/reports';  
+const TARGET_DIR = process.env.TARGET_DIR || path.join(__dirname, '../../../tooling-clone/tooling/');
+const REPORT_OUTPUT_DIR = path.join(__dirname, '../../../site/src/content/data_site/reports');  
 const REPORT_NAME = 'open-graph-fetch-report';
 
 // Load environment variables from .env file
@@ -196,7 +196,7 @@ function updateMarkdownFile(filePath, ogData, screenshotUrl) {
   Object.assign(frontmatter, ogData);
 
   if (screenshotUrl) {
-    frontmatter.og_screenshot = screenshotUrl;
+    frontmatter.og_screenshot_url = screenshotUrl;
   }
 
   const frontmatterLines = Object.entries(frontmatter)
@@ -219,7 +219,7 @@ function updateMarkdownFile(filePath, ogData, screenshotUrl) {
  */
 function needsOpenGraphFetch(frontmatter) {
   // Skip if already has OpenGraph data
-  if (frontmatter.og_image || frontmatter.og_screenshot || frontmatter.og_last_error) {
+  if (frontmatter.og_image || frontmatter.og_screenshot_url || frontmatter.og_last_error) {
     stats.openGraph.skippedDueToYaml++;
     return { needsFetch: false, reason: 'has_required_properties' };
   }
@@ -239,7 +239,7 @@ function needsOpenGraphFetch(frontmatter) {
  */
 function needsScreenshotFetch(frontmatter) {
   // Skip if already has a screenshot
-  if (frontmatter.og_screenshot || frontmatter.og_screenshot_url) {
+  if (frontmatter.og_screenshot_url) {
     return { needsFetch: false, reason: 'has_screenshot' };
   }
 
@@ -647,7 +647,7 @@ function queueScreenshotFetch(url, frontmatter, content, filePath) {
     fetchScreenshotUrl(url, filePath)
       .then(screenshotUrl => {
         if (screenshotUrl) {
-          frontmatter.og_screenshot = screenshotUrl;
+          frontmatter.og_screenshot_url = screenshotUrl;
           frontmatter.og_last_fetch = new Date().toISOString();
           updateMarkdownFile(filePath, frontmatter, content);
           console.log(`✅ Updated ${path.basename(filePath)} with screenshot URL`);

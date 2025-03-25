@@ -1,0 +1,34 @@
+---
+import Layout from './Layout.astro';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  pageName: string;
+}
+
+const { pageName } = Astro.props;
+
+// Get the page content from the pages collection
+const pages = await getCollection('pages');
+const pageContent = pages.find(page => page.slug === pageName);
+
+if (!pageContent) {
+  throw new Error(`Page ${pageName} not found in pages collection`);
+}
+
+const { Content } = await pageContent.render();
+---
+
+<Layout>
+  <div class="information-content">
+    <Content />
+  </div>
+</Layout>
+
+<style>
+  .information-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+</style>

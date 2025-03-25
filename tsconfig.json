@@ -34,10 +34,10 @@
         "./scripts/*"
       ],
       "@changelog--code/*": [
-        ".src/content/changelog-code/*"
+        "../content/changelog--code/*"
       ],
       "@changelog--content/*": [
-        "../content/changelog-content/*"
+        "../content/changelog--content/*"
       ],
       "@lossless-content/*": [
         "../content/*"
@@ -48,4 +48,3 @@
     "jsxImportSource": "astro"
   }
 }
-

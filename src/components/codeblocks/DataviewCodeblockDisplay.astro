@@ -1,0 +1,22 @@
+---
+// src/components/codeblocks/DataviewCodeblockDisplay.astro
+import BaseCodeblock from './BaseCodeblock.astro';
+
+interface Props {
+  code: string;
+  lang?: string;
+}
+
+const { code, lang = 'dataview' } = Astro.props;
+
+---
+
+<BaseCodeblock code={code} lang={lang}>
+  <style>
+    /* Add dataview-specific styles */
+    .codeblock--dataview {
+      background-color: #f8f8f8;
+      border-left: 4px solid #50fa7b;
+    }
+  </style>
+</BaseCodeblock>
