@@ -139,6 +139,36 @@ function stripQuotes(value) {
 }
 
 /**
+ * Formats a value for frontmatter based on its type and content
+ * @param {string} key - The frontmatter key
+ * @param {string} value - The value to format
+ * @returns {string} Formatted value
+ */
+function formatFrontmatterValue(key, value) {
+  if (!value) return '';
+
+  // URL properties should be bare (no quotes)
+  const urlProperties = ['url', 'image', 'favicon', 'og_image', 'og_screenshot_url'];
+  if (urlProperties.includes(key)) {
+    return value.trim();
+  }
+
+  // Error messages should be in double quotes (case insensitive)
+  if (key.toLowerCase().includes('error')) {
+    return `"${value.replace(/"/g, '')}"`;
+  }
+
+  // Title and description should be in single quotes if they contain special characters
+  if (key === 'title' || key === 'description') {
+    if (/[:#\[\]{}|><=&!]/.test(value)) {
+      return `'${value.replace(/'/g, '')}'`;
+    }
+  }
+
+  return value;
+}
+
+/**
  * Updates a markdown file with new OpenGraph data
  * 
  * Purpose:
@@ -170,7 +200,7 @@ function updateMarkdownFile(filePath, ogData, screenshotUrl) {
   }
 
   const frontmatterLines = Object.entries(frontmatter)
-    .map(([key, value]) => `${key}: ${typeof value === 'string' ? stripQuotes(value) : value}`);
+    .map(([key, value]) => `${key}: ${formatFrontmatterValue(key, value)}`);
 
   const newContent = [
     '---',
@@ -188,8 +218,9 @@ function updateMarkdownFile(filePath, ogData, screenshotUrl) {
  * @returns {Object} Object indicating if fetch is needed and reason
  */
 function needsOpenGraphFetch(frontmatter) {
-  // Skip if required properties are present
-  if (frontmatter.image || frontmatter.og_image || frontmatter.og_last_error) {
+  // Skip if already has OpenGraph data
+  if (frontmatter.og_image || frontmatter.og_screenshot || frontmatter.og_last_error) {
+    stats.openGraph.skippedDueToYaml++;
     return { needsFetch: false, reason: 'has_required_properties' };
   }
 
@@ -207,10 +238,12 @@ function needsOpenGraphFetch(frontmatter) {
  * @returns {Object} Object indicating if fetch is needed and reason
  */
 function needsScreenshotFetch(frontmatter) {
-  if (frontmatter.og_screenshot) {
+  // Skip if already has a screenshot
+  if (frontmatter.og_screenshot || frontmatter.og_screenshot_url) {
     return { needsFetch: false, reason: 'has_screenshot' };
   }
 
+  // Skip if no URL present
   if (!frontmatter.url) {
     return { needsFetch: false, reason: 'no_url' };
   }
@@ -531,88 +564,28 @@ function ensureDirectoryExists(filePath) {
  * @returns {Promise<void>}
  */
 async function generateReport(outputPath) {
-  return new Promise((resolve, reject) => {
-    const report = [];
-    const frontmatter = generateReportFrontmatter({
-      date: new Date(),
-      tags: [
-        "Data-Augmentation",
-        "OpenGraph",
-        "Automation",
-        "Content-Processing"
-      ]
-    });
-    report.push(frontmatter);
-    report.push('');
+  const reportContent = [
+    generateReportFrontmatter('OpenGraph Data Fetch Report'),
+    '\n# OpenGraph Data Fetch Report\n',
+    '\n## Summary',
+    `- Total files processed: ${stats.filesProcessed}`,
+    `- Files with existing OG data (skipped): ${stats.openGraph.skippedDueToYaml}`,
+    `- Files with new OG data: ${stats.openGraph.newSuccesses.size}`,
+    `- Files with OG errors: ${stats.openGraph.newErrors.size}`,
+    `- Files with new screenshots: ${stats.screenshots.newSuccesses.size}`,
+    `- Files with screenshot errors: ${stats.screenshots.errors.size}`,
+    '\n## Files with New OpenGraph Data',
+    Array.from(stats.openGraph.newSuccesses).map(file => `- ${convertToBacklinkPath(file)}`).join('\n'),
+    '\n## Files with OpenGraph Errors',
+    Array.from(stats.openGraph.newErrors).map(file => `- ${convertToBacklinkPath(file)}`).join('\n'),
+    '\n## Files with New Screenshots',
+    Array.from(stats.screenshots.newSuccesses).map(file => `- ${convertToBacklinkPath(file)}`).join('\n'),
+    '\n## Files with Screenshot Errors',
+    Array.from(stats.screenshots.errors).map(file => `- ${convertToBacklinkPath(file)}`).join('\n'),
+  ].join('\n');
 
-    report.push('## Summary of Files Processed');
-    report.push(`Files processed: ${stats.filesProcessed}`);
-    report.push(`Total Files with issues: ${stats.filesWithIssues.size}\n`);
-
-    report.push('Open Graph data fetches:');
-    report.push(`- Skipped bc YAML inconsistency: ${stats.openGraph.skippedDueToYaml}`);
-    report.push(`- Skipped bc prior Open Graph Data: ${stats.openGraph.properOpenGraphDataFound}`);
-    report.push(`- New Open Graph data: ${stats.openGraph.newSuccesses.size}`);
-    report.push(`- New Screenshots: ${stats.screenshots.newSuccesses.size}`);
-    report.push(`- New Errors: ${stats.openGraph.newErrors.size}\n`);
-
-    report.push('### Files with Issues that were skipped completely');
-    if (stats.filesWithIssues.size > 0) {
-      const issueFiles = Array.from(stats.filesWithIssues)
-        .map(file => convertToBacklinkPath(file))
-        .join(', ');
-      report.push(issueFiles);
-    }
-    report.push('\n');
-
-    report.push('### Files that have new open graph data ');
-    if (stats.openGraph.newSuccesses.size > 0) {
-      const successFiles = Array.from(stats.openGraph.newSuccesses)
-        .map(file => convertToBacklinkPath(file))
-        .join(', ');
-      report.push(successFiles);
-    }
-    report.push('\n');
-
-    report.push('### Files that have a new screenshot');
-    if (stats.screenshots.newSuccesses.size > 0) {
-      const successFiles = Array.from(stats.screenshots.newSuccesses)
-        .map(file => convertToBacklinkPath(file))
-        .join(', ');
-      report.push(successFiles);
-    }
-    report.push('\n');
-
-    report.push('### Files that OpenGraphIo returned an error for core og data:');
-    if (stats.openGraph.newErrors.size > 0) {
-      const errorFiles = Array.from(stats.openGraph.newErrors)
-        .map(file => convertToBacklinkPath(file))
-        .join(', ');
-      report.push(errorFiles);
-    }
-    report.push('\n');
-
-    report.push('### Files that OpenGraphIo returned an error for screenshot:');
-    if (stats.screenshots.errors.size > 0) {
-      const errorFiles = Array.from(stats.screenshots.errors)
-        .map(file => convertToBacklinkPath(file))
-        .join(', ');
-      report.push(errorFiles);
-    }
-    report.push('\n');
-
-    fs.writeFile(outputPath, report.join('\n'), 'utf8', (err) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      // After write completes, try to trigger filesystem refresh
-      fs.readFile(outputPath, 'utf8', () => {
-        console.log(`📝 Report written to: ${outputPath}`);
-        resolve();
-      });
-    });
-  });
+  ensureDirectoryExists(outputPath);
+  await fs.promises.writeFile(outputPath, reportContent);
 }
 
 /**
