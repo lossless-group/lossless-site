@@ -1,0 +1,21 @@
+---
+// src/components/codeblocks/LitegalCodeblockDisplay.astro
+import BaseCodeblock from './BaseCodeblock.astro';
+
+interface Props {
+  code: string;
+  lang?: string;
+}
+
+const { code, lang = 'litegal' } = Astro.props;
+---
+
+<BaseCodeblock code={code} lang={lang}>
+  <style>
+    /* Add litegal-specific styles here */
+    .codeblock--litegal {
+      background-color: #f4f4f4;
+      border-left: 4px solid #4a9eff;
+    }
+  </style>
+</BaseCodeblock>

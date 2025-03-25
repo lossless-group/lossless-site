@@ -1,31 +1,43 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
+import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
 
-// https://astro.build/config
 export default defineConfig({
   output: "server",
   adapter: node({
     mode: 'standalone'
   }),
-  experimental: {
-    contentLayer: true
-  },
-  content: {
-    sources: [
-      // Default site-specific content
-      {
-        source: 'src/content',
-        baseUrl: '/'
-      },
-      // Root-level content repository
-      // Independently managed as a submodule
-      {
-        source: '../content',
-        baseUrl: '/content'
-      }
-    ]
+  integrations: [
+    mdx({
+      // MDX options here
+      extendMarkdownConfig: true, // Extend the existing markdown config
+      optimize: false // Don't minify MDX content for better debugging
+    })
+  ],
+  markdown: {
+    syntaxHighlight: false, // Disable Shiki's syntax highlighting
+    shikiConfig: {
+      theme: 'github-dark',
+      // Register our custom languages
+      langs: [
+        {
+          id: 'litegal',
+          scopeName: 'source.litegal',
+          grammar: {
+            patterns: [{ match: '.*', name: 'text.litegal' }]
+          }
+        },
+        {
+          id: 'dataview',
+          scopeName: 'source.dataview',
+          grammar: {
+            patterns: [{ match: '.*', name: 'text.dataview' }]
+          }
+        }
+      ]
+    }
   },
   vite: {
     resolve: {

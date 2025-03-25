@@ -1,0 +1,19 @@
+---
+title: 'Testing MDX Integration'
+---
+import BaseCodeblock from '../../components/codeblocks/BaseCodeblock.astro';
+import LitegalCodeblock from '../../components/codeblocks/LitegalCodeblockDisplay.astro';
+import DataviewCodeblock from '../../components/codeblocks/DataviewCodeblockDisplay.astro';
+
+# Testing MDX Integration
+
+Here's a test of our custom code blocks:
+
+<LitegalCodeblock code={`function test() {
+  console.log("Hello from litegal!");
+}`} />
+
+<DataviewCodeblock code={`dataview
+table file.name, tags
+from "content"
+where file.name = this.file.name`} />

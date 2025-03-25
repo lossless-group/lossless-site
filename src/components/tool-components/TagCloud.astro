@@ -9,11 +9,14 @@ interface Props {
 }
 
 const {
-  tags = [],
+  tags: rawTags,
   tagFrequencies = {},
   visibleTagRowLimit = 4,
   maxWidth = "100%",
 } = Astro.props;
+
+// Ensure tags is always an array
+const tags = rawTags ?? [];
 
 // Calculate approximate row height based on tag chip height + gap
 const rowHeight = 26; // Tag height (22px) + gap (6px)
@@ -26,14 +29,13 @@ const maxHeight = visibleTagRowLimit * rowHeight;
     style={`max-height: ${maxHeight}px; max-width: ${maxWidth};`}
   >
     {
-      tags.length > 0 &&
-        tags.map((tag) => (
-          <TagChip
-            tag={tag}
-            count={tagFrequencies[tag] || 0}
-            includeCount={true}
-          />
-        ))
+      tags.map((tag) => (
+        <TagChip
+          tag={tag}
+          count={tagFrequencies[tag] || 0}
+          includeCount={true}
+        />
+      ))
     }
   </div>
 </div>
