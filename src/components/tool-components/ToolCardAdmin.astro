@@ -1,0 +1,332 @@
+---
+import { filterTitle, getEffectiveSiteName } from "@utils/toolUtils";
+import TagCloud from "./TagCloud.astro";
+import ToolYAMLEdit from "./ToolYAMLEdit.astro";
+
+// TODO: This is supposed to be an admin interface for tool cards. 
+// Leaving it be as of 2025-03-25
+
+interface Tool {
+  site_name?: string;
+  title?: string;
+  url: string;
+  image?: string;
+  favicon?: string;
+  description?: string;
+  description_site_cp?: string;
+  tags?: string[];
+  filename?: string;
+  og_screenshot_url?: string;
+}
+
+interface Props {
+  tool?: Tool;
+  // Support for direct properties
+  site_name?: string;
+  title?: string;
+  url?: string;
+  image?: string;
+  favicon?: string;
+  description?: string;
+  description_site_cp?: string;
+  tags?: string[];
+  filename?: string;
+  og_screenshot_url?: string;
+}
+
+const { tool, ...directProps } = Astro.props;
+
+// Use tool props if provided, otherwise use direct props
+const  tool = tool || directProps;
+
+
+const siteName = getEffectiveSiteName(tool);
+const tags = tool.tags || [];
+const imageUrl = tool.image || tool.og_screenshot_url;
+
+// Prioritize zinger for displayTitle, fall back to filtered title
+const displayTitle = tool.zinger || (tool.title ? filterTitle(tool.title, siteName) : "");
+
+// Handle description with proper priority:
+// 1. site_description_cp or description_site_cp (they're the same thing)
+// 2. fall back to description
+// 3. fall back to empty string
+const hasSiteCP = (tool.site_description_cp || tool.description_site_cp || "").trim() !== "";
+const hasDescription = (tool.description || "").trim() !== "";
+
+const effectiveDescription = hasSiteCP 
+  ? (tool.site_description_cp || tool.description_site_cp)
+  : hasDescription
+    ? tool.description
+    : "";
+
+// Log the final effective description
+/* console.log("Effective description:", {
+  value: effectiveDescription,
+  length: effectiveDescription.length,
+  isEmpty: effectiveDescription === "",
+}); */
+---
+
+<div class="tool-card">
+  <div class="content-wrapper">
+    {
+      imageUrl && (
+        <div class="tool-card-image">
+          <img
+            src={imageUrl}
+            alt={displayTitle}
+            data-primary-image={tool.image}
+            data-screenshot-url={tool.og_screenshot_url}
+          />
+        </div>
+      )
+    }
+    <div class="tool-card__header">
+      <div class="tool-card__site-name">
+        {tool.favicon && <img class="tool-favicon" src={tool.favicon} alt="" />}
+        <a href={tool.url} target="_blank" rel="noopener noreferrer">
+          <h2>{siteName}</h2>
+        </a>
+      </div>
+      <h4>{displayTitle}</h4>
+      {Astro.props.filePath && 
+        <button class="edit-button" data-edit-toggle>
+          <span class="edit-icon">✎</span>
+          Edit
+        </button>
+      }
+    </div>
+    {
+      effectiveDescription && (
+        <p class="tool-description">{effectiveDescription}</p>
+      )
+    }
+    <TagCloud tags={tags} />
+  </div>
+  
+  {Astro.props.filePath && 
+    <div class="yaml-edit-container" data-yaml-edit style="display: none;">
+      <ToolYAMLEdit 
+        frontmatter={tool} 
+        filePath={Astro.props.filePath} 
+      />
+    </div>
+  }
+</div>
+
+<script>
+  // Handle image loading and fallback
+  document.addEventListener("DOMContentLoaded", () => {
+    // Image fallback handling
+    document.querySelectorAll(".tool-card-image img").forEach((img) => {
+      const imgElement = img as HTMLImageElement;
+      imgElement.addEventListener(
+        "error",
+        function () {
+          const imageElement = imgElement;
+          const primaryImage = imageElement.getAttribute("data-primary-image");
+          const screenshotUrl = imageElement.getAttribute("data-screenshot-url");
+
+          if (imageElement.src === primaryImage && screenshotUrl) {
+            console.log("Primary image failed to load, falling back to screenshot URL");
+            imageElement.src = screenshotUrl;
+          }
+        }
+      );
+    });
+
+    // YAML edit toggle handling - ensure only one editor is visible at a time
+    let currentlyOpenEditor: HTMLElement | null = null;
+    let currentlyActiveButton: HTMLElement | null = null;
+
+    document.querySelectorAll("[data-edit-toggle]").forEach((button) => {
+      button.addEventListener("click", function() {
+        const thisButton = this as HTMLElement;
+        const card = thisButton.closest(".tool-card");
+        const yamlEdit = card?.querySelector("[data-yaml-edit]") as HTMLElement;
+
+        // If clicking the same button that's currently active, just close it
+        if (thisButton === currentlyActiveButton) {
+          yamlEdit.style.display = "none";
+          thisButton.classList.remove("active");
+          currentlyOpenEditor = null;
+          currentlyActiveButton = null;
+          return;
+        }
+
+        // Close any currently open editor
+        if (currentlyOpenEditor) {
+          currentlyOpenEditor.style.display = "none";
+          currentlyActiveButton?.classList.remove("active");
+        }
+
+        // Open this editor
+        if (yamlEdit) {
+          yamlEdit.style.display = "block";
+          thisButton.classList.add("active");
+          currentlyOpenEditor = yamlEdit;
+          currentlyActiveButton = thisButton;
+        }
+      });
+    });
+
+    // Close editor when clicking outside
+    document.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      // If click is not on a tool card, edit button, or YAML editor, close any open editor
+      if (!target.closest(".tool-card")) {
+        if (currentlyOpenEditor) {
+          currentlyOpenEditor.style.display = "none";
+          currentlyActiveButton?.classList.remove("active");
+          currentlyOpenEditor = null;
+          currentlyActiveButton = null;
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .tool-card {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    color: aliceblue;
+    padding: 0.15em;
+    border-radius: 1em;
+    transition: all 0.2s ease-in-out;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    min-width: 310px;
+    max-height: 100%;
+    margin-bottom: 2px;
+    box-sizing: border-box;
+  }
+
+  .tool-card h2 {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25em;
+  }
+
+  .tool-card .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5em;
+  }
+
+  .tool-card:hover {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 20%
+    );
+    transform: translateY(-2px);
+    margin-bottom: 0;
+  }
+
+  .tool-card-image {
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    margin-bottom: 0.5em;
+  }
+
+  .tool-card-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 0.5em;
+  }
+
+  .tool-card__header {
+    position: relative;
+    margin-bottom: 0.5em;
+  }
+
+  .tool-card__site-name {
+    display: block;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .tool-card__site-name {
+    align-items: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .tool-card__site-name h2 {
+    margin: 0;
+    line-height: 1;
+  }
+
+  .tool-favicon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: block;
+  }
+
+  .tool-card h4 {
+    color: var(--clr-heading);
+    font-size: var(--fs-350);
+    margin: 0;
+  }
+
+  .tool-description {
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-300);
+    margin-bottom: 0.5em;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .edit-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--clr-lossless-primary-glass);
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    color: var(--clr-body);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: var(--fs-200);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    opacity: 0.6;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 1;
+  }
+
+  .edit-button:hover,
+  .edit-button.active {
+    opacity: 1;
+    background: var(--clr-lossless-primary-dark);
+  }
+
+  .edit-icon {
+    font-size: 1em;
+  }
+
+  .yaml-edit-container {
+    margin-top: 1rem;
+    border-top: 1px solid var(--clr-border);
+    padding-top: 1rem;
+  }
+</style>
