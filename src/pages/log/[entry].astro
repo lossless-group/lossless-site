@@ -1,0 +1,135 @@
+---
+import { getCollection, render } from 'astro:content';
+import OneArticle from '@layouts/OneArticle.astro';
+import Layout from '@layouts/Layout.astro';
+import ChangelogEntryPage from '@components/changelog/ChangelogEntryPage.astro';
+import path from 'path';
+
+// Flexible interface that allows any additional fields
+interface ChangelogData {
+  tags: any[];
+  authors: any[];
+  title?: string;
+  [key: string]: any;  // Allow any additional fields
+}
+
+// Get the entry parameter from the URL
+const { entry } = Astro.params;
+
+// Get all changelog entries
+const allEntries = await getCollection('changelog--content');
+
+// Find the matching entry by filename without extension
+const changelogEntry = allEntries.find(e => {
+  const filename = path.basename(e.id, '.md');
+  return filename === entry;
+});
+
+// If no entry is found, redirect to the changelog page
+if (!changelogEntry) {
+  return Astro.redirect('/workflow/changelog');
+}
+
+// Render the content using Astro's built-in markdown rendering
+const { Content } = await render(changelogEntry);
+
+// Prepare entry data with flexible typing
+const entryData: ChangelogData = {
+  ...changelogEntry.data,
+  fileName: entry
+};
+---
+
+<Layout title={entryData.title || 'Changelog Entry'}>
+  <ChangelogEntryPage entry={entryData}>
+    <Content />
+  </ChangelogEntryPage>
+</Layout>
+
+<style>
+  .changelog-entry-full {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 2rem;
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: none;
+    font-family: var(--ff-legible);
+    font-size: var(--fs-300);
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-family: var(--ff-legible);
+    font-size: var(--fs-300);
+  }
+
+  time {
+    color: var(--clr-lossless-accent--brightest);
+    font-weight: var(--fw-semi-bold);
+  }
+
+  .category {
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--clr-lossless-attn-action);
+    color: var(--white--pure);
+    font-weight: var(--fw-semi-bold);
+  }
+
+  .emphasis {
+    font-size: var(--fs-700);
+    color: var(--clr-heading);
+    margin: 0 0 0.5rem;
+    line-height: 1.2;
+  }
+
+  .title {
+    font-size: var(--fs-500);
+    font-family: var(--ff-legible);
+    color: var(--clr-body);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .content {
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    line-height: 1.6;
+    color: var(--clr-body);
+  }
+
+  .content :global(h2) {
+    font-size: var(--fs-500);
+    color: var(--clr-heading);
+    margin: 2rem 0 1rem;
+  }
+
+  .content :global(p) {
+    margin: 1rem 0;
+  }
+
+  .content :global(ul) {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .content :global(li) {
+    margin: 0.5rem 0;
+  }
+</style>

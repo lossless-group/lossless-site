@@ -106,14 +106,18 @@ const SEPARATOR_PATTERN = TITLE_SEPARATORS
  * @param siteName The site name to remove from the title
  * @returns The filtered title
  */
-export function filterTitle(title: string, siteName: string): string {
-    if (!title || !siteName) return title || '';
+export function filterTitle(title: string, siteName: any): string {
+    // Handle non-string inputs gracefully
+    const titleStr = String(title || '');
+    const siteNameStr = String(siteName || '');
+    
+    if (!titleStr || !siteNameStr) return titleStr;
     
     const separatorRegex = new RegExp(`\\s*(${SEPARATOR_PATTERN})\\s*`);
-    let cleanTitle = title;
+    let cleanTitle = titleStr;
 
     // Split site name into parts and clean each part
-    const siteNameParts = siteName.split(separatorRegex).filter(Boolean);
+    const siteNameParts = siteNameStr.split(separatorRegex).filter(Boolean);
     
     siteNameParts.forEach(part => {
         const escapedPart = part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

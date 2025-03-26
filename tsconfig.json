@@ -1,6 +1,6 @@
 {
   "extends": "astro/tsconfigs/base",
-  "include": [".astro/types.d.ts", "src/**/*"],
+  "include": [".astro/types.d.ts", "src/**/*", "scripts/config.ts"],
   "exclude": ["dist"],
   "compilerOptions": {
     "baseUrl": ".",

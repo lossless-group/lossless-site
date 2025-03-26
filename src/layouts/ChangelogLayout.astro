@@ -16,10 +16,12 @@ interface Props {
 const { title, description } = Astro.props;
 
 import { getCollection } from "astro:content";
+import path from 'path';
 import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
+import ChangelogEntry from '@components/changelog/ChangelogEntry.astro';
 import Layout from "@layouts/Layout.astro";
 
-// Get both code and content changes
+// Get content changes
 const contentChanges = await getCollection('changelog--content');
 
 // Sort changes by date in descending order
@@ -35,15 +37,16 @@ const sortedContentChanges = contentChanges.sort(sortByDate);
 <Layout title={title} description={description}>
   <main>
     <div class="changelog-container">
-      <div class="column-container">
-        <ArticleListColumn
-          entries={sortedContentChanges.map(entry => entry.data)}
-        />
-      </div>
+      <ArticleListColumn
+        entries={sortedContentChanges.map(entry => ({
+          ...entry.data,
+          slug: path.basename(entry.id, '.md')
+        }))}
+        EntryComponent={ChangelogEntry}
+      />
     </div>
   </main>
 </Layout>
-
 
 <style>
   .changelog-container {
@@ -51,27 +54,5 @@ const sortedContentChanges = contentChanges.sort(sortByDate);
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
-  }
-
-  .changelog-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  .changelog-column {
-    min-width: 0; /* Prevents overflow in grid items */
-  }
-
-  .changelog-column h2 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-
-  @media (max-width: 768px) {
-    .changelog-grid {
-      grid-template-columns: 1fr;
-    }
   }
 </style>

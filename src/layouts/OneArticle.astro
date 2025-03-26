@@ -1,0 +1,34 @@
+---
+/**
+ * OneArticle.astro
+ * Layout for displaying a single article in a centered, readable format
+ */
+
+interface Props {
+  Component: any;
+  data: Record<string, any>;
+}
+
+const { Component, data } = Astro.props;
+---
+
+<div class="one-article">
+  <Component {...data}>
+    <slot />
+  </Component>
+</div>
+
+<style>
+  .one-article {
+    width: 100%;
+    max-width: var(--content-width, 1200px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .one-article {
+      padding: 4rem 2rem;
+    }
+  }
+</style>
