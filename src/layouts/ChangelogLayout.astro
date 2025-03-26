@@ -1,0 +1,77 @@
+---
+/**
+ * Changelog Layout
+ * 
+ * Displays a list of changelog entries in chronological order.
+ * Shows both code and content changes in a two-column layout.
+ * 
+ * @component
+ */
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+import { getCollection } from "astro:content";
+import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
+import Layout from "@layouts/Layout.astro";
+
+// Get both code and content changes
+const contentChanges = await getCollection('changelog--content');
+
+// Sort changes by date in descending order
+const sortByDate = (a, b) => {
+  const dateA = new Date(a.data.date);
+  const dateB = new Date(b.data.date);
+  return dateB.getTime() - dateA.getTime();
+};
+
+const sortedContentChanges = contentChanges.sort(sortByDate);
+
+---
+<Layout title={title} description={description}>
+  <main>
+    <div class="changelog-container">
+      <div class="column-container">
+        <ArticleListColumn
+          entries={sortedContentChanges.map(entry => entry.data)}
+        />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+
+<style>
+  .changelog-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .changelog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .changelog-column {
+    min-width: 0; /* Prevents overflow in grid items */
+  }
+
+  .changelog-column h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .changelog-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

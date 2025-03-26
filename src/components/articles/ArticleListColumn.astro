@@ -1,0 +1,15 @@
+---
+interface Props {
+  entries: Array<{
+    title: string;
+  }>;
+}
+
+const { entries } = Astro.props;
+---
+
+<div>
+  {entries.map(entry => (
+    <h3>{entry.title}</h3>
+  ))}
+</div>
