@@ -1,7 +1,10 @@
 ---
+import ChangelogEntry from '../changelog/ChangelogEntry.astro';
+
 interface Props {
   entries: Array<{
     title: string;
+    date?: Date;
   }>;
 }
 
@@ -10,6 +13,9 @@ const { entries } = Astro.props;
 
 <div>
   {entries.map(entry => (
-    <h3>{entry.title}</h3>
+    <ChangelogEntry 
+      title={entry.title}
+      date={entry.date || new Date()}
+    />
   ))}
 </div>
