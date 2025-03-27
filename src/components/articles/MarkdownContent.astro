@@ -1,0 +1,50 @@
+---
+interface Props {
+  content: string;  // The processed markdown content to render
+}
+
+const { content } = Astro.props;
+---
+
+<div class="markdown-content">
+  <Fragment set:html={content} />
+</div>
+
+<style>
+  .markdown-content {
+    line-height: 1.6;
+  }
+
+  .markdown-content :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .markdown-content :global(h1),
+  .markdown-content :global(h2),
+  .markdown-content :global(h3) {
+    margin: 2rem 0 1rem;
+  }
+
+  .markdown-content :global(ul),
+  .markdown-content :global(ol) {
+    margin: 1rem 0;
+    padding-left: 2rem;
+  }
+
+  .markdown-content :global(a) {
+    color: var(--clr-lossless-link);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--clr-lossless-link);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .markdown-content :global(a:hover) {
+    color: var(--clr-lossless-link-hover);
+    border-bottom-color: var(--clr-lossless-link-hover);
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-link) 10%,
+      transparent
+    );
+  }
+</style>

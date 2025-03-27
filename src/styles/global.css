@@ -41,6 +41,9 @@
     --clr-lossless-primary-glass-gr--60-40p: var(--gr-white--60-40p);
     --clr-lossless-attn-action: var(--purple-heart);
     --clr-lossless-ui-btn-border: var(--clr-lossless-primary-light);
+    --clr-lossless-link: var(--purple-heart);  
+    --clr-lossless-link-hover: var(--cyan-aqua--brightest);  
+    --clr-lossless-link-visited: var(--bastille);  
     --grd--lossless-eastern-crimson: linear-gradient(107deg, #22A6B5 5.36%, #9138E0 23.14%, #D9233B 47.56%, #F59C49 72.33%);
 
     --clr-primary-bg: var(--clr-stolen--github--dark);

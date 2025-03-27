@@ -10,6 +10,7 @@ interface ChangelogData {
   tags: any[];
   authors: any[];
   title?: string;
+  content?: string;  // Raw markdown content
   [key: string]: any;  // Allow any additional fields
 }
 
@@ -36,7 +37,8 @@ const { Content } = await render(changelogEntry);
 // Prepare entry data with flexible typing
 const entryData: ChangelogData = {
   ...changelogEntry.data,
-  fileName: entry
+  fileName: entry,
+  content: changelogEntry.body  // Pass the raw markdown content
 };
 ---
 

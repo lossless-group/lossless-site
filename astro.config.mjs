@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
+import { remarkObsidianLinks } from './src/utils/remarkObsidianLinks';
 
 export default defineConfig({
   output: "server",
@@ -17,6 +18,7 @@ export default defineConfig({
     })
   ],
   markdown: {
+    remarkPlugins: [remarkObsidianLinks],
     syntaxHighlight: false, // Disable Shiki's syntax highlighting
     shikiConfig: {
       theme: 'github-dark',

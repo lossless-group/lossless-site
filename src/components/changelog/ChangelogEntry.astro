@@ -18,12 +18,14 @@
  */
 
 import { formatDate } from "@utils/formatDate";
+import { processObsidianLinks } from "@utils/processObsidianLinks";
 
 interface Props {
   title: string;
   date: Date | string;
   category?: string;
   contextSetter?: string;
+  description?: string;
   slug?: string;
   class?: string;
 }
@@ -33,11 +35,17 @@ const {
   date,
   category,
   contextSetter,
+  description,
   slug,
   class: className 
 } = Astro.props;
+
 // Format the date consistently
 const formattedDate = formatDate(new Date(date));
+
+// Process any Obsidian links in the title and description
+const processedTitle = processObsidianLinks(title);
+const processedDescription = description ? processObsidianLinks(description) : '';
 ---
 
 <div class:list={["changelog-entry", className]}>
@@ -49,10 +57,15 @@ const formattedDate = formatDate(new Date(date));
     <h5 class="changelog-entry__emphasis">{contextSetter}</h5>
     <h5 class="changelog-entry__title">
       <a href={`/log/${slug || ''}`} class="changelog-entry__link">
-        {title}
+        <Fragment set:html={processedTitle} />
       </a>
     </h5>
   </div>
+  {description && (
+    <div class="changelog-entry__description">
+      <Fragment set:html={processedDescription} />
+    </div>
+  )}
   <div class="changelog-entry__content">
     <slot />
   </div>
@@ -68,6 +81,7 @@ const formattedDate = formatDate(new Date(date));
     padding: 1rem;
     border-radius: 0.5rem;
     position: relative;
+    border-bottom: 1px solid var(--border-color);
   }
 
   /* Header Section */
@@ -75,6 +89,7 @@ const formattedDate = formatDate(new Date(date));
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    margin-bottom: 0.5rem;
   }
 
   /* Meta Information */
@@ -83,7 +98,9 @@ const formattedDate = formatDate(new Date(date));
     align-items: center;
     gap: 1rem;
     font-family: var(--ff-legible);
-    margin-bottom: 0.5rem;
+    font-size: var(--fs-200);
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
   }
 
   time {
@@ -99,6 +116,7 @@ const formattedDate = formatDate(new Date(date));
     color: var(--white--pure);
     font-size: var(--fs-200);
     font-weight: var(--fw-semi-bold);
+    color: var(--accent);
   }
 
   .changelog-entry__emphasis {
@@ -106,6 +124,8 @@ const formattedDate = formatDate(new Date(date));
     color: var(--clr-heading);
     margin: 0;
     line-height: 1.2;
+    font-size: var(--fs-300);
+    color: var(--text-muted);
   }
 
   .changelog-entry__title {
@@ -122,7 +142,14 @@ const formattedDate = formatDate(new Date(date));
   }
 
   .changelog-entry__link:hover {
+    text-decoration: underline;
     color: var(--clr-lossless-accent--brightest);
+  }
+
+  .changelog-entry__description {
+    font-size: var(--fs-300);
+    color: var(--text);
+    margin-top: 0.5rem;
   }
 
   .changelog-entry__content {
@@ -150,5 +177,14 @@ const formattedDate = formatDate(new Date(date));
 
   .changelog-entry__button:hover {
     background: var(--clr-lossless-accent--bright);
+  }
+
+  :global(.changelog-entry .internal-link) {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  :global(.changelog-entry .internal-link:hover) {
+    text-decoration: underline;
   }
 </style>

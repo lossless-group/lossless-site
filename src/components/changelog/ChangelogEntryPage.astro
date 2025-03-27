@@ -1,24 +1,34 @@
 ---
 import { formatDate } from "@utils/formatDate";
+import { processInlineContent, processContent } from "@utils/processContent";
+import MarkdownContent from "@components/articles/MarkdownContent.astro";
 
 interface Props {
-  title?: string;
-  date?: Date | string;
-  category?: string;
-  contextSetter?: string;
-  fileName?: string;
-  [key: string]: any;
+  entry: {
+    title?: string;
+    date?: Date | string;
+    category?: string;
+    contextSetter?: string;
+    fileName?: string;
+    content?: string;  
+    [key: string]: any;
+  }
 }
 
+const { entry } = Astro.props;
 const {
   title,
   date,
   category,
-  emphasis
-} = Astro.props;
+  contextSetter,
+  content
+} = entry;
 
 // Format the date if it exists
 const formattedDate = date ? formatDate(new Date(date)) : '';
+
+// Process the markdown content
+const processedContent = content ? processContent(content) : '';
 ---
 
 <div class="changelog-entry-full">
@@ -33,15 +43,15 @@ const formattedDate = date ? formatDate(new Date(date)) : '';
           <span class="category">{category}</span>
         )}
       </div>
-      {emphasis && (
-        <h1 class="emphasis">{emphasis}</h1>
+      {contextSetter && (
+        <h1 class="emphasis">{processInlineContent(contextSetter)}</h1>
       )}
       {title && (
-        <h1 class="title">{title}</h1>
+        <h1 class="title">{processInlineContent(title)}</h1>
       )}
     </header>
     <div class="content">
-      <slot />
+      <MarkdownContent content={processedContent} />
     </div>
   </article>
 </div>
@@ -56,80 +66,50 @@ const formattedDate = date ? formatDate(new Date(date)) : '';
   .back-link {
     display: inline-block;
     margin-bottom: 2rem;
-    color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-link);
     text-decoration: none;
-    font-family: var(--ff-legible);
-    font-size: var(--fs-300);
-  }
-
-  .back-link:hover {
-    text-decoration: underline;
-  }
-
-  header {
-    margin-bottom: 2rem;
   }
 
   .meta {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
     margin-bottom: 1rem;
-    font-family: var(--ff-legible);
-    font-size: var(--fs-300);
-  }
-
-  time {
-    color: var(--clr-lossless-accent--brightest);
-    font-weight: var(--fw-semi-bold);
+    color: var(--clr-lossless-primary-dark);
   }
 
   .category {
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.25rem;
-    background: var(--clr-lossless-attn-action);
-    color: var(--white--pure);
-    font-weight: var(--fw-semi-bold);
+    margin-left: 1rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--clr-lossless-primary-glass);
+    border-radius: 4px;
   }
 
   .emphasis {
-    font-size: var(--fs-700);
-    color: var(--clr-heading);
-    margin: 0 0 0.5rem;
-    line-height: 1.2;
+    font-size: 1.5rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 0.5rem;
   }
 
   .title {
-    font-size: var(--fs-500);
-    font-family: var(--ff-legible);
-    color: var(--clr-body);
-    margin: 0;
-    line-height: 1.4;
+    font-size: 2rem;
+    margin-bottom: 2rem;
   }
 
   .content {
-    font-family: var(--ff-legible);
-    font-size: var(--fs-400);
     line-height: 1.6;
-    color: var(--clr-body);
-  }
-
-  .content :global(h2) {
-    font-size: var(--fs-500);
-    color: var(--clr-heading);
-    margin: 2rem 0 1rem;
   }
 
   .content :global(p) {
-    margin: 1rem 0;
+    margin-bottom: 1rem;
   }
 
-  .content :global(ul) {
-    margin: 1rem 0;
-    padding-left: 1.5rem;
+  .content :global(h1),
+  .content :global(h2),
+  .content :global(h3) {
+    margin: 2rem 0 1rem;
   }
 
-  .content :global(li) {
-    margin: 0.5rem 0;
+  .content :global(ul),
+  .content :global(ol) {
+    margin: 1rem 0;
+    padding-left: 2rem;
   }
 </style>
