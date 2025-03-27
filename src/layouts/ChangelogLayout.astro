@@ -20,6 +20,7 @@ import path from 'path';
 import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
 import ChangelogEntry from '@components/changelog/ChangelogEntry.astro';
 import Layout from "@layouts/Layout.astro";
+import Button from  "@components/basics/Button.astro"
 
 // Get both content and code changes
 const contentChanges = await getCollection('changelog--content');
@@ -41,22 +42,24 @@ const sortedCodeChanges = codeChanges.sort(sortByDate);
   <main>
     <div class="changelog-header">
       <div class="toggle-buttons">
-        <button
-          class="toggle-button"
+        <Button
           data-active="true"
           data-type="content"
           onclick="toggleChangelog('content')"
+          variety="default"
+          isBordered
         >
           Content Changes
-        </button>
-        <button
-          class="toggle-button"
+        </Button>
+        <Button
           data-active="false"
           data-type="code"
           onclick="toggleChangelog('code')"
+          variety="default"
+          isBordered
         >
           Code Changes
-        </button>
+        </Button>
       </div>
     </div>
     <div class="changelog-container">
@@ -93,18 +96,13 @@ const sortedCodeChanges = codeChanges.sort(sortByDate);
     justify-content: center;
   }
 
-  .toggle-button {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    background: var(--surface);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .toggle-button[data-active="true"] {
-    background: var(--accent);
-    color: var(--accent-text);
+  :global(.btn[data-active="true"]) {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 40%
+    ) !important;
+    transform: translateY(-2px);
   }
 
   .changelog-section[data-visible="false"] {
@@ -126,7 +124,7 @@ const sortedCodeChanges = codeChanges.sort(sortByDate);
 <script>
   function toggleChangelog(type: 'content' | 'code') {
     // Update button states
-    document.querySelectorAll<HTMLButtonElement>('.toggle-button').forEach(button => {
+    document.querySelectorAll<HTMLButtonElement>('.btn').forEach(button => {
       button.setAttribute('data-active', button.dataset.type === type ? 'true' : 'false');
     });
 
@@ -138,7 +136,7 @@ const sortedCodeChanges = codeChanges.sort(sortByDate);
 
   // Add click handlers
   document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll<HTMLButtonElement>('.toggle-button').forEach(button => {
+    document.querySelectorAll<HTMLButtonElement>('.btn').forEach(button => {
       button.addEventListener('click', () => {
         toggleChangelog(button.dataset.type as 'content' | 'code');
       });
