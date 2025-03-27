@@ -1,35 +1,32 @@
 ---
-title: OpenGraph Data Update Report
-date: 2025-03-17
+title: OpenGraph Data Fetch Report
+datetime: 2025-03-17T00:00:00.000Z
+authors: 
+ - Michael Staton
+augmented_with: 'Windsurf on Claude 3.5 Sonnet'
+category: Data-Augmentation
+tags:
+- Data-Augmentation
+- OpenGraph
+- Content-Automation
+- Content-Processing
 ---
-## Summary of Files Processed
+
+## OpenGraph Fetch Report
 Files checked: 730
 Files to do a first OpenGraph fetch: 0
 Files to update based on run condition: 0
 Successful API Calls : 0
 Unsuccessful API Calls : 0
 
-### New files that received there first OpenGraph properties in this run. 
+### New files that received their first OpenGraph properties in this run
 
+### Files with updated OpenGraph properties
 
-### Files with updated OpenGraph properties. 
+### List of files that could not be processed
+These could not have frontmatter, not have a UUID, whatever.
 
-
-### List of files that could not be processed at all.  
-These could not have frontmatter, not have a UUID, whatever. 
-
-
-
-
----
-
----
-title: File Processing Report
-date: 2025-03-17
-version: 1.0
-status: completed
----
-## Summary
+## File Processing Summary
 Total filePaths loaded for script request: 730
 Number of files observed with no frontmatter: 0
 Number of files observed with no UUID: 0

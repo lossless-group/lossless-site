@@ -23,7 +23,7 @@ interface Props {
   title: string;
   date: Date | string;
   category?: string;
-  emphasis?: string;
+  contextSetter?: string;
   slug?: string;
   class?: string;
 }
@@ -32,7 +32,7 @@ const {
   title,
   date,
   category,
-  emphasis,
+  contextSetter,
   slug,
   class: className 
 } = Astro.props;
@@ -46,7 +46,7 @@ const formattedDate = formatDate(new Date(date));
       <time datetime={formattedDate}>{formattedDate}</time>
       {category && <span class="changelog-entry__category">{category}</span>}
     </div>
-    <h5 class="changelog-entry__emphasis">{emphasis}</h5>
+    <h5 class="changelog-entry__emphasis">{contextSetter}</h5>
     <h5 class="changelog-entry__title">
       <a href={`/log/${slug || ''}`} class="changelog-entry__link">
         {title}

@@ -1,8 +1,23 @@
-# Astro Starter Kit: Basics
+# Basics
 
-```sh
-npm create astro@latest -- --template basics
+## Stack:
+- [Shiki](https://shiki.style/) for syntax highlighting.
+
+```bash
+pnpm install --save-dev
 ```
+
+```bash
+pnpm build
+```
+
+```bash
+pnpm dev
+```
+
+## Why Astro
+
+
 
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
 [![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)

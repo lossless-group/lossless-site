@@ -21,8 +21,9 @@ import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
 import ChangelogEntry from '@components/changelog/ChangelogEntry.astro';
 import Layout from "@layouts/Layout.astro";
 
-// Get content changes
+// Get both content and code changes
 const contentChanges = await getCollection('changelog--content');
+const codeChanges = await getCollection('changelog--code');
 
 // Sort changes by date in descending order
 const sortByDate = (a, b) => {
@@ -32,23 +33,87 @@ const sortByDate = (a, b) => {
 };
 
 const sortedContentChanges = contentChanges.sort(sortByDate);
+const sortedCodeChanges = codeChanges.sort(sortByDate);
 
 ---
 <Layout title={title} description={description}>
   <main>
+    <div class="changelog-header">
+      <div class="toggle-buttons">
+        <button
+          class="toggle-button"
+          data-active="true"
+          data-type="content"
+          onclick="toggleChangelog('content')"
+        >
+          Content Changes
+        </button>
+        <button
+          class="toggle-button"
+          data-active="false"
+          data-type="code"
+          onclick="toggleChangelog('code')"
+        >
+          Code Changes
+        </button>
+      </div>
+    </div>
     <div class="changelog-container">
-      <ArticleListColumn
-        entries={sortedContentChanges.map(entry => ({
-          ...entry.data,
-          slug: path.basename(entry.id, '.md')
-        }))}
-        EntryComponent={ChangelogEntry}
-      />
+      <div class="changelog-section" data-type="content" data-visible="true">
+        <ArticleListColumn
+          entries={sortedContentChanges.map(entry => ({
+            ...entry.data,
+            slug: path.basename(entry.id, '.md')
+          }))}
+          EntryComponent={ChangelogEntry}
+        />
+      </div>
+      <div class="changelog-section" data-type="code" data-visible="false">
+        <ArticleListColumn
+          entries={sortedCodeChanges.map(entry => ({
+            ...entry.data,
+            slug: path.basename(entry.id, '.md')
+          }))}
+          EntryComponent={ChangelogEntry}
+        />
+      </div>
     </div>
   </main>
 </Layout>
 
 <style>
+  .changelog-header {
+    margin-bottom: 2rem;
+  }
+
+  .toggle-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .toggle-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-button[data-active="true"] {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+
+  .changelog-section[data-visible="false"] {
+    display: none;
+  }
+
+  .changelog-section[data-visible="true"] {
+    display: block;
+  }
+
   .changelog-container {
     width: 100%;
     max-width: 1200px;
@@ -56,3 +121,26 @@ const sortedContentChanges = contentChanges.sort(sortByDate);
     padding: 1rem;
   }
 </style>
+
+<script>
+  function toggleChangelog(type: 'content' | 'code') {
+    // Update button states
+    document.querySelectorAll<HTMLButtonElement>('.toggle-button').forEach(button => {
+      button.setAttribute('data-active', button.dataset.type === type ? 'true' : 'false');
+    });
+
+    // Update section visibility
+    document.querySelectorAll<HTMLDivElement>('.changelog-section').forEach(section => {
+      section.setAttribute('data-visible', section.dataset.type === type ? 'true' : 'false');
+    });
+  }
+
+  // Add click handlers
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll<HTMLButtonElement>('.toggle-button').forEach(button => {
+      button.addEventListener('click', () => {
+        toggleChangelog(button.dataset.type as 'content' | 'code');
+      });
+    });
+  });
+</script>

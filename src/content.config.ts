@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob, file } from 'astro/loaders';
+
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
@@ -10,37 +11,50 @@ const cardCollection = defineCollection({
 });
 
 const changelogContentCollection = defineCollection({
-  schema: z.array(z.any())
+  loader: glob({pattern: "**/*.md", base: "../content/changelog--content"}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags : [] as string[],
+    authors: Array.isArray(data.authors) ? data.authors : [] as string[],
+    // Map snake_case context_setter to camelCase contextSetter, ensuring string type
+    contextSetter: (data.context_setter ?? "") as string
+  }))
 });
 
 const changelogCodeCollection = defineCollection({
-  schema: z.array(z.any())
+  loader: glob({pattern: "**/*.md", base: "../content/changelog--code"}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags : [] as string[],
+    authors: Array.isArray(data.authors) ? data.authors : [] as string[]
+  }))
 });
 
 const reportCollection = defineCollection({
-  schema: z.array(z.any())
+  type: 'content',
+  schema: z.any() // Allow any frontmatter structure to avoid validation errors
 });
 
 // Pages collection for individual MDX files
 const pagesCollection = defineCollection({
   type: 'content',
-  schema: z.object({
-    title: z.string(),
-    // Other fields are optional and flexible
-    [z.string()]: z.any()
-  }).passthrough() // Allow unknown keys
+  schema: z.any() // Allow any frontmatter structure to avoid validation errors
 });
 
-// Individual markdown/mdx files
+// Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
-  schema: z.object({}).passthrough(), // Accept any object shape
-  loader: glob({
-    pattern: '**/*.{md,mdx}',
-    base: '../content/tooling'
-  })
+  loader: glob({pattern: "**/*.md", base: "../content/tooling"}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags : [] as string[],
+    authors: Array.isArray(data.authors) ? data.authors : [] as string[]
+  }))
 });
 
-// Define where to find the content
+// Define where to find the content - using relative paths from src/content
 export const paths = {
   'cards': 'cards',
   'changelog--content': '../content/changelog--content',
@@ -49,6 +63,7 @@ export const paths = {
   'tooling': '../content/tooling'
 };
 
+// Export the collections
 export const collections = {
   'cards': cardCollection,
   'changelog--content': changelogContentCollection,
