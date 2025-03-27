@@ -27,8 +27,9 @@ const codeChanges = await getCollection('changelog--code');
 
 // Sort changes by date in descending order
 const sortByDate = (a, b) => {
-  const dateA = new Date(a.data.date);
-  const dateB = new Date(b.data.date);
+  // Handle both date and date_created fields
+  const dateA = new Date(a.data.date || a.data.date_created);
+  const dateB = new Date(b.data.date || b.data.date_created);
   return dateB.getTime() - dateA.getTime();
 };
 
