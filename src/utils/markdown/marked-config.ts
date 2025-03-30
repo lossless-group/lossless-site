@@ -1,5 +1,4 @@
 import { marked } from 'marked';
-import { baseUrl } from 'marked-base-url';
 
 // Function to transform directory paths to kebab-case but preserve file name case
 const transformPath = (path: string): string => {
@@ -32,6 +31,11 @@ const backlinkRegex = /\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g;
 const transformBacklinks = (html: string): string => {
   console.log('transformBacklinks called with:', { html });
   
+  // Add global window.debugContent for browser inspection
+  if (typeof window !== 'undefined') {
+    (window as any).debugContent = { html };
+  }
+  
   const matches = [...html.matchAll(backlinkRegex)];
   console.log('Found backlinks:', matches);
   
@@ -40,14 +44,21 @@ const transformBacklinks = (html: string): string => {
     const defaultDisplayText = path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
     const finalDisplayText = displayText || defaultDisplayText;
     
-    console.log('Processing backlink:', {
+    // Log each backlink transformation
+    const backlink = {
       original: match,
       path,
-      displayText,
       transformedPath,
-      defaultDisplayText,
+      displayText,
       finalDisplayText
-    });
+    };
+    console.log('Processing backlink:', backlink);
+    if (typeof window !== 'undefined') {
+      (window as any).debugContent = { 
+        ...(window as any).debugContent,
+        backlinks: [...((window as any).debugContent?.backlinks || []), backlink]
+      };
+    }
     
     return `<a href="/${transformedPath}" class="backlink">${finalDisplayText}</a>`;
   });
@@ -56,17 +67,15 @@ const transformBacklinks = (html: string): string => {
   return transformed;
 };
 
-// Configure marked
-const markedConfig = {
+// Configure marked with hooks
+marked.use({
   hooks: {
-    postprocess: (html: string) => {
-      console.log('postprocess hook called with:', { html });
+    postprocess(html: string) {
+      console.log('Marked postprocess hook running on:', { html });
       return transformBacklinks(html);
     }
   }
-};
+});
 
-console.log('Configuring marked with:', markedConfig);
-marked.use(baseUrl('/'), markedConfig);
-
+// Export the configured marked instance
 export { marked };

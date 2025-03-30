@@ -15,16 +15,32 @@ interface ChangelogData {
 
 // Get the entry parameter from the URL
 const { entry } = Astro.params;
+console.log('Entry param:', entry);
 
 // Get all changelog entries from both collections
 const contentEntries = await getCollection('changelog--content');
 const codeEntries = await getCollection('changelog--code');
 const allEntries = [...contentEntries, ...codeEntries];
 
+console.log('Available entries:', {
+  contentEntries: contentEntries.map(e => e.id),
+  codeEntries: codeEntries.map(e => e.id),
+  total: allEntries.length
+});
+
 // Find the matching entry by filename without extension
 const changelogEntry = allEntries.find(e => {
   const filename = path.basename(e.id, '.md');
   return filename === entry;
+});
+
+console.log('Found entry?', {
+  searchingFor: entry,
+  found: !!changelogEntry,
+  matchingEntry: changelogEntry ? {
+    id: changelogEntry.id,
+    data: changelogEntry.data
+  } : null
 });
 
 // If no entry is found, redirect to the changelog page
@@ -34,6 +50,24 @@ if (!changelogEntry) {
 
 // Render the content using Astro's built-in markdown rendering
 const { Content } = await render(changelogEntry);
+
+// Add debug logging for the Content object
+console.log('Debug - Content object:', {
+  changelogEntry,
+  renderedContent: Content,
+  rawContent: changelogEntry.body,
+  metadata: changelogEntry.data
+});
+
+// Make content available in browser console
+if (typeof window !== 'undefined') {
+  (window as any).debugContent = {
+    changelogEntry,
+    renderedContent: Content,
+    rawContent: changelogEntry.body,
+    metadata: changelogEntry.data
+  };
+}
 
 // Prepare entry data with flexible typing
 const entryData: ChangelogData = {

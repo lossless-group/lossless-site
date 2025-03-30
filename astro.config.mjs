@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
+import { marked } from './src/utils/markdown/marked-config';
 
 export default defineConfig({
   output: "server",
@@ -37,7 +38,16 @@ export default defineConfig({
           }
         }
       ]
-    }
+    },
+    render: [
+      {
+        mode: 'sync',
+        renderer: (content) => {
+          console.log('Astro markdown renderer:', { content });
+          return marked.parse(content);
+        }
+      }
+    ]
   },
   vite: {
     resolve: {
