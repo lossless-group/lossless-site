@@ -3,8 +3,8 @@ import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
-import { marked } from './src/utils/markdown/marked-config';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
+import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 
 export default defineConfig({
   output: "server",
@@ -19,7 +19,8 @@ export default defineConfig({
     })
   ],
   markdown: {
-    remarkPlugins: [remarkBacklinks],
+    remarkPlugins: [remarkBacklinks, remarkDefinitionList],
+    remarkRehype: { handlers: defListHastHandlers },
     syntaxHighlight: false, // Disable Shiki's syntax highlighting
     shikiConfig: {
       theme: 'github-dark',

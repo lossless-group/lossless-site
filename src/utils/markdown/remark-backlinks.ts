@@ -1,10 +1,9 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text } from 'mdast';
 
-const backlinkRegex = /\[\[(.*?)(?:\|(.*?))?\]\]/g;  // Added 'g' flag for global matching
+const backlinkRegex = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
 
 function transformPath(path: string): string {
-  // Transform the path as needed
   return `/content/${path.toLowerCase().replace(/ /g, '-')}`;
 }
 
@@ -12,7 +11,18 @@ function transformPath(path: string): string {
  * Transform wiki-style backlinks [[Page]] into markdown links
  */
 export default function remarkBacklinks() {
-  return function transformer(tree: Root) {
+  return async function transformer(tree: Root) {
+    console.log('\n🔗 Remark Backlinks Plugin: Starting transformation...\n');
+    
+    // Add a paragraph node at the start to verify plugin execution
+    tree.children.unshift({
+      type: 'paragraph',
+      children: [{
+        type: 'text',
+        value: '🔗 Remark Plugin Active'
+      }]
+    });
+
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
       
@@ -20,15 +30,16 @@ export default function remarkBacklinks() {
       const matches = Array.from(value.matchAll(backlinkRegex));
       
       if (matches.length > 0) {
-        // Create an array to hold the new nodes
+        console.log(`\n🔍 Found ${matches.length} backlinks in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
+        
         const newNodes = [];
         let lastIndex = 0;
 
         matches.forEach(match => {
           const [fullMatch, path, displayText] = match;
+          console.log(`  ↳ Converting: [[${path}]] → ${transformPath(path)}`);
           const startIndex = match.index!;
           
-          // Add any text before the match
           if (startIndex > lastIndex) {
             newNodes.push({
               type: 'text',
@@ -36,7 +47,6 @@ export default function remarkBacklinks() {
             });
           }
 
-          // Add the link node
           const transformedPath = transformPath(path);
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
@@ -52,7 +62,6 @@ export default function remarkBacklinks() {
           lastIndex = startIndex + fullMatch.length;
         });
 
-        // Add any remaining text after the last match
         if (lastIndex < value.length) {
           newNodes.push({
             type: 'text',
@@ -60,7 +69,6 @@ export default function remarkBacklinks() {
           });
         }
 
-        // Replace the original node with our new nodes
         parent.children.splice(index, 1, ...newNodes);
       }
     });

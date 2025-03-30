@@ -19,6 +19,7 @@
     "gray-matter": "^4.0.3",
     "mdast-util-from-markdown": "^2.0.2",
     "remark": "^15.0.1",
+    "remark-definition-list": "^2.0.0",
     "remark-parse": "^11.0.0",
     "shiki": "^3.2.1",
     "undici": "^5.28.2",
