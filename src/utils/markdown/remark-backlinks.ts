@@ -1,7 +1,8 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text } from 'mdast';
 
-const backlinkRegex = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
+// Match [[...]] but skip if it's a visual path
+const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
 
 function transformPath(path: string): string {
   return `/content/${path.toLowerCase().replace(/ /g, '-')}`;
@@ -9,6 +10,7 @@ function transformPath(path: string): string {
 
 /**
  * Transform wiki-style backlinks [[Page]] into markdown links
+ * Skips any paths containing 'visuals' as those are handled by remark-images
  */
 export default function remarkBacklinks() {
   return async function transformer(tree: Root) {
@@ -37,7 +39,6 @@ export default function remarkBacklinks() {
 
         matches.forEach(match => {
           const [fullMatch, path, displayText] = match;
-          console.log(`  ↳ Converting: [[${path}]] → ${transformPath(path)}`);
           const startIndex = match.index!;
           
           if (startIndex > lastIndex) {
@@ -50,6 +51,7 @@ export default function remarkBacklinks() {
           const transformedPath = transformPath(path);
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
+          console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
           newNodes.push({
             type: 'link',
             url: transformedPath,

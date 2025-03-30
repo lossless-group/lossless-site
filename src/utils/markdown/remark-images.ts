@@ -2,7 +2,7 @@ import { visit } from 'unist-util-visit';
 import type { Root, Text } from 'mdast';
 
 // Regex patterns for different image types
-const wikiImageRegex = /!\[\[(.*?)(?:\|(.*?))?\]\]/g;
+const wikiImageRegex = /!\[\[((.*?\/)?[^/|]+?)(?:\|(.*?))?\]\]/g;
 const markdownImageRegex = /!\[(.*?)\]\((https?:\/\/.*?)\)/g;
 
 interface ImagePluginOptions {
@@ -20,8 +20,16 @@ function getImageDirectory(filename: string): string {
 }
 
 function transformImagePath(filename: string): string {
+  // If filename already contains a path, strip any leading content/ and ensure proper format
+  if (filename.includes('/')) {
+    // Remove any leading content/ if present
+    const normalizedPath = filename.replace(/^content\//, '');
+    return `/${normalizedPath}`;
+  }
+  
+  // Otherwise use the default directory structure
   const directory = getImageDirectory(filename);
-  return `/content/Visuals/${directory}/${filename}`;
+  return `/visuals/${directory}/${filename}`;
 }
 
 function generateAltText(filename: string): string {
@@ -58,7 +66,7 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
 
         // Handle wiki-style images
         wikiMatches.forEach(match => {
-          const [fullMatch, filename] = match;
+          const [fullMatch, filename, _pathComponent, displayText] = match;
           const startIndex = match.index!;
           
           if (startIndex > lastIndex) {
@@ -68,8 +76,8 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
             });
           }
 
-          const transformedPath = transformImagePath(filename);
-          const altText = generateAltText(filename);
+          const transformedPath = transformImagePath(filename.trim());
+          const altText = displayText?.trim() || generateAltText(filename.trim());
           
           console.log(`  ↳ Converting wiki image: [[${filename}]] → ${transformedPath}`);
           

@@ -4,9 +4,9 @@ import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
-import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 import remarkImages from './src/utils/markdown/remark-images';
+import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 
 export default defineConfig({
 	output: "server",
@@ -22,8 +22,8 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [
-      remarkBacklinks,
       [remarkImages, { renderInFrontmatter: false, defaultAltText: 'Image from URL' }],
+      remarkBacklinks,
       remarkDefinitionList
     ],
     remarkRehype: { handlers: defListHastHandlers },
