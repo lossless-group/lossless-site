@@ -6,6 +6,7 @@ import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
+import remarkImages from './src/utils/markdown/remark-images';
 
 export default defineConfig({
 	output: "server",
@@ -20,7 +21,11 @@ export default defineConfig({
     })
   ],
   markdown: {
-    remarkPlugins: [remarkBacklinks, remarkDefinitionList],
+    remarkPlugins: [
+      remarkBacklinks,
+      [remarkImages, { renderInFrontmatter: false, defaultAltText: 'Image from URL' }],
+      remarkDefinitionList
+    ],
     remarkRehype: { handlers: defListHastHandlers },
     syntaxHighlight: false, // Disable Shiki's syntax highlighting
     shikiConfig: {
@@ -65,7 +70,7 @@ export default defineConfig({
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
       }
     }
-  }
+  },
 	experimental: {
 		svg: {
 			mode: "sprite",
