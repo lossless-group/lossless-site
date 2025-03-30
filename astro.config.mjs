@@ -4,6 +4,7 @@ import node from '@astrojs/node';
 import mdx from '@astrojs/mdx';
 import { fileURLToPath } from 'url';
 import { marked } from './src/utils/markdown/marked-config';
+import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 
 export default defineConfig({
   output: "server",
@@ -18,6 +19,7 @@ export default defineConfig({
     })
   ],
   markdown: {
+    remarkPlugins: [remarkBacklinks],
     syntaxHighlight: false, // Disable Shiki's syntax highlighting
     shikiConfig: {
       theme: 'github-dark',

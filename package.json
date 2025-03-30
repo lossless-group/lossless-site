@@ -17,10 +17,16 @@
     "dotenv": "^16.3.1",
     "glob": "^10.3.10",
     "gray-matter": "^4.0.3",
+    "mdast-util-from-markdown": "^2.0.2",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
     "shiki": "^3.2.1",
-    "undici": "^5.28.2"
+    "undici": "^5.28.2",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
+    "@types/mdast": "^4.0.4",
     "husky": "^9.1.7",
     "marked": "^15.0.7",
     "marked-admonition-extension": "^0.0.4",

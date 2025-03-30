@@ -71,8 +71,8 @@ const transformBacklinks = (html: string): string => {
 marked.use({
   hooks: {
     postprocess(html: string) {
-      console.log('Marked postprocess hook running on:', { html });
-      return transformBacklinks(html);
+      console.log('POSTPROCESS TEST:', { html });
+      return html + '<p style="color: red; font-size: 24px;">Hi Postprocess</p>';
     }
   }
 });
