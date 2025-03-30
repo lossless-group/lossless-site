@@ -6,6 +6,7 @@ interface Props {
     title?: string;
     date?: Date | string;
     category?: string;
+    context_setter?: string;
     contextSetter?: string;
     fileName?: string;
     [key: string]: any;
@@ -17,11 +18,13 @@ const {
   title,
   date,
   category,
-  emphasis
+  context_setter,
+  contextSetter = context_setter // Use the transformed version if available, fallback to original
 } = entry;
 
 // Format the date if it exists
-const formattedDate = date ? formatDate(new Date(date)) : '';
+const formattedDate = date ? new Date(date).toLocaleDateString() : '';
+
 ---
 
 <div class="changelog-entry-full">
@@ -36,13 +39,14 @@ const formattedDate = date ? formatDate(new Date(date)) : '';
           <span class="category">{category}</span>
         )}
       </div>
-      {emphasis && (
-        <h1 class="emphasis">{emphasis}</h1>
+      {contextSetter && (
+        <h1 class="emphasis">{contextSetter}</h1>
       )}
       {title && (
         <h1 class="title">{title}</h1>
       )}
     </header>
+    
     <div class="content">
       <slot />
     </div>

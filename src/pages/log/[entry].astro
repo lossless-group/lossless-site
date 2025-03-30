@@ -16,8 +16,10 @@ interface ChangelogData {
 // Get the entry parameter from the URL
 const { entry } = Astro.params;
 
-// Get all changelog entries
-const allEntries = await getCollection('changelog--content');
+// Get all changelog entries from both collections
+const contentEntries = await getCollection('changelog--content');
+const codeEntries = await getCollection('changelog--code');
+const allEntries = [...contentEntries, ...codeEntries];
 
 // Find the matching entry by filename without extension
 const changelogEntry = allEntries.find(e => {
