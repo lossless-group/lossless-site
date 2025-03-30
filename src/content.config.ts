@@ -1,13 +1,31 @@
 import { defineCollection, z } from 'astro:content';
 import { glob, file } from 'astro/loaders';
 
-
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
   type: 'data',
   schema: z.object({
     cards: z.array(z.any())
   }).passthrough()
+});
+
+const vocabularyCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "../content/vocabulary"}),
+  schema: z.object({
+    // No required frontmatter, but we'll pass through any that exists
+  }).passthrough().transform((data, context) => {
+    // Get the filename without extension
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    return {
+      // Extract title from filename
+      title: filename,
+      // Convert filename to slug
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+      // Pass through any frontmatter
+      ...data
+    };
+  })
 });
 
 const changelogContentCollection = defineCollection({
@@ -43,7 +61,6 @@ const pagesCollection = defineCollection({
   schema: z.any() // Allow any frontmatter structure to avoid validation errors
 });
 
-
 // Pages collection for individual MDX files
 const markdownFileContent = defineCollection({
   type: 'data',
@@ -67,12 +84,14 @@ export const paths = {
   'changelog--content': '../content/changelog--content',
   'changelog--code': '../content/changelog--code',
   'reports': 'reports',
-  'tooling': '../content/tooling'
+  'tooling': '../content/tooling',
+  'vocabulary': '../content/vocabulary'
 };
 
 // Export the collections
 export const collections = {
   'cards': cardCollection,
+  'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
   'reports': reportCollection,

@@ -6,6 +6,8 @@
     "baseUrl": ".",
     "strictNullChecks": false,
     "allowJs": true,
+    "moduleResolution": "node",
+    "module": "ESNext",
     "plugins": [
       {
         "name": "@astrojs/tsplugin"

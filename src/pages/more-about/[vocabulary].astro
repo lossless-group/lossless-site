@@ -1,11 +1,41 @@
 ---
-import Layout from '@layouts/Layout.astro'
-import Articles from '@layouts/Articles.astro'
-import ArticlePreview from '@components/articles/ArticlePreview.astro'
----
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import remarkAsf from '@utils/markdown/remark-asf';
+import unified from 'types/unified';
+import remarkParse from 'remark-parse';
 
-<Layout>
-   <Articles>
-      <h1>More About</h1>
-   </Articles>
+export async function getStaticPaths() {
+  const vocabularyEntries = await getCollection('vocabulary');
+  return vocabularyEntries.map(entry => ({
+    params: { vocabulary: entry.data.slug },
+    props: { entry }
+  }));
+}
+
+type Props = {
+  entry: CollectionEntry<'vocabulary'>;
+};
+
+const { entry }: Props = Astro.props;
+if (!entry) {
+  throw new Error("Vocabulary entry not found");
+}
+
+// Process the content with our custom remark plugin
+const processedContent = await unified()
+  .use(remarkParse)
+  .use(remarkAsf, { markdownFile: entry.id })
+  .process(entry.body);
+
+<Layout title={entry.data.title || entry.data.slug}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    data={{
+      title: entry.data.title || entry.data.slug,
+      content: String(processedContent)
+    }}
+  />
 </Layout>
