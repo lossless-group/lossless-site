@@ -43,6 +43,13 @@ const pagesCollection = defineCollection({
   schema: z.any() // Allow any frontmatter structure to avoid validation errors
 });
 
+
+// Pages collection for individual MDX files
+const markdownFileContent = defineCollection({
+  type: 'data',
+  schema: z.any() // Allow any frontmatter structure to avoid validation errors
+});
+
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/tooling"}),
