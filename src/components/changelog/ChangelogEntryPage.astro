@@ -2,20 +2,23 @@
 import { formatDate } from "@utils/formatDate";
 
 interface Props {
-  title?: string;
-  date?: Date | string;
-  category?: string;
-  contextSetter?: string;
-  fileName?: string;
-  [key: string]: any;
+  entry: {
+    title?: string;
+    date?: Date | string;
+    category?: string;
+    contextSetter?: string;
+    fileName?: string;
+    [key: string]: any;
+  }
 }
 
+const { entry } = Astro.props;
 const {
   title,
   date,
   category,
   emphasis
-} = Astro.props;
+} = entry;
 
 // Format the date if it exists
 const formattedDate = date ? formatDate(new Date(date)) : '';
