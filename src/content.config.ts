@@ -1,6 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
-
+import { glob } from 'astro/loaders';
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
@@ -54,13 +53,26 @@ const toolCollection = defineCollection({
   }))
 });
 
+// Visuals collection for handling images with metadata
+const visualsCollection = defineCollection({
+  loader: glob({
+    pattern: ["**/*.{png,jpg,jpeg,gif,webp,svg}"],
+    base: "../content/visuals"
+  }),
+  schema: ({ image }) => z.object({
+    alt: z.string().optional(),
+    src: image(),
+  }).passthrough()
+});
+
 // Define where to find the content - using relative paths from src/content
 export const paths = {
   'cards': 'cards',
   'changelog--content': '../content/changelog--content',
   'changelog--code': '../content/changelog--code',
   'reports': 'reports',
-  'tooling': '../content/tooling'
+  'tooling': '../content/tooling',
+  'visuals': '../content/visuals'
 };
 
 // Export the collections
@@ -70,5 +82,6 @@ export const collections = {
   'changelog--code': changelogCodeCollection,
   'reports': reportCollection,
   'pages': pagesCollection,
-  'tooling': toolCollection
+  'tooling': toolCollection,
+  'visuals': visualsCollection
 };

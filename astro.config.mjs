@@ -7,6 +7,10 @@ import { fileURLToPath } from 'url';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 import remarkImages from './src/utils/markdown/remark-images';
+import remarkLitegal from './src/utils/markdown/remark-litegal';
+
+// Import gallery styles
+import './src/styles/gallery.css';
 
 export default defineConfig({
 	output: "server",
@@ -24,7 +28,8 @@ export default defineConfig({
     remarkPlugins: [
       remarkBacklinks,
       [remarkImages, { renderInFrontmatter: false, defaultAltText: 'Image from URL' }],
-      remarkDefinitionList
+      remarkDefinitionList,
+      remarkLitegal
     ],
     remarkRehype: { handlers: defListHastHandlers },
     syntaxHighlight: false, // Disable Shiki's syntax highlighting

@@ -21,7 +21,7 @@ function getImageDirectory(filename: string): string {
 
 function transformImagePath(filename: string): string {
   const directory = getImageDirectory(filename);
-  return `/content/Visuals/${directory}/${filename}`;
+  return `../content/visuals/${directory}/${filename}`;
 }
 
 function generateAltText(filename: string): string {
