@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 // @ts-check
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
@@ -7,7 +8,7 @@ import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 
 export default defineConfig({
-  output: "server",
+	output: "server",
   adapter: node({
     mode: 'standalone'
   }),
@@ -53,6 +54,7 @@ export default defineConfig({
     ]
   },
   vite: {
+		plugins: [tailwindcss()],
     resolve: {
       alias: {
         '@basics': fileURLToPath(new URL('./src/components/basics', import.meta.url)),
@@ -64,4 +66,9 @@ export default defineConfig({
       }
     }
   }
+	experimental: {
+		svg: {
+			mode: "sprite",
+		},
+	},
 });
