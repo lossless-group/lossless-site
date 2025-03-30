@@ -53,6 +53,11 @@ export default function remarkBacklinks() {
           newNodes.push({
             type: 'link',
             url: transformedPath,
+            data: {
+              hProperties: {
+                'data-internal-link': ''
+              }
+            },
             children: [{
               type: 'text',
               value: finalDisplayText

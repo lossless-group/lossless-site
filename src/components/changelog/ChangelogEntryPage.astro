@@ -139,4 +139,41 @@ const formattedDate = date ? new Date(date).toLocaleDateString() : '';
   .content :global(li) {
     margin: 0.5rem 0;
   }
+
+  /* Internal link styles */
+  .content :global(a[data-internal-link]) {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--clr-lossless-accent--brightest);
+    padding-bottom: 0.1rem;
+    transition: border-bottom-style 0.2s ease;
+  }
+
+  .content :global(a[data-internal-link]:hover) {
+    border-bottom-style: solid;
+  }
+
+  /* Code block styles */
+  .content :global(pre) {
+    background: var(--clr-code-bg, #1e1e1e);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .content :global(code) {
+    font-family: var(--ff-mono, 'JetBrains Mono', monospace);
+    font-size: var(--fs-300);
+    line-height: 1.5;
+  }
+
+  /* Inline code styles */
+  .content :global(:not(pre) > code) {
+    background: var(--clr-code-inline-bg, #2e2e2e);
+    color: var(--clr-code-inline, #e0e0e0);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+  }
 </style>
