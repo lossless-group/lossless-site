@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: theme('colors.slate.50');
+    --foreground: theme('colors.slate.950');
+    
+    --muted: theme('colors.slate.100');
+    --muted-foreground: theme('colors.slate.500');
+    
+    --popover: theme('colors.slate.50');
+    --popover-foreground: theme('colors.slate.950');
+    
+    --card: theme('colors.slate.50');
+    --card-foreground: theme('colors.slate.950');
+    
+    --border: theme('colors.slate.200');
+    --input: theme('colors.slate.200');
+    
+    --primary: theme('colors.slate.900');
+    --primary-foreground: theme('colors.slate.50');
+    
+    --secondary: theme('colors.slate.100');
+    --secondary-foreground: theme('colors.slate.900');
+    
+    --accent: theme('colors.slate.100');
+    --accent-foreground: theme('colors.slate.900');
+    
+    --destructive: theme('colors.red.500');
+    --destructive-foreground: theme('colors.slate.50');
+    
+    --ring: theme('colors.slate.400');
+    
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: theme('colors.slate.950');
+    --foreground: theme('colors.slate.50');
+    
+    --muted: theme('colors.slate.800');
+    --muted-foreground: theme('colors.slate.400');
+    
+    --popover: theme('colors.slate.950');
+    --popover-foreground: theme('colors.slate.50');
+    
+    --card: theme('colors.slate.950');
+    --card-foreground: theme('colors.slate.50');
+    
+    --border: theme('colors.slate.800');
+    --input: theme('colors.slate.800');
+    
+    --primary: theme('colors.slate.50');
+    --primary-foreground: theme('colors.slate.900');
+    
+    --secondary: theme('colors.slate.800');
+    --secondary-foreground: theme('colors.slate.50');
+    
+    --accent: theme('colors.slate.800');
+    --accent-foreground: theme('colors.slate.50');
+    
+    --destructive: theme('colors.red.900');
+    --destructive-foreground: theme('colors.slate.50');
+    
+    --ring: theme('colors.slate.700');
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

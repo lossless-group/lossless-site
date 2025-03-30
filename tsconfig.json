@@ -12,6 +12,8 @@
       }
     ],
     "paths": {
+      "@config/*": ["src/config/*"],
+			"@js/*": ["src/js/*"],
       "@basics/*": [
         "./src/components/basics/*"
       ],

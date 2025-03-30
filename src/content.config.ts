@@ -32,6 +32,29 @@ const changelogCodeCollection = defineCollection({
   }))
 });
 
+// authors
+const authorsCollection = defineCollection({
+	loader: glob({ pattern: "**/[^_]*{md,mdx}", base: "./src/content/authors" }),
+	schema: ({ image }) =>
+		z.object({
+			name: z.string(),
+			avatar: image(),
+			about: z.string(),
+			email: z.string(),
+			authorLink: z.string(), // author page link. Could be a personal website, github, twitter, whatever you want
+		}),
+});
+
+const promptCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/prompts"}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags : [] as string[],
+    authors: Array.isArray(data.authors) ? data.authors : [] as string[]
+  }))
+});
+
 const reportCollection = defineCollection({
   type: 'content',
   schema: z.any() // Allow any frontmatter structure to avoid validation errors
@@ -69,6 +92,8 @@ export const collections = {
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
   'reports': reportCollection,
+  'authors': authorsCollection,
   'pages': pagesCollection,
-  'tooling': toolCollection
+  'tooling': toolCollection,
+  'prompts': promptCollection
 };

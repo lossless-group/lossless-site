@@ -1,0 +1,115 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { type CollectionEntry, getEntries, getEntry } from "astro:content";
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+
+// components
+import Category from "@components/Category/CategoryBadge.astro";
+
+// utils
+import { formatDate } from "@utils/textUtils";
+import { getLocaleFromUrl } from "@utils/localeUtils";
+
+interface Props {
+	post: CollectionEntry<"prompts"> & {
+		data: {
+			title: string;
+			description: string;
+			date_first_published: string;
+			date_last_modified?: string;
+			draft?: boolean;
+			tags: string[];
+			authors: string[];
+			slug?: string;
+			heroImage?: string;
+		}
+	};
+	showDescription?: boolean;
+	class?: string;
+	rest?: any; // catch-all for any additional parameters, such as "aria-label"
+}
+
+const { post, showDescription = false, class: className, ...rest } = Astro.props as Props;
+
+// Extract data from the post
+const { data } = post;
+const { title, description, date_first_published, tags } = data;
+
+const currLocale = getLocaleFromUrl(Astro.url);
+const authorsData = await getEntries(post.data.authors);
+---
+
+<article class:list={["", className]} {...rest} data-pagefind-ignore>
+	<div
+		class="relative aspect-video overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800"
+	>
+		<a href={getRelativeLocaleUrl(currLocale, `/blog/${post.id}/`)}>
+			{data.heroImage ? (
+				<Image
+					src={data.heroImage}
+					alt={`${title} blog post`}
+					height={700}
+					quality="high"
+					class="h-full w-full object-cover"
+				/>
+			) : (
+				<div class="h-full w-full bg-gray-200 dark:bg-gray-700" />
+			)}
+		</a>
+
+		<!-- category -->
+		{
+			tags && tags.length > 0 && (
+				<div class="absolute top-3 right-3 flex gap-2 text-xs">
+					{tags.map((tag) => (
+						<Category category={tag} />
+					))}
+				</div>
+			)
+		}
+	</div>
+	<div class="mt-2">
+		<div class="flex flex-wrap items-center justify-between gap-2">
+			<!-- author -->
+			{
+				authorsData.length > 0 && (
+					<div class="flex items-center">
+						<div class="border-base-300 dark:border-base-600/60 mr-2 aspect-square size-7 overflow-hidden rounded-full border">
+							<Image
+								src={authorsData[0].data.avatar}
+								alt={`Avatar of ${authorsData[0].data.name}`}
+								width={32}
+								class="h-full w-full object-cover"
+							/>
+						</div>
+						<span class="text-sm">{authorsData[0].data.name}</span>
+					</div>
+				)
+			}
+
+			<!-- published date -->
+			<p class="text-sm whitespace-nowrap opacity-70">
+				{formatDate(date_first_published, currLocale)}
+			</p>
+		</div>
+		<!-- title -->
+		<a
+			href={getRelativeLocaleUrl(currLocale, `/blog/${post.id}/`)}
+			class="hover:text-primary-700 dark:hover:text-primary-400"
+		>
+			<h2 class="mt-1 line-clamp-2 text-lg font-medium transition-colors md:text-xl">
+				{title}
+			</h2>
+		</a>
+
+		<!-- description -->
+		{
+			showDescription && (
+				<p class="description mt-2 line-clamp-3 hidden text-sm md:block lg:text-base">
+					{description}
+				</p>
+			)
+		}
+	</div>
+</article>

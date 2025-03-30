@@ -8,7 +8,7 @@ import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 
 export default defineConfig({
-	output: "server",
+  output: "server",
   adapter: node({
     mode: 'standalone'
   }),
@@ -53,8 +53,16 @@ export default defineConfig({
       }
     ]
   },
+  // i18n configuration must match src/config/translations.json.ts
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "fr"],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   vite: {
-		plugins: [tailwindcss()],
+    plugins: [tailwindcss()],
     resolve: {
       alias: {
         '@basics': fileURLToPath(new URL('./src/components/basics', import.meta.url)),
@@ -65,10 +73,10 @@ export default defineConfig({
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
       }
     }
-  }
-	experimental: {
-		svg: {
-			mode: "sprite",
-		},
-	},
+  },
+  experimental: {
+    svg: {
+      mode: "sprite",
+    },
+  },
 });
