@@ -4,7 +4,7 @@ import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import remarkAsf from '@utils/markdown/remark-asf';
-import unified from 'types/unified';
+import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 
 export async function getStaticPaths() {
@@ -29,6 +29,7 @@ const processedContent = await unified()
   .use(remarkParse)
   .use(remarkAsf, { markdownFile: entry.id })
   .process(entry.body);
+---
 
 <Layout title={entry.data.title || entry.data.slug}>
   <OneArticle

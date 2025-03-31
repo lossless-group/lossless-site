@@ -1,5 +1,5 @@
-import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
+import { defineCollection, z, getCollection } from 'astro:content';
+import { file, glob } from 'astro/loaders';
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
@@ -13,6 +13,10 @@ const vocabularyCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/vocabulary"}),
   schema: z.object({
     // No required frontmatter, but we'll pass through any that exists
+    aliases: z.union([
+      z.string().transform(str => [str]), // Single string -> array with one string
+      z.array(z.string())                 // Already an array
+    ]).optional().default([])             // Default to empty array if missing
   }).passthrough().transform((data, context) => {
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
