@@ -8,6 +8,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
+import { Debug } from 'astro:components';
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
@@ -41,9 +42,15 @@ const processedContent = await unified()
   .use(remarkRehype)      // Convert mdast to hast
   .use(rehypeStringify)   // Stringify hast to HTML
   .process(entry.body);
+
+console.log('Entry:', { id: entry.id, title: entry.data.title, slug: entry.data.slug });
+console.log('Processed content:', String(processedContent).substring(0, 100) + '...');
+
 ---
 
 <Layout title={entry.data.title || entry.data.slug}>
+  <Debug {entry} />
+  <Debug processedContent={String(processedContent)} />
   <OneArticle
     Component={OneArticleOnPage}
     data={{
