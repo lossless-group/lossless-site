@@ -1,12 +1,17 @@
 {
   "extends": "astro/tsconfigs/base",
-  "include": [".astro/types.d.ts", "src/**/*", "archive_src/config.ts"],
+  "include": [
+    ".astro/types.d.ts",
+    "src/**/*",
+    "archive_src/config.ts",
+    "src/types/**/*.d.ts"
+  ],
   "exclude": ["dist"],
   "compilerOptions": {
     "baseUrl": ".",
     "strictNullChecks": false,
     "allowJs": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "module": "ESNext",
     "plugins": [
       {

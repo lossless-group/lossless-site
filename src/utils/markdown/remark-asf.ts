@@ -1,8 +1,9 @@
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
 import type { Root } from 'mdast'
-import { toMarkdown } from 'mdast-util-to-markdown'
+import type { Plugin } from 'unified'
 import { rehypeAstro } from '@nasa-gcn/remark-rehype-astro'
 
 interface RemarkAsfOptions {
@@ -18,15 +19,16 @@ export default function remarkAsf(options?: RemarkAsfOptions) {
     throw new Error('markdownFile is required for remarkAsf plugin');
   }
 
-  return async function transformer(tree: Root) {
-    // First convert markdown to HTML using remark-rehype
-    // @ts-expect-error Types between remark-rehype and unified are temporarily incompatible
-    const htmlTree = remarkRehype()(tree)
-    
-    // Then apply rehypeAstro to the HTML tree
-    // @ts-expect-error Types between rehype-astro and unified are temporarily incompatible
-    const astroTree = rehypeAstro({ markdownFile: options.markdownFile })(htmlTree)
+  return async function transformer(tree: Root): Promise<Root> {
+    // Create a new processor for the transformation
+    const processor = unified()
+      .use(remarkParse) // Add markdown parser
+      .use(remarkRehype) // Convert markdown to HTML
+      .use(rehypeAstro, { markdownFile: options.markdownFile }) // Apply Astro features
+      .use(rehypeStringify) // Add HTML stringifier
 
-    return astroTree
+    // Process the tree
+    const result = await processor.run(tree)
+    return result as Root
   }
 }
