@@ -14,12 +14,29 @@ export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
   console.log('Found entries:', vocabularyEntries.map(e => ({ slug: e.data.slug, id: e.id })));
   return vocabularyEntries.map(entry => {
-    // Use the entry ID (filename) as fallback if slug is not present
-    const slug = entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-');
-    console.log('Processing entry:', { id: entry.id, slug });
+    // Generate slug and title from the entry ID if not present
+    const filename = entry.id.replace(/\.md$/, '');
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    const title = entry.data.title || filename
+      .split(/[\s-]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
+    // Create a new entry with updated data
+    const updatedEntry = {
+      ...entry,
+      data: {
+        ...entry.data,
+        title,
+        slug,
+        aliases: entry.data.aliases || []
+      }
+    };
+
+    console.log('Processing entry:', { id: entry.id, slug, title });
     return {
       params: { vocabulary: slug },
-      props: { entry }
+      props: { entry: updatedEntry }
     };
   });
 }
