@@ -1,14 +1,14 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
-import Layout from '@layouts/Layout.astro';
-import OneArticle from '@layouts/OneArticle.astro';
-import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import remarkAsf from '@utils/markdown/remark-asf';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import { Debug } from 'astro:components';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import remarkAsf from '@utils/markdown/remark-asf';
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');

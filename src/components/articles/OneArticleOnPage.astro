@@ -1,4 +1,63 @@
 ---
+interface Props {
+  title: string;
+  content: string;
+}
 
+const { title, content } = Astro.props;
 ---
 
+<article class="prose mx-auto">
+  <h1>{title}</h1>
+  <div set:html={content} />
+</article>
+
+<style>
+  .prose {
+    color: var(--clr-lossless-primary-light);
+    max-width: 65ch;
+    padding: 1rem;
+  }
+
+  .prose h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose :global(h2) {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h3) {
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(p) {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .prose :global(a) {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: none;
+  }
+
+  .prose :global(a:hover) {
+    text-decoration: underline;
+  }
+
+  .prose :global(ul), .prose :global(ol) {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+</style>
