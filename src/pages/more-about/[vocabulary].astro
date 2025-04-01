@@ -9,6 +9,8 @@ import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import remarkAsf from '@utils/markdown/remark-asf';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkImages from '@utils/markdown/remark-images';
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
@@ -56,6 +58,11 @@ if (!entry) {
 const processedContent = await unified()
   .use(remarkParse)        // Parse markdown to mdast
   .use(remarkAsf, { markdownFile: entry.id })         // Transform mdast with file path
+  .use(remarkBacklinks)
+  .use(remarkImages, {
+    renderInFrontmatter: false,
+    defaultAltText: 'Vocabulary Entry Image'
+  })
   .use(remarkRehype)      // Convert mdast to hast
   .use(rehypeStringify)   // Stringify hast to HTML
   .process(entry.body);
