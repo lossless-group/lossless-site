@@ -7,9 +7,10 @@ import { fileURLToPath } from 'url';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 import remarkImages from './src/utils/markdown/remark-images';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
+import remarkCalloutHandler from './src/utils/markdown/remark-callout-handler';
 
 export default defineConfig({
-	output: "server",
+  output: "server",
   adapter: node({
     mode: 'standalone'
   }),
@@ -22,9 +23,10 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [
-      [remarkImages, { renderInFrontmatter: false, defaultAltText: 'Image from URL' }],
-      remarkBacklinks,
-      remarkDefinitionList
+      remarkCalloutHandler, // Must be first to see raw markdown
+      remarkBacklinks,      // Then handle wiki-links
+      remarkImages,         // Then handle images
+      remarkDefinitionList  // Finally handle definition lists
     ],
     remarkRehype: { handlers: defListHastHandlers },
     syntaxHighlight: false, // Disable Shiki's syntax highlighting
@@ -47,6 +49,10 @@ export default defineConfig({
           }
         }
       ]
+    },
+    parse: {
+      blockquotes: true,
+      gfm: true
     },
     render: [
       {
