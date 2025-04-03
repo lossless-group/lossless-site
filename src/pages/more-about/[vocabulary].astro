@@ -1,59 +1,10 @@
 ---
-import { getCollection, getEntryBySlug, type CollectionEntry } from 'astro:content';
-import { unified } from 'unified';
-import type { Plugin, Transformer } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeStringify from 'rehype-stringify';
-import { Debug } from 'astro:components';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import remarkAsf from '@utils/markdown/remark-asf';
-import remarkBacklinks from '@utils/markdown/remark-backlinks';
-import remarkImages from '@utils/markdown/remark-images';
-import { processCallouts } from '@utils/markdown/callouts/processCalloutPipeline';
-import type { Root as MdastRoot } from 'mdast';
-// @ts-expect-error - Using local type definition for HAST Root
-import type { Root } from '@types/hast';
-import fs from 'fs';
-import path from 'path';
-import { astDebugger } from '../../utils/debug/ast-debugger';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
-
-// Turn debug mode on/off here
-const DEBUG_AST = process.env.DEBUG_AST === 'true';
-
-// Debug directory and file writing setup
-function createDebugDir() {
-  const baseDebugDir = path.join(process.cwd(), 'debug');
-  if (!fs.existsSync(baseDebugDir)) {
-    fs.mkdirSync(baseDebugDir);
-  }
-
-  // Get current date in YYYY-MM-DD format
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const debugDir = path.join(baseDebugDir, `${dateStr}_01`);
-  
-  if (!fs.existsSync(debugDir)) {
-    fs.mkdirSync(debugDir);
-  }
-  return debugDir;
-}
-
-// Only create debug directory and write files if debugging is enabled
-if (DEBUG_AST) {
-  createDebugDir();
-}
-
-// Helper function for debug file writing
-const writeDebugFile = (name: string, content: any) => {
-  if (DEBUG_AST) {
-    astDebugger.writeDebugFile(name, content);
-  }
-};
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
@@ -61,7 +12,6 @@ export async function getStaticPaths() {
     // Generate slug and title from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
-    const title = entry.data.title || filename;
     return {
       params: { vocabulary: slug },
       props: { entry }
@@ -74,87 +24,11 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-
-// Step 1: Parse markdown to initial MDAST
-const mdast = await unified()
-  .use(remarkParse)
-  .parse(entry.body) as MdastRoot;
-
-writeDebugFile('1-parsed-ast', mdast);
-
-// Step 2: Apply remark transforms in sequence
-let currentAst = mdast as MdastRoot;
-
-// Create a processor for each transformation step
-const processor = unified()
-  .use(remarkParse);
-
-// Run transforms in sequence
-currentAst = await processor
-  .use(processCallouts)
-  .runSync(currentAst as MdastRoot) as MdastRoot;
-writeDebugFile('2-callouts-ast', currentAst);
-
-currentAst = await processor
-  .use(remarkAsf, { markdownFile: entry.id })
-  .runSync(currentAst as MdastRoot) as MdastRoot;
-writeDebugFile('3-asf-ast', currentAst);
-
-currentAst = await processor
-  .use(remarkBacklinks)
-  .runSync(currentAst as MdastRoot) as MdastRoot;
-writeDebugFile('4-backlinks-ast', currentAst);
-
-currentAst = await processor
-  .use(remarkImages)
-  .runSync(currentAst as MdastRoot) as MdastRoot;
-writeDebugFile('5-images-ast', currentAst);
-
-// Step 3: Convert MDAST to HAST
-const hastProcessor = unified().use(remarkRehype);
-const hast = await hastProcessor.run(currentAst as MdastRoot) as Root;
-writeDebugFile('6-hast-ast', hast);
-
-// Step 4: Convert HAST to HTML
-const htmlProcessor = unified().use(rehypeStringify);
-const htmlResult = await htmlProcessor.stringify(hast);
-writeDebugFile('7-final-html', htmlResult);
-
-// Create processed entry with transformed content
-const processedEntry = {
-  ...entry,
-  body: String(htmlResult)
-};
-
-console.log('Processed Entry:', { 
-  id: processedEntry.id, 
-  title: processedEntry.data.title, 
-  slug: processedEntry.data.slug,
-  contentLength: processedEntry.body.length
-});
 ---
 
-<Layout title={processedEntry.data.title || processedEntry.data.slug}>
-  {DEBUG_AST && (
-    <>
-      <h2>Debug Output:</h2>
-      <h3>1. Initial MDAST:</h3>
-      <Debug ast={mdast} />
-      <h3>2. After Callouts:</h3>
-      <Debug ast={currentAst} />
-      <h3>3. After ASF:</h3>
-      <Debug ast={currentAst} />
-      <h3>4. After Backlinks:</h3>
-      <Debug ast={currentAst} />
-      <h3>5. After Images:</h3>
-      <Debug ast={currentAst} />
-      <h3>6. Final HAST:</h3>
-      <Debug ast={hast} />
-      <hr />
-    </>
-  )}
+<Layout title={entry.data.title || entry.id}>
   <OneArticleOnPage
-    title={processedEntry.data.title || processedEntry.data.slug}
-    content={processedEntry.body}
+    title={entry.data.title || entry.id}
+    content={entry.body}
   />
 </Layout>
