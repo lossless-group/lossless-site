@@ -60,4 +60,43 @@ const { title, content } = Astro.props;
   .prose :global(li) {
     margin-bottom: 0.5rem;
   }
+
+  /* Callout styles */
+  .prose :global(.callout) {
+    border: 1px solid var(--clr-lossless-primary-light);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: var(--clr-lossless-primary-darkest);
+  }
+
+  .prose :global(.callout-header) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(.callout-content) {
+    margin-top: 0.5rem;
+    line-height: 1.6;
+  }
+
+  /* Type-specific styles */
+  .prose :global(.callout-note) {
+    border-color: var(--clr-lossless-accent--brightest);
+    background-color: var(--clr-lossless-primary-darker);
+  }
+
+  .prose :global(.callout-warning) {
+    border-color: var(--clr-lossless-warning);
+    background-color: var(--clr-lossless-warning-bg);
+  }
+
+  .prose :global(.callout-important) {
+    border-color: var(--clr-lossless-important);
+    background-color: var(--clr-lossless-important-bg);
+  }
 </style>
