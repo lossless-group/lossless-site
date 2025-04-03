@@ -8,6 +8,7 @@ import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-lis
 import remarkImages from './src/utils/markdown/remark-images';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import { processCallouts } from './src/utils/markdown/callouts/processCalloutPipeline';
+import remarkCallouts from './src/utils/markdown/remark-callout-handler';
 
 export default defineConfig({
   output: "server",
@@ -26,6 +27,7 @@ export default defineConfig({
       processCallouts, // Must be first to see raw markdown
       remarkBacklinks,      // Then handle wiki-links
       remarkImages,         // Then handle images
+      remarkCallouts,
       remarkDefinitionList  // Finally handle definition lists
     ],
     remarkRehype: { handlers: defListHastHandlers },

@@ -6,7 +6,7 @@
   background-color: var(--clr-lossless-primary-darkest);
 }
 
-.callout-title {
+.callout-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -15,21 +15,23 @@
   color: var(--clr-lossless-accent--brightest);
 }
 
-.callout-icon {
-  font-size: 1.25rem;
-}
-
 .callout-content {
   margin-top: 0.5rem;
   line-height: 1.6;
 }
 
-/* Special styling for LLM responses */
-.callout-llm-response {
+/* Type-specific styles */
+.callout-note {
   border-color: var(--clr-lossless-accent--brightest);
   background-color: var(--clr-lossless-primary-darker);
 }
 
-.callout-llm-response .callout-title {
-  color: var(--clr-lossless-accent--brightest);
+.callout-warning {
+  border-color: var(--clr-lossless-warning);
+  background-color: var(--clr-lossless-warning-bg);
+}
+
+.callout-important {
+  border-color: var(--clr-lossless-important);
+  background-color: var(--clr-lossless-important-bg);
 }
