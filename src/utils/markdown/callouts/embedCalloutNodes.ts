@@ -1,8 +1,25 @@
 import { visit, SKIP } from 'unist-util-visit';
 import type { Node, Parent } from 'unist';
-import type { Blockquote } from 'mdast';
+import type { Data } from 'unist';
 import { astDebugger } from '../../debug/ast-debugger';
-import type { TransformedCallout } from './types';
+
+interface CalloutNode extends Node {
+  data?: {
+    hProperties?: {
+      className?: string[];
+      'data-type'?: string;
+    };
+  };
+}
+
+interface TransformedCallout {
+  originalNode: Node;
+  transformedNode: CalloutNode;
+  metadata: {
+    id: string;
+    transformations: string[];
+  };
+}
 
 /* section open ==============================================================
 |
@@ -44,15 +61,15 @@ export async function embedCallouts(tree: Node, transformed: TransformedCallout[
     
     /* ??-- Logic continued:
        //-- Replace nodes in tree
-       ---- - Visit each blockquote
-       ---- - Check for transformation
+       ---- - Visit each element
+       ---- - Check for transformation and callout class
        ---- - Replace if found
        ---- - Skip children to avoid re-processing
     -->
     */
-    visit(tree, 'blockquote', (node: Blockquote, index: number, parent: Parent) => {
+    visit(tree, 'element', (node: CalloutNode, index: number, parent: Parent) => {
       const replacement = transformMap.get(node);
-      if (!replacement) return SKIP;
+      if (!replacement || !node.data?.hProperties?.className?.includes('callout')) return SKIP;
       
       if (typeof index === 'number') {
         parent.children[index] = replacement;

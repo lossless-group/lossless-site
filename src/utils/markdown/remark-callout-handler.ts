@@ -1,90 +1,72 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text, Blockquote, Parent, Paragraph } from 'mdast';
-import { toString } from 'mdast-util-to-string';
 import type { Visitor } from 'unist-util-visit';
+import { detectMarkdownCallouts } from './callouts/detectMarkdownCallouts';
+import { isolateCallouts } from './callouts/isolateCalloutContent';
+import { transformCallouts } from './callouts/transformCalloutStructure';
+import { embedCallouts } from './callouts/embedCalloutNodes';
+import { astDebugger } from '../debug/ast-debugger';
 
-function debugNode(node: any, depth = 0): string {
-  const indent = '  '.repeat(depth);
-  let result = `${indent}type: ${node.type}\n`;
-  
-  if (node.value) {
-    result += `${indent}value: ${node.value}\n`;
-  }
-  
-  if (node.children) {
-    result += `${indent}children:\n`;
-    node.children.forEach((child: any) => {
-      result += debugNode(child, depth + 1);
-    });
-  }
-  
-  return result;
-}
-
-function parseCalloutFromText(text: string): { type: string; title: string } | null {
-  // Look for [!Type] pattern at the start
-  const calloutMatch = text.match(/^\[!(.*?)\]/);
-  if (!calloutMatch) return null;
-
-  const type = calloutMatch[1].trim();
-  
-  // Rest of first line is title
-  const title = text.slice(calloutMatch[0].length).split('\n')[0].trim() || type;
-  
-  return {
-    type,
-    title
-  };
-}
+/* section open ==============================================================
+|
+| ??-- About: Remark Plugin for Callout Processing
+| ??-- Type: Markdown AST Transformation
+|
+| ??-- Includes: 
+| //---- Callout detection
+| //---- Content isolation
+| //---- Structure transformation
+| //---- Node embedding
+|
+====================================== */
 
 export default function remarkCalloutHandler() {
-  return (tree: Root) => {
-    console.log('=== START REMARK CALLOUT HANDLER ===');
-    console.log('Full tree structure:');
-    console.log(debugNode(tree));
+  return async (tree: Root) => {
+    astDebugger.writeDebugFile('1-initial-tree', tree);
     
-    const visitor: Visitor<Blockquote, Parent> = (node, index, parent) => {
-      if (!node.children?.length) return;
-
-      // Only look at the first paragraph for callout syntax
-      const firstParagraph = node.children[0] as Paragraph;
-      if (firstParagraph?.type !== 'paragraph' || !firstParagraph.children?.length) return;
-
-      const firstText = firstParagraph.children[0] as Text;
-      if (firstText?.type !== 'text') return;
-
-      const callout = parseCalloutFromText(firstText.value);
-      if (!callout) {
-        console.log('No callout found in blockquote');
-        return;
-      }
-
-      console.log('Found callout:', callout);
-
-      // Remove the [!Type] syntax from first text node
-      firstText.value = firstText.value.replace(/^\[!.*?\]/, '').trim();
-
-      // If first paragraph is now empty, remove it
-      if (!firstText.value && firstParagraph.children.length === 1) {
-        node.children.shift();
-      }
-
-      // Mark this blockquote as a callout
-      node.data = {
-        hName: 'article',
-        hProperties: {
-          className: ['callout', `callout-${callout.type.toLowerCase()}`],
-          'data-type': callout.type,
-          'data-title': callout.title
-        }
-      };
+    try {
+      // Phase 1: Detect callouts in the AST
+      const detectedCallouts = await detectMarkdownCallouts(tree);
+      astDebugger.writeDebugFile('2-detected-callouts', detectedCallouts);
       
-      console.log('Transformed node:', debugNode(node));
-    };
-
-    visit(tree, 'blockquote', visitor);
-    
-    console.log('=== END REMARK CALLOUT HANDLER ===');
-    return tree;
+      if (detectedCallouts.length === 0) {
+        astDebugger.writeDebugFile('2a-no-callouts', { message: 'No callouts detected' });
+        return tree;
+      }
+      
+      // Phase 2: Isolate callout content
+      const isolatedCallouts = await isolateCallouts(detectedCallouts);
+      astDebugger.writeDebugFile('3-isolated-callouts', isolatedCallouts);
+      
+      // Phase 3: Transform callout structure
+      const transformedCallouts = await Promise.all(
+        isolatedCallouts.map(callout => transformCalloutStructure(callout))
+      );
+      astDebugger.writeDebugFile('4-transformed-callouts', transformedCallouts);
+      
+      // Phase 4: Embed transformed nodes back into AST
+      const updatedTree = await embedCalloutNodes(tree, transformedCallouts);
+      astDebugger.writeDebugFile('5-final-tree', updatedTree);
+      
+      return updatedTree;
+    } catch (error) {
+      console.error('Error in callout processing:', error);
+      astDebugger.writeDebugFile('error-callout-processing', {
+        phase: 'remarkCalloutHandler',
+        error: error.message,
+        stack: error.stack
+      });
+      // Return original tree on error to avoid breaking the pipeline
+      return tree;
+    }
   };
 }
+
+/* ========================================
+??-- Affects: 
+//----   AST traversal
+//----   Callout processing
+//----   Debug logs
+// 
+// Close: Remark Plugin for Callout Processing
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/

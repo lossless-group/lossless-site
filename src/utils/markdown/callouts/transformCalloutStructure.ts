@@ -98,7 +98,7 @@ export async function transformCallouts(isolated: IsolatedCallout[]): Promise<Tr
           - embedCallouts in embed.ts
       */
       const transformedNode: TransformedBlockquote = {
-        type: 'blockquote',
+        type: 'element',
         data: calloutData,
         children: [headerNode, contentNode],
         position: item.node.position
@@ -130,7 +130,7 @@ export async function transformCallouts(isolated: IsolatedCallout[]): Promise<Tr
       return {
         originalNode: item.node,
         transformedNode: {
-          type: 'blockquote',
+          type: 'element',
           data: {
             hName: 'article',
             hProperties: {
