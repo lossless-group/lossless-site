@@ -1,10 +1,6 @@
-import { visit } from 'unist-util-visit';
-import type { Root, Text, Blockquote, Parent, Paragraph } from 'mdast';
-import type { Visitor } from 'unist-util-visit';
-import { detectMarkdownCallouts } from './callouts/detectMarkdownCallouts';
-import { isolateCallouts } from './callouts/isolateCalloutContent';
-import { transformCallouts } from './callouts/transformCalloutStructure';
-import { embedCallouts } from './callouts/embedCalloutNodes';
+import type { Root } from 'mdast';
+import type { Plugin } from 'unified';
+import { processCallouts } from './callouts/processCalloutPipeline';
 import { astDebugger } from '../debug/ast-debugger';
 
 /* section open ==============================================================
@@ -13,46 +9,34 @@ import { astDebugger } from '../debug/ast-debugger';
 | ??-- Type: Markdown AST Transformation
 |
 | ??-- Includes: 
-| //---- Callout detection
-| //---- Content isolation
-| //---- Structure transformation
-| //---- Node embedding
+| //---- Integration with unified pipeline
+| //---- Error handling
+| //---- Debug output
 |
 ====================================== */
 
-export default function remarkCalloutHandler() {
+/**
+ * Remark plugin that processes callouts in markdown.
+ * Uses the four-phase pipeline from processCalloutPipeline:
+ * 1. Detection (detectMarkdownCallouts)
+ * 2. Isolation (isolateCalloutContent)
+ * 3. Transformation (transformCalloutStructure)
+ * 4. Embedding (embedCalloutNodes)
+ */
+const remarkCalloutHandler: Plugin<[], Root> = () => {
   return async (tree: Root) => {
-    astDebugger.writeDebugFile('1-initial-tree', tree);
-    
     try {
-      // Phase 1: Detect callouts in the AST
-      const detectedCallouts = await detectMarkdownCallouts(tree);
-      astDebugger.writeDebugFile('2-detected-callouts', detectedCallouts);
+      astDebugger.writeDebugFile('0-initial-tree', tree);
       
-      if (detectedCallouts.length === 0) {
-        astDebugger.writeDebugFile('2a-no-callouts', { message: 'No callouts detected' });
-        return tree;
-      }
+      // Process callouts through all phases
+      const processedTree = await processCallouts(tree);
       
-      // Phase 2: Isolate callout content
-      const isolatedCallouts = await isolateCallouts(detectedCallouts);
-      astDebugger.writeDebugFile('3-isolated-callouts', isolatedCallouts);
-      
-      // Phase 3: Transform callout structure
-      const transformedCallouts = await Promise.all(
-        isolatedCallouts.map(callout => transformCalloutStructure(callout))
-      );
-      astDebugger.writeDebugFile('4-transformed-callouts', transformedCallouts);
-      
-      // Phase 4: Embed transformed nodes back into AST
-      const updatedTree = await embedCalloutNodes(tree, transformedCallouts);
-      astDebugger.writeDebugFile('5-final-tree', updatedTree);
-      
-      return updatedTree;
+      astDebugger.writeDebugFile('5-final-tree', processedTree);
+      return processedTree;
     } catch (error) {
-      console.error('Error in callout processing:', error);
-      astDebugger.writeDebugFile('error-callout-processing', {
-        phase: 'remarkCalloutHandler',
+      console.error('Error in remark-callout:', error);
+      astDebugger.writeDebugFile('remark-callout-error', {
+        phase: 'remark-plugin',
         error: error.message,
         stack: error.stack
       });
@@ -60,12 +44,14 @@ export default function remarkCalloutHandler() {
       return tree;
     }
   };
-}
+};
+
+export default remarkCalloutHandler;
 
 /* ========================================
 ??-- Affects: 
-//----   AST traversal
-//----   Callout processing
+//----   Remark plugin pipeline
+//----   AST transformation
 //----   Debug logs
 // 
 // Close: Remark Plugin for Callout Processing

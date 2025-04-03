@@ -6,18 +6,20 @@ class AstDebugger {
   private isEnabled: boolean = false;
 
   constructor() {
-    // Only enable in browser context
-    if (typeof window === 'undefined') return;
+    // Only enable in development environment
+    if (process.env.NODE_ENV !== 'development') return;
     
     // Only enable if explicitly requested via URL parameter
-    const url = new URL(window.location.href);
-    this.isEnabled = url.searchParams.has('debug-ast');
-    
-    // Only create directory when the page loads in browser
-    if (document.readyState === 'complete') {
-      this.init();
-    } else {
-      window.addEventListener('load', () => this.init());
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      this.isEnabled = url.searchParams.has('debug-ast');
+      
+      // Set up initialization after page load
+      if (document.readyState === 'complete') {
+        this.init();
+      } else {
+        window.addEventListener('load', () => this.init());
+      }
     }
   }
 
@@ -52,7 +54,7 @@ class AstDebugger {
     console.log('Debug output directory:', this.debugDir);
   }
 
-  writeDebugFile(name: string, content: any) {
+  public writeDebugFile(name: string, content: any) {
     if (!this.isEnabled || !this.debugDir) return;
     const filePath = path.join(this.debugDir, `${name}.json`);
     fs.writeFileSync(filePath, JSON.stringify(content, null, 2));

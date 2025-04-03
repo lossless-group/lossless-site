@@ -1,12 +1,11 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntryBySlug, type CollectionEntry } from 'astro:content';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import { Debug } from 'astro:components';
 import Layout from '@layouts/Layout.astro';
-import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
@@ -18,53 +17,12 @@ import type { Root as MdastRoot } from 'mdast';
 import type { Root } from '@types/hast';
 import fs from 'fs';
 import path from 'path';
+import { astDebugger } from '../../utils/debug/ast-debugger';
 
 // Turn debug mode on/off here
-const DEBUG_AST = true; // Set to true to debug AST transformations
+const DEBUG_AST = process.env.DEBUG_AST === 'true';
 
-export async function getStaticPaths() {
-  const vocabularyEntries = await getCollection('vocabulary');
-  console.log('Found entries:', vocabularyEntries.map(e => ({ slug: e.data.slug, id: e.id })));
-  return vocabularyEntries.map(entry => {
-    // Generate slug and title from the entry ID if not present
-    const filename = entry.id.replace(/\.md$/, '');
-    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
-    const title = entry.data.title || filename
-      .split(/[\s-]+/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-
-    // Create a new entry with updated data
-    const updatedEntry = {
-      ...entry,
-      data: {
-        ...entry.data,
-        title,
-        slug,
-        aliases: entry.data.aliases || []
-      }
-    };
-
-    console.log('Processing entry:', { id: entry.id, slug, title });
-    return {
-      params: { vocabulary: slug },
-      props: { entry: updatedEntry }
-    };
-  });
-}
-
-export const prerender = true;
-
-type Props = {
-  entry: CollectionEntry<'vocabulary'>;
-};
-
-const { entry }: Props = Astro.props;
-if (!entry) {
-  throw new Error("Vocabulary entry not found");
-}
-
-// Create debug directory only when page is rendered
+// Debug directory and file writing setup
 function createDebugDir() {
   const baseDebugDir = path.join(process.cwd(), 'debug');
   if (!fs.existsSync(baseDebugDir)) {
@@ -83,102 +41,130 @@ function createDebugDir() {
 }
 
 // Only create debug directory and write files if debugging is enabled
-let debugDir: string | undefined;
-let writeDebugFile: ((name: string, content: any) => void) | undefined;
-
 if (DEBUG_AST) {
-  debugDir = createDebugDir();
-  console.log('Debug output directory:', debugDir);
-  
-  writeDebugFile = (name: string, content: any) => {
-    if (!debugDir) return;
-    const filePath = path.join(debugDir, `${name}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
-  };
+  createDebugDir();
 }
 
-// Process the content with our custom remark plugin in discrete steps
-// 1. Parse markdown to mdast
-const parsedAst = unified()
+// Helper function for debug file writing
+const writeDebugFile = (name: string, content: any) => {
+  if (DEBUG_AST) {
+    astDebugger.writeDebugFile(name, content);
+  }
+};
+
+export async function getStaticPaths() {
+  const vocabularyEntries = await getCollection('vocabulary');
+  console.log('Found entries:', vocabularyEntries.map(e => ({ slug: e.data.slug, id: e.id })));
+  return vocabularyEntries.map(entry => {
+    // Generate slug and title from the entry ID if not present
+    const filename = entry.id.replace(/\.md$/, '');
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    const title = entry.data.title || filename;
+    return {
+      params: { vocabulary: slug },
+      props: { entry }
+    };
+  });
+}
+
+interface Props {
+  entry: CollectionEntry<'vocabulary'>;
+}
+
+const { entry } = Astro.props;
+
+// Process with our custom remark plugins in discrete steps
+const parsedAst = await unified()
   .use(remarkParse)
-  .parse(entry.body);
-writeDebugFile?.('1-parsed-ast', parsedAst);
-console.log('1. Parsed AST:', parsedAst);
+  .process(entry.body);
+writeDebugFile('1-parsed-ast', parsedAst.data);
+console.log('1. Parsed AST:', parsedAst.data);
 
-// 2. Apply remarkCallouts transformation (marks blockquotes as callouts)
 const calloutsAst = await unified()
+  .use(remarkParse)
   .use(remarkCallouts)
-  .run(parsedAst);
-writeDebugFile?.('2-callouts-ast', calloutsAst);
-console.log('2. Callouts AST:', calloutsAst);
+  .process(entry.body);
+writeDebugFile('2-callouts-ast', calloutsAst.data);
+console.log('2. Callouts AST:', calloutsAst.data);
 
-// 3. Apply remarkAsf transformation
 const asfAst = await unified()
-  .use(remarkAsf, { markdownFile: entry.id })
-  .run(calloutsAst);
-writeDebugFile?.('3-asf-ast', asfAst);
-console.log('3. ASF AST:', asfAst);
+  .use(remarkParse)
+  .use(remarkAsf)
+  .process(entry.body);
+writeDebugFile('3-asf-ast', asfAst.data);
+console.log('3. ASF AST:', asfAst.data);
 
-// 4. Apply backlinks transformation
 const backlinksAst = await unified()
+  .use(remarkParse)
   .use(remarkBacklinks)
-  .run(asfAst);
-writeDebugFile?.('4-backlinks-ast', backlinksAst);
-console.log('4. Backlinks AST:', backlinksAst);
+  .process(entry.body);
+writeDebugFile('4-backlinks-ast', backlinksAst.data);
+console.log('4. Backlinks AST:', backlinksAst.data);
 
-// 5. Apply images transformation
 const imagesAst = await unified()
-  .use(remarkImages, {
-    renderInFrontmatter: false,
-    defaultAltText: 'Vocabulary Entry Image'
-  })
-  .run(backlinksAst) as MdastRoot;
-writeDebugFile?.('5-images-ast', imagesAst);
-console.log('5. Images AST:', imagesAst);
+  .use(remarkParse)
+  .use(remarkImages)
+  .process(entry.body);
+writeDebugFile('5-images-ast', imagesAst.data);
+console.log('5. Images AST:', imagesAst.data);
 
-// 6. Convert to hast (HTML AST)
 const hastAst = await unified()
+  .use(remarkParse)
   .use(remarkRehype)
-  .run(imagesAst) as Root;
-writeDebugFile?.('6-hast-ast', hastAst);
-console.log('6. HAST AST:', hastAst);
+  .process(entry.body);
+writeDebugFile('6-hast-ast', hastAst.data);
+console.log('6. HAST AST:', hastAst.data);
 
-// 7. Apply rehypeCallouts transformation (structures HTML for ArticleCallout)
 const calloutsHastAst = await unified()
-  .use(rehypeCallouts)
-  .run(hastAst) as Root;
-writeDebugFile?.('7-callouts-hast-ast', calloutsHastAst);
-console.log('7. Callouts HAST AST:', calloutsHastAst);
+  .use(remarkParse)
+  .use(remarkCallouts)
+  .use(remarkRehype)
+  .process(entry.body);
+writeDebugFile('7-callouts-hast-ast', calloutsHastAst.data);
+console.log('7. Callouts HAST AST:', calloutsHastAst.data);
 
-// 8. Convert to HTML string
+// Final processing with all plugins
 const processedContent = await unified()
-  .use(rehypeStringify)
-  .stringify(calloutsHastAst);
-writeDebugFile?.('8-final-html', processedContent);
-console.log('8. Final HTML:', processedContent);
+  .use(remarkParse)           // 1. Parse markdown to MDAST
+  .use(remarkCallouts)        // 2. Transform blockquotes to callout nodes
+  .use(remarkAsf)            // 3. Process ASF syntax
+  .use(remarkBacklinks)      // 4. Process backlinks
+  .use(remarkImages)         // 5. Process images
+  .use(remarkRehype)         // 6. Convert MDAST to HAST
+  .use(rehypeStringify)      // 7. Convert HAST to HTML
+  .process(entry.body);
+
+const htmlContent = processedContent.toString();
+writeDebugFile('8-final-html', htmlContent);
+console.log('8. Final HTML:', htmlContent);
 
 console.log('Entry:', { id: entry.id, title: entry.data.title, slug: entry.data.slug });
 
 ---
 
 <Layout title={entry.data.title || entry.data.slug}>
-  <article class="prose dark:prose-invert max-w-none">
-    <h2>Debug Output:</h2>
-    <h3>1. After Parse:</h3>
-    <Debug {parsedAst} />
-    <h3>2. After Callouts:</h3>
-    <Debug {calloutsAst} />
-    <h3>3. After ASF:</h3>
-    <Debug {asfAst} />
-    <h3>4. After Backlinks:</h3>
-    <Debug {backlinksAst} />
-    <h3>5. After Images:</h3>
-    <Debug {imagesAst} />
-    <h3>6. After HAST:</h3>
-    <Debug {hastAst} />
-    <h3>7. After Callouts HAST:</h3>
-    <Debug {calloutsHastAst} />
-    <hr />
-    <div set:html={processedContent} />
-  </article>
+  {DEBUG_AST && (
+    <>
+      <h2>Debug Output:</h2>
+      <h3>1. After Parse:</h3>
+      <Debug {parsedAst} />
+      <h3>2. After Callouts:</h3>
+      <Debug {calloutsAst} />
+      <h3>3. After ASF:</h3>
+      <Debug {asfAst} />
+      <h3>4. After Backlinks:</h3>
+      <Debug {backlinksAst} />
+      <h3>5. After Images:</h3>
+      <Debug {imagesAst} />
+      <h3>6. After HAST:</h3>
+      <Debug {hastAst} />
+      <h3>7. After Callouts HAST:</h3>
+      <Debug {calloutsHastAst} />
+      <hr />
+    </>
+  )}
+  <OneArticleOnPage
+    title={entry.data.title || entry.data.slug}
+    content={htmlContent}
+  />
 </Layout>
