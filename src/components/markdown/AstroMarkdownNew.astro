@@ -1,0 +1,68 @@
+---
+import type {Root, RootContent} from 'mdast'
+import Blockquote from './Blockquote.astro'
+import Paragraph from './Paragraph.astro'
+import Link from './Link.astro'
+import Backlink from './Backlink.astro'
+import {toHtml} from 'hast-util-to-html'
+import {dirname} from 'path'
+
+export interface Props {
+    node: Root | RootContent;
+    data: {
+        path: string;
+        [key: string]: any;
+    };
+}
+
+const {node, data} = Astro.props;
+
+// List of node types we handle with specific components
+const handled_types = [
+    "root",
+    "paragraph",
+    "blockquote",
+    "text",
+    "link",
+    "backlink"  
+];
+
+const other_type = !handled_types.includes(node.type)
+data.dirpath = dirname(data.path)
+
+// Debug output to see AST structure
+console.log(`Processing node type: ${node.type}`)
+console.log(JSON.stringify(node, null, 2))
+---
+
+{(node.type === "root") && 
+    <>
+        {node.children.map((child) => (
+            <Astro.self node={child} data={data} />
+        ))}
+    </>
+}
+
+{(node.type === "paragraph") && 
+    <Paragraph node={node} data={data} />
+}
+
+{(node.type === "blockquote") && 
+    <Blockquote node={node} data={data} />
+}
+
+{(node.type === "text") && 
+    <Fragment set:html={node.value} />
+}
+
+{(node.type === "link") && 
+    <Link node={node} data={data} />
+}
+
+{(node.type === "backlink") && 
+    <Backlink node={node} data={data} />
+}
+
+{other_type && 
+    <Fragment set:html={toHtml(node)} />
+}

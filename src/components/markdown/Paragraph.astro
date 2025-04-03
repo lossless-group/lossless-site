@@ -1,0 +1,29 @@
+---
+import type { PhrasingContent } from 'mdast'
+import AstroMarkdownNew from './AstroMarkdownNew.astro'
+
+export interface Props {
+    node: {
+        type: 'paragraph';
+        children: PhrasingContent[];
+    };
+    data: {
+        path: string;
+        [key: string]: any;
+    };
+}
+
+const { node, data } = Astro.props;
+
+// Check if paragraph contains only text or has images
+const hasOnlyText = node.children.every(child => child.type === 'text');
+const hasImage = node.children.some(child => child.type === 'image');
+
+const className = hasImage ? 'paragraph image' : hasOnlyText ? 'paragraph text' : 'paragraph';
+---
+
+<p class={className}>
+    {node.children.map(child => (
+        <AstroMarkdownNew node={child} data={data} />
+    ))}
+</p>

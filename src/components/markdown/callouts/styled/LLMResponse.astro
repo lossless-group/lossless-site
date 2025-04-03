@@ -1,0 +1,49 @@
+---
+interface Props {
+  title?: string;
+  content: string;
+  className?: string;
+  [key: string]: any;
+}
+
+const { title, content, className = 'callout callout-llm-response', ...attrs } = Astro.props;
+---
+
+<div class={className} {...attrs}>
+  {title && (
+    <div class="callout-title">
+      <span class="callout-icon">🤖</span>
+      <span class="callout-title-text">{title}</span>
+    </div>
+  )}
+  <div class="callout-content">
+    <Fragment set:html={content} />
+  </div>
+</div>
+
+<style>
+.callout-llm-response {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #f8fafc;
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.callout-icon {
+  font-size: 1.25rem;
+}
+
+.callout-content {
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+</style>

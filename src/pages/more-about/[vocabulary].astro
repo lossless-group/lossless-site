@@ -11,6 +11,16 @@ import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
+import remarkCallouts from '@utils/markdown/remark-callout-handler';
+import rehypeCallouts from '@utils/markdown/rehype-callout-handler';
+import type { Root as MdastRoot } from 'mdast';
+// @ts-expect-error - Using local type definition for HAST Root
+import type { Root } from '@types/hast';
+import fs from 'fs';
+import path from 'path';
+
+// Turn debug mode on/off here
+const DEBUG_AST = true; // Set to true to debug AST transformations
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
@@ -54,32 +64,121 @@ if (!entry) {
   throw new Error("Vocabulary entry not found");
 }
 
-// Process the content with our custom remark plugin
-const processedContent = await unified()
-  .use(remarkParse)        // Parse markdown to mdast
-  .use(remarkAsf, { markdownFile: entry.id })         // Transform mdast with file path
+// Create debug directory only when page is rendered
+function createDebugDir() {
+  const baseDebugDir = path.join(process.cwd(), 'debug');
+  if (!fs.existsSync(baseDebugDir)) {
+    fs.mkdirSync(baseDebugDir);
+  }
+
+  // Get current date in YYYY-MM-DD format
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const debugDir = path.join(baseDebugDir, `${dateStr}_01`);
+  
+  if (!fs.existsSync(debugDir)) {
+    fs.mkdirSync(debugDir);
+  }
+  return debugDir;
+}
+
+// Only create debug directory and write files if debugging is enabled
+let debugDir: string | undefined;
+let writeDebugFile: ((name: string, content: any) => void) | undefined;
+
+if (DEBUG_AST) {
+  debugDir = createDebugDir();
+  console.log('Debug output directory:', debugDir);
+  
+  writeDebugFile = (name: string, content: any) => {
+    if (!debugDir) return;
+    const filePath = path.join(debugDir, `${name}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
+  };
+}
+
+// Process the content with our custom remark plugin in discrete steps
+// 1. Parse markdown to mdast
+const parsedAst = unified()
+  .use(remarkParse)
+  .parse(entry.body);
+writeDebugFile?.('1-parsed-ast', parsedAst);
+console.log('1. Parsed AST:', parsedAst);
+
+// 2. Apply remarkCallouts transformation (marks blockquotes as callouts)
+const calloutsAst = await unified()
+  .use(remarkCallouts)
+  .run(parsedAst);
+writeDebugFile?.('2-callouts-ast', calloutsAst);
+console.log('2. Callouts AST:', calloutsAst);
+
+// 3. Apply remarkAsf transformation
+const asfAst = await unified()
+  .use(remarkAsf, { markdownFile: entry.id })
+  .run(calloutsAst);
+writeDebugFile?.('3-asf-ast', asfAst);
+console.log('3. ASF AST:', asfAst);
+
+// 4. Apply backlinks transformation
+const backlinksAst = await unified()
   .use(remarkBacklinks)
+  .run(asfAst);
+writeDebugFile?.('4-backlinks-ast', backlinksAst);
+console.log('4. Backlinks AST:', backlinksAst);
+
+// 5. Apply images transformation
+const imagesAst = await unified()
   .use(remarkImages, {
     renderInFrontmatter: false,
     defaultAltText: 'Vocabulary Entry Image'
   })
-  .use(remarkRehype)      // Convert mdast to hast
-  .use(rehypeStringify)   // Stringify hast to HTML
-  .process(entry.body);
+  .run(backlinksAst) as MdastRoot;
+writeDebugFile?.('5-images-ast', imagesAst);
+console.log('5. Images AST:', imagesAst);
+
+// 6. Convert to hast (HTML AST)
+const hastAst = await unified()
+  .use(remarkRehype)
+  .run(imagesAst) as Root;
+writeDebugFile?.('6-hast-ast', hastAst);
+console.log('6. HAST AST:', hastAst);
+
+// 7. Apply rehypeCallouts transformation (structures HTML for ArticleCallout)
+const calloutsHastAst = await unified()
+  .use(rehypeCallouts)
+  .run(hastAst) as Root;
+writeDebugFile?.('7-callouts-hast-ast', calloutsHastAst);
+console.log('7. Callouts HAST AST:', calloutsHastAst);
+
+// 8. Convert to HTML string
+const processedContent = await unified()
+  .use(rehypeStringify)
+  .stringify(calloutsHastAst);
+writeDebugFile?.('8-final-html', processedContent);
+console.log('8. Final HTML:', processedContent);
 
 console.log('Entry:', { id: entry.id, title: entry.data.title, slug: entry.data.slug });
-console.log('Processed content:', String(processedContent).substring(0, 100) + '...');
 
 ---
 
 <Layout title={entry.data.title || entry.data.slug}>
-  <Debug {entry} />
-  <Debug processedContent={String(processedContent)} />
-  <OneArticle
-    Component={OneArticleOnPage}
-    data={{
-      title: entry.data.title || entry.data.slug,
-      content: String(processedContent)
-    }}
-  />
+  <article class="prose dark:prose-invert max-w-none">
+    <h2>Debug Output:</h2>
+    <h3>1. After Parse:</h3>
+    <Debug {parsedAst} />
+    <h3>2. After Callouts:</h3>
+    <Debug {calloutsAst} />
+    <h3>3. After ASF:</h3>
+    <Debug {asfAst} />
+    <h3>4. After Backlinks:</h3>
+    <Debug {backlinksAst} />
+    <h3>5. After Images:</h3>
+    <Debug {imagesAst} />
+    <h3>6. After HAST:</h3>
+    <Debug {hastAst} />
+    <h3>7. After Callouts HAST:</h3>
+    <Debug {calloutsHastAst} />
+    <hr />
+    <div set:html={processedContent} />
+  </article>
 </Layout>

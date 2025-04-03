@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import type { Root, Text, Blockquote, Parent, Paragraph } from 'mdast';
 import { toString } from 'mdast-util-to-string';
+import type { Visitor } from 'unist-util-visit';
 
 function debugNode(node: any, depth = 0): string {
   const indent = '  '.repeat(depth);
@@ -20,39 +21,19 @@ function debugNode(node: any, depth = 0): string {
   return result;
 }
 
-function parseCalloutFromText(text: string): { type: string; title: string; content: string } | null {
-  // Split into lines and look for blockquote pattern
-  const lines = text.split('\n');
-  const calloutLines: string[] = [];
-  let inCallout = false;
-  let type = '';
-  let title = '';
+function parseCalloutFromText(text: string): { type: string; title: string } | null {
+  // Look for [!Type] pattern at the start
+  const calloutMatch = text.match(/^\[!(.*?)\]/);
+  if (!calloutMatch) return null;
 
-  for (const line of lines) {
-    if (line.startsWith('> [!')) {
-      // Start of callout
-      inCallout = true;
-      const match = line.match(/^>\s*\[!(\w+)\]\s*(.*)$/);
-      if (match) {
-        [, type, title] = match;
-      }
-    } else if (inCallout && line.startsWith('>')) {
-      // Continuation of callout
-      calloutLines.push(line.substring(1).trim());
-    } else if (inCallout) {
-      // End of callout
-      break;
-    }
-  }
-
-  if (!type || !inCallout) {
-    return null;
-  }
-
+  const type = calloutMatch[1].trim();
+  
+  // Rest of first line is title
+  const title = text.slice(calloutMatch[0].length).split('\n')[0].trim() || type;
+  
   return {
-    type: type.toLowerCase(),
-    title: title.trim(),
-    content: calloutLines.join('\n').trim()
+    type,
+    title
   };
 }
 
@@ -62,39 +43,48 @@ export default function remarkCalloutHandler() {
     console.log('Full tree structure:');
     console.log(debugNode(tree));
     
-    visit(tree, 'text', (node: any, index: number, parent: any) => {
-      const text = node.value;
-      console.log('Processing text node:', text);
+    const visitor: Visitor<Blockquote, Parent> = (node, index, parent) => {
+      if (!node.children?.length) return;
 
-      const callout = parseCalloutFromText(text);
+      // Only look at the first paragraph for callout syntax
+      const firstParagraph = node.children[0] as Paragraph;
+      if (firstParagraph?.type !== 'paragraph' || !firstParagraph.children?.length) return;
+
+      const firstText = firstParagraph.children[0] as Text;
+      if (firstText?.type !== 'text') return;
+
+      const callout = parseCalloutFromText(firstText.value);
       if (!callout) {
-        console.log('No callout found in text');
+        console.log('No callout found in blockquote');
         return;
       }
 
       console.log('Found callout:', callout);
 
-      // Create HTML
-      const html = `
-<div class="callout callout-${callout.type}">
-  <div class="callout-title">
-    <span class="callout-icon">${callout.type === 'llm-response' ? '🤖' : '📝'}</span>
-    <span class="callout-title-text">${callout.title}</span>
-  </div>
-  <div class="callout-content">
-    ${callout.content}
-  </div>
-</div>`;
+      // Remove the [!Type] syntax from first text node
+      firstText.value = firstText.value.replace(/^\[!.*?\]/, '').trim();
 
-      // Replace the node with our HTML
-      Object.assign(node, {
-        type: 'html',
-        value: html
-      });
+      // If first paragraph is now empty, remove it
+      if (!firstText.value && firstParagraph.children.length === 1) {
+        node.children.shift();
+      }
+
+      // Mark this blockquote as a callout
+      node.data = {
+        hName: 'article',
+        hProperties: {
+          className: ['callout', `callout-${callout.type.toLowerCase()}`],
+          'data-type': callout.type,
+          'data-title': callout.title
+        }
+      };
       
-      console.log('Transformed to HTML node:', node);
-    });
+      console.log('Transformed node:', debugNode(node));
+    };
+
+    visit(tree, 'blockquote', visitor);
     
     console.log('=== END REMARK CALLOUT HANDLER ===');
+    return tree;
   };
 }

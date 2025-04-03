@@ -1,0 +1,2774 @@
+{
+  "type": "root",
+  "children": [
+    {
+      "type": "element",
+      "tagName": "p",
+      "properties": {},
+      "children": [
+        {
+          "type": "text",
+          "value": "🔗 Remark Plugin Active"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "element",
+      "tagName": "div",
+      "properties": {},
+      "children": [
+        {
+          "type": "text",
+          "value": "https://youtu.be/w5Wr3j4h_1I?si=MkvjqMt3xPbBZjUL",
+          "position": {
+            "start": {
+              "line": 1,
+              "column": 1,
+              "offset": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 49,
+              "offset": 48
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 1,
+          "column": 1,
+          "offset": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 49,
+          "offset": 48
+        }
+      }
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "element",
+      "tagName": "div",
+      "properties": {},
+      "children": [
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "[!LLM Response]\nExplain agile methodologies in software development. How did it become a trend? Who first wrote about it or promoted it? What firms are known to be religious practitioners? What are the controversies? Is there any data or research to back up either believers or non-believers?",
+              "position": {
+                "start": {
+                  "line": 3,
+                  "column": 3,
+                  "offset": 52
+                },
+                "end": {
+                  "line": 4,
+                  "column": 279,
+                  "offset": 347
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 3,
+              "column": 3,
+              "offset": 52
+            },
+            "end": {
+              "line": 4,
+              "column": 279,
+              "offset": 347
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Agile methodologies have revolutionized software development by prioritizing flexibility, iterative progress, and customer collaboration over rigid, linear processes. Emerging as a response to the limitations of traditional models like Waterfall, Agile gained momentum in the 1990s and became mainstream after the 2001 Agile Manifesto[1][3]. Its adoption by major firms and proven benefits in dynamic environments solidified its trend status, though debates persist about misapplication, scalability, and cultural challenges[5][6][9].",
+              "position": {
+                "start": {
+                  "line": 6,
+                  "column": 3,
+                  "offset": 353
+                },
+                "end": {
+                  "line": 6,
+                  "column": 537,
+                  "offset": 887
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 6,
+              "column": 3,
+              "offset": 353
+            },
+            "end": {
+              "line": 6,
+              "column": 537,
+              "offset": 887
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Core Principles and Methodologies",
+              "position": {
+                "start": {
+                  "line": 8,
+                  "column": 7,
+                  "offset": 897
+                },
+                "end": {
+                  "line": 8,
+                  "column": 40,
+                  "offset": 930
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 8,
+              "column": 3,
+              "offset": 893
+            },
+            "end": {
+              "line": 8,
+              "column": 42,
+              "offset": 932
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Agile emphasizes delivering working software incrementally through short development cycles (",
+              "position": {
+                "start": {
+                  "line": 9,
+                  "column": 3,
+                  "offset": 935
+                },
+                "end": {
+                  "line": 9,
+                  "column": 96,
+                  "offset": 1028
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "sprints",
+                  "position": {
+                    "start": {
+                      "line": 9,
+                      "column": 97,
+                      "offset": 1029
+                    },
+                    "end": {
+                      "line": 9,
+                      "column": 104,
+                      "offset": 1036
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 9,
+                  "column": 96,
+                  "offset": 1028
+                },
+                "end": {
+                  "line": 9,
+                  "column": 105,
+                  "offset": 1037
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "), continuous feedback, and adaptive planning. Key methodologies include:",
+              "position": {
+                "start": {
+                  "line": 9,
+                  "column": 105,
+                  "offset": 1037
+                },
+                "end": {
+                  "line": 9,
+                  "column": 178,
+                  "offset": 1110
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 9,
+              "column": 3,
+              "offset": 935
+            },
+            "end": {
+              "line": 9,
+              "column": 180,
+              "offset": 1112
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Scrum",
+                      "position": {
+                        "start": {
+                          "line": 10,
+                          "column": 7,
+                          "offset": 1119
+                        },
+                        "end": {
+                          "line": 10,
+                          "column": 12,
+                          "offset": 1124
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 10,
+                      "column": 5,
+                      "offset": 1117
+                    },
+                    "end": {
+                      "line": 10,
+                      "column": 14,
+                      "offset": 1126
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Uses time-boxed sprints (2–4 weeks), daily standups, and roles like Scrum Master/Product Owner[1][3].",
+                  "position": {
+                    "start": {
+                      "line": 10,
+                      "column": 14,
+                      "offset": 1126
+                    },
+                    "end": {
+                      "line": 10,
+                      "column": 117,
+                      "offset": 1229
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 10,
+                  "column": 3,
+                  "offset": 1115
+                },
+                "end": {
+                  "line": 10,
+                  "column": 119,
+                  "offset": 1231
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Kanban",
+                      "position": {
+                        "start": {
+                          "line": 11,
+                          "column": 7,
+                          "offset": 1238
+                        },
+                        "end": {
+                          "line": 11,
+                          "column": 13,
+                          "offset": 1244
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 11,
+                      "column": 5,
+                      "offset": 1236
+                    },
+                    "end": {
+                      "line": 11,
+                      "column": 15,
+                      "offset": 1246
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Focuses on visualizing workflows and limiting work in progress[1][6].",
+                  "position": {
+                    "start": {
+                      "line": 11,
+                      "column": 15,
+                      "offset": 1246
+                    },
+                    "end": {
+                      "line": 11,
+                      "column": 86,
+                      "offset": 1317
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 11,
+                  "column": 3,
+                  "offset": 1234
+                },
+                "end": {
+                  "line": 11,
+                  "column": 88,
+                  "offset": 1319
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Extreme Programming (XP)",
+                      "position": {
+                        "start": {
+                          "line": 12,
+                          "column": 7,
+                          "offset": 1326
+                        },
+                        "end": {
+                          "line": 12,
+                          "column": 31,
+                          "offset": 1350
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 12,
+                      "column": 5,
+                      "offset": 1324
+                    },
+                    "end": {
+                      "line": 12,
+                      "column": 33,
+                      "offset": 1352
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Prioritizes technical excellence through practices like test-driven development[3].",
+                  "position": {
+                    "start": {
+                      "line": 12,
+                      "column": 33,
+                      "offset": 1352
+                    },
+                    "end": {
+                      "line": 12,
+                      "column": 118,
+                      "offset": 1437
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 12,
+                  "column": 3,
+                  "offset": 1322
+                },
+                "end": {
+                  "line": 12,
+                  "column": 120,
+                  "offset": 1439
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 10,
+              "column": 3,
+              "offset": 1115
+            },
+            "end": {
+              "line": 13,
+              "column": 3,
+              "offset": 1442
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "The Agile lifecycle involves six stages:",
+              "position": {
+                "start": {
+                  "line": 14,
+                  "column": 3,
+                  "offset": 1445
+                },
+                "end": {
+                  "line": 14,
+                  "column": 43,
+                  "offset": 1485
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 14,
+              "column": 3,
+              "offset": 1445
+            },
+            "end": {
+              "line": 14,
+              "column": 45,
+              "offset": 1487
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Concept",
+                      "position": {
+                        "start": {
+                          "line": 15,
+                          "column": 8,
+                          "offset": 1495
+                        },
+                        "end": {
+                          "line": 15,
+                          "column": 15,
+                          "offset": 1502
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 15,
+                      "column": 6,
+                      "offset": 1493
+                    },
+                    "end": {
+                      "line": 15,
+                      "column": 17,
+                      "offset": 1504
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Identifying business opportunities and feasibility[1][2].",
+                  "position": {
+                    "start": {
+                      "line": 15,
+                      "column": 17,
+                      "offset": 1504
+                    },
+                    "end": {
+                      "line": 15,
+                      "column": 76,
+                      "offset": 1563
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 15,
+                  "column": 3,
+                  "offset": 1490
+                },
+                "end": {
+                  "line": 15,
+                  "column": 78,
+                  "offset": 1565
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Inception",
+                      "position": {
+                        "start": {
+                          "line": 16,
+                          "column": 8,
+                          "offset": 1573
+                        },
+                        "end": {
+                          "line": 16,
+                          "column": 17,
+                          "offset": 1582
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 16,
+                      "column": 6,
+                      "offset": 1571
+                    },
+                    "end": {
+                      "line": 16,
+                      "column": 19,
+                      "offset": 1584
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Forming teams, defining requirements, and setting timelines[1].",
+                  "position": {
+                    "start": {
+                      "line": 16,
+                      "column": 19,
+                      "offset": 1584
+                    },
+                    "end": {
+                      "line": 16,
+                      "column": 84,
+                      "offset": 1649
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 16,
+                  "column": 3,
+                  "offset": 1568
+                },
+                "end": {
+                  "line": 16,
+                  "column": 86,
+                  "offset": 1651
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Iteration",
+                      "position": {
+                        "start": {
+                          "line": 17,
+                          "column": 8,
+                          "offset": 1659
+                        },
+                        "end": {
+                          "line": 17,
+                          "column": 17,
+                          "offset": 1668
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 17,
+                      "column": 6,
+                      "offset": 1657
+                    },
+                    "end": {
+                      "line": 17,
+                      "column": 19,
+                      "offset": 1670
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Building software in cycles (2–4 weeks) with stakeholder feedback[1][2].",
+                  "position": {
+                    "start": {
+                      "line": 17,
+                      "column": 19,
+                      "offset": 1670
+                    },
+                    "end": {
+                      "line": 17,
+                      "column": 93,
+                      "offset": 1744
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 17,
+                  "column": 3,
+                  "offset": 1654
+                },
+                "end": {
+                  "line": 17,
+                  "column": 95,
+                  "offset": 1746
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Release",
+                      "position": {
+                        "start": {
+                          "line": 18,
+                          "column": 8,
+                          "offset": 1754
+                        },
+                        "end": {
+                          "line": 18,
+                          "column": 15,
+                          "offset": 1761
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 18,
+                      "column": 6,
+                      "offset": 1752
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 17,
+                      "offset": 1763
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Final testing and deployment[1].",
+                  "position": {
+                    "start": {
+                      "line": 18,
+                      "column": 17,
+                      "offset": 1763
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 51,
+                      "offset": 1797
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 18,
+                  "column": 3,
+                  "offset": 1749
+                },
+                "end": {
+                  "line": 18,
+                  "column": 53,
+                  "offset": 1799
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Production",
+                      "position": {
+                        "start": {
+                          "line": 19,
+                          "column": 8,
+                          "offset": 1807
+                        },
+                        "end": {
+                          "line": 19,
+                          "column": 18,
+                          "offset": 1817
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 19,
+                      "column": 6,
+                      "offset": 1805
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 20,
+                      "offset": 1819
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Ongoing support and user training[1].",
+                  "position": {
+                    "start": {
+                      "line": 19,
+                      "column": 20,
+                      "offset": 1819
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 59,
+                      "offset": 1858
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 19,
+                  "column": 3,
+                  "offset": 1802
+                },
+                "end": {
+                  "line": 19,
+                  "column": 61,
+                  "offset": 1860
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Retirement",
+                      "position": {
+                        "start": {
+                          "line": 20,
+                          "column": 8,
+                          "offset": 1868
+                        },
+                        "end": {
+                          "line": 20,
+                          "column": 18,
+                          "offset": 1878
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 20,
+                      "column": 6,
+                      "offset": 1866
+                    },
+                    "end": {
+                      "line": 20,
+                      "column": 20,
+                      "offset": 1880
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Phasing out outdated systems[1].",
+                  "position": {
+                    "start": {
+                      "line": 20,
+                      "column": 20,
+                      "offset": 1880
+                    },
+                    "end": {
+                      "line": 20,
+                      "column": 54,
+                      "offset": 1914
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 20,
+                  "column": 3,
+                  "offset": 1863
+                },
+                "end": {
+                  "line": 20,
+                  "column": 56,
+                  "offset": 1916
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 15,
+              "column": 3,
+              "offset": 1490
+            },
+            "end": {
+              "line": 21,
+              "column": 3,
+              "offset": 1919
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Rise to Prominence",
+              "position": {
+                "start": {
+                  "line": 22,
+                  "column": 7,
+                  "offset": 1926
+                },
+                "end": {
+                  "line": 22,
+                  "column": 25,
+                  "offset": 1944
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 22,
+              "column": 3,
+              "offset": 1922
+            },
+            "end": {
+              "line": 22,
+              "column": 27,
+              "offset": 1946
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Agile’s origins trace to the 1990s, when developers sought alternatives to inflexible Waterfall methods. The pivotal moment came in February 2001, when 17 developers, including Jeff Sutherland and Ken Schwaber (Scrum creators), published the ",
+              "position": {
+                "start": {
+                  "line": 23,
+                  "column": 3,
+                  "offset": 1949
+                },
+                "end": {
+                  "line": 23,
+                  "column": 245,
+                  "offset": 2191
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Agile Manifesto",
+                  "position": {
+                    "start": {
+                      "line": 23,
+                      "column": 246,
+                      "offset": 2192
+                    },
+                    "end": {
+                      "line": 23,
+                      "column": 261,
+                      "offset": 2207
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 23,
+                  "column": 245,
+                  "offset": 2191
+                },
+                "end": {
+                  "line": 23,
+                  "column": 262,
+                  "offset": 2208
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "[3]. Its four values—prioritizing individuals, working software, customer collaboration, and responsiveness to change—resonated widely[3][6]. By the mid-2000s, frameworks like Scrum and XP became industry standards, accelerated by proven benefits:",
+              "position": {
+                "start": {
+                  "line": 23,
+                  "column": 262,
+                  "offset": 2208
+                },
+                "end": {
+                  "line": 23,
+                  "column": 509,
+                  "offset": 2455
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 23,
+              "column": 3,
+              "offset": 1949
+            },
+            "end": {
+              "line": 23,
+              "column": 511,
+              "offset": 2457
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "58% faster delivery of business results compared to Waterfall[5].",
+                  "position": {
+                    "start": {
+                      "line": 24,
+                      "column": 5,
+                      "offset": 2462
+                    },
+                    "end": {
+                      "line": 24,
+                      "column": 70,
+                      "offset": 2527
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 24,
+                  "column": 3,
+                  "offset": 2460
+                },
+                "end": {
+                  "line": 24,
+                  "column": 72,
+                  "offset": 2529
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "40% reduction in defects at Cisco[4].",
+                  "position": {
+                    "start": {
+                      "line": 25,
+                      "column": 5,
+                      "offset": 2534
+                    },
+                    "end": {
+                      "line": 25,
+                      "column": 42,
+                      "offset": 2571
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 25,
+                  "column": 3,
+                  "offset": 2532
+                },
+                "end": {
+                  "line": 25,
+                  "column": 44,
+                  "offset": 2573
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Improved team morale and transparency[4][6].",
+                  "position": {
+                    "start": {
+                      "line": 26,
+                      "column": 5,
+                      "offset": 2578
+                    },
+                    "end": {
+                      "line": 26,
+                      "column": 49,
+                      "offset": 2622
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 26,
+                  "column": 3,
+                  "offset": 2576
+                },
+                "end": {
+                  "line": 26,
+                  "column": 51,
+                  "offset": 2624
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 24,
+              "column": 3,
+              "offset": 2460
+            },
+            "end": {
+              "line": 27,
+              "column": 3,
+              "offset": 2627
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Notable Adopters",
+              "position": {
+                "start": {
+                  "line": 28,
+                  "column": 7,
+                  "offset": 2634
+                },
+                "end": {
+                  "line": 28,
+                  "column": 23,
+                  "offset": 2650
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 28,
+              "column": 3,
+              "offset": 2630
+            },
+            "end": {
+              "line": 28,
+              "column": 25,
+              "offset": 2652
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Several firms are recognized for deeply embedding Agile practices:",
+              "position": {
+                "start": {
+                  "line": 29,
+                  "column": 3,
+                  "offset": 2655
+                },
+                "end": {
+                  "line": 29,
+                  "column": 69,
+                  "offset": 2721
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 29,
+              "column": 3,
+              "offset": 2655
+            },
+            "end": {
+              "line": 29,
+              "column": 71,
+              "offset": 2723
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "| Company         | Methodology  | Outcome                                                                 |",
+              "position": {
+                "start": {
+                  "line": 31,
+                  "column": 3,
+                  "offset": 2729
+                },
+                "end": {
+                  "line": 31,
+                  "column": 111,
+                  "offset": 2837
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [],
+              "position": {
+                "start": {
+                  "line": 31,
+                  "column": 111,
+                  "offset": 2837
+                },
+                "end": {
+                  "line": 32,
+                  "column": 1,
+                  "offset": 2840
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "text",
+              "value": "|-----------------|--------------|-------------------------------------------------------------------------|",
+              "position": {
+                "start": {
+                  "line": 32,
+                  "column": 3,
+                  "offset": 2842
+                },
+                "end": {
+                  "line": 32,
+                  "column": 111,
+                  "offset": 2950
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [],
+              "position": {
+                "start": {
+                  "line": 32,
+                  "column": 111,
+                  "offset": 2950
+                },
+                "end": {
+                  "line": 33,
+                  "column": 1,
+                  "offset": 2953
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "text",
+              "value": "| ",
+              "position": {
+                "start": {
+                  "line": 33,
+                  "column": 3,
+                  "offset": 2955
+                },
+                "end": {
+                  "line": 33,
+                  "column": 5,
+                  "offset": 2957
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "PayPal",
+                  "position": {
+                    "start": {
+                      "line": 33,
+                      "column": 7,
+                      "offset": 2959
+                    },
+                    "end": {
+                      "line": 33,
+                      "column": 13,
+                      "offset": 2965
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 33,
+                  "column": 5,
+                  "offset": 2957
+                },
+                "end": {
+                  "line": 33,
+                  "column": 15,
+                  "offset": 2967
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "      | Scrum        | Delivered 58 new products in 6 months post-transition[4].              |",
+              "position": {
+                "start": {
+                  "line": 33,
+                  "column": 15,
+                  "offset": 2967
+                },
+                "end": {
+                  "line": 33,
+                  "column": 110,
+                  "offset": 3062
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [],
+              "position": {
+                "start": {
+                  "line": 33,
+                  "column": 110,
+                  "offset": 3062
+                },
+                "end": {
+                  "line": 34,
+                  "column": 1,
+                  "offset": 3065
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "text",
+              "value": "| ",
+              "position": {
+                "start": {
+                  "line": 34,
+                  "column": 3,
+                  "offset": 3067
+                },
+                "end": {
+                  "line": 34,
+                  "column": 5,
+                  "offset": 3069
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Philips",
+                  "position": {
+                    "start": {
+                      "line": 34,
+                      "column": 7,
+                      "offset": 3071
+                    },
+                    "end": {
+                      "line": 34,
+                      "column": 14,
+                      "offset": 3078
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 34,
+                  "column": 5,
+                  "offset": 3069
+                },
+                "end": {
+                  "line": 34,
+                  "column": 16,
+                  "offset": 3080
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "     | SAFe/Scrum   | Reduced release cycles from 18 to 6 months[4].                         |",
+              "position": {
+                "start": {
+                  "line": 34,
+                  "column": 16,
+                  "offset": 3080
+                },
+                "end": {
+                  "line": 34,
+                  "column": 110,
+                  "offset": 3174
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [],
+              "position": {
+                "start": {
+                  "line": 34,
+                  "column": 110,
+                  "offset": 3174
+                },
+                "end": {
+                  "line": 35,
+                  "column": 1,
+                  "offset": 3177
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "text",
+              "value": "| ",
+              "position": {
+                "start": {
+                  "line": 35,
+                  "column": 3,
+                  "offset": 3179
+                },
+                "end": {
+                  "line": 35,
+                  "column": 5,
+                  "offset": 3181
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Spotify",
+                  "position": {
+                    "start": {
+                      "line": 35,
+                      "column": 7,
+                      "offset": 3183
+                    },
+                    "end": {
+                      "line": 35,
+                      "column": 14,
+                      "offset": 3190
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 35,
+                  "column": 5,
+                  "offset": 3181
+                },
+                "end": {
+                  "line": 35,
+                  "column": 16,
+                  "offset": 3192
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "     | Custom Scrum | Scaled Agile across global teams, boosting transparency[4].            |",
+              "position": {
+                "start": {
+                  "line": 35,
+                  "column": 16,
+                  "offset": 3192
+                },
+                "end": {
+                  "line": 35,
+                  "column": 110,
+                  "offset": 3286
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [],
+              "position": {
+                "start": {
+                  "line": 35,
+                  "column": 110,
+                  "offset": 3286
+                },
+                "end": {
+                  "line": 36,
+                  "column": 1,
+                  "offset": 3289
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "text",
+              "value": "| ",
+              "position": {
+                "start": {
+                  "line": 36,
+                  "column": 3,
+                  "offset": 3291
+                },
+                "end": {
+                  "line": 36,
+                  "column": 5,
+                  "offset": 3293
+                }
+              }
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Sony (PlayStation)",
+                  "position": {
+                    "start": {
+                      "line": 36,
+                      "column": 7,
+                      "offset": 3295
+                    },
+                    "end": {
+                      "line": 36,
+                      "column": 25,
+                      "offset": 3313
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 36,
+                  "column": 5,
+                  "offset": 3293
+                },
+                "end": {
+                  "line": 36,
+                  "column": 27,
+                  "offset": 3315
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": " | SAFe       | Saved $30M in the first year through streamlined workflows[4].         |",
+              "position": {
+                "start": {
+                  "line": 36,
+                  "column": 27,
+                  "offset": 3315
+                },
+                "end": {
+                  "line": 36,
+                  "column": 115,
+                  "offset": 3403
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 31,
+              "column": 3,
+              "offset": 2729
+            },
+            "end": {
+              "line": 36,
+              "column": 117,
+              "offset": 3405
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Controversies and Criticisms",
+              "position": {
+                "start": {
+                  "line": 38,
+                  "column": 7,
+                  "offset": 3415
+                },
+                "end": {
+                  "line": 38,
+                  "column": 35,
+                  "offset": 3443
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 38,
+              "column": 3,
+              "offset": 3411
+            },
+            "end": {
+              "line": 38,
+              "column": 37,
+              "offset": 3445
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Despite its success, Agile faces scrutiny:",
+              "position": {
+                "start": {
+                  "line": 39,
+                  "column": 3,
+                  "offset": 3448
+                },
+                "end": {
+                  "line": 39,
+                  "column": 45,
+                  "offset": 3490
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 39,
+              "column": 3,
+              "offset": 3448
+            },
+            "end": {
+              "line": 39,
+              "column": 47,
+              "offset": 3492
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Misapplication",
+                      "position": {
+                        "start": {
+                          "line": 40,
+                          "column": 8,
+                          "offset": 3500
+                        },
+                        "end": {
+                          "line": 40,
+                          "column": 22,
+                          "offset": 3514
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 40,
+                      "column": 6,
+                      "offset": 3498
+                    },
+                    "end": {
+                      "line": 40,
+                      "column": 24,
+                      "offset": 3516
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Superficial adoption (“pseudo-Agile”) without cultural buy-in leads to failed implementations[6][9].",
+                  "position": {
+                    "start": {
+                      "line": 40,
+                      "column": 24,
+                      "offset": 3516
+                    },
+                    "end": {
+                      "line": 40,
+                      "column": 126,
+                      "offset": 3618
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 40,
+                  "column": 3,
+                  "offset": 3495
+                },
+                "end": {
+                  "line": 40,
+                  "column": 128,
+                  "offset": 3620
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Scaling Challenges",
+                      "position": {
+                        "start": {
+                          "line": 41,
+                          "column": 8,
+                          "offset": 3628
+                        },
+                        "end": {
+                          "line": 41,
+                          "column": 26,
+                          "offset": 3646
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 41,
+                      "column": 6,
+                      "offset": 3626
+                    },
+                    "end": {
+                      "line": 41,
+                      "column": 28,
+                      "offset": 3648
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Large organizations struggle with coordination; frameworks like SAFe introduce complexity[6][9].",
+                  "position": {
+                    "start": {
+                      "line": 41,
+                      "column": 28,
+                      "offset": 3648
+                    },
+                    "end": {
+                      "line": 41,
+                      "column": 126,
+                      "offset": 3746
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 41,
+                  "column": 3,
+                  "offset": 3623
+                },
+                "end": {
+                  "line": 41,
+                  "column": 128,
+                  "offset": 3748
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Overemphasis on Speed",
+                      "position": {
+                        "start": {
+                          "line": 42,
+                          "column": 8,
+                          "offset": 3756
+                        },
+                        "end": {
+                          "line": 42,
+                          "column": 29,
+                          "offset": 3777
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 42,
+                      "column": 6,
+                      "offset": 3754
+                    },
+                    "end": {
+                      "line": 42,
+                      "column": 31,
+                      "offset": 3779
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Rapid iterations risk technical debt and unstable products[6][9].",
+                  "position": {
+                    "start": {
+                      "line": 42,
+                      "column": 31,
+                      "offset": 3779
+                    },
+                    "end": {
+                      "line": 42,
+                      "column": 98,
+                      "offset": 3846
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 42,
+                  "column": 3,
+                  "offset": 3751
+                },
+                "end": {
+                  "line": 42,
+                  "column": 100,
+                  "offset": 3848
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Cultural Resistance",
+                      "position": {
+                        "start": {
+                          "line": 43,
+                          "column": 8,
+                          "offset": 3856
+                        },
+                        "end": {
+                          "line": 43,
+                          "column": 27,
+                          "offset": 3875
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 43,
+                      "column": 6,
+                      "offset": 3854
+                    },
+                    "end": {
+                      "line": 43,
+                      "column": 29,
+                      "offset": 3877
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Transitioning from hierarchical structures to self-organizing teams often meets internal pushback[5][6].",
+                  "position": {
+                    "start": {
+                      "line": 43,
+                      "column": 29,
+                      "offset": 3877
+                    },
+                    "end": {
+                      "line": 43,
+                      "column": 135,
+                      "offset": 3983
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 43,
+                  "column": 3,
+                  "offset": 3851
+                },
+                "end": {
+                  "line": 43,
+                  "column": 137,
+                  "offset": 3985
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Documentation Gaps",
+                      "position": {
+                        "start": {
+                          "line": 44,
+                          "column": 8,
+                          "offset": 3993
+                        },
+                        "end": {
+                          "line": 44,
+                          "column": 26,
+                          "offset": 4011
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 44,
+                      "column": 6,
+                      "offset": 3991
+                    },
+                    "end": {
+                      "line": 44,
+                      "column": 28,
+                      "offset": 4013
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Minimal documentation complicates onboarding and long-term maintenance[6][9].",
+                  "position": {
+                    "start": {
+                      "line": 44,
+                      "column": 28,
+                      "offset": 4013
+                    },
+                    "end": {
+                      "line": 44,
+                      "column": 107,
+                      "offset": 4092
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 44,
+                  "column": 3,
+                  "offset": 3988
+                },
+                "end": {
+                  "line": 44,
+                  "column": 109,
+                  "offset": 4094
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 40,
+              "column": 3,
+              "offset": 3495
+            },
+            "end": {
+              "line": 45,
+              "column": 3,
+              "offset": 4097
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Evidence and Research",
+              "position": {
+                "start": {
+                  "line": 46,
+                  "column": 7,
+                  "offset": 4104
+                },
+                "end": {
+                  "line": 46,
+                  "column": 28,
+                  "offset": 4125
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 46,
+              "column": 3,
+              "offset": 4100
+            },
+            "end": {
+              "line": 46,
+              "column": 30,
+              "offset": 4127
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Studies highlight Agile’s strengths and limitations:",
+              "position": {
+                "start": {
+                  "line": 47,
+                  "column": 3,
+                  "offset": 4130
+                },
+                "end": {
+                  "line": 47,
+                  "column": 55,
+                  "offset": 4182
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 47,
+              "column": 3,
+              "offset": 4130
+            },
+            "end": {
+              "line": 47,
+              "column": 57,
+              "offset": 4184
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Pros",
+                      "position": {
+                        "start": {
+                          "line": 48,
+                          "column": 7,
+                          "offset": 4191
+                        },
+                        "end": {
+                          "line": 48,
+                          "column": 11,
+                          "offset": 4195
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 48,
+                      "column": 5,
+                      "offset": 4189
+                    },
+                    "end": {
+                      "line": 48,
+                      "column": 13,
+                      "offset": 4197
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Agile projects report 14–58% faster delivery, 40% fewer defects, and higher customer satisfaction in dynamic environments[4][8][11].",
+                  "position": {
+                    "start": {
+                      "line": 48,
+                      "column": 13,
+                      "offset": 4197
+                    },
+                    "end": {
+                      "line": 48,
+                      "column": 147,
+                      "offset": 4331
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 48,
+                  "column": 3,
+                  "offset": 4187
+                },
+                "end": {
+                  "line": 48,
+                  "column": 149,
+                  "offset": 4333
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "element",
+                  "tagName": "div",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Cons",
+                      "position": {
+                        "start": {
+                          "line": 49,
+                          "column": 7,
+                          "offset": 4340
+                        },
+                        "end": {
+                          "line": 49,
+                          "column": 11,
+                          "offset": 4344
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 49,
+                      "column": 5,
+                      "offset": 4338
+                    },
+                    "end": {
+                      "line": 49,
+                      "column": 13,
+                      "offset": 4346
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Traditional methods outperform Agile in regulated industries with fixed scopes[8]. Hybrid models (Agile + Waterfall) are increasingly popular for balancing flexibility and structure[8][11].",
+                  "position": {
+                    "start": {
+                      "line": 49,
+                      "column": 13,
+                      "offset": 4346
+                    },
+                    "end": {
+                      "line": 49,
+                      "column": 204,
+                      "offset": 4537
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 49,
+                  "column": 3,
+                  "offset": 4336
+                },
+                "end": {
+                  "line": 49,
+                  "column": 206,
+                  "offset": 4539
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            },
+            {
+              "type": "element",
+              "tagName": "div",
+              "properties": {},
+              "children": [
+                {
+                  "type": "text",
+                  "value": "ROI debates persist: Some studies show Agile’s benefit-to-cost ratio lags behind Waterfall, though it achieves business goals more consistently[5].",
+                  "position": {
+                    "start": {
+                      "line": 50,
+                      "column": 5,
+                      "offset": 4544
+                    },
+                    "end": {
+                      "line": 50,
+                      "column": 152,
+                      "offset": 4691
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 50,
+                  "column": 3,
+                  "offset": 4542
+                },
+                "end": {
+                  "line": 50,
+                  "column": 154,
+                  "offset": 4693
+                }
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n"
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 48,
+              "column": 3,
+              "offset": 4187
+            },
+            "end": {
+              "line": 51,
+              "column": 3,
+              "offset": 4696
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Agile remains dominant in software development but requires thoughtful adaptation to avoid pitfalls. As organizations like BBVA and Philips demonstrate, success hinges on aligning Agile principles with company-wide cultural shifts[4][6].",
+              "position": {
+                "start": {
+                  "line": 52,
+                  "column": 3,
+                  "offset": 4699
+                },
+                "end": {
+                  "line": 52,
+                  "column": 240,
+                  "offset": 4936
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 52,
+              "column": 3,
+              "offset": 4699
+            },
+            "end": {
+              "line": 52,
+              "column": 240,
+              "offset": 4936
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        },
+        {
+          "type": "element",
+          "tagName": "div",
+          "properties": {},
+          "children": [
+            {
+              "type": "text",
+              "value": "Citations:\n[1] https://www.techtarget.com/searchsoftwarequality/definition/agile-software-development\n[2] https://www.wrike.com/project-management-guide/faq/what-is-agile-methodology-in-project-management/\n[3] https://www.knowledgehut.com/blog/agile/history-of-agile\n[4] https://www.smartsheet.com/content/agile-project-management-examples\n[5] https://www.pmi.org/learning/library/agile-problems-challenges-failures-5869\n[6] https://www.linkedin.com/pulse/critique-agile-navigating-challenges-popular-seif-radwan-zjrlf\n[7] https://agiledata.org\n[8] https://allacademicresearch.com/index.php/AJBAIS/article/view/127\n[9] https://flowchainsensei.wordpress.com/2024/06/06/agile-faith-and-the-nature-of-belief/\n[10] https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/using-agile-to-accelerate-your-data-transformation\n[11] https://gsconlinepress.com/journals/gscarr/sites/default/files/GSCARR-2024-0181.pdf\n[12] https://pm.stackexchange.com/questions/22606/what-to-do-with-an-agile-non-believer\n[13] https://sciendo.com/pdf/10.2478/aei-2023-0001\n[14] https://www.reddit.com/r/learnprogramming/comments/tgnrhz/what_is_agile_and_why_is_it_important/\n[15] https://www.redhat.com/en/topics/devops/what-is-agile-methodology\n[16] https://www.infoworld.com/article/2259475/what-is-agile-methodology-modern-software-development-explained.html\n[17] https://assets.asana.biz/transform/f3519623-44e4-4506-8e1f-38cb74819c58/inline-agile-agile-methodology-1-2x?sa=X&ved=2ahUKEwiB5Yq6krqMAxVzh68BHfm2Hg8Q_B16BAgBEAI\n[18] https://www.atlassian.com/agile\n[19] https://asana.com/resources/agile-methodology\n[20] https://www.agilealliance.org/agile101/\n[21] https://www.parabol.co/blog/most-popular-agile-methodologies/\n[22] https://www.planview.com/resources/guide/agile-methodologies-a-beginners-guide/history-of-agile/\n[23] https://www.unosquare.com/blog/agile-development-101/\n[24] https://www.testrail.com/blog/agile-testing-trends/\n[25] https://www.reddit.com/r/programming/comments/1abk8o6/agile_development_is_fading_in_popularity_at/\n[26] https://www.leadingagile.com/2011/01/the-12-key-reasons-companies-adopt-agile/\n[27] https://www.qatouch.com/blog/agile-methodology-in-software-testing/\n[28] https://www.mckinsey.com/featured-insights/mckinsey-explainers/what-is-agile\n[29] https://www.randstad.ca/employers/workplace-insights/workplace-innovation/what-is-the-agile-methodology-and-why-is-it-so-popular/\n[30] https://www.atlassian.com/agile/project-management/metrics\n[31] https://www.projectmanagement.com/discussion-topic/171399/Why-Agile-Become-has-become-a-Trend-\n[32] https://www.forbes.com/sites/stevedenning/2024/02/26/why-the-worlds-most-valuable-firms-are-so-agile/\n[33] https://www.infoworld.com/article/2334751/a-brief-history-of-the-agile-methodology.html\n[34] https://agilemanifesto.org/authors.html\n[35] https://dirox.com/post/understanding-agile-methodology-definition-concepts\n[36] https://www.agilealliance.org/agile101/the-agile-manifesto/\n[37] https://agilemania.com/history-of-agile-software-development\n[38] https://www.atlassian.com/agile/manifesto\n[39] https://agilemanifesto.org/history.html\n[40] https://www.agilealliance.org/a-short-history-of-agile/\n[41] https://hbr.org/2016/05/embracing-agile\n[42] https://github.com/resources/articles/devops/what-is-agile-methodology\n[43] https://www.reddit.com/r/agile/comments/wklj4q/what_are_some_companies_that_truly_practice_agile/\n[44] https://www.cascade.app/blog/agile-methodology-in-non-tech\n[45] https://www.linkedin.com/pulse/agile-full-featured-religious-dogma-darius-blasband\n[46] http://www.agile-doctor.com/2011/08/14/agile-as-religion/\n[47] https://bambooagile.eu/insights/agile-software-development-companies\n[48] https://firstanalytics.com/if-agile-is-a-religion-data-scientists-are-heretics/\n[49] https://www.growthaccelerationpartners.com/blog/real-life-examples-of-agile-methodology\n[50] https://jhall.io/archive/2021/04/24/agile-isnt-a-religion/\n[51] http://jake-jorgovan.com/blog/agile-scrum-consultants\n[52] https://senexrex.com/religion-vs-science-agile/\n[53] https://www.consultancy.eu/news/4153/half-of-companies-applying-agile-methodologies-practices\n[54] https://www.forbes.com/councils/forbestechcouncil/2023/07/19/agile-methodology-benefits-and-challenges-for-engineering-leaders/\n[55] https://www.bcs.org/articles-opinion-and-research/the-uncomfortable-truth-about-agile/\n[56] https://www.reddit.com/r/projectmanagement/comments/xuutce/why_is_agile_so_bad/\n[57] https://www.reddit.com/r/agile/comments/17pcfj8/challenges_youve_faced_when_implementing_agile_in/\n[58] https://www.forbes.com/councils/forbestechcouncil/2023/12/06/20-common-challenges-when-introducing-agile-and-how-to-overcome-them/\n[59] https://devops.com/agile-scrum-is-a-failure-heres-why/\n[60] https://premieragile.com/challenges-in-agile-scrum-implementation/\n[61] https://logicmag.io/clouds/agile-and-the-long-crisis-of-software/\n[62] https://hbr.org/2021/04/have-we-taken-agile-too-far\n[63] https://www.solutelabs.com/blog/agile-transformation-challenges-solutions\n[64] https://www.forbes.com/sites/moorinsights/2024/07/29/a-new-study-pokes-holes-in-the-agile-method-but-is-it-agiles-fault/\n[65] https://productschool.com/blog/product-strategy/types-agile-methodology\n[66] https://agilegnostic.wordpress.com/2015/06/19/i-think-agile-as-a-religion/\n[67] https://roundtable.datascience.salon/an-agile-approach-to-data-strategy\n[68] https://pmc.ncbi.nlm.nih.gov/articles/PMC10578531/\n[69] https://www.linkedin.com/pulse/agile-vs-religion-corin-healy-2e4ef\n[70] https://www.runn.io/blog/agile-statistics\n[71] https://sps.wfu.edu/articles/benefits-agile-project-management/\n[72] https://www.agilekiwi.com/other/agile/faith-doubt-and-evidence-agile-as-religion-versus-agile-as-social-science/\n[73] https://www.cprime.com/resources/blog/agile-methodologies-how-they-fit-into-data-science-processes/\n[74] https://ccaps.umn.edu/story/agile-methodology-advantages-and-disadvantages\n[75] https://www.bareknucklesagile.com/post/agile-as-a-religion-after-all-it-s-perfect-right\n[76] https://www.parabol.co/resources/agile-statistics/\n[77] https://digitalcommons.harrisburgu.edu/cgi/viewcontent.cgi?article=1031&context=dandt\n[78] https://www.browserstack.com/guide/agile-development-methodologies\n[79] https://www.spiceworks.com/tech/devops/articles/what-is-agile-software-development/\n[80] https://www.opentext.com/what-is/agile-development\n[81] https://techfarhub.usds.gov/pre-solicitation/agile-overview/\n[82] https://en.wikipedia.org/wiki/Agile_software_development\n[83] https://www.invensislearning.com/blog/reasons-behind-agile-popularity/\n[84] https://www.linkedin.com/advice/0/how-can-you-use-trend-analysis-support-agile-jpqie\n[85] https://teamhood.com/agile/the-agile-evolution-up-to-2020-what-to-expect-next/\n[86] https://romebusinessschool.com/blog/agile-methodologies/\n[87] https://www.iiba.org/business-analysis-blogs/3-major-trends-transforming-the-agile-method-in-2019/\n[88] https://adevait.com/blog/remote-work/adopting-agile-the-latest-reports-about-the-popular-mindset\n[89] https://www.red-gate.com/blog/database-devops/real-origins-agile-manifesto\n[90] https://www.true-agile.org/blog/agile-manifesto/\n[91] https://study.com/academy/lesson/the-history-of-agile.html\n[92] https://www.productplan.com/glossary/agile-manifesto/\n[93] https://www.youtube.com/watch?v=AGdi3zZutXk\n[94] https://blog.gitscrum.com/7-successful-agile-methodologies-cases-in-giant-companies/\n[95] https://premieragile.com/industries-benefit-from-agile-adoption/\n[96] https://businessmap.io/blog/agile-companies\n[97] https://www.centrx-exl.com/industry-insights/agile-companies\n[98] https://ozemio.com/blog/challenges-with-agile-methodology/\n[99] https://www.lucidchart.com/blog/3-disadvantages-of-agile-methodology\n[100] https://www.linkedin.com/pulse/common-challenges-agile-implementation-how-overcome-them-ali-lavasani-rmlle\n[101] https://www.planview.com/resources/articles/disadvantages-agile/\n[102] https://tdan.com/the-end-of-agile-part-2-critiques-of-agile/31699\n[103] https://www.lonti.com/blog/agile-data-management-a-comprehensive-guide",
+              "position": {
+                "start": {
+                  "line": 54,
+                  "column": 3,
+                  "offset": 4942
+                },
+                "end": {
+                  "line": 157,
+                  "column": 79,
+                  "offset": 13248
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 54,
+              "column": 3,
+              "offset": 4942
+            },
+            "end": {
+              "line": 157,
+              "column": 79,
+              "offset": 13248
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": "\n"
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 3,
+          "column": 1,
+          "offset": 50
+        },
+        "end": {
+          "line": 157,
+          "column": 79,
+          "offset": 13248
+        }
+      }
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "element",
+      "tagName": "div",
+      "properties": {},
+      "children": [],
+      "position": {
+        "start": {
+          "line": 159,
+          "column": 1,
+          "offset": 13250
+        },
+        "end": {
+          "line": 159,
+          "column": 4,
+          "offset": 13253
+        }
+      }
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "text",
+      "value": "\n"
+    },
+    {
+      "type": "element",
+      "tagName": "div",
+      "properties": {},
+      "children": [
+        {
+          "type": "text",
+          "value": "Answer from Perplexity: pplx.ai/share",
+          "position": {
+            "start": {
+              "line": 160,
+              "column": 1,
+              "offset": 13254
+            },
+            "end": {
+              "line": 160,
+              "column": 38,
+              "offset": 13291
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 160,
+          "column": 1,
+          "offset": 13254
+        },
+        "end": {
+          "line": 160,
+          "column": 38,
+          "offset": 13291
+        }
+      }
+    }
+  ],
+  "position": {
+    "start": {
+      "line": 1,
+      "column": 1,
+      "offset": 0
+    },
+    "end": {
+      "line": 160,
+      "column": 38,
+      "offset": 13291
+    }
+  }
+}

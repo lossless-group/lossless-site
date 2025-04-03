@@ -1,0 +1,29 @@
+---
+import type { PhrasingContent } from 'mdast'
+import AstroMarkdownNew from './AstroMarkdownNew.astro'
+
+export interface Props {
+    node: {
+        type: 'link';
+        url: string;
+        title?: string;
+        children: PhrasingContent[];
+    };
+    data: {
+        path: string;
+        [key: string]: any;
+    };
+}
+
+const { node, data } = Astro.props;
+
+// Handle both internal and external links
+const isExternal = node.url.startsWith('http') || node.url.startsWith('https');
+const className = isExternal ? 'external-link' : 'internal-link';
+---
+
+<a href={node.url} class={className} title={node.title}>
+    {node.children.map(child => (
+        <AstroMarkdownNew node={child} data={data} />
+    ))}
+</a>

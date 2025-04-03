@@ -1,0 +1,32 @@
+---
+import type { PhrasingContent } from 'mdast'
+import AstroMarkdownNew from './AstroMarkdownNew.astro'
+
+export interface Props {
+    node: {
+        type: 'backlink';
+        target: string;
+        displayText?: string;
+        children: PhrasingContent[];
+    };
+    data: {
+        path: string;
+        [key: string]: any;
+    };
+}
+
+const { node, data } = Astro.props;
+
+// Convert target to URL-friendly format
+const targetSlug = node.target.toLowerCase().replace(/\s+/g, '-');
+
+// Use display text if provided, otherwise use target
+const displayText = node.displayText || node.target;
+
+// Build the internal link URL
+const linkUrl = `/content/${targetSlug}`;
+---
+
+<a href={linkUrl} class="backlink" data-internal-link>
+    {displayText}
+</a>
