@@ -79,7 +79,7 @@
           "children": [
             {
               "type": "text",
-              "value": "Explain agile methodologies in software development. How did it become a trend? Who first wrote about it or promoted it? What firms are known to be religious practitioners? What are the controversies? Is there any data or research to back up either believers or non-believers?",
+              "value": "[!LLM Response]\nExplain agile methodologies in software development. How did it become a trend? Who first wrote about it or promoted it? What firms are known to be religious practitioners? What are the controversies? Is there any data or research to back up either believers or non-believers?",
               "position": {
                 "start": {
                   "line": 3,

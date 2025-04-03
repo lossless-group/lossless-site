@@ -1,9 +1,9 @@
 import type { Node } from 'unist';
 import { astDebugger } from '../../debug/ast-debugger';
 import { detectMarkdownCallouts } from './detectMarkdownCallouts';
-import { isolateCalloutContent } from './isolateCalloutContent';
-import { transformCalloutStructure } from './transformCalloutStructure';
-import { embedCalloutNodes } from './embedCalloutNodes';
+import { isolateCallouts } from './isolateCalloutContent';
+import { transformCallouts } from './transformCalloutStructure';
+import { embedCallouts } from './embedCalloutNodes';
 import type { CalloutNode, IsolatedCallout, TransformedCallout } from './calloutTypes';
 
 /* section open ==============================================================
@@ -53,7 +53,7 @@ export async function processCallouts(tree: Node): Promise<Node> {
     }
     
     // Phase 2: Isolation
-    const isolated = await isolateCalloutContent(detected);
+    const isolated = await isolateCallouts(detected);
     if (!isolated.length) {
       astDebugger.writeDebugFile('2-isolation-failed', {
         phase: 'isolate',
@@ -63,7 +63,7 @@ export async function processCallouts(tree: Node): Promise<Node> {
     }
     
     // Phase 3: Transformation
-    const transformed = await transformCalloutStructure(isolated);
+    const transformed = await transformCallouts(isolated);
     if (!transformed.length) {
       astDebugger.writeDebugFile('3-transform-failed', {
         phase: 'transform',
@@ -73,7 +73,7 @@ export async function processCallouts(tree: Node): Promise<Node> {
     }
     
     // Phase 4: Embedding
-    return await embedCalloutNodes(tree, transformed);
+    return await embedCallouts(tree, transformed);
   } catch (error) {
     console.error('Error in callout pipeline:', error);
     astDebugger.writeDebugFile('pipeline-error', {

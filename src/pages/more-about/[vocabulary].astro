@@ -19,6 +19,9 @@ import fs from 'fs';
 import path from 'path';
 import { astDebugger } from '../../utils/debug/ast-debugger';
 
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
 // Turn debug mode on/off here
 const DEBUG_AST = process.env.DEBUG_AST === 'true';
 
@@ -76,58 +79,58 @@ const { entry } = Astro.props;
 // Process with our custom remark plugins in discrete steps
 const parsedAst = await unified()
   .use(remarkParse)
-  .process(entry.body);
-writeDebugFile('1-parsed-ast', parsedAst.data);
-console.log('1. Parsed AST:', parsedAst.data);
+  .parse(entry.body);
+writeDebugFile('1-parsed-ast', parsedAst);
+console.log('1. Parsed AST:', parsedAst);
 
 const calloutsAst = await unified()
   .use(remarkParse)
   .use(remarkCallouts)
-  .process(entry.body);
-writeDebugFile('2-callouts-ast', calloutsAst.data);
-console.log('2. Callouts AST:', calloutsAst.data);
+  .parse(entry.body);
+writeDebugFile('2-callouts-ast', calloutsAst);
+console.log('2. Callouts AST:', calloutsAst);
 
 const asfAst = await unified()
   .use(remarkParse)
-  .use(remarkAsf)
-  .process(entry.body);
-writeDebugFile('3-asf-ast', asfAst.data);
-console.log('3. ASF AST:', asfAst.data);
+  .use(remarkAsf, { markdownFile: entry.id })
+  .parse(entry.body);
+writeDebugFile('3-asf-ast', asfAst);
+console.log('3. ASF AST:', asfAst);
 
 const backlinksAst = await unified()
   .use(remarkParse)
   .use(remarkBacklinks)
-  .process(entry.body);
-writeDebugFile('4-backlinks-ast', backlinksAst.data);
-console.log('4. Backlinks AST:', backlinksAst.data);
+  .parse(entry.body);
+writeDebugFile('4-backlinks-ast', backlinksAst);
+console.log('4. Backlinks AST:', backlinksAst);
 
 const imagesAst = await unified()
   .use(remarkParse)
   .use(remarkImages)
-  .process(entry.body);
-writeDebugFile('5-images-ast', imagesAst.data);
-console.log('5. Images AST:', imagesAst.data);
+  .parse(entry.body);
+writeDebugFile('5-images-ast', imagesAst);
+console.log('5. Images AST:', imagesAst);
 
 const hastAst = await unified()
   .use(remarkParse)
   .use(remarkRehype)
-  .process(entry.body);
-writeDebugFile('6-hast-ast', hastAst.data);
-console.log('6. HAST AST:', hastAst.data);
+  .parse(entry.body);
+writeDebugFile('6-hast-ast', hastAst);
+console.log('6. HAST AST:', hastAst);
 
 const calloutsHastAst = await unified()
   .use(remarkParse)
   .use(remarkCallouts)
   .use(remarkRehype)
-  .process(entry.body);
-writeDebugFile('7-callouts-hast-ast', calloutsHastAst.data);
-console.log('7. Callouts HAST AST:', calloutsHastAst.data);
+  .parse(entry.body);
+writeDebugFile('7-callouts-hast-ast', calloutsHastAst);
+console.log('7. Callouts HAST AST:', calloutsHastAst);
 
 // Final processing with all plugins
 const processedContent = await unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
   .use(remarkCallouts)        // 2. Transform blockquotes to callout nodes
-  .use(remarkAsf)            // 3. Process ASF syntax
+  .use(remarkAsf, { markdownFile: entry.id })            // 3. Process ASF syntax
   .use(remarkBacklinks)      // 4. Process backlinks
   .use(remarkImages)         // 5. Process images
   .use(remarkRehype)         // 6. Convert MDAST to HAST

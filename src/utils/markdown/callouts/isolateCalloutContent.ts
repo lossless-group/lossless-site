@@ -1,7 +1,7 @@
 import type { Node } from 'unist';
 import type { BlockContent, Content } from 'mdast';
 import { astDebugger } from '../../debug/ast-debugger';
-import type { CalloutNode, IsolatedCallout } from './types';
+import type { CalloutNode, IsolatedCallout } from './calloutTypes';
 
 /* section open ==============================================================
 |
