@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-list';
 import remarkImages from './src/utils/markdown/remark-images';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
-import remarkCalloutHandler from './src/utils/markdown/remark-callout-handler';
+import { processCallouts } from './src/utils/markdown/callouts/processCalloutPipeline';
 
 export default defineConfig({
   output: "server",
@@ -23,7 +23,7 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [
-      remarkCalloutHandler, // Must be first to see raw markdown
+      processCallouts, // Must be first to see raw markdown
       remarkBacklinks,      // Then handle wiki-links
       remarkImages,         // Then handle images
       remarkDefinitionList  // Finally handle definition lists

@@ -1,5 +1,5 @@
-import type { Node } from 'unist';
-import type { Blockquote, BlockContent, Content } from 'mdast';
+import type { Node, Parent } from 'unist';
+import type { Blockquote, BlockContent } from 'mdast';
 
 /* section open ==============================================================
 |
@@ -18,9 +18,36 @@ export interface CalloutInfo {
   title?: string;
 }
 
-export interface CalloutNode {
-  node: Blockquote;
-  info: CalloutInfo;
+export interface CalloutElementData {
+  hName: string;
+  hProperties: {
+    className?: string[];
+    'data-type'?: string;
+    'data-title'?: string;
+    id?: string;
+    onclick?: string;
+    open?: boolean;
+    [key: string]: any;
+  };
+}
+
+export interface CalloutElement extends Node {
+  type: 'element';
+  data: CalloutElementData;
+  children: (CalloutElement | CalloutText)[];
+}
+
+export interface CalloutText extends Node {
+  type: 'text';
+  value: string;
+}
+
+export interface CalloutNode extends Node {
+  type: 'callout';
+  calloutType: string;
+  title?: string;
+  data: CalloutElementData;
+  children: CalloutElement[];
 }
 
 export interface IsolatedCallout {
@@ -34,23 +61,6 @@ export interface IsolatedCallout {
     };
     id: string;
   };
-}
-
-export interface CalloutText {
-  type: 'text';
-  value: string;
-}
-
-export interface CalloutElement {
-  type: 'element';
-  data: {
-    hName: string;
-    hProperties: {
-      className: string[];
-      [key: string]: unknown;
-    };
-  };
-  children: (BlockContent | CalloutElement | CalloutText)[];
 }
 
 export interface CalloutData {
@@ -82,6 +92,15 @@ export interface TransformedCallout {
 //----   AST type safety
 //----   Pipeline interfaces
 //----   Component structure
+// 
+// Close: Callout Type Definitions
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+
+/* ========================================
+??-- Affects: 
+//----   AST node types
+//----   HTML transformation
+//----   Type safety
 // 
 // Close: Callout Type Definitions
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/

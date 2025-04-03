@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntryBySlug, type CollectionEntry } from 'astro:content';
 import { unified } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
@@ -10,8 +11,7 @@ import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
-import remarkCallouts from '@utils/markdown/remark-callout-handler';
-import rehypeCallouts from '@utils/markdown/rehype-callout-handler';
+import { processCallouts } from '@utils/markdown/callouts/processCalloutPipeline';
 import type { Root as MdastRoot } from 'mdast';
 // @ts-expect-error - Using local type definition for HAST Root
 import type { Root } from '@types/hast';
@@ -57,7 +57,6 @@ const writeDebugFile = (name: string, content: any) => {
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
-  console.log('Found entries:', vocabularyEntries.map(e => ({ slug: e.data.slug, id: e.id })));
   return vocabularyEntries.map(entry => {
     // Generate slug and title from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
@@ -76,98 +75,86 @@ interface Props {
 
 const { entry } = Astro.props;
 
-// Process with our custom remark plugins in discrete steps
-const parsedAst = await unified()
+// Step 1: Parse markdown to initial MDAST
+const mdast = await unified()
   .use(remarkParse)
-  .parse(entry.body);
-writeDebugFile('1-parsed-ast', parsedAst);
-console.log('1. Parsed AST:', parsedAst);
+  .parse(entry.body) as MdastRoot;
 
-const calloutsAst = await unified()
-  .use(remarkParse)
-  .use(remarkCallouts)
-  .parse(entry.body);
-writeDebugFile('2-callouts-ast', calloutsAst);
-console.log('2. Callouts AST:', calloutsAst);
+writeDebugFile('1-parsed-ast', mdast);
 
-const asfAst = await unified()
-  .use(remarkParse)
+// Step 2: Apply remark transforms in sequence
+let currentAst = mdast as MdastRoot;
+
+// Create a processor for each transformation step
+const processor = unified()
+  .use(remarkParse);
+
+// Run transforms in sequence
+currentAst = await processor
+  .use(processCallouts)
+  .runSync(currentAst as MdastRoot) as MdastRoot;
+writeDebugFile('2-callouts-ast', currentAst);
+
+currentAst = await processor
   .use(remarkAsf, { markdownFile: entry.id })
-  .parse(entry.body);
-writeDebugFile('3-asf-ast', asfAst);
-console.log('3. ASF AST:', asfAst);
+  .runSync(currentAst as MdastRoot) as MdastRoot;
+writeDebugFile('3-asf-ast', currentAst);
 
-const backlinksAst = await unified()
-  .use(remarkParse)
+currentAst = await processor
   .use(remarkBacklinks)
-  .parse(entry.body);
-writeDebugFile('4-backlinks-ast', backlinksAst);
-console.log('4. Backlinks AST:', backlinksAst);
+  .runSync(currentAst as MdastRoot) as MdastRoot;
+writeDebugFile('4-backlinks-ast', currentAst);
 
-const imagesAst = await unified()
-  .use(remarkParse)
+currentAst = await processor
   .use(remarkImages)
-  .parse(entry.body);
-writeDebugFile('5-images-ast', imagesAst);
-console.log('5. Images AST:', imagesAst);
+  .runSync(currentAst as MdastRoot) as MdastRoot;
+writeDebugFile('5-images-ast', currentAst);
 
-const hastAst = await unified()
-  .use(remarkParse)
-  .use(remarkRehype)
-  .parse(entry.body);
-writeDebugFile('6-hast-ast', hastAst);
-console.log('6. HAST AST:', hastAst);
+// Step 3: Convert MDAST to HAST
+const hastProcessor = unified().use(remarkRehype);
+const hast = await hastProcessor.run(currentAst as MdastRoot) as Root;
+writeDebugFile('6-hast-ast', hast);
 
-const calloutsHastAst = await unified()
-  .use(remarkParse)
-  .use(remarkCallouts)
-  .use(remarkRehype)
-  .parse(entry.body);
-writeDebugFile('7-callouts-hast-ast', calloutsHastAst);
-console.log('7. Callouts HAST AST:', calloutsHastAst);
+// Step 4: Convert HAST to HTML
+const htmlProcessor = unified().use(rehypeStringify);
+const htmlResult = await htmlProcessor.stringify(hast);
+writeDebugFile('7-final-html', htmlResult);
 
-// Final processing with all plugins
-const processedContent = await unified()
-  .use(remarkParse)           // 1. Parse markdown to MDAST
-  .use(remarkCallouts)        // 2. Transform blockquotes to callout nodes
-  .use(remarkAsf, { markdownFile: entry.id })            // 3. Process ASF syntax
-  .use(remarkBacklinks)      // 4. Process backlinks
-  .use(remarkImages)         // 5. Process images
-  .use(remarkRehype)         // 6. Convert MDAST to HAST
-  .use(rehypeStringify)      // 7. Convert HAST to HTML
-  .process(entry.body);
+// Create processed entry with transformed content
+const processedEntry = {
+  ...entry,
+  body: String(htmlResult)
+};
 
-const htmlContent = processedContent.toString();
-writeDebugFile('8-final-html', htmlContent);
-console.log('8. Final HTML:', htmlContent);
-
-console.log('Entry:', { id: entry.id, title: entry.data.title, slug: entry.data.slug });
-
+console.log('Processed Entry:', { 
+  id: processedEntry.id, 
+  title: processedEntry.data.title, 
+  slug: processedEntry.data.slug,
+  contentLength: processedEntry.body.length
+});
 ---
 
-<Layout title={entry.data.title || entry.data.slug}>
+<Layout title={processedEntry.data.title || processedEntry.data.slug}>
   {DEBUG_AST && (
     <>
       <h2>Debug Output:</h2>
-      <h3>1. After Parse:</h3>
-      <Debug {parsedAst} />
+      <h3>1. Initial MDAST:</h3>
+      <Debug ast={mdast} />
       <h3>2. After Callouts:</h3>
-      <Debug {calloutsAst} />
+      <Debug ast={currentAst} />
       <h3>3. After ASF:</h3>
-      <Debug {asfAst} />
+      <Debug ast={currentAst} />
       <h3>4. After Backlinks:</h3>
-      <Debug {backlinksAst} />
+      <Debug ast={currentAst} />
       <h3>5. After Images:</h3>
-      <Debug {imagesAst} />
-      <h3>6. After HAST:</h3>
-      <Debug {hastAst} />
-      <h3>7. After Callouts HAST:</h3>
-      <Debug {calloutsHastAst} />
+      <Debug ast={currentAst} />
+      <h3>6. Final HAST:</h3>
+      <Debug ast={hast} />
       <hr />
     </>
   )}
   <OneArticleOnPage
-    title={entry.data.title || entry.data.slug}
-    content={htmlContent}
+    title={processedEntry.data.title || processedEntry.data.slug}
+    content={processedEntry.body}
   />
 </Layout>
