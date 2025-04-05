@@ -1,5 +1,5 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 
@@ -24,11 +24,12 @@ interface Props {
 }
 
 const { entry } = Astro.props;
+const { Content } = await render(entry);
 ---
 
 <Layout title={entry.data.title || entry.id}>
   <OneArticleOnPage
     title={entry.data.title || entry.id}
-    content={entry.body}
+    content={Content}
   />
 </Layout>
