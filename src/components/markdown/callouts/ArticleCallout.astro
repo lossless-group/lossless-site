@@ -1,15 +1,76 @@
 ---
 interface Props {
-    type?: string;
-    title?: string;
+  type?: string;
+  title?: string;
+  node?: any; // AST node
+  data?: any; // Data object
+  'data-ast'?: string; // AST data attribute
 }
 
-const { type = 'note', title } = Astro.props;
+const { type = 'info', title, node, data, 'data-ast': astData } = Astro.props;
+
+// Parse AST data if provided
+const astNode = astData ? JSON.parse(astData) : null;
 ---
 
-<article class={`callout callout-${type}`}>
-    <header class="callout-header">{title || type.charAt(0).toUpperCase() + type.slice(1)}</header>
-    <div class="callout-content">
-        <slot />
-    </div>
+<article class={`callout callout-${type}`} data-debug-enabled>
+  <header class="callout-header">{title || type.charAt(0).toUpperCase() + type.slice(1)}</header>
+  <div class="callout-content">
+    <slot />
+  </div>
 </article>
+
+<script>
+  interface CalloutDebugData {
+    type: string;
+    header: string | undefined;
+    content: string | undefined;
+    astNode: any | undefined;
+  }
+
+  declare global {
+    interface Window {
+      calloutDebug: CalloutDebugData[];
+    }
+  }
+
+  // Make callout data available in browser console
+  const callouts = document.querySelectorAll('.callout[data-debug-enabled]');
+  
+  callouts.forEach((callout, index) => {
+    const debugData = {
+      type: callout.classList.toString().split('callout-')[1],
+      header: callout.querySelector('.callout-header')?.textContent,
+      content: callout.querySelector('.callout-content')?.innerHTML,
+      astNode: callout.getAttribute('data-ast') ? JSON.parse(callout.getAttribute('data-ast') || '') : undefined
+    };
+    
+    // Add to window object for console access
+    if (!window.calloutDebug) {
+      window.calloutDebug = [];
+    }
+    window.calloutDebug[index] = debugData;
+  });
+
+  console.log('Callout debug data available at window.calloutDebug');
+</script>
+
+<style>
+  .callout {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--clr-lossless-primary-dark);
+    border: 1px solid var(--clr-lossless-accent--brightest);
+  }
+
+  .callout-header {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .callout-content {
+    color: var(--clr-lossless-primary-light);
+  }
+</style>

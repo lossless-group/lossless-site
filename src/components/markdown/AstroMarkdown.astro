@@ -3,6 +3,10 @@ import type {Root, RootContent} from 'mdast'
 import type {Root as HastRoot} from 'hast'
 import {toHtml} from 'hast-util-to-html'
 import {dirname} from 'path'
+import remarkAsf from '@utils/markdown/remark-asf';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkImages from '@utils/markdown/remark-images';
+import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import ArticleCallout from './callouts/ArticleCallout.astro';
 
 export interface Props {
@@ -16,10 +20,11 @@ export interface Props {
 const {node, data} = Astro.props;
 
 // List of node types we handle with specific components
+// Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
 const handled_types = [
     "root",
+    "blockquote",  // Handle blockquotes before paragraphs since they contain paragraphs
     "paragraph",
-    "blockquote",  // We'll handle blockquotes for callouts
     "text",
     "heading"
 ]
@@ -40,6 +45,14 @@ console.log(JSON.stringify(node, null, 2))
     </>
 }
 
+{(node.type === "blockquote") &&
+    <ArticleCallout data-ast={JSON.stringify(node)}>
+        {node.children.map((child) => (
+            <Astro.self node={child} data={data} />
+        ))}
+    </ArticleCallout>
+}
+
 {(node.type === "paragraph") &&
     <div class="paragraph">
         {node.children.map((child) => (
@@ -50,14 +63,6 @@ console.log(JSON.stringify(node, null, 2))
 
 {(node.type === "text") && 
     <span>{node.value}</span>
-}
-
-{(node.type === "blockquote") &&
-    <ArticleCallout>
-        {node.children.map((child) => (
-            <Astro.self node={child} data={data} />
-        ))}
-    </ArticleCallout>
 }
 
 {other_type && 
