@@ -3,6 +3,7 @@ import type {Root, RootContent} from 'mdast'
 import type {Root as HastRoot} from 'hast'
 import {toHtml} from 'hast-util-to-html'
 import {dirname} from 'path'
+import ArticleCallout from './callouts/ArticleCallout.astro';
 
 export interface Props {
     node: Root | RootContent;
@@ -52,11 +53,11 @@ console.log(JSON.stringify(node, null, 2))
 }
 
 {(node.type === "blockquote") &&
-    <div class="blockquote">
+    <ArticleCallout>
         {node.children.map((child) => (
             <Astro.self node={child} data={data} />
         ))}
-    </div>
+    </ArticleCallout>
 }
 
 {other_type && 
