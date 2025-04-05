@@ -46,11 +46,11 @@ console.log(JSON.stringify(node, null, 2))
 }
 
 {(node.type === "blockquote") &&
-    <ArticleCallout data-ast={JSON.stringify(node)}>
+    <>
         {node.children.map((child) => (
-            <Astro.self node={child} data={data} />
+            <ArticleCallout node={child} />
         ))}
-    </ArticleCallout>
+    </>
 }
 
 {(node.type === "paragraph") &&

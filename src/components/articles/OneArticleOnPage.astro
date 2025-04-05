@@ -3,15 +3,18 @@ import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import type { Root } from 'mdast';
 
 interface Props {
-  title: string;
   content: Root;
+  data?: {
+    path: string;
+    id?: string;  // File ID (e.g., 'Agile.md')
+  };
 }
 
-const { title, content } = Astro.props;
+const { content, data = { path: Astro.url.pathname } } = Astro.props;
 
-const data = {
-  path: Astro.url.pathname,
-};
+// Extract title from file ID if available
+const title = data.id ? data.id.replace(/\.md$/, '') : '';
+
 ---
 
 <article class="prose mx-auto">

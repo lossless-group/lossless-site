@@ -7,16 +7,22 @@ interface Props {
   'data-ast'?: string; // AST data attribute
 }
 
+import {unified} from 'unified';
+import remarkRehype from 'remark-rehype';
+import {toHtml} from 'hast-util-to-html';
+
 const { type = 'info', title, node, data, 'data-ast': astData } = Astro.props;
 
-// Parse AST data if provided
-const astNode = astData ? JSON.parse(astData) : null;
+// Since we already have an AST node, we only need to convert it to HTML
+const processedContent = await unified()
+  .use(remarkRehype) // Convert mdast to hast
+  .run(node) // Use run() since we're starting with an AST
+  .then(result => toHtml(result)); // Convert HAST to HTML string directly
 ---
 
 <article class={`callout callout-${type}`} data-debug-enabled>
   <header class="callout-header">{title || type.charAt(0).toUpperCase() + type.slice(1)}</header>
-  <div class="callout-content">
-    <slot />
+  <div class="callout-content" set:html={processedContent}>
   </div>
 </article>
 

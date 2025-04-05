@@ -2,7 +2,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
@@ -36,10 +35,9 @@ const { entry } = Astro.props;
 // Process with our custom remark plugins to get MDAST
 const mdast = await unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
-  .use(remarkCallouts)        // 2. Transform blockquotes to callout nodes
-  .use(remarkAsf, { markdownFile: entry.id })            // 3. Process ASF syntax
-  .use(remarkBacklinks)      // 4. Process backlinks
-  .use(remarkImages)         // 5. Process images
+  .use(remarkBacklinks)       // 2. Process inline wiki-style links
+  .use(remarkImages)          // 3. Process inline images
+  .use(remarkCallouts)        // 4. Process container elements (blockquotes to callouts)
   .parse(entry.body);        // Note: We stop at MDAST, no conversion to HAST/HTML
 ---
 
@@ -49,7 +47,10 @@ const mdast = await unified()
     markdownFile={entry.id}
   />
   <OneArticleOnPage
-    title={entry.data.title || entry.data.slug}
     content={mdast}
+    data={{
+      path: Astro.url.pathname,
+      id: entry.id
+    }}
   />
 </Layout>
