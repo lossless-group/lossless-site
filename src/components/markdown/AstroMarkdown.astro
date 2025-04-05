@@ -46,11 +46,7 @@ console.log(JSON.stringify(node, null, 2))
 }
 
 {(node.type === "blockquote") &&
-    <>
-        {node.children.map((child) => (
-            <ArticleCallout node={child} />
-        ))}
-    </>
+    <ArticleCallout node={node} />
 }
 
 {(node.type === "paragraph") &&
