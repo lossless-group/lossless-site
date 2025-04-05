@@ -33,8 +33,11 @@ const other_type = !handled_types.includes(node.type)
 data.dirpath = dirname(data.path)
 
 // Debug output to see AST structure
-console.log(`Processing node type: ${node.type}`)
-console.log(JSON.stringify(node, null, 2))
+console.log(`=== AstroMarkdown Debug ===`)
+console.log(`Node type: ${node.type}`)
+if (node.type === "blockquote") {
+    console.log('Blockquote children:', JSON.stringify(node.children, null, 2))
+}
 ---
 
 {(node.type === "root") && 

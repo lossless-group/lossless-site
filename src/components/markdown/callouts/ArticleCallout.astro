@@ -13,15 +13,61 @@ import {toHtml} from 'hast-util-to-html';
 
 const { type = 'info', title, node, data, 'data-ast': astData } = Astro.props;
 
-// Since we already have an AST node, we only need to convert it to HTML
+// Debug: Log just the essential parts
+console.log('=== ArticleCallout Debug ===');
+console.log('Node type:', node?.type);
+console.log('Children:', node?.children?.map(child => ({type: child.type})));
+
+// Extract callout metadata from first line
+let calloutType = type;
+let calloutTitle = title;
+let contentNode = node;
+
+// Get the first paragraph's first text node
+const firstParagraph = node?.children?.[0];
+if (firstParagraph?.type === 'paragraph') {
+  const firstTextNode = firstParagraph.children?.[0];
+  if (firstTextNode?.type === 'text') {
+    const lines = firstTextNode.value.split('\n');
+    const firstLine = lines[0];
+    
+    const match = firstLine.match(/^\[!([^\]]+)\]\s*(.*)$/);
+    if (match) {
+      calloutType = match[1].trim();
+      calloutTitle = match[2].trim() || calloutType;
+      
+      // Update first paragraph to remove metadata line
+      contentNode = {
+        ...node,
+        children: [
+          {
+            ...firstParagraph,
+            children: [
+              {
+                ...firstTextNode,
+                value: lines.slice(1).join('\n')
+              },
+              ...firstParagraph.children.slice(1)
+            ]
+          },
+          ...node.children.slice(1)
+        ]
+      };
+    }
+  }
+}
+
+console.log('Extracted:', { calloutType, calloutTitle });
+
+// Convert remaining content to HTML
 const processedContent = await unified()
-  .use(remarkRehype) // Convert mdast to hast
-  .run(node) // Use run() since we're starting with an AST
-  .then(result => toHtml(result)); // Convert HAST to HTML string directly
+  .use(remarkRehype)
+  .run(contentNode)
+  .then(result => toHtml(result));
 ---
 
-<article class={`callout callout-${type}`} data-debug-enabled>
-  <header class="callout-header">{title || type.charAt(0).toUpperCase() + type.slice(1)}</header>
+<article class={`callout callout-${calloutType.toLowerCase()}`} data-debug-enabled>
+  <header class="callout-header">{calloutTitle}</header>
   <div class="callout-content" set:html={processedContent}>
   </div>
 </article>
