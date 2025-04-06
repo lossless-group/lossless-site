@@ -36,7 +36,7 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
 
   .prose > :global(h1:first-child) {  
     font-size: 2rem;
-    margin-bottom: 2rem;  
+    margin-bottom: 2rem;
   }
 
   .prose :global(h2) {
@@ -54,8 +54,31 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
   }
 
   .prose :global(p), .prose :global(.paragraph) {
-    margin-bottom: 1.2rem;  
+    margin-bottom: 1.2rem;
     line-height: 1.3;
+  }
+
+  /* Add citation specific styles */
+  .prose :global(.citations) {
+    display: block;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(.citation) {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light);
+    opacity: 0.9;
+    line-height: 1.8;
+    padding-left: 2rem;
+    text-indent: -2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .prose :global(.citation:last-child) {
+    margin-bottom: 0;
   }
 
   .prose :global(a) {

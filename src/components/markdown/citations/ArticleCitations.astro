@@ -1,0 +1,55 @@
+---
+interface Props {
+    node: {
+        type?: string;
+        children?: Array<{
+            type: string;
+            value: string;
+            data?: {
+                hName?: string;
+                hProperties?: {
+                    className?: string;
+                };
+            };
+        }>;
+        data?: {
+            hProperties?: Record<string, any>;
+        };
+    };
+}
+
+const { node } = Astro.props;
+const citations = node.children || [];
+---
+
+<div class="citations">
+    {citations.map((citation) => (
+        <div class="citation" data-citation-type={citation.type}>
+            {citation.value}
+        </div>
+    ))}
+</div>
+
+<style>
+    .citations {
+        display: block;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--clr-lossless-accent--brightest);
+    }
+
+    .citation {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--clr-lossless-primary-light);
+        opacity: 0.9;
+        line-height: 1.8;
+        padding-left: 2rem;
+        text-indent: -2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .citation:last-child {
+        margin-bottom: 0;
+    }
+</style>

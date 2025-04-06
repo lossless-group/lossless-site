@@ -7,6 +7,7 @@ import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import ArticleCallout from './callouts/ArticleCallout.astro';
+import ArticleCitations from './citations/ArticleCitations.astro';
 
 interface Props {
     node: {
@@ -35,7 +36,9 @@ const handled_types = [
     "blockquote",  // Handle blockquotes before paragraphs since they contain paragraphs
     "paragraph",
     "text",
-    "heading"
+    "heading",
+    "citations",
+    "citation"
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -76,9 +79,17 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
     <ArticleCallout node={node} />
 }
 
+{(node.type === "citations") && 
+    <ArticleCitations node={node} />
+}
+
+{(node.type === "citation") && 
+    <div class="citation">{node.value}</div>
+}
+
 {(node.type === "paragraph") &&
     <div class="paragraph">
-        {node.children.map((child) => (
+        {node.children.map((child: any) => (
             <Astro.self node={child} data={data} />
         ))}
     </div>
