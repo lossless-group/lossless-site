@@ -38,7 +38,8 @@ const handled_types = [
     "text",
     "heading",
     "citations",
-    "citation"
+    "citation",
+    "thematicBreak" // Add support for horizontal rules
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -93,6 +94,10 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
             <Astro.self node={child} data={data} />
         ))}
     </div>
+}
+
+{(node.type === "thematicBreak") && 
+    <hr />
 }
 
 {(node.type === "text") && 

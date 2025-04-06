@@ -1,13 +1,13 @@
-import type { Root, Paragraph, Parent } from 'mdast';
 import { visit } from 'unist-util-visit';
+import type { Root, Paragraph, Parent } from 'mdast';
 
 type CitationNode = {
-  type: 'citation';
+  type: string;
   value: string;
-  data: {
-    hName: string;
-    hProperties: {
-      className: string;
+  data?: {
+    hName?: string;
+    hProperties?: {
+      className?: string;
     };
   };
 };
@@ -76,7 +76,10 @@ export function processCitations(content: string = ''): { processedContent: stri
 /**
  * Function to parse citation text and convert URLs to links
  */
-function parseCitation(text: string) {
+function parseCitation(text: string | undefined) {
+  // Guard against undefined or empty text
+  if (!text) return null;
+
   // Regular expression to match citation number and URL
   // Supports both http:// and https:// URLs
   const regex = /\[(\d+)\]\s*((?:https?|http):\/\/[^\s]+)/;
@@ -91,6 +94,15 @@ function parseCitation(text: string) {
   }
   
   return null;
+}
+
+/**
+ * Check if a node is a Perplexity attribution
+ */
+function isPerplexityAttribution(node: any): boolean {
+  return node.type === 'paragraph' && 
+         node.children?.[0]?.type === 'text' &&
+         node.children[0].value.startsWith('Answer from Perplexity');
 }
 
 /**
@@ -184,5 +196,93 @@ export default function remarkCitations() {
 
       tree.children.push(citationsNode as unknown as Paragraph);
     }
+
+    visit(tree, (node: any, index: number, parent: any) => {
+      if (node.type === 'citations') {
+        // Look ahead for thematicBreak and Perplexity attribution
+        const nextNodes = parent.children.slice(index + 1);
+        let attributionIndex = -1;
+        
+        // Find the Perplexity attribution if it exists
+        for (let i = 0; i < nextNodes.length; i++) {
+          if (nextNodes[i].type === 'thematicBreak' && 
+              nextNodes[i + 1] && isPerplexityAttribution(nextNodes[i + 1])) {
+            attributionIndex = i;
+            break;
+          }
+        }
+
+        // If we found the attribution pattern, include it in the citations
+        if (attributionIndex !== -1) {
+          // Create attribution node
+          const attributionNode = {
+            type: 'citation-attribution',
+            data: {
+              hName: 'div',
+              hProperties: {
+                className: 'citation-attribution'
+              }
+            },
+            children: [nextNodes[attributionIndex + 1]]
+          };
+
+          // Add attribution to citations node
+          node.children.push(attributionNode);
+
+          // Remove the thematicBreak and attribution from parent
+          parent.children.splice(index + 1, 2);
+        }
+
+        // Transform citation nodes to include link structure
+        if (node.children) {
+          node.children = node.children.map((citation: CitationNode) => {
+            if (citation.type === 'citation-attribution') return citation;
+
+            const parsed = parseCitation(citation.value);
+            if (parsed) {
+              return {
+                type: 'citation',
+                data: {
+                  hName: 'div',
+                  hProperties: {
+                    className: 'citation'
+                  }
+                },
+                children: [
+                  {
+                    type: 'text',
+                    value: `[${parsed.number}] `
+                  },
+                  {
+                    type: 'link',
+                    url: parsed.url,
+                    data: {
+                      hName: 'a',
+                      hProperties: {
+                        href: parsed.url,
+                        target: '_blank',
+                        rel: 'noopener noreferrer'
+                      }
+                    },
+                    children: [{
+                      type: 'text',
+                      value: parsed.url
+                    }]
+                  }
+                ]
+              };
+            }
+            return citation;
+          });
+        }
+
+        node.data = {
+          hName: 'div',
+          hProperties: {
+            className: 'citations-container'
+          }
+        };
+      }
+    });
   };
 }

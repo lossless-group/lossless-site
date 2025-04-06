@@ -4,10 +4,16 @@ interface Props {
         type?: string;
         children?: Array<{
             type: string;
+            value?: string;
+            url?: string;
             children?: Array<{
                 type: string;
                 value?: string;
                 url?: string;
+                children?: Array<{
+                    type: string;
+                    value: string;
+                }>;
                 data?: {
                     hName?: string;
                     hProperties?: {
@@ -33,28 +39,11 @@ interface Props {
 
 const { node } = Astro.props;
 const citations = node.children || [];
-
-// Function to parse citation text and convert URLs to links
-function parseCitation(text: string) {
-    // Regular expression to match citation number and URL
-    const regex = /\[(\d+)\]\s*(https?:\/\/[^\s]+)/;
-    const match = text.match(regex);
-    
-    if (match) {
-        const [_, number, url] = match;
-        return {
-            number,
-            url: url.trim()
-        };
-    }
-    
-    return null;
-}
 ---
 
 <div class="citations">
     {citations.map((citation) => (
-        <div class="citation" data-citation-type={citation.type}>
+        <div class={citation.type === 'citation-attribution' ? 'citation-attribution' : 'citation'}>
             {citation.children?.map((child) => {
                 if (child.type === 'link') {
                     return (
@@ -63,17 +52,7 @@ function parseCitation(text: string) {
                         </a>
                     );
                 }
-                const parsed = parseCitation(child.value);
-                return parsed ? (
-                    <>
-                        [{parsed.number}]{" "}
-                        <a href={parsed.url} target="_blank" rel="noopener noreferrer">
-                            {parsed.url}
-                        </a>
-                    </>
-                ) : (
-                    child.value
-                );
+                return child.value;
             })}
         </div>
     ))}
@@ -96,6 +75,17 @@ function parseCitation(text: string) {
         padding-left: 2rem;
         text-indent: -2rem;
         margin-bottom: 0.5rem;
+    }
+
+    .citation-attribution {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--clr-lossless-primary-light);
+        opacity: 0.8;
+        font-style: italic;
+        margin-top: 1rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--clr-lossless-accent);
     }
 
     .citation:last-child {
