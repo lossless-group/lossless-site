@@ -2,18 +2,49 @@
 /**
  * OneArticle.astro
  * Layout for displaying a single article in a centered, readable format
+ * Handles markdown processing with remark plugins
  */
+
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkImages from '@utils/markdown/remark-images';
+import remarkCallouts from '@utils/markdown/remark-callout-handler';
+import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 
 interface Props {
   Component: any;
   data: Record<string, any>;
+  content: string;
+  markdownFile?: string;
 }
 
-const { Component, data } = Astro.props;
+const { Component, data, content, markdownFile } = Astro.props;
+
+// Process with our custom remark plugins to get MDAST
+const processor = unified()
+  .use(remarkParse)           // 1. Parse markdown to MDAST
+  .use(remarkBacklinks)       // 2. Process inline wiki-style links
+  .use(remarkImages)          // 3. Process inline images
+  .use(remarkCallouts);       // 4. Process container elements (blockquotes to callouts)
+
+// First parse to MDAST
+const mdast = await processor.parse(content);
+
+// Then run transformations
+const transformedMdast = await processor.run(mdast);
+
+// Debug output to see AST structure
+console.log('\n=== OneArticle.astro Debug ===');
+console.log('MDAST structure:', JSON.stringify(transformedMdast, null, 2));
 ---
 
 <div class="one-article">
-  <Component {...data}>
+  {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
+  <Component 
+    {...data}
+    content={transformedMdast}
+  >
     <slot />
   </Component>
 </div>

@@ -1,14 +1,8 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkBacklinks from '@utils/markdown/remark-backlinks';
-import remarkImages from '@utils/markdown/remark-images';
-import remarkCallouts from '@utils/markdown/remark-callout-handler';
-import remarkRehype from 'remark-rehype';
 import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
@@ -33,32 +27,13 @@ interface Props {
 
 const { entry } = Astro.props;
 
-// Process with our custom remark plugins to get MDAST
-const processor = unified()
-  .use(remarkParse)           // 1. Parse markdown to MDAST
-  .use(remarkBacklinks)       // 2. Process inline wiki-style links
-  .use(remarkImages)          // 3. Process inline images
-  .use(remarkCallouts);       // 4. Process container elements (blockquotes to callouts)
-
-// First parse to MDAST
-const mdast = await processor.parse(entry.body);
-
-// Then run transformations
-const transformedMdast = await processor.run(mdast);
-
-// Debug output to see AST structure
-console.log('\n=== [vocabulary].astro Debug ===');
-console.log('MDAST structure:', JSON.stringify(transformedMdast, null, 2));
-
 ---
 
 <Layout title={entry.data.title || entry.data.slug}>
-  <DebugMarkdown 
+  <OneArticle
+    Component={OneArticleOnPage}
     content={entry.body}
     markdownFile={entry.id}
-  />
-  <OneArticleOnPage
-    content={transformedMdast}
     data={{
       path: Astro.url.pathname,
       id: entry.id
