@@ -3,14 +3,21 @@ import type {Root, RootContent} from 'mdast'
 import type {Root as HastRoot} from 'hast'
 import {toHtml} from 'hast-util-to-html'
 import {dirname} from 'path'
-import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import ArticleCallout from './callouts/ArticleCallout.astro';
 
-export interface Props {
-    node: Root | RootContent;
+interface Props {
+    node: {
+        type: string;
+        value?: string;
+        children?: any[];
+        url?: string;
+        data?: {
+            hProperties?: Record<string, string>;
+        };
+    };
     data: {
         path: string;
         [key: string]: any;
@@ -23,6 +30,7 @@ const {node, data} = Astro.props;
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
 const handled_types = [
     "root",
+    "link",        // Handle standard MDAST link nodes
     "blockquote",  // Handle blockquotes before paragraphs since they contain paragraphs
     "paragraph",
     "text",
@@ -35,9 +43,8 @@ data.dirpath = dirname(data.path)
 // Debug output to see AST structure
 console.log(`=== AstroMarkdown Debug ===`)
 console.log(`Node type: ${node.type}`)
-if (node.type === "blockquote") {
-    console.log('Blockquote children:', JSON.stringify(node.children, null, 2))
-}
+console.log('Node structure:', JSON.stringify(node, null, 2))
+
 ---
 
 {(node.type === "root") && 
@@ -46,6 +53,12 @@ if (node.type === "blockquote") {
             <Astro.self node={child} data={data} />
         ))}
     </>
+}
+
+{(node.type === "link") && 
+    <a href={node.url} {...node.data?.hProperties}>
+        {node.children[0].value}
+    </a>
 }
 
 {(node.type === "blockquote") &&

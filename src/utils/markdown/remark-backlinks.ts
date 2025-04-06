@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Root, Text } from 'mdast';
+import type { Root, Text, Link } from 'mdast';
 
 // Match [[...]] but skip if it's a visual path
 const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
@@ -15,15 +15,6 @@ function transformPath(path: string): string {
 export default function remarkBacklinks() {
   return async function transformer(tree: Root) {
     console.log('\n🔗 Remark Backlinks Plugin: Starting transformation...\n');
-    
-    // Add a paragraph node at the start to verify plugin execution
-    tree.children.unshift({
-      type: 'paragraph',
-      children: [{
-        type: 'text',
-        value: '🔗 Remark Plugin Active'
-      }]
-    });
 
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
@@ -52,6 +43,8 @@ export default function remarkBacklinks() {
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
           console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
+          
+          // Create a standard MDAST link node instead of a custom backLink node
           newNodes.push({
             type: 'link',
             url: transformedPath,
@@ -64,7 +57,7 @@ export default function remarkBacklinks() {
               type: 'text',
               value: finalDisplayText
             }]
-          });
+          } as Link);
 
           lastIndex = startIndex + fullMatch.length;
         });
