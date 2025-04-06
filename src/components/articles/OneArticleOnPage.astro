@@ -15,7 +15,16 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
 ---
 
 <article class="prose mx-auto">
-  <AstroMarkdown node={content} data={data} />
+  <AstroMarkdown 
+    node={{
+      type: 'root',
+      children: content.children || [],
+      data: {
+        hProperties: content.data?.hProperties || {}
+      }
+    }} 
+    data={data} 
+  />
 </article>
 
 <style>
@@ -25,9 +34,9 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
     padding: 1rem;
   }
 
-  .prose h1 {
+  .prose > :global(h1:first-child) {  
     font-size: 2rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;  
   }
 
   .prose :global(h2) {
@@ -44,9 +53,9 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
     color: var(--clr-lossless-accent--brightest);
   }
 
-  .prose :global(p) {
-    margin-bottom: 1rem;
-    line-height: 1.6;
+  .prose :global(p), .prose :global(.paragraph) {
+    margin-bottom: 1.2rem;  
+    line-height: 1.3;
   }
 
   .prose :global(a) {
