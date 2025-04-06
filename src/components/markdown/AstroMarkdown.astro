@@ -20,6 +20,7 @@ interface Props {
     };
     data: {
         path: string;
+        id?: string;  // File ID (e.g., 'Agile.md')
         [key: string]: any;
     };
 }
@@ -40,6 +41,15 @@ const handled_types = [
 const other_type = !handled_types.includes(node.type)
 data.dirpath = dirname(data.path)
 
+// Extract title from file ID if available and convert to Title Case
+const title = data.id ? 
+  data.id
+    .replace(/\.md$/, '')
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+  : '';
+
 // Debug output to see AST structure
 console.log(`=== AstroMarkdown Debug ===`)
 console.log(`Node type: ${node.type}`)
@@ -49,6 +59,7 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
 
 {(node.type === "root") && 
     <>
+        <h1>{title}</h1>
         {node.children.map((child) => (
             <Astro.self node={child} data={data} />
         ))}

@@ -12,13 +12,9 @@ interface Props {
 
 const { content, data = { path: Astro.url.pathname } } = Astro.props;
 
-// Extract title from file ID if available
-const title = data.id ? data.id.replace(/\.md$/, '') : '';
-
 ---
 
 <article class="prose mx-auto">
-  <h1>{title}</h1>
   <AstroMarkdown node={content} data={data} />
 </article>
 

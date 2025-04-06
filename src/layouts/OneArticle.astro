@@ -42,8 +42,8 @@ console.log('MDAST structure:', JSON.stringify(transformedMdast, null, 2));
 <div class="one-article">
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
   <Component 
-    {...data}
     content={transformedMdast}
+    data={data}
   >
     <slot />
   </Component>
