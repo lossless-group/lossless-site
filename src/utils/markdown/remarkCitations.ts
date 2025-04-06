@@ -74,6 +74,26 @@ export function processCitations(content: string = ''): { processedContent: stri
 }
 
 /**
+ * Function to parse citation text and convert URLs to links
+ */
+function parseCitation(text: string) {
+  // Regular expression to match citation number and URL
+  // Supports both http:// and https:// URLs
+  const regex = /\[(\d+)\]\s*((?:https?|http):\/\/[^\s]+)/;
+  const match = text.match(regex);
+  
+  if (match) {
+    const [_, number, url] = match;
+    return {
+      number,
+      url: url.trim()
+    };
+  }
+  
+  return null;
+}
+
+/**
  * Remark plugin to transform citation paragraphs into a structured format
  * Takes pre-processed citations and injects them into the MDAST at the end
  */
@@ -115,7 +135,45 @@ export default function remarkCitations() {
     if (citationsFound.length > 0) {
       const citationsNode = {
         type: 'citations',
-        children: citationsFound,
+        children: citationsFound.map((citation: CitationNode) => {
+          const parsed = parseCitation(citation.value);
+          
+          if (parsed) {
+            return {
+              type: 'citation',
+              data: {
+                hName: 'div',
+                hProperties: {
+                  className: 'citation'
+                }
+              },
+              children: [
+                {
+                  type: 'text',
+                  value: `[${parsed.number}] `
+                },
+                {
+                  type: 'link',
+                  url: parsed.url,
+                  data: {
+                    hName: 'a',
+                    hProperties: {
+                      href: parsed.url,
+                      target: '_blank',
+                      rel: 'noopener noreferrer'
+                    }
+                  },
+                  children: [{
+                    type: 'text',
+                    value: parsed.url
+                  }]
+                }
+              ]
+            };
+          }
+          
+          return citation;
+        }),
         data: {
           hName: 'div',
           hProperties: {

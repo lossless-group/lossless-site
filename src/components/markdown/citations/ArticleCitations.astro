@@ -4,7 +4,20 @@ interface Props {
         type?: string;
         children?: Array<{
             type: string;
-            value: string;
+            children?: Array<{
+                type: string;
+                value?: string;
+                url?: string;
+                data?: {
+                    hName?: string;
+                    hProperties?: {
+                        className?: string;
+                        href?: string;
+                        target?: string;
+                        rel?: string;
+                    };
+                };
+            }>;
             data?: {
                 hName?: string;
                 hProperties?: {
@@ -20,12 +33,48 @@ interface Props {
 
 const { node } = Astro.props;
 const citations = node.children || [];
+
+// Function to parse citation text and convert URLs to links
+function parseCitation(text: string) {
+    // Regular expression to match citation number and URL
+    const regex = /\[(\d+)\]\s*(https?:\/\/[^\s]+)/;
+    const match = text.match(regex);
+    
+    if (match) {
+        const [_, number, url] = match;
+        return {
+            number,
+            url: url.trim()
+        };
+    }
+    
+    return null;
+}
 ---
 
 <div class="citations">
     {citations.map((citation) => (
         <div class="citation" data-citation-type={citation.type}>
-            {citation.value}
+            {citation.children?.map((child) => {
+                if (child.type === 'link') {
+                    return (
+                        <a href={child.url} target="_blank" rel="noopener noreferrer">
+                            {child.children?.[0].value}
+                        </a>
+                    );
+                }
+                const parsed = parseCitation(child.value);
+                return parsed ? (
+                    <>
+                        [{parsed.number}]{" "}
+                        <a href={parsed.url} target="_blank" rel="noopener noreferrer">
+                            {parsed.url}
+                        </a>
+                    </>
+                ) : (
+                    child.value
+                );
+            })}
         </div>
     ))}
 </div>
@@ -51,5 +100,16 @@ const citations = node.children || [];
 
     .citation:last-child {
         margin-bottom: 0;
+    }
+
+    .citation a {
+        color: var(--clr-lossless-accent);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .citation a:hover {
+        color: var(--clr-lossless-accent--brightest);
+        text-decoration: underline;
     }
 </style>
