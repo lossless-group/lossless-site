@@ -12,6 +12,7 @@ import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import remarkCitations from '@utils/markdown/remarkCitations';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
+import markdownDebugger from '@utils/markdown/markdownDebugger';
 
 interface Props {
   Component: any;
@@ -37,8 +38,10 @@ const mdast = await processor.parse(content || '');
 const transformedMdast = await processor.run(mdast);
 
 // Debug output to see AST structure
-console.log('\n=== OneArticle.astro Debug ===');
-console.log('MDAST structure:', JSON.stringify(transformedMdast, null, 2));
+markdownDebugger.log('OneArticle.astro Debug');
+markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
+markdownDebugger.verbose('MDAST structure:', transformedMdast);
+
 ---
 
 <div class="one-article">

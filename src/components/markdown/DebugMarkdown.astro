@@ -8,7 +8,7 @@ import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import type { Root as MdastRoot } from 'mdast';
-import { astDebugger } from '../../utils/debug/ast-debugger';
+import markdownDebugger from '@utils/markdown/markdownDebugger';
 
 interface Props {
   content: string;
@@ -18,51 +18,63 @@ interface Props {
 
 const { content, markdownFile, enabled = process.env.DEBUG_AST === 'true' } = Astro.props;
 
-// Process with our custom remark plugins in discrete steps
-const parsedAst = await unified()
-  .use(remarkParse)
-  .parse(content);
-astDebugger.writeDebugFile('1-parsed-ast', parsedAst);
+// Initialize variables
+let parsedAst;
+let calloutsAst;
+let asfAst;
+let backlinksAst;
+let imagesAst;
+let hastAst;
+let calloutsHastAst;
 
-const calloutsAst = await unified()
-  .use(remarkParse)
-  .use(remarkCallouts)
-  .parse(content);
-astDebugger.writeDebugFile('2-callouts-ast', calloutsAst);
+// Only process if debugging is enabled
+if (enabled) {
+  // Process with our custom remark plugins in discrete steps
+  parsedAst = await unified()
+    .use(remarkParse)
+    .parse(content);
+  markdownDebugger.writeDebugFile('1-parsed-ast', parsedAst);
 
-const asfAst = await unified()
-  .use(remarkParse)
-  .use(remarkAsf, { markdownFile })
-  .parse(content);
-astDebugger.writeDebugFile('3-asf-ast', asfAst);
+  calloutsAst = await unified()
+    .use(remarkParse)
+    .use(remarkCallouts)
+    .parse(content);
+  markdownDebugger.writeDebugFile('2-callouts-ast', calloutsAst);
 
-const backlinksAst = await unified()
-  .use(remarkParse)
-  .use(remarkBacklinks)
-  .parse(content);
-astDebugger.writeDebugFile('4-backlinks-ast', backlinksAst);
+  asfAst = await unified()
+    .use(remarkParse)
+    .use(remarkAsf, { markdownFile })
+    .parse(content);
+  markdownDebugger.writeDebugFile('3-asf-ast', asfAst);
 
-const imagesAst = await unified()
-  .use(remarkParse)
-  .use(remarkImages)
-  .parse(content);
-astDebugger.writeDebugFile('5-images-ast', imagesAst);
+  backlinksAst = await unified()
+    .use(remarkParse)
+    .use(remarkBacklinks)
+    .parse(content);
+  markdownDebugger.writeDebugFile('4-backlinks-ast', backlinksAst);
 
-const hastAst = await unified()
-  .use(remarkParse)
-  .use(remarkRehype)
-  .parse(content);
-astDebugger.writeDebugFile('6-hast-ast', hastAst);
+  imagesAst = await unified()
+    .use(remarkParse)
+    .use(remarkImages)
+    .parse(content);
+  markdownDebugger.writeDebugFile('5-images-ast', imagesAst);
 
-const calloutsHastAst = await unified()
-  .use(remarkParse)
-  .use(remarkCallouts)
-  .use(remarkRehype)
-  .parse(content);
-astDebugger.writeDebugFile('7-callouts-hast-ast', calloutsHastAst);
+  hastAst = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .parse(content);
+  markdownDebugger.writeDebugFile('6-hast-ast', hastAst);
+
+  calloutsHastAst = await unified()
+    .use(remarkParse)
+    .use(remarkCallouts)
+    .use(remarkRehype)
+    .parse(content);
+  markdownDebugger.writeDebugFile('7-callouts-hast-ast', calloutsHastAst);
+}
 ---
 
-{enabled && (
+{enabled && parsedAst && (
   <>
     <h2>Debug Output:</h2>
     <h3>1. After Parse:</h3>

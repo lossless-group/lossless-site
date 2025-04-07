@@ -1,5 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text } from 'mdast';
+import markdownDebugger from './markdownDebugger';
 
 // Regex patterns for different image types
 const wikiImageRegex = /!\[\[((.*?\/)?[^/|]+?)(?:\|(.*?))?\]\]/g;
@@ -49,7 +50,7 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
   const options = { ...defaultOptions, ...userOptions };
   
   return async function transformer(tree: Root) {
-    console.log('\n🖼️ Remark Images Plugin: Starting transformation...\n');
+    markdownDebugger.startPlugin('Images');
 
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
@@ -59,7 +60,7 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
       const markdownMatches = Array.from(value.matchAll(markdownImageRegex));
       
       if (wikiMatches.length > 0 || markdownMatches.length > 0) {
-        console.log(`\n🔍 Found images in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
+        markdownDebugger.log(`\n🔍 Found images in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
         
         const newNodes = [];
         let lastIndex = 0;
@@ -79,7 +80,7 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
           const transformedPath = transformImagePath(filename.trim());
           const altText = displayText?.trim() || generateAltText(filename.trim());
           
-          console.log(`  ↳ Converting wiki image: [[${filename}]] → ${transformedPath}`);
+          markdownDebugger.verbose(`  ↳ Converting wiki image: [[${filename}]] → ${transformedPath}`);
           
           newNodes.push({
             type: 'image',
@@ -103,7 +104,7 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
             });
           }
 
-          console.log(`  ↳ Processing URL image: ${url}`);
+          markdownDebugger.verbose(`  ↳ Processing URL image: ${url}`);
           
           newNodes.push({
             type: 'image',
@@ -125,5 +126,8 @@ export default function remarkImages(userOptions: Partial<ImagePluginOptions> = 
         parent.children.splice(index, 1, ...newNodes);
       }
     });
+    
+    markdownDebugger.endPlugin('Images');
+    return tree;
   };
 }

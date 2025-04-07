@@ -1,10 +1,11 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Element, Properties, Text } from 'hast';
 import type { Visitor } from 'unist-util-visit';
+import markdownDebugger from './markdownDebugger';
 
 export default function rehypeCalloutHandler() {
   return (tree: Root) => {
-    console.log('=== START REHYPE CALLOUT HANDLER ===');
+    markdownDebugger.startPlugin('Rehype Callout Handler');
     
     const visitor: Visitor<Element> = (node) => {
       if (
@@ -16,7 +17,7 @@ export default function rehypeCalloutHandler() {
         return;
       }
 
-      console.log('Found callout article:', node);
+      markdownDebugger.verbose('Found callout article:', node);
 
       const type = node.properties['data-type'] as string;
       const title = node.properties['data-title'] as string;
@@ -70,12 +71,12 @@ export default function rehypeCalloutHandler() {
       delete (node.properties as Properties)['data-type'];
       delete (node.properties as Properties)['data-title'];
 
-      console.log('Transformed callout:', node);
+      markdownDebugger.verbose('Transformed callout:', node);
     };
 
     visit(tree, 'element', visitor);
     
-    console.log('=== END REHYPE CALLOUT HANDLER ===');
+    markdownDebugger.endPlugin('Rehype Callout Handler');
     return tree;
   };
 }

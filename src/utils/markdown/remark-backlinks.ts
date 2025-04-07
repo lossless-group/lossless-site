@@ -1,5 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text, Link } from 'mdast';
+import markdownDebugger from './markdownDebugger';
 
 // Match [[...]] but skip if it's a visual path
 const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
@@ -14,7 +15,7 @@ function transformPath(path: string): string {
  */
 export default function remarkBacklinks() {
   return async function transformer(tree: Root) {
-    console.log('\n🔗 Remark Backlinks Plugin: Starting transformation...\n');
+    markdownDebugger.startPlugin('Backlinks');
 
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
@@ -23,7 +24,7 @@ export default function remarkBacklinks() {
       const matches = Array.from(value.matchAll(backlinkRegex));
       
       if (matches.length > 0) {
-        console.log(`\n🔍 Found ${matches.length} backlinks in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
+        markdownDebugger.log(`\n🔍 Found ${matches.length} backlinks in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
         
         const newNodes = [];
         let lastIndex = 0;
@@ -42,7 +43,7 @@ export default function remarkBacklinks() {
           const transformedPath = transformPath(path);
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
-          console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
+          markdownDebugger.verbose(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
           
           // Create a standard MDAST link node instead of a custom backLink node
           newNodes.push({
@@ -72,5 +73,7 @@ export default function remarkBacklinks() {
         parent.children.splice(index, 1, ...newNodes);
       }
     });
+    
+    markdownDebugger.endPlugin('Backlinks');
   };
 }

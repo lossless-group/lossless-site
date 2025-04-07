@@ -1,5 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Paragraph, Parent } from 'mdast';
+import markdownDebugger from './markdownDebugger';
 
 type CitationNode = {
   type: string;
@@ -58,26 +59,11 @@ interface RemarkCitationsOptions {
   citations?: CitationNode[];
 }
 
-// Debug utility function
-function debugNode(prefix: string, node: any) {
-  if (!node) {
-    console.log(`\n=== ${prefix} ===`);
-    console.log('Node is null or undefined');
-    console.log('=== End Debug ===\n');
-    return;
-  }
-
-  console.log(`\n=== ${prefix} ===`);
-  console.log('Node type:', node.type);
-  if (node.type === 'text' && node.value) {
-    console.log('Text value:', node.value);
-  }
-  if (Array.isArray(node.children)) {
-    console.log('Children types:', node.children.map((child: any) => child?.type || 'unknown'));
-    console.log('Children values:', node.children.map((child: any) => child?.value || ''));
-  }
-  console.log('Full node:', JSON.stringify(node, null, 2));
-  console.log('=== End Debug ===\n');
+/**
+ * Debug utility for logging node information
+ */
+function debugNode(prefix: string, node: any): void {
+  markdownDebugger.debugNode(prefix, node);
 }
 
 /**
@@ -219,7 +205,7 @@ function createCitationsSectionNode(citations: CitationNode[]): CitationsContain
  */
 export default function remarkCitations() {
   return (tree: Root) => {
-    debugNode('Initial Tree', tree);
+    markdownDebugger.startPlugin('Citations');
     
     let allCitations: CitationNode[] = [];
     let hasProcessedCitations = false;
@@ -243,7 +229,7 @@ export default function remarkCitations() {
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (trimmedLine && /^\[\d+\]\s+https?:\/\/\S+$/.test(trimmedLine)) {
-          console.log('Found citation:', trimmedLine);
+          markdownDebugger.verbose('Found citation:', trimmedLine);
           citationLines.push(trimmedLine);
           const citationNode = createCitationNode(trimmedLine);
           if (citationNode) {
@@ -281,7 +267,7 @@ export default function remarkCitations() {
       }
     }
 
-    debugNode('Final Tree', tree);
+    markdownDebugger.endPlugin('Citations');
     return tree;
   };
 }
