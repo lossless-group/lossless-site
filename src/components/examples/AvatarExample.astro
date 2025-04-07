@@ -1,0 +1,139 @@
+---
+/**
+ * AvatarExample.astro
+ * 
+ * This component demonstrates the usage of the Starwind UI Avatar component with
+ * different variations and configurations.
+ * 
+ * The Avatar component consists of three parts:
+ * 1. Avatar - The main container component
+ * 2. AvatarImage - The image to display (with fallback handling)
+ * 3. AvatarFallback - Content to show when the image fails to load
+ */
+
+// Import the Starwind Avatar components
+import Avatar from "../starwind/avatar/Avatar.astro";
+import AvatarImage from "../starwind/avatar/AvatarImage.astro";
+import AvatarFallback from "../starwind/avatar/AvatarFallback.astro";
+
+// Define sample avatar URLs and initials for the examples
+const avatarUrls = {
+  valid: "https://i.pravatar.cc/300",
+  invalid: "https://invalid-image-url.example/image.jpg"
+};
+
+const userInitials = {
+  jd: "JD",
+  ab: "AB",
+  cd: "CD"
+};
+
+// Define the variants to demonstrate
+const variants = ["default", "primary", "secondary", "info", "success", "warning", "error"] as const;
+const sizes = ["sm", "md", "lg"] as const;
+---
+
+<div class="p-6 space-y-8" style="color: var(--clr-lossless-primary-light);">
+  <section class="space-y-4">
+    <h2 class="text-xl font-semibold" style="color: var(--clr-lossless-primary-light);">Basic Avatar Examples</h2>
+    
+    <div class="flex flex-wrap gap-4 items-center">
+      <!-- Basic avatar with image -->
+      <div class="flex flex-col items-center gap-2">
+        <Avatar>
+          <AvatarImage src={avatarUrls.valid} alt="User avatar" />
+          <AvatarFallback>{userInitials.jd}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm">Basic</span>
+      </div>
+
+      <!-- Avatar with fallback (invalid image) -->
+      <div class="flex flex-col items-center gap-2">
+        <Avatar>
+          <AvatarImage src={avatarUrls.invalid} alt="Invalid avatar" />
+          <AvatarFallback>{userInitials.ab}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm">With Fallback</span>
+      </div>
+
+      <!-- Avatar with only fallback -->
+      <div class="flex flex-col items-center gap-2">
+        <Avatar>
+          <AvatarFallback>{userInitials.cd}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm">Initials Only</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-xl font-semibold" style="color: var(--clr-lossless-primary-light);">Avatar Variants</h2>
+    
+    <div class="flex flex-wrap gap-4 items-center">
+      {variants.map(variant => (
+        <div class="flex flex-col items-center gap-2">
+          <Avatar variant={variant}>
+            <AvatarFallback>{userInitials.jd}</AvatarFallback>
+          </Avatar>
+          <span class="text-sm">{variant}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-xl font-semibold" style="color: var(--clr-lossless-primary-light);">Avatar Sizes</h2>
+    
+    <div class="flex flex-wrap gap-4 items-center">
+      {sizes.map(size => (
+        <div class="flex flex-col items-center gap-2">
+          <Avatar size={size}>
+            <AvatarImage src={avatarUrls.valid} alt={`${size} avatar`} />
+            <AvatarFallback>{userInitials.jd}</AvatarFallback>
+          </Avatar>
+          <span class="text-sm">{size}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-xl font-semibold" style="color: var(--clr-lossless-primary-light);">Custom Styling</h2>
+    
+    <div class="flex flex-wrap gap-4 items-center">
+      <!-- Custom border width -->
+      <div class="flex flex-col items-center gap-2">
+        <Avatar class="border-4">
+          <AvatarImage src={avatarUrls.valid} alt="Custom border avatar" />
+          <AvatarFallback>{userInitials.jd}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm">Thick Border</span>
+      </div>
+
+      <!-- Custom background color for fallback -->
+      <div class="flex flex-col items-center gap-2">
+        <Avatar variant="primary">
+          <AvatarFallback class="bg-primary text-primary-foreground">{userInitials.ab}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm">Custom BG</span>
+      </div>
+
+      <!-- Larger size with custom styling -->
+      <div class="flex flex-col items-center gap-2">
+        <Avatar class="h-16 w-16 text-lg">
+          <AvatarFallback>{userInitials.cd}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm">Custom Size</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Override Starwind Avatar component styles to match your site's theme */
+  :global(.starwind-avatar) {
+    --border-color: var(--clr-lossless-ui-btn-border);
+    --background-color: var(--clr-lossless-primary-dark);
+    --text-color: var(--clr-lossless-primary-light);
+  }
+</style>

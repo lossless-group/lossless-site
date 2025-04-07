@@ -18,45 +18,73 @@
  */
 
 import { formatDate } from "@utils/formatDate";
+import AuthorHandle from "@components/basics/AuthorHandle.astro";
 
-interface Props {
-  title: string;
-  date: Date | string;
-  category?: string;
-  contextSetter?: string;
-  slug?: string;
-  class?: string;
-}
-
+// Props are kept flexible with minimal requirements
 const {
   title,
   date,
   category,
+  categories,
   contextSetter,
   slug,
-  class: className 
+  class: className,
+  authors = []
 } = Astro.props;
-// Format the date consistently
-const formattedDate = formatDate(new Date(date));
+
+// Format the date consistently if it exists
+const formattedDate = date ? formatDate(new Date(date)) : '';
+
+// Normalize categories to always be an array
+const normalizeCategories = () => {
+  if (categories) {
+    // If categories is already an array, use it
+    return Array.isArray(categories) ? categories : [categories];
+  } else if (category) {
+    // If only category is present (string), convert to array
+    return Array.isArray(category) ? category : [category];
+  }
+  return [];
+};
+
+const categoryList = normalizeCategories();
+
+// Only render AuthorHandle if we have authors
+const hasAuthors = Array.isArray(authors) && authors.length > 0;
 ---
 
 <div class:list={["changelog-entry", className]}>
-  <div class="changelog-entry__header">
-    <div class="changelog-entry__meta">
-      <time datetime={formattedDate}>{formattedDate}</time>
-      {category && <span class="changelog-entry__category">{category}</span>}
+  <div class="changelog-entry__container">
+    <div class="changelog-entry__header">
+      <div class="changelog-entry__meta">
+        {formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}
+        {categoryList.map(cat => (
+          <span class="changelog-entry__category">{cat}</span>
+        ))}
+      </div>
+      {contextSetter && <h5 class="changelog-entry__emphasis">{contextSetter}</h5>}
+      {title && (
+        <h5 class="changelog-entry__title">
+          <a href={`/log/${slug || ''}`} class="changelog-entry__link">
+            {title}
+          </a>
+        </h5>
+      )}
     </div>
-    <h5 class="changelog-entry__emphasis">{contextSetter}</h5>
-    <h5 class="changelog-entry__title">
-      <a href={`/log/${slug || ''}`} class="changelog-entry__link">
-        {title}
-      </a>
-    </h5>
+    
+    <div class="changelog-entry__content">
+      <slot />
+    </div>
   </div>
-  <div class="changelog-entry__content">
-    <slot />
-  </div>
+  
   <div class="changelog-entry__footer">
+    {/* Author handle positioned at bottom left */}
+    {hasAuthors && (
+      <div class="changelog-entry__author">
+        <AuthorHandle authors={authors} showName={true} showRole={false} />
+      </div>
+    )}
+    
     <a href={`/log/${slug || ''}`} class="changelog-entry__button">
       Read Full Entry →
     </a>
@@ -68,6 +96,13 @@ const formattedDate = formatDate(new Date(date));
     padding: 1rem;
     border-radius: 0.5rem;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px; /* Ensure minimum height for entries */
+  }
+
+  .changelog-entry__container {
+    flex: 1;
   }
 
   /* Header Section */
@@ -81,7 +116,8 @@ const formattedDate = formatDate(new Date(date));
   .changelog-entry__meta {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     font-family: var(--ff-legible);
     margin-bottom: 0.5rem;
   }
@@ -99,6 +135,28 @@ const formattedDate = formatDate(new Date(date));
     color: var(--white--pure);
     font-size: var(--fs-200);
     font-weight: var(--fw-semi-bold);
+  }
+
+  .changelog-entry__author {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Style the author handle components */
+  :global(.changelog-entry__author .author-handle) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  :global(.changelog-entry__author .author-name) {
+    color: var(--clr-lossless-attn-action);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-200);
+  }
+
+  :global(.changelog-entry__author .author-avatar figure) {
+    border-color: var(--clr-lossless-attn-action) !important;
   }
 
   .changelog-entry__emphasis {
@@ -128,11 +186,17 @@ const formattedDate = formatDate(new Date(date));
   .changelog-entry__content {
     margin-top: 1rem;
     color: var(--clr-body);
+    flex: 1;
   }
 
   .changelog-entry__footer {
-    margin-top: 1rem;
-    text-align: right;
+    margin-top: 2rem; /* Increased spacing */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto; /* Push to bottom */
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05); /* Subtle separator */
   }
 
   .changelog-entry__button {

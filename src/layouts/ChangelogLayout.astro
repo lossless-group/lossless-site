@@ -8,11 +8,6 @@
  * @component
  */
 
-interface Props {
-  title: string;
-  description: string;
-}
-
 const { title, description } = Astro.props;
 
 import { getCollection } from "astro:content";
@@ -20,67 +15,85 @@ import path from 'path';
 import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
 import ChangelogEntry from '@components/changelog/ChangelogEntry.astro';
 import Layout from "@layouts/Layout.astro";
-import Button from  "@components/basics/Button.astro"
+
+// Import Starwind Tabs components
+import Tabs from "@components/starwind/tabs/Tabs.astro";
+import TabsList from "@components/starwind/tabs/TabsList.astro";
+import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
+import TabsContent from "@components/starwind/tabs/TabsContent.astro";
 
 // Get both content and code changes
 const contentChanges = await getCollection('changelog--content');
 const codeChanges = await getCollection('changelog--code');
 
-// Sort changes by date in descending order
-const sortByDate = (a, b) => {
+// Sort changes by date in descending order, and for same date, by index in descending order
+const sortByDateAndIndex = (a, b) => {
   // Handle both date and date_created fields
   const dateA = new Date(a.data.date || a.data.date_created);
   const dateB = new Date(b.data.date || b.data.date_created);
+  
+  // If dates are the same, sort by index (extracted from filename)
+  if (dateA.getTime() === dateB.getTime()) {
+    // Extract index from the filename in the ID (e.g., "changelog--code/2025-04-06_03.md" -> "03")
+    const filenameA = path.basename(a.id);
+    const filenameB = path.basename(b.id);
+    
+    const indexA = filenameA.split('_').pop()?.split('.')[0] || '0';
+    const indexB = filenameB.split('_').pop()?.split('.')[0] || '0';
+    
+    // Convert to numbers and compare in descending order (higher index first)
+    return parseInt(indexB, 10) - parseInt(indexA, 10);
+  }
+  
+  // Otherwise, sort by date in descending order
   return dateB.getTime() - dateA.getTime();
 };
 
-const sortedContentChanges = contentChanges.sort(sortByDate);
-const sortedCodeChanges = codeChanges.sort(sortByDate);
+const sortedContentChanges = contentChanges.sort(sortByDateAndIndex);
+const sortedCodeChanges = codeChanges.sort(sortByDateAndIndex);
+
+// Helper function to normalize author data
+const normalizeAuthorData = (entry) => {
+  // Handle both author (string) and authors (array) fields
+  let authorData = [];
+  
+  if (entry.data.authors) {
+    // If authors is already an array, use it
+    authorData = Array.isArray(entry.data.authors) ? entry.data.authors : [entry.data.authors];
+  } else if (entry.data.author) {
+    // If only author is present (string), convert to array
+    authorData = [entry.data.author];
+  }
+  
+  return {
+    ...entry.data,
+    slug: path.basename(entry.id, '.md'),
+    authors: authorData
+  };
+};
 
 ---
 <Layout title={title} description={description}>
   <main>
     <div class="changelog-header">
-      <div class="toggle-buttons">
-        <Button
-          data-active="true"
-          data-type="content"
-          onclick="toggleChangelog('content')"
-          variety="default"
-          isBordered
-        >
-          Content Changes
-        </Button>
-        <Button
-          data-active="false"
-          data-type="code"
-          onclick="toggleChangelog('code')"
-          variety="default"
-          isBordered
-        >
-          Code Changes
-        </Button>
-      </div>
-    </div>
-    <div class="changelog-container">
-      <div class="changelog-section" data-type="content" data-visible="true">
-        <ArticleListColumn
-          entries={sortedContentChanges.map(entry => ({
-            ...entry.data,
-            slug: path.basename(entry.id, '.md')
-          }))}
-          EntryComponent={ChangelogEntry}
-        />
-      </div>
-      <div class="changelog-section" data-type="code" data-visible="false">
-        <ArticleListColumn
-          entries={sortedCodeChanges.map(entry => ({
-            ...entry.data,
-            slug: path.basename(entry.id, '.md')
-          }))}
-          EntryComponent={ChangelogEntry}
-        />
-      </div>
+      <Tabs defaultValue="content" class="changelog-tabs">
+        <TabsList class="changelog-tabs-list">
+          <TabsTrigger value="content" class="changelog-tab">Content Changes</TabsTrigger>
+          <TabsTrigger value="code" class="changelog-tab">Code Changes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="content" class="changelog-tab-content">
+          <ArticleListColumn
+            entries={sortedContentChanges.map(entry => normalizeAuthorData(entry))}
+            EntryComponent={ChangelogEntry}
+          />
+        </TabsContent>
+        <TabsContent value="code" class="changelog-tab-content">
+          <ArticleListColumn
+            entries={sortedCodeChanges.map(entry => normalizeAuthorData(entry))}
+            EntryComponent={ChangelogEntry}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   </main>
 </Layout>
@@ -90,56 +103,44 @@ const sortedCodeChanges = codeChanges.sort(sortByDate);
     margin-bottom: 2rem;
   }
 
-  .toggle-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+  /* Style the tabs with our brand colors */
+  :global(.changelog-tabs-list) {
+    background: var(--clr-lossless-primary-glass);
+    border: 1px solid var(--clr-lossless-primary-light);
+    border-radius: 0.5rem;
   }
 
-  :global(.btn[data-active="true"]) {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 40%
-    ) !important;
-    transform: translateY(-2px);
+  :global(.changelog-tab) {
+    color: var(--clr-lossless-primary-dark);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    transition: all 0.2s ease;
   }
 
-  .changelog-section[data-visible="false"] {
-    display: none;
+  :global(.changelog-tab[data-state="active"]) {
+    background: color-mix(in oklab, var(--clr-lossless-primary-light), transparent 40%);
+    color: var(--clr-lossless-primary-dark);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
-  .changelog-section[data-visible="true"] {
-    display: block;
+  :global(.changelog-tab:hover) {
+    color: var(--clr-lossless-accent--brightest);
   }
 
-  .changelog-container {
+  :global(.changelog-tab[data-state="active"]:hover) {
+    background: var(--clr-lossless-primary-light);
+    color: var(--white--pure);
+  }
+
+  :global(.changelog-tab-content) {
+    margin-top: 1.5rem;
+  }
+
+  /* Container styles */
+  main {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
   }
 </style>
-
-<script>
-  function toggleChangelog(type: 'content' | 'code') {
-    // Update button states
-    document.querySelectorAll<HTMLButtonElement>('.btn').forEach(button => {
-      button.setAttribute('data-active', button.dataset.type === type ? 'true' : 'false');
-    });
-
-    // Update section visibility
-    document.querySelectorAll<HTMLDivElement>('.changelog-section').forEach(section => {
-      section.setAttribute('data-visible', section.dataset.type === type ? 'true' : 'false');
-    });
-  }
-
-  // Add click handlers
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll<HTMLButtonElement>('.btn').forEach(button => {
-      button.addEventListener('click', () => {
-        toggleChangelog(button.dataset.type as 'content' | 'code');
-      });
-    });
-  });
-</script>
