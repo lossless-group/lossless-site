@@ -13,8 +13,12 @@ interface Props {
 const { sourceDir, width, maxWidth } = Astro.props;
 
 // Get all SVG files from the source directory
-const svgFiles = await glob(`${sourceDir}/*.svg`);
-console.log("Found SVG files:", svgFiles);
+// Ensure we're using the correct path resolution
+const resolvedPath = path.join(process.cwd(), sourceDir);
+console.log("Looking for SVGs in:", resolvedPath);
+const svgFiles = await glob(`${resolvedPath}/*.svg`);
+console.log(`Found ${svgFiles.length} SVG files`);
+
 ---
 
 <div class="ribbon-container">
