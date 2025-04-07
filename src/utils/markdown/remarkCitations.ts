@@ -1,64 +1,22 @@
 import { visit } from 'unist-util-visit';
-import type { Root, Paragraph, Parent } from 'mdast';
+import type { Root, Paragraph, Parent, PhrasingContent, Text } from 'mdast';
+import type { RemarkCitationsOptions, CitationNode, CitationsContainerNode } from '../../types/remarkPluginOptions';
 
-type CitationNode = {
-  type: string;
-  value?: string;
-  data?: {
-    hName?: string;
-    hProperties?: {
-      className?: string;
-    };
-  };
-  children?: Array<{
-    type: string;
-    value?: string;
-    url?: string;
-    data?: {
-      hName?: string;
-      hProperties?: {
-        href?: string;
-        target?: string;
-        rel?: string;
-        className?: string;
-      };
-    };
-    children?: Array<{
-      type: string;
-      value: string;
-    }>;
-  }>;
-};
+/* section open ==============================================================
+|
+| ??-- About: Citation Processing Plugin
+| ??-- Type: Remark Plugin
+|
+| ??-- Includes: 
+| //---- Citation node transformation
+| //---- Citation container creation
+| //---- HTML property mapping
+|
+====================================== */
 
-type CitationsContainerNode = {
-  type: 'citations';
-  children: (CitationNode | {
-    type: string;
-    depth?: number;
-    children: Array<{
-      type: string;
-      value: string;
-    }>;
-    data?: {
-      hName: string;
-      hProperties: {
-        className: string;
-      };
-    };
-  })[];
-  data: {
-    hName: string;
-    hProperties: {
-      className: string;
-    };
-  };
-};
-
-interface RemarkCitationsOptions {
-  citations?: CitationNode[];
-}
-
-// Debug utility function
+/**
+ * Debug utility function
+ */
 function debugNode(prefix: string, node: any) {
   if (!node) {
     console.log(`\n=== ${prefix} ===`);
@@ -107,28 +65,42 @@ function parseCitation(text: string | undefined) {
  * Process a citation text into a citation node
  */
 function createCitationNode(text: string): CitationNode {
-  const node = {
-    type: 'citation',
-    value: text,
+  const [id, url] = text.split(' ');
+  return {
+    type: 'citation' as const,
     data: {
       hName: 'div',
       hProperties: {
         className: 'citation'
       }
-    }
+    },
+    children: [{
+      type: 'link',
+      url: url,
+      data: {
+        hName: 'a',
+        hProperties: {
+          href: url,
+          target: '_blank',
+          rel: 'noopener noreferrer'
+        }
+      },
+      children: [{
+        type: 'text',
+        value: id
+      }]
+    }] as PhrasingContent[]
   };
-  debugNode('Citation Node Created', node);
-  return node;
 }
 
 /**
  * Create a citations section node with header
  */
-function createCitationsSectionNode(citations: CitationNode[]): CitationsContainerNode {
+function createCitationsSectionNode(citations: any[]): any {
   debugNode('Citations Array Input', citations);
   
-  const citationsNode: CitationsContainerNode = {
-    type: 'citations' as const,
+  const citationsNode = {
+    type: 'citationsContainer' as const,
     children: [
       {
         type: 'heading',
@@ -144,8 +116,8 @@ function createCitationsSectionNode(citations: CitationNode[]): CitationsContain
           }
         }
       },
-      ...citations.map((citation: CitationNode) => {
-        const parsed = parseCitation(citation.value);
+      ...citations.map((citation: any) => {
+        const parsed = parseCitation(citation.children[0].value);
         debugNode('Parsed Citation', parsed);
         
         if (parsed) {
@@ -188,7 +160,7 @@ function createCitationsSectionNode(citations: CitationNode[]): CitationsContain
           type: 'paragraph',
           children: [{
             type: 'text',
-            value: citation.value
+            value: citation.children[0].value
           }],
           data: {
             hName: 'div',
@@ -217,7 +189,7 @@ function createCitationsSectionNode(citations: CitationNode[]): CitationsContain
  * Remark plugin to transform citation paragraphs into a structured format
  * Extracts citations from anywhere in the document and moves them to the end
  */
-export default function remarkCitations() {
+const remarkCitations = (options: RemarkCitationsOptions = {}) => {
   return (tree: Root) => {
     debugNode('Initial Tree', tree);
     
@@ -230,7 +202,7 @@ export default function remarkCitations() {
       if (hasProcessedCitations) return;
       
       // Skip if we're already inside a citation or citations container
-      if (parent && (parent.type === 'citation' || parent.type === 'citations' || 
+      if (parent && (parent.type === 'citation' || parent.type === 'citationsContainer' || 
           (parent.data?.hProperties?.className === 'citation'))) {
         return;
       }
@@ -273,17 +245,26 @@ export default function remarkCitations() {
       tree.children.splice(index, 1);
     });
 
+    // Only add citations section if we actually found citations
     if (allCitations.length > 0) {
-      debugNode('All Citations Collected', { type: 'collection', children: allCitations });
-      const citationsNode = createCitationsSectionNode(allCitations);
-      if (citationsNode) {
-        hasProcessedCitations = true;
-        debugNode('Final Citations Node', citationsNode);
-        tree.children.push(citationsNode as unknown as Paragraph);
-      }
+      // Create a container div for all citations
+      const citationsContainer: CitationsContainerNode = {
+        type: 'citations',
+        data: {
+          hName: 'div',
+          hProperties: {
+            className: 'citations-container'
+          }
+        },
+        children: allCitations
+      };
+      
+      tree.children.push(citationsContainer as any);
     }
 
     debugNode('Final Tree', tree);
     return tree;
   };
-}
+};
+
+export default remarkCitations;

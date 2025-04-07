@@ -61,6 +61,21 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
 
 ---
 
+<style>
+  /* Citation link styles */
+  :global(a[data-citation]) {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--clr-lossless-accent--brightest);
+    padding-bottom: 0.1rem;
+    transition: border-bottom-style 0.2s ease;
+  }
+
+  :global(a[data-citation]:hover) {
+    border-bottom-style: solid;
+  }
+</style>
+
 {(node.type === "root") && 
     <>
         <h1>{title}</h1>
