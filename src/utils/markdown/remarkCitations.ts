@@ -242,8 +242,6 @@ export default function remarkCitations() {
       
       lines.forEach(line => {
         const trimmedLine = line.trim();
-        // Only treat a line as a citation if it ONLY contains a citation pattern
-        // i.e., [number] followed by a URL, and nothing else
         if (trimmedLine && /^\[\d+\]\s+https?:\/\/\S+$/.test(trimmedLine)) {
           console.log('Found citation:', trimmedLine);
           citationLines.push(trimmedLine);

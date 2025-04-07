@@ -73,9 +73,27 @@ const citationsNodes = citationsRoot.children.filter((node): node is CitationNod
 // Remove citations nodes from content before converting to HTML
 const contentWithoutCitations: Root = {
   type: 'root',
-  children: citationsRoot.children.filter((node) => 
-    node.type !== 'citations' && node.type !== 'citation'
-  )
+  children: citationsRoot.children.filter((node) => {
+    // Filter out citations and citation nodes
+    if (node.type === 'citations' || node.type === 'citation') {
+      return false;
+    }
+    
+    // Filter out the "Citations:" header node (could be heading or paragraph)
+    if (node.type === 'heading' || node.type === 'paragraph') {
+      // Check if this node contains "Citations:" text
+      const hasOnlyChildWithCitationsText = node.children?.length === 1 && 
+        node.children[0].type === 'text' && 
+        node.children[0].value === 'Citations:';
+      
+      if (hasOnlyChildWithCitationsText) {
+        return false;
+      }
+    }
+    
+    // Keep all other nodes
+    return true;
+  })
 };
 
 // Convert remaining content to HTML
