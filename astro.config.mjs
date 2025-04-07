@@ -8,6 +8,7 @@ import { remarkDefinitionList, defListHastHandlers } from 'remark-definition-lis
 import remarkImages from './src/utils/markdown/remark-images';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import remarkCalloutHandler from './src/utils/markdown/remark-callout-handler';
+import remarkCitations from './src/utils/markdown/remarkCitations';
 
 export default defineConfig({
   output: "server",
@@ -26,7 +27,8 @@ export default defineConfig({
       remarkCalloutHandler, // Must be first to see raw markdown
       remarkBacklinks,      // Then handle wiki-links
       remarkImages,         // Then handle images
-      remarkDefinitionList  // Finally handle definition lists
+      remarkDefinitionList, // Handle definition lists
+      remarkCitations      // Finally handle citations
     ],
     remarkRehype: { handlers: defListHastHandlers },
     syntaxHighlight: false, // Disable Shiki's syntax highlighting

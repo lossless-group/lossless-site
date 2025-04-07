@@ -3,18 +3,49 @@ import type { Root, Paragraph, Parent } from 'mdast';
 
 type CitationNode = {
   type: string;
-  value: string;
+  value?: string;
   data?: {
     hName?: string;
     hProperties?: {
       className?: string;
     };
   };
+  children?: Array<{
+    type: string;
+    value?: string;
+    url?: string;
+    data?: {
+      hName?: string;
+      hProperties?: {
+        href?: string;
+        target?: string;
+        rel?: string;
+        className?: string;
+      };
+    };
+    children?: Array<{
+      type: string;
+      value: string;
+    }>;
+  }>;
 };
 
 type CitationsContainerNode = {
   type: 'citations';
-  children: CitationNode[];
+  children: (CitationNode | {
+    type: string;
+    depth?: number;
+    children: Array<{
+      type: string;
+      value: string;
+    }>;
+    data?: {
+      hName: string;
+      hProperties: {
+        className: string;
+      };
+    };
+  })[];
   data: {
     hName: string;
     hProperties: {
@@ -27,50 +58,26 @@ interface RemarkCitationsOptions {
   citations?: CitationNode[];
 }
 
-/**
- * Pre-process content to extract citations before MDAST transformation
- * @param content The raw markdown content
- * @returns Object containing processed content and extracted citations
- */
-export function processCitations(content: string = ''): { processedContent: string; citations: CitationNode[] } {
-  if (!content) {
-    return {
-      processedContent: '',
-      citations: []
-    };
+// Debug utility function
+function debugNode(prefix: string, node: any) {
+  if (!node) {
+    console.log(`\n=== ${prefix} ===`);
+    console.log('Node is null or undefined');
+    console.log('=== End Debug ===\n');
+    return;
   }
 
-  const lines = content.split('\n');
-  const citations: CitationNode[] = [];
-  const contentLines: string[] = [];
-  let inCitationsBlock = false;
-
-  for (const line of lines) {
-    if (line.startsWith('Citations:') || line.match(/^\[\d+\]/)) {
-      inCitationsBlock = true;
-      if (line.startsWith('Citations:')) continue;
-    }
-
-    if (inCitationsBlock && line.trim()) {
-      citations.push({
-        type: 'citation',
-        value: line.trim(),
-        data: {
-          hName: 'div',
-          hProperties: {
-            className: 'citation'
-          }
-        }
-      });
-    } else if (!inCitationsBlock) {
-      contentLines.push(line);
-    }
+  console.log(`\n=== ${prefix} ===`);
+  console.log('Node type:', node.type);
+  if (node.type === 'text' && node.value) {
+    console.log('Text value:', node.value);
   }
-
-  return {
-    processedContent: contentLines.join('\n'),
-    citations
-  };
+  if (Array.isArray(node.children)) {
+    console.log('Children types:', node.children.map((child: any) => child?.type || 'unknown'));
+    console.log('Children values:', node.children.map((child: any) => child?.value || ''));
+  }
+  console.log('Full node:', JSON.stringify(node, null, 2));
+  console.log('=== End Debug ===\n');
 }
 
 /**
@@ -97,192 +104,186 @@ function parseCitation(text: string | undefined) {
 }
 
 /**
- * Check if a node is a Perplexity attribution
+ * Process a citation text into a citation node
  */
-function isPerplexityAttribution(node: any): boolean {
-  return node.type === 'paragraph' && 
-         node.children?.[0]?.type === 'text' &&
-         node.children[0].value.startsWith('Answer from Perplexity');
+function createCitationNode(text: string): CitationNode {
+  const node = {
+    type: 'citation',
+    value: text,
+    data: {
+      hName: 'div',
+      hProperties: {
+        className: 'citation'
+      }
+    }
+  };
+  debugNode('Citation Node Created', node);
+  return node;
 }
 
 /**
- * Remark plugin to transform citation paragraphs into a structured format
- * Takes pre-processed citations and injects them into the MDAST at the end
+ * Create a citations section node with header
  */
-export default function remarkCitations() {
-  return (tree: Root) => {
-    let citationsFound: CitationNode[] = [];
-
-    // First pass: find and extract citations from paragraphs
-    visit(tree, 'paragraph', (node: Paragraph, index: number, parent: Parent) => {
-      const firstChild = node.children[0];
-      if (firstChild?.type === 'text' && 
-          (firstChild.value.startsWith('Citations:') || firstChild.value.includes('\n[1]'))) {
+function createCitationsSectionNode(citations: CitationNode[]): CitationsContainerNode {
+  debugNode('Citations Array Input', citations);
+  
+  const citationsNode: CitationsContainerNode = {
+    type: 'citations' as const,
+    children: [
+      {
+        type: 'heading',
+        depth: 2,
+        children: [{
+          type: 'text',
+          value: 'Citations:'
+        }],
+        data: {
+          hName: 'h2',
+          hProperties: {
+            className: 'citations-header'
+          }
+        }
+      },
+      ...citations.map((citation: CitationNode) => {
+        const parsed = parseCitation(citation.value);
+        debugNode('Parsed Citation', parsed);
         
-        // Split the citations text into individual citations
-        const citations = firstChild.value
-          .split('\n')
-          .filter(line => line.trim() && !line.startsWith('Citations:'))
-          .map(citation => ({
-            type: 'citation',
-            value: citation.trim(),
+        if (parsed) {
+          const parsedNode = {
+            type: 'paragraph',
             data: {
               hName: 'div',
               hProperties: {
                 className: 'citation'
               }
-            }
-          } as CitationNode));
-
-        citationsFound = citationsFound.concat(citations);
-
-        // Remove this paragraph since we'll add citations at the end
-        if (typeof index === 'number' && Array.isArray(parent?.children)) {
-          parent.children.splice(index, 1);
-        }
-      }
-    });
-
-    // Second pass: add citations container at the end if we found any
-    if (citationsFound.length > 0) {
-      const citationsNode = {
-        type: 'citations',
-        children: citationsFound.map((citation: CitationNode) => {
-          const parsed = parseCitation(citation.value);
-          
-          if (parsed) {
-            return {
-              type: 'citation',
-              data: {
-                hName: 'div',
-                hProperties: {
-                  className: 'citation'
-                }
-              },
-              children: [
-                {
-                  type: 'text',
-                  value: `[${parsed.number}] `
-                },
-                {
-                  type: 'link',
-                  url: parsed.url,
-                  data: {
-                    hName: 'a',
-                    hProperties: {
-                      href: parsed.url,
-                      target: '_blank',
-                      rel: 'noopener noreferrer'
-                    }
-                  },
-                  children: [{
-                    type: 'text',
-                    value: parsed.url
-                  }]
-                }
-              ]
-            };
-          }
-          
-          return citation;
-        }),
-        data: {
-          hName: 'div',
-          hProperties: {
-            className: 'citations-container'
-          }
-        }
-      } as CitationsContainerNode;
-
-      tree.children.push(citationsNode as unknown as Paragraph);
-    }
-
-    visit(tree, (node: any, index: number, parent: any) => {
-      if (node.type === 'citations') {
-        // Look ahead for thematicBreak and Perplexity attribution
-        const nextNodes = parent.children.slice(index + 1);
-        let attributionIndex = -1;
-        
-        // Find the Perplexity attribution if it exists
-        for (let i = 0; i < nextNodes.length; i++) {
-          if (nextNodes[i].type === 'thematicBreak' && 
-              nextNodes[i + 1] && isPerplexityAttribution(nextNodes[i + 1])) {
-            attributionIndex = i;
-            break;
-          }
-        }
-
-        // If we found the attribution pattern, include it in the citations
-        if (attributionIndex !== -1) {
-          // Create attribution node
-          const attributionNode = {
-            type: 'citation-attribution',
-            data: {
-              hName: 'div',
-              hProperties: {
-                className: 'citation-attribution'
-              }
             },
-            children: [nextNodes[attributionIndex + 1]]
-          };
-
-          // Add attribution to citations node
-          node.children.push(attributionNode);
-
-          // Remove the thematicBreak and attribution from parent
-          parent.children.splice(index + 1, 2);
-        }
-
-        // Transform citation nodes to include link structure
-        if (node.children) {
-          node.children = node.children.map((citation: CitationNode) => {
-            if (citation.type === 'citation-attribution') return citation;
-
-            const parsed = parseCitation(citation.value);
-            if (parsed) {
-              return {
-                type: 'citation',
+            children: [
+              {
+                type: 'text',
+                value: `[${parsed.number}] `
+              },
+              {
+                type: 'link',
+                url: parsed.url,
                 data: {
-                  hName: 'div',
+                  hName: 'a',
                   hProperties: {
-                    className: 'citation'
+                    href: parsed.url,
+                    target: '_blank',
+                    rel: 'noopener noreferrer'
                   }
                 },
-                children: [
-                  {
-                    type: 'text',
-                    value: `[${parsed.number}] `
-                  },
-                  {
-                    type: 'link',
-                    url: parsed.url,
-                    data: {
-                      hName: 'a',
-                      hProperties: {
-                        href: parsed.url,
-                        target: '_blank',
-                        rel: 'noopener noreferrer'
-                      }
-                    },
-                    children: [{
-                      type: 'text',
-                      value: parsed.url
-                    }]
-                  }
-                ]
-              };
-            }
-            return citation;
-          });
+                children: [{
+                  type: 'text',
+                  value: parsed.url
+                }]
+              }
+            ]
+          };
+          debugNode('Created Parsed Citation Node', parsedNode);
+          return parsedNode;
         }
-
-        node.data = {
-          hName: 'div',
-          hProperties: {
-            className: 'citations-container'
+        
+        const unparsedNode = {
+          type: 'paragraph',
+          children: [{
+            type: 'text',
+            value: citation.value
+          }],
+          data: {
+            hName: 'div',
+            hProperties: {
+              className: 'citation'
+            }
           }
         };
+        debugNode('Created Unparsed Citation Node', unparsedNode);
+        return unparsedNode;
+      })
+    ],
+    data: {
+      hName: 'div',
+      hProperties: {
+        className: 'citations-container'
+      }
+    }
+  };
+  
+  debugNode('Final Citations Section Node', citationsNode);
+  return citationsNode;
+}
+
+/**
+ * Remark plugin to transform citation paragraphs into a structured format
+ * Extracts citations from anywhere in the document and moves them to the end
+ */
+export default function remarkCitations() {
+  return (tree: Root) => {
+    debugNode('Initial Tree', tree);
+    
+    let allCitations: CitationNode[] = [];
+    let hasProcessedCitations = false;
+    let nodesToRemove: number[] = [];
+
+    // First pass: find all citations in any text content
+    visit(tree, 'text', (node: any, index: number, parent: Parent) => {
+      if (hasProcessedCitations) return;
+      
+      // Skip if we're already inside a citation or citations container
+      if (parent && (parent.type === 'citation' || parent.type === 'citations' || 
+          (parent.data?.hProperties?.className === 'citation'))) {
+        return;
+      }
+
+      const text = node.value || '';
+      const lines = text.split('\n');
+      const citationLines: string[] = [];
+      const otherLines: string[] = [];
+      
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        // Only treat a line as a citation if it ONLY contains a citation pattern
+        // i.e., [number] followed by a URL, and nothing else
+        if (trimmedLine && /^\[\d+\]\s+https?:\/\/\S+$/.test(trimmedLine)) {
+          console.log('Found citation:', trimmedLine);
+          citationLines.push(trimmedLine);
+          const citationNode = createCitationNode(trimmedLine);
+          if (citationNode) {
+            allCitations.push(citationNode);
+          }
+        } else {
+          otherLines.push(line);
+        }
+      });
+
+      // If we found citations in this node, update the node's text to exclude them
+      if (citationLines.length > 0 && parent) {
+        if (otherLines.length === 0) {
+          // If all lines were citations, mark the parent for removal
+          nodesToRemove.push(index);
+        } else {
+          // Otherwise update the node's text to only include non-citation lines
+          node.value = otherLines.join('\n');
+        }
       }
     });
+
+    // Remove nodes marked for deletion, in reverse order to maintain correct indices
+    nodesToRemove.sort((a, b) => b - a).forEach(index => {
+      tree.children.splice(index, 1);
+    });
+
+    if (allCitations.length > 0) {
+      debugNode('All Citations Collected', { type: 'collection', children: allCitations });
+      const citationsNode = createCitationsSectionNode(allCitations);
+      if (citationsNode) {
+        hasProcessedCitations = true;
+        debugNode('Final Citations Node', citationsNode);
+        tree.children.push(citationsNode as unknown as Paragraph);
+      }
+    }
+
+    debugNode('Final Tree', tree);
+    return tree;
   };
 }
