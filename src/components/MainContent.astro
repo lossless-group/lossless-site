@@ -6,6 +6,8 @@ import { getEntry, getCollection } from "astro:content";
 import TrademarkRibbon from "@components/trademarks/TrademarkRibbon.astro";
 import TubeContainerSVG from "@basics/tube-attempts/TubeContainerSVG.astro";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
+import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
+
 interface Tool {
   url: string;
   site_name?: string;
@@ -54,6 +56,7 @@ const allTags = [
       <TubeContainerSVG />
     </div>
     <ThinGradientBleedSeparator />
+
   </section>
 
   <section class="main-content-element">
@@ -69,7 +72,7 @@ const allTags = [
     <div id="ribbon-context">
       <h2>Tech we're watching.</h2>
     </div>
-    <div id="ribbon-container" style="width: 100%; overflow: visible;">
+    <div id="ribbon-container">
       <div class="trademark-ribbon-wrapper">
         <TrademarkRibbon
           sourceDir={TRADEMARK_CONFIG.sourceDir}
@@ -78,6 +81,12 @@ const allTags = [
         />
       </div>
     </div>
+
+  </section>
+  <ThinGradientBleedSeparator />
+  <section>
+    <AlternatingSideImageComponent jsonPath="messages/featureSideImage.json" />
+    <ThinGradientBleedSeparator />
   </section>
   <div class="main-content-element">
     {
@@ -141,23 +150,17 @@ const allTags = [
   }
 
   #ribbon-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 2rem;
-    width: 100vw; /* Full viewport width */
-    max-width: 100vw; /* Ensure it can expand to full viewport width */
+    width: 100vw;
     position: relative;
     left: 50%;
     right: 50%;
     margin-left: -50vw;
     margin-right: -50vw;
-    overflow: hidden; /* Hide overflow at container level */
+    overflow: visible;
   }
   
   .trademark-ribbon-wrapper {
     width: 100%;
-    overflow: visible; /* Allow the ribbon to be visible */
+    overflow: visible;
   }
 </style>

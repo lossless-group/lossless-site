@@ -1,0 +1,29 @@
+[
+  {
+    "label": "Notebook Interface",
+    "title": "Training wheels for the command line",
+    "details": "Our advanced notebook interface makes coding and documentation effortless. With real-time preview, syntax highlighting, and intuitive controls, you can focus on your ideas instead of formatting. Perfect for research, experimentation, and technical documentation.",
+    "imageSide": "right",
+    "ctaText": "Learn More",
+    "ctaUrl": "#",
+    "imageUrl": "https://i.imgur.com/ueZ058L.png"
+  },
+  {
+    "label": "Collaborative Coding",
+    "title": "Real-time Team Collaboration",
+    "details": "Work together seamlessly with your team in real-time. Changes sync instantly across all devices, with smart conflict resolution and version history. Boost productivity and keep everyone on the same page with our collaborative notebook environment.",
+    "imageSide": "left",
+    "ctaText": "Try It Now",
+    "ctaUrl": "#",
+    "imageUrl": "https://via.placeholder.com/1200x800/506b3a/ffffff.png?text=Team+Collaboration"
+  },
+  {
+    "label": "AI Integration",
+    "title": "Intelligent Coding Assistant",
+    "details": "Leverage the power of AI to enhance your development workflow. Get smart code suggestions, automated documentation, and intelligent error detection. Our AI assistant learns from your coding style to provide personalized recommendations.",
+    "imageSide": "right",
+    "ctaText": "Explore Features",
+    "ctaUrl": "#",
+    "imageUrl": "https://via.placeholder.com/1200x800/6b3a50/ffffff.png?text=AI+Assistant"
+  }
+]

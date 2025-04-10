@@ -1,0 +1,56 @@
+---
+/**
+ * Alternating Side Image Example Page
+ * 
+ * This page demonstrates the usage of the AlternatingSideImage component
+ * which automatically renders FeatureSideImage components from JSON data.
+ */
+
+import Layout from "@layouts/Layout.astro";
+import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
+
+// The AlternatingSideImage component will load data from the specified JSON file
+---
+
+<Layout title="Alternating Side Image Examples" description="Examples of the AlternatingSideImage component">
+  <main class="container">
+    <h1 class="page-title">Alternating Side Image Examples</h1>
+    
+    <p class="description">
+      This example demonstrates how to use the AlternatingSideImage component to automatically
+      render multiple FeatureSideImage components from a JSON data source. Simply add more items
+      to the JSON file to see additional features appear.
+    </p>
+    
+    <!-- The component automatically loads and renders all features from the JSON file -->
+    <AlternatingSideImageComponent jsonPath="messages/featureSideImage.json" />
+  </main>
+</Layout>
+
+<style>
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .page-title {
+    color: var(--clr-heading);
+    font-family: var(--ff-heading);
+    font-size: var(--fs-800);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .description {
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+    text-align: center;
+    opacity: 0.9;
+  }
+</style>
