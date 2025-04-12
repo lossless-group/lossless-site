@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+
+// Get entries from both collections
+const vocabularyEntries = await getCollection('vocabulary');
+// Use type assertion to avoid TypeScript errors until Astro regenerates types
+const conceptsEntries = await getCollection('concepts' as any) as any[];
+
+// Sort entries alphabetically by title
+vocabularyEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<Layout title="Reference - Vocabulary & Concepts">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">Reference Library</h1>
+    <p class="text-lg mb-8">Browse our collection of vocabulary terms and conceptual frameworks.</p>
+    
+    <!-- Navigation tabs -->
+    <div class="flex gap-4 mb-8">
+      <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
+      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
+      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Concepts</a>
+    </div>
+    
+    <!-- Vocabulary Section -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
+      <p class="mb-6">Terms and definitions used throughout our work.</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {vocabularyEntries.map(entry => (
+          <div class="bg-gray-800 p-4 rounded-lg">
+            <h3 class="text-xl font-bold mb-2">
+              <a href={`/more-about/${entry.data.slug}`} class="text-blue-400 hover:underline">
+                {entry.data.title}
+              </a>
+            </h3>
+            {entry.data.aliases && entry.data.aliases.length > 0 && (
+              <p class="text-sm text-gray-400 mb-2">
+                Also known as: {entry.data.aliases.join(', ')}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+    
+    <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+    
+    <!-- Concepts Section -->
+    <section>
+      <h2 class="text-2xl font-bold mb-4">Concepts</h2>
+      <p class="mb-6">Important ideas and frameworks we use in our work.</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {conceptsEntries.map(entry => (
+          <div class="bg-gray-800 p-4 rounded-lg">
+            <h3 class="text-xl font-bold mb-2">
+              <a href={`/more-about/${entry.data.slug}`} class="text-blue-400 hover:underline">
+                {entry.data.title}
+              </a>
+            </h3>
+            <p class="text-gray-300">
+              {entry.data.description || "Learn more about this concept..."}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

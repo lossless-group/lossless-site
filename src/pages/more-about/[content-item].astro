@@ -1,0 +1,73 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Get entries from both collections
+  const vocabularyEntries = await getCollection('vocabulary');
+  // Use type assertion to avoid TypeScript errors until Astro regenerates types
+  const conceptsEntries = await getCollection('concepts' as any);
+  
+  // Process vocabulary entries
+  const vocabularyPaths = vocabularyEntries.map(entry => {
+    // Generate slug and title from the entry ID if not present
+    const filename = entry.id.replace(/\.md$/, '');
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    
+    return {
+      params: { 'content-item': slug },
+      props: { 
+        entry,
+        contentType: 'vocabulary'
+      }
+    };
+  });
+  
+  // Process concepts entries
+  const conceptsPaths = conceptsEntries.map((entry: any) => {
+    // Generate slug and title from the entry ID if not present
+    const filename = entry.id.replace(/\.md$/, '');
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    
+    return {
+      params: { 'content-item': slug },
+      props: { 
+        entry,
+        contentType: 'concepts'
+      }
+    };
+  });
+  
+  // Combine both path arrays
+  return [...vocabularyPaths, ...conceptsPaths];
+}
+
+// Use a more flexible type definition to avoid TypeScript errors
+interface Props {
+  entry: any;
+  contentType: 'vocabulary' | 'concepts';
+}
+
+const { entry, contentType } = Astro.props;
+
+// Add content type to the data object for potential use in components
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  contentType: contentType
+};
+---
+
+<Layout title={entry.data.title || entry.data.slug}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

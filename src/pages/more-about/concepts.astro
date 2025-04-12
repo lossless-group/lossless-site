@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+
+// Get entries from concepts collection
+// Use type assertion to avoid TypeScript errors until Astro regenerates types
+const conceptsEntries = await getCollection('concepts' as any) as any[];
+
+// Sort entries alphabetically by title
+conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<Layout title="Concepts">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">Concepts</h1>
+    <p class="mb-6">Important ideas and frameworks we use in our work.</p>
+    
+    <!-- Navigation tabs -->
+    <div class="flex gap-4 mb-8">
+      <a href="/more-about" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">All Reference</a>
+      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
+      <a href="/more-about/concepts" class="px-4 py-2 bg-blue-600 text-white rounded-md">Concepts</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {conceptsEntries.map(entry => (
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <h2 class="text-xl font-bold mb-2">
+            <a href={`/more-about/${entry.data.slug}`} class="text-blue-400 hover:underline">
+              {entry.data.title}
+            </a>
+          </h2>
+          <p class="text-gray-300">
+            {entry.data.description || "Learn more about this concept..."}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>

@@ -51,12 +51,25 @@ const routeMappings = getAllRouteMappings();
     <h3 class="text-xl font-semibold mb-2">Add New Mapping</h3>
     <form id="add-mapping-form" class="space-y-4">
       <div class="flex flex-col">
+        <label for="contentType" class="mb-1">Content Type:</label>
+        <select 
+          id="contentType" 
+          name="contentType" 
+          class="border border-gray-300 px-3 py-2 rounded"
+          required
+        >
+          <option value="vocabulary">Vocabulary</option>
+          <option value="concepts">Concepts</option>
+        </select>
+      </div>
+      
+      <div class="flex flex-col">
         <label for="contentPath" class="mb-1">Content Path:</label>
         <input 
           type="text" 
           id="contentPath" 
           name="contentPath" 
-          placeholder="e.g., vocabulary"
+          placeholder="e.g., vocabulary/Term-Name or concepts/Concept-Name"
           class="border border-gray-300 px-3 py-2 rounded"
           required
         />
@@ -68,7 +81,7 @@ const routeMappings = getAllRouteMappings();
           type="text" 
           id="routePath" 
           name="routePath" 
-          placeholder="e.g., more-about"
+          placeholder="e.g., more-about/term-name"
           class="border border-gray-300 px-3 py-2 rounded"
           required
         />
@@ -107,13 +120,31 @@ const routeMappings = getAllRouteMappings();
     window.location.reload();
   }
   
+  // Handle content type selection to update the content path placeholder
+  document.getElementById('contentType')?.addEventListener('change', (e) => {
+    const contentType = (e.target as HTMLSelectElement).value;
+    const contentPathInput = document.getElementById('contentPath') as HTMLInputElement;
+    
+    if (contentType === 'vocabulary') {
+      contentPathInput.placeholder = 'e.g., vocabulary/Term-Name';
+    } else if (contentType === 'concepts') {
+      contentPathInput.placeholder = 'e.g., concepts/Concept-Name';
+    }
+  });
+  
   // Handle form submission for adding new mapping
   document.getElementById('add-mapping-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(e.target as HTMLFormElement);
-    const contentPath = formData.get('contentPath') as string;
+    const contentType = formData.get('contentType') as string;
+    let contentPath = formData.get('contentPath') as string;
     const routePath = formData.get('routePath') as string;
+    
+    // If the content path doesn't already include the content type prefix, add it
+    if (!contentPath.startsWith('vocabulary/') && !contentPath.startsWith('concepts/')) {
+      contentPath = `${contentType}/${contentPath}`;
+    }
     
     try {
       const response = await fetch('/api/route-mappings', {

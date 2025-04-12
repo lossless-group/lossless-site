@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+
+// Get entries from vocabulary collection
+const vocabularyEntries = await getCollection('vocabulary');
+
+// Sort entries alphabetically by title
+vocabularyEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<Layout title="Vocabulary">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">Vocabulary</h1>
+    <p class="mb-6">Terms and definitions used throughout our work.</p>
+    
+    <!-- Navigation tabs -->
+    <div class="flex gap-4 mb-8">
+      <a href="/more-about" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">All Reference</a>
+      <a href="/more-about/vocabulary" class="px-4 py-2 bg-blue-600 text-white rounded-md">Vocabulary</a>
+      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Concepts</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {vocabularyEntries.map(entry => (
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <h2 class="text-xl font-bold mb-2">
+            <a href={`/more-about/${entry.data.slug}`} class="text-blue-400 hover:underline">
+              {entry.data.title}
+            </a>
+          </h2>
+          {entry.data.aliases && entry.data.aliases.length > 0 && (
+            <p class="text-sm text-gray-400 mb-2">
+              Also known as: {entry.data.aliases.join(', ')}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>

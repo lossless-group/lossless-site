@@ -36,6 +36,34 @@ const vocabularyCollection = defineCollection({
   })
 });
 
+// Concepts collection - follows same pattern as vocabulary
+const conceptsCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "../content/concepts"}),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]), // Single string -> array with one string
+      z.array(z.string())                 // Already an array
+    ]).optional().default([])             // Default to empty array if missing
+  }).passthrough().transform((data, context) => {
+    // Get the filename without extension
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Convert filename to title case for display
+    const titleCase = filename
+      .split(/[\s-]+/)  // Split on spaces or dashes
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    // Merge our computed values into the data object
+    return {
+      ...data,  // Start with existing data
+      title: titleCase,  // Override with computed title
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
+      aliases: data.aliases || []  // Ensure aliases exists
+    };
+  })
+});
+
 const changelogContentCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/changelog--content"}),
   schema: z.object({}).passthrough().transform((data) => ({
@@ -92,6 +120,7 @@ export const paths = {
   'cards': 'cards',
   'changelog--content': '../content/changelog--content',
   'changelog--code': '../content/changelog--code',
+  'concepts': '../content/concepts',
   'reports': '../content/reports',
   'tooling': '../content/tooling',
   'vocabulary': '../content/vocabulary'
@@ -100,6 +129,7 @@ export const paths = {
 // Export the collections
 export const collections = {
   'cards': cardCollection,
+  'concepts': conceptsCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
