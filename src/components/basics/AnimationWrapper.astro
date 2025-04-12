@@ -1,0 +1,56 @@
+---
+/**
+ * AnimationWrapper.astro
+ * 
+ * A wrapper component that initializes animations for its children.
+ * This component ensures that animations are properly initialized when the page loads.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <AnimationWrapper>
+ *   <div data-animate="fade-up">This will animate</div>
+ * </AnimationWrapper>
+ * ```
+ */
+
+// Define the component interface
+interface Props {
+  /**
+   * Whether to enable animations
+   * @default true
+   */
+  enabled?: boolean;
+}
+
+const { enabled = true } = Astro.props;
+---
+
+<div class:list={["animation-wrapper", { "animations-enabled": enabled }]}>
+  <slot />
+</div>
+
+<script>
+  // Import the animation utility
+  import { initAnimations, resetAnimations } from '../../utils/animationUtils';
+  
+  // Initialize animations when the DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initAnimations, 100);
+    });
+  } else {
+    // DOM already loaded, run now with a small delay
+    setTimeout(initAnimations, 100);
+  }
+  
+  // Re-initialize on view transitions
+  document.addEventListener('astro:page-load', resetAnimations);
+  document.addEventListener('astro:after-swap', resetAnimations);
+</script>
+
+<style>
+  .animation-wrapper {
+    display: contents; /* This makes the wrapper invisible in the DOM tree */
+  }
+</style>

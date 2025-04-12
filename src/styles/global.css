@@ -1,5 +1,6 @@
 @import url("structure.css");
 @import url("fonts--google.css");
+@import url("animations.css");
 
 :root {
     --elephant: hsl(191, 75%, 17%);

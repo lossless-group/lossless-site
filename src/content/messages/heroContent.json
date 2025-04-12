@@ -1,0 +1,50 @@
+[
+  {
+    "id": "main-hero",
+    "title": "Build Better Experiences",
+    "subtitle": "With Lossless Components",
+    "description": "Our component library helps you create beautiful, accessible interfaces with minimal effort.",
+    "ctaText": "Get Started",
+    "ctaUrl": "/docs",
+    "imageUrl": "/visuals/Convey__Picto__Assembly-Line.svg",
+    "backgroundStyle": "gradient",
+    "alignment": "left",
+    "fullBleed": true
+  },
+  {
+    "id": "features-hero",
+    "title": "Powerful Features",
+    "subtitle": "For Modern Developers",
+    "description": "Take advantage of our cutting-edge tools to streamline your workflow and boost productivity.",
+    "ctaText": "Explore Features",
+    "ctaUrl": "/features",
+    "imageUrl": "https://i.imgur.com/ueZ058L.png",
+    "backgroundStyle": "glass",
+    "alignment": "center",
+    "fullBleed": false
+  },
+  {
+    "id": "glassmorphic-hero",
+    "title": "Modern Glassmorphic Design",
+    "subtitle": "Subtle & Elegant",
+    "description": "This style uses a dark background with subtle gradient blobs to create depth and visual interest while maintaining readability.",
+    "ctaText": "Explore More",
+    "ctaUrl": "/examples",
+    "imageUrl": "/visuals/Convey__Picto__Assembly-Line.svg",
+    "backgroundStyle": "glassmorphic",
+    "alignment": "left",
+    "fullBleed": true
+  },
+  {
+    "id": "glassmorphic-vivid-hero",
+    "title": "Vibrant Glassmorphic Design",
+    "subtitle": "Bold & Striking",
+    "description": "This enhanced style combines our dark background with more prominent gradient elements for a bolder, more vibrant visual impact.",
+    "ctaText": "See More Examples",
+    "ctaUrl": "/examples",
+    "imageUrl": "/visuals/Convey__Picto__Assembly-Line.svg",
+    "backgroundStyle": "glassmorphic-vivid",
+    "alignment": "left",
+    "fullBleed": true
+  }
+]

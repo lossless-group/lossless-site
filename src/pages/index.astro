@@ -1,8 +1,26 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import ThreeColumnFrame from "@layouts/ThreeColumnFrame.astro";
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 ---
 
 <Layout>
+  <AnimationWrapper>
+    <Hero
+      title="Lossless Monorepo"
+      subtitle="Build Better Experiences"
+      description="Our component library helps you create beautiful, accessible interfaces with minimal effort and maximum impact."
+      ctaText="Explore Components"
+      ctaUrl="/examples"
+      image={{
+        src: "/visuals/Convey__Picto__Assembly-Line.svg",
+        alt: "Assembly line illustration"
+      }}
+      alignment="left"
+      fullBleed={true}
+      animate={true}
+    />
+  </AnimationWrapper>
   <ThreeColumnFrame />
 </Layout>
