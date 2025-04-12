@@ -92,3 +92,6 @@ a, p {
     color: var(--clr-body);
     font-family: var(--ff-base);
 }
+
+/* Import animations */
+@import './animations.css';

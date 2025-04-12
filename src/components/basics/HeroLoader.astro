@@ -1,0 +1,130 @@
+---
+/**
+ * HeroLoader.astro
+ * 
+ * A component that loads hero content from a JSON file and renders it using the Hero component.
+ * Supports loading a specific hero by ID or defaulting to the first hero in the file.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <HeroLoader jsonPath="messages/heroContent.json" heroId="main-hero" />
+ * ```
+ */
+
+import Hero from "@components/basics/Hero.astro";
+import path from "node:path";
+import fs from "node:fs";
+import { getImageForPath } from "@utils/imageMapping";
+
+// Define the interface for hero data from JSON
+interface HeroData {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  imageUrl?: string;
+  backgroundStyle?: 'gradient' | 'dark' | 'glass' | 'glassmorphic' | 'glassmorphic-vivid';
+  alignment?: 'left' | 'center';
+  fullBleed?: boolean;
+}
+
+interface Props {
+  /**
+   * Path to the JSON file containing hero data, relative to src/content/
+   * @example "messages/heroContent.json"
+   */
+  jsonPath: string;
+  
+  /**
+   * ID of the specific hero to display from the JSON array
+   * If not provided, the first hero in the array will be used
+   */
+  heroId?: string;
+  
+  /**
+   * Additional CSS classes to apply to the hero
+   */
+  classes?: string;
+
+  /**
+   * Whether to enable animations
+   * @default true
+   */
+  animate?: boolean;
+}
+
+const { jsonPath, heroId, classes = "", animate = true } = Astro.props;
+
+// Load the hero data from the JSON file
+// Use path.join with process.cwd() to ensure correct path resolution
+const fullPath = path.join(process.cwd(), "src/content", jsonPath);
+let heroes: HeroData[] = [];
+let selectedHero: HeroData | null = null;
+
+try {
+  // Read and parse the JSON file
+  const fileContent = fs.readFileSync(fullPath, "utf-8");
+  heroes = JSON.parse(fileContent);
+  
+  // Select the hero by ID or default to the first one
+  if (heroId) {
+    selectedHero = heroes.find(hero => hero.id === heroId) || heroes[0];
+  } else {
+    selectedHero = heroes[0];
+  }
+  
+  // Log success for debugging
+  console.log(`Successfully loaded hero: ${selectedHero?.id || 'unknown'} from ${jsonPath}`);
+} catch (error) {
+  // Log error for debugging
+  console.error(`Error loading hero data from ${fullPath}:`, error);
+}
+
+// Process the hero data if we have a selected hero
+let heroProps = null;
+
+if (selectedHero) {
+  // Process the image using the utility function
+  const image = selectedHero.imageUrl ? 
+    getImageForPath(selectedHero.imageUrl, selectedHero.title) : 
+    undefined;
+  
+  // Prepare the props for the Hero component
+  heroProps = {
+    title: selectedHero.title,
+    subtitle: selectedHero.subtitle,
+    description: selectedHero.description,
+    ctaText: selectedHero.ctaText,
+    ctaUrl: selectedHero.ctaUrl,
+    image: image,
+    backgroundStyle: selectedHero.backgroundStyle,
+    alignment: selectedHero.alignment,
+    fullBleed: selectedHero.fullBleed,
+    classes: classes,
+    animate: animate
+  };
+}
+---
+
+{heroProps ? (
+  <Hero {...heroProps} />
+) : (
+  <div class="hero-error">
+    <p>Error loading hero content. Please check the JSON file path and format.</p>
+  </div>
+)}
+
+<style>
+  .hero-error {
+    background-color: var(--clr-lossless-primary-dark);
+    color: var(--clr-lossless-primary-light);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin: 2rem 0;
+    border: 1px solid var(--clr-lossless-accent--brightest);
+  }
+</style>

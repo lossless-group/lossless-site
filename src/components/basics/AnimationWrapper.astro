@@ -1,0 +1,147 @@
+---
+/**
+ * AnimationWrapper.astro
+ * 
+ * A wrapper component that initializes animations for its children.
+ * This component ensures that animations are properly initialized when the page loads.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <AnimationWrapper>
+ *   <div data-animate="fade-up">This will animate</div>
+ * </AnimationWrapper>
+ * ```
+ */
+
+// Define the component interface
+interface Props {
+  /**
+   * Whether to enable animations
+   * @default true
+   */
+  enabled?: boolean;
+}
+
+const { enabled = true } = Astro.props;
+---
+
+<div class:list={["animation-wrapper", { "animations-enabled": enabled }]}>
+  <slot />
+</div>
+
+<script>
+  // This script runs on the client side to initialize animations
+  
+  /**
+   * Simple Animation Utility for Scroll Animations
+   * 
+   * This utility provides basic scroll-based animations for components.
+   * It's a lightweight alternative to AOS (Animate On Scroll) that doesn't
+   * require external dependencies.
+   */
+  
+  // Animation class that will be added to elements when they enter viewport
+  const ANIMATION_ACTIVE_CLASS = 'animate-active';
+  
+  // Options for the Intersection Observer
+  const observerOptions = {
+    root: null, // Use the viewport as the root
+    rootMargin: '0px', // No margin
+    threshold: 0.1 // Trigger when 10% of the element is visible
+  };
+  
+  // Store observer instance to prevent multiple observers
+  let observer = null;
+  
+  /**
+   * Initialize animations for elements with data-animate attribute
+   */
+  function initAnimations() {
+    // Only run on the client
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    
+    console.log('Initializing animations');
+  
+    // Disconnect existing observer if it exists
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+  
+    // Get all elements with data-animate attribute
+    const animatedElements = document.querySelectorAll('[data-animate]');
+    
+    if (animatedElements.length === 0) {
+      console.log('No animated elements found');
+      return;
+    }
+    
+    console.log(`Found ${animatedElements.length} elements to animate`);
+  
+    // Create observer
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // If element is in viewport
+        if (entry.isIntersecting) {
+          const element = entry.target as HTMLElement;
+          const delay = element.dataset.animateDelay || '0';
+          
+          console.log(`Animating element with delay ${delay}s`, element);
+          
+          // Add animation after delay
+          setTimeout(() => {
+            element.classList.add(ANIMATION_ACTIVE_CLASS);
+          }, parseFloat(delay) * 1000);
+          
+          // Unobserve after animation is triggered
+          observer.unobserve(element);
+        }
+      });
+    }, observerOptions);
+  
+    // Observe all animated elements
+    animatedElements.forEach(element => {
+      // Reset element state by removing active class
+      element.classList.remove(ANIMATION_ACTIVE_CLASS);
+      
+      // Start observing
+      observer.observe(element);
+    });
+  }
+  
+  /**
+   * Reset animations - useful for view transitions or dynamic content
+   */
+  function resetAnimations() {
+    // Only run on the client
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    
+    console.log('Resetting animations');
+  
+    // Get all animated elements
+    const animatedElements = document.querySelectorAll('[data-animate]');
+    
+    // Remove animation class
+    animatedElements.forEach(element => {
+      element.classList.remove(ANIMATION_ACTIVE_CLASS);
+    });
+    
+    // Re-initialize animations
+    initAnimations();
+  }
+  
+  // Initialize animations when the DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initAnimations, 100);
+    });
+  } else {
+    // DOM already loaded, run now with a small delay
+    setTimeout(initAnimations, 100);
+  }
+  
+  // Re-initialize on view transitions
+  document.addEventListener('astro:page-load', resetAnimations);
+  document.addEventListener('astro:after-swap', resetAnimations);
+</script>
