@@ -45,12 +45,13 @@ const allTags = [
   ),
 ];
 ---
+
+<!-- Full-bleed separator -->
 <ThinGradientBleedSeparator />
 
-<div id="main-content-col">
- 
-
-  <section class="main-content-element">
+<!-- Content section with tools -->
+<div class="content-wrapper">
+  <section>
     <h2>Tools</h2>
     <div class="tools-header">
       <TagCloud
@@ -63,23 +64,36 @@ const allTags = [
     <div id="ribbon-context">
       <h2>Tech we're watching.</h2>
     </div>
-    <div id="ribbon-container">
-      <div class="trademark-ribbon-wrapper">
-        <TrademarkRibbon
-          sourceDir={TRADEMARK_CONFIG.sourceDir}
-          width="auto"
-          maxWidth="92%"
-        />
-      </div>
-    </div>
-
   </section>
-  <ThinGradientBleedSeparator />
+</div>
+
+<!-- Full-bleed ribbon container -->
+<div id="ribbon-container">
+  <div class="trademark-ribbon-wrapper">
+    <TrademarkRibbon
+      sourceDir={TRADEMARK_CONFIG.sourceDir}
+      width="auto"
+      maxWidth="92%"
+    />
+  </div>
+</div>
+
+<!-- Full-bleed separator -->
+<ThinGradientBleedSeparator />
+
+<!-- Content section with alternating side images -->
+<div class="content-wrapper">
   <section>
     <AlternatingSideImageComponent jsonPath="messages/featureSideImage.json" />
-    <ThinGradientBleedSeparator />
   </section>
-  <div class="main-content-element">
+</div>
+
+<!-- Full-bleed separator -->
+<ThinGradientBleedSeparator />
+
+<!-- Content section with card grid -->
+<div class="content-wrapper">
+  <section>
     {
       tools && tools.length > 0 ? (
         <CardGrid gap="2rem" tools={tools} />
@@ -87,7 +101,7 @@ const allTags = [
         <p>No tools found</p>
       )
     }
-  </div>
+  </section>
 </div>
 
 <style>
@@ -96,37 +110,40 @@ const allTags = [
     margin-top: 1rem;
   }
 
+  /* Content wrapper with consistent 92% max-width */
+  .content-wrapper {
+    width: 92%;
+    max-width: 92%;
+    margin: 0 auto;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
   .tools-header {
     margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 2rem;
+    width: 100%;
   }
 
-  #main-content-col {
-    width: 94%;
-    padding: 2rem 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: visible;
-    justify-content: center;
-    margin: 0 auto;
-  }
   #hero-container {
     display: flex;
     background: var(--grd--lossless-eastern-crimson);
     padding: 2rem;
     border-radius: 1rem;
-    width: 92%;
+    width: 100%;
     justify-content: center;
     align-items: center;
   }
 
-  .main-content-element {
-    width: 92%;
-    margin: 4% auto;
+  section {
+    width: 100%;
+    margin: 0 auto;
     padding: 1rem 0;
     display: flex;
     flex-direction: column;
@@ -135,11 +152,12 @@ const allTags = [
   }
 
   #ribbon-context {
-    width: 92%;
+    width: 100%;
     text-align: center;
     margin: 0 auto 1rem auto;
   }
 
+  /* Full-bleed container for the ribbon */
   #ribbon-container {
     width: 100vw;
     position: relative;
