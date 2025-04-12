@@ -15,12 +15,26 @@ export async function getStaticPaths() {
   
   // Process vocabulary entries
   const vocabularyPaths = vocabularyEntries.map(entry => {
-    // Generate slug and title from the entry ID if not present
+    // Generate slug from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
+    
+    // Handle nested paths by converting directory structure to URL path
+    // Replace spaces with hyphens and convert to lowercase
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
     
+    // Generate title from the filename if not present in the frontmatter
+    // Extract just the filename without the path for the title
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    
+    // Add computed title to the entry data for use in the template
+    // This ensures the title is available in the same way as the original implementation
+    if (!entry.data.title) {
+      entry.data.title = baseFilename;
+    }
+    
     return {
-      params: { 'content-item': slug },
+      params: { slug },
       props: { 
         entry,
         contentType: 'vocabulary'
@@ -30,12 +44,26 @@ export async function getStaticPaths() {
   
   // Process concepts entries
   const conceptsPaths = conceptsEntries.map((entry: any) => {
-    // Generate slug and title from the entry ID if not present
+    // Generate slug from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
+    
+    // Handle nested paths by converting directory structure to URL path
+    // Replace spaces with hyphens and convert to lowercase
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
     
+    // Generate title from the filename if not present in the frontmatter
+    // Extract just the filename without the path for the title
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    
+    // Add computed title to the entry data for use in the template
+    // This ensures the title is available in the same way as the original implementation
+    if (!entry.data.title) {
+      entry.data.title = baseFilename;
+    }
+    
     return {
-      params: { 'content-item': slug },
+      params: { slug },
       props: { 
         entry,
         contentType: 'concepts'
@@ -63,7 +91,7 @@ const contentData = {
 };
 ---
 
-<Layout title={entry.data.title || entry.data.slug}>
+<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
   <OneArticle
     Component={OneArticleOnPage}
     content={entry.body}
