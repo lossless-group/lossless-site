@@ -10,6 +10,7 @@ interface Tool {
 }
 
 interface Props {
+  [key: string]: any;
   tool?: Tool;
   // Support for direct properties
   site_name?: string;
@@ -17,6 +18,7 @@ interface Props {
   url?: string;
   tags?: string[];
   filename?: string;
+  filePath?: string; // Explicitly declare filePath as optional
 }
 
 const { tool, ...directProps } = Astro.props;

@@ -1,0 +1,170 @@
+---
+/**
+ * AuthorHandle.astro
+ * 
+ * This component renders author information based on the content's author property.
+ * It matches the author name with the people/authors.json data and renders the appropriate
+ * information including headshot, name, and role.
+ * 
+ * Usage:
+ * <AuthorHandle authors={entry.data.authors} />
+ * 
+ * Props:
+ * - authors: string | string[] - The author(s) of the content
+ * - size: "sm" | "md" | "lg" - Optional size of the avatar (default: "md")
+ * - variant: "default" | "primary" | "secondary" | etc. - Optional variant of the avatar (default: "default")
+ */
+
+// Import the Starwind Avatar components
+import Avatar from "../starwind/avatar/Avatar.astro";
+import AvatarImage from "../starwind/avatar/AvatarImage.astro";
+import AvatarFallback from "../starwind/avatar/AvatarFallback.astro";
+
+// Import the authors data
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
+// Define the interface for author data
+interface Author {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  headshotOf: string;
+  socialLinks: {
+    twitter?: string;
+    github?: string;
+    [key: string]: string | undefined;
+  };
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+interface Props {
+  authors: string | string[];
+  size?: "sm" | "md" | "lg";
+  variant?: "default" | "primary" | "secondary" | "info" | "success" | "warning" | "error";
+  showName?: boolean;
+  showRole?: boolean;
+}
+
+// Get the authors data
+const authorsFilePath = path.join(process.cwd(), 'src/content/people/authors.json');
+const authorsFileContent = await fs.readFile(authorsFilePath, 'utf-8');
+const authorsData = JSON.parse(authorsFileContent);
+
+// Normalize the authors prop to always be an array
+const { 
+  authors: authorsProp, 
+  size = "md", 
+  variant = "default",
+  showName = true,
+  showRole = true
+} = Astro.props;
+
+const authorsList = Array.isArray(authorsProp) 
+  ? authorsProp 
+  : (typeof authorsProp === 'string' ? [authorsProp] : []);
+
+/**
+ * Find the best matching author from the authors.json file
+ * Uses a flexible matching approach to handle slight variations in names
+ */
+function findBestMatchingAuthor(authorName: string, authorsData: any): Author | undefined {
+  // If empty, return undefined
+  if (!authorName || authorName.trim() === '') {
+    return undefined;
+  }
+  
+  // Normalize the name for comparison (lowercase, trim whitespace)
+  const normalizedName = authorName.toLowerCase().trim();
+  
+  // First try exact matches on id or name
+  const exactMatch = authorsData.authors.find((author: Author) => 
+    author.id.toLowerCase() === normalizedName || 
+    author.name.toLowerCase() === normalizedName
+  );
+  
+  if (exactMatch) {
+    return exactMatch;
+  }
+  
+  // Try partial matches (e.g., "Michael" should match "Michael Staton")
+  const partialMatches = authorsData.authors.filter((author: Author) => {
+    const authorFullName = author.name.toLowerCase();
+    const authorId = author.id.toLowerCase();
+    
+    // Check if the name is contained within the full name
+    return authorFullName.includes(normalizedName) || 
+           normalizedName.includes(authorFullName) ||
+           authorId.includes(normalizedName) ||
+           normalizedName.includes(authorId);
+  });
+  
+  // Return the first partial match if any found
+  return partialMatches.length > 0 ? partialMatches[0] : undefined;
+}
+
+// Find matching authors from the JSON data using the flexible matching
+const matchedAuthors = authorsList
+  .map(authorName => findBestMatchingAuthor(authorName, authorsData))
+  .filter(Boolean) as Author[]; // Remove any undefined entries
+---
+
+<div class="author-handle-container">
+  {matchedAuthors.map((author: Author) => (
+    <div class="author-handle">
+      <div class="author-avatar">
+        <Avatar size={size} variant={variant}>
+          {author.headshotOf ? (
+            <AvatarImage src={author.headshotOf} alt={`${author.name}'s headshot`} />
+          ) : null}
+          <AvatarFallback>
+            {author.name
+              .split(' ')
+              .map(part => part[0])
+              .join('')}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+      
+      {(showName || showRole) && (
+        <div class="author-info" style="color: var(--clr-lossless-primary-light);">
+          {showName && <div class="author-name">{author.name}</div>}
+          {showRole && <div class="author-role">{author.role}</div>}
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  .author-handle-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .author-handle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .author-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .author-name {
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-300);
+  }
+
+  .author-role {
+    font-size: var(--fs-200);
+    opacity: 0.8;
+  }
+</style>

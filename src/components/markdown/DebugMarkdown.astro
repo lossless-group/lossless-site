@@ -1,0 +1,96 @@
+---
+import { Debug } from 'astro:components';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import remarkAsf from '@utils/markdown/remark-asf';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkImages from '@utils/markdown/remark-images';
+import remarkCallouts from '@utils/markdown/remark-callout-handler';
+import type { Root as MdastRoot } from 'mdast';
+import markdownDebugger from '@utils/markdown/markdownDebugger';
+
+interface Props {
+  content: string;
+  markdownFile: string;
+  enabled?: boolean;
+}
+
+const { content, markdownFile, enabled = process.env.DEBUG_AST === 'true' } = Astro.props;
+
+// Initialize variables
+let parsedAst;
+let calloutsAst;
+let asfAst;
+let backlinksAst;
+let imagesAst;
+let hastAst;
+let calloutsHastAst;
+
+// Only process if debugging is enabled
+if (enabled) {
+  // Process with our custom remark plugins in discrete steps
+  parsedAst = await unified()
+    .use(remarkParse)
+    .parse(content);
+  markdownDebugger.writeDebugFile('1-parsed-ast', parsedAst);
+
+  calloutsAst = await unified()
+    .use(remarkParse)
+    .use(remarkCallouts)
+    .parse(content);
+  markdownDebugger.writeDebugFile('2-callouts-ast', calloutsAst);
+
+  asfAst = await unified()
+    .use(remarkParse)
+    .use(remarkAsf, { markdownFile })
+    .parse(content);
+  markdownDebugger.writeDebugFile('3-asf-ast', asfAst);
+
+  backlinksAst = await unified()
+    .use(remarkParse)
+    .use(remarkBacklinks)
+    .parse(content);
+  markdownDebugger.writeDebugFile('4-backlinks-ast', backlinksAst);
+
+  imagesAst = await unified()
+    .use(remarkParse)
+    .use(remarkImages)
+    .parse(content);
+  markdownDebugger.writeDebugFile('5-images-ast', imagesAst);
+
+  hastAst = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .parse(content);
+  markdownDebugger.writeDebugFile('6-hast-ast', hastAst);
+
+  calloutsHastAst = await unified()
+    .use(remarkParse)
+    .use(remarkCallouts)
+    .use(remarkRehype)
+    .parse(content);
+  markdownDebugger.writeDebugFile('7-callouts-hast-ast', calloutsHastAst);
+}
+---
+
+{enabled && parsedAst && (
+  <>
+    <h2>Debug Output:</h2>
+    <h3>1. After Parse:</h3>
+    <Debug {parsedAst} />
+    <h3>2. After Callouts:</h3>
+    <Debug {calloutsAst} />
+    <h3>3. After ASF:</h3>
+    <Debug {asfAst} />
+    <h3>4. After Backlinks:</h3>
+    <Debug {backlinksAst} />
+    <h3>5. After Images:</h3>
+    <Debug {imagesAst} />
+    <h3>6. After HAST:</h3>
+    <Debug {hastAst} />
+    <h3>7. After Callouts HAST:</h3>
+    <Debug {calloutsHastAst} />
+    <hr />
+  </>
+)}

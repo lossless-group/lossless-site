@@ -1,0 +1,191 @@
+---
+interface Props {
+  frontmatter: Record<string, any>;
+  filePath?: string;
+}
+
+const { frontmatter, filePath } = Astro.props;
+const yamlString = JSON.stringify(frontmatter, null, 2);
+---
+
+<div class="yaml-editor" data-filepath={filePath}>
+  <div class="editor-container">
+    <textarea 
+      class="yaml-editor-textarea"
+      spellcheck="false"
+      data-yaml-content
+    >{yamlString}</textarea>
+    <pre class="yaml-display"><code class="language-yaml">{yamlString}</code></pre>
+  </div>
+  <div class="editor-actions">
+    <button class="save-button" data-save-yaml>Save Changes</button>
+    <span class="save-status" data-save-status></span>
+  </div>
+  {filePath && <p class="file-path">File: {filePath}</p>}
+</div>
+
+<style>
+  .yaml-editor {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid var(--clr-border);
+    border-radius: 4px;
+    background: var(--clr-lossless-primary-glass);
+  }
+
+  .editor-container {
+    position: relative;
+    margin: 1rem 0;
+  }
+
+  .yaml-editor-textarea,
+  .yaml-display {
+    margin: 0;
+    padding: 1rem;
+    font-family: var(--ff-mono);
+    font-size: var(--fs-300);
+    line-height: 1.5;
+    tab-size: 2;
+    min-height: 200px;
+    max-height: 400px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: pre;
+    word-wrap: normal;
+    overflow-x: auto;
+  }
+
+  .yaml-editor-textarea {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--clr-body); /* Make cursor visible */
+    z-index: 1;
+    border: none;
+    outline: none;
+  }
+
+  .yaml-editor-textarea:focus {
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--clr-body);
+  }
+
+  .yaml-display {
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .editor-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .save-button {
+    padding: 0.5rem 1rem;
+    background: var(--clr-lossless-primary);
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    border-radius: 4px;
+    color: var(--clr-body);
+    cursor: pointer;
+    font-size: var(--fs-300);
+  }
+
+  .save-button:hover {
+    background: var(--clr-lossless-primary-dark);
+  }
+
+  .save-status {
+    font-size: var(--fs-300);
+    color: var(--clr-body-muted);
+  }
+
+  .file-path {
+    margin-top: 1rem;
+    font-size: 0.9em;
+    color: var(--clr-body-muted);
+  }
+</style>
+
+<script>
+  // Sync scroll between textarea and display
+  document.addEventListener('DOMContentLoaded', () => {
+    const textareas = document.querySelectorAll<HTMLTextAreaElement>('.yaml-editor-textarea');
+    
+    textareas.forEach(textarea => {
+      const editor = textarea.closest('.yaml-editor');
+      const display = textarea.nextElementSibling as HTMLElement;
+      const saveButton = editor?.querySelector('[data-save-yaml]');
+      const saveStatus = editor?.querySelector('[data-save-status]');
+      const filePath = editor?.getAttribute('data-filepath');
+      
+      textarea.addEventListener('scroll', () => {
+        display.scrollTop = textarea.scrollTop;
+        display.scrollLeft = textarea.scrollLeft;
+      });
+
+      // Handle tab key
+      textarea.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const value = textarea.value;
+          
+          textarea.value = value.substring(0, start) + '  ' + value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+          
+          // Update display
+          const codeElement = display.querySelector('code');
+          if (codeElement) {
+            codeElement.textContent = textarea.value;
+          }
+        }
+      });
+
+      // Update syntax highlighting on input
+      textarea.addEventListener('input', () => {
+        const codeElement = display.querySelector('code');
+        if (codeElement) {
+          codeElement.textContent = textarea.value;
+        }
+      });
+
+      // Handle save
+      saveButton?.addEventListener('click', async () => {
+        if (!filePath) return;
+
+        try {
+          if (saveStatus) saveStatus.textContent = 'Saving...';
+
+          const response = await fetch('/api/save-yaml', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              filePath,
+              content: textarea.value
+            })
+          });
+
+          if (!response.ok) throw new Error('Failed to save');
+
+          if (saveStatus) saveStatus.textContent = 'Saved!';
+          setTimeout(() => {
+            if (saveStatus) saveStatus.textContent = '';
+          }, 2000);
+        } catch (error) {
+          console.error('Failed to save:', error);
+          if (saveStatus) saveStatus.textContent = 'Error saving!';
+        }
+      });
+    });
+  });
+</script>

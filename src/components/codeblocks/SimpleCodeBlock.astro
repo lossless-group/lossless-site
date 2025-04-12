@@ -1,0 +1,99 @@
+---
+/**
+ * SimpleCodeBlock.astro
+ * 
+ * A minimal wrapper for code blocks that adds a copy button without complex AST transformations.
+ * This component is designed to be used with Astro's built-in markdown rendering and Shiki.
+ * 
+ * It works by using CSS to style pre/code blocks and adding a copy button with JavaScript.
+ */
+---
+
+<style is:global>
+  /* Style for code blocks */
+  pre {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    overflow: auto;
+    margin: 1.5rem 0;
+  }
+
+  /* Copy button */
+  .code-copy-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--clr-lossless-primary-glass, rgba(30, 30, 30, 0.3));
+    border: 1px solid var(--clr-lossless-primary-light, #444);
+    border-radius: 0.25rem;
+    color: var(--clr-lossless-accent--brightest, #fff);
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  .code-copy-button:hover {
+    opacity: 1;
+    background: var(--clr-lossless-primary-light, #444);
+  }
+
+  /* Language indicator */
+  .code-lang-indicator {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    padding: 0.15rem 0.4rem;
+    background: var(--clr-lossless-primary-glass, rgba(30, 30, 30, 0.3));
+    border-radius: 0.25rem;
+    color: var(--clr-lossless-accent--brightest, #fff);
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+  // Add copy buttons to all code blocks
+  document.addEventListener('DOMContentLoaded', () => {
+    const codeBlocks = document.querySelectorAll('pre');
+    
+    codeBlocks.forEach(block => {
+      // Skip if already processed
+      if (block.querySelector('.code-copy-button')) return;
+      
+      // Create copy button
+      const copyButton = document.createElement('button');
+      copyButton.className = 'code-copy-button';
+      copyButton.textContent = 'Copy';
+      
+      // Add click handler
+      copyButton.addEventListener('click', () => {
+        const code = block.querySelector('code')?.textContent || '';
+        navigator.clipboard.writeText(code).then(() => {
+          // Visual feedback
+          copyButton.textContent = 'Copied!';
+          setTimeout(() => {
+            copyButton.textContent = 'Copy';
+          }, 2000);
+        });
+      });
+      
+      // Add language indicator if available
+      const codeElement = block.querySelector('code');
+      if (codeElement && codeElement.className) {
+        const langMatch = codeElement.className.match(/language-(\w+)/);
+        if (langMatch && langMatch[1]) {
+          const langIndicator = document.createElement('div');
+          langIndicator.className = 'code-lang-indicator';
+          langIndicator.textContent = langMatch[1];
+          block.appendChild(langIndicator);
+        }
+      }
+      
+      // Add button to block
+      block.appendChild(copyButton);
+    });
+  });
+</script>

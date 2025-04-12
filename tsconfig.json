@@ -1,11 +1,18 @@
 {
   "extends": "astro/tsconfigs/base",
-  "include": [".astro/types.d.ts", "src/**/*"],
+  "include": [
+    ".astro/types.d.ts",
+    "src/**/*",
+    "archive_src/config.ts",
+    "src/types/**/*.d.ts"
+  ],
   "exclude": ["dist"],
   "compilerOptions": {
     "baseUrl": ".",
     "strictNullChecks": false,
     "allowJs": true,
+    "moduleResolution": "node",
+    "module": "ESNext",
     "plugins": [
       {
         "name": "@astrojs/tsplugin"

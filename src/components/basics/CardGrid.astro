@@ -5,16 +5,7 @@ import BareToolCard from "@components/tool-components/BareToolCard.astro";
 interface Props {
   gap?: string;
   minCardWidth?: string;
-  tools: Array<{
-    url: string;
-    site_name?: string;
-    title?: string;
-    image?: string;
-    favicon?: string;
-    description?: string;
-    tags?: string[];
-    id: string;
-  }>;
+  tools: Array<Record<string, any>>;
 }
 
 const { gap = "2rem", tools = [] } = Astro.props;
@@ -30,14 +21,8 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
       <div class="card-grid">
         {toolsWithImages.map((tool) => (
           <ToolCard
-            url={tool.url}
-            site_name={tool.site_name}
-            title={tool.title}
-            image={tool.image}
-            favicon={tool.favicon}
-            description={tool.description}
-            tags={tool.tags}
-            filename={tool.id}
+            {...tool}
+            filePath={tool.filePath}
           />
         ))}
       </div>
@@ -49,11 +34,8 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
       <div class="bare-tools-grid">
         {toolsWithoutImages.map((tool) => (
           <BareToolCard
-            url={tool.url}
-            site_name={tool.site_name}
-            title={tool.title}
-            tags={tool.tags}
-            filename={tool.id}
+            {...tool}
+            filePath={tool.filePath}
           />
         ))}
       </div>

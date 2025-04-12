@@ -1,0 +1,119 @@
+---
+/**
+ * AlternatingSideImage.astro
+ * 
+ * A component that automatically renders multiple FeatureSideImage components
+ * with alternating image positions based on JSON data.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <AlternatingSideImage jsonPath="messages/featureSideImage.json" />
+ * ```
+ */
+
+import FeatureSideImage from "@components/basics/FeatureSideImage.astro";
+import path from "node:path";
+import fs from "node:fs";
+import { getImageForPath } from "@utils/imageMapping";
+
+// Define the interface for feature data
+interface FeatureData {
+  label: string;
+  title: string;
+  details: string;
+  imageSide: "left" | "right";
+  ctaText: string;
+  ctaUrl: string;
+  imageUrl: string;
+}
+
+interface Props {
+  /**
+   * Path to the JSON file containing feature data, relative to src/content/
+   * @example "messages/featureSideImage.json"
+   */
+  jsonPath: string;
+  
+  /**
+   * Additional CSS classes to apply to the container
+   */
+  classes?: string;
+}
+
+const { jsonPath, classes = "" } = Astro.props;
+
+// Load the feature data from the JSON file
+// Use path.join with process.cwd() to ensure correct path resolution
+const fullPath = path.join(process.cwd(), "src/content", jsonPath);
+let features: FeatureData[] = [];
+
+try {
+  // Read and parse the JSON file
+  const fileContent = fs.readFileSync(fullPath, "utf-8");
+  features = JSON.parse(fileContent);
+  
+  // Log success for debugging
+  console.log(`Successfully loaded ${features.length} features from ${jsonPath}`);
+} catch (error) {
+  // Log error for debugging
+  console.error(`Error loading feature data from ${fullPath}:`, error);
+}
+
+// Process features to create image objects using the utility function
+const processedFeatures = features.map(feature => ({
+  ...feature,
+  // Use the getImageForPath utility to handle both remote and local images
+  processedImage: getImageForPath(feature.imageUrl, feature.title)
+}));
+
+---
+
+<div class:list={["alternating-side-image-container", classes]}>
+  {processedFeatures.map((feature) => (
+    <FeatureSideImage
+      label={feature.label}
+      title={feature.title}
+      details={feature.details}
+      image={feature.processedImage}
+      imageSide={feature.imageSide}
+    >
+      <div slot="content-footer" class="cta-container">
+        <a href={feature.ctaUrl} class="cta-button">{feature.ctaText}</a>
+      </div>
+    </FeatureSideImage>
+  ))}
+</div>
+
+<style>
+  .alternating-side-image-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* These styles will be inherited by the FeatureSideImage components */
+  :global(.cta-container) {
+    margin-top: 1.5rem;
+  }
+  
+  :global(.cta-button) {
+    display: inline-block;
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--white--pure);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  
+  :global(.cta-button:hover) {
+    background: var(--clr-lossless-attn-action);
+  }
+</style>

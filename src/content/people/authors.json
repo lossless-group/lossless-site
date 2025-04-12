@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/people.schema.json",
+  "authors": [
+    {
+      "id": "mpstaton",
+      "name": "Michael Staton",
+      "role": "Creator",
+      "bio": "Creator of Lossless Group",
+      "headshotOf": "/images/staton_headshot.jpeg",
+      "socialLinks": {
+        "twitter": "https://twitter.com/mpstaton",
+        "github": "https://github.com/mpstaton"
+      },
+      "metadata": {
+        "createdAt": "2025-04-06T20:32:45-07:00",
+        "updatedAt": "2025-04-06T20:32:45-07:00"
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+---
+/**
+ * ArticleListColumn.astro
+ * A structural component that renders a collection of items in a column layout.
+ * Does not make assumptions about the content type.
+ */
+import CollectionEntryRow from '../basics/CollectionEntryRow.astro';
+
+interface Props {
+  // Accept any array of items
+  entries: Array<Record<string, any>>;
+  // Optional component to render each entry
+  EntryComponent?: any;
+}
+
+const { entries, EntryComponent } = Astro.props;
+---
+
+<div class="article-list-column">
+  {entries.map(entry => (
+    <CollectionEntryRow>
+      {EntryComponent ? (
+        <EntryComponent {...entry} />
+      ) : (
+        <slot name="entry" {entry} />
+      )}
+    </CollectionEntryRow>
+  ))}
+</div>
+
+<style>
+  .article-list-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>

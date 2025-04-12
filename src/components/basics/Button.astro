@@ -8,8 +8,8 @@ const {
   classes,
   variety = "default",
   isBordered,
-  background = "hsl(130, 50%, 50%)",
-  color = "hsl(130, 50%, 2%)",
+  background = "var(--clr-lossless-primary-glass)",
+  color = "var(--clr-heading)",
   ...rest
 } = Astro.props;
 ---
@@ -26,29 +26,40 @@ const {
   <slot />
 </button>
 
-<style
-  define:vars={{
-    background,
-    color,
-  }}
->
+<style>
   .btn {
-    font: inherit;
-    display: flex;
-    gap: 0.25rem;
+    display: inline-flex;
     align-items: center;
-    cursor: pointer;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.5em 1em;
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-300);
+    color: var(--clr-heading);
+    background: var(--clr-lossless-primary-glass);
     border: none;
-    background: var(--background);
-    color: var(--color);
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
   }
-  .btn--default {
-    padding: 4px 16px;
+
+  .btn:hover {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 20%
+    );
+    transform: translateY(-2px);
   }
+
+  .btn.border {
+    border: 1px solid var(--clr-lossless-primary-dark);
+  }
+
   .btn--icon {
-    aspect-ratio: 1/1;
-  }
-  .border {
-    border: 1px solid red;
+    padding: 0.5em;
+    border-radius: 50%;
+    aspect-ratio: 1;
   }
 </style>

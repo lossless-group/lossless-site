@@ -1,0 +1,73 @@
+---
+/**
+ * Avatar Example Page
+ * 
+ * This page demonstrates the Starwind UI Avatar component with various configurations.
+ * It serves as a reference for how to use the Avatar component in your project.
+ */
+
+import AvatarExample from "../../components/examples/AvatarExample.astro";
+import Layout from "../../layouts/Layout.astro";
+
+// Page metadata
+const title = "Starwind UI - Avatar Component Examples";
+const description = "Examples and usage patterns for the Starwind UI Avatar component";
+---
+
+<Layout title={title} description={description}>
+  <main class="container mx-auto py-8">
+    <div class="prose prose-lg max-w-none mb-8" style="color: var(--clr-body);">
+      <h1 style="color: var(--clr-lossless-primary-light);">Starwind UI Avatar Component</h1>
+      <p>
+        The Avatar component is used to represent a user, and displays the user's 
+        profile picture, initials, or fallback icon.
+      </p>
+      
+      <h2 style="color: var(--clr-lossless-primary-light);">Component Structure</h2>
+      <p>
+        The Avatar component consists of three parts:
+      </p>
+      <ul>
+        <li><code>Avatar</code> - The main container component</li>
+        <li><code>AvatarImage</code> - The image to display (with fallback handling)</li>
+        <li><code>AvatarFallback</code> - Content to show when the image fails to load</li>
+      </ul>
+      
+      <h2 style="color: var(--clr-lossless-primary-light);">Import</h2>
+      <pre><code class="language-astro p-4 rounded-md" style="background-color: var(--clr-lossless-primary-dark); color: var(--clr-lossless-primary-light);">
+import Avatar from "../starwind/avatar/Avatar.astro";
+import AvatarImage from "../starwind/avatar/AvatarImage.astro";
+import AvatarFallback from "../starwind/avatar/AvatarFallback.astro";
+      </code></pre>
+      
+      <h2 style="color: var(--clr-lossless-primary-light);">Basic Usage</h2>
+      <pre><code class="language-astro p-4 rounded-md" style="background-color: var(--clr-lossless-primary-dark); color: var(--clr-lossless-primary-light);">
+&lt;Avatar&gt;
+  &lt;AvatarImage src="https://example.com/avatar.jpg" alt="User avatar" /&gt;
+  &lt;AvatarFallback&gt;JD&lt;/AvatarFallback&gt;
+&lt;/Avatar&gt;
+      </code></pre>
+    </div>
+    
+    <div class="rounded-lg border shadow-sm" style="background-color: var(--clr-lossless-primary-dark); color: var(--clr-lossless-primary-light); border-color: var(--clr-lossless-ui-btn-border);">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--clr-lossless-primary-light);">Avatar Examples</h2>
+        <AvatarExample />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Override Starwind variables to match your site's theme */
+  :root {
+    --background: var(--clr-primary-bg);
+    --foreground: var(--clr-body);
+    --card: var(--clr-lossless-primary-dark);
+    --card-foreground: var(--clr-lossless-primary-light);
+    --border: var(--clr-lossless-ui-btn-border);
+    --input: var(--clr-lossless-primary-glass);
+    --muted: var(--clr-lossless-primary-dark);
+    --muted-foreground: var(--clr-lossless-primary-light);
+  }
+</style>

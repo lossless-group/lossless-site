@@ -1,0 +1,190 @@
+---
+/**
+ * FeatureSideImage.astro
+ * 
+ * Creates a responsive side-by-side layout with content on one side and an image on the other.
+ * Supports alternating layouts with the image on either the left or right side.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <FeatureSideImage
+ *   label="Important Feature"
+ *   title="Real-time Collaboration"
+ *   details="Work together with your team in real-time with our advanced collaboration tools."
+ *   image={importedImage}
+ *   imageSide="right"
+ * />
+ * ```
+ */
+
+interface Props {
+  label: string;            // Colored text label (appears above title)
+  title: string;            // Main heading
+  details: string;          // Descriptive paragraph text
+  image: {                  // Simple image object with src and optional alt
+    src: string;
+    alt?: string;
+  };
+  imageSide: "left" | "right"; // Which side the image appears on
+  classes?: string;         // Additional CSS classes
+}
+
+const { 
+  image, 
+  label, 
+  title, 
+  details, 
+  imageSide = "right", 
+  classes = "" 
+} = Astro.props;
+
+// Determine if we need to reorder content for left-side images
+const contentOrderClass = imageSide === "left" ? "feature-content--order-last" : "";
+const imageAnimationDirection = imageSide === "left" ? "right" : "left";
+
+// Check if this is a placeholder image
+const isPlaceholder = image.src.includes('placeholder.com');
+---
+
+<div class:list={["feature-side-image", classes]}>
+  <!-- Text Content -->
+  <div class:list={["feature-content", contentOrderClass]}>
+    <div class="feature-label-container">
+      <p class="feature-label">{label}</p>
+    </div>
+    <h2 class="feature-title">{title}</h2>
+    <p class="feature-details">{details}</p>
+    <slot name="content-footer" />
+  </div>
+
+  <!-- Image -->
+  <div class="feature-image-container">
+    <div class:list={["feature-image-wrapper", { "feature-image-wrapper--placeholder": isPlaceholder }]}>
+      <img 
+        class="feature-image"
+        src={image.src}
+        alt={image.alt || title}
+        loading="lazy"
+      />
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Container */
+  .feature-side-image {
+    display: grid;
+    gap: 2rem;
+    border-radius: 1rem;
+    margin: 3rem auto;
+    width: 100%;
+  }
+
+  /* Text Content */
+  .feature-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .feature-label-container {
+    display: flex;
+  }
+
+  .feature-label {
+    color: var(--clr-lossless-accent--brightest);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+  }
+
+  .feature-title {
+    color: var(--clr-heading);
+    font-family: var(--ff-heading);
+    font-size: var(--fs-700);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-details {
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-400);
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  /* Image */
+  .feature-image-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-image-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Only apply gradient background and overlay to placeholder images */
+  .feature-image-wrapper--placeholder {
+    background: linear-gradient(
+      135deg,
+      var(--clr-lossless-primary-light) 0%,
+      var(--clr-lossless-primary-glass) 50%,
+      var(--clr-lossless-primary-dark) 100%
+    );
+    padding: 1px;
+  }
+
+  .feature-image-wrapper--placeholder::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: calc(1rem - 1px);
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 70%);
+    z-index: 1;
+  }
+
+  .feature-image {
+    position: relative;
+    z-index: 10;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 1rem;
+    object-fit: contain;
+    border: 1px solid transparent;
+  }
+
+  /* Responsive */
+  @media (min-width: 768px) {
+    .feature-side-image {
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    .feature-content--order-last {
+      order: 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .feature-side-image {
+      gap: 5rem;
+    }
+  }
+</style>

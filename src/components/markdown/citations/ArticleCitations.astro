@@ -1,0 +1,105 @@
+---
+interface Props {
+    node: {
+        type?: string;
+        children?: Array<{
+            type: string;
+            value?: string;
+            url?: string;
+            children?: Array<{
+                type: string;
+                value?: string;
+                url?: string;
+                children?: Array<{
+                    type: string;
+                    value: string;
+                }>;
+                data?: {
+                    hName?: string;
+                    hProperties?: {
+                        className?: string;
+                        href?: string;
+                        target?: string;
+                        rel?: string;
+                    };
+                };
+            }>;
+            data?: {
+                hName?: string;
+                hProperties?: {
+                    className?: string;
+                };
+            };
+        }>;
+        data?: {
+            hProperties?: Record<string, any>;
+        };
+    };
+}
+
+const { node } = Astro.props;
+const citations = node.children || [];
+---
+
+<div class="citations">
+    {citations.map((citation) => (
+        <div class={citation.type === 'citation-attribution' ? 'citation-attribution' : 'citation'}>
+            {citation.children?.map((child) => {
+                if (child.type === 'link') {
+                    return (
+                        <a href={child.url} target="_blank" rel="noopener noreferrer">
+                            {child.children?.[0].value}
+                        </a>
+                    );
+                }
+                return child.value;
+            })}
+        </div>
+    ))}
+</div>
+
+<style>
+    .citations {
+        display: block;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--clr-lossless-accent--brightest);
+    }
+
+    .citation {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--clr-lossless-primary-light);
+        opacity: 0.9;
+        line-height: 1.8;
+        padding-left: 2rem;
+        text-indent: -2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .citation-attribution {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--clr-lossless-primary-light);
+        opacity: 0.8;
+        font-style: italic;
+        margin-top: 1rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--clr-lossless-accent);
+    }
+
+    .citation:last-child {
+        margin-bottom: 0;
+    }
+
+    .citation a {
+        color: var(--clr-lossless-accent);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .citation a:hover {
+        color: var(--clr-lossless-accent--brightest);
+        text-decoration: underline;
+    }
+</style>

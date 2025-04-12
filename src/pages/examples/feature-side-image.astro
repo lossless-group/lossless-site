@@ -1,0 +1,96 @@
+---
+/**
+ * Feature Side Image Example Page
+ * 
+ * This page demonstrates the usage of the FeatureSideImage component
+ * with different configurations and image positions.
+ */
+
+import Layout from "@layouts/Layout.astro";
+import FeatureSideImageComponent from "@components/basics/FeatureSideImage.astro";
+
+// Import the Image component from astro:assets
+import { Image } from "astro:assets";
+import { getImage } from "astro:assets";
+
+// Create a placeholder image for the example
+const placeholderImageSrc = "https://via.placeholder.com/1200x800/3a506b/ffffff?text=Feature+Image";
+const placeholderImage = {
+  src: placeholderImageSrc,
+  width: 1200,
+  height: 800,
+  format: "png" as const
+};
+
+// Use the placeholder image for both examples
+---
+
+<Layout title="Feature Side Image Examples" description="Examples of the FeatureSideImage component">
+  <main class="container">
+    <h1 class="page-title">Feature Side Image Examples</h1>
+    
+    <!-- Example 1: Image on the right -->
+    <FeatureSideImageComponent
+      label="Notebook Interface"
+      title="Streamlined Development Environment"
+      details="Our advanced notebook interface makes coding and documentation effortless. With real-time preview, syntax highlighting, and intuitive controls, you can focus on your ideas instead of formatting. Perfect for research, experimentation, and technical documentation."
+      image={placeholderImage}
+      imageSide="right"
+    >
+      <div slot="content-footer" class="cta-container">
+        <a href="#" class="cta-button">Learn More</a>
+      </div>
+    </FeatureSideImageComponent>
+    
+    <!-- Example 2: Image on the left -->
+    <FeatureSideImageComponent
+      label="Collaborative Coding"
+      title="Real-time Team Collaboration"
+      details="Work together seamlessly with your team in real-time. Changes sync instantly across all devices, with smart conflict resolution and version history. Boost productivity and keep everyone on the same page with our collaborative notebook environment."
+      image={placeholderImage}
+      imageSide="left"
+    >
+      <div slot="content-footer" class="cta-container">
+        <a href="#" class="cta-button">Try It Now</a>
+      </div>
+    </FeatureSideImageComponent>
+  </main>
+</Layout>
+
+<style>
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .page-title {
+    color: var(--clr-heading);
+    font-family: var(--ff-heading);
+    font-size: var(--fs-800);
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  
+  .cta-container {
+    margin-top: 1.5rem;
+  }
+  
+  .cta-button {
+    display: inline-block;
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--white--pure);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  
+  .cta-button:hover {
+    background: var(--clr-lossless-attn-action);
+  }
+</style>
