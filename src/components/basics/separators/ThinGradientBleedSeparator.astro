@@ -2,22 +2,23 @@
 import "@styles/global.css";
 ---
 
-<div class="separator-container">
+<div class="separator-wrapper">
   <div class="separator--primary-bg-grd"></div>
 </div>
 
 <style>
-  .separator-container {
+  .separator-wrapper {
+    position: relative;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    height: 2px;
     margin: 0;
-    padding: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .separator--primary-bg-grd {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100vw;
     height: 2px;
     background: var(--grd__primary-bg);

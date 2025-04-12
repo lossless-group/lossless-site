@@ -1,5 +1,6 @@
 ---
 import "@styles/global.css";
+import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 ---
 
 <header>
@@ -23,7 +24,9 @@ import "@styles/global.css";
       <img src="/visuals/appIcon__LinkedIn.svg" alt="" />
     </span>
   </div>
-  <div class="separator--thin"></div>
+  <div class="header-separator">
+    <ThinGradientBleedSeparator />
+  </div>
 </header>
 
 <style>
@@ -46,9 +49,17 @@ import "@styles/global.css";
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 2em 3em;
+    padding: 1.25em 3em 1.25em;
     max-height: 6vh;
   }
+
+  /* Add spacing for the separator */
+  .header-separator {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 1.25em;
+  }
+  
   .connect-with-us-icons {
     display: flex;
     flex-direction: row;
