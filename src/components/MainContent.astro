@@ -46,8 +46,13 @@ const allTags = [
 ];
 ---
 
-<!-- Full-bleed separator -->
-<ThinGradientBleedSeparator />
+<!-- Full-bleed separator with subtle styling -->
+<ThinGradientBleedSeparator 
+  height="1px" 
+  marginTop="0.5rem" 
+  marginBottom="1rem" 
+  color="var(--grd__primary-bg)" 
+/>
 
 <!-- Content section with tools -->
 <div class="content-wrapper">
@@ -78,8 +83,14 @@ const allTags = [
   </div>
 </div>
 
-<!-- Full-bleed separator -->
-<ThinGradientBleedSeparator />
+<!-- Full-bleed separator with more prominent styling -->
+<ThinGradientBleedSeparator 
+  height="3px" 
+  marginTop="1.5rem" 
+  marginBottom="1.5rem" 
+  color="var(--grd__primary-bg)" 
+  animate={true}
+/>
 
 <!-- Content section with alternating side images -->
 <div class="content-wrapper">
@@ -88,8 +99,13 @@ const allTags = [
   </section>
 </div>
 
-<!-- Full-bleed separator -->
-<ThinGradientBleedSeparator />
+<!-- Full-bleed separator with standard styling -->
+<ThinGradientBleedSeparator 
+  height="2px" 
+  marginTop="1rem" 
+  marginBottom="1rem" 
+  color="var(--grd__primary-bg)" 
+/>
 
 <!-- Content section with card grid -->
 <div class="content-wrapper">
