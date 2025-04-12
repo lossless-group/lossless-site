@@ -48,6 +48,14 @@ export function getImageForPath(imagePath: string, title: string = ''): { src: s
     };
   }
   
+  // Handle local paths that start with a slash (from the public directory)
+  if (imagePath.startsWith('/')) {
+    return {
+      src: imagePath,
+      alt: title
+    };
+  }
+  
   // For the specific Warp Notebooks image, use a direct mapping
   if (imagePath.includes('Screenshot 2025-03-30 at 11.42.35 AM_Warp--Notebooks.png')) {
     // Using a relative path that works in the browser
