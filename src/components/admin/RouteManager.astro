@@ -1,0 +1,190 @@
+---
+/**
+ * Route Manager Component
+ * 
+ * This component provides a UI for managing content path to web route mappings.
+ * It allows administrators to add, update, remove, and view route mappings.
+ */
+
+// Import necessary utilities
+import { getAllRouteMappings } from '../../utils/routing/routeManager';
+
+// Get all current route mappings
+const routeMappings = getAllRouteMappings();
+---
+
+<div class="route-manager">
+  <h2 class="text-2xl font-bold mb-4">Route Mappings Manager</h2>
+  
+  <div class="mb-8">
+    <h3 class="text-xl font-semibold mb-2">Current Mappings</h3>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white border border-gray-300">
+        <thead>
+          <tr>
+            <th class="py-2 px-4 border-b">Content Path</th>
+            <th class="py-2 px-4 border-b">Web Route</th>
+            <th class="py-2 px-4 border-b">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {routeMappings.map((mapping) => (
+            <tr>
+              <td class="py-2 px-4 border-b">{mapping.contentPath}</td>
+              <td class="py-2 px-4 border-b">{mapping.routePath}</td>
+              <td class="py-2 px-4 border-b">
+                <button 
+                  class="delete-mapping bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+                  data-content-path={mapping.contentPath}
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div>
+    <h3 class="text-xl font-semibold mb-2">Add New Mapping</h3>
+    <form id="add-mapping-form" class="space-y-4">
+      <div class="flex flex-col">
+        <label for="contentPath" class="mb-1">Content Path:</label>
+        <input 
+          type="text" 
+          id="contentPath" 
+          name="contentPath" 
+          placeholder="e.g., vocabulary"
+          class="border border-gray-300 px-3 py-2 rounded"
+          required
+        />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="routePath" class="mb-1">Web Route:</label>
+        <input 
+          type="text" 
+          id="routePath" 
+          name="routePath" 
+          placeholder="e.g., more-about"
+          class="border border-gray-300 px-3 py-2 rounded"
+          required
+        />
+      </div>
+      
+      <button 
+        type="submit"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Add Mapping
+      </button>
+    </form>
+  </div>
+  
+  <div id="status-message" class="mt-4 p-3 hidden"></div>
+</div>
+
+<script>
+  // Function to show status message
+  function showStatusMessage(message, isError = false) {
+    const statusElement = document.getElementById('status-message');
+    if (statusElement) {
+      statusElement.textContent = message;
+      statusElement.className = `mt-4 p-3 ${isError ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
+      statusElement.classList.remove('hidden');
+      
+      // Hide the message after 5 seconds
+      setTimeout(() => {
+        statusElement.classList.add('hidden');
+      }, 5000);
+    }
+  }
+  
+  // Function to refresh the page after a successful operation
+  function refreshPage() {
+    window.location.reload();
+  }
+  
+  // Handle form submission for adding new mapping
+  document.getElementById('add-mapping-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    const contentPath = formData.get('contentPath') as string;
+    const routePath = formData.get('routePath') as string;
+    
+    try {
+      const response = await fetch('/api/route-mappings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'add',
+          contentPath,
+          routePath
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        showStatusMessage(data.message);
+        // Reset form
+        (e.target as HTMLFormElement).reset();
+        // Refresh the page after a short delay
+        setTimeout(refreshPage, 1000);
+      } else {
+        showStatusMessage(data.error, true);
+      }
+    } catch (error) {
+      showStatusMessage('An error occurred while adding the mapping.', true);
+      console.error(error);
+    }
+  });
+  
+  // Handle delete button clicks
+  document.querySelectorAll('.delete-mapping').forEach(button => {
+    button.addEventListener('click', async () => {
+      const contentPath = (button as HTMLElement).dataset.contentPath;
+      
+      if (confirm(`Are you sure you want to remove the mapping for "${contentPath}"?`)) {
+        try {
+          const response = await fetch('/api/route-mappings', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'remove',
+              contentPath
+            }),
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showStatusMessage(data.message);
+            // Refresh the page after a short delay
+            setTimeout(refreshPage, 1000);
+          } else {
+            showStatusMessage(data.error, true);
+          }
+        } catch (error) {
+          showStatusMessage('An error occurred while removing the mapping.', true);
+          console.error(error);
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .route-manager {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+</style>

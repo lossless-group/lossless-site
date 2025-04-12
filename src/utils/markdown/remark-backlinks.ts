@@ -1,12 +1,14 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text, Link } from 'mdast';
 import markdownDebugger from './markdownDebugger';
+import { transformContentPathToRoute } from '../routing/routeManager';
 
 // Match [[...]] but skip if it's a visual path
 const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
 
+// This function is kept for backward compatibility but uses the route manager internally
 function transformPath(path: string): string {
-  return `/content/${path.toLowerCase().replace(/ /g, '-')}`;
+  return transformContentPathToRoute(path);
 }
 
 /**
@@ -40,7 +42,8 @@ export default function remarkBacklinks() {
             });
           }
 
-          const transformedPath = transformPath(path);
+          // Use the route manager to transform the path
+          const transformedPath = transformContentPathToRoute(path);
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
           markdownDebugger.verbose(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);

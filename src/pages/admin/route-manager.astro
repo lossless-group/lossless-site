@@ -1,0 +1,27 @@
+---
+/**
+ * Route Manager Admin Page
+ * 
+ * This page provides an interface for managing content path to web route mappings.
+ * It allows administrators to configure how wiki-style links are transformed into web routes.
+ */
+
+import Layout from '@layouts/Layout.astro';
+import RouteManagerComponent from '@components/admin/RouteManager.astro';
+---
+
+<Layout title="Route Manager">
+  <div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-6">Content Route Manager</h1>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <p class="mb-6">
+        This tool allows you to configure how content paths are mapped to web routes.
+        For example, you can map <code>vocabulary/Software Development</code> to 
+        <code>/more-about/software-development</code>.
+      </p>
+      
+      <RouteManagerComponent />
+    </div>
+  </div>
+</Layout>
