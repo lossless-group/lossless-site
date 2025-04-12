@@ -1,0 +1,90 @@
+/**
+ * codeblocks.css
+ * 
+ * Enhances Shiki's syntax highlighting with additional styling.
+ * Provides special styling for custom language blocks.
+ */
+
+/* Base code block styling */
+pre {
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-family: var(--ff-monospace, 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background-color: var(--clr-code-bg, #1e1e1e);
+  border: 1px solid var(--clr-code-border, #333);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Add language indicator to code blocks that aren't in our component */
+pre[data-language]::before {
+  content: attr(data-language);
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--clr-code-lang, #8a8a8a);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* Language-specific styling for standard code blocks */
+pre[data-language="typescript"],
+pre[data-language="javascript"],
+pre[data-language="js"],
+pre[data-language="ts"] {
+  border-left: 4px solid var(--clr-lossless-accent--brightest, #4a9eff);
+}
+
+pre[data-language="html"],
+pre[data-language="xml"],
+pre[data-language="astro"] {
+  border-left: 4px solid var(--clr-lossless-primary-light, #ff6b6b);
+}
+
+pre[data-language="css"],
+pre[data-language="scss"] {
+  border-left: 4px solid var(--clr-lossless-primary-dark, #9c27b0);
+}
+
+pre[data-language="json"] {
+  border-left: 4px solid var(--clr-lossless-attn-action, #f1c40f);
+}
+
+pre[data-language="markdown"],
+pre[data-language="md"] {
+  border-left: 4px solid var(--clr-lossless-primary-glass, #34495e);
+}
+
+/* Special styling for custom languages */
+pre[data-language="litegal"] {
+  border-left: 4px solid #4a9eff;
+}
+
+pre[data-language="dataview"] {
+  border-left: 4px solid #9c27b0;
+}
+
+/* Ensure code spans the full width of the pre element */
+pre code {
+  display: inline-block;
+  min-width: 100%;
+}
+
+/* Add a subtle hover effect */
+pre:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Additional styles for our component-based approach */
+.codeblock-container {
+  margin: 1.5rem 0;
+}
+
+/* Ensure our component styles don't conflict with Shiki's */
+.codeblock-container pre {
+  margin: 0;
+}

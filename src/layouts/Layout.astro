@@ -4,6 +4,8 @@ import Footer from "@basics/Footer.astro";
 import "@styles/global.css";
 import "@styles/starwind.css";
 import "@styles/callouts.css";
+import "@styles/codeblocks.css";
+import SimpleCodeBlock from "@components/codeblocks/SimpleCodeBlock.astro";
 ---
 
 <!doctype html>
@@ -19,6 +21,7 @@ import "@styles/callouts.css";
     <Header />
     <slot />
     <Footer />
+    <SimpleCodeBlock />
   </body>
 </html>
 
