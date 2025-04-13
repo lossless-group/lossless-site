@@ -98,3 +98,372 @@
 [data-animate-stagger].animate-active > *:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
 [data-animate-stagger].animate-active > *:nth-child(4) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
 [data-animate-stagger].animate-active > *:nth-child(5) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+
+/* 
+ * ========================================
+ * INTERACTION STATE TRANSITIONS
+ * ========================================
+ * 
+ * This section defines standardized transitions for interactive states
+ * like hover, focus, and active states across components.
+ * 
+ * It provides:
+ * 1. CSS custom properties for consistent timing and effects
+ * 2. Utility classes for common transition patterns
+ * 3. Component-specific animation mixins
+ * 4. State management standardization
+ */
+
+/* CSS Custom Properties for Transitions */
+:root {
+  /* Timing durations - standardize on multiples of 100ms */
+  --transition-duration-fast: 0.1s;
+  --transition-duration-standard: 0.2s;  /* Most common in our codebase */
+  --transition-duration-slow: 0.3s;
+  --transition-duration-slower: 0.5s;
+
+  /* Timing functions */
+  --transition-timing-standard: ease-in-out;  /* Most common in our codebase */
+  --transition-timing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-timing-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-timing-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  
+  /* Transform values */
+  --transform-elevation-small: translateY(-2px);
+  --transform-elevation-medium: translateY(-4px);
+  --transform-elevation-large: translateY(-8px);
+  
+  /* Color mix values for hover states */
+  --color-mix-hover-subtle: 5%;  /* Very subtle lightening amount */
+  --color-mix-hover-light: 20%;  /* Standard lightening amount */
+  --color-mix-hover-medium: 40%;
+  --color-mix-hover-strong: 60%;
+  
+  /* Custom colors for hover states */
+  --clr-lossless-primary-dark-80: #2a2a35;  /* Slightly lighter than primary-dark */
+  --clr-tagchip-hover: #ff5500;  /* Extremely bright orange for testing */
+  --clr-tagchip-border-hover: #ffaa00;  /* Bright yellow border for testing */
+  
+  /* Starwind compatibility - map our variables to Starwind variables */
+  --default-transition-duration: var(--transition-duration-standard);
+  --default-transition-timing-function: var(--transition-timing-standard);
+}
+
+/* 
+ * ========================================
+ * UTILITY TRANSITION CLASSES
+ * ========================================
+ */
+
+/* Transition utility classes */
+.transition-all {
+  transition-property: all;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.transition-borders {
+  transition-property: border-color, border-width, border-style, border-radius;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.transition-shadow {
+  transition-property: box-shadow;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+/* Duration modifiers */
+.transition-fast {
+  transition-duration: var(--transition-duration-fast);
+}
+
+.transition-slow {
+  transition-duration: var(--transition-duration-slow);
+}
+
+.transition-slower {
+  transition-duration: var(--transition-duration-slower);
+}
+
+/* Timing function modifiers */
+.transition-smooth {
+  transition-timing-function: var(--transition-timing-smooth);
+}
+
+.transition-bounce {
+  transition-timing-function: var(--transition-timing-bounce);
+}
+
+.transition-sharp {
+  transition-timing-function: var(--transition-timing-sharp);
+}
+
+/* 
+ * ========================================
+ * HOVER EFFECT UTILITY CLASSES
+ * ========================================
+ */
+
+.hover-elevate {
+  transition-property: transform;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.hover-elevate:hover {
+  transform: var(--transform-elevation-small);
+}
+
+.hover-elevate-medium:hover {
+  transform: var(--transform-elevation-medium);
+}
+
+.hover-elevate-large:hover {
+  transform: var(--transform-elevation-large);
+}
+
+/* Size increase on hover */
+.hover-grow {
+  transition-property: transform;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.hover-grow:hover {
+  transform: scale(1.05);
+}
+
+/* Combined elevation and growth */
+.hover-elevate-grow {
+  transition-property: transform;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.hover-elevate-grow:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.hover-lighten {
+  transition-property: background-color;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.hover-lighten-subtle {
+  transition-property: background-color, border-color;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.hover-lighten-subtle:hover {
+  background: var(--clr-tagchip-hover);
+  border-color: var(--clr-tagchip-border-hover);
+}
+
+.hover-lighten:hover {
+  background: color-mix(
+    in oklab,
+    var(--clr-lossless-primary-glass),
+    var(--clr-lossless-primary-dark) var(--color-mix-hover-light)
+  );
+}
+
+.hover-lighten-medium:hover {
+  background: color-mix(
+    in oklab,
+    var(--clr-lossless-primary-glass),
+    var(--clr-lossless-primary-dark) var(--color-mix-hover-medium)
+  );
+}
+
+.hover-lighten-strong:hover {
+  background: color-mix(
+    in oklab,
+    var(--clr-lossless-primary-glass),
+    var(--clr-lossless-primary-dark) var(--color-mix-hover-strong)
+  );
+}
+
+/* Test class for debugging hover effects */
+.hover-test {
+  transition-property: background-color, border-color, color, transform;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.hover-test:hover {
+  background-color: #ff0000 !important; /* Bright red */
+  border: 2px solid #ffff00 !important; /* Bright yellow border */
+  color: #ffffff !important; /* White text */
+  transform: scale(1.1) translateY(-3px) !important; /* Larger scale and more elevation */
+}
+
+/* 
+ * ========================================
+ * COMPONENT-SPECIFIC ANIMATION MIXINS
+ * ========================================
+ */
+
+/* Card hover effects */
+.card-hover-effect {
+  transition-property: transform, background-color, box-shadow;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+.card-hover-effect:hover {
+  transform: var(--transform-elevation-medium);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  background: color-mix(
+    in oklab,
+    var(--clr-lossless-primary-glass),
+    var(--clr-lossless-primary-dark) var(--color-mix-hover-light)
+  );
+}
+
+/* Link hover effects */
+.link-hover-effect {
+  transition-property: color;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-smooth);
+}
+
+.link-hover-effect:hover {
+  color: var(--clr-lossless-accent--brightest);
+}
+
+/* Internal link hover effect */
+.internal-link-hover-effect {
+  border-bottom: 1px dashed var(--clr-lossless-accent--brightest);
+  transition-property: border-bottom-style;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-smooth);
+}
+
+.internal-link-hover-effect:hover {
+  border-bottom-style: solid;
+}
+
+/* 
+ * ========================================
+ * STATE MANAGEMENT STANDARDIZATION
+ * ========================================
+ */
+
+/* State-based transitions */
+[data-state] {
+  transition-property: color, background-color, border-color, transform, opacity;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+[data-state="active"] {
+  /* Active state styles - to be customized per component */
+  opacity: 1;
+}
+
+[data-state="hover"] {
+  /* Hover state styles - to be customized per component */
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+[data-state="focus"] {
+  /* Focus state styles - to be customized per component */
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: 2px;
+}
+
+/* 
+ * ========================================
+ * STARWIND COMPONENT INTEGRATION
+ * ========================================
+ */
+
+/* State-based transitions for Starwind components */
+[data-state] {
+  transition-property: color, background-color, border-color, transform, opacity;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+/* Active state styles */
+[data-state="active"] {
+  opacity: 1;
+}
+
+/* Hover state styles */
+[data-state="hover"] {
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+/* Focus state styles */
+[data-state="focus"] {
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: 2px;
+}
+
+/* Compatibility class for Starwind components */
+.starwind-transition {
+  transition-property: color, background-color, border-color, transform, opacity;
+  transition-duration: var(--transition-duration-standard);
+  transition-timing-function: var(--transition-timing-standard);
+}
+
+/* Extend the existing starwind-transition-colors class */
+.starwind-transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke,
+    --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+  transition-timing-function: var(--transition-timing-standard);
+  transition-duration: var(--transition-duration-standard);
+}
+
+/* Accessibility - respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all,
+  .transition-colors,
+  .transition-transform,
+  .transition-borders,
+  .transition-opacity,
+  .transition-shadow,
+  .hover-elevate,
+  .hover-lighten,
+  .card-hover-effect,
+  .link-hover-effect,
+  .internal-link-hover-effect,
+  [data-state],
+  .starwind-transition,
+  .starwind-transition-colors,
+  .hover-grow,
+  .hover-elevate-grow,
+  .hover-lighten-subtle {
+    transition-duration: 0.1s !important;
+    transition-property: color, background-color !important;
+    transform: none !important;
+  }
+  .hover-test {
+    transition-duration: 0.1s !important;
+  }
+}

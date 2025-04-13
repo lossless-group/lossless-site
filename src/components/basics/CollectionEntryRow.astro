@@ -28,7 +28,7 @@ interface Props {
 const { class: className, isHighlighted = false } = Astro.props;
 ---
 
-<div class:list={["collection-entry-row", className, { highlighted: isHighlighted }]}>
+<div class:list={["collection-entry-row card-hover-effect", className, { highlighted: isHighlighted }]}>
   <slot />
 </div>
 
@@ -50,17 +50,7 @@ const { class: className, isHighlighted = false } = Astro.props;
     );
     border: 1px solid var(--clr-lossless-ui-btn-border);
     
-    /* Transitions */
-    transition: all 0.2s ease-in-out;
-  }
-
-  .collection-entry-row:hover {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 20%
-    );
-    transform: translateY(-2px);
+    /* Removed transition property - now handled by card-hover-effect class */
   }
 
   .collection-entry-row.highlighted {

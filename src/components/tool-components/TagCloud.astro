@@ -61,9 +61,11 @@ const maxHeight = visibleTagRowLimit * rowHeight;
 
   /* Show scrollbar on hover if content overflows */
   .tool-tags:hover {
-    background: calc(var(--clr-lossless-primary-dark) * 80%);
+    background: var(--clr-lossless-primary-dark-80);
     border: 0.1em solid var(--clr-lossless-primary-glass);
     border-radius: 1em;
+    overflow-y: auto; /* Change from hidden to auto on hover */
+    z-index: 5; /* Lower z-index to ensure tag chips appear above */
   }
 
   /* Customize scrollbar */

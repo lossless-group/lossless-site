@@ -1,5 +1,5 @@
 ---
-import TagChip from '@tool-components/TagChip.astro';
+import TagChip from './TagChip.astro';
 
 interface Props {
   allRenderedTags: string[];
@@ -66,7 +66,7 @@ const sortedTags = allRenderedTags.sort((a, b) => {
   });
 
   // Handle input enter key
-  input?.addEventListener('keydown', (e) => {
+  input?.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       const searchValue = (e.target as HTMLInputElement).value.trim();
       if (searchValue) {
@@ -123,18 +123,14 @@ const sortedTags = allRenderedTags.sort((a, b) => {
   .tag-column {
     flex-direction: column;
     display: flex;
-    gap: 0.2em;
+    gap: 0.5em;
     height: 100%;
     width: max-content;
-    overflow: hidden;
-    transition: overflow 0.2s ease;
-  }
-
-  /* Only show scrollbar and enable scroll on hover */
-  .tag-column:hover {
     overflow-y: auto;
+    padding: 0.5em;
+    padding-right: 1em;
   }
-
+  
   /* Customize scrollbar */
   .tag-column::-webkit-scrollbar {
     width: 6px;

@@ -18,15 +18,31 @@ const { tag, count = 0, includeCount = false } = Astro.props;
     color: var(--clr-lossless-primary-glass);
     border-radius: 0.25em;
     white-space: nowrap;
-    transition: all 0.5s ease-in-out;
+    /* Removed transition property - now handled by transition-colors class */
     padding: 0.2em 0.3em;
     display: inline-flex;
     align-items: center;
     height: fit-content;
+    position: relative; /* Add position relative */
+    z-index: 20; /* Ensure tag chips are above the tag cloud */
+    cursor: pointer; /* Add cursor pointer to indicate clickable */
+    border: 1px solid transparent; /* Add transparent border for hover effect */
     & p {
       font-size: var(--fs-200);
       margin: 0;
     }
+  }
+
+  /* Direct hover style in the component to ensure it works */
+  .tool-tag:hover {
+    background-color: #3a3a45; /* Subtle darker color */
+    border-color: var(--clr-lossless-accent--brightest); /* Accent color border */
+    color: var(--clr-lossless-primary-glass--lighter); /* Slightly lighter text */
+    transform: translateY(-2px) scale(1.05); /* Subtle elevation and growth */
+    transition: background-color 0.2s ease-in-out, 
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                transform 0.2s ease-in-out;
   }
 
   .count {
@@ -35,11 +51,5 @@ const { tag, count = 0, includeCount = false } = Astro.props;
     font-size: 0.9em;
   }
 
-  .tool-tag:hover {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 20%
-    );
-  }
+  /* Removed .tool-tag:hover styles - now handled by hover-lighten class */
 </style>
