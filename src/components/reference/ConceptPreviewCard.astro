@@ -1,0 +1,89 @@
+---
+/**
+ * ConceptPreviewCard.astro
+ * 
+ * This component renders a preview card for a concept from the concepts collection.
+ * It displays the concept title and description (if any) in a consistent card format.
+ * 
+ * @component
+ * @param {Object} entry - The concept entry object from the content collection
+ * @param {string} entry.id - The ID of the concept entry (filename)
+ * @param {Object} entry.data - The frontmatter data of the concept entry
+ * @param {string} entry.data.title - The title of the concept
+ * @param {string} entry.data.description - Optional description of the concept
+ * @param {string} entry.data.slug - Optional custom slug for the URL
+ */
+
+// Define the props interface for type safety
+interface Props {
+  entry: {
+    id: string;
+    data: {
+      title: string;
+      description?: string;
+      slug?: string;
+    };
+  };
+}
+
+// Destructure the entry from props
+const { entry } = Astro.props;
+
+// Generate the URL for the concept
+// If a slug is provided in the frontmatter, use it; otherwise, generate from the filename
+const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`;
+---
+
+<div class="concept-card">
+  <h3 class="concept-card__title">
+    <a href={url} class="concept-card__link">
+      {entry.data.title}
+    </a>
+  </h3>
+  <p class="concept-card__description">
+    {entry.data.description || "Learn more about this concept..."}
+  </p>
+</div>
+
+<style>
+  /**
+   * ConceptPreviewCard Styles
+   * 
+   * These styles define the appearance of concept preview cards
+   * using the project's CSS variables for consistent theming.
+   * 
+   * The styles maintain visual consistency with VocabularyPreviewCard
+   * while allowing for concept-specific styling variations.
+   */
+
+  /* Card container */
+  .concept-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Card title */
+  .concept-card__title {
+    font-size: 1rem; /* text-base */
+    font-weight: 400; /* font-bold */
+    margin-bottom: 0.5rem; /* mb-2 */
+  }
+
+  /* Card link */
+  .concept-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  /* Card link hover state */
+  .concept-card__link:hover {
+    text-decoration: underline;
+  }
+
+  /* Card description */
+  .concept-card__description {
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 300; /* font-bold */
+    color: var(--white--pure--70p, hsla(0, 0%, 100%, .7)); /* text-gray-300 */
+  }
+</style>

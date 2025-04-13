@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
+import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
 
 // Get entries from concepts collection
 // Use type assertion to avoid TypeScript errors until Astro regenerates types
@@ -45,16 +46,7 @@ conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {conceptsEntries.map(entry => (
-        <div class="bg-gray-800 p-4 rounded-lg">
-          <h2 class="text-sm font-bold mb-2">
-            <a href={`/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`} class="text-blue-400 hover:underline">
-              {entry.data.title}
-            </a>
-          </h2>
-          <p class="text-xs text-gray-300">
-            {entry.data.description || "Learn more about this concept..."}
-          </p>
-        </div>
+        <ConceptPreviewCard entry={entry} />
       ))}
     </div>
   </div>

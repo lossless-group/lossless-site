@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
+import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
 
 // Get entries from vocabulary collection
 const vocabularyEntries = await getCollection('vocabulary');
@@ -44,18 +45,7 @@ vocabularyEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {vocabularyEntries.map(entry => (
-        <div class="bg-gray-800 p-4 rounded-lg">
-          <h2 class="text-sm font-bold mb-2">
-            <a href={`/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`} class="text-blue-400 hover:underline">
-              {entry.data.title}
-            </a>
-          </h2>
-          {entry.data.aliases && entry.data.aliases.length > 0 && (
-            <p class="text-xs text-gray-400 mb-2">
-              Also known as: {entry.data.aliases.join(', ')}
-            </p>
-          )}
-        </div>
+        <VocabularyPreviewCard entry={entry} />
       ))}
     </div>
   </div>

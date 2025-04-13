@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
+import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
 
 // Get entries from both collections
 const vocabularyEntries = await getCollection('vocabulary');
@@ -62,18 +64,7 @@ conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {vocabularyEntries.map(entry => (
-          <div class="bg-gray-800 p-4 rounded-lg">
-            <h3 class="text-sm font-bold mb-2">
-              <a href={`/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`} class="text-blue-400 hover:underline">
-                {entry.data.title}
-              </a>
-            </h3>
-            {entry.data.aliases && entry.data.aliases.length > 0 && (
-              <p class="text-xs text-gray-400 mb-2">
-                Also known as: {entry.data.aliases.join(', ')}
-              </p>
-            )}
-          </div>
+          <VocabularyPreviewCard entry={entry} />
         ))}
       </div>
     </section>
@@ -87,16 +78,7 @@ conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {conceptsEntries.map(entry => (
-          <div class="bg-gray-800 p-4 rounded-lg">
-            <h3 class="text-sm font-bold mb-2">
-              <a href={`/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`} class="text-blue-400 hover:underline">
-                {entry.data.title}
-              </a>
-            </h3>
-            <p class="text-xs text-gray-300">
-              {entry.data.description || "Learn more about this concept..."}
-            </p>
-          </div>
+          <ConceptPreviewCard entry={entry} />
         ))}
       </div>
     </section>
