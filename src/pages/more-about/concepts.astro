@@ -6,6 +6,27 @@ import Layout from '@layouts/Layout.astro';
 // Use type assertion to avoid TypeScript errors until Astro regenerates types
 const conceptsEntries = await getCollection('concepts' as any) as any[];
 
+// Helper function to convert filename to proper case
+function toProperCase(str) {
+  // Handle hyphenated or underscored filenames
+  return str
+    .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+// Process entries to ensure they all have titles
+// For entries without titles, use the filename as the title in proper case
+conceptsEntries.forEach(entry => {
+  if (!entry.data.title) {
+    const filename = entry.id.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    entry.data.title = toProperCase(baseFilename);
+  }
+});
+
 // Sort entries alphabetically by title
 conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
 ---
@@ -25,12 +46,12 @@ conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {conceptsEntries.map(entry => (
         <div class="bg-gray-800 p-4 rounded-lg">
-          <h2 class="text-xl font-bold mb-2">
-            <a href={`/more-about/${entry.data.slug}`} class="text-blue-400 hover:underline">
+          <h2 class="text-sm font-bold mb-2">
+            <a href={`/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`} class="text-blue-400 hover:underline">
               {entry.data.title}
             </a>
           </h2>
-          <p class="text-gray-300">
+          <p class="text-xs text-gray-300">
             {entry.data.description || "Learn more about this concept..."}
           </p>
         </div>
