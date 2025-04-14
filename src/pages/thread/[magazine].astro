@@ -1,0 +1,43 @@
+---
+// [magazine].astro
+// Dynamic page for rendering a magazine-style layout with prompt/content cards.
+// Loads prompt data from Astro collections and passes it as a passthrough array to the layout.
+// Follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
+
+import Layout from '@layouts/Layout.astro';
+import PostCardContentLayout from '../../layouts/PostCardContentLayout.astro';
+import { getCollection } from 'astro:content';
+
+// Load all prompt entries from the prompts collection
+const promptEntries = await getCollection('prompts');
+
+// Transform the entries to include a URL property and flatten the structure for the card components
+const contentThreads = promptEntries.map(entry => {
+  // Extract the filename without extension to create a slug
+  const pathParts = entry.id.split('/');
+  const filename = pathParts[pathParts.length - 1].replace(/\.md$/, '');
+  const slug = filename.toLowerCase().replace(/\s+/g, '-');
+  
+  return {
+    ...entry.data,
+    id: entry.id,
+    url: `/prompts/${slug}`, // Generate URL from filename
+    // Include any other properties needed by the card components
+  };
+});
+
+console.log("DEBUG: Transformed contentThreads:", contentThreads);
+---
+<Layout title="Vibe Coding Prompts">
+  <PostCardContentLayout contentThreads={contentThreads} />
+</Layout>
+
+<!--
+  [magazine].astro loads prompt data from the Astro content collection and transforms it
+  to match the expected structure for the card components.
+
+  The transformation adds a URL property and creates a slug from the filename.
+  All props are passed through and deconstructed as needed by child components.
+  No type enforcement is used; this is required by .windsurfrules.
+  Any transformation logic occurs here, not in the card/layout components.
+-->

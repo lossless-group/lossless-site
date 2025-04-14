@@ -9,12 +9,12 @@
     "imageUrl": "https://i.imgur.com/ueZ058L.png"
   },
   {
-    "label": "Collaborative Coding",
-    "title": "Real-time Team Collaboration",
-    "details": "Work together seamlessly with your team in real-time. Changes sync instantly across all devices, with smart conflict resolution and version history. Boost productivity and keep everyone on the same page with our collaborative notebook environment.",
+    "label": "Vibe Coding, Done Right",
+    "title": "A prompt library for AI-powered coding, battle tested",
+    "details": "Build on our many months of prompt engineering for Vibe Coding. Our prompts have many iteration cycles and work together in concert to help you generate better code faster, and get to working products with less frustration.",
     "imageSide": "left",
     "ctaText": "Try It Now",
-    "ctaUrl": "#",
+    "ctaUrl": "/thread/prompts",
     "imageUrl": "/visuals/Convey__Picto__Assembly-Line.svg"
   },
   {

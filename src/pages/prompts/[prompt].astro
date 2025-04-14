@@ -1,0 +1,169 @@
+---
+// [prompt].astro
+// Dynamic route for individual prompt pages
+// Loads a specific prompt from the content collection and renders it
+// Follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
+
+import { getCollection, render } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import path from 'path';
+
+// Get the prompt parameter from the URL
+const { prompt } = Astro.params;
+console.log('Prompt param:', prompt);
+
+// Get all prompt entries from the collection
+const promptEntries = await getCollection('prompts');
+
+console.log('Available prompts:', {
+  promptEntries: promptEntries.map(e => e.id),
+  total: promptEntries.length
+});
+
+// Find the matching prompt by filename without extension
+const promptEntry = promptEntries.find(e => {
+  const filename = path.basename(e.id, '.md');
+  // Convert filename to slug format for comparison
+  const slug = filename.toLowerCase().replace(/\s+/g, '-');
+  return slug === prompt;
+});
+
+console.log('Found prompt?', {
+  searchingFor: prompt,
+  found: !!promptEntry,
+  matchingEntry: promptEntry ? {
+    id: promptEntry.id,
+    data: promptEntry.data
+  } : null
+});
+
+// If no prompt is found, redirect to the prompts index page
+if (!promptEntry) {
+  return Astro.redirect('/thread/magazine');
+}
+
+// Render the content using Astro's built-in markdown rendering
+const { Content } = await render(promptEntry);
+
+// Extract data from the entry with proper fallbacks
+const { 
+  title = path.basename(promptEntry.id, '.md'),
+  tags = [],
+  authors = [],
+  lede,
+  date_authored_initial_draft,
+  ...restData
+} = promptEntry.data as {
+  title?: string;
+  tags: any[];
+  authors?: string[];
+  lede?: string;
+  date_authored_initial_draft?: string;
+  [key: string]: any;
+};
+
+// Combine everything into a single object for the component
+const promptData = {
+  title,
+  tags,
+  authors,
+  lede,
+  date_authored_initial_draft,
+  ...restData,
+  fileName: prompt
+};
+
+---
+
+<Layout title={promptData.title || 'Prompt'}>
+  <article class="prose mx-auto">
+    <header>
+      {promptData.title && <h1>{promptData.title}</h1>}
+      {promptData.lede && <p class="lede">{promptData.lede}</p>}
+      <div class="meta">
+        {promptData.date_authored_initial_draft && (
+          <time datetime={new Date(promptData.date_authored_initial_draft).toISOString()}>
+            {new Date(promptData.date_authored_initial_draft).toLocaleDateString()}
+          </time>
+        )}
+        {promptData.authors && promptData.authors.length > 0 && (
+          <div class="authors">
+            By: {promptData.authors.join(', ')}
+          </div>
+        )}
+      </div>
+    </header>
+    <div class="content">
+      <Content />
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .prose {
+    color: var(--clr-lossless-primary-light);
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  header {
+    margin-bottom: 2rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .lede {
+    font-size: 1.2rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 1rem;
+  }
+  
+  .meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light);
+    opacity: 0.8;
+  }
+  
+  .content :global(h2) {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+  
+  .content :global(h3) {
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+  
+  .content :global(p) {
+    margin-bottom: 1.2rem;
+    line-height: 1.3;
+  }
+  
+  .content :global(ul), .content :global(ol) {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  
+  .content :global(a) {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: none;
+  }
+  
+  .content :global(a:hover) {
+    text-decoration: underline;
+  }
+</style>

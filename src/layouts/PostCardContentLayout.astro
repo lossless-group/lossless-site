@@ -1,0 +1,90 @@
+---
+// PostCardContentLayout.astro
+// Receives an array of objects as the 'contentThreads' prop.
+// Renders the first as a feature card, the rest as standard cards.
+// Follows passthrough pattern: NO type safety, NO explicit interfaces.
+import { getCollection } from "astro:content";
+
+import PostCardFeature from '../components/articles/PostCardFeature.astro';
+import PostCard from '../components/articles/PostCard.astro';
+
+const { contentThreads = [] } = Astro.props;
+---
+
+{contentThreads.length === 0 ? (
+  <div class="magazine-empty">No content available.</div>
+) : (
+  <div class="magazine-container">
+    {/* Feature card displayed separately, outside the grid */}
+    {contentThreads.length > 0 && (
+      <div class="feature-card-container">
+        <PostCardFeature {...contentThreads[0]} />
+      </div>
+    )}
+    
+    {/* Regular cards in a grid layout */}
+    {contentThreads.length > 1 && (
+      <div class="magazine-grid">
+        {contentThreads.slice(1).map((item) => (
+          <PostCard {...item} />
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
+<!--
+  PostCardContentLayout.astro expects:
+    - contentThreads: array of objects (each with at least the fields needed by PostCard/PostCardFeature)
+  No type enforcement is used; this is required by .windsurfrules.
+  Handles empty arrays gracefully.
+-->
+
+<style>
+  /* Container for the entire magazine layout */
+  .magazine-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8, 2rem);
+    margin: 2rem auto;
+    max-width: 92vw;
+  }
+
+  /* Feature card container */
+  .feature-card-container {
+    width: 100%;
+    margin-bottom: var(--spacing-4, 1rem);
+  }
+
+  /* Magazine grid layout: responsive, clean, visually balanced */
+  .magazine-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6, 1.5rem);
+  }
+
+  /* Medium screens: 2 columns */
+  @media (min-width: 768px) {
+    .magazine-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Large screens: 3 columns */
+  @media (min-width: 1024px) {
+    .magazine-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Empty state styling */
+  .magazine-empty {
+    color: #fff;
+    background: #222c;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.25rem;
+    margin: 2rem 0;
+  }
+</style>

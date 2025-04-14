@@ -64,6 +64,17 @@ const conceptsCollection = defineCollection({
   })
 });
 
+const promptsCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/prompts"}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags
+      : data.tags ? [data.tags]
+      : []
+  }))
+});
+
 const changelogContentCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/changelog--content"}),
   schema: z.object({}).passthrough().transform((data) => ({
@@ -123,7 +134,8 @@ export const paths = {
   'concepts': '../content/concepts',
   'reports': '../content/reports',
   'tooling': '../content/tooling',
-  'vocabulary': '../content/vocabulary'
+  'vocabulary': '../content/vocabulary',
+  'prompts': '../content/lost-in-public/prompts'
 };
 
 // Export the collections
@@ -135,5 +147,6 @@ export const collections = {
   'changelog--code': changelogCodeCollection,
   'reports': reportCollection,
   'pages': pagesCollection,
-  'tooling': toolCollection
+  'tooling': toolCollection,
+  'prompts': promptsCollection
 };
