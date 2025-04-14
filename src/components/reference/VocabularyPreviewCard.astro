@@ -31,7 +31,7 @@ const { entry } = Astro.props;
 
 // Generate the URL for the vocabulary term
 // If a slug is provided in the frontmatter, use it; otherwise, generate from the filename
-const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLowerCase().replace(/\s+/g, '-')}`;
+const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').replace(/\s+/g, '-')}`;
 ---
 
 <div class="vocabulary-card">
@@ -60,6 +60,11 @@ const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLo
     background-color: var(--clr-lossless-primary-dark, #19141D);
     padding: 1rem;
     border-radius: 0.5rem;
+    border: 1px solid transparent; /* Add transparent border for hover effect */
+    transition: background-color 0.2s ease-in-out, 
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out, /* Note: this affects ALL text color */
+                transform 0.2s ease-in-out;
   }
 
   /* Card title */
@@ -74,9 +79,12 @@ const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').toLo
     color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
   }
 
-  /* Card link hover state */
-  .vocabulary-card__link:hover {
-    text-decoration: underline;
+  /* Custom hover effect mirroring TagChip */
+  .vocabulary-card:hover {
+    background-color: #3a3a45; /* Subtle darker color from TagChip */
+    border-color: var(--clr-lossless-accent--brightest); /* Accent color border */
+    color: var(--clr-lossless-primary-glass--lighter); /* Slightly lighter text from TagChip */
+    transform: translateY(-2px) scale(1.05); /* Subtle elevation and growth from TagChip */
   }
 
   /* Card aliases */

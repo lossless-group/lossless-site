@@ -23,7 +23,7 @@ const defaultRouteMappings: RouteMapping[] = [
   },
   {
     contentPath: 'lost-in-public/prompts',
-    routePath: 'prompts'
+    routePath: 'thread/prompts'
   },
   // Add more mappings as needed
 ];

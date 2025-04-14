@@ -2,85 +2,95 @@
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
-import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
-import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import type { CollectionEntry } from 'astro:content';
 
-// Get entries from both collections
-const vocabularyEntries = await getCollection('vocabulary');
-// Use type assertion to avoid TypeScript errors until Astro regenerates types
-const conceptsEntries = await getCollection('concepts' as any) as any[];
-
-// Helper function to convert filename to proper case
-function toProperCase(str) {
-  // Handle hyphenated or underscored filenames
-  return str
-    .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+interface ReferenceItem {
+  id: string;
+  slug: string;
+  collection: 'vocabulary' | 'concepts';
+  data: {
+    title: string;
+    slug?: string;
+    aliases?: string[];
+    description?: string;
+  };
 }
 
-// Process entries to ensure they all have titles
-// For entries without titles, use the filename as the title in proper case
-vocabularyEntries.forEach(entry => {
-  if (!entry.data.title) {
+const vocabularyEntries = await getCollection('vocabulary');
+const conceptsEntries = await getCollection('concepts');
+
+// Helper function to convert filenames to titles, preserving acronym casing
+function toProperCase(str: string): string {
+  return str
+    .replace(/[-_]/g, ' ') // Replace hyphens/underscores with spaces
+    .split(' ')           // Split into words
+    .map(word => {
+      if (!word) return ''; // Handle empty strings if they occur
+      const firstChar = word.charAt(0).toUpperCase(); // Capitalize the first letter
+      const restOfWord = word.slice(1); // Get the rest of the word *as is*
+      return firstChar + restOfWord; // Combine them
+    })
+    .join(' ');           // Join words back with spaces
+}
+
+// Process entries to add titles from filenames if missing and sort
+function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
+  entries.forEach(entry => {
+    // Remove the check again: always generate title from filename
     const filename = entry.id.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    entry.data.title = toProperCase(baseFilename);
-  }
-});
+    (entry.data as any).title = toProperCase(baseFilename);
+  });
+  entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
+  return entries;
+}
 
-conceptsEntries.forEach(entry => {
-  if (!entry.data.title) {
-    const filename = entry.id.replace(/\.md$/, '');
-    const filenameParts = filename.split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-    entry.data.title = toProperCase(baseFilename);
-  }
-});
+const processedVocabularyEntries = processEntries(vocabularyEntries);
+const processedConceptsEntries = processEntries(conceptsEntries);
 
-// Sort entries alphabetically by title
-vocabularyEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
-conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => ({
+  id: entry.id,
+  slug: (entry as any).slug, // Cast to any to access Astro-generated slug
+  collection: entry.collection,
+  data: entry.data as ReferenceItem['data'], // Assert data structure matches
+}));
+
+const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => ({
+  id: entry.id,
+  slug: (entry as any).slug, // Cast to any to access Astro-generated slug
+  collection: entry.collection,
+  data: entry.data as ReferenceItem['data'], // Assert data structure matches
+}));
 ---
 
 <Layout title="Reference - Vocabulary & Concepts">
   <div class="container mx-auto py-8 px-4">
     <h1 class="text-3xl font-bold mb-6">Reference Library</h1>
     <p class="text-lg mb-8">Browse our collection of vocabulary terms and conceptual frameworks.</p>
-    
-    <!-- Navigation tabs -->
+
     <div class="flex gap-4 mb-8">
       <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
       <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
       <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Concepts</a>
     </div>
-    
-    <!-- Vocabulary Section -->
+
     <section class="mb-12">
       <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
       <p class="mb-6">Terms and definitions used throughout our work.</p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {vocabularyEntries.map(entry => (
-          <VocabularyPreviewCard entry={entry} />
-        ))}
-      </div>
+
+      <ReferenceGrid items={vocabularyItems} />
     </section>
-    
+
     <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
-    
-    <!-- Concepts Section -->
+
     <section>
       <h2 class="text-2xl font-bold mb-4">Concepts</h2>
       <p class="mb-6">Important ideas and frameworks we use in our work.</p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {conceptsEntries.map(entry => (
-          <ConceptPreviewCard entry={entry} />
-        ))}
-      </div>
+
+      <ReferenceGrid items={conceptItems} />
     </section>
+
   </div>
 </Layout>
