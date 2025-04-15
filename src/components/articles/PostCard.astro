@@ -7,7 +7,7 @@
 // Accept both Astro collection entry and flat frontmatter object
 const { data, ...rest } = Astro.props;
 const props = data ? data : Astro.props;
-const { title, lede, authors, tags, date_authored_initial_draft, url, summary, image } = props;
+const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
 
 // Format date if it exists
 let formattedDate = '';
@@ -30,7 +30,7 @@ if (date_authored_initial_draft) {
 ---
 
 <article class="post-card card-hover-effect">
-  {image && <img src={image} alt={title} class="post-card__image" />}
+  {banner_image && <img src={banner_image} alt={title} class="post-card__image" />}
   <div class="content-wrapper">
     <div class="post-card__header">
       <h2 class="post-card__title"><a href={url}><span class="text-wrapper">{title}</span></a></h2>
