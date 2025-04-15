@@ -166,7 +166,6 @@ const initialSortedTags = getSortedTags(allTags, initialSortType);
             includeCount={true} 
             id={`tag-${tag}`}
             data-tag={tag}
-            data-count={tagFrequencies[tag]}
             aria-label={`Click to filter by ${trainCaseToNormalCase(tag)}`}
             title={`Click to filter by ${trainCaseToNormalCase(tag)}`}
           />
@@ -267,15 +266,6 @@ const initialSortedTags = getSortedTags(allTags, initialSortType);
     outline-offset: 2px;
   }
   
-  /* Tag list styling */
-  .tag-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-  }
-  
   /* No tags message */
   .no-tags-message {
     color: var(--clr-body);
@@ -344,6 +334,15 @@ const initialSortedTags = getSortedTags(allTags, initialSortType);
     background: var(--clr-lossless-primary-glass);
     border-radius: 3px;
   }
+  
+  /* Tag list styling */
+  .tag-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
 </style>
 
 <!-- Client-side sorting functionality -->
@@ -383,36 +382,79 @@ const initialSortedTags = getSortedTags(allTags, initialSortType);
   function renderTags() {
     const sortedTags = getSortedTags(tags, currentSortType);
     
-    // Clear current list
-    tagList.innerHTML = '';
+    // Get all existing TagChip components by their data-tag attribute
+    const tagChips = Array.from(tagList.children).filter(child => 
+      child.hasAttribute('data-tag') || (child.tagName === 'A' && child.classList.contains('tool-tag'))
+    );
     
-    // Add sorted tags
+    // Create a document fragment for efficient DOM manipulation
+    const fragment = document.createDocumentFragment();
+    
+    // For debugging
+    console.log('Sorted tags:', sortedTags);
+    console.log('Found tag chips:', tagChips.length);
+    
+    // Reorder the TagChip components according to the sorted tags
     sortedTags.forEach(tag => {
-      // Create a new tag chip element
-      const chip = document.createElement('a');
-      chip.href = `/toolkit/${encodeURIComponent(tag)}`;
-      chip.id = `tag-${tag}`;
-      chip.className = 'tool-tag';
-      chip.dataset.tag = tag;
-      chip.dataset.count = tagFrequencies[tag];
-      chip.setAttribute('aria-label', `Click to filter by ${trainCaseToNormalCase(tag)}`);
-      chip.setAttribute('title', `Click to filter by ${trainCaseToNormalCase(tag)}`);
+      // Find the TagChip component for this tag - try multiple ways to identify it
+      const tagChip = tagChips.find(chip => 
+        chip.getAttribute('data-tag') === tag || 
+        (chip.querySelector('p') && chip.querySelector('p').textContent.trim().startsWith(tag))
+      );
       
-      // Create the tag content
-      const tagContent = document.createElement('p');
-      tagContent.textContent = tag;
-      
-      // Add count if available
-      if (tagFrequencies[tag] > 0) {
-        const countSpan = document.createElement('span');
-        countSpan.className = 'count';
-        countSpan.textContent = `(${tagFrequencies[tag]})`;
-        tagContent.appendChild(countSpan);
+      if (tagChip) {
+        // Move this TagChip to the fragment in the new order
+        fragment.appendChild(tagChip);
+        console.log(`Appended tag: ${tag}`);
+      } else {
+        console.log(`Could not find chip for tag: ${tag}`);
       }
-      
-      chip.appendChild(tagContent);
-      tagList.appendChild(chip);
     });
+    
+    // Clear the tag list and add the reordered TagChips
+    while (tagList.firstChild) {
+      tagList.removeChild(tagList.firstChild);
+    }
+    
+    // If we have reordered tags, append them
+    if (fragment.childElementCount > 0) {
+      tagList.appendChild(fragment);
+      console.log(`Appended ${fragment.childElementCount} tags to the list`);
+    } else {
+      // If no tags were found, check if we need to show a message
+      if (sortedTags.length > 0) {
+        console.error('Tags were sorted but none were found in the DOM');
+        // Try to recreate the tags as a fallback
+        sortedTags.forEach(tag => {
+          const chip = document.createElement('a');
+          chip.href = `/toolkit/${encodeURIComponent(tag)}`;
+          chip.className = 'tool-tag';
+          chip.setAttribute('data-tag', tag);
+          
+          const tagContent = document.createElement('p');
+          tagContent.textContent = tag;
+          
+          if (tagFrequencies[tag] > 0) {
+            const countSpan = document.createElement('span');
+            countSpan.className = 'count';
+            countSpan.textContent = `(${tagFrequencies[tag]})`;
+            tagContent.appendChild(countSpan);
+          }
+          
+          chip.appendChild(tagContent);
+          fragment.appendChild(chip);
+        });
+        
+        tagList.appendChild(fragment);
+        console.log('Recreated tags as fallback');
+      } else {
+        // No tags to show
+        const noTagsMessage = document.createElement('p');
+        noTagsMessage.className = 'no-tags-message';
+        noTagsMessage.textContent = 'No tags available';
+        tagList.appendChild(noTagsMessage);
+      }
+    }
   }
   
   // Update icons based on current sort state
