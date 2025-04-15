@@ -66,6 +66,21 @@ export default defineConfig({
               { match: '\\b[0-9]+\\b', name: 'constant.numeric.dataview' }
             ]
           }
+        },
+        {
+          id: 'dataviewjs',
+          scopeName: 'source.dataviewjs',
+          grammar: {
+            patterns: [
+              // DataviewJS extends JavaScript syntax with Dataview features
+              { include: 'source.js' },  // Include JavaScript patterns
+              { match: '\\b(dv|luxon|moment|dataview)\\b', name: 'support.class.dataviewjs' },
+              { match: '\\b(table|list|task|from|where|sort|group)\\b', name: 'keyword.control.dataviewjs' },
+              { match: '\\b(file|tags|outlinks|inlinks)\\b', name: 'support.function.dataviewjs' },
+              { match: '"[^"]*"', name: 'string.quoted.double.dataviewjs' },
+              { match: '\'[^\']*\'', name: 'string.quoted.single.dataviewjs' }
+            ]
+          }
         }
       ]
     },

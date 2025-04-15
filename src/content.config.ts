@@ -14,8 +14,13 @@ const vocabularyCollection = defineCollection({
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
-      z.array(z.string())                 // Already an array
-    ]).optional().default([])             // Default to empty array if missing
+      z.array(z.string()),                // Already an array
+      z.null(),                          // Handle null values
+      z.undefined()                      // Handle undefined values
+    ]).transform(val => {
+      if (!val) return [];              // Transform null/undefined to empty array
+      return val;                       // Keep arrays and transformed strings as-is
+    }).default([])                      // Default to empty array if missing
   }).passthrough().transform((data, context) => {
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
@@ -42,8 +47,13 @@ const conceptsCollection = defineCollection({
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
-      z.array(z.string())                 // Already an array
-    ]).optional().default([])             // Default to empty array if missing
+      z.array(z.string()),                // Already an array
+      z.null(),                          // Handle null values
+      z.undefined()                      // Handle undefined values
+    ]).transform(val => {
+      if (!val) return [];              // Transform null/undefined to empty array
+      return val;                       // Keep arrays and transformed strings as-is
+    }).default([])                      // Default to empty array if missing
   }).passthrough().transform((data, context) => {
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
