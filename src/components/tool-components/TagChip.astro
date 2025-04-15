@@ -3,12 +3,15 @@ interface Props {
   tag: string;
   count?: number;
   includeCount?: boolean;
+  isSelected?: boolean;
+  title?: string;
+  [key: string]: any; // Allow other HTML attributes such as aria-label, onClick, etc.
 }
 
-const { tag, count = 0, includeCount = false } = Astro.props;
+const { tag, count = 0, includeCount = false, isSelected = false, title } = Astro.props;
 ---
 
-<a href={`/toolkit/${tag}`} class="tool-tag">
+<a href={`/toolkit/${tag}`} class={`tool-tag${isSelected ? ' selected' : ''}`} title={title}>
   <p>{tag}{includeCount && count > 0 && <span class="count">({count})</span>}</p>
 </a>
 
@@ -43,6 +46,10 @@ const { tag, count = 0, includeCount = false } = Astro.props;
                 border-color 0.2s ease-in-out,
                 color 0.2s ease-in-out,
                 transform 0.2s ease-in-out;
+  }
+
+  .tool-tag.selected {
+    /* Add styles for selected state */
   }
 
   .count {

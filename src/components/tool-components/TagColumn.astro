@@ -1,91 +1,257 @@
 ---
+// Import TagChip component for rendering individual tags
 import TagChip from './TagChip.astro';
+// Import Tabler Icons for sorting toggles
+import IconListSearch from '@tabler/icons/icons/filled/list-search.svg';
+import IconSortAscendingLetters from '@tabler/icons/icons/filled/sort-ascending-letters.svg';
+import IconSortDescendingLetters from '@tabler/icons/icons/filled/sort-descending-letters.svg';
+import IconSortAscendingNumbers from '@tabler/icons/icons/filled/sort-ascending-numbers.svg';
+import IconSortDescendingNumbers from '@tabler/icons/icons/filled/sort-descending-numbers.svg';
 
+// =============================
+// Interface for Props
+// =============================
+// Accepts a generic tag array and an array of all objects to be filtered
 interface Props {
-  allRenderedTags: string[];
-  tools: any[]; // Add this prop to get access to all tools
+  collectionExtractedTagArray?: Array<{ tag: string; count?: number; [key: string]: any }>;
+  allObjects?: any[];
+  // Alternative props from previous implementation
+  allRenderedTags?: string[];
+  tools?: any[];
 }
 
-const { allRenderedTags, tools } = Astro.props;
+// Destructure props with defaults
+const { 
+  collectionExtractedTagArray = [], 
+  allObjects = [],
+  allRenderedTags = [],
+  tools = []
+} = Astro.props;
 
-// Calculate tag frequencies
-const tagFrequencies = allRenderedTags.reduce((acc, tag) => {
-  const count = tools.filter(tool => tool.tags?.includes(tag)).length;
-  acc[tag] = count;
-  return acc;
-}, {} as Record<string, number>);
+// =============================
+// Utility: Convert train-case to Normal Case for accessibility
+// =============================
+/**
+ * Converts a train-case or kebab-case string to Normal Case.
+ * Example: "artificial-intelligence" => "Artificial Intelligence"
+ */
+function trainCaseToNormalCase(tag: string): string {
+  return tag
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
-// Sort tags by frequency (descending) and then alphabetically for ties
-const sortedTags = allRenderedTags.sort((a, b) => {
-  const countDiff = tagFrequencies[b] - tagFrequencies[a];
-  return countDiff !== 0 ? countDiff : a.localeCompare(b);
-});
+// =============================
+// Tag Frequency Calculation
+// =============================
+// Generate a frequency map for all tags
+let tagFrequencies: Record<string, number> = {};
+let allTags: string[] = [];
+
+// Check which prop set we're using and calculate accordingly
+if (collectionExtractedTagArray.length > 0) {
+  // Using the new implementation
+  tagFrequencies = collectionExtractedTagArray?.reduce((acc, tagObj) => {
+    const tag = tagObj.tag;
+    // If count is provided, use it; otherwise, count from allObjects
+    const count = tagObj.count ?? (allObjects?.filter(obj => obj.tags?.includes(tag)).length || 0);
+    acc[tag] = count;
+    return acc;
+  }, {} as Record<string, number>) || {};
+  
+  // Get all tag strings
+  allTags = collectionExtractedTagArray?.map(tagObj => tagObj.tag) || [];
+} else if (allRenderedTags.length > 0) {
+  // Using the previous implementation
+  tagFrequencies = allRenderedTags.reduce((acc, tag) => {
+    const count = tools.filter(tool => tool.tags?.includes(tag)).length;
+    acc[tag] = count;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Get all tag strings
+  allTags = [...allRenderedTags];
+}
+
+// =============================
+// Initial sort for server-side rendering
+// =============================
+// Default to frequency-desc for initial render
+const initialSortType = 'frequency-desc';
+
+// Function to sort tags based on sort type
+function getSortedTags(tags: string[], sortType: string): string[] {
+  if (sortType === 'frequency-desc') return [...tags].sort((a, b) => tagFrequencies[b] - tagFrequencies[a]);
+  if (sortType === 'frequency-asc') return [...tags].sort((a, b) => tagFrequencies[a] - tagFrequencies[b]);
+  if (sortType === 'alpha-asc') return [...tags].sort((a, b) => a.localeCompare(b));
+  if (sortType === 'alpha-desc') return [...tags].sort((a, b) => b.localeCompare(a));
+  return tags; // Default fallback
+}
+
+// Get initial sorted tags for server-side rendering
+const initialSortedTags = getSortedTags(allTags, initialSortType);
+
 ---
 
+<!-- ============================= -->
+<!-- TagColumn UI -->
+<!-- ============================= -->
 <div class="tag-column-wrapper">
-  <form class="tag-search-form" role="search">
-    <input 
-      type="search"
-      id="tag-search"
-      name="tag-search"
-      placeholder="Search tags..."
-      list="tag-options"
-      autocomplete="on"
-    />
-    <datalist id="tag-options">
-      {sortedTags.map(tag => (
-        <option value={tag} />
-      ))}
-    </datalist>
-  </form>
+  <!-- Mobile collapse tab/icon -->
+  <button
+    class="tag-collapse-tab md:hidden"
+    aria-label="Expand tag column"
+    id="tag-collapse-btn"
+    tabindex={0}
+  >
+    <IconListSearch color="currentColor" />
+  </button>
 
-  <div class="tag-column">
-    {
-      sortedTags.map((tag) => (
-        <TagChip 
-          tag={tag} 
-          count={tagFrequencies[tag]} 
-          includeCount={true} 
-        />
-      ))
-    }
-  </div>
+  <!-- Tag column (collapsible on mobile) -->
+  <aside
+    class="tag-column"
+    id="tag-column"
+    aria-expanded="true"
+  >
+    <!-- Sorting toggles -->
+    <div class="tag-sort-controls">
+      <button 
+        id="sort-alpha-btn" 
+        class="sort-button" 
+        data-sort-type="alpha-asc"
+        aria-label="Sort alphabetically (A-Z)"
+        title="Sort alphabetically"
+      >
+        <IconSortAscendingLetters id="alpha-icon" class="sort-icon" />
+        <span class="sort-label">A-Z</span>
+      </button>
+      
+      <button 
+        id="sort-freq-btn" 
+        class="sort-button active" 
+        data-sort-type="frequency-desc"
+        aria-label="Sort by frequency (most to least)"
+        title="Sort by frequency"
+      >
+        <IconSortDescendingNumbers id="freq-icon" class="sort-icon" />
+        <span class="sort-label">#</span>
+      </button>
+    </div>
+
+    <!-- Tag search form -->
+    <form class="tag-search-form" role="search">
+      <input 
+        type="search"
+        id="tag-search"
+        name="tag-search"
+        placeholder="Search tags..."
+        list="tag-options"
+        autocomplete="on"
+      />
+      <datalist id="tag-options">
+        {initialSortedTags.map(tag => (
+          <option value={tag} />
+        ))}
+      </datalist>
+    </form>
+
+    <!-- Tag list with data attribute for client-side sorting -->
+    <div id="tag-list" class="tag-list" data-tags={JSON.stringify(allTags)} data-frequencies={JSON.stringify(tagFrequencies)}>
+      {initialSortedTags.length > 0 ? (
+        initialSortedTags.map(tag => (
+          <TagChip 
+            tag={tag} 
+            count={tagFrequencies[tag]} 
+            includeCount={true} 
+            id={`tag-${tag}`}
+            data-tag={tag}
+            data-count={tagFrequencies[tag]}
+            aria-label={`Click to filter by ${trainCaseToNormalCase(tag)}`}
+            title={`Click to filter by ${trainCaseToNormalCase(tag)}`}
+          />
+        ))
+      ) : (
+        <p class="no-tags-message">No tags available</p>
+      )}
+    </div>
+  </aside>
 </div>
 
-<script>
-  // Handle form submission
-  const form = document.querySelector('.tag-search-form');
-  const input = document.querySelector('#tag-search');
-
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const searchValue = (input as HTMLInputElement)?.value.trim();
-    if (searchValue) {
-      window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
-    }
-  });
-
-  // Handle input enter key
-  input?.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      const searchValue = (e.target as HTMLInputElement).value.trim();
-      if (searchValue) {
-        window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
-      }
-    }
-  });
-</script>
-
 <style>
-  .tag-search-form {
-    margin-bottom: 1rem;
+  /* Base styles for the tag column */
+  .tag-column-wrapper {
+    position: sticky;
+    top: 2rem;
+    height: calc(100vh - 4rem);
+    padding-right: 0.5rem;
+    z-index: 10;
+  }
+  
+  .tag-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    height: 100%;
+    width: max-content;
+    overflow-y: auto;
+    padding: 0.75em;
+    padding-right: 1em;
+    background: var(--clr-lossless-primary-dark);
+    border-radius: 0.5em;
+    transition: all 0.2s ease;
+  }
+  
+  /* Sort controls styling */
+  .tag-sort-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
     position: sticky;
     top: 0;
-    background: var(--clr-primary-bg);
-    padding: 0.5rem 0;
+    z-index: 2;
+    background: var(--clr-lossless-primary-dark);
+    padding: 0.25rem 0;
+  }
+  
+  .sort-button {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.5rem;
+    border: none;
+    background: var(--clr-lossless-primary-glass);
+    color: var(--clr-body);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .sort-button:hover {
+    background: var(--clr-lossless-primary);
+  }
+  
+  .sort-button.active {
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-dark);
+  }
+  
+  .sort-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  /* Tag search form styling */
+  .tag-search-form {
+    margin-bottom: 0.75rem;
+    position: sticky;
+    top: 2.5rem;
+    background: var(--clr-lossless-primary-dark);
+    padding: 0.25rem 0;
     z-index: 1;
   }
-
+  
   #tag-search {
     width: 100%;
     padding: 0.5rem;
@@ -95,108 +261,268 @@ const sortedTags = allRenderedTags.sort((a, b) => {
     color: var(--clr-body);
     font-size: var(--fs-300);
   }
-
+  
   #tag-search:focus {
     outline: 2px solid var(--clr-lossless-primary-glass);
     outline-offset: 2px;
   }
-
-  #tag-search::placeholder {
-    color: var(--clr-body);
-    opacity: 0.7;
-  }
-  #tag-options {
-    background: var(--clr-lossless-primary-dark);
-    color: calc(var(--clr-body) * 10%);
-    font-size: var(--fs-200);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-  }
-
-  .tag-column-wrapper {
-    position: sticky;
-    top: 2rem;
-    height: calc(100vh - 4rem);
-    padding-right: 0.5rem; /* Space for scrollbar */
-  }
-
-  .tag-column {
-    flex-direction: column;
+  
+  /* Tag list styling */
+  .tag-list {
     display: flex;
-    gap: 0.5em;
-    height: 100%;
-    width: max-content;
+    flex-direction: column;
+    gap: 0.5rem;
     overflow-y: auto;
-    padding: 0.5em;
-    padding-right: 1em;
+    padding-right: 0.5rem;
+  }
+  
+  /* No tags message */
+  .no-tags-message {
+    color: var(--clr-body);
+    font-style: italic;
+    opacity: 0.7;
+    text-align: center;
+    padding: 1rem 0;
+  }
+  
+  /* Mobile styles */
+  .tag-collapse-tab {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .tag-column-wrapper {
+      position: relative;
+      height: auto;
+      max-height: 300px;
+    }
+    
+    .tag-column {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    
+    .tag-collapse-tab {
+      display: block;
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      z-index: 30;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--clr-lossless-primary-dark);
+      border: none;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .tag-column.collapsed {
+      max-width: 2.5rem;
+      opacity: 0.6;
+      overflow: hidden;
+      pointer-events: none;
+    }
   }
   
   /* Customize scrollbar */
+  .tag-list::-webkit-scrollbar,
   .tag-column::-webkit-scrollbar {
     width: 6px;
   }
 
+  .tag-list::-webkit-scrollbar-track,
   .tag-column::-webkit-scrollbar-track {
     background: var(--clr-lossless-primary-dark);
     border-radius: 3px;
   }
 
+  .tag-list::-webkit-scrollbar-thumb,
   .tag-column::-webkit-scrollbar-thumb {
     background: var(--clr-lossless-primary-glass);
     border-radius: 3px;
   }
-
-  @media (max-width: 768px) {
-    .tag-column-wrapper {
-      position: static;
-      height: auto;
-      max-height: 200px;
-    }
-
-    .tag-column {
-      overflow-y: auto;
-    }
-  }
-
-  /* Style the autocomplete dropdown */
-  input::-webkit-calendar-picker-indicator {
-    opacity: 0;
-  }
-
-  /* Firefox */
-  #tag-options option {
-    background: var(--clr-lossless-primary-dark);
-    color: var(--clr-body);
-    font-size: var(--fs-200);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-  }
-
-  /* Chromium browsers */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--clr-body);
-    -webkit-box-shadow: 0 0 0px 1000px var(--clr-lossless-primary-dark) inset;
-    font-size: var(--fs-200);
-  }
-
-  /* For the actual dropdown in Chrome/Safari */
-  ::-webkit-list-button,
-  ::-webkit-inner-spin-button,
-  ::-webkit-calendar-picker-indicator {
-    opacity: 0;
-  }
-
-  ::-webkit-input-placeholder {
-    font-size: var(--fs-200);
-  }
-
-  /* For the datalist popup */
-  option {
-    font-size: var(--fs-100);
-    padding: 0.25rem 0.5rem;
-    background-color: var(--clr-primary-bg);
-    color: var(--clr-body);
-  }
 </style>
+
+<!-- Client-side sorting functionality -->
+<script>
+  // Get DOM elements
+  const sortAlphaBtn = document.getElementById('sort-alpha-btn');
+  const sortFreqBtn = document.getElementById('sort-freq-btn');
+  const tagList = document.getElementById('tag-list');
+  const alphaIcon = document.getElementById('alpha-icon');
+  const freqIcon = document.getElementById('freq-icon');
+  
+  // Get tag data from the data attributes
+  const tags = JSON.parse(tagList.dataset.tags || '[]');
+  const tagFrequencies = JSON.parse(tagList.dataset.frequencies || '{}');
+  
+  // Current sort state
+  let currentSortType = 'frequency-desc';
+  
+  // Sort function
+  function getSortedTags(tags, sortType) {
+    if (sortType === 'frequency-desc') return [...tags].sort((a, b) => tagFrequencies[b] - tagFrequencies[a]);
+    if (sortType === 'frequency-asc') return [...tags].sort((a, b) => tagFrequencies[a] - tagFrequencies[b]);
+    if (sortType === 'alpha-asc') return [...tags].sort((a, b) => a.localeCompare(b));
+    if (sortType === 'alpha-desc') return [...tags].sort((a, b) => b.localeCompare(a));
+    return tags;
+  }
+  
+  // Convert train-case to Normal Case for display
+  function trainCaseToNormalCase(tag) {
+    return tag
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  
+  // Render function to update the tag list
+  function renderTags() {
+    const sortedTags = getSortedTags(tags, currentSortType);
+    
+    // Clear current list
+    tagList.innerHTML = '';
+    
+    // Add sorted tags
+    sortedTags.forEach(tag => {
+      // Create a new tag chip element
+      const chip = document.createElement('a');
+      chip.href = `/toolkit/${encodeURIComponent(tag)}`;
+      chip.id = `tag-${tag}`;
+      chip.className = 'tool-tag';
+      chip.dataset.tag = tag;
+      chip.dataset.count = tagFrequencies[tag];
+      chip.setAttribute('aria-label', `Click to filter by ${trainCaseToNormalCase(tag)}`);
+      chip.setAttribute('title', `Click to filter by ${trainCaseToNormalCase(tag)}`);
+      
+      // Create the tag content
+      const tagContent = document.createElement('p');
+      tagContent.textContent = tag;
+      
+      // Add count if available
+      if (tagFrequencies[tag] > 0) {
+        const countSpan = document.createElement('span');
+        countSpan.className = 'count';
+        countSpan.textContent = `(${tagFrequencies[tag]})`;
+        tagContent.appendChild(countSpan);
+      }
+      
+      chip.appendChild(tagContent);
+      tagList.appendChild(chip);
+    });
+  }
+  
+  // Update icons based on current sort state
+  function updateSortIcons() {
+    if (currentSortType === 'alpha-asc') {
+      alphaIcon.setAttribute('src', '/tabler/icons/icons/filled/sort-ascending-letters.svg');
+      alphaIcon.parentElement.setAttribute('aria-label', 'Sort alphabetically (A-Z)');
+    } else if (currentSortType === 'alpha-desc') {
+      alphaIcon.setAttribute('src', '/tabler/icons/icons/filled/sort-descending-letters.svg');
+      alphaIcon.parentElement.setAttribute('aria-label', 'Sort alphabetically (Z-A)');
+    } else if (currentSortType === 'frequency-asc') {
+      freqIcon.setAttribute('src', '/tabler/icons/icons/filled/sort-ascending-numbers.svg');
+      freqIcon.parentElement.setAttribute('aria-label', 'Sort by frequency (least to most)');
+    } else if (currentSortType === 'frequency-desc') {
+      freqIcon.setAttribute('src', '/tabler/icons/icons/filled/sort-descending-numbers.svg');
+      freqIcon.parentElement.setAttribute('aria-label', 'Sort by frequency (most to least)');
+    }
+  }
+  
+  // Event handlers for sort buttons
+  sortAlphaBtn.addEventListener('click', () => {
+    // Toggle between alpha-asc and alpha-desc
+    currentSortType = currentSortType === 'alpha-asc' ? 'alpha-desc' : 'alpha-asc';
+    
+    // Update active button state
+    sortAlphaBtn.classList.add('active');
+    sortFreqBtn.classList.remove('active');
+    
+    // Update button data attribute
+    sortAlphaBtn.dataset.sortType = currentSortType;
+    
+    // Update icons
+    updateSortIcons();
+    
+    // Re-render tags
+    renderTags();
+  });
+  
+  sortFreqBtn.addEventListener('click', () => {
+    // Toggle between frequency-desc and frequency-asc
+    currentSortType = currentSortType === 'frequency-desc' ? 'frequency-asc' : 'frequency-desc';
+    
+    // Update active button state
+    sortFreqBtn.classList.add('active');
+    sortAlphaBtn.classList.remove('active');
+    
+    // Update button data attribute
+    sortFreqBtn.dataset.sortType = currentSortType;
+    
+    // Update icons
+    updateSortIcons();
+    
+    // Re-render tags
+    renderTags();
+  });
+  
+  // Handle form submission
+  const form = document.querySelector('.tag-search-form');
+  const input = document.querySelector('#tag-search') as HTMLInputElement;
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const searchValue = input.value.trim();
+    if (searchValue) {
+      window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
+    }
+  });
+
+  // Handle input enter key
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const searchValue = (e.target as HTMLInputElement).value.trim();
+      if (searchValue) {
+        window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
+      }
+    }
+  });
+</script>
+
+<!-- Mobile collapse/expand functionality -->
+<script>
+  // Get references to the collapse button and the tag column
+  const collapseBtn = document.getElementById('tag-collapse-btn');
+  const tagColumn = document.getElementById('tag-column');
+  
+  // Only attach if both exist
+  if (collapseBtn && tagColumn) {
+    collapseBtn.addEventListener('click', () => {
+      // Toggle 'collapsed' class on the tag column
+      tagColumn.classList.toggle('collapsed');
+      
+      // Update aria attributes for accessibility
+      const expanded = !tagColumn.classList.contains('collapsed');
+      tagColumn.setAttribute('aria-expanded', expanded.toString());
+      
+      // Update the button label
+      collapseBtn.setAttribute('aria-label', expanded ? 'Collapse tag column' : 'Expand tag column');
+    });
+  }
+  
+  // Auto-collapse on mobile when a tag is clicked
+  document.querySelectorAll('.tool-tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      if (window.innerWidth <= 768 && tagColumn) {
+        tagColumn.classList.add('collapsed');
+        tagColumn.setAttribute('aria-expanded', 'false');
+        if (collapseBtn) {
+          collapseBtn.setAttribute('aria-label', 'Expand tag column');
+        }
+      }
+    });
+  });
+</script>

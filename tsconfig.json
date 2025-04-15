@@ -48,6 +48,9 @@
       ],
       "@lossless-content/*": [
         "../content/*"
+      ],
+      "@tabler/*": [
+        "./node_modules/@tabler/icons/*"
       ]
     },
     "types": ["astro/client"],

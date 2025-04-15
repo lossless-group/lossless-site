@@ -98,7 +98,8 @@ export default defineConfig({
         '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
         '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
-        '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
+        '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
+        '@tabler/icons': fileURLToPath(new URL('./node_modules/@tabler/icons', import.meta.url))
       }
     }
   },
