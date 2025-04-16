@@ -571,33 +571,29 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
 </style>
 
 <!-- Client-side sorting functionality -->
-<script is:inline>
-  // Initialize the component
-  function initialize() {
+<script>
+  // This script handles tag selection, filtering, and sorting
+  document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
-    const sortAlphaBtn = document.getElementById('sort-alpha-btn');
-    const sortFreqBtn = document.getElementById('sort-freq-btn');
     const tagList = document.getElementById('tag-list');
     const selectedTagsSection = document.getElementById('selected-tags-section');
     const selectedTagsList = document.getElementById('selected-tags-list');
+    const sortAlphaBtn = document.getElementById('sort-alpha-btn');
+    const sortFreqBtn = document.getElementById('sort-freq-btn');
     
-    if (!tagList) {
-      console.error('Tag list element not found');
-      return;
-    }
+    // Get tag data from data attributes
+    const tags = tagList ? JSON.parse(tagList.getAttribute('data-tags') || '[]') : [];
+    const tagFrequencies = tagList ? JSON.parse(tagList.getAttribute('data-frequencies') || '{}') : {};
     
-    // Get tag data and frequencies from data attributes
-    const tags = JSON.parse(tagList.getAttribute('data-tags') || '[]');
-    const tagFrequencies = JSON.parse(tagList.getAttribute('data-frequencies') || '{}');
-    
-    // Current sort state
-    let currentSortType = 'alpha-asc'; // Default to alphabetical ascending
-    
-    // Selected tags state
+    // Track selected tags
     let selectedTags = [];
     
-    // Function to convert train-case to Normal Case for display
+    // Track current sort type
+    let currentSortType = 'alpha-asc';
+    
+    // Utility function to convert train-case to Normal Case
     function trainCaseToNormalCase(tag) {
+      if (!tag) return '';
       return tag
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -614,8 +610,10 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
         // Update the UI to reflect selected tags
         updateTagSelectionUI();
         
-        // Filter content based on selected tags
-        filterContent(selectedTags);
+        // Dispatch a custom event to notify that tags have been updated
+        window.dispatchEvent(new CustomEvent('tagsUpdated', {
+          detail: { selectedTags }
+        }));
       }
     }
     
@@ -635,8 +633,10 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
       // Update the UI to reflect selected tags
       updateTagSelectionUI();
       
-      // Filter content based on selected tags
-      filterContent(selectedTags);
+      // Dispatch a custom event to notify that tags have been updated
+      window.dispatchEvent(new CustomEvent('tagsUpdated', {
+        detail: { selectedTags }
+      }));
     }
     
     // Function to update the URL with selected tags
@@ -661,114 +661,78 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
         }
       }
       
+      // Clear the selected tags list to prevent duplicates
+      if (selectedTagsList) {
+        selectedTagsList.innerHTML = '';
+      }
+      
+      // Keep track of which tags have already been added to the selected tags list
+      const addedToSelectedList = new Set<string>();
+      
       // Update the selected state of all tag chips
       document.querySelectorAll('.tool-tag').forEach(tagChip => {
         const tag = tagChip.getAttribute('data-tag');
         if (!tag) return;
         
         const isSelected = selectedTags.includes(tag);
-        const isInSelectedSection = tagChip.closest('#selected-tags-list') !== null;
         
         // Update the selected state
         if (isSelected) {
           tagChip.classList.add('selected');
           tagChip.setAttribute('aria-selected', 'true');
-        } else {
-          tagChip.classList.remove('selected');
-          tagChip.setAttribute('aria-selected', 'false');
-        }
-        
-        // If tag should be selected but isn't in the selected section, clone it there
-        if (isSelected && !isInSelectedSection && selectedTagsList) {
-          // Check if it's already in the selected section
-          const existingInSelected = selectedTagsList.querySelector(`[data-tag="${tag}"]`);
-          if (!existingInSelected) {
+          
+          // Only add to selected section if this tag hasn't been added yet
+          if (selectedTagsList && !addedToSelectedList.has(tag)) {
+            // Mark this tag as added
+            addedToSelectedList.add(tag);
+            
             // Clone the tag chip
-            const clonedChip = tagChip.cloneNode(true);
+            const clonedChip = tagChip.cloneNode(true) as HTMLElement;
             
             // Update attributes for the selected state
             clonedChip.classList.add('selected');
+            clonedChip.classList.add('selected-tag-item'); 
             clonedChip.setAttribute('aria-selected', 'true');
             clonedChip.setAttribute('title', `Click to remove ${trainCaseToNormalCase(tag)}`);
             clonedChip.setAttribute('aria-label', `Remove ${trainCaseToNormalCase(tag)}`);
             
-            // Add event listener to the cloned chip
-            clonedChip.addEventListener('click', (e) => {
+            // Remove any existing event listeners by replacing with a new element
+            const newChip = clonedChip.cloneNode(true) as HTMLElement;
+            
+            // Add event listener to the new chip
+            newChip.addEventListener('click', (e) => {
               e.preventDefault();
-              toggleTagSelection(tag);
+              e.stopPropagation(); // Prevent event bubbling
+              
+              // Log for debugging
+              console.log(`Removing tag: ${tag}`);
+              
+              // Remove tag from selectedTags array
+              selectedTags = selectedTags.filter(t => t !== tag);
+              
+              // Update URL to reflect selected tags
+              updateURL();
+              
+              // Update the UI to reflect selected tags
+              updateTagSelectionUI();
+              
+              // Dispatch a custom event to notify that tags have been updated
+              window.dispatchEvent(new CustomEvent('tagsUpdated', {
+                detail: { selectedTags }
+              }));
             });
             
             // Add to selected tags list
-            selectedTagsList.appendChild(clonedChip);
+            selectedTagsList.appendChild(newChip);
           }
-        } 
-        // If tag should not be selected but is in the selected section, remove it
-        else if (!isSelected && isInSelectedSection) {
-          tagChip.remove();
-        }
-      });
-    }
-    
-    // Function to filter content based on selected tags
-    function filterContent(selectedTags) {
-      // Get all tool cards
-      const toolCards = document.querySelectorAll('.tool-card');
-      
-      // If no tags selected, show all cards
-      if (selectedTags.length === 0) {
-        toolCards.forEach(card => {
-          card.style.display = '';
-        });
-        return;
-      }
-      
-      // Create an array to track cards and their match counts
-      const cardMatches = [];
-      
-      // Filter cards based on selected tags
-      toolCards.forEach(card => {
-        // Get the card's tags
-        const cardTagsStr = card.getAttribute('data-tags');
-        if (!cardTagsStr) return;
-        
-        const cardTags = JSON.parse(cardTagsStr);
-        
-        // Count how many selected tags match this card's tags
-        const matchCount = selectedTags.filter(tag => cardTags.includes(tag)).length;
-        
-        // If the card has at least one matching tag, add it to our array with its match count
-        if (matchCount > 0) {
-          cardMatches.push({
-            card: card,
-            matchCount
-          });
         } else {
-          // Hide cards with no matches
-          card.style.display = 'none';
+          tagChip.classList.remove('selected');
+          tagChip.setAttribute('aria-selected', 'false');
         }
       });
       
-      // Sort cards by match count (descending)
-      cardMatches.sort((a, b) => b.matchCount - a.matchCount);
-      
-      // Get the parent container of the cards
-      const cardContainer = toolCards[0]?.parentElement;
-      if (!cardContainer) return;
-      
-      // Remove all cards from the DOM
-      toolCards.forEach(card => card.remove());
-      
-      // Add cards back in the new sorted order
-      cardMatches.forEach(({card, matchCount}) => {
-        // Show the card
-        card.style.display = '';
-        
-        // Add a data attribute showing the match count (useful for debugging)
-        card.setAttribute('data-match-count', matchCount.toString());
-        
-        // Add the card back to the container
-        cardContainer.appendChild(card);
-      });
+      // Reorder the available tags to prioritize selected ones
+      reorderTags();
     }
     
     // Function to reorder tags based on current sort
@@ -785,20 +749,19 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
         }
       });
       
-      // Get available tags (excluding selected ones)
-      const availableTags = tags.filter(tag => !selectedTags.includes(tag));
-      
       // Sort the available tags
-      const sortedAvailableTags = getSortedTags(availableTags, currentSortType);
+      const sortedTags = getSortedTags(tags, currentSortType, selectedTags);
       
       // Create a document fragment for better performance
       const fragment = document.createDocumentFragment();
       
       // Add chips in sorted order
-      sortedAvailableTags.forEach(tag => {
+      sortedTags.forEach(tag => {
         const chip = tagToChip.get(tag);
         if (chip) {
-          fragment.appendChild(chip.cloneNode(true));
+          // Clone to avoid removing the original from the DOM
+          const chipClone = chip.cloneNode(true);
+          fragment.appendChild(chipClone);
         }
       });
       
@@ -812,10 +775,18 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
       }
     }
     
-    // Function to sort tags based on sort type
-    function getSortedTags(tags, sortType) {
+    // Function to sort tags based on sort type and selected tags
+    function getSortedTags(tags, sortType, selectedTags = []) {
+      // First sort by selection status (selected tags first)
       return [...tags].sort((a, b) => {
-        // Sort by the chosen criteria
+        const aSelected = selectedTags.includes(a);
+        const bSelected = selectedTags.includes(b);
+        
+        // Prioritize selected tags
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        
+        // If both tags have the same selection status, sort by the chosen criteria
         if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
         if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
         if (sortType === 'alpha-asc') return a.localeCompare(b);
@@ -871,97 +842,117 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
       }
     }
     
-    // Set initial sort state based on active button
-    if (sortAlphaBtn && sortAlphaBtn.classList.contains('active') && sortAlphaBtn.dataset.sortType) {
-      currentSortType = sortAlphaBtn.dataset.sortType;
-    } else if (sortFreqBtn && sortFreqBtn.classList.contains('active') && sortFreqBtn.dataset.sortType) {
-      currentSortType = sortFreqBtn.dataset.sortType;
-    }
-    
-    // Initialize selected tags from URL
-    initializeSelectedTags();
-    
-    // Update icons to match initial state
-    updateSortIcons();
-    
-    // Attach click listeners to initial tags
-    attachTagClickListeners();
-    
-    // Event handlers for sort buttons
-    if (sortAlphaBtn) {
-      sortAlphaBtn.addEventListener('click', () => {
-        // Toggle between alpha-asc and alpha-desc
-        currentSortType = currentSortType === 'alpha-asc' ? 'alpha-desc' : 'alpha-asc';
-        
-        // Update active button state
-        sortAlphaBtn.classList.add('active');
-        if (sortFreqBtn) sortFreqBtn.classList.remove('active');
-        
-        // Update button data attribute
-        sortAlphaBtn.dataset.sortType = currentSortType;
-        
-        // Update icons
-        updateSortIcons();
-        
-        // Reorder tags
-        reorderTags();
-      });
-    }
-    
-    if (sortFreqBtn) {
-      sortFreqBtn.addEventListener('click', () => {
-        // Toggle between frequency-desc and frequency-asc
-        currentSortType = currentSortType === 'frequency-desc' ? 'frequency-asc' : 'frequency-desc';
-        
-        // Update active button state
-        sortFreqBtn.classList.add('active');
-        if (sortAlphaBtn) sortAlphaBtn.classList.remove('active');
-        
-        // Update button data attribute
-        sortFreqBtn.dataset.sortType = currentSortType;
-        
-        // Update icons
-        updateSortIcons();
-        
-        // Reorder tags
-        reorderTags();
-      });
-    }
-    
-    // Handle form submission
-    const form = document.querySelector('.tag-search-form');
-    const input = document.querySelector('#tag-search');
-
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const searchValue = input.value.trim();
-      if (searchValue) {
-        window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
+    // Function to initialize the component
+    function initialize() {
+      // Set initial sort state based on active button
+      if (sortAlphaBtn && sortAlphaBtn.classList.contains('active') && sortAlphaBtn.dataset.sortType) {
+        currentSortType = sortAlphaBtn.dataset.sortType;
+      } else if (sortFreqBtn && sortFreqBtn.classList.contains('active') && sortFreqBtn.dataset.sortType) {
+        currentSortType = sortFreqBtn.dataset.sortType;
       }
-    });
+      
+      // Initialize selected tags from URL
+      initializeSelectedTags();
+      
+      // Update icons to match initial state
+      updateSortIcons();
+      
+      // Attach click listeners to initial tags
+      attachTagClickListeners();
+      
+      // Event handlers for sort buttons
+      if (sortAlphaBtn) {
+        sortAlphaBtn.addEventListener('click', () => {
+          // Toggle between alpha-asc and alpha-desc
+          currentSortType = currentSortType === 'alpha-asc' ? 'alpha-desc' : 'alpha-asc';
+          
+          // Update active button state
+          sortAlphaBtn.classList.add('active');
+          if (sortFreqBtn) sortFreqBtn.classList.remove('active');
+          
+          // Update button data attribute
+          sortAlphaBtn.dataset.sortType = currentSortType;
+          
+          // Update icons
+          updateSortIcons();
+          
+          // Reorder tags
+          reorderTags();
+        });
+      }
+      
+      if (sortFreqBtn) {
+        sortFreqBtn.addEventListener('click', () => {
+          // Toggle between frequency-desc and frequency-asc
+          currentSortType = currentSortType === 'frequency-desc' ? 'frequency-asc' : 'frequency-desc';
+          
+          // Update active button state
+          sortFreqBtn.classList.add('active');
+          if (sortAlphaBtn) sortAlphaBtn.classList.remove('active');
+          
+          // Update button data attribute
+          sortFreqBtn.dataset.sortType = currentSortType;
+          
+          // Update icons
+          updateSortIcons();
+          
+          // Reorder tags
+          reorderTags();
+        });
+      }
+      
+      // Listen for popstate events (browser back/forward)
+      window.addEventListener('popstate', () => {
+        // Re-initialize selected tags from URL
+        selectedTags = [];
+        initializeSelectedTags();
+      });
+      
+      // Listen for cardsFiltered events from ToolkitLayout
+      window.addEventListener('cardsFiltered', (event: CustomEvent) => {
+        // Update UI to match the filtered cards
+        if (event.detail && event.detail.selectedTags) {
+          // Only update if the tags have changed
+          const newTags = event.detail.selectedTags;
+          if (JSON.stringify(newTags) !== JSON.stringify(selectedTags)) {
+            selectedTags = newTags;
+            updateTagSelectionUI();
+          }
+        }
+      });
+      
+      // Handle form submission
+      const form = document.querySelector('.tag-search-form');
+      const input = document.querySelector('#tag-search') as HTMLInputElement;
 
-    // Handle input enter key
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const searchValue = e.target.value.trim();
+      form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const searchValue = input.value.trim();
         if (searchValue) {
           window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
         }
-      }
-    });
+      });
+
+      // Handle input enter key
+      input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const searchValue = (e.target as HTMLInputElement).value.trim();
+          if (searchValue) {
+            window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
+          }
+        }
+      });
+      
+      // Handle filter button click
+      const filterButton = document.querySelector('.filter-button');
+      filterButton?.addEventListener('click', () => {
+        // Toggle datalist dropdown
+        input?.focus();
+        input?.click();
+      });
+    }
     
-    // Handle filter button click
-    const filterButton = document.querySelector('.filter-button');
-    filterButton?.addEventListener('click', () => {
-      // Toggle datalist dropdown
-      input?.focus();
-      input?.click();
-    });
-  }
-  
-  // Run initialization when DOM is fully loaded
-  document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the component
+    // Run initialization when DOM is fully loaded
     initialize();
   });
 </script>
