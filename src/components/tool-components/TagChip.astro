@@ -16,40 +16,43 @@ const { tag, count = 0, includeCount = false, isSelected = false, title } = Astr
 </a>
 
 <style>
+  /* Container to handle the hover effect */
   .tool-tag {
     background: var(--clr-lossless-primary-dark);
     color: var(--clr-lossless-primary-glass);
     border-radius: 0.25em;
     white-space: nowrap;
-    /* Removed transition property - now handled by transition-colors class */
-    padding: 0.2em 0.3em;
-    display: inline-flex;
-    align-items: center;
+    padding: 0.1em 0.3em;
+    display: inline-block;
     height: fit-content;
-    position: relative; /* Add position relative */
-    z-index: 20; /* Ensure tag chips are above the tag cloud */
-    cursor: pointer; /* Add cursor pointer to indicate clickable */
-    border: 1px solid transparent; /* Add transparent border for hover effect */
-    & p {
-      font-size: var(--fs-200);
-      margin: 0;
-    }
+    position: relative;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    margin: 3px;
+    overflow: visible;
+  }
+
+  /* Content styling */
+  .tool-tag p {
+    font-size: var(--fs-250);
+    margin: 0;
+    display: inline-block;
   }
 
   /* Direct hover style in the component to ensure it works */
   .tool-tag:hover {
-    background-color: #3a3a45; /* Subtle darker color */
-    border-color: var(--clr-lossless-accent--brightest); /* Accent color border */
-    color: var(--clr-lossless-primary-glass--lighter); /* Slightly lighter text */
-    transform: translateY(-2px) scale(1.05); /* Subtle elevation and growth */
-    transition: background-color 0.2s ease-in-out, 
-                border-color 0.2s ease-in-out,
-                color 0.2s ease-in-out,
-                transform 0.2s ease-in-out;
+    background-color: #3a3a45;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .tool-tag.selected {
-    /* Add styles for selected state */
+    background-color: var(--clr-lossless-accent);
+    color: var(--clr-white, #ffffff);
+    border-color: var(--clr-lossless-accent);
   }
 
   .count {
@@ -57,6 +60,4 @@ const { tag, count = 0, includeCount = false, isSelected = false, title } = Astr
     opacity: 0.8;
     font-size: 0.9em;
   }
-
-  /* Removed .tool-tag:hover styles - now handled by hover-lighten class */
 </style>
