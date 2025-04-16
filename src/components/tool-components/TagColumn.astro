@@ -182,20 +182,48 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
     </div>
 
     <!-- Tag list with data attribute for client-side sorting -->
-    <div id="tag-list" class="tag-list" data-tags={JSON.stringify(allTags)} data-frequencies={JSON.stringify(tagFrequencies)}>
-      {initialSortedTags.length > 0 ? (
-        initialSortedTags.map(tag => (
-          <TagChip 
-            tag={tag} 
-            count={tagFrequencies[tag]} 
-            selected={selectedTags.includes(tag)}
-            href={`#${tag}`}
-            title={`Click to filter by ${trainCaseToNormalCase(tag)}`}
-          />
-        ))
-      ) : (
-        <p class="no-tags-message">No tags available</p>
-      )}
+    <div id="tag-list-container">
+      <!-- Selected tags section - initially empty, will be populated by JS -->
+      <div id="selected-tags-section" class="selected-tags-section" style={selectedTags.length > 0 ? "" : "display: none;"}>
+        <h3 class="selected-tags-heading">Selected Tags</h3>
+        <div id="selected-tags-list" class="selected-tags-list">
+          {selectedTags.length > 0 && selectedTags.map(tag => (
+            <TagChip 
+              tag={tag} 
+              count={tagFrequencies[tag]} 
+              includeCount={true} 
+              id={`selected-tag-${tag}`}
+              data-tag={tag}
+              selected={true}
+              aria-label={`Remove ${trainCaseToNormalCase(tag)}`}
+              title={`Click to remove ${trainCaseToNormalCase(tag)}`}
+              href={`#${tag}`}
+            />
+          ))}
+        </div>
+        {selectedTags.length > 0 && <hr class="tag-separator" />}
+      </div>
+      
+      <!-- Available tags section -->
+      <div id="tag-list" class="tag-list" data-tags={JSON.stringify(allTags)} data-frequencies={JSON.stringify(tagFrequencies)}>
+        {initialSortedTags.length > 0 ? (
+          initialSortedTags.map(tag => (
+            <TagChip 
+              tag={tag} 
+              count={tagFrequencies[tag]} 
+              includeCount={true} 
+              id={`tag-${tag}`}
+              data-tag={tag}
+              selected={selectedTags.includes(tag)}
+              aria-label={`Click to filter by ${trainCaseToNormalCase(tag)}`}
+              title={`Click to filter by ${trainCaseToNormalCase(tag)}`}
+              href={`#${tag}`}
+            />
+          ))
+        ) : (
+          <p class="no-tags-message">No tags available</p>
+        )}
+      </div>
     </div>
   </aside>
 </div>
@@ -510,75 +538,99 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
     -moz-appearance: none;
   }
   
-  /* Selected tags section styling */
+  /* Selected tags section styles */
   .selected-tags-section {
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--clr-lossless-primary-glass);
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: var(--clr-lossless-primary-dark);
+    border-radius: 0.25rem;
+    border-left: 2px solid var(--clr-lossless-accent);
   }
   
   .selected-tags-heading {
-    font-size: var(--fs-100);
-    color: var(--clr-lossless-accent);
+    font-size: var(--fs-200);
+    color: var(--clr-lossless-primary-glass--lightest);
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 500;
   }
   
-  .selected-tag-wrapper {
+  .selected-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
     margin-bottom: 0.5rem;
   }
   
-  .selected-tag-wrapper .tool-tag {
-    background-color: var(--clr-lossless-accent);
-    color: var(--clr-white, #ffffff);
-    box-shadow: 0 0 5px rgba(255, 165, 0, 0.3);
-    transform: translateY(-1px);
-    border: 1px solid var(--clr-lossless-accent);
-  }
-  
-  .selected-tag-wrapper .tool-tag:hover {
-    background-color: var(--clr-lossless-accent--brightest);
-    box-shadow: 0 0 8px rgba(255, 165, 0, 0.5);
-  }
-  
-  .selected-tag-wrapper .tool-tag .count {
-    color: rgba(255, 255, 255, 0.9);
+  .tag-separator {
+    border: 0;
+    height: 1px;
+    background: var(--clr-lossless-primary-glass);
+    margin: 0.5rem 0;
+    opacity: 0.3;
   }
 </style>
 
 <!-- Client-side sorting functionality -->
-<script>
-  // Get DOM elements
-  const sortAlphaBtn = document.getElementById('sort-alpha-btn');
-  const sortFreqBtn = document.getElementById('sort-freq-btn');
-  const tagList = document.getElementById('tag-list');
-  
-  // Get tag data and frequencies from data attributes
-  const tags = JSON.parse(tagList?.dataset.tags || '[]');
-  const tagFrequencies = JSON.parse(tagList?.dataset.frequencies || '{}');
-  
-  // Current sort state
-  let currentSortType = 'frequency-desc';
-  
-  // Selected tags state
-  let selectedTags: string[] = [];
-  
-  // Function to convert train-case to Normal Case for display
-  function trainCaseToNormalCase(tag: string): string {
-    return tag
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-  
-  // Check URL for already selected tags
-  function initializeSelectedTags() {
-    // Check URL parameters for selected tags
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('tags')) {
-      selectedTags = urlParams.get('tags')?.split(',') || [];
+<script is:inline>
+  // Initialize the component
+  function initialize() {
+    // Get DOM elements
+    const sortAlphaBtn = document.getElementById('sort-alpha-btn');
+    const sortFreqBtn = document.getElementById('sort-freq-btn');
+    const tagList = document.getElementById('tag-list');
+    const selectedTagsSection = document.getElementById('selected-tags-section');
+    const selectedTagsList = document.getElementById('selected-tags-list');
+    
+    if (!tagList) {
+      console.error('Tag list element not found');
+      return;
+    }
+    
+    // Get tag data and frequencies from data attributes
+    const tags = JSON.parse(tagList.getAttribute('data-tags') || '[]');
+    const tagFrequencies = JSON.parse(tagList.getAttribute('data-frequencies') || '{}');
+    
+    // Current sort state
+    let currentSortType = 'alpha-asc'; // Default to alphabetical ascending
+    
+    // Selected tags state
+    let selectedTags = [];
+    
+    // Function to convert train-case to Normal Case for display
+    function trainCaseToNormalCase(tag) {
+      return tag
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+    
+    // Check URL for already selected tags
+    function initializeSelectedTags() {
+      // Check URL parameters for selected tags
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('tags')) {
+        selectedTags = urlParams.get('tags').split(',');
+        
+        // Update the UI to reflect selected tags
+        updateTagSelectionUI();
+        
+        // Filter content based on selected tags
+        filterContent(selectedTags);
+      }
+    }
+    
+    // Function to toggle tag selection
+    function toggleTagSelection(tag) {
+      if (selectedTags.includes(tag)) {
+        // Remove tag if already selected
+        selectedTags = selectedTags.filter(t => t !== tag);
+      } else {
+        // Add tag if not selected
+        selectedTags.push(tag);
+      }
+      
+      // Update URL to reflect selected tags
+      updateURL();
       
       // Update the UI to reflect selected tags
       updateTagSelectionUI();
@@ -586,332 +638,238 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
       // Filter content based on selected tags
       filterContent(selectedTags);
     }
-  }
-  
-  // Function to toggle tag selection
-  function toggleTagSelection(tag: string) {
-    console.log('Toggling tag:', tag);
     
-    if (selectedTags.includes(tag)) {
-      // Remove tag if already selected
-      console.log('Removing tag from selection');
-      selectedTags = selectedTags.filter(t => t !== tag);
-    } else {
-      // Add tag if not selected
-      console.log('Adding tag to selection');
-      selectedTags.push(tag);
-    }
-    
-    console.log('Selected tags:', selectedTags);
-    
-    // Update URL to reflect selected tags
-    updateURL();
-    
-    // Update the UI to reflect selected tags
-    updateTagSelectionUI();
-    
-    // Filter content based on selected tags
-    filterContent(selectedTags);
-    
-    // Reorder tags to show selected tags at the top
-    reorderTags();
-  }
-  
-  // Function to update the URL with selected tags
-  function updateURL() {
-    const newUrl = new URL(window.location.href);
-    if (selectedTags.length > 0) {
-      newUrl.searchParams.set('tags', selectedTags.join(','));
-    } else {
-      newUrl.searchParams.delete('tags');
-    }
-    history.pushState({}, '', newUrl);
-  }
-  
-  // Function to update the UI to reflect selected tags
-  function updateTagSelectionUI() {
-    console.log('Updating tag selection UI');
-    
-    // Get all tag chips
-    const tagChips = document.querySelectorAll('.tool-tag');
-    console.log('Found tag chips:', tagChips.length);
-    
-    // Update each tag chip's selected state
-    tagChips.forEach(chip => {
-      const tag = (chip as HTMLElement).dataset.tag;
-      console.log('Checking tag:', tag, 'Selected:', selectedTags.includes(tag));
-      
-      if (tag && selectedTags.includes(tag)) {
-        chip.classList.add('selected');
-        chip.setAttribute('aria-selected', 'true');
-        console.log('Added selected class to', tag);
-      } else if (tag) {
-        chip.classList.remove('selected');
-        chip.setAttribute('aria-selected', 'false');
-        console.log('Removed selected class from', tag);
-      }
-    });
-  }
-  
-  // Function to filter content based on selected tags
-  function filterContent(selectedTags: string[]) {
-    console.log('Filtering content with tags:', selectedTags);
-    
-    // Get all tool cards
-    const toolCards = document.querySelectorAll('.tool-card');
-    
-    // If no tags selected, show all cards
-    if (selectedTags.length === 0) {
-      toolCards.forEach(card => {
-        (card as HTMLElement).style.display = '';
-      });
-      return;
-    }
-    
-    // Create an array to track cards and their match counts
-    const cardMatches: {card: HTMLElement, matchCount: number}[] = [];
-    
-    // Filter cards based on selected tags
-    toolCards.forEach(card => {
-      // Get the card's tags
-      const cardTagsStr = (card as HTMLElement).dataset.tags;
-      if (!cardTagsStr) return;
-      
-      const cardTags = JSON.parse(cardTagsStr);
-      
-      // Count how many selected tags match this card's tags
-      const matchCount = selectedTags.filter(tag => cardTags.includes(tag)).length;
-      
-      // If the card has at least one matching tag, add it to our array with its match count
-      if (matchCount > 0) {
-        cardMatches.push({
-          card: card as HTMLElement,
-          matchCount
-        });
+    // Function to update the URL with selected tags
+    function updateURL() {
+      const newUrl = new URL(window.location.href);
+      if (selectedTags.length > 0) {
+        newUrl.searchParams.set('tags', selectedTags.join(','));
       } else {
-        // Hide cards with no matches
-        (card as HTMLElement).style.display = 'none';
+        newUrl.searchParams.delete('tags');
       }
-    });
+      history.pushState({}, '', newUrl);
+    }
     
-    // Sort cards by match count (descending)
-    cardMatches.sort((a, b) => b.matchCount - a.matchCount);
-    
-    // Get the parent container of the cards
-    const cardContainer = toolCards[0]?.parentElement;
-    if (!cardContainer) return;
-    
-    // Remove all cards from the DOM
-    toolCards.forEach(card => card.remove());
-    
-    // Add cards back in the new sorted order
-    cardMatches.forEach(({card, matchCount}) => {
-      // Show the card
-      card.style.display = '';
-      
-      // Add a data attribute showing the match count (useful for debugging)
-      card.setAttribute('data-match-count', matchCount.toString());
-      
-      // Add the card back to the container
-      cardContainer.appendChild(card);
-    });
-    
-    console.log(`Filtered to ${cardMatches.length} cards with at least one matching tag`);
-  }
-  
-  // Function to reorder tags based on selection status and current sort
-  function reorderTags() {
-    if (!tagList) return;
-    
-    console.log('Reordering tags with selected tags:', selectedTags);
-    
-    // Get all tag chip wrappers
-    const tagWrappers = Array.from(tagList.children) as HTMLElement[];
-    console.log('Found tag wrappers:', tagWrappers.length);
-    
-    // Create a map of tag to wrapper element
-    const tagToWrapper = new Map<string, HTMLElement>();
-    tagWrappers.forEach(wrapper => {
-      const tagChip = wrapper.querySelector('.tool-tag');
-      if (tagChip) {
-        const tag = (tagChip as HTMLElement).dataset.tag;
-        if (tag) {
-          tagToWrapper.set(tag, wrapper);
-          console.log('Mapped tag to wrapper:', tag);
+    // Function to update the UI to reflect selected tags
+    function updateTagSelectionUI() {
+      // Show or hide the selected tags section based on whether there are selected tags
+      if (selectedTagsSection) {
+        if (selectedTags.length > 0) {
+          selectedTagsSection.style.display = '';
+        } else {
+          selectedTagsSection.style.display = 'none';
         }
       }
-    });
-    
-    // Get sorted tags
-    const sortedTags = getSortedTags(tags, currentSortType, selectedTags);
-    console.log('Sorted tags for reordering:', sortedTags);
-    
-    // Create a document fragment for better performance
-    const fragment = document.createDocumentFragment();
-    
-    // Add wrappers in sorted order
-    sortedTags.forEach(tag => {
-      const wrapper = tagToWrapper.get(tag);
-      if (wrapper) {
-        fragment.appendChild(wrapper.cloneNode(true));
-        console.log('Added wrapper for tag to fragment:', tag);
-      } else {
-        console.warn('No wrapper found for tag:', tag);
-      }
-    });
-    
-    // Replace all children with the sorted ones
-    if (fragment.childNodes.length > 0) {
-      console.log('Replacing tag list with', fragment.childNodes.length, 'items');
-      tagList.innerHTML = '';
-      tagList.appendChild(fragment);
       
-      // Re-attach click listeners to the newly added elements
-      attachTagClickListeners();
-    } else {
-      console.warn('No tags to reorder! Fragment is empty.');
-    }
-  }
-  
-  // Sort function
-  function getSortedTags(tags: string[], sortType: string, selectedTags: string[] = []): string[] {
-    console.log('Sorting tags with selected tags:', selectedTags);
-    
-    // First sort by selection status (selected tags first)
-    return [...tags].sort((a, b) => {
-      const aSelected = selectedTags.includes(a);
-      const bSelected = selectedTags.includes(b);
-      
-      // Prioritize selected tags
-      if (aSelected && !bSelected) return -1;
-      if (!aSelected && bSelected) return 1;
-      
-      // If both tags have the same selection status, sort by the chosen criteria
-      if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
-      if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
-      if (sortType === 'alpha-asc') return a.localeCompare(b);
-      if (sortType === 'alpha-desc') return b.localeCompare(a);
-      return 0; // Default fallback
-    });
-  }
-  
-  // Function to render the tags
-  function renderTags() {
-    if (!tagList) return;
-    
-    console.log('Rendering tags with selected tags:', selectedTags);
-    
-    // Get sorted tags with selected tags prioritized at the top
-    const sortedTags = getSortedTags(tags, currentSortType, selectedTags);
-    console.log('Sorted tags:', sortedTags);
-    
-    // Clear the tag list
-    tagList.innerHTML = '';
-    
-    // First, add a visual separator for selected tags if any exist
-    if (selectedTags.length > 0) {
-      // Create a selected tags section
-      const selectedSection = document.createElement('div');
-      selectedSection.className = 'selected-tags-section';
-      selectedSection.innerHTML = '<h3 class="selected-tags-heading">Selected Tags</h3>';
-      tagList.appendChild(selectedSection);
-    }
-    
-    // Add sorted tags
-    sortedTags.forEach(tag => {
-      // Create a new tag chip
-      const chip = document.createElement('div');
-      chip.className = 'tag-chip-wrapper';
-      
-      const normalCase = trainCaseToNormalCase(tag);
-      const isSelected = selectedTags.includes(tag);
-      
-      // If this is a selected tag, add a special class
-      if (isSelected) {
-        chip.classList.add('selected-tag-wrapper');
-      }
-      
-      chip.innerHTML = `
-        <a 
-          class="tool-tag${isSelected ? ' selected' : ''}" 
-          data-tag="${tag}"
-          href="#${tag}"
-          title="Click to filter by ${normalCase}"
-          aria-label="Filter by ${normalCase}${isSelected ? ' (currently selected)' : ''}"
-          aria-selected="${isSelected ? 'true' : 'false'}"
-        >
-          <p>${normalCase}</p>
-          <span class="count">(${tagFrequencies[tag] || 0})</span>
-        </a>
-      `;
-      
-      tagList.appendChild(chip);
-    });
-    
-    // Attach click listeners to the newly rendered tags
-    attachTagClickListeners();
-  }
-  
-  // Add click event listeners to all tag chips
-  function attachTagClickListeners() {
-    console.log('Attaching tag click listeners');
-    
-    document.querySelectorAll('.tool-tag').forEach(tagChip => {
-      // Remove existing click listeners by cloning and replacing
-      const newTagChip = tagChip.cloneNode(true);
-      if (tagChip.parentNode) {
-        tagChip.parentNode.replaceChild(newTagChip, tagChip);
-      }
-      
-      // Add new click listener
-      newTagChip.addEventListener('click', (e) => {
-        e.preventDefault();
-        const tag = (newTagChip as HTMLElement).dataset.tag;
-        console.log('Tag chip clicked:', tag);
-        if (tag) toggleTagSelection(tag);
+      // Update the selected state of all tag chips
+      document.querySelectorAll('.tool-tag').forEach(tagChip => {
+        const tag = tagChip.getAttribute('data-tag');
+        if (!tag) return;
+        
+        const isSelected = selectedTags.includes(tag);
+        const isInSelectedSection = tagChip.closest('#selected-tags-list') !== null;
+        
+        // Update the selected state
+        if (isSelected) {
+          tagChip.classList.add('selected');
+          tagChip.setAttribute('aria-selected', 'true');
+        } else {
+          tagChip.classList.remove('selected');
+          tagChip.setAttribute('aria-selected', 'false');
+        }
+        
+        // If tag should be selected but isn't in the selected section, clone it there
+        if (isSelected && !isInSelectedSection && selectedTagsList) {
+          // Check if it's already in the selected section
+          const existingInSelected = selectedTagsList.querySelector(`[data-tag="${tag}"]`);
+          if (!existingInSelected) {
+            // Clone the tag chip
+            const clonedChip = tagChip.cloneNode(true);
+            
+            // Update attributes for the selected state
+            clonedChip.classList.add('selected');
+            clonedChip.setAttribute('aria-selected', 'true');
+            clonedChip.setAttribute('title', `Click to remove ${trainCaseToNormalCase(tag)}`);
+            clonedChip.setAttribute('aria-label', `Remove ${trainCaseToNormalCase(tag)}`);
+            
+            // Add event listener to the cloned chip
+            clonedChip.addEventListener('click', (e) => {
+              e.preventDefault();
+              toggleTagSelection(tag);
+            });
+            
+            // Add to selected tags list
+            selectedTagsList.appendChild(clonedChip);
+          }
+        } 
+        // If tag should not be selected but is in the selected section, remove it
+        else if (!isSelected && isInSelectedSection) {
+          tagChip.remove();
+        }
       });
-    });
-  }
-  
-  // Update the sort icons based on current sort type
-  function updateSortIcons() {
-    const alphaIconAsc = document.getElementById('alpha-icon-asc');
-    const alphaIconDesc = document.getElementById('alpha-icon-desc');
-    const freqIconAsc = document.getElementById('freq-icon-asc');
-    const freqIconDesc = document.getElementById('freq-icon-desc');
-    
-    // Hide all icons first
-    [alphaIconAsc, alphaIconDesc, freqIconAsc, freqIconDesc].forEach(icon => {
-      if (icon) icon.classList.add('hidden');
-    });
-    
-    // Show the appropriate icon based on current sort type
-    if (currentSortType === 'alpha-asc' && alphaIconAsc && alphaIconDesc && sortAlphaBtn) {
-      alphaIconAsc.classList.remove('hidden');
-      alphaIconDesc.classList.add('hidden');
-      const sortLabel = sortAlphaBtn.querySelector('.sort-label');
-      if (sortLabel) sortLabel.textContent = 'A-Z';
-    } else if (currentSortType === 'alpha-desc' && alphaIconAsc && alphaIconDesc && sortAlphaBtn) {
-      alphaIconAsc.classList.add('hidden');
-      alphaIconDesc.classList.remove('hidden');
-      const sortLabel = sortAlphaBtn.querySelector('.sort-label');
-      if (sortLabel) sortLabel.textContent = 'Z-A';
-    } else if (currentSortType === 'frequency-asc' && freqIconAsc && freqIconDesc && sortFreqBtn) {
-      freqIconAsc.classList.remove('hidden');
-      freqIconDesc.classList.add('hidden');
-      const sortLabel = sortFreqBtn.querySelector('.sort-label');
-      if (sortLabel) sortLabel.textContent = '1-9';
-    } else if (currentSortType === 'frequency-desc' && freqIconAsc && freqIconDesc && sortFreqBtn) {
-      freqIconAsc.classList.add('hidden');
-      freqIconDesc.classList.remove('hidden');
-      const sortLabel = sortFreqBtn.querySelector('.sort-label');
-      if (sortLabel) sortLabel.textContent = '9-1';
     }
-  }
-  
-  // Initial setup
-  function initialize() {
-    console.log('Initializing TagColumn');
+    
+    // Function to filter content based on selected tags
+    function filterContent(selectedTags) {
+      // Get all tool cards
+      const toolCards = document.querySelectorAll('.tool-card');
+      
+      // If no tags selected, show all cards
+      if (selectedTags.length === 0) {
+        toolCards.forEach(card => {
+          card.style.display = '';
+        });
+        return;
+      }
+      
+      // Create an array to track cards and their match counts
+      const cardMatches = [];
+      
+      // Filter cards based on selected tags
+      toolCards.forEach(card => {
+        // Get the card's tags
+        const cardTagsStr = card.getAttribute('data-tags');
+        if (!cardTagsStr) return;
+        
+        const cardTags = JSON.parse(cardTagsStr);
+        
+        // Count how many selected tags match this card's tags
+        const matchCount = selectedTags.filter(tag => cardTags.includes(tag)).length;
+        
+        // If the card has at least one matching tag, add it to our array with its match count
+        if (matchCount > 0) {
+          cardMatches.push({
+            card: card,
+            matchCount
+          });
+        } else {
+          // Hide cards with no matches
+          card.style.display = 'none';
+        }
+      });
+      
+      // Sort cards by match count (descending)
+      cardMatches.sort((a, b) => b.matchCount - a.matchCount);
+      
+      // Get the parent container of the cards
+      const cardContainer = toolCards[0]?.parentElement;
+      if (!cardContainer) return;
+      
+      // Remove all cards from the DOM
+      toolCards.forEach(card => card.remove());
+      
+      // Add cards back in the new sorted order
+      cardMatches.forEach(({card, matchCount}) => {
+        // Show the card
+        card.style.display = '';
+        
+        // Add a data attribute showing the match count (useful for debugging)
+        card.setAttribute('data-match-count', matchCount.toString());
+        
+        // Add the card back to the container
+        cardContainer.appendChild(card);
+      });
+    }
+    
+    // Function to reorder tags based on current sort
+    function reorderTags() {
+      // Get all tag chips in the available section
+      const tagChips = Array.from(tagList.querySelectorAll('.tool-tag'));
+      
+      // Create a map of tag to chip element
+      const tagToChip = new Map();
+      tagChips.forEach(chip => {
+        const tag = chip.getAttribute('data-tag');
+        if (tag) {
+          tagToChip.set(tag, chip);
+        }
+      });
+      
+      // Get available tags (excluding selected ones)
+      const availableTags = tags.filter(tag => !selectedTags.includes(tag));
+      
+      // Sort the available tags
+      const sortedAvailableTags = getSortedTags(availableTags, currentSortType);
+      
+      // Create a document fragment for better performance
+      const fragment = document.createDocumentFragment();
+      
+      // Add chips in sorted order
+      sortedAvailableTags.forEach(tag => {
+        const chip = tagToChip.get(tag);
+        if (chip) {
+          fragment.appendChild(chip.cloneNode(true));
+        }
+      });
+      
+      // Replace all children with the sorted ones
+      if (fragment.childNodes.length > 0) {
+        tagList.innerHTML = '';
+        tagList.appendChild(fragment);
+        
+        // Re-attach click listeners
+        attachTagClickListeners();
+      }
+    }
+    
+    // Function to sort tags based on sort type
+    function getSortedTags(tags, sortType) {
+      return [...tags].sort((a, b) => {
+        // Sort by the chosen criteria
+        if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
+        if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
+        if (sortType === 'alpha-asc') return a.localeCompare(b);
+        if (sortType === 'alpha-desc') return b.localeCompare(a);
+        return 0; // Default fallback
+      });
+    }
+    
+    // Add click event listeners to all tag chips
+    function attachTagClickListeners() {
+      document.querySelectorAll('.tool-tag').forEach(tagChip => {
+        tagChip.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tag = tagChip.getAttribute('data-tag');
+          if (tag) toggleTagSelection(tag);
+        });
+      });
+    }
+    
+    // Update the sort icons based on current sort type
+    function updateSortIcons() {
+      const alphaIconAsc = document.getElementById('alpha-icon-asc');
+      const alphaIconDesc = document.getElementById('alpha-icon-desc');
+      const freqIconAsc = document.getElementById('freq-icon-asc');
+      const freqIconDesc = document.getElementById('freq-icon-desc');
+      
+      // Hide all icons first
+      [alphaIconAsc, alphaIconDesc, freqIconAsc, freqIconDesc].forEach(icon => {
+        if (icon) icon.classList.add('hidden');
+      });
+      
+      // Show the appropriate icon based on current sort type
+      if (currentSortType === 'alpha-asc' && alphaIconAsc && alphaIconDesc && sortAlphaBtn) {
+        alphaIconAsc.classList.remove('hidden');
+        alphaIconDesc.classList.add('hidden');
+        const sortLabel = sortAlphaBtn.querySelector('.sort-label');
+        if (sortLabel) sortLabel.textContent = 'A-Z';
+      } else if (currentSortType === 'alpha-desc' && alphaIconAsc && alphaIconDesc && sortAlphaBtn) {
+        alphaIconAsc.classList.add('hidden');
+        alphaIconDesc.classList.remove('hidden');
+        const sortLabel = sortAlphaBtn.querySelector('.sort-label');
+        if (sortLabel) sortLabel.textContent = 'Z-A';
+      } else if (currentSortType === 'frequency-asc' && freqIconAsc && freqIconDesc && sortFreqBtn) {
+        freqIconAsc.classList.remove('hidden');
+        freqIconDesc.classList.add('hidden');
+        const sortLabel = sortFreqBtn.querySelector('.sort-label');
+        if (sortLabel) sortLabel.textContent = '1-9';
+      } else if (currentSortType === 'frequency-desc' && freqIconAsc && freqIconDesc && sortFreqBtn) {
+        freqIconAsc.classList.add('hidden');
+        freqIconDesc.classList.remove('hidden');
+        const sortLabel = sortFreqBtn.querySelector('.sort-label');
+        if (sortLabel) sortLabel.textContent = '9-1';
+      }
+    }
     
     // Set initial sort state based on active button
     if (sortAlphaBtn && sortAlphaBtn.classList.contains('active') && sortAlphaBtn.dataset.sortType) {
@@ -972,7 +930,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
     
     // Handle form submission
     const form = document.querySelector('.tag-search-form');
-    const input = document.querySelector('#tag-search') as HTMLInputElement;
+    const input = document.querySelector('#tag-search');
 
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -985,7 +943,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
     // Handle input enter key
     input?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const searchValue = (e.target as HTMLInputElement).value.trim();
+        const searchValue = e.target.value.trim();
         if (searchValue) {
           window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
         }
