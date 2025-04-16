@@ -1,13 +1,12 @@
 import { visit } from 'unist-util-visit';
-import type { Root, Element, Properties, Text } from 'hast';
-import type { Visitor } from 'unist-util-visit';
+import type { Root } from 'mdast';
 import markdownDebugger from './markdownDebugger';
 
 export default function rehypeCalloutHandler() {
   return (tree: Root) => {
     markdownDebugger.startPlugin('Rehype Callout Handler');
     
-    const visitor: Visitor<Element> = (node) => {
+    const visitor = (node) => {
       if (
         node.type !== 'element' ||
         node.tagName !== 'article' ||
@@ -23,7 +22,7 @@ export default function rehypeCalloutHandler() {
       const title = node.properties['data-title'] as string;
 
       // Create header element with icon and title
-      const header: Element = {
+      const header: any = {
         type: 'element',
         tagName: 'header',
         properties: { className: ['callout-header'] },
@@ -46,7 +45,7 @@ export default function rehypeCalloutHandler() {
       };
 
       // Create content container that preserves all block elements
-      const content: Element = {
+      const content: any = {
         type: 'element',
         tagName: 'div',
         properties: { className: ['callout-content'] },
@@ -68,8 +67,8 @@ export default function rehypeCalloutHandler() {
       node.children = [header, content];
 
       // Clean up data attributes we don't need anymore
-      delete (node.properties as Properties)['data-type'];
-      delete (node.properties as Properties)['data-title'];
+      delete (node.properties as any)['data-type'];
+      delete (node.properties as any)['data-title'];
 
       markdownDebugger.verbose('Transformed callout:', node);
     };

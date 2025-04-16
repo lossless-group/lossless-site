@@ -25,9 +25,11 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [
-      remarkCalloutHandler, // Must be first to see raw markdown
+      [remarkImages, {      // Handle images first
+        visualsDirectory: 'content/visuals'
+      }],
+      remarkCalloutHandler, // Then handle callouts
       remarkBacklinks,      // Then handle wiki-links
-      remarkImages,         // Then handle images
       remarkDefinitionList, // Handle definition lists
       remarkCitations,      // Handle citations
     ],
@@ -103,6 +105,7 @@ export default defineConfig({
         '@basics': fileURLToPath(new URL('./src/components/basics', import.meta.url)),
         '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
         '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
+        '@visuals': fileURLToPath(new URL('./src/content/visuals', import.meta.url)),
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
         '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),

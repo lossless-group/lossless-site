@@ -4,7 +4,6 @@ import type {Root as HastRoot} from 'hast'
 import {toHtml} from 'hast-util-to-html'
 import {dirname} from 'path'
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
-import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import ArticleCallout from './callouts/ArticleCallout.astro';
 import ArticleCitations from './citations/ArticleCitations.astro';
@@ -15,6 +14,7 @@ interface Props {
         value?: string;
         children?: any[];
         url?: string;
+        alt?: string;
         data?: {
             hProperties?: Record<string, any>;
         };
@@ -40,7 +40,8 @@ const handled_types = [
     "citations",
     "citation",
     "html",        // Handle raw HTML nodes
-    "thematicBreak" // Add support for horizontal rules
+    "thematicBreak", // Add support for horizontal rules
+    "image"        // Handle image nodes
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -109,8 +110,26 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
     <Fragment set:html={node.value} />
 }
 
+{(node.type === "image") && 
+    <img 
+        src={node.url} 
+        alt={node.alt || ''} 
+        {...node.data?.hProperties}
+        class="embedded-image"
+    />
+}
+
 {other_type && 
     <div class={`unhandled-${node.type}`}>
         {JSON.stringify(node)}
     </div>
 }
+
+<style>
+.embedded-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem 0;
+}
+</style>

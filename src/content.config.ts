@@ -9,6 +9,37 @@ const cardCollection = defineCollection({
   }).passthrough()
 });
 
+const visualsCollection = defineCollection({
+  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: "../content/visuals"}),  // Explicitly list image extensions
+  schema: z.object({
+    // Define base fields that all images should have
+    id: z.string().optional(),
+    title: z.string().optional(),
+    alt: z.string().optional(),
+    width: z.number().optional(),
+    height: z.number().optional(),
+    format: z.enum(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']).optional()
+  }).passthrough().transform((data, context) => {
+    // Get the filename without extension
+    const filename = String(context.path).split('/').pop()?.replace(/\.[^.]+$/, '') || '';
+    const extension = String(context.path).split('.').pop()?.toLowerCase() || '';
+    
+    // Convert filename to title case for display
+    const titleCase = filename
+      .split(/[\s-]+/)  // Split on spaces or dashes
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    return {
+      ...data,
+      id: filename,  // Original filename as id
+      title: data.title || titleCase,  // Use provided title or computed one
+      format: extension as 'png' | 'jpg' | 'jpeg' | 'gif' | 'webp' | 'svg',
+      slug: filename.toLowerCase().replace(/\s+/g, '-')  // Add computed slug
+    };
+  })
+});
+
 const vocabularyCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/vocabulary"}),
   schema: z.object({

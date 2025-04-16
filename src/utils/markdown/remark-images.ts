@@ -1,133 +1,122 @@
+import type { Plugin } from 'unified';
+import type { Root, Image, Text } from 'mdast';
 import { visit } from 'unist-util-visit';
-import type { Root, Text } from 'mdast';
 import markdownDebugger from './markdownDebugger';
 
-// Regex patterns for different image types
-const wikiImageRegex = /!\[\[((.*?\/)?[^/|]+?)(?:\|(.*?))?\]\]/g;
-const markdownImageRegex = /!\[(.*?)\]\((https?:\/\/.*?)\)/g;
-
-interface ImagePluginOptions {
-  renderInFrontmatter: boolean;
-  defaultAltText: string;
-}
-
-const defaultOptions: ImagePluginOptions = {
-  renderInFrontmatter: false,
-  defaultAltText: 'Image from URL'
-};
-
-function getImageDirectory(filename: string): string {
-  return filename.includes('Hero') ? 'Heroes' : 'Screenshots';
-}
-
-function transformImagePath(filename: string): string {
-  // If filename already contains a path, strip any leading content/ and ensure proper format
-  if (filename.includes('/')) {
-    // Remove any leading content/ if present
-    const normalizedPath = filename.replace(/^content\//, '');
-    return `/${normalizedPath}`;
-  }
-  
-  // Otherwise use the default directory structure
-  const directory = getImageDirectory(filename);
-  return `/visuals/${directory}/${filename}`;
-}
-
-function generateAltText(filename: string): string {
-  // Extract the name after the last underscore and before the extension
-  const match = filename.match(/_([^_]+)\.[^.]+$/);
-  if (!match) return filename;
-  
-  const baseName = match[1];
-  const extension = filename.split('.').pop()?.toUpperCase() || '';
-  return `${baseName} ${extension}`;
+interface Options {
+  visualsDirectory: string;
 }
 
 /**
- * Transform wiki-style image embeds and markdown images into proper HTML img tags
+ * Normalize image path by:
+ * 1. Removing leading slash if present
+ * 2. Removing 'visuals/' prefix if present
+ * 3. Adding appropriate directory prefix:
+ *    - Keep assets/ paths as is
+ *    - Add visualsDirectory prefix for non-asset paths
+ * 4. Ensure leading slash for final URL
  */
-export default function remarkImages(userOptions: Partial<ImagePluginOptions> = {}) {
-  const options = { ...defaultOptions, ...userOptions };
-  
-  return async function transformer(tree: Root) {
+function normalizePath(path: string, visualsDirectory: string): string {
+  let normalizedPath = path.trim();
+
+  // Remove leading slash if present
+  normalizedPath = normalizedPath.replace(/^\//, '');
+
+  // If it's an assets path, return as is with leading slash
+  if (normalizedPath.toLowerCase().startsWith('assets/')) {
+    markdownDebugger.verbose(`  ↳ Assets path detected: ${normalizedPath}`);
+    return `/${normalizedPath}`;
+  }
+
+  // Remove visuals/ prefix if present
+  normalizedPath = normalizedPath.replace(/^visuals\//i, '');
+
+  // Add visualsDirectory prefix and leading slash
+  return `/${visualsDirectory}/${normalizedPath}`;
+}
+
+/**
+ * Transform wiki-style image syntax into standard markdown image syntax
+ * Example: ![[image.png|alt text]] -> ![alt text](/content/visuals/image.png)
+ */
+const remarkImages: Plugin<[Options?], Root> = (options = { visualsDirectory: 'content/visuals' }) => {
+  return async (tree) => {
     markdownDebugger.startPlugin('Images');
+    markdownDebugger.log('\n=== AST Debug ===');
+    markdownDebugger.log('Tree structure:', JSON.stringify(tree, null, 2));
+
+    // Match ![[...]] for image links
+    const wikiImageRegex = /!\[\[(.*?)(?:\|(.*?))?\]\]/g;
 
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
-      
+
+      markdownDebugger.log('\n=== Node Debug ===');
+      markdownDebugger.log('Node type:', node.type);
+      markdownDebugger.log('Node value:', node.value);
+      markdownDebugger.log('Parent type:', parent.type);
+      markdownDebugger.log('Parent children:', JSON.stringify(parent.children, null, 2));
+
       const value = node.value;
-      const wikiMatches = Array.from(value.matchAll(wikiImageRegex));
-      const markdownMatches = Array.from(value.matchAll(markdownImageRegex));
-      
-      if (wikiMatches.length > 0 || markdownMatches.length > 0) {
-        markdownDebugger.log(`\n🔍 Found images in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
-        
+      const matches = Array.from(value.matchAll(wikiImageRegex));
+
+      if (matches.length > 0) {
+        markdownDebugger.log(`\n🔍 Found ${matches.length} images in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
+
         const newNodes = [];
         let lastIndex = 0;
 
-        // Handle wiki-style images
-        wikiMatches.forEach(match => {
-          const [fullMatch, filename, _pathComponent, displayText] = match;
-          const startIndex = match.index!;
-          
-          if (startIndex > lastIndex) {
-            newNodes.push({
-              type: 'text',
-              value: value.slice(lastIndex, startIndex)
-            });
+        for (const match of matches) {
+          const [fullMatch, path, alt = ''] = match;
+          const matchIndex = match.index!;
+
+          // Add text before the match if any
+          if (matchIndex > lastIndex) {
+            newNodes.push({ type: 'text', value: value.slice(lastIndex, matchIndex) });
           }
 
-          const transformedPath = transformImagePath(filename.trim());
-          const altText = displayText?.trim() || generateAltText(filename.trim());
-          
-          markdownDebugger.verbose(`  ↳ Converting wiki image: [[${filename}]] → ${transformedPath}`);
-          
-          newNodes.push({
+          const finalPath = normalizePath(path, options.visualsDirectory);
+          const displayAlt = alt.trim() || path.trim().replace(/^(assets|visuals)\//, '');
+
+          // Create image node with proper type and URL
+          const imageNode: Image = {
             type: 'image',
-            url: transformedPath,
-            alt: altText,
-            title: null
-          });
+            url: finalPath,
+            alt: displayAlt,
+            title: displayAlt,
+            data: {
+              hName: 'img',
+              hProperties: {
+                src: finalPath,
+                alt: displayAlt,
+                class: 'embedded-image'
+              }
+            }
+          };
 
-          lastIndex = startIndex + fullMatch.length;
-        });
+          markdownDebugger.log('\n=== Image Node ===');
+          markdownDebugger.log('Image node:', JSON.stringify(imageNode, null, 2));
+          markdownDebugger.verbose(`  ↳ Converting wiki image: ${fullMatch} → ![${imageNode.alt}](${imageNode.url})`);
+          newNodes.push(imageNode);
 
-        // Handle markdown-style images with URLs
-        markdownMatches.forEach(match => {
-          const [fullMatch, alt, url] = match;
-          const startIndex = match.index!;
-          
-          if (startIndex > lastIndex) {
-            newNodes.push({
-              type: 'text',
-              value: value.slice(lastIndex, startIndex)
-            });
-          }
-
-          markdownDebugger.verbose(`  ↳ Processing URL image: ${url}`);
-          
-          newNodes.push({
-            type: 'image',
-            url: url,
-            alt: options.defaultAltText,
-            title: null
-          });
-
-          lastIndex = startIndex + fullMatch.length;
-        });
-
-        if (lastIndex < value.length) {
-          newNodes.push({
-            type: 'text',
-            value: value.slice(lastIndex)
-          });
+          lastIndex = matchIndex + fullMatch.length;
         }
 
+        // Add remaining text if any
+        if (lastIndex < value.length) {
+          newNodes.push({ type: 'text', value: value.slice(lastIndex) });
+        }
+
+        markdownDebugger.log('\n=== New Nodes ===');
+        markdownDebugger.log('New nodes:', JSON.stringify(newNodes, null, 2));
+
+        // Replace the current node with our new nodes
         parent.children.splice(index, 1, ...newNodes);
       }
     });
-    
+
     markdownDebugger.endPlugin('Images');
-    return tree;
   };
-}
+};
+
+export default remarkImages;
