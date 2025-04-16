@@ -4,7 +4,6 @@ interface Props {
   count?: number;
   selected?: boolean;
   includeCount?: boolean;
-  isSelected?: boolean;
   title?: string;
   href?: string;
   [key: string]: any; // Allow other HTML attributes such as aria-label, onClick, etc.
@@ -14,7 +13,6 @@ const {
   tag, 
   count = 0, 
   includeCount = false, 
-  isSelected = false, 
   selected = false, 
   title,
   href,
@@ -29,7 +27,9 @@ function trainCaseToNormalCase(tag: string): string {
 }
 
 const normalCase = trainCaseToNormalCase(tag);
-const isTagSelected = selected || isSelected;
+// Only use the explicit 'selected' prop, not the legacy 'isSelected' prop
+const isTagSelected = selected;
+
 ---
 
 <a 

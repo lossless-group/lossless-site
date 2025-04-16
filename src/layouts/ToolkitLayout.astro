@@ -67,16 +67,62 @@ const toolsWithFilePath = filteredEntries.map(entry => ({
       const urlParams = new URLSearchParams(window.location.search);
       const selectedTags = urlParams.has('tags') ? urlParams.get('tags').split(',') : [];
       
-      // If no tags selected, show all cards
-      if (selectedTags.length === 0) {
-        document.querySelectorAll('.tool-card').forEach(card => {
-          (card as HTMLElement).style.display = '';
-        });
-        return;
-      }
+      // Log the selected tags for debugging
+      console.log('Selected tags:', selectedTags);
       
       // Get all tool cards
       const toolCards = document.querySelectorAll('.tool-card');
+      console.log('Total tool cards found:', toolCards.length);
+      
+      // Get the parent containers for cards
+      const cardContainers = document.querySelectorAll('.card-grid, .bare-tools-grid');
+      if (cardContainers.length === 0) return;
+      
+      // Reset all cards to their original containers and display state
+      // This ensures we start from a clean state each time
+      const originalContainers = new Map();
+      
+      // First, record which cards belong to which containers
+      toolCards.forEach(card => {
+        const container = card.closest('.card-grid, .bare-tools-grid');
+        if (container) {
+          if (!originalContainers.has(container)) {
+            originalContainers.set(container, []);
+          }
+          originalContainers.get(container).push(card);
+        }
+      });
+      
+      // If no tags selected, show all cards in their original order and exit
+      if (selectedTags.length === 0 || selectedTags[0] === '') {
+        console.log('No tags selected, showing all cards');
+        
+        // Reset all cards to their original containers
+        originalContainers.forEach((cards, container) => {
+          // Remove all cards first to ensure proper order
+          container.querySelectorAll('.tool-card').forEach(card => {
+            // Don't actually remove the card, just detach it
+            if (card.parentNode) {
+              card.parentNode.removeChild(card);
+            }
+          });
+          
+          // Add them back in their original order
+          cards.forEach(card => {
+            // Ensure the card is visible
+            (card as HTMLElement).style.display = '';
+            card.removeAttribute('data-match-count');
+            container.appendChild(card);
+          });
+        });
+        
+        // Dispatch a custom event to notify that cards have been reset
+        window.dispatchEvent(new CustomEvent('cardsFiltered', {
+          detail: { selectedTags: [] }
+        }));
+        
+        return;
+      }
       
       // Create an array to track cards and their match counts
       const cardMatches = [];
@@ -111,10 +157,6 @@ const toolsWithFilePath = filteredEntries.map(entry => ({
       // Sort cards by match count (descending)
       cardMatches.sort((a, b) => b.matchCount - a.matchCount);
       
-      // Get the parent containers for cards with and without images
-      const cardContainers = document.querySelectorAll('.card-grid, .bare-tools-grid');
-      if (cardContainers.length === 0) return;
-      
       // Create a map to store cards by their container
       const containerToCards = new Map();
       
@@ -136,7 +178,7 @@ const toolsWithFilePath = filteredEntries.map(entry => ({
       // Reorder cards within each container
       containerToCards.forEach((cards, container) => {
         // Remove all cards from this container
-        cards.forEach(({card}) => card.remove());
+        container.querySelectorAll('.tool-card').forEach(card => card.remove());
         
         // Add cards back in the new sorted order
         cards.forEach(({card, matchCount}) => {
@@ -150,6 +192,11 @@ const toolsWithFilePath = filteredEntries.map(entry => ({
           container.appendChild(card);
         });
       });
+      
+      // Dispatch a custom event to notify that cards have been filtered
+      window.dispatchEvent(new CustomEvent('cardsFiltered', {
+        detail: { selectedTags }
+      }));
     }
     
     // Listen for URL changes (which happen when tags are selected/deselected)

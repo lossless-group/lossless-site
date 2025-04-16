@@ -25,6 +25,7 @@
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-to-hast": "^13.2.0",
     "mdast-util-to-markdown": "^2.1.2",
+    "rehype-raw": "^7.0.0",
     "remark": "^15.0.1",
     "remark-definition-list": "^2.0.0",
     "remark-parse": "^11.0.0",
