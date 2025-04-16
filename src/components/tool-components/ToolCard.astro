@@ -88,7 +88,7 @@ const effectiveDescription = hasDescriptionSiteCp
 }); */
 ---
 
-<div class="tool-card card-hover-effect">
+<div class="tool-card card-hover-effect" data-tags={JSON.stringify(safeTags)}>
   <div class="content-wrapper">
     {
       (image || og_screenshot_url) && (

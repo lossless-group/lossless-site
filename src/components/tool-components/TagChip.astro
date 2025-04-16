@@ -2,17 +2,46 @@
 interface Props {
   tag: string;
   count?: number;
+  selected?: boolean;
   includeCount?: boolean;
   isSelected?: boolean;
   title?: string;
+  href?: string;
   [key: string]: any; // Allow other HTML attributes such as aria-label, onClick, etc.
 }
 
-const { tag, count = 0, includeCount = false, isSelected = false, title } = Astro.props;
+const { 
+  tag, 
+  count = 0, 
+  includeCount = false, 
+  isSelected = false, 
+  selected = false, 
+  title,
+  href,
+  ...rest 
+} = Astro.props;
+
+function trainCaseToNormalCase(tag: string): string {
+  return tag
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+const normalCase = trainCaseToNormalCase(tag);
+const isTagSelected = selected || isSelected;
 ---
 
-<a href={`/toolkit/${tag}`} class={`tool-tag${isSelected ? ' selected' : ''}`} title={title}>
-  <p>{tag}{includeCount && count > 0 && <span class="count">({count})</span>}</p>
+<a 
+  href={href || `/toolkit/${tag}`} 
+  class={`tool-tag${isTagSelected ? ' selected' : ''}`} 
+  title={title || `Click to filter by ${normalCase}`}
+  aria-label={`Filter by ${normalCase}${isTagSelected ? ' (currently selected)' : ''}`}
+  data-tag={tag}
+  {...rest}
+>
+  <p>{normalCase}</p>
+  {(includeCount && count > 0) || count !== undefined ? <span class="count">({count})</span> : null}
 </a>
 
 <style>
@@ -49,10 +78,12 @@ const { tag, count = 0, includeCount = false, isSelected = false, title } = Astr
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
+  /* Selected state styling */
   .tool-tag.selected {
     background-color: var(--clr-lossless-accent);
     color: var(--clr-white, #ffffff);
     border-color: var(--clr-lossless-accent);
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
   }
 
   .count {

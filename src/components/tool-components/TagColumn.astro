@@ -19,6 +19,8 @@ interface Props {
   // Alternative props from previous implementation
   allRenderedTags?: string[];
   tools?: any[];
+  // Add prop for initially selected tags
+  selectedTags?: string[];
 }
 
 // Destructure props with defaults
@@ -26,7 +28,8 @@ const {
   collectionExtractedTagArray = [], 
   allObjects = [],
   allRenderedTags = [],
-  tools = []
+  tools = [],
+  selectedTags = []
 } = Astro.props;
 
 // =============================
@@ -81,17 +84,28 @@ if (collectionExtractedTagArray.length > 0) {
 // Default to frequency-desc for initial render
 const initialSortType = 'frequency-desc';
 
-// Function to sort tags based on sort type
-function getSortedTags(tags: string[], sortType: string): string[] {
-  if (sortType === 'frequency-desc') return [...tags].sort((a, b) => tagFrequencies[b] - tagFrequencies[a]);
-  if (sortType === 'frequency-asc') return [...tags].sort((a, b) => tagFrequencies[a] - tagFrequencies[b]);
-  if (sortType === 'alpha-asc') return [...tags].sort((a, b) => a.localeCompare(b));
-  if (sortType === 'alpha-desc') return [...tags].sort((a, b) => b.localeCompare(a));
-  return tags; // Default fallback
+// Function to sort tags based on sort type and selected tags
+function getSortedTags(tags: string[], sortType: string, selectedTags: string[] = []): string[] {
+  // First sort by selection status (selected tags first)
+  return [...tags].sort((a, b) => {
+    const aSelected = selectedTags.includes(a);
+    const bSelected = selectedTags.includes(b);
+    
+    // Prioritize selected tags
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    
+    // If both tags have the same selection status, sort by the chosen criteria
+    if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
+    if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
+    if (sortType === 'alpha-asc') return a.localeCompare(b);
+    if (sortType === 'alpha-desc') return b.localeCompare(a);
+    return 0; // Default fallback
+  });
 }
 
 // Get initial sorted tags for server-side rendering
-const initialSortedTags = getSortedTags(allTags, initialSortType);
+const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
 
 ---
 
@@ -174,10 +188,8 @@ const initialSortedTags = getSortedTags(allTags, initialSortType);
           <TagChip 
             tag={tag} 
             count={tagFrequencies[tag]} 
-            includeCount={true} 
-            id={`tag-${tag}`}
-            data-tag={tag}
-            aria-label={`Click to filter by ${trainCaseToNormalCase(tag)}`}
+            selected={selectedTags.includes(tag)}
+            href={`#${tag}`}
             title={`Click to filter by ${trainCaseToNormalCase(tag)}`}
           />
         ))
@@ -505,203 +517,376 @@ const initialSortedTags = getSortedTags(allTags, initialSortType);
   const sortAlphaBtn = document.getElementById('sort-alpha-btn');
   const sortFreqBtn = document.getElementById('sort-freq-btn');
   const tagList = document.getElementById('tag-list');
-  const alphaIconAsc = document.getElementById('alpha-icon-asc');
-  const alphaIconDesc = document.getElementById('alpha-icon-desc');
-  const freqIconAsc = document.getElementById('freq-icon-asc');
-  const freqIconDesc = document.getElementById('freq-icon-desc');
   
-  // Get tag data from the data attributes
-  const tags = JSON.parse(tagList.dataset.tags || '[]');
-  const tagFrequencies = JSON.parse(tagList.dataset.frequencies || '{}');
+  // Get tag data and frequencies from data attributes
+  const tags = JSON.parse(tagList?.dataset.tags || '[]');
+  const tagFrequencies = JSON.parse(tagList?.dataset.frequencies || '{}');
   
   // Current sort state
   let currentSortType = 'frequency-desc';
   
-  // Sort function
-  function getSortedTags(tags, sortType) {
-    if (sortType === 'frequency-desc') return [...tags].sort((a, b) => tagFrequencies[b] - tagFrequencies[a]);
-    if (sortType === 'frequency-asc') return [...tags].sort((a, b) => tagFrequencies[a] - tagFrequencies[b]);
-    if (sortType === 'alpha-asc') return [...tags].sort((a, b) => a.localeCompare(b));
-    if (sortType === 'alpha-desc') return [...tags].sort((a, b) => b.localeCompare(a));
-    return tags;
-  }
+  // Selected tags state
+  let selectedTags: string[] = [];
   
-  // Convert train-case to Normal Case for display
-  function trainCaseToNormalCase(tag) {
+  // Function to convert train-case to Normal Case for display
+  function trainCaseToNormalCase(tag: string): string {
     return tag
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
   
-  // Render function to update the tag list
-  function renderTags() {
-    const sortedTags = getSortedTags(tags, currentSortType);
+  // Check URL for already selected tags
+  function initializeSelectedTags() {
+    // Check URL parameters for selected tags
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('tags')) {
+      selectedTags = urlParams.get('tags')?.split(',') || [];
+      
+      // Update the UI to reflect selected tags
+      updateTagSelectionUI();
+      
+      // Filter content based on selected tags
+      filterContent(selectedTags);
+    }
+  }
+  
+  // Function to toggle tag selection
+  function toggleTagSelection(tag: string) {
+    console.log('Toggling tag selection:', tag);
     
-    // Get all existing TagChip components by their data-tag attribute
-    const tagChips = Array.from(tagList.children).filter(child => 
-      child.hasAttribute('data-tag') || (child.tagName === 'A' && child.classList.contains('tool-tag'))
-    );
+    if (selectedTags.includes(tag)) {
+      // Remove tag if already selected
+      console.log('Removing tag from selection');
+      selectedTags = selectedTags.filter(t => t !== tag);
+    } else {
+      // Add tag if not selected
+      console.log('Adding tag to selection');
+      selectedTags.push(tag);
+    }
     
-    // Create a document fragment for efficient DOM manipulation
-    const fragment = document.createDocumentFragment();
+    console.log('Selected tags after toggle:', selectedTags);
     
-    // For debugging
-    console.log('Sorted tags:', sortedTags);
+    // Update URL to reflect selected tags
+    updateURL();
+    
+    // Update the UI to reflect selected tags
+    updateTagSelectionUI();
+    
+    // Filter content based on selected tags
+    filterContent(selectedTags);
+    
+    // Reorder tags to show selected tags at the top
+    reorderTags();
+  }
+  
+  // Function to update the URL with selected tags
+  function updateURL() {
+    const newUrl = new URL(window.location.href);
+    if (selectedTags.length > 0) {
+      newUrl.searchParams.set('tags', selectedTags.join(','));
+    } else {
+      newUrl.searchParams.delete('tags');
+    }
+    history.pushState({}, '', newUrl);
+  }
+  
+  // Function to update the UI to reflect selected tags
+  function updateTagSelectionUI() {
+    console.log('Updating tag selection UI');
+    
+    // Get all tag chips
+    const tagChips = document.querySelectorAll('.tool-tag');
     console.log('Found tag chips:', tagChips.length);
     
-    // Reorder the TagChip components according to the sorted tags
-    sortedTags.forEach(tag => {
-      // Find the TagChip component for this tag - try multiple ways to identify it
-      const tagChip = tagChips.find(chip => 
-        chip.getAttribute('data-tag') === tag || 
-        (chip.querySelector('p') && chip.querySelector('p').textContent.trim().startsWith(tag))
-      );
+    // Update each tag chip's selected state
+    tagChips.forEach(chip => {
+      const tag = (chip as HTMLElement).dataset.tag;
+      console.log('Checking tag:', tag, 'Selected:', selectedTags.includes(tag));
       
+      if (tag && selectedTags.includes(tag)) {
+        chip.classList.add('selected');
+        chip.setAttribute('aria-selected', 'true');
+        console.log('Added selected class to', tag);
+      } else if (tag) {
+        chip.classList.remove('selected');
+        chip.setAttribute('aria-selected', 'false');
+        console.log('Removed selected class from', tag);
+      }
+    });
+  }
+  
+  // Function to filter content based on selected tags
+  function filterContent(selectedTags: string[]) {
+    console.log('Filtering content with selected tags:', selectedTags);
+    
+    // Get all tool cards
+    const toolCards = document.querySelectorAll('.tool-card');
+    console.log('Found tool cards:', toolCards.length);
+    
+    // If no tags selected, show all cards
+    if (selectedTags.length === 0) {
+      console.log('No tags selected, showing all cards');
+      toolCards.forEach(card => {
+        (card as HTMLElement).style.display = '';
+      });
+      return;
+    }
+    
+    // Filter cards based on selected tags
+    toolCards.forEach(card => {
+      // Get the card's tags
+      const cardTagsStr = (card as HTMLElement).dataset.tags;
+      if (!cardTagsStr) {
+        console.warn('Card has no tags:', card);
+        return;
+      }
+      
+      try {
+        const cardTags = JSON.parse(cardTagsStr);
+        console.log('Card tags:', cardTags);
+        
+        // Check if card has at least one of the selected tags (OR logic)
+        const hasAnySelectedTag = selectedTags.some(tag => cardTags.includes(tag));
+        console.log('Card has any selected tag:', hasAnySelectedTag, 'for card:', (card as HTMLElement).id || 'unknown');
+        
+        // Show or hide card
+        (card as HTMLElement).style.display = hasAnySelectedTag ? '' : 'none';
+      } catch (error) {
+        console.error('Error parsing card tags:', error, 'for card:', (card as HTMLElement).id || 'unknown');
+      }
+    });
+  }
+  
+  // Sort function
+  function getSortedTags(tags: string[], sortType: string, selectedTags: string[] = []): string[] {
+    console.log('Sorting tags with selected tags:', selectedTags);
+    
+    // First sort by selection status (selected tags first)
+    return [...tags].sort((a, b) => {
+      const aSelected = selectedTags.includes(a);
+      const bSelected = selectedTags.includes(b);
+      
+      // Prioritize selected tags
+      if (aSelected && !bSelected) return -1;
+      if (!aSelected && bSelected) return 1;
+      
+      // If both tags have the same selection status, sort by the chosen criteria
+      if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
+      if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
+      if (sortType === 'alpha-asc') return a.localeCompare(b);
+      if (sortType === 'alpha-desc') return b.localeCompare(a);
+      return 0; // Default fallback
+    });
+  }
+  
+  // Function to reorder tags based on selection status and current sort
+  function reorderTags() {
+    if (!tagList) return;
+    
+    console.log('Reordering tags with selected tags:', selectedTags);
+    
+    // Get all tag chip wrappers
+    const tagWrappers = Array.from(tagList.children) as HTMLElement[];
+    console.log('Found tag wrappers:', tagWrappers.length);
+    
+    // Create a map of tag to wrapper element
+    const tagToWrapper = new Map<string, HTMLElement>();
+    tagWrappers.forEach(wrapper => {
+      const tagChip = wrapper.querySelector('.tool-tag');
       if (tagChip) {
-        // Move this TagChip to the fragment in the new order
-        fragment.appendChild(tagChip);
-        console.log(`Appended tag: ${tag}`);
-      } else {
-        console.log(`Could not find chip for tag: ${tag}`);
+        const tag = (tagChip as HTMLElement).dataset.tag;
+        if (tag) {
+          tagToWrapper.set(tag, wrapper);
+          console.log('Mapped tag to wrapper:', tag);
+        }
       }
     });
     
-    // Clear the tag list and add the reordered TagChips
-    while (tagList.firstChild) {
-      tagList.removeChild(tagList.firstChild);
-    }
+    // Get sorted tags
+    const sortedTags = getSortedTags(tags, currentSortType, selectedTags);
+    console.log('Sorted tags for reordering:', sortedTags);
     
-    // If we have reordered tags, append them
-    if (fragment.childElementCount > 0) {
-      tagList.appendChild(fragment);
-      console.log(`Appended ${fragment.childElementCount} tags to the list`);
-    } else {
-      // If no tags were found, check if we need to show a message
-      if (sortedTags.length > 0) {
-        console.error('Tags were sorted but none were found in the DOM');
-        // Try to recreate the tags as a fallback
-        sortedTags.forEach(tag => {
-          const chip = document.createElement('a');
-          chip.href = `/toolkit/${encodeURIComponent(tag)}`;
-          chip.className = 'tool-tag';
-          chip.setAttribute('data-tag', tag);
-          
-          const tagContent = document.createElement('p');
-          tagContent.textContent = tag;
-          
-          if (tagFrequencies[tag] > 0) {
-            const countSpan = document.createElement('span');
-            countSpan.className = 'count';
-            countSpan.textContent = `(${tagFrequencies[tag]})`;
-            tagContent.appendChild(countSpan);
-          }
-          
-          chip.appendChild(tagContent);
-          fragment.appendChild(chip);
-        });
-        
-        tagList.appendChild(fragment);
-        console.log('Recreated tags as fallback');
+    // Create a document fragment for better performance
+    const fragment = document.createDocumentFragment();
+    
+    // Add wrappers in sorted order
+    sortedTags.forEach(tag => {
+      const wrapper = tagToWrapper.get(tag);
+      if (wrapper) {
+        fragment.appendChild(wrapper.cloneNode(true));
+        console.log('Added wrapper for tag to fragment:', tag);
       } else {
-        // No tags to show
-        const noTagsMessage = document.createElement('p');
-        noTagsMessage.className = 'no-tags-message';
-        noTagsMessage.textContent = 'No tags available';
-        tagList.appendChild(noTagsMessage);
+        console.warn('No wrapper found for tag:', tag);
       }
+    });
+    
+    // Replace all children with the sorted ones
+    if (fragment.childNodes.length > 0) {
+      console.log('Replacing tag list with', fragment.childNodes.length, 'items');
+      tagList.innerHTML = '';
+      tagList.appendChild(fragment);
+      
+      // Re-attach click listeners to the newly added elements
+      attachTagClickListeners();
+    } else {
+      console.warn('No tags to reorder! Fragment is empty.');
     }
   }
   
-  // Update icons based on current sort state
+  // Add click event listeners to all tag chips
+  function attachTagClickListeners() {
+    console.log('Attaching tag click listeners');
+    
+    document.querySelectorAll('.tool-tag').forEach(tagChip => {
+      // Remove existing click listeners by cloning and replacing
+      const newTagChip = tagChip.cloneNode(true);
+      if (tagChip.parentNode) {
+        tagChip.parentNode.replaceChild(newTagChip, tagChip);
+      }
+      
+      // Add new click listener
+      newTagChip.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tag = (newTagChip as HTMLElement).dataset.tag;
+        console.log('Tag chip clicked:', tag);
+        if (tag) toggleTagSelection(tag);
+      });
+    });
+  }
+  
+  // Update the sort icons based on current sort type
   function updateSortIcons() {
-    if (currentSortType === 'alpha-asc') {
+    const alphaIconAsc = document.getElementById('alpha-icon-asc');
+    const alphaIconDesc = document.getElementById('alpha-icon-desc');
+    const freqIconAsc = document.getElementById('freq-icon-asc');
+    const freqIconDesc = document.getElementById('freq-icon-desc');
+    
+    // Hide all icons first
+    [alphaIconAsc, alphaIconDesc, freqIconAsc, freqIconDesc].forEach(icon => {
+      if (icon) icon.classList.add('hidden');
+    });
+    
+    // Show the appropriate icon based on current sort type
+    if (currentSortType === 'alpha-asc' && alphaIconAsc && alphaIconDesc && sortAlphaBtn) {
       alphaIconAsc.classList.remove('hidden');
       alphaIconDesc.classList.add('hidden');
-      sortAlphaBtn.querySelector('.sort-label').textContent = 'A-Z';
-    } else if (currentSortType === 'alpha-desc') {
+      const sortLabel = sortAlphaBtn.querySelector('.sort-label');
+      if (sortLabel) sortLabel.textContent = 'A-Z';
+    } else if (currentSortType === 'alpha-desc' && alphaIconAsc && alphaIconDesc && sortAlphaBtn) {
       alphaIconAsc.classList.add('hidden');
       alphaIconDesc.classList.remove('hidden');
-      sortAlphaBtn.querySelector('.sort-label').textContent = 'Z-A';
-    } else if (currentSortType === 'frequency-asc') {
+      const sortLabel = sortAlphaBtn.querySelector('.sort-label');
+      if (sortLabel) sortLabel.textContent = 'Z-A';
+    } else if (currentSortType === 'frequency-asc' && freqIconAsc && freqIconDesc && sortFreqBtn) {
       freqIconAsc.classList.remove('hidden');
       freqIconDesc.classList.add('hidden');
-      sortFreqBtn.querySelector('.sort-label').textContent = '1-9';
-    } else if (currentSortType === 'frequency-desc') {
+      const sortLabel = sortFreqBtn.querySelector('.sort-label');
+      if (sortLabel) sortLabel.textContent = '1-9';
+    } else if (currentSortType === 'frequency-desc' && freqIconAsc && freqIconDesc && sortFreqBtn) {
       freqIconAsc.classList.add('hidden');
       freqIconDesc.classList.remove('hidden');
-      sortFreqBtn.querySelector('.sort-label').textContent = '9-1';
+      const sortLabel = sortFreqBtn.querySelector('.sort-label');
+      if (sortLabel) sortLabel.textContent = '9-1';
     }
   }
   
-  // Initial setup
-  // Set initial sort state based on active button
-  if (sortAlphaBtn.classList.contains('active')) {
-    currentSortType = sortAlphaBtn.dataset.sortType;
-  } else if (sortFreqBtn.classList.contains('active')) {
-    currentSortType = sortFreqBtn.dataset.sortType;
-  }
-  
-  // Update icons to match initial state
-  updateSortIcons();
-  
-  // Event handlers for sort buttons
-  sortAlphaBtn.addEventListener('click', () => {
-    // Toggle between alpha-asc and alpha-desc
-    currentSortType = currentSortType === 'alpha-asc' ? 'alpha-desc' : 'alpha-asc';
+  // Initialize the component
+  function initialize() {
+    console.log('Initializing TagColumn');
     
-    // Update active button state
-    sortAlphaBtn.classList.add('active');
-    sortFreqBtn.classList.remove('active');
-    
-    // Update button data attribute
-    sortAlphaBtn.dataset.sortType = currentSortType;
-    
-    // Update icons
-    updateSortIcons();
-    
-    // Re-render tags
-    renderTags();
-  });
-  
-  sortFreqBtn.addEventListener('click', () => {
-    // Toggle between frequency-desc and frequency-asc
-    currentSortType = currentSortType === 'frequency-desc' ? 'frequency-asc' : 'frequency-desc';
-    
-    // Update active button state
-    sortFreqBtn.classList.add('active');
-    sortAlphaBtn.classList.remove('active');
-    
-    // Update button data attribute
-    sortFreqBtn.dataset.sortType = currentSortType;
-    
-    // Update icons
-    updateSortIcons();
-    
-    // Re-render tags
-    renderTags();
-  });
-  
-  // Handle form submission
-  const form = document.querySelector('.tag-search-form');
-  const input = document.querySelector('#tag-search') as HTMLInputElement;
-
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const searchValue = input.value.trim();
-    if (searchValue) {
-      window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
+    // Set initial sort state based on active button
+    if (sortAlphaBtn && sortAlphaBtn.classList.contains('active') && sortAlphaBtn.dataset.sortType) {
+      currentSortType = sortAlphaBtn.dataset.sortType;
+    } else if (sortFreqBtn && sortFreqBtn.classList.contains('active') && sortFreqBtn.dataset.sortType) {
+      currentSortType = sortFreqBtn.dataset.sortType;
     }
-  });
+    
+    // Initialize selected tags from URL
+    initializeSelectedTags();
+    
+    // Update icons to match initial state
+    updateSortIcons();
+    
+    // Attach click listeners to initial tags
+    attachTagClickListeners();
+    
+    // Event handlers for sort buttons
+    if (sortAlphaBtn) {
+      sortAlphaBtn.addEventListener('click', () => {
+        // Toggle between alpha-asc and alpha-desc
+        currentSortType = currentSortType === 'alpha-asc' ? 'alpha-desc' : 'alpha-asc';
+        
+        // Update active button state
+        sortAlphaBtn.classList.add('active');
+        if (sortFreqBtn) sortFreqBtn.classList.remove('active');
+        
+        // Update button data attribute
+        sortAlphaBtn.dataset.sortType = currentSortType;
+        
+        // Update icons
+        updateSortIcons();
+        
+        // Reorder tags
+        reorderTags();
+      });
+    }
+    
+    if (sortFreqBtn) {
+      sortFreqBtn.addEventListener('click', () => {
+        // Toggle between frequency-desc and frequency-asc
+        currentSortType = currentSortType === 'frequency-desc' ? 'frequency-asc' : 'frequency-desc';
+        
+        // Update active button state
+        sortFreqBtn.classList.add('active');
+        if (sortAlphaBtn) sortAlphaBtn.classList.remove('active');
+        
+        // Update button data attribute
+        sortFreqBtn.dataset.sortType = currentSortType;
+        
+        // Update icons
+        updateSortIcons();
+        
+        // Reorder tags
+        reorderTags();
+      });
+    }
+    
+    // Handle form submission
+    const form = document.querySelector('.tag-search-form');
+    const input = document.querySelector('#tag-search') as HTMLInputElement;
 
-  // Handle input enter key
-  input?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const searchValue = (e.target as HTMLInputElement).value.trim();
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const searchValue = input.value.trim();
       if (searchValue) {
         window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
       }
-    }
+    });
+
+    // Handle input enter key
+    input?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const searchValue = (e.target as HTMLInputElement).value.trim();
+        if (searchValue) {
+          window.location.href = `/toolkit/${encodeURIComponent(searchValue)}`;
+        }
+      }
+    });
+    
+    // Handle filter button click
+    const filterButton = document.querySelector('.filter-button');
+    filterButton?.addEventListener('click', () => {
+      // Toggle datalist dropdown
+      input?.focus();
+      input?.click();
+    });
+  }
+  
+  // Run initialization when DOM is fully loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the component
+    initialize();
   });
 </script>
 
