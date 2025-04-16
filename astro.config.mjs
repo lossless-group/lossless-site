@@ -9,6 +9,7 @@ import remarkImages from './src/utils/markdown/remark-images';
 import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import remarkCalloutHandler from './src/utils/markdown/remark-callout-handler';
 import remarkCitations from './src/utils/markdown/remarkCitations';
+import rehypeRaw from 'rehype-raw';
 
 export default defineConfig({
   output: "server",
@@ -30,7 +31,13 @@ export default defineConfig({
       remarkDefinitionList, // Handle definition lists
       remarkCitations,      // Handle citations
     ],
-    remarkRehype: { handlers: defListHastHandlers },
+    remarkRehype: { 
+      allowDangerousHtml: true, // Allow HTML in markdown
+      handlers: defListHastHandlers 
+    },
+    rehypePlugins: [
+      rehypeRaw // Process HTML nodes (including iframes)
+    ],
     syntaxHighlight: 'shiki', // Use Shiki for syntax highlighting
     shikiConfig: {
       theme: 'github-dark', // Use a dark theme for better readability

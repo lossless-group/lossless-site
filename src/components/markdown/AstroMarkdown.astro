@@ -39,6 +39,7 @@ const handled_types = [
     "heading",
     "citations",
     "citation",
+    "html",        // Handle raw HTML nodes
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -102,6 +103,10 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
 
 {(node.type === "text") && 
     <span>{node.value}</span>
+}
+
+{(node.type === "html") && 
+    <Fragment set:html={node.value} />
 }
 
 {other_type && 
