@@ -9,9 +9,10 @@ import SimpleCodeBlock from "@components/codeblocks/SimpleCodeBlock.astro";
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title = "Go Lossless: Innovate and Collaborate" } = Astro.props;
+const { title = "Go Lossless: Innovate and Collaborate", description } = Astro.props;
 ---
 
 <!doctype html>
@@ -22,6 +23,7 @@ const { title = "Go Lossless: Innovate and Collaborate" } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    {description && <meta name="description" content={description} />}
   </head>
   <body>
     <Header />
