@@ -509,6 +509,43 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
   .tag-search-form input[list] {
     -moz-appearance: none;
   }
+  
+  /* Selected tags section styling */
+  .selected-tags-section {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--clr-lossless-primary-glass);
+  }
+  
+  .selected-tags-heading {
+    font-size: var(--fs-100);
+    color: var(--clr-lossless-accent);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .selected-tag-wrapper {
+    margin-bottom: 0.5rem;
+  }
+  
+  .selected-tag-wrapper .tool-tag {
+    background-color: var(--clr-lossless-accent);
+    color: var(--clr-white, #ffffff);
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.3);
+    transform: translateY(-1px);
+    border: 1px solid var(--clr-lossless-accent);
+  }
+  
+  .selected-tag-wrapper .tool-tag:hover {
+    background-color: var(--clr-lossless-accent--brightest);
+    box-shadow: 0 0 8px rgba(255, 165, 0, 0.5);
+  }
+  
+  .selected-tag-wrapper .tool-tag .count {
+    color: rgba(255, 255, 255, 0.9);
+  }
 </style>
 
 <!-- Client-side sorting functionality -->
@@ -553,7 +590,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
   
   // Function to toggle tag selection
   function toggleTagSelection(tag: string) {
-    console.log('Toggling tag selection:', tag);
+    console.log('Toggling tag:', tag);
     
     if (selectedTags.includes(tag)) {
       // Remove tag if already selected
@@ -565,7 +602,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
       selectedTags.push(tag);
     }
     
-    console.log('Selected tags after toggle:', selectedTags);
+    console.log('Selected tags:', selectedTags);
     
     // Update URL to reflect selected tags
     updateURL();
@@ -618,66 +655,68 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
   
   // Function to filter content based on selected tags
   function filterContent(selectedTags: string[]) {
-    console.log('Filtering content with selected tags:', selectedTags);
+    console.log('Filtering content with tags:', selectedTags);
     
     // Get all tool cards
     const toolCards = document.querySelectorAll('.tool-card');
-    console.log('Found tool cards:', toolCards.length);
     
     // If no tags selected, show all cards
     if (selectedTags.length === 0) {
-      console.log('No tags selected, showing all cards');
       toolCards.forEach(card => {
         (card as HTMLElement).style.display = '';
       });
       return;
     }
     
+    // Create an array to track cards and their match counts
+    const cardMatches: {card: HTMLElement, matchCount: number}[] = [];
+    
     // Filter cards based on selected tags
     toolCards.forEach(card => {
       // Get the card's tags
       const cardTagsStr = (card as HTMLElement).dataset.tags;
-      if (!cardTagsStr) {
-        console.warn('Card has no tags:', card);
-        return;
-      }
+      if (!cardTagsStr) return;
       
-      try {
-        const cardTags = JSON.parse(cardTagsStr);
-        console.log('Card tags:', cardTags);
-        
-        // Check if card has at least one of the selected tags (OR logic)
-        const hasAnySelectedTag = selectedTags.some(tag => cardTags.includes(tag));
-        console.log('Card has any selected tag:', hasAnySelectedTag, 'for card:', (card as HTMLElement).id || 'unknown');
-        
-        // Show or hide card
-        (card as HTMLElement).style.display = hasAnySelectedTag ? '' : 'none';
-      } catch (error) {
-        console.error('Error parsing card tags:', error, 'for card:', (card as HTMLElement).id || 'unknown');
+      const cardTags = JSON.parse(cardTagsStr);
+      
+      // Count how many selected tags match this card's tags
+      const matchCount = selectedTags.filter(tag => cardTags.includes(tag)).length;
+      
+      // If the card has at least one matching tag, add it to our array with its match count
+      if (matchCount > 0) {
+        cardMatches.push({
+          card: card as HTMLElement,
+          matchCount
+        });
+      } else {
+        // Hide cards with no matches
+        (card as HTMLElement).style.display = 'none';
       }
     });
-  }
-  
-  // Sort function
-  function getSortedTags(tags: string[], sortType: string, selectedTags: string[] = []): string[] {
-    console.log('Sorting tags with selected tags:', selectedTags);
     
-    // First sort by selection status (selected tags first)
-    return [...tags].sort((a, b) => {
-      const aSelected = selectedTags.includes(a);
-      const bSelected = selectedTags.includes(b);
+    // Sort cards by match count (descending)
+    cardMatches.sort((a, b) => b.matchCount - a.matchCount);
+    
+    // Get the parent container of the cards
+    const cardContainer = toolCards[0]?.parentElement;
+    if (!cardContainer) return;
+    
+    // Remove all cards from the DOM
+    toolCards.forEach(card => card.remove());
+    
+    // Add cards back in the new sorted order
+    cardMatches.forEach(({card, matchCount}) => {
+      // Show the card
+      card.style.display = '';
       
-      // Prioritize selected tags
-      if (aSelected && !bSelected) return -1;
-      if (!aSelected && bSelected) return 1;
+      // Add a data attribute showing the match count (useful for debugging)
+      card.setAttribute('data-match-count', matchCount.toString());
       
-      // If both tags have the same selection status, sort by the chosen criteria
-      if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
-      if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
-      if (sortType === 'alpha-asc') return a.localeCompare(b);
-      if (sortType === 'alpha-desc') return b.localeCompare(a);
-      return 0; // Default fallback
+      // Add the card back to the container
+      cardContainer.appendChild(card);
     });
+    
+    console.log(`Filtered to ${cardMatches.length} cards with at least one matching tag`);
   }
   
   // Function to reorder tags based on selection status and current sort
@@ -732,6 +771,85 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
     } else {
       console.warn('No tags to reorder! Fragment is empty.');
     }
+  }
+  
+  // Sort function
+  function getSortedTags(tags: string[], sortType: string, selectedTags: string[] = []): string[] {
+    console.log('Sorting tags with selected tags:', selectedTags);
+    
+    // First sort by selection status (selected tags first)
+    return [...tags].sort((a, b) => {
+      const aSelected = selectedTags.includes(a);
+      const bSelected = selectedTags.includes(b);
+      
+      // Prioritize selected tags
+      if (aSelected && !bSelected) return -1;
+      if (!aSelected && bSelected) return 1;
+      
+      // If both tags have the same selection status, sort by the chosen criteria
+      if (sortType === 'frequency-desc') return tagFrequencies[b] - tagFrequencies[a];
+      if (sortType === 'frequency-asc') return tagFrequencies[a] - tagFrequencies[b];
+      if (sortType === 'alpha-asc') return a.localeCompare(b);
+      if (sortType === 'alpha-desc') return b.localeCompare(a);
+      return 0; // Default fallback
+    });
+  }
+  
+  // Function to render the tags
+  function renderTags() {
+    if (!tagList) return;
+    
+    console.log('Rendering tags with selected tags:', selectedTags);
+    
+    // Get sorted tags with selected tags prioritized at the top
+    const sortedTags = getSortedTags(tags, currentSortType, selectedTags);
+    console.log('Sorted tags:', sortedTags);
+    
+    // Clear the tag list
+    tagList.innerHTML = '';
+    
+    // First, add a visual separator for selected tags if any exist
+    if (selectedTags.length > 0) {
+      // Create a selected tags section
+      const selectedSection = document.createElement('div');
+      selectedSection.className = 'selected-tags-section';
+      selectedSection.innerHTML = '<h3 class="selected-tags-heading">Selected Tags</h3>';
+      tagList.appendChild(selectedSection);
+    }
+    
+    // Add sorted tags
+    sortedTags.forEach(tag => {
+      // Create a new tag chip
+      const chip = document.createElement('div');
+      chip.className = 'tag-chip-wrapper';
+      
+      const normalCase = trainCaseToNormalCase(tag);
+      const isSelected = selectedTags.includes(tag);
+      
+      // If this is a selected tag, add a special class
+      if (isSelected) {
+        chip.classList.add('selected-tag-wrapper');
+      }
+      
+      chip.innerHTML = `
+        <a 
+          class="tool-tag${isSelected ? ' selected' : ''}" 
+          data-tag="${tag}"
+          href="#${tag}"
+          title="Click to filter by ${normalCase}"
+          aria-label="Filter by ${normalCase}${isSelected ? ' (currently selected)' : ''}"
+          aria-selected="${isSelected ? 'true' : 'false'}"
+        >
+          <p>${normalCase}</p>
+          <span class="count">(${tagFrequencies[tag] || 0})</span>
+        </a>
+      `;
+      
+      tagList.appendChild(chip);
+    });
+    
+    // Attach click listeners to the newly rendered tags
+    attachTagClickListeners();
   }
   
   // Add click event listeners to all tag chips
@@ -791,7 +909,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
     }
   }
   
-  // Initialize the component
+  // Initial setup
   function initialize() {
     console.log('Initializing TagColumn');
     
