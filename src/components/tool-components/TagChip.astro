@@ -41,7 +41,7 @@ const isTagSelected = selected || isSelected;
   {...rest}
 >
   <p>{normalCase}</p>
-  {(includeCount && count > 0) || count !== undefined ? <span class="count">({count})</span> : null}
+  {count !== undefined && count > 0 ? <span class="count">({count})</span> : null}
 </a>
 
 <style>
@@ -65,7 +65,15 @@ const isTagSelected = selected || isSelected;
   /* Content styling */
   .tool-tag p {
     font-size: var(--fs-250);
-    margin: 0;
+    margin: 0.1em 0.3em;
+    display: inline-block;
+  }
+
+  /* Count styling */
+  .tool-tag .count {
+    font-size: var(--fs-200) !important;
+    margin-left: 0.3em;
+    opacity: 0.8;
     display: inline-block;
   }
 
@@ -84,11 +92,5 @@ const isTagSelected = selected || isSelected;
     color: var(--clr-white, #ffffff);
     border-color: var(--clr-lossless-accent);
     box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
-  }
-
-  .count {
-    margin-left: 0.3em;
-    opacity: 0.8;
-    font-size: 0.9em;
   }
 </style>

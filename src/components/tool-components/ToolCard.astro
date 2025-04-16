@@ -5,8 +5,12 @@ import TagCloud from "./TagCloud.astro";
 interface Tool {
   site_name?: string;
   title?: string;
+  zinger?: string;
+  og_title?: string;
   url: string;
   image?: string;
+  og_image?: string;
+  og_image_url?: string;
   favicon?: string;
   description?: string;
   description_site_cp?: string;
@@ -20,8 +24,12 @@ interface Props {
   // Support for direct properties
   site_name?: string;
   title?: string;
+  zinger?: string;
+  og_title?: string;
   url?: string;
   image?: string;
+  og_image?: string;
+  og_image_url?: string;
   favicon?: string;
   description?: string;
   description_site_cp?: string;
@@ -36,8 +44,12 @@ const { tool, ...directProps } = Astro.props;
 const {
   site_name = directProps.site_name,
   title = directProps.title,
+  zinger = directProps.zinger,
+  og_title = directProps.og_title,
   url = directProps.url,
   image = directProps.image,
+  og_image = directProps.og_image,
+  og_image_url = directProps.og_image_url,
   favicon = directProps.favicon,
   description = directProps.description,
   description_site_cp = directProps.description_site_cp,
@@ -52,8 +64,11 @@ const safeTags = tags || [];
 // Get the effective site name using the utility function
 const effectiveSiteName = getEffectiveSiteName(site_name, filename, url);
 
-// Only set displayTitle if title exists, otherwise leave it blank
-const displayTitle = title ? filterTitle(title, effectiveSiteName || "") : "";
+// Get the effective title with fallback order: zinger → title → og_title
+const effectiveTitle = zinger || title || og_title || "";
+
+// Only filter the title if it exists, otherwise leave it blank
+const displayTitle = effectiveTitle ? filterTitle(effectiveTitle, effectiveSiteName || "") : "";
 
 // More robust description handling
 const hasDescriptionSiteCp =
@@ -88,15 +103,15 @@ const effectiveDescription = hasDescriptionSiteCp
 }); */
 ---
 
-<div class="tool-card card-hover-effect" data-tags={JSON.stringify(safeTags)}>
+<div class="tool-card card card-hover-effect" data-tags={JSON.stringify(safeTags)}>
   <div class="content-wrapper">
     {
-      (image || og_screenshot_url) && (
+      (image || og_image || og_image_url || og_screenshot_url) && (
         <div class="tool-card-image">
           <img
-            src={image || og_screenshot_url}
+            src={image || og_image || og_image_url || og_screenshot_url}
             alt={displayTitle}
-            data-primary-image={image}
+            data-primary-image={image || og_image || og_image_url}
             data-screenshot-url={og_screenshot_url}
           />
         </div>
@@ -223,6 +238,11 @@ const effectiveDescription = hasDescriptionSiteCp
     height: 180px;
     object-fit: cover;
     border-radius: 0.5em;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .tool-card:hover .tool-card-image img {
+    transform: scale(1.1);
   }
 
   .tool-card__header {

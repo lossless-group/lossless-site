@@ -32,8 +32,8 @@ const maxHeight = visibleTagRowLimit * rowHeight;
       tags.map((tag) => (
         <TagChip
           tag={tag}
-          count={tagFrequencies[tag] || 0}
-          includeCount={true}
+          count={tagFrequencies && tagFrequencies[tag] > 0 ? tagFrequencies[tag] : undefined}
+          includeCount={!!tagFrequencies}
         />
       ))
     }
@@ -44,7 +44,7 @@ const maxHeight = visibleTagRowLimit * rowHeight;
   .tool-cloud {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6em;
+    gap: 0.2em;
     width: 100%;
     justify-content: space-between;
   }
@@ -52,10 +52,10 @@ const maxHeight = visibleTagRowLimit * rowHeight;
   .tool-tags {
     display: flex;
     flex-flow: row wrap;
-    gap: 0.5em;
+    gap: 0.2em;
     width: 100%;
     overflow-y: hidden;
-    padding: 0.6em 1em;
+    padding: 0.4em 0.6em;
     justify-content: space-between; /* Add space for potential scrollbar */
   }
 

@@ -42,7 +42,7 @@ const effectiveSiteName = getEffectiveSiteName(site_name, filename, url);
 const displayTitle = title ? filterTitle(title, effectiveSiteName || "") : "";
 ---
 
-<div class="bare-tool-card">
+<div class="bare-tool-card card tool-card" data-tags={JSON.stringify(safeTags)}>
   <a href={url} target="_blank" rel="noopener noreferrer">
     <div class="bare-tool-card__header">
       <h2>{effectiveSiteName}</h2>
