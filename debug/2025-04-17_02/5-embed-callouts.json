@@ -1,0 +1,4026 @@
+{
+  "phase": "embed",
+  "replacements": [],
+  "finalTree": {
+    "type": "root",
+    "children": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A "
+          },
+          {
+            "type": "link",
+            "url": "/rag",
+            "data": {
+              "hProperties": {
+                "data-internal-link": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "RAG"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " or "
+          },
+          {
+            "type": "link",
+            "url": "/knowledge-augmented-generation",
+            "data": {
+              "hProperties": {
+                "data-internal-link": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "KAG"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " technique on customer data that can create "
+          },
+          {
+            "type": "link",
+            "url": "/more-about/explainers-for-ai/synthetic-data",
+            "data": {
+              "hProperties": {
+                "data-internal-link": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "Synthetic Data"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": ", and then use "
+          },
+          {
+            "type": "link",
+            "url": "/generative-ai",
+            "data": {
+              "hProperties": {
+                "data-internal-link": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "Generative AI"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " to create "
+          },
+          {
+            "type": "link",
+            "url": "/more-about/explainers-for-ai/synthetic-customers",
+            "data": {
+              "hProperties": {
+                "data-internal-link": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "Synthetic Customers"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": ", which may behave like your existing customer personas."
+          }
+        ],
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 290,
+            "offset": 289
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "[!NOTE] AI Explains\nAI can generate synthetic customers by simulating individuals or groups with realistic characteristics, behaviors, and preferences. These synthetic customers are created using data-driven models that mimic real-world customer data patterns without exposing personal or sensitive information. Here’s how it works and how synthetic customers can assist with product design:",
+                "position": {
+                  "start": {
+                    "line": 3,
+                    "column": 3,
+                    "offset": 293
+                  },
+                  "end": {
+                    "line": 4,
+                    "column": 374,
+                    "offset": 686
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 3,
+                "column": 3,
+                "offset": 293
+              },
+              "end": {
+                "line": 4,
+                "column": 374,
+                "offset": 686
+              }
+            }
+          },
+          {
+            "type": "thematicBreak",
+            "position": {
+              "start": {
+                "line": 6,
+                "column": 3,
+                "offset": 692
+              },
+              "end": {
+                "line": 6,
+                "column": 6,
+                "offset": 695
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 3,
+            "children": [
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "How AI Generates Synthetic Customers",
+                    "position": {
+                      "start": {
+                        "line": 8,
+                        "column": 9,
+                        "offset": 707
+                      },
+                      "end": {
+                        "line": 8,
+                        "column": 45,
+                        "offset": 743
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 8,
+                    "column": 7,
+                    "offset": 705
+                  },
+                  "end": {
+                    "line": 8,
+                    "column": 47,
+                    "offset": 745
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 8,
+                "column": 3,
+                "offset": 701
+              },
+              "end": {
+                "line": 8,
+                "column": 47,
+                "offset": 745
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": true,
+            "start": 1,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Data Collection and Preprocessing",
+                            "position": {
+                              "start": {
+                                "line": 10,
+                                "column": 8,
+                                "offset": 756
+                              },
+                              "end": {
+                                "line": 10,
+                                "column": 41,
+                                "offset": 789
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 10,
+                            "column": 6,
+                            "offset": 754
+                          },
+                          "end": {
+                            "line": 10,
+                            "column": 43,
+                            "offset": 791
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 10,
+                            "column": 43,
+                            "offset": 791
+                          },
+                          "end": {
+                            "line": 10,
+                            "column": 44,
+                            "offset": 792
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 10,
+                        "column": 6,
+                        "offset": 754
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 44,
+                        "offset": 792
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "AI uses anonymized customer data or publicly available datasets to understand the demographics, behaviors, and purchasing patterns of customers.",
+                                "position": {
+                                  "start": {
+                                    "line": 12,
+                                    "column": 9,
+                                    "offset": 808
+                                  },
+                                  "end": {
+                                    "line": 12,
+                                    "column": 153,
+                                    "offset": 952
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 12,
+                                "column": 9,
+                                "offset": 808
+                              },
+                              "end": {
+                                "line": 12,
+                                "column": 153,
+                                "offset": 952
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 12,
+                            "column": 7,
+                            "offset": 806
+                          },
+                          "end": {
+                            "line": 12,
+                            "column": 153,
+                            "offset": 952
+                          }
+                        }
+                      },
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "Data is preprocessed to remove bias, noise, and any personally identifiable information (PII).",
+                                "position": {
+                                  "start": {
+                                    "line": 13,
+                                    "column": 9,
+                                    "offset": 961
+                                  },
+                                  "end": {
+                                    "line": 13,
+                                    "column": 103,
+                                    "offset": 1055
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 13,
+                                "column": 9,
+                                "offset": 961
+                              },
+                              "end": {
+                                "line": 13,
+                                "column": 103,
+                                "offset": 1055
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 13,
+                            "column": 7,
+                            "offset": 959
+                          },
+                          "end": {
+                            "line": 13,
+                            "column": 103,
+                            "offset": 1055
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 12,
+                        "column": 7,
+                        "offset": 806
+                      },
+                      "end": {
+                        "line": 13,
+                        "column": 103,
+                        "offset": 1055
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 10,
+                    "column": 3,
+                    "offset": 751
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 103,
+                    "offset": 1055
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Statistical Modeling",
+                            "position": {
+                              "start": {
+                                "line": 14,
+                                "column": 8,
+                                "offset": 1063
+                              },
+                              "end": {
+                                "line": 14,
+                                "column": 28,
+                                "offset": 1083
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 14,
+                            "column": 6,
+                            "offset": 1061
+                          },
+                          "end": {
+                            "line": 14,
+                            "column": 30,
+                            "offset": 1085
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 14,
+                            "column": 30,
+                            "offset": 1085
+                          },
+                          "end": {
+                            "line": 14,
+                            "column": 31,
+                            "offset": 1086
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 14,
+                        "column": 6,
+                        "offset": 1061
+                      },
+                      "end": {
+                        "line": 14,
+                        "column": 31,
+                        "offset": 1086
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "AI applies statistical techniques such as ",
+                                "position": {
+                                  "start": {
+                                    "line": 16,
+                                    "column": 9,
+                                    "offset": 1102
+                                  },
+                                  "end": {
+                                    "line": 16,
+                                    "column": 51,
+                                    "offset": 1144
+                                  }
+                                }
+                              },
+                              {
+                                "type": "strong",
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "probabilistic modeling",
+                                    "position": {
+                                      "start": {
+                                        "line": 16,
+                                        "column": 53,
+                                        "offset": 1146
+                                      },
+                                      "end": {
+                                        "line": 16,
+                                        "column": 75,
+                                        "offset": 1168
+                                      }
+                                    }
+                                  }
+                                ],
+                                "position": {
+                                  "start": {
+                                    "line": 16,
+                                    "column": 51,
+                                    "offset": 1144
+                                  },
+                                  "end": {
+                                    "line": 16,
+                                    "column": 77,
+                                    "offset": 1170
+                                  }
+                                }
+                              },
+                              {
+                                "type": "text",
+                                "value": " to simulate distributions of customer attributes (e.g., age, income, preferences, location).",
+                                "position": {
+                                  "start": {
+                                    "line": 16,
+                                    "column": 77,
+                                    "offset": 1170
+                                  },
+                                  "end": {
+                                    "line": 16,
+                                    "column": 170,
+                                    "offset": 1263
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 16,
+                                "column": 9,
+                                "offset": 1102
+                              },
+                              "end": {
+                                "line": 16,
+                                "column": 170,
+                                "offset": 1263
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 16,
+                            "column": 7,
+                            "offset": 1100
+                          },
+                          "end": {
+                            "line": 16,
+                            "column": 170,
+                            "offset": 1263
+                          }
+                        }
+                      },
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "These models ensure that synthetic customers represent the diversity of the target market.",
+                                "position": {
+                                  "start": {
+                                    "line": 17,
+                                    "column": 9,
+                                    "offset": 1272
+                                  },
+                                  "end": {
+                                    "line": 17,
+                                    "column": 99,
+                                    "offset": 1362
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 17,
+                                "column": 9,
+                                "offset": 1272
+                              },
+                              "end": {
+                                "line": 17,
+                                "column": 99,
+                                "offset": 1362
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 17,
+                            "column": 7,
+                            "offset": 1270
+                          },
+                          "end": {
+                            "line": 17,
+                            "column": 99,
+                            "offset": 1362
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 16,
+                        "column": 7,
+                        "offset": 1100
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 99,
+                        "offset": 1362
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 14,
+                    "column": 3,
+                    "offset": 1058
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 99,
+                    "offset": 1362
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Machine Learning and Generative Models",
+                            "position": {
+                              "start": {
+                                "line": 18,
+                                "column": 8,
+                                "offset": 1370
+                              },
+                              "end": {
+                                "line": 18,
+                                "column": 46,
+                                "offset": 1408
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 18,
+                            "column": 6,
+                            "offset": 1368
+                          },
+                          "end": {
+                            "line": 18,
+                            "column": 48,
+                            "offset": 1410
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 18,
+                            "column": 48,
+                            "offset": 1410
+                          },
+                          "end": {
+                            "line": 18,
+                            "column": 49,
+                            "offset": 1411
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 18,
+                        "column": 6,
+                        "offset": 1368
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 49,
+                        "offset": 1411
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "strong",
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Generative Adversarial Networks (GANs)",
+                                    "position": {
+                                      "start": {
+                                        "line": 20,
+                                        "column": 11,
+                                        "offset": 1429
+                                      },
+                                      "end": {
+                                        "line": 20,
+                                        "column": 49,
+                                        "offset": 1467
+                                      }
+                                    }
+                                  }
+                                ],
+                                "position": {
+                                  "start": {
+                                    "line": 20,
+                                    "column": 9,
+                                    "offset": 1427
+                                  },
+                                  "end": {
+                                    "line": 20,
+                                    "column": 51,
+                                    "offset": 1469
+                                  }
+                                }
+                              },
+                              {
+                                "type": "text",
+                                "value": ": Generate realistic synthetic data by having two networks (generator and discriminator) work together to create plausible customer profiles.",
+                                "position": {
+                                  "start": {
+                                    "line": 20,
+                                    "column": 51,
+                                    "offset": 1469
+                                  },
+                                  "end": {
+                                    "line": 20,
+                                    "column": 192,
+                                    "offset": 1610
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 20,
+                                "column": 9,
+                                "offset": 1427
+                              },
+                              "end": {
+                                "line": 20,
+                                "column": 192,
+                                "offset": 1610
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 20,
+                            "column": 7,
+                            "offset": 1425
+                          },
+                          "end": {
+                            "line": 20,
+                            "column": 192,
+                            "offset": 1610
+                          }
+                        }
+                      },
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "strong",
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Variational Autoencoders (VAEs)",
+                                    "position": {
+                                      "start": {
+                                        "line": 21,
+                                        "column": 11,
+                                        "offset": 1621
+                                      },
+                                      "end": {
+                                        "line": 21,
+                                        "column": 42,
+                                        "offset": 1652
+                                      }
+                                    }
+                                  }
+                                ],
+                                "position": {
+                                  "start": {
+                                    "line": 21,
+                                    "column": 9,
+                                    "offset": 1619
+                                  },
+                                  "end": {
+                                    "line": 21,
+                                    "column": 44,
+                                    "offset": 1654
+                                  }
+                                }
+                              },
+                              {
+                                "type": "text",
+                                "value": ": Learn latent variables from real customer data to generate new, synthetic customers with similar distributions.",
+                                "position": {
+                                  "start": {
+                                    "line": 21,
+                                    "column": 44,
+                                    "offset": 1654
+                                  },
+                                  "end": {
+                                    "line": 21,
+                                    "column": 157,
+                                    "offset": 1767
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 21,
+                                "column": 9,
+                                "offset": 1619
+                              },
+                              "end": {
+                                "line": 21,
+                                "column": 157,
+                                "offset": 1767
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 21,
+                            "column": 7,
+                            "offset": 1617
+                          },
+                          "end": {
+                            "line": 21,
+                            "column": 157,
+                            "offset": 1767
+                          }
+                        }
+                      },
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "strong",
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Rule-based Systems",
+                                    "position": {
+                                      "start": {
+                                        "line": 22,
+                                        "column": 11,
+                                        "offset": 1778
+                                      },
+                                      "end": {
+                                        "line": 22,
+                                        "column": 29,
+                                        "offset": 1796
+                                      }
+                                    }
+                                  }
+                                ],
+                                "position": {
+                                  "start": {
+                                    "line": 22,
+                                    "column": 9,
+                                    "offset": 1776
+                                  },
+                                  "end": {
+                                    "line": 22,
+                                    "column": 31,
+                                    "offset": 1798
+                                  }
+                                }
+                              },
+                              {
+                                "type": "text",
+                                "value": ": Incorporate domain knowledge to generate synthetic customers with specific attributes (e.g., frequent buyers, price-sensitive shoppers).",
+                                "position": {
+                                  "start": {
+                                    "line": 22,
+                                    "column": 31,
+                                    "offset": 1798
+                                  },
+                                  "end": {
+                                    "line": 22,
+                                    "column": 169,
+                                    "offset": 1936
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 22,
+                                "column": 9,
+                                "offset": 1776
+                              },
+                              "end": {
+                                "line": 22,
+                                "column": 169,
+                                "offset": 1936
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 22,
+                            "column": 7,
+                            "offset": 1774
+                          },
+                          "end": {
+                            "line": 22,
+                            "column": 169,
+                            "offset": 1936
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 20,
+                        "column": 7,
+                        "offset": 1425
+                      },
+                      "end": {
+                        "line": 22,
+                        "column": 169,
+                        "offset": 1936
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 18,
+                    "column": 3,
+                    "offset": 1365
+                  },
+                  "end": {
+                    "line": 22,
+                    "column": 169,
+                    "offset": 1936
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Behavioral Simulation",
+                            "position": {
+                              "start": {
+                                "line": 23,
+                                "column": 8,
+                                "offset": 1944
+                              },
+                              "end": {
+                                "line": 23,
+                                "column": 29,
+                                "offset": 1965
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 23,
+                            "column": 6,
+                            "offset": 1942
+                          },
+                          "end": {
+                            "line": 23,
+                            "column": 31,
+                            "offset": 1967
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 23,
+                            "column": 31,
+                            "offset": 1967
+                          },
+                          "end": {
+                            "line": 23,
+                            "column": 32,
+                            "offset": 1968
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 23,
+                        "column": 6,
+                        "offset": 1942
+                      },
+                      "end": {
+                        "line": 23,
+                        "column": 32,
+                        "offset": 1968
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "AI can simulate customer decision-making processes, preferences, and reactions based on real-world behavioral patterns.",
+                                "position": {
+                                  "start": {
+                                    "line": 25,
+                                    "column": 9,
+                                    "offset": 1984
+                                  },
+                                  "end": {
+                                    "line": 25,
+                                    "column": 128,
+                                    "offset": 2103
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 25,
+                                "column": 9,
+                                "offset": 1984
+                              },
+                              "end": {
+                                "line": 25,
+                                "column": 128,
+                                "offset": 2103
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 25,
+                            "column": 7,
+                            "offset": 1982
+                          },
+                          "end": {
+                            "line": 25,
+                            "column": 128,
+                            "offset": 2103
+                          }
+                        }
+                      },
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "Techniques like ",
+                                "position": {
+                                  "start": {
+                                    "line": 26,
+                                    "column": 9,
+                                    "offset": 2112
+                                  },
+                                  "end": {
+                                    "line": 26,
+                                    "column": 25,
+                                    "offset": 2128
+                                  }
+                                }
+                              },
+                              {
+                                "type": "strong",
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "reinforcement learning",
+                                    "position": {
+                                      "start": {
+                                        "line": 26,
+                                        "column": 27,
+                                        "offset": 2130
+                                      },
+                                      "end": {
+                                        "line": 26,
+                                        "column": 49,
+                                        "offset": 2152
+                                      }
+                                    }
+                                  }
+                                ],
+                                "position": {
+                                  "start": {
+                                    "line": 26,
+                                    "column": 25,
+                                    "offset": 2128
+                                  },
+                                  "end": {
+                                    "line": 26,
+                                    "column": 51,
+                                    "offset": 2154
+                                  }
+                                }
+                              },
+                              {
+                                "type": "text",
+                                "value": " can predict how synthetic customers might interact with a product or service.",
+                                "position": {
+                                  "start": {
+                                    "line": 26,
+                                    "column": 51,
+                                    "offset": 2154
+                                  },
+                                  "end": {
+                                    "line": 26,
+                                    "column": 129,
+                                    "offset": 2232
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 26,
+                                "column": 9,
+                                "offset": 2112
+                              },
+                              "end": {
+                                "line": 26,
+                                "column": 129,
+                                "offset": 2232
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 26,
+                            "column": 7,
+                            "offset": 2110
+                          },
+                          "end": {
+                            "line": 26,
+                            "column": 129,
+                            "offset": 2232
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 25,
+                        "column": 7,
+                        "offset": 1982
+                      },
+                      "end": {
+                        "line": 27,
+                        "column": 3,
+                        "offset": 2235
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 23,
+                    "column": 3,
+                    "offset": 1939
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 3,
+                    "offset": 2235
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 10,
+                "column": 3,
+                "offset": 751
+              },
+              "end": {
+                "line": 27,
+                "column": 3,
+                "offset": 2235
+              }
+            }
+          },
+          {
+            "type": "thematicBreak",
+            "position": {
+              "start": {
+                "line": 28,
+                "column": 3,
+                "offset": 2238
+              },
+              "end": {
+                "line": 28,
+                "column": 6,
+                "offset": 2241
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 3,
+            "children": [
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "How Synthetic Customers Help with Product Design",
+                    "position": {
+                      "start": {
+                        "line": 30,
+                        "column": 9,
+                        "offset": 2253
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 57,
+                        "offset": 2301
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 30,
+                    "column": 7,
+                    "offset": 2251
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 59,
+                    "offset": 2303
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 30,
+                "column": 3,
+                "offset": 2247
+              },
+              "end": {
+                "line": 30,
+                "column": 59,
+                "offset": 2303
+              }
+            }
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "Simulated customers can provide insights throughout the product design process, helping create user-centered products and services. Key benefits include:",
+                "position": {
+                  "start": {
+                    "line": 32,
+                    "column": 3,
+                    "offset": 2309
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 156,
+                    "offset": 2462
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 32,
+                "column": 3,
+                "offset": 2309
+              },
+              "end": {
+                "line": 32,
+                "column": 156,
+                "offset": 2462
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "1. ",
+                "position": {
+                  "start": {
+                    "line": 34,
+                    "column": 8,
+                    "offset": 2473
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 11,
+                    "offset": 2476
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Early-Stage Prototyping and Validation",
+                    "position": {
+                      "start": {
+                        "line": 34,
+                        "column": 13,
+                        "offset": 2478
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 51,
+                        "offset": 2516
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 34,
+                    "column": 11,
+                    "offset": 2476
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 53,
+                    "offset": 2518
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 34,
+                    "column": 53,
+                    "offset": 2518
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 54,
+                    "offset": 2519
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 34,
+                "column": 3,
+                "offset": 2468
+              },
+              "end": {
+                "line": 34,
+                "column": 54,
+                "offset": 2519
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Synthetic customers can simulate user interactions with prototypes or mockups.",
+                        "position": {
+                          "start": {
+                            "line": 36,
+                            "column": 5,
+                            "offset": 2527
+                          },
+                          "end": {
+                            "line": 36,
+                            "column": 83,
+                            "offset": 2605
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 36,
+                        "column": 5,
+                        "offset": 2527
+                      },
+                      "end": {
+                        "line": 36,
+                        "column": 83,
+                        "offset": 2605
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 36,
+                    "column": 3,
+                    "offset": 2525
+                  },
+                  "end": {
+                    "line": 36,
+                    "column": 83,
+                    "offset": 2605
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Designers can test product concepts against these simulated users, reducing development costs and time.",
+                        "position": {
+                          "start": {
+                            "line": 37,
+                            "column": 5,
+                            "offset": 2610
+                          },
+                          "end": {
+                            "line": 37,
+                            "column": 108,
+                            "offset": 2713
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 37,
+                        "column": 5,
+                        "offset": 2610
+                      },
+                      "end": {
+                        "line": 37,
+                        "column": 108,
+                        "offset": 2713
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 37,
+                    "column": 3,
+                    "offset": 2608
+                  },
+                  "end": {
+                    "line": 37,
+                    "column": 108,
+                    "offset": 2713
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 36,
+                "column": 3,
+                "offset": 2525
+              },
+              "end": {
+                "line": 38,
+                "column": 3,
+                "offset": 2716
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "2. ",
+                "position": {
+                  "start": {
+                    "line": 39,
+                    "column": 8,
+                    "offset": 2724
+                  },
+                  "end": {
+                    "line": 39,
+                    "column": 11,
+                    "offset": 2727
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Personalization and Targeting",
+                    "position": {
+                      "start": {
+                        "line": 39,
+                        "column": 13,
+                        "offset": 2729
+                      },
+                      "end": {
+                        "line": 39,
+                        "column": 42,
+                        "offset": 2758
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 39,
+                    "column": 11,
+                    "offset": 2727
+                  },
+                  "end": {
+                    "line": 39,
+                    "column": 44,
+                    "offset": 2760
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 39,
+                    "column": 44,
+                    "offset": 2760
+                  },
+                  "end": {
+                    "line": 39,
+                    "column": 45,
+                    "offset": 2761
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 39,
+                "column": 3,
+                "offset": 2719
+              },
+              "end": {
+                "line": 39,
+                "column": 45,
+                "offset": 2761
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Synthetic customers help identify market segments to design products tailored to specific groups (e.g., budget-conscious shoppers or luxury buyers).",
+                        "position": {
+                          "start": {
+                            "line": 41,
+                            "column": 5,
+                            "offset": 2769
+                          },
+                          "end": {
+                            "line": 41,
+                            "column": 153,
+                            "offset": 2917
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 41,
+                        "column": 5,
+                        "offset": 2769
+                      },
+                      "end": {
+                        "line": 41,
+                        "column": 153,
+                        "offset": 2917
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 41,
+                    "column": 3,
+                    "offset": 2767
+                  },
+                  "end": {
+                    "line": 41,
+                    "column": 153,
+                    "offset": 2917
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "They can simulate demand for various product features across demographic groups.",
+                        "position": {
+                          "start": {
+                            "line": 42,
+                            "column": 5,
+                            "offset": 2922
+                          },
+                          "end": {
+                            "line": 42,
+                            "column": 85,
+                            "offset": 3002
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 42,
+                        "column": 5,
+                        "offset": 2922
+                      },
+                      "end": {
+                        "line": 42,
+                        "column": 85,
+                        "offset": 3002
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 42,
+                    "column": 3,
+                    "offset": 2920
+                  },
+                  "end": {
+                    "line": 42,
+                    "column": 85,
+                    "offset": 3002
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 41,
+                "column": 3,
+                "offset": 2767
+              },
+              "end": {
+                "line": 43,
+                "column": 3,
+                "offset": 3005
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "3. ",
+                "position": {
+                  "start": {
+                    "line": 44,
+                    "column": 8,
+                    "offset": 3013
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 11,
+                    "offset": 3016
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Scenario Testing",
+                    "position": {
+                      "start": {
+                        "line": 44,
+                        "column": 13,
+                        "offset": 3018
+                      },
+                      "end": {
+                        "line": 44,
+                        "column": 29,
+                        "offset": 3034
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 44,
+                    "column": 11,
+                    "offset": 3016
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 31,
+                    "offset": 3036
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 44,
+                    "column": 31,
+                    "offset": 3036
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 32,
+                    "offset": 3037
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 44,
+                "column": 3,
+                "offset": 3008
+              },
+              "end": {
+                "line": 44,
+                "column": 32,
+                "offset": 3037
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Synthetic customers can be used to test \"what-if\" scenarios, such as how users might respond to a price increase, a product redesign, or a new feature.",
+                        "position": {
+                          "start": {
+                            "line": 46,
+                            "column": 5,
+                            "offset": 3045
+                          },
+                          "end": {
+                            "line": 46,
+                            "column": 156,
+                            "offset": 3196
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 46,
+                        "column": 5,
+                        "offset": 3045
+                      },
+                      "end": {
+                        "line": 46,
+                        "column": 156,
+                        "offset": 3196
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 46,
+                    "column": 3,
+                    "offset": 3043
+                  },
+                  "end": {
+                    "line": 46,
+                    "column": 156,
+                    "offset": 3196
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "This allows teams to anticipate customer reactions and refine strategies.",
+                        "position": {
+                          "start": {
+                            "line": 47,
+                            "column": 5,
+                            "offset": 3201
+                          },
+                          "end": {
+                            "line": 47,
+                            "column": 78,
+                            "offset": 3274
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 47,
+                        "column": 5,
+                        "offset": 3201
+                      },
+                      "end": {
+                        "line": 47,
+                        "column": 78,
+                        "offset": 3274
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 47,
+                    "column": 3,
+                    "offset": 3199
+                  },
+                  "end": {
+                    "line": 47,
+                    "column": 78,
+                    "offset": 3274
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 46,
+                "column": 3,
+                "offset": 3043
+              },
+              "end": {
+                "line": 48,
+                "column": 3,
+                "offset": 3277
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "4. ",
+                "position": {
+                  "start": {
+                    "line": 49,
+                    "column": 8,
+                    "offset": 3285
+                  },
+                  "end": {
+                    "line": 49,
+                    "column": 11,
+                    "offset": 3288
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Bias Mitigation",
+                    "position": {
+                      "start": {
+                        "line": 49,
+                        "column": 13,
+                        "offset": 3290
+                      },
+                      "end": {
+                        "line": 49,
+                        "column": 28,
+                        "offset": 3305
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 49,
+                    "column": 11,
+                    "offset": 3288
+                  },
+                  "end": {
+                    "line": 49,
+                    "column": 30,
+                    "offset": 3307
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 49,
+                    "column": 30,
+                    "offset": 3307
+                  },
+                  "end": {
+                    "line": 49,
+                    "column": 31,
+                    "offset": 3308
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 49,
+                "column": 3,
+                "offset": 3280
+              },
+              "end": {
+                "line": 49,
+                "column": 31,
+                "offset": 3308
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "By generating diverse and inclusive synthetic customer profiles, AI can help designers ensure their products are accessible and appealing to underrepresented groups.",
+                        "position": {
+                          "start": {
+                            "line": 51,
+                            "column": 5,
+                            "offset": 3316
+                          },
+                          "end": {
+                            "line": 51,
+                            "column": 170,
+                            "offset": 3481
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 51,
+                        "column": 5,
+                        "offset": 3316
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 170,
+                        "offset": 3481
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 51,
+                    "column": 3,
+                    "offset": 3314
+                  },
+                  "end": {
+                    "line": 51,
+                    "column": 170,
+                    "offset": 3481
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 51,
+                "column": 3,
+                "offset": 3314
+              },
+              "end": {
+                "line": 52,
+                "column": 3,
+                "offset": 3484
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "5. ",
+                "position": {
+                  "start": {
+                    "line": 53,
+                    "column": 8,
+                    "offset": 3492
+                  },
+                  "end": {
+                    "line": 53,
+                    "column": 11,
+                    "offset": 3495
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "A/B Testing Simulations",
+                    "position": {
+                      "start": {
+                        "line": 53,
+                        "column": 13,
+                        "offset": 3497
+                      },
+                      "end": {
+                        "line": 53,
+                        "column": 36,
+                        "offset": 3520
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 53,
+                    "column": 11,
+                    "offset": 3495
+                  },
+                  "end": {
+                    "line": 53,
+                    "column": 38,
+                    "offset": 3522
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 53,
+                    "column": 38,
+                    "offset": 3522
+                  },
+                  "end": {
+                    "line": 53,
+                    "column": 39,
+                    "offset": 3523
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 53,
+                "column": 3,
+                "offset": 3487
+              },
+              "end": {
+                "line": 53,
+                "column": 39,
+                "offset": 3523
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Synthetic customers can be used to run virtual A/B tests on design options before involving real users, saving time and resources.",
+                        "position": {
+                          "start": {
+                            "line": 55,
+                            "column": 5,
+                            "offset": 3531
+                          },
+                          "end": {
+                            "line": 55,
+                            "column": 135,
+                            "offset": 3661
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 55,
+                        "column": 5,
+                        "offset": 3531
+                      },
+                      "end": {
+                        "line": 55,
+                        "column": 135,
+                        "offset": 3661
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 55,
+                    "column": 3,
+                    "offset": 3529
+                  },
+                  "end": {
+                    "line": 55,
+                    "column": 135,
+                    "offset": 3661
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 55,
+                "column": 3,
+                "offset": 3529
+              },
+              "end": {
+                "line": 56,
+                "column": 3,
+                "offset": 3664
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "6. ",
+                "position": {
+                  "start": {
+                    "line": 57,
+                    "column": 8,
+                    "offset": 3672
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 11,
+                    "offset": 3675
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Product Usage and Usability Analysis",
+                    "position": {
+                      "start": {
+                        "line": 57,
+                        "column": 13,
+                        "offset": 3677
+                      },
+                      "end": {
+                        "line": 57,
+                        "column": 49,
+                        "offset": 3713
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 57,
+                    "column": 11,
+                    "offset": 3675
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 51,
+                    "offset": 3715
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 57,
+                    "column": 51,
+                    "offset": 3715
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 52,
+                    "offset": 3716
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 57,
+                "column": 3,
+                "offset": 3667
+              },
+              "end": {
+                "line": 57,
+                "column": 52,
+                "offset": 3716
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Simulated customers can mimic how real customers might use a product, highlighting usability issues and opportunities for improvement.",
+                        "position": {
+                          "start": {
+                            "line": 59,
+                            "column": 5,
+                            "offset": 3724
+                          },
+                          "end": {
+                            "line": 59,
+                            "column": 139,
+                            "offset": 3858
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 59,
+                        "column": 5,
+                        "offset": 3724
+                      },
+                      "end": {
+                        "line": 59,
+                        "column": 139,
+                        "offset": 3858
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 59,
+                    "column": 3,
+                    "offset": 3722
+                  },
+                  "end": {
+                    "line": 59,
+                    "column": 139,
+                    "offset": 3858
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Behavioral models can predict pain points, such as complex navigation or unclear instructions.",
+                        "position": {
+                          "start": {
+                            "line": 60,
+                            "column": 5,
+                            "offset": 3863
+                          },
+                          "end": {
+                            "line": 60,
+                            "column": 99,
+                            "offset": 3957
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 60,
+                        "column": 5,
+                        "offset": 3863
+                      },
+                      "end": {
+                        "line": 60,
+                        "column": 99,
+                        "offset": 3957
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 60,
+                    "column": 3,
+                    "offset": 3861
+                  },
+                  "end": {
+                    "line": 60,
+                    "column": 99,
+                    "offset": 3957
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 59,
+                "column": 3,
+                "offset": 3722
+              },
+              "end": {
+                "line": 61,
+                "column": 3,
+                "offset": 3960
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "7. ",
+                "position": {
+                  "start": {
+                    "line": 62,
+                    "column": 8,
+                    "offset": 3968
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 11,
+                    "offset": 3971
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Scalability",
+                    "position": {
+                      "start": {
+                        "line": 62,
+                        "column": 13,
+                        "offset": 3973
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 24,
+                        "offset": 3984
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 62,
+                    "column": 11,
+                    "offset": 3971
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 26,
+                    "offset": 3986
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 62,
+                    "column": 26,
+                    "offset": 3986
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 27,
+                    "offset": 3987
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 62,
+                "column": 3,
+                "offset": 3963
+              },
+              "end": {
+                "line": 62,
+                "column": 27,
+                "offset": 3987
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Synthetic customers provide limitless scalability, allowing organizations to model thousands or millions of user interactions without additional costs or risks.",
+                        "position": {
+                          "start": {
+                            "line": 64,
+                            "column": 5,
+                            "offset": 3995
+                          },
+                          "end": {
+                            "line": 64,
+                            "column": 165,
+                            "offset": 4155
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 64,
+                        "column": 5,
+                        "offset": 3995
+                      },
+                      "end": {
+                        "line": 64,
+                        "column": 165,
+                        "offset": 4155
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 64,
+                    "column": 3,
+                    "offset": 3993
+                  },
+                  "end": {
+                    "line": 64,
+                    "column": 165,
+                    "offset": 4155
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 64,
+                "column": 3,
+                "offset": 3993
+              },
+              "end": {
+                "line": 65,
+                "column": 3,
+                "offset": 4158
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 4,
+            "children": [
+              {
+                "type": "text",
+                "value": "8. ",
+                "position": {
+                  "start": {
+                    "line": 66,
+                    "column": 8,
+                    "offset": 4166
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 11,
+                    "offset": 4169
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Privacy and Compliance",
+                    "position": {
+                      "start": {
+                        "line": 66,
+                        "column": 13,
+                        "offset": 4171
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 35,
+                        "offset": 4193
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 66,
+                    "column": 11,
+                    "offset": 4169
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 37,
+                    "offset": 4195
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": ":",
+                "position": {
+                  "start": {
+                    "line": 66,
+                    "column": 37,
+                    "offset": 4195
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 38,
+                    "offset": 4196
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 66,
+                "column": 3,
+                "offset": 4161
+              },
+              "end": {
+                "line": 66,
+                "column": 38,
+                "offset": 4196
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Synthetic data ensures compliance with data privacy regulations (e.g., GDPR, CCPA) because it doesn’t rely on real customer data. This allows safer experimentation during product design.",
+                        "position": {
+                          "start": {
+                            "line": 68,
+                            "column": 5,
+                            "offset": 4204
+                          },
+                          "end": {
+                            "line": 68,
+                            "column": 191,
+                            "offset": 4390
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 68,
+                        "column": 5,
+                        "offset": 4204
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 191,
+                        "offset": 4390
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 68,
+                    "column": 3,
+                    "offset": 4202
+                  },
+                  "end": {
+                    "line": 68,
+                    "column": 191,
+                    "offset": 4390
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 68,
+                "column": 3,
+                "offset": 4202
+              },
+              "end": {
+                "line": 69,
+                "column": 3,
+                "offset": 4393
+              }
+            }
+          },
+          {
+            "type": "thematicBreak",
+            "position": {
+              "start": {
+                "line": 70,
+                "column": 3,
+                "offset": 4396
+              },
+              "end": {
+                "line": 70,
+                "column": 6,
+                "offset": 4399
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 3,
+            "children": [
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Example Applications",
+                    "position": {
+                      "start": {
+                        "line": 72,
+                        "column": 9,
+                        "offset": 4411
+                      },
+                      "end": {
+                        "line": 72,
+                        "column": 29,
+                        "offset": 4431
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 72,
+                    "column": 7,
+                    "offset": 4409
+                  },
+                  "end": {
+                    "line": 72,
+                    "column": 31,
+                    "offset": 4433
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 72,
+                "column": 3,
+                "offset": 4405
+              },
+              "end": {
+                "line": 72,
+                "column": 31,
+                "offset": 4433
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": true,
+            "start": 1,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "E-Commerce",
+                            "position": {
+                              "start": {
+                                "line": 74,
+                                "column": 8,
+                                "offset": 4444
+                              },
+                              "end": {
+                                "line": 74,
+                                "column": 18,
+                                "offset": 4454
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 74,
+                            "column": 6,
+                            "offset": 4442
+                          },
+                          "end": {
+                            "line": 74,
+                            "column": 20,
+                            "offset": 4456
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 74,
+                            "column": 20,
+                            "offset": 4456
+                          },
+                          "end": {
+                            "line": 74,
+                            "column": 21,
+                            "offset": 4457
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 74,
+                        "column": 6,
+                        "offset": 4442
+                      },
+                      "end": {
+                        "line": 74,
+                        "column": 21,
+                        "offset": 4457
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "Simulate different types of online shoppers to optimize website design, checkout flows, and personalized recommendations.",
+                                "position": {
+                                  "start": {
+                                    "line": 76,
+                                    "column": 9,
+                                    "offset": 4473
+                                  },
+                                  "end": {
+                                    "line": 76,
+                                    "column": 130,
+                                    "offset": 4594
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 76,
+                                "column": 9,
+                                "offset": 4473
+                              },
+                              "end": {
+                                "line": 76,
+                                "column": 130,
+                                "offset": 4594
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 76,
+                            "column": 7,
+                            "offset": 4471
+                          },
+                          "end": {
+                            "line": 76,
+                            "column": 130,
+                            "offset": 4594
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 76,
+                        "column": 7,
+                        "offset": 4471
+                      },
+                      "end": {
+                        "line": 76,
+                        "column": 130,
+                        "offset": 4594
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 74,
+                    "column": 3,
+                    "offset": 4439
+                  },
+                  "end": {
+                    "line": 76,
+                    "column": 130,
+                    "offset": 4594
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Automotive Industry",
+                            "position": {
+                              "start": {
+                                "line": 77,
+                                "column": 8,
+                                "offset": 4602
+                              },
+                              "end": {
+                                "line": 77,
+                                "column": 27,
+                                "offset": 4621
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 77,
+                            "column": 6,
+                            "offset": 4600
+                          },
+                          "end": {
+                            "line": 77,
+                            "column": 29,
+                            "offset": 4623
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 77,
+                            "column": 29,
+                            "offset": 4623
+                          },
+                          "end": {
+                            "line": 77,
+                            "column": 30,
+                            "offset": 4624
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 77,
+                        "column": 6,
+                        "offset": 4600
+                      },
+                      "end": {
+                        "line": 77,
+                        "column": 30,
+                        "offset": 4624
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "Generate synthetic drivers to test the usability of in-car interfaces and features based on different driver behaviors and preferences.",
+                                "position": {
+                                  "start": {
+                                    "line": 79,
+                                    "column": 9,
+                                    "offset": 4640
+                                  },
+                                  "end": {
+                                    "line": 79,
+                                    "column": 144,
+                                    "offset": 4775
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 79,
+                                "column": 9,
+                                "offset": 4640
+                              },
+                              "end": {
+                                "line": 79,
+                                "column": 144,
+                                "offset": 4775
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 79,
+                            "column": 7,
+                            "offset": 4638
+                          },
+                          "end": {
+                            "line": 79,
+                            "column": 144,
+                            "offset": 4775
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 79,
+                        "column": 7,
+                        "offset": 4638
+                      },
+                      "end": {
+                        "line": 79,
+                        "column": 144,
+                        "offset": 4775
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 77,
+                    "column": 3,
+                    "offset": 4597
+                  },
+                  "end": {
+                    "line": 79,
+                    "column": 144,
+                    "offset": 4775
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Healthcare",
+                            "position": {
+                              "start": {
+                                "line": 80,
+                                "column": 8,
+                                "offset": 4783
+                              },
+                              "end": {
+                                "line": 80,
+                                "column": 18,
+                                "offset": 4793
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 80,
+                            "column": 6,
+                            "offset": 4781
+                          },
+                          "end": {
+                            "line": 80,
+                            "column": 20,
+                            "offset": 4795
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 80,
+                            "column": 20,
+                            "offset": 4795
+                          },
+                          "end": {
+                            "line": 80,
+                            "column": 21,
+                            "offset": 4796
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 80,
+                        "column": 6,
+                        "offset": 4781
+                      },
+                      "end": {
+                        "line": 80,
+                        "column": 21,
+                        "offset": 4796
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "Use synthetic patients to design user-friendly medical devices or telehealth platforms for diverse needs.",
+                                "position": {
+                                  "start": {
+                                    "line": 82,
+                                    "column": 9,
+                                    "offset": 4812
+                                  },
+                                  "end": {
+                                    "line": 82,
+                                    "column": 114,
+                                    "offset": 4917
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 82,
+                                "column": 9,
+                                "offset": 4812
+                              },
+                              "end": {
+                                "line": 82,
+                                "column": 114,
+                                "offset": 4917
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 82,
+                            "column": 7,
+                            "offset": 4810
+                          },
+                          "end": {
+                            "line": 82,
+                            "column": 114,
+                            "offset": 4917
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 82,
+                        "column": 7,
+                        "offset": 4810
+                      },
+                      "end": {
+                        "line": 82,
+                        "column": 114,
+                        "offset": 4917
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 80,
+                    "column": 3,
+                    "offset": 4778
+                  },
+                  "end": {
+                    "line": 82,
+                    "column": 114,
+                    "offset": 4917
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": true,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Software Development",
+                            "position": {
+                              "start": {
+                                "line": 83,
+                                "column": 8,
+                                "offset": 4925
+                              },
+                              "end": {
+                                "line": 83,
+                                "column": 28,
+                                "offset": 4945
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 83,
+                            "column": 6,
+                            "offset": 4923
+                          },
+                          "end": {
+                            "line": 83,
+                            "column": 30,
+                            "offset": 4947
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ":",
+                        "position": {
+                          "start": {
+                            "line": 83,
+                            "column": 30,
+                            "offset": 4947
+                          },
+                          "end": {
+                            "line": 83,
+                            "column": 31,
+                            "offset": 4948
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 83,
+                        "column": 6,
+                        "offset": 4923
+                      },
+                      "end": {
+                        "line": 83,
+                        "column": 31,
+                        "offset": 4948
+                      }
+                    }
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": null,
+                    "spread": false,
+                    "children": [
+                      {
+                        "type": "listItem",
+                        "spread": false,
+                        "checked": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "Simulate users interacting with software applications to refine UI/UX designs.",
+                                "position": {
+                                  "start": {
+                                    "line": 85,
+                                    "column": 9,
+                                    "offset": 4964
+                                  },
+                                  "end": {
+                                    "line": 85,
+                                    "column": 87,
+                                    "offset": 5042
+                                  }
+                                }
+                              }
+                            ],
+                            "position": {
+                              "start": {
+                                "line": 85,
+                                "column": 9,
+                                "offset": 4964
+                              },
+                              "end": {
+                                "line": 85,
+                                "column": 87,
+                                "offset": 5042
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 85,
+                            "column": 7,
+                            "offset": 4962
+                          },
+                          "end": {
+                            "line": 85,
+                            "column": 87,
+                            "offset": 5042
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 85,
+                        "column": 7,
+                        "offset": 4962
+                      },
+                      "end": {
+                        "line": 86,
+                        "column": 3,
+                        "offset": 5045
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 83,
+                    "column": 3,
+                    "offset": 4920
+                  },
+                  "end": {
+                    "line": 86,
+                    "column": 3,
+                    "offset": 5045
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 74,
+                "column": 3,
+                "offset": 4439
+              },
+              "end": {
+                "line": 86,
+                "column": 3,
+                "offset": 5045
+              }
+            }
+          },
+          {
+            "type": "thematicBreak",
+            "position": {
+              "start": {
+                "line": 87,
+                "column": 3,
+                "offset": 5048
+              },
+              "end": {
+                "line": 87,
+                "column": 6,
+                "offset": 5051
+              }
+            }
+          },
+          {
+            "type": "heading",
+            "depth": 3,
+            "children": [
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Limitations to Consider",
+                    "position": {
+                      "start": {
+                        "line": 89,
+                        "column": 9,
+                        "offset": 5063
+                      },
+                      "end": {
+                        "line": 89,
+                        "column": 32,
+                        "offset": 5086
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 89,
+                    "column": 7,
+                    "offset": 5061
+                  },
+                  "end": {
+                    "line": 89,
+                    "column": 34,
+                    "offset": 5088
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 89,
+                "column": 3,
+                "offset": 5057
+              },
+              "end": {
+                "line": 89,
+                "column": 34,
+                "offset": 5088
+              }
+            }
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "start": null,
+            "spread": false,
+            "children": [
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Realism",
+                            "position": {
+                              "start": {
+                                "line": 91,
+                                "column": 7,
+                                "offset": 5098
+                              },
+                              "end": {
+                                "line": 91,
+                                "column": 14,
+                                "offset": 5105
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 91,
+                            "column": 5,
+                            "offset": 5096
+                          },
+                          "end": {
+                            "line": 91,
+                            "column": 16,
+                            "offset": 5107
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ": Synthetic customers may not fully capture the complexity of real-world behaviors.",
+                        "position": {
+                          "start": {
+                            "line": 91,
+                            "column": 16,
+                            "offset": 5107
+                          },
+                          "end": {
+                            "line": 91,
+                            "column": 99,
+                            "offset": 5190
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 91,
+                        "column": 5,
+                        "offset": 5096
+                      },
+                      "end": {
+                        "line": 91,
+                        "column": 99,
+                        "offset": 5190
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 91,
+                    "column": 3,
+                    "offset": 5094
+                  },
+                  "end": {
+                    "line": 91,
+                    "column": 99,
+                    "offset": 5190
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Bias in Data",
+                            "position": {
+                              "start": {
+                                "line": 92,
+                                "column": 7,
+                                "offset": 5197
+                              },
+                              "end": {
+                                "line": 92,
+                                "column": 19,
+                                "offset": 5209
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 92,
+                            "column": 5,
+                            "offset": 5195
+                          },
+                          "end": {
+                            "line": 92,
+                            "column": 21,
+                            "offset": 5211
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ": If training data is biased, synthetic customers will inherit those biases.",
+                        "position": {
+                          "start": {
+                            "line": 92,
+                            "column": 21,
+                            "offset": 5211
+                          },
+                          "end": {
+                            "line": 92,
+                            "column": 97,
+                            "offset": 5287
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 92,
+                        "column": 5,
+                        "offset": 5195
+                      },
+                      "end": {
+                        "line": 92,
+                        "column": 97,
+                        "offset": 5287
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 92,
+                    "column": 3,
+                    "offset": 5193
+                  },
+                  "end": {
+                    "line": 92,
+                    "column": 97,
+                    "offset": 5287
+                  }
+                }
+              },
+              {
+                "type": "listItem",
+                "spread": false,
+                "checked": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "strong",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "Overfitting",
+                            "position": {
+                              "start": {
+                                "line": 93,
+                                "column": 7,
+                                "offset": 5294
+                              },
+                              "end": {
+                                "line": 93,
+                                "column": 18,
+                                "offset": 5305
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "start": {
+                            "line": 93,
+                            "column": 5,
+                            "offset": 5292
+                          },
+                          "end": {
+                            "line": 93,
+                            "column": 20,
+                            "offset": 5307
+                          }
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "value": ": Synthetic customers may closely resemble the input data, reducing diversity.",
+                        "position": {
+                          "start": {
+                            "line": 93,
+                            "column": 20,
+                            "offset": 5307
+                          },
+                          "end": {
+                            "line": 93,
+                            "column": 98,
+                            "offset": 5385
+                          }
+                        }
+                      }
+                    ],
+                    "position": {
+                      "start": {
+                        "line": 93,
+                        "column": 5,
+                        "offset": 5292
+                      },
+                      "end": {
+                        "line": 93,
+                        "column": 98,
+                        "offset": 5385
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 93,
+                    "column": 3,
+                    "offset": 5290
+                  },
+                  "end": {
+                    "line": 93,
+                    "column": 98,
+                    "offset": 5385
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 91,
+                "column": 3,
+                "offset": 5094
+              },
+              "end": {
+                "line": 94,
+                "column": 3,
+                "offset": 5388
+              }
+            }
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "By addressing these limitations, synthetic customers can be a powerful tool to enhance product design, enabling companies to innovate faster and more effectively.",
+                "position": {
+                  "start": {
+                    "line": 95,
+                    "column": 3,
+                    "offset": 5391
+                  },
+                  "end": {
+                    "line": 95,
+                    "column": 165,
+                    "offset": 5553
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 95,
+                "column": 3,
+                "offset": 5391
+              },
+              "end": {
+                "line": 95,
+                "column": 165,
+                "offset": 5553
+              }
+            }
+          }
+        ],
+        "position": {
+          "start": {
+            "line": 3,
+            "column": 1,
+            "offset": 291
+          },
+          "end": {
+            "line": 95,
+            "column": 165,
+            "offset": 5553
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Share",
+            "position": {
+              "start": {
+                "line": 97,
+                "column": 1,
+                "offset": 5555
+              },
+              "end": {
+                "line": 97,
+                "column": 6,
+                "offset": 5560
+              }
+            }
+          }
+        ],
+        "position": {
+          "start": {
+            "line": 97,
+            "column": 1,
+            "offset": 5555
+          },
+          "end": {
+            "line": 97,
+            "column": 6,
+            "offset": 5560
+          }
+        }
+      }
+    ],
+    "position": {
+      "start": {
+        "line": 1,
+        "column": 1,
+        "offset": 0
+      },
+      "end": {
+        "line": 97,
+        "column": 6,
+        "offset": 5560
+      }
+    }
+  }
+}

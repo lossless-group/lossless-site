@@ -1,0 +1,674 @@
+{
+  "type": "root",
+  "children": [
+    {
+      "type": "mdxjsEsm",
+      "value": "import BaseCodeblock from '../../components/codeblocks/BaseCodeblock.astro';\nimport LitegalCodeblock from '../../components/codeblocks/LitegalCodeblockDisplay.astro';\nimport DataviewCodeblock from '../../components/codeblocks/DataviewCodeblockDisplay.astro';",
+      "position": {
+        "start": {
+          "line": 4,
+          "column": 1,
+          "offset": 41
+        },
+        "end": {
+          "line": 6,
+          "column": 92,
+          "offset": 299
+        }
+      },
+      "data": {
+        "estree": {
+          "type": "Program",
+          "start": 41,
+          "end": 299,
+          "loc": {
+            "start": {
+              "line": 4,
+              "column": 0,
+              "offset": 41
+            },
+            "end": {
+              "line": 6,
+              "column": 91,
+              "offset": 299
+            }
+          },
+          "body": [
+            {
+              "type": "ImportDeclaration",
+              "start": 41,
+              "end": 117,
+              "loc": {
+                "start": {
+                  "line": 4,
+                  "column": 0,
+                  "offset": 41
+                },
+                "end": {
+                  "line": 4,
+                  "column": 76,
+                  "offset": 117
+                }
+              },
+              "specifiers": [
+                {
+                  "type": "ImportDefaultSpecifier",
+                  "start": 48,
+                  "end": 61,
+                  "loc": {
+                    "start": {
+                      "line": 4,
+                      "column": 7,
+                      "offset": 48
+                    },
+                    "end": {
+                      "line": 4,
+                      "column": 20,
+                      "offset": 61
+                    }
+                  },
+                  "local": {
+                    "type": "Identifier",
+                    "start": 48,
+                    "end": 61,
+                    "loc": {
+                      "start": {
+                        "line": 4,
+                        "column": 7,
+                        "offset": 48
+                      },
+                      "end": {
+                        "line": 4,
+                        "column": 20,
+                        "offset": 61
+                      }
+                    },
+                    "name": "BaseCodeblock",
+                    "range": [
+                      48,
+                      61
+                    ]
+                  },
+                  "range": [
+                    48,
+                    61
+                  ]
+                }
+              ],
+              "source": {
+                "type": "Literal",
+                "start": 67,
+                "end": 116,
+                "loc": {
+                  "start": {
+                    "line": 4,
+                    "column": 26,
+                    "offset": 67
+                  },
+                  "end": {
+                    "line": 4,
+                    "column": 75,
+                    "offset": 116
+                  }
+                },
+                "value": "../../components/codeblocks/BaseCodeblock.astro",
+                "raw": "'../../components/codeblocks/BaseCodeblock.astro'",
+                "range": [
+                  67,
+                  116
+                ]
+              },
+              "range": [
+                41,
+                117
+              ]
+            },
+            {
+              "type": "ImportDeclaration",
+              "start": 118,
+              "end": 207,
+              "loc": {
+                "start": {
+                  "line": 5,
+                  "column": 0,
+                  "offset": 118
+                },
+                "end": {
+                  "line": 5,
+                  "column": 89,
+                  "offset": 207
+                }
+              },
+              "specifiers": [
+                {
+                  "type": "ImportDefaultSpecifier",
+                  "start": 125,
+                  "end": 141,
+                  "loc": {
+                    "start": {
+                      "line": 5,
+                      "column": 7,
+                      "offset": 125
+                    },
+                    "end": {
+                      "line": 5,
+                      "column": 23,
+                      "offset": 141
+                    }
+                  },
+                  "local": {
+                    "type": "Identifier",
+                    "start": 125,
+                    "end": 141,
+                    "loc": {
+                      "start": {
+                        "line": 5,
+                        "column": 7,
+                        "offset": 125
+                      },
+                      "end": {
+                        "line": 5,
+                        "column": 23,
+                        "offset": 141
+                      }
+                    },
+                    "name": "LitegalCodeblock",
+                    "range": [
+                      125,
+                      141
+                    ]
+                  },
+                  "range": [
+                    125,
+                    141
+                  ]
+                }
+              ],
+              "source": {
+                "type": "Literal",
+                "start": 147,
+                "end": 206,
+                "loc": {
+                  "start": {
+                    "line": 5,
+                    "column": 29,
+                    "offset": 147
+                  },
+                  "end": {
+                    "line": 5,
+                    "column": 88,
+                    "offset": 206
+                  }
+                },
+                "value": "../../components/codeblocks/LitegalCodeblockDisplay.astro",
+                "raw": "'../../components/codeblocks/LitegalCodeblockDisplay.astro'",
+                "range": [
+                  147,
+                  206
+                ]
+              },
+              "range": [
+                118,
+                207
+              ]
+            },
+            {
+              "type": "ImportDeclaration",
+              "start": 208,
+              "end": 299,
+              "loc": {
+                "start": {
+                  "line": 6,
+                  "column": 0,
+                  "offset": 208
+                },
+                "end": {
+                  "line": 6,
+                  "column": 91,
+                  "offset": 299
+                }
+              },
+              "specifiers": [
+                {
+                  "type": "ImportDefaultSpecifier",
+                  "start": 215,
+                  "end": 232,
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 7,
+                      "offset": 215
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 24,
+                      "offset": 232
+                    }
+                  },
+                  "local": {
+                    "type": "Identifier",
+                    "start": 215,
+                    "end": 232,
+                    "loc": {
+                      "start": {
+                        "line": 6,
+                        "column": 7,
+                        "offset": 215
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 24,
+                        "offset": 232
+                      }
+                    },
+                    "name": "DataviewCodeblock",
+                    "range": [
+                      215,
+                      232
+                    ]
+                  },
+                  "range": [
+                    215,
+                    232
+                  ]
+                }
+              ],
+              "source": {
+                "type": "Literal",
+                "start": 238,
+                "end": 298,
+                "loc": {
+                  "start": {
+                    "line": 6,
+                    "column": 30,
+                    "offset": 238
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 90,
+                    "offset": 298
+                  }
+                },
+                "value": "../../components/codeblocks/DataviewCodeblockDisplay.astro",
+                "raw": "'../../components/codeblocks/DataviewCodeblockDisplay.astro'",
+                "range": [
+                  238,
+                  298
+                ]
+              },
+              "range": [
+                208,
+                299
+              ]
+            }
+          ],
+          "sourceType": "module",
+          "comments": [],
+          "range": [
+            41,
+            299
+          ]
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 1,
+      "children": [
+        {
+          "type": "text",
+          "value": "Testing MDX Integration",
+          "position": {
+            "start": {
+              "line": 8,
+              "column": 3,
+              "offset": 303
+            },
+            "end": {
+              "line": 8,
+              "column": 26,
+              "offset": 326
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 8,
+          "column": 1,
+          "offset": 301
+        },
+        "end": {
+          "line": 8,
+          "column": 26,
+          "offset": 326
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Here’s a test of our custom code blocks:",
+          "position": {
+            "start": {
+              "line": 10,
+              "column": 1,
+              "offset": 328
+            },
+            "end": {
+              "line": 10,
+              "column": 41,
+              "offset": 368
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 10,
+          "column": 1,
+          "offset": 328
+        },
+        "end": {
+          "line": 10,
+          "column": 41,
+          "offset": 368
+        }
+      }
+    },
+    {
+      "type": "mdxJsxFlowElement",
+      "name": "LitegalCodeblock",
+      "attributes": [
+        {
+          "type": "mdxJsxAttribute",
+          "name": "code",
+          "value": {
+            "type": "mdxJsxAttributeValueExpression",
+            "value": "`function test() {\nconsole.log(\"Hello from litegal!\");\n}`",
+            "data": {
+              "estree": {
+                "type": "Program",
+                "start": 394,
+                "end": 453,
+                "body": [
+                  {
+                    "type": "ExpressionStatement",
+                    "expression": {
+                      "type": "TemplateLiteral",
+                      "start": 394,
+                      "end": 453,
+                      "loc": {
+                        "start": {
+                          "line": 12,
+                          "column": 24,
+                          "offset": 394
+                        },
+                        "end": {
+                          "line": 14,
+                          "column": 2,
+                          "offset": 453
+                        }
+                      },
+                      "expressions": [],
+                      "quasis": [
+                        {
+                          "type": "TemplateElement",
+                          "start": 395,
+                          "end": 452,
+                          "loc": {
+                            "start": {
+                              "line": 12,
+                              "column": 25,
+                              "offset": 395
+                            },
+                            "end": {
+                              "line": 14,
+                              "column": 1,
+                              "offset": 452
+                            }
+                          },
+                          "value": {
+                            "raw": "function test() {\nconsole.log(\"Hello from litegal!\");\n}",
+                            "cooked": "function test() {\nconsole.log(\"Hello from litegal!\");\n}"
+                          },
+                          "tail": true,
+                          "range": [
+                            395,
+                            452
+                          ]
+                        }
+                      ],
+                      "range": [
+                        394,
+                        453
+                      ]
+                    },
+                    "start": 394,
+                    "end": 453,
+                    "loc": {
+                      "start": {
+                        "line": 12,
+                        "column": 24,
+                        "offset": 394
+                      },
+                      "end": {
+                        "line": 14,
+                        "column": 2,
+                        "offset": 453
+                      }
+                    },
+                    "range": [
+                      394,
+                      453
+                    ]
+                  }
+                ],
+                "sourceType": "module",
+                "comments": [],
+                "loc": {
+                  "start": {
+                    "line": 12,
+                    "column": 24,
+                    "offset": 394
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 2,
+                    "offset": 453
+                  }
+                },
+                "range": [
+                  394,
+                  453
+                ]
+              }
+            }
+          },
+          "position": {
+            "start": {
+              "line": 12,
+              "column": 19,
+              "offset": 388
+            },
+            "end": {
+              "line": 14,
+              "column": 4,
+              "offset": 454
+            }
+          }
+        }
+      ],
+      "children": [],
+      "position": {
+        "start": {
+          "line": 12,
+          "column": 1,
+          "offset": 370
+        },
+        "end": {
+          "line": 14,
+          "column": 7,
+          "offset": 457
+        }
+      },
+      "data": {
+        "_mdxExplicitJsx": true
+      }
+    },
+    {
+      "type": "mdxJsxFlowElement",
+      "name": "DataviewCodeblock",
+      "attributes": [
+        {
+          "type": "mdxJsxAttribute",
+          "name": "code",
+          "value": {
+            "type": "mdxJsxAttributeValueExpression",
+            "value": "`dataview\ntable file.name, tags\nfrom \"content\"\nwhere file.name = this.file.name`",
+            "data": {
+              "estree": {
+                "type": "Program",
+                "start": 484,
+                "end": 564,
+                "body": [
+                  {
+                    "type": "ExpressionStatement",
+                    "expression": {
+                      "type": "TemplateLiteral",
+                      "start": 484,
+                      "end": 564,
+                      "loc": {
+                        "start": {
+                          "line": 16,
+                          "column": 25,
+                          "offset": 484
+                        },
+                        "end": {
+                          "line": 19,
+                          "column": 33,
+                          "offset": 564
+                        }
+                      },
+                      "expressions": [],
+                      "quasis": [
+                        {
+                          "type": "TemplateElement",
+                          "start": 485,
+                          "end": 563,
+                          "loc": {
+                            "start": {
+                              "line": 16,
+                              "column": 26,
+                              "offset": 485
+                            },
+                            "end": {
+                              "line": 19,
+                              "column": 32,
+                              "offset": 563
+                            }
+                          },
+                          "value": {
+                            "raw": "dataview\ntable file.name, tags\nfrom \"content\"\nwhere file.name = this.file.name",
+                            "cooked": "dataview\ntable file.name, tags\nfrom \"content\"\nwhere file.name = this.file.name"
+                          },
+                          "tail": true,
+                          "range": [
+                            485,
+                            563
+                          ]
+                        }
+                      ],
+                      "range": [
+                        484,
+                        564
+                      ]
+                    },
+                    "start": 484,
+                    "end": 564,
+                    "loc": {
+                      "start": {
+                        "line": 16,
+                        "column": 25,
+                        "offset": 484
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 33,
+                        "offset": 564
+                      }
+                    },
+                    "range": [
+                      484,
+                      564
+                    ]
+                  }
+                ],
+                "sourceType": "module",
+                "comments": [],
+                "loc": {
+                  "start": {
+                    "line": 16,
+                    "column": 25,
+                    "offset": 484
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 33,
+                    "offset": 564
+                  }
+                },
+                "range": [
+                  484,
+                  564
+                ]
+              }
+            }
+          },
+          "position": {
+            "start": {
+              "line": 16,
+              "column": 20,
+              "offset": 478
+            },
+            "end": {
+              "line": 19,
+              "column": 35,
+              "offset": 565
+            }
+          }
+        }
+      ],
+      "children": [],
+      "position": {
+        "start": {
+          "line": 16,
+          "column": 1,
+          "offset": 459
+        },
+        "end": {
+          "line": 19,
+          "column": 38,
+          "offset": 568
+        }
+      },
+      "data": {
+        "_mdxExplicitJsx": true
+      }
+    }
+  ],
+  "position": {
+    "start": {
+      "line": 1,
+      "column": 1,
+      "offset": 0
+    },
+    "end": {
+      "line": 20,
+      "column": 1,
+      "offset": 569
+    }
+  }
+}

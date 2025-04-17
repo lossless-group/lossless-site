@@ -42,8 +42,11 @@ const citations = node.children || [];
 ---
 
 <div class="citations">
-    {citations.map((citation) => (
-        <div class={citation.type === 'citation-attribution' ? 'citation-attribution' : 'citation'}>
+    {citations.map((citation, idx) => (
+        <div 
+            class={citation.type === 'citation-attribution' ? 'citation-attribution' : 'citation'}
+            id={citation.type === 'paragraph' || citation.type === 'citation' ? `citation-${idx+1}` : undefined}
+        >
             {citation.children?.map((child) => {
                 if (child.type === 'link') {
                     return (

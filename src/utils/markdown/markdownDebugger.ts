@@ -83,9 +83,12 @@ class MarkdownDebugger {
 
   /**
    * Write a debug file using the AST debugger
+   *
+   * REMOVED ALL ENVIRONMENT VARIABLE CHECKS. This function will ALWAYS write a debug file when called.
+   * The caller (e.g., OneArticle.astro) is responsible for deciding when to invoke this.
    */
   writeDebugFile(name: string, content: any): void {
-    if (!this.isEnabled || process.env.DEBUG_AST !== 'true') return;
+    // Write debug file unconditionally
     astDebugger.writeDebugFile(name, content);
   }
 

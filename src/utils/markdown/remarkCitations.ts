@@ -73,19 +73,27 @@ function parseCitation(text: string | undefined) {
   // Guard against undefined or empty text
   if (!text) return null;
 
-  // Regular expression to match citation number and URL
-  // Supports both http:// and https:// URLs
-  const regex = /\[(\d+)\]\s*((?:https?|http):\/\/[^\s]+)/;
-  const match = text.match(regex);
-  
+  // Try to match [n] url
+  let regex = /\[(\d+)\]\s*((?:https?|http):\/\/[^\s]+)/;
+  let match = text.match(regex);
   if (match) {
     const [_, number, url] = match;
-    return {
-      number,
-      url: url.trim()
-    };
+    return { number, url: url.trim() };
   }
-  
+  // Try to match [n] [title](url)
+  regex = /\[(\d+)\]\s+\[.*?\]\((https?:\/\/[^\s]+)\)/;
+  match = text.match(regex);
+  if (match) {
+    const [_, number, url] = match;
+    return { number, url: url.trim() };
+  }
+  // Try to match [n] ... <url> anywhere in the line
+  regex = /\[(\d+)\][^\[]*?(https?:\/\/[^\s]+)/;
+  match = text.match(regex);
+  if (match) {
+    const [_, number, url] = match;
+    return { number, url: url.trim() };
+  }
   return null;
 }
 
@@ -201,73 +209,113 @@ function createCitationsSectionNode(citations: CitationNode[]): CitationsContain
 
 /**
  * Remark plugin to transform citation paragraphs into a structured format
- * Extracts citations from anywhere in the document and moves them to the end
+ * Extracts citations from anywhere in the document (including inside callouts/containers) and moves them to the end
+ * Now robustly traverses ALL nodes, not just text, and removes empty parent containers after extraction.
  */
 export default function remarkCitations() {
   return (tree: Root) => {
     markdownDebugger.startPlugin('Citations');
-    
     let allCitations: CitationNode[] = [];
-    let hasProcessedCitations = false;
-    let nodesToRemove: number[] = [];
 
-    // First pass: find all citations in any text content
-    visit(tree, 'text', (node: any, index: number, parent: Parent) => {
-      if (hasProcessedCitations) return;
-      
-      // Skip if we're already inside a citation or citations container
-      if (parent && (parent.type === 'citation' || parent.type === 'citations' || 
-          (parent.data?.hProperties?.className === 'citation'))) {
-        return;
+    // Helper: Recursively collect and remove citations from any node
+    function collectCitations(node: any, parent: any, index: number | null): boolean {
+      let isCitationNode = false;
+
+      // --- Inline citation transformation ---
+      // Transform inline [n] or [^hex] in text nodes to citation reference nodes
+      if (node.type === 'text' && typeof node.value === 'string') {
+        // Replace inline [n] or [^hex] with a custom citationRef node
+        node.value = node.value.replace(/\[(\d+|\^[0-9a-f]{6})\]/g, (match, citationId) => {
+          // Mark for AST replacement: we use a placeholder to split later
+          return `|||CITEREF:${citationId}|||`;
+        });
+      }
+      // After all replacements, split text node into text/citationRef nodes
+      if (node.type === 'text' && typeof node.value === 'string' && node.value.includes('|||CITEREF:')) {
+        const parts = node.value.split(/(\|\|\|CITEREF:[^|]+\|\|\|)/g).filter(Boolean);
+        if (parts.length > 1 && parent && Array.isArray(parent.children)) {
+          const newNodes = parts.map(part => {
+            const match = part.match(/^\|\|\|CITEREF:([^|]+)\|\|\|$/);
+            if (match) {
+              return {
+                type: 'citationRef',
+                data: { citationId: match[1] },
+                value: `[${match[1]}]` // fallback: render as plain text if not handled
+              };
+            } else {
+              return { type: 'text', value: part };
+            }
+          });
+          // Replace this node in parent.children
+          parent.children.splice(index, 1, ...newNodes);
+          // No further processing needed for this node
+          return false;
+        }
       }
 
-      const text = node.value || '';
-      const lines = text.split('\n');
-      const citationLines: string[] = [];
-      const otherLines: string[] = [];
-      
-      lines.forEach(line => {
-        const trimmedLine = line.trim();
-        if (trimmedLine && /^\[\d+\]\s+https?:\/\/\S+$/.test(trimmedLine)) {
-          markdownDebugger.verbose('Found citation:', trimmedLine);
-          citationLines.push(trimmedLine);
-          const citationNode = createCitationNode(trimmedLine);
-          if (citationNode) {
-            allCitations.push(citationNode);
+      // Only process text or paragraph nodes for extraction
+      if (node.type === 'text' || node.type === 'paragraph') {
+        const text = node.value || (node.children && node.children.map((c: any) => c.value).join('\n')) || '';
+        const lines = text.split('\n');
+        const citationLines: string[] = [];
+        const otherLines: string[] = [];
+        lines.forEach((line, idx) => {
+          const trimmedLine = line.trim();
+          // Match [n] url or [n] [title](url) or [n] <url> anywhere in the line
+          if (/\[(\d+|\^[0-9a-f]{6})\]:?\s+https?:\/\/\S+/i.test(trimmedLine) ||
+              /\[(\d+|\^[0-9a-f]{6})\]\s+\[.*?\]\((https?:\/\/\S+)\)/i.test(trimmedLine) ||
+              /\[(\d+|\^[0-9a-f]{6})\][^\[]*https?:\/\/\S+/i.test(trimmedLine)
+          ) {
+            citationLines.push(trimmedLine);
+            const citationNode = createCitationNode(trimmedLine);
+            if (citationNode) allCitations.push(citationNode);
+            isCitationNode = true;
+            // Remove this line from the paragraph
+            lines[idx] = null;
+          } else {
+            otherLines.push(line);
           }
-        } else {
-          otherLines.push(line);
-        }
-      });
-
-      // If we found citations in this node, update the node's text to exclude them
-      if (citationLines.length > 0 && parent) {
-        if (otherLines.length === 0) {
-          // If all lines were citations, mark the parent for removal
-          nodesToRemove.push(index);
-        } else {
-          // Otherwise update the node's text to only include non-citation lines
-          node.value = otherLines.join('\n');
+        });
+        // Remove extracted citation lines from paragraph text
+        const filteredLines = lines.filter(l => l !== null);
+        if (citationLines.length > 0 && parent && index !== null) {
+          if (filteredLines.length === 0) {
+            parent.children.splice(index, 1);
+            return true; // Node removed
+          } else {
+            if (node.type === 'text') node.value = filteredLines.join('\n');
+            if (node.type === 'paragraph') node.children = [{ type: 'text', value: filteredLines.join('\n') }];
+          }
         }
       }
-    });
+      // Recursively process children
+      if (node.children && Array.isArray(node.children)) {
+        // Iterate in reverse to safely remove by index
+        for (let i = node.children.length - 1; i >= 0; i--) {
+          const removed = collectCitations(node.children[i], node, i);
+          // If a child node was removed and parent is now empty, remove parent
+          if (removed && node.children.length === 0 && parent && typeof index === 'number') {
+            parent.children.splice(index, 1);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
 
-    // Remove nodes marked for deletion, in reverse order to maintain correct indices
-    nodesToRemove.sort((a, b) => b - a).forEach(index => {
-      tree.children.splice(index, 1);
-    });
+    collectCitations(tree, null, null);
 
     if (allCitations.length > 0) {
       debugNode('All Citations Collected', { type: 'collection', children: allCitations });
       const citationsNode = createCitationsSectionNode(allCitations);
       if (citationsNode) {
-        hasProcessedCitations = true;
         debugNode('Final Citations Node', citationsNode);
         tree.children.push(citationsNode as unknown as Paragraph);
       }
     }
-
     markdownDebugger.endPlugin('Citations');
     return tree;
   };
 }
+
+// NOTE: Downstream renderer (AstroMarkdown.astro or rehype plugin) must render citationRef nodes as superscript or link, or fallback to value as plain text.

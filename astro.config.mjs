@@ -10,6 +10,7 @@ import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import remarkCalloutHandler from './src/utils/markdown/remark-callout-handler';
 import remarkCitations from './src/utils/markdown/remarkCitations';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from './src/utils/markdown/remarkGfm'; // GitHub Flavored Markdown support (tables, task lists, autolinks, etc.) Flavored Markdown support (tables, task lists, autolinks, etc.)
 
 export default defineConfig({
   output: "server",
@@ -25,11 +26,16 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [
+      // === REMARK-GFM: GitHub Flavored Markdown support ===
+      // Enables tables, strikethrough, autolinks, task lists, and more
+      // Must be first to ensure GFM features are available before custom plugins
+      // === Custom plugins below (order matters) ===
       remarkCalloutHandler, // Must be first to see raw markdown
       remarkBacklinks,      // Then handle wiki-links
       remarkImages,         // Then handle images
       remarkDefinitionList, // Handle definition lists
       remarkCitations,      // Handle citations
+      remarkGfm
     ],
     remarkRehype: { 
       allowDangerousHtml: true, // Allow HTML in markdown

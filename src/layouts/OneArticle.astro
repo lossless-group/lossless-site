@@ -7,6 +7,7 @@
 
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm'; // GitHub Flavored Markdown support (tables, task lists, strikethrough, autolinks, etc.)
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
@@ -26,18 +27,25 @@ const { Component, data, content, markdownFile } = Astro.props;
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
-  .use(remarkCitations)       // 2. Process citations
-  .use(remarkBacklinks)       // 3. Process inline wiki-style links
-  .use(remarkImages)          // 4. Process inline images
-  .use(remarkCallouts);       // 5. Process container elements (blockquotes to callouts)
+  .use(remarkCitations)       // 3. Process citations
+  .use(remarkBacklinks)       // 4. Process inline wiki-style links
+  .use(remarkImages)          // 5. Process inline images
+  .use(remarkCallouts)        // 6. Process container elements (blockquotes to callouts)
+  .use(remarkGfm)             // 2. Add GFM support (tables, task lists, etc.)
 
 // First parse to MDAST
 const mdast = await processor.parse(content || '');
 
+// Debug output to see AST structure after parsing
+const debugAstParam = typeof Astro !== 'undefined' && Astro.request && Astro.request.url && Astro.request.url.includes('debug-ast');
+if (debugAstParam) {
+  markdownDebugger.writeDebugFile('1-parsed-mdast', mdast);
+}
+
 // Then run transformations
 const transformedMdast = await processor.run(mdast);
 
-// Debug output to see AST structure
+// Debug output to see AST structure after all plugins
 markdownDebugger.log('OneArticle.astro Debug');
 markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
 markdownDebugger.verbose('MDAST structure:', transformedMdast);
