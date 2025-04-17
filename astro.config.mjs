@@ -10,6 +10,7 @@ import remarkBacklinks from './src/utils/markdown/remark-backlinks';
 import remarkCalloutHandler from './src/utils/markdown/remark-callout-handler';
 import remarkCitations from './src/utils/markdown/remarkCitations';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm'; // GitHub Flavored Markdown support
 
 export default defineConfig({
   output: "server",
@@ -28,6 +29,7 @@ export default defineConfig({
       [remarkImages, {      // Handle images first
         visualsDirectory: 'content/visuals'
       }],
+      remarkGfm,           // GitHub Flavored Markdown support
       remarkCalloutHandler, // Then handle callouts
       remarkBacklinks,      // Then handle wiki-links
       remarkDefinitionList, // Handle definition lists

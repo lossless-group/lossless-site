@@ -12,13 +12,17 @@ import { astDebugger } from '../debug/ast-debugger';
  * environment variables and URL parameters.
  */
 class MarkdownDebugger {
-  private isEnabled: boolean = false;
-  private isVerbose: boolean = false;
+  private isEnabled: boolean = true;  // Enable by default during development
+  private isVerbose: boolean = true;  // Enable verbose logging by default
 
   constructor() {
     // Check for environment variables
-    this.isEnabled = process.env.DEBUG_MARKDOWN === 'true';
-    this.isVerbose = process.env.DEBUG_MARKDOWN_VERBOSE === 'true';
+    if (process.env.DEBUG_MARKDOWN === 'false') {
+      this.isEnabled = false;
+    }
+    if (process.env.DEBUG_MARKDOWN_VERBOSE === 'false') {
+      this.isVerbose = false;
+    }
     
     // For client-side, also enable if URL has debug-markdown parameter
     // This check only runs in the browser, not during SSG build

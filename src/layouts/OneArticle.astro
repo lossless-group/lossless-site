@@ -11,6 +11,8 @@ import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import remarkCitations from '@utils/markdown/remarkCitations';
+import remarkGfm from 'remark-gfm';
+import remarkWikiLinkWrapper from '@utils/markdown/remarkWikiLinkWrapper';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
@@ -26,10 +28,12 @@ const { Component, data, content, markdownFile } = Astro.props;
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
-  .use(remarkCitations)       // 2. Process citations
-  .use(remarkBacklinks)       // 3. Process inline wiki-style links
-  .use(remarkImages)          // 4. Process inline images
-  .use(remarkCallouts);       // 5. Process container elements (blockquotes to callouts)
+  .use(remarkGfm)            // 2. Process GFM features (tables, etc.)
+  .use(remarkWikiLinkWrapper) // 3. Process wiki-style links with error handling
+  .use(remarkCitations)       // 4. Process citations
+  .use(remarkBacklinks)       // 5. Process inline wiki-style links
+  .use(remarkImages)          // 6. Process inline images
+  .use(remarkCallouts);       // 7. Process container elements (blockquotes to callouts)
 
 // First parse to MDAST
 const mdast = await processor.parse(content || '');

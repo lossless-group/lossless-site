@@ -16,6 +16,7 @@ interface Props {
         url?: string;
         alt?: string;
         data?: {
+            hName?: string;
             hProperties?: Record<string, any>;
         };
     };
@@ -41,7 +42,10 @@ const handled_types = [
     "citation",
     "html",        // Handle raw HTML nodes
     "thematicBreak", // Add support for horizontal rules
-    "image"        // Handle image nodes
+    "image",       // Handle image nodes
+    "table",       // GFM table support
+    "tableRow",
+    "tableCell"
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -66,7 +70,7 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
 {(node.type === "root") && 
     <>
         <h1>{title}</h1>
-        {node.children.map((child) => (
+        {node.children?.map((child) => (
             <Astro.self node={child} data={data} />
         ))}
     </>
@@ -92,7 +96,7 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
 
 {(node.type === "paragraph") &&
     <div class="paragraph">
-        {node.children.map((child: any) => (
+        {node.children?.map((child: any) => (
             <Astro.self node={child} data={data} />
         ))}
     </div>
@@ -108,6 +112,38 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
 
 {(node.type === "html") && 
     <Fragment set:html={node.value} />
+}
+
+{(node.type === "table") && 
+    <table>
+        {node.children?.map((row: any) => (
+            <Astro.self node={row} data={data} />
+        ))}
+    </table>
+}
+
+{(node.type === "tableRow") && 
+    <tr>
+        {node.children?.map((cell: any) => (
+            <Astro.self node={cell} data={data} />
+        ))}
+    </tr>
+}
+
+{(node.type === "tableCell") && 
+    node.data?.hName === 'th' ? (
+        <th style={node.data?.hProperties?.style}>
+            {node.children?.map((child: any) => (
+                <Astro.self node={child} data={data} />
+            ))}
+        </th>
+    ) : (
+        <td style={node.data?.hProperties?.style}>
+            {node.children?.map((child: any) => (
+                <Astro.self node={child} data={data} />
+            ))}
+        </td>
+    )
 }
 
 {(node.type === "image") && 
@@ -131,5 +167,31 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
     height: auto;
     display: block;
     margin: 1rem 0;
+}
+
+/* GFM table styles */
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+table tr {
+    background-color: var(--surface-1);
+    border-top: 1px solid var(--surface-3);
+}
+
+table tr:nth-child(2n) {
+    background-color: var(--surface-2);
+}
+
+table th,
+table td {
+    padding: 6px 13px;
+    border: 1px solid var(--surface-3);
+}
+
+table th {
+    font-weight: 600;
 }
 </style>
