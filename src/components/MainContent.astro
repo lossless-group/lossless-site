@@ -6,6 +6,7 @@ import { getEntry, getCollection } from "astro:content";
 import TrademarkRibbon from "@components/trademarks/TrademarkRibbon.astro";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
+import Section__IconHeaderMessage from "@components/basics/messages/Section__IconHeaderMessage.astro";
 
 interface Tool {
   url: string;
@@ -90,6 +91,11 @@ const allTags = [
   color="var(--grd__primary-bg)" 
   animate={true}
 />
+
+<!-- Section: IconHeaderMessage grid for homepage (index instance) -->
+<section class="content-wrapper">
+  <Section__IconHeaderMessage instance="index" />
+</section>
 
 <!-- Content section with alternating side images -->
 <div class="content-wrapper">
