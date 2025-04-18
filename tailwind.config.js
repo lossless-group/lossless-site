@@ -17,6 +17,13 @@ module.exports = {
     './public/**/*.html',
     './src/styles/**/*.css',
   ],
+  safelist: [
+    'md:grid-cols-1',
+    'md:grid-cols-2',
+    'md:grid-cols-3',
+    'md:grid-cols-4',
+    // ...add as many as you might use
+  ],
   theme: {
     // DO NOT use theme.extend.colors here, use custom key as requested
     'lossless-theme': {

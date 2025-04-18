@@ -21,9 +21,10 @@
  * - iconClass?: string (optional extra classes for icon)
  * - headerClass?: string (optional extra classes for header)
  * - messageClass?: string (optional extra classes for message)
+ * - animationClass?: string (optional animation classes)
  *
  * Usage Locations (update as adopted):
- * - [list here as adopted]
+ * - Section__IconHeaderMessage.astro (layout controlled by parent grid)
  */
 
 // Astro Icon v2+ usage: import Icon from 'astro-icon';
@@ -75,9 +76,11 @@ const {
   - Icon and header are inline with gap
   - Opacity and theme-aware color for message
   - Animation classes can be passed in
+  - Layout and width are now fully controlled by the parent grid (Section__IconHeaderMessage.astro)
+  - **NEW:** All text blocks (header and message) set to w-full and text-justify to fill out the width of the card
 -->
-<div class={`flex flex-col gap-2 ${animationClass}`.trim()}>
-  <div class="flex items-start gap-2">
+<div class={`flex flex-col gap-2 w-full ${animationClass}`.trim()}>
+  <div class="flex items-start gap-2 w-full">
     <!-- Icon rendering logic: SVG-only version. All icons must be SVGs. -->
     {icon ? (
       <!-- 
@@ -100,23 +103,20 @@ const {
       <slot name="icon" />
     )}
     <!-- Header/title -->
-    <h3 class={`inline text-lg ${headerClass}`.trim()}>{title}</h3>
+    <h3 class={`inline text-lg w-full ${headerClass}`.trim()}>{title}</h3>
   </div>
   {message && (
-    <p class={`opacity-90 dark:opacity-80 ${messageClass}`.trim()}>{message}</p>
+    <p class={`opacity-90 dark:opacity-80 w-full ml-8 ${messageClass}`.trim()}>{message}</p>
   )}
   <!--
     Where this component is called:
     (Update this list as you use the component in other files)
-    - [No usages yet]
+    - Section__IconHeaderMessage.astro (layout controlled by parent grid)
   -->
 </div>
 
 <style>
-
 h3 {
-  font-size: 1.3rem;
-  
+  font-size: 1.2rem;
 }
-
 </style>

@@ -29,15 +29,30 @@ interface Props {
 
 const { instance } = Astro.props;
 const messages = iconHeaderMessages[instance] || [];
+// Extract max_columns from the JSON (default to 3 if not present)
+const maxColumns = iconHeaderMessages.max_columns || 3;
+
+// Helper function to map maxColumns to Tailwind grid-cols class
+function getGridColsClass(cols) {
+  switch (cols) {
+    case 1: return 'md:grid-cols-1';
+    case 2: return 'md:grid-cols-2';
+    case 3: return 'md:grid-cols-3';
+    case 4: return 'md:grid-cols-4';
+    default: return 'md:grid-cols-3';
+  }
+}
+const gridColsClass = getGridColsClass(maxColumns);
 
 ---
 
 <!--
   Section__IconHeaderMessage renders a grid of IconHeaderMessage cards.
-  - Uses CSS grid, defaults to two columns, stacks to one on mobile.
+  - Uses CSS grid, column count is set by max_columns from iconHeaderMessages.json.
+  - Responsive: stacks to 1 column on mobile, 2 on medium, up to max_columns on desktop.
   - Aggressively commented for maintainability.
   - If no messages, displays a fallback message.
-  - Each IconHeaderMessage is passed all relevant props from the JSON entry.
+  - Each IconHeaderMessage is passed all relevant props from the JSON entry, as well as columns for responsive width.
   - Calls: IconHeaderMessage.astro
   - Data source: site/src/content/messages/iconHeaderMessages.json
   - Usage locations: [update as adopted, e.g. index.astro]
@@ -46,7 +61,10 @@ const messages = iconHeaderMessages[instance] || [];
   {messages.length === 0 ? (
     <p class="text-center text-gray-500 py-8">No messages found for this section.</p>
   ) : (
-    <div class="icon-header-message-grid">
+    <div
+      class={`icon-header-message-grid grid grid-cols-1 sm:grid-cols-2 ${gridColsClass} gap-8`}
+      style={`--icon-header-message-cols: ${maxColumns};`}
+    >
       {messages.map((msg, idx) => (
         <IconHeaderMessage key={idx} {...msg} />
       ))}
@@ -55,16 +73,11 @@ const messages = iconHeaderMessages[instance] || [];
 </section>
 
 <style>
-.icon-header-message-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2rem;
-}
-@media (max-width: 700px) {
-  .icon-header-message-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/*
+  Responsive grid for IconHeaderMessage cards:
+  - Uses Tailwind's grid-cols utilities for 1/2/maxColumns columns.
+  - Fallback for custom property if needed.
+*/
 .icon-header-message-section {
   width: 100%;
   margin: 0 auto;
