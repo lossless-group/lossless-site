@@ -167,6 +167,37 @@ const toolCollection = defineCollection({
   }))
 });
 
+// ***
+// Open: Specs Collection Definition
+// Type: Content Collection
+// Includes:
+//   - specsCollection (defineCollection)
+//   - glob loader for ../content/specs
+//   - Flexible schema with normalization
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const specsCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "../content/specs" }),
+  schema: z.object({}).passthrough().transform((data, context) => {
+    // Extract filename without extension for slug
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    return {
+      ...data,
+      // Always normalize tags to an array
+      tags: Array.isArray(data.tags)
+        ? data.tags
+        : data.tags ? [data.tags] : [],
+      // Add slug for routing/lookup
+      slug: filename.toLowerCase().replace(/\s+/g, '-')
+    };
+  })
+});
+
+// ========================================
+// Affects: [specsCollection, collections export, paths export]
+// Close: Specs Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 // Define where to find the content - using relative paths from src/content
 export const paths = {
   'cards': 'cards',
@@ -176,7 +207,8 @@ export const paths = {
   'reports': '../content/reports',
   'tooling': '../content/tooling',
   'vocabulary': '../content/vocabulary',
-  'prompts': '../content/lost-in-public/prompts'
+  'prompts': '../content/lost-in-public/prompts',
+  'specs': '../content/specs',
 };
 
 // Export the collections
@@ -189,5 +221,6 @@ export const collections = {
   'reports': reportCollection,
   'pages': pagesCollection,
   'tooling': toolCollection,
-  'prompts': promptsCollection
+  'prompts': promptsCollection,
+  'specs': specsCollection,
 };
