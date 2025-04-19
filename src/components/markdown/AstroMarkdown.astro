@@ -1,10 +1,5 @@
 ---
-import type {Root, RootContent} from 'mdast'
-import type {Root as HastRoot} from 'hast'
-import {toHtml} from 'hast-util-to-html'
 import {dirname} from 'path'
-import remarkBacklinks from '@utils/markdown/remark-backlinks';
-import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import ArticleCallout from './callouts/ArticleCallout.astro';
 import ArticleCitations from './citations/ArticleCitations.astro';
 
@@ -14,7 +9,6 @@ interface Props {
         value?: string;
         children?: any[];
         url?: string;
-        alt?: string;
         data?: {
             hProperties?: Record<string, any>;
         };
@@ -39,9 +33,15 @@ const handled_types = [
     "heading",
     "citations",
     "citation",
-    "html",        // Handle raw HTML nodes
-    "thematicBreak", // Add support for horizontal rules
-    "image"        // Handle image nodes
+    "image",
+    "list",
+    "listItem",
+    "code",
+    "inlineCode",
+    "table",
+    "tableRow",
+    "tableCell",
+    "thematicBreak" // Add support for horizontal rules
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -72,14 +72,112 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
     </>
 }
 
+{(node.type === "image") &&
+    <img src={node.url} />
+}
+
+{(node.type === "list") &&
+  <>
+    {node['ordered']
+      ? <ol>
+          {node.children.map((item) => (
+            <Astro.self node={item} data={data} />
+          ))}
+        </ol>
+      : <ul>
+          {node.children.map((item) => (
+            <Astro.self node={item} data={data} />
+          ))}
+        </ul>
+    }
+  </>
+}
+
+{(node.type === "listItem") &&
+  <li class="custom-li">
+    <span class="li-content">
+      {node.children.map(child => (
+        <Astro.self node={child} data={data} />
+      ))}
+    </span>
+  </li>
+}
+
+{(node.type === "table") &&
+  <div class="md-table-wrapper">
+    <table class="md-table">
+      <tbody>
+        {node.children.map(row => (
+          <Astro.self node={row} data={data} />
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <style>
+     .md-table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+    }
+
+    .md-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        background-color: transparent;
+    }
+
+    .md-tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .md-td {
+        border: 1px solid rgb(255, 255, 255);
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        colrgb(255, 255, 255);
+    }
+
+
+  </style>
+}
+
+{(node.type === "tableRow") &&
+  <tr class="md-tr">
+    {node.children.map(cell => (
+      <Astro.self node={cell} data={data} />
+    ))}
+  </tr>
+}
+
+{(node.type === "tableCell") &&
+  <td class="md-td">
+    {node.children.map(child => (
+      <Astro.self node={child} data={data} />
+    ))}
+  </td>
+}
+
+
 {(node.type === "link") && 
     <a href={node.url} {...node.data?.hProperties}>
         {node.children[0].value}
     </a>
 }
 
+{(node.type === "code") &&
+  <pre class="code-block">
+    <code class={`language-text`}>
+      {node.value}
+    </code>
+  </pre>
+}
+
 {(node.type === "blockquote") &&
     <ArticleCallout node={node} />
+}
+
+{(node.type === "inlineCode") &&
+  <code class="inline-code">{node.value}</code>
 }
 
 {(node.type === "citations") && 
@@ -106,30 +204,8 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
     <span>{node.value}</span>
 }
 
-{(node.type === "html") && 
-    <Fragment set:html={node.value} />
-}
-
-{(node.type === "image") && 
-    <img 
-        src={node.url} 
-        alt={node.alt || ''} 
-        {...node.data?.hProperties}
-        class="embedded-image"
-    />
-}
-
 {other_type && 
     <div class={`unhandled-${node.type}`}>
         {JSON.stringify(node)}
     </div>
 }
-
-<style>
-.embedded-image {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 1rem 0;
-}
-</style>

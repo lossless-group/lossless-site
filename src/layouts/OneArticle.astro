@@ -7,6 +7,7 @@
 
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
@@ -26,13 +27,14 @@ const { Component, data, content, markdownFile } = Astro.props;
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
-  .use(remarkCitations)       // 2. Process citations
-  .use(remarkBacklinks)       // 3. Process inline wiki-style links
+  .use(remarkGfm)
   .use(remarkImages)          // 4. Process inline images
-  .use(remarkCallouts);       // 5. Process container elements (blockquotes to callouts)
+  .use(remarkBacklinks)       // 3. Process inline wiki-style links
+  .use(remarkCitations)       // 2. Process citations
+  .use(remarkCallouts)       // 5. Process container elements (blockquotes to callouts)
 
 // First parse to MDAST
-const mdast = await processor.parse(content || '');
+const mdast = processor.parse(content || '');
 
 // Then run transformations
 const transformedMdast = await processor.run(mdast);

@@ -1,11 +1,9 @@
 ---
 import Header from "@basics/Header.astro";
-import Footer from "@basics/Footer.astro";
 import "@styles/global.css";
 import "@styles/starwind.css";
 import "@styles/callouts.css";
 import "@styles/codeblocks.css";
-import SimpleCodeBlock from "@components/codeblocks/SimpleCodeBlock.astro";
 
 interface Props {
   title?: string;
@@ -28,8 +26,6 @@ const { title = "Go Lossless: Innovate and Collaborate", description } = Astro.p
   <body>
     <Header />
     <slot />
-    <Footer />
-    <SimpleCodeBlock />
   </body>
 </html>
 
