@@ -1,0 +1,17 @@
+{
+  "page": "main",
+  "questionsAndAnswers": [
+    {
+      "question": "What do you mean by 'free updates'?",
+      "answer": "All future improvements and new features are included at no extra cost."
+    },
+    {
+      "question": "How do I contact support?",
+      "answer": "You can reach us via email or our support portal, 24/7."
+    },
+    {
+      "question": "Can I use markdown in answers?",
+      "answer": "Yes! Answers can contain **markdown** for formatting, links, and more."
+    }
+  ]
+}

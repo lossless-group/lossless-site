@@ -6,7 +6,8 @@
       "@components/*": ["./src/components/*"],
       "@visuals/*": ["./src/assets/visuals/*"],
       "@layouts/*": ["./src/layouts/*"],
-      "@styles/*": ["./src/styles/*"]
+      "@styles/*": ["./src/styles/*"],
+      "@content/*": ["./src/content/*"]
     },
     "jsx": "react-jsx",
     "checkJs": true

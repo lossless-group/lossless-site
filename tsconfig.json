@@ -51,6 +51,9 @@
       ],
       "@tabler/*": [
         "./node_modules/@tabler/icons/*"
+      ],
+      "@content/*": [
+        "./src/content/*"
       ]
     },
     "types": ["astro/client"],

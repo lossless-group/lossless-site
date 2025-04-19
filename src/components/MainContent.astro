@@ -6,6 +6,9 @@ import { getEntry, getCollection } from "astro:content";
 import TrademarkRibbon from "@components/trademarks/TrademarkRibbon.astro";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
+import Section__IconHeaderMessage from "@components/basics/messages/Section__IconHeaderMessage.astro";
+import Section__QuestionsAnswers from "./reference/Section__QuestionsAnswers.astro";
+import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json";
 
 interface Tool {
   url: string;
@@ -43,6 +46,12 @@ const allTags = [
     tools.flatMap((tool) => tool.tags || []).filter((tag) => tag) // Remove any undefined/null values
   ),
 ];
+
+// Extract the questionsAndAnswers array for the "main" page
+const qaList = questionsAndAnswersData.page === "main"
+  ? questionsAndAnswersData.questionsAndAnswers
+  : [];
+
 ---
 
 <!-- Full-bleed separator with subtle styling -->
@@ -91,6 +100,11 @@ const allTags = [
   animate={true}
 />
 
+<!-- Section: IconHeaderMessage grid for homepage (index instance) -->
+<section class="content-wrapper">
+  <Section__IconHeaderMessage instance="index" />
+</section>
+
 <!-- Content section with alternating side images -->
 <div class="content-wrapper">
   <section>
@@ -105,6 +119,14 @@ const allTags = [
   marginBottom="1rem" 
   color="var(--grd__primary-bg)" 
 />
+
+<!-- Q&A Section (Accordion) -->
+<div class="content-wrapper">
+  <section>
+    <h2>Frequently Asked Questions</h2>
+    <Section__QuestionsAnswers qaList={qaList} containerClass="w-[80vw]" />
+  </section>
+</div>
 
 <!-- Content section with card grid -->
 <div class="content-wrapper">

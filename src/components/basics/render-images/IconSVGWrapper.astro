@@ -1,0 +1,68 @@
+---
+// IconSVGWrapper.astro
+//
+// This Astro component wraps and renders an SVG icon, inlining the SVG markup for full Astro-native compatibility.
+//
+// PROPS:
+//   - src: string (required) — absolute or relative path to the SVG file (relative to project root or /src)
+//   - alt: string (required) — accessible label for screen readers
+//   - width: string|number (optional) — width of the icon (e.g., '32', '2em')
+//   - height: string|number (optional) — height of the icon
+//   - class: string (optional) — additional CSS classes
+//
+// BEHAVIOR:
+//   - Reads and inlines the SVG content at build time using Node's fs.readFileSync.
+//   - Applies width/height/class/aria-label for accessibility and styling.
+//   - Aggressively commented per project rules.
+//
+// USAGE EXAMPLES:
+//   <IconSVGWrapper src="/src/assets/icons/wand.svg" alt="Magic Wand" width="32" height="32" class="icon-wand" />
+//   <IconSVGWrapper src="/src/assets/icons/shield.svg" alt="Shield" width="2em" />
+
+import fs from "node:fs";
+import path from "node:path";
+
+interface Props {
+  src: string; // Path to the SVG file (relative to /src or absolute)
+  alt: string; // Accessible label
+  width?: string | number; // Optional width
+  height?: string | number; // Optional height
+  class?: string; // Optional CSS class
+}
+
+const { src, alt, width, height, class: className } = Astro.props as Props;
+
+// ---
+// 1. Resolve the absolute path to the SVG file
+//    - If src starts with '/', treat as absolute from project root
+//    - Otherwise, resolve relative to current working directory
+// ---
+const resolvedPath = src.startsWith("/")
+  ? path.join(process.cwd(), src)
+  : path.resolve(process.cwd(), src);
+
+// ---
+// 2. Read the SVG file content as a string
+// ---
+let svgContent = "";
+try {
+  svgContent = fs.readFileSync(resolvedPath, "utf-8");
+} catch (err) {
+  throw new Error(`IconSVGWrapper: SVG not found or unreadable at path: ${resolvedPath}`);
+}
+
+// ---
+// 3. Render the SVG markup using set:html
+//    - Add accessibility attributes and sizing using a wrapping <span>
+//    - The SVG itself should have role="img" and aria-label for accessibility
+//    - If the SVG file does not have these, inject them (optional advanced step)
+// ---
+---
+<span
+  class={className}
+  style={`display:inline-block; width:${width || 'auto'}; height:${height || 'auto'};`}
+  role="img"
+  aria-label={alt}
+>
+  <span set:html={svgContent} />
+</span>

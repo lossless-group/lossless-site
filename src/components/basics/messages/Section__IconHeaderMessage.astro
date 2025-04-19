@@ -1,0 +1,86 @@
+---
+/**
+ * Section__IconHeaderMessage.astro
+ *
+ * Renders a responsive grid of IconHeaderMessage cards based on a named instance (array) in iconHeaderMessages.json.
+ *
+ * - Defaults to two columns, responsive to one on small screens.
+ * - Each card is populated using the IconHeaderMessage component.
+ * - The instance prop determines which array of messages to render (e.g., "index" for index.astro).
+ *
+ * Props:
+ * - instance: string (required) - the key in iconHeaderMessages.json to select the array for this page/section.
+ *
+ * Usage Example:
+ * <Section__IconHeaderMessage instance="index" />
+ *
+ * Where this component is called:
+ * - Used in any page/section that needs a grid of messages (e.g., index.astro, About page, etc.)
+ * - Calls: IconHeaderMessage.astro (for each message)
+ */
+
+import IconHeaderMessage from './IconHeaderMessage.astro';
+import iconHeaderMessages from '@content/messages/iconHeaderMessages.json';
+
+interface Props {
+  /** The key for the instance (e.g., "index") to select from the JSON */
+  instance: string;
+}
+
+const { instance } = Astro.props;
+const messages = iconHeaderMessages[instance] || [];
+// Extract max_columns from the JSON (default to 3 if not present)
+const maxColumns = iconHeaderMessages.max_columns || 3;
+
+// Helper function to map maxColumns to Tailwind grid-cols class
+function getGridColsClass(cols) {
+  switch (cols) {
+    case 1: return 'md:grid-cols-1';
+    case 2: return 'md:grid-cols-2';
+    case 3: return 'md:grid-cols-3';
+    case 4: return 'md:grid-cols-4';
+    default: return 'md:grid-cols-3';
+  }
+}
+const gridColsClass = getGridColsClass(maxColumns);
+
+---
+
+<!--
+  Section__IconHeaderMessage renders a grid of IconHeaderMessage cards.
+  - Uses CSS grid, column count is set by max_columns from iconHeaderMessages.json.
+  - Responsive: stacks to 1 column on mobile, 2 on medium, up to max_columns on desktop.
+  - Aggressively commented for maintainability.
+  - If no messages, displays a fallback message.
+  - Each IconHeaderMessage is passed all relevant props from the JSON entry, as well as columns for responsive width.
+  - Calls: IconHeaderMessage.astro
+  - Data source: site/src/content/messages/iconHeaderMessages.json
+  - Usage locations: [update as adopted, e.g. index.astro]
+-->
+<section class="icon-header-message-section">
+  {messages.length === 0 ? (
+    <p class="text-center text-gray-500 py-8">No messages found for this section.</p>
+  ) : (
+    <div
+      class={`icon-header-message-grid grid grid-cols-1 sm:grid-cols-2 ${gridColsClass} gap-8`}
+      style={`--icon-header-message-cols: ${maxColumns};`}
+    >
+      {messages.map((msg, idx) => (
+        <IconHeaderMessage key={idx} {...msg} />
+      ))}
+    </div>
+  )}
+</section>
+
+<style>
+/*
+  Responsive grid for IconHeaderMessage cards:
+  - Uses Tailwind's grid-cols utilities for 1/2/maxColumns columns.
+  - Fallback for custom property if needed.
+*/
+.icon-header-message-section {
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+</style>

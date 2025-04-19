@@ -1,0 +1,122 @@
+---
+/**
+ * IconHeaderMessage.astro
+ * 
+ * A reusable message card component that displays an icon, a header/title, and an optional message/description.
+ *
+ * @component
+ * @example
+ * ```astro
+ * <IconHeaderMessage 
+ *   icon="tabler/wand.svg" 
+ *   title="Real-time insights at your fingertips" 
+ *   message="Data syncs across your team instantly. Real-time access, with 99.9% uptime." 
+ * />
+ * ```
+ *
+ * Props:
+ * - icon: string (SVG path)
+ * - title: string (main heading)
+ * - message?: string (optional supporting text)
+ * - iconClass?: string (optional extra classes for icon)
+ * - headerClass?: string (optional extra classes for header)
+ * - messageClass?: string (optional extra classes for message)
+ * - animationClass?: string (optional animation classes)
+ *
+ * Usage Locations (update as adopted):
+ * - Section__IconHeaderMessage.astro (layout controlled by parent grid)
+ */
+
+// Astro Icon v2+ usage: import Icon from 'astro-icon';
+import IconSVGWrapper from '../render-images/IconSVGWrapper.astro';
+
+/**
+ * AstroIconProps - for type assertion on Icon usage
+ * - name: string (icon name for astro-icon)
+ * - class: string (optional CSS classes)
+ * - aria-hidden: string (optional ARIA attribute)
+ */
+type AstroIconProps = {
+  name: string;
+  class?: string;
+  "aria-hidden"?: string;
+};
+
+interface Props {
+  /** Icon name for Astro Icon (e.g., 'tabler/wand.svg') or SVG path */
+  icon: string;
+  /** Main heading text */
+  title: string;
+  /** Supporting message/description */
+  message?: string;
+  /** Extra classes for icon */
+  iconClass?: string;
+  /** Extra classes for header */
+  headerClass?: string;
+  /** Extra classes for message */
+  messageClass?: string;
+  /** Animation classes (optional) */
+  animationClass?: string;
+}
+
+const {
+  icon,
+  title,
+  message = '',
+  iconClass = '',
+  headerClass = '',
+  messageClass = '',
+  animationClass = '',
+} = Astro.props;
+---
+
+<!--
+  IconHeaderMessage component markup
+  - Uses flex column layout for vertical stacking
+  - Icon and header are inline with gap
+  - Opacity and theme-aware color for message
+  - Animation classes can be passed in
+  - Layout and width are now fully controlled by the parent grid (Section__IconHeaderMessage.astro)
+  - **NEW:** All text blocks (header and message) set to w-full and text-justify to fill out the width of the card
+-->
+<div class={`flex flex-col gap-2 w-full ${animationClass}`.trim()}>
+  <div class="flex items-start gap-2 w-full">
+    <!-- Icon rendering logic: SVG-only version. All icons must be SVGs. -->
+    {icon ? (
+      <!-- 
+        Use IconSVGWrapper for SVG icons to ensure native rendering.
+        Pass icon prop as src, title as alt text, and set width/height for consistent sizing.
+        This project now only supports SVG icons. All icon props must be SVG file paths.
+        If icon is not provided, fallback to slot for custom icon content.
+      -->
+      <IconSVGWrapper 
+        src={icon} 
+        alt={title} 
+        width="32" 
+        height="32" 
+        class={iconClass} 
+      />
+    ) : (
+      <!-- 
+        If no icon is provided, render the slot for custom icon content.
+      -->
+      <slot name="icon" />
+    )}
+    <!-- Header/title -->
+    <h3 class={`inline text-lg w-full ${headerClass}`.trim()}>{title}</h3>
+  </div>
+  {message && (
+    <p class={`opacity-90 dark:opacity-80 w-full ml-8 ${messageClass}`.trim()}>{message}</p>
+  )}
+  <!--
+    Where this component is called:
+    (Update this list as you use the component in other files)
+    - Section__IconHeaderMessage.astro (layout controlled by parent grid)
+  -->
+</div>
+
+<style>
+h3 {
+  font-size: 1.2rem;
+}
+</style>
