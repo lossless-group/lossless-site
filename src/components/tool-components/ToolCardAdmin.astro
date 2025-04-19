@@ -34,10 +34,10 @@ interface Props {
   og_screenshot_url?: string;
 }
 
-const { tool, ...directProps } = Astro.props;
+const { tool: toolObj, ...directProps } = Astro.props;
 
 // Use tool props if provided, otherwise use direct props
-const  tool = tool || directProps;
+const tool = toolObj || directProps;
 
 
 const siteName = getEffectiveSiteName(tool);

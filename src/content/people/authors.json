@@ -15,6 +15,20 @@
         "createdAt": "2025-04-06T20:32:45-07:00",
         "updatedAt": "2025-04-06T20:32:45-07:00"
       }
+    },
+    {
+      "id": "tanujks",
+      "name": "Tanuj Siripurapu",
+      "role": "Creator",
+      "bio": "Developer @ Lossless Group",
+      "headshotOf": "/images/tanuj_headshot.jpg",
+      "socialLinks": {
+        "github": "https://github.com/tanujks"
+      },
+      "metadata": {
+        "createdAt": "2025-04-06T20:32:45-07:00",
+        "updatedAt": "2025-04-06T20:32:45-07:00"
+      }
     }
   ]
 }
