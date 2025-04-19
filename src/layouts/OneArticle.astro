@@ -28,15 +28,15 @@ const { Component, data, content, markdownFile } = Astro.props;
 const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
   .use(remarkGfm)
-  .use(remarkImages)          // 4. Process inline images
-  .use(remarkBacklinks)       // 3. Process inline wiki-style links
-  .use(remarkCitations)       // 2. Process citations
-  .use(remarkCallouts)       // 5. Process container elements (blockquotes to callouts)
+  .use(remarkImages)         
+  .use(remarkBacklinks)       
+  .use(remarkCitations)       
+  .use(remarkCallouts)       
 
 // First parse to MDAST
 const mdast = processor.parse(content || '');
+// console.log("=== Raw MDAST ===", JSON.stringify(mdast, null, 2));
 
-// Then run transformations
 const transformedMdast = await processor.run(mdast);
 
 // Debug output to see AST structure

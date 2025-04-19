@@ -9,6 +9,7 @@ interface Props {
         value?: string;
         children?: any[];
         url?: string;
+        depth?: number;
         data?: {
             hProperties?: Record<string, any>;
         };
@@ -41,6 +42,10 @@ const handled_types = [
     "table",
     "tableRow",
     "tableCell",
+    "strong",
+    "emphasis",
+    "break",
+    "citationReference",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -57,9 +62,9 @@ const title = data.id ?
   : '';
 
 // Debug output to see AST structure
-console.log(`=== AstroMarkdown Debug ===`)
-console.log(`Node type: ${node.type}`)
-console.log('Node structure:', JSON.stringify(node, null, 2))
+// console.log(`=== AstroMarkdown Debug ===`)
+// console.log(`Node type: ${node.type}`)
+// console.log('Node structure:', JSON.stringify(node, null, 2))
 
 ---
 
@@ -70,6 +75,39 @@ console.log('Node structure:', JSON.stringify(node, null, 2))
             <Astro.self node={child} data={data} />
         ))}
     </>
+}
+
+{(node.type === "heading") &&
+  <>
+    {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>}
+    {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>}
+    {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>}
+    {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>}
+    {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>}
+    {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>}
+  </>
+}
+
+{(node.type === "strong") &&
+  <strong>
+    {node.children.map(child => (
+      <Astro.self node={child} data={data} />
+    ))}
+  </strong>
+}
+
+{(node.type === "emphasis") &&
+  <em>
+    {node.children.map(child => (
+      <Astro.self node={child} data={data} />
+    ))}
+  </em>
+}
+
+{(node.type === 'citationReference') &&
+  <sup class="cite-ref">
+    {node.children.map(child => <Astro.self node={child} data={data} />)}
+  </sup>
 }
 
 {(node.type === "image") &&
