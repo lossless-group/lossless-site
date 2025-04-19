@@ -1,5 +1,6 @@
 ---
 import "@styles/global.css";
+import Hero from "@components/basics/Hero.astro";
 import CardGrid from "@basics/CardGrid.astro";
 import TagCloud from "@components/tool-components/TagCloud.astro";
 import { getEntry, getCollection } from "astro:content";
@@ -127,6 +128,29 @@ const qaList = questionsAndAnswersData.page === "main"
     <Section__QuestionsAnswers qaList={qaList} containerClass="w-[80vw]" />
   </section>
 </div>
+
+
+<!-- Full-bleed separator with more prominent styling -->
+<ThinGradientBleedSeparator 
+  height="3px" 
+  marginTop="1.5rem" 
+  marginBottom="1.5rem" 
+  color="var(--grd__primary-bg)" 
+  animate={true}
+/>
+
+<section class="example-section" data-animate="fade-up" data-animate-delay="0.2">
+  <Hero
+    title="Customize Your Experience"
+    subtitle="Flexible & Powerful"
+    description="The Hero component supports various layouts and content configurations to meet your specific needs."
+    ctaText="View Documentation"
+    ctaUrl="/docs/hero"
+    alignment="center"
+    fullBleed={false}
+    animate={true}
+  />
+</section>
 
 <!-- Content section with card grid -->
 <div class="content-wrapper">

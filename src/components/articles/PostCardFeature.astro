@@ -4,32 +4,29 @@
 // This follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
 // Example usage: <PostCardFeature {...item} />
 
+import TagCloud from "../tool-components/TagCloud.astro";
+import AuthorHandle from "../basics/AuthorHandle.astro";
+import { formatDate } from "@utils/formatDate";
+
 // Accept both Astro collection entry and flat frontmatter object
 const { data, ...rest } = Astro.props;
 const props = data ? data : Astro.props;
 const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
 
 // Format date if it exists
+// Defensive: Always use the robust formatDate utility, which handles Date, string, or number
 let formattedDate = '';
 if (date_authored_initial_draft) {
-  // Check if the date is already a string in YYYY-MM-DD format
-  if (typeof date_authored_initial_draft === 'string' && 
-      date_authored_initial_draft.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    formattedDate = date_authored_initial_draft;
-  } else {
-    // Try to format the date
-    try {
-      const date = new Date(date_authored_initial_draft);
-      formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    } catch (e) {
-      console.error('Error formatting date:', e);
-      formattedDate = date_authored_initial_draft?.toString() || '';
-    }
+  try {
+    formattedDate = formatDate(date_authored_initial_draft);
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    formattedDate = date_authored_initial_draft?.toString() || '';
   }
 }
 
-// For browser-side debugging, stringify the props
-const debugProps = JSON.stringify(Astro.props);
+const hasAuthors = Array.isArray(authors) && authors.length > 0;
+
 ---
 
 <article class="post-card-feature card-hover-effect">
@@ -49,11 +46,25 @@ const debugProps = JSON.stringify(Astro.props);
       <h1 class="post-card-feature__title"><a href={url}><span class="text-wrapper">{title}</span></a></h1>
       <p class="post-card-feature__lede"><span class="text-wrapper">{lede || summary}</span></p>
       <div class="post-card-feature__meta">
-        <span class="post-card-feature__authors">{authors?.join(', ')}</span>
-        <span class="post-card-feature__date">{formattedDate}</span>
-        <div class="post-card-feature__tags">
-          {tags?.map(tag => <span class="post-card-feature__tag">{tag}</span>)}
+        {/*
+          Layout Correction: Author and date are wrapped in a flex row and spaced apart.
+          - .post-card-feature__meta-row uses justify-content: space-between for polar alignment.
+          - TagCloud is rendered below, never sharing space with author/date.
+          - Aggressive comments clarify structure.
+        */}
+        <div class="post-card-feature__meta-row">
+          {hasAuthors && (
+            <span class="post-card-feature__author">
+              <AuthorHandle authors={authors} showName={true} showRole={false} />
+            </span>
+          )}
+          <span class="post-card-feature__date">{formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}</span>
         </div>
+        {tags && tags.length > 0 && (
+          <div class="post-card-feature__meta-tags">
+            <TagCloud tags={tags} />
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -182,33 +193,32 @@ const debugProps = JSON.stringify(Astro.props);
 
   .post-card-feature__meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    font-size: var(--fs-300);
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: var(--fs-250);
     color: var(--clr-body);
     margin-top: auto;
   }
-
-  .post-card-feature__authors {
-    font-weight: var(--fw-semi-bold);
-  }
-
-  .post-card-feature__tags {
+  .post-card-feature__meta-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
+    gap: 1rem;
   }
-
-  .post-card-feature__tag {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 70%
-    );
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: var(--fs-250);
+  .post-card-feature__author,
+  .post-card-feature__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .post-card-feature__meta-tags {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
   }
 
   /* Common text wrapping styles for all text elements */

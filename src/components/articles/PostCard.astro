@@ -4,29 +4,37 @@
 // This follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
 // Example usage: <PostCard {...item} />
 
+import TagCloud from "../tool-components/TagCloud.astro";
+import AuthorHandle from "../basics/AuthorHandle.astro";
+import { formatDate } from "@utils/formatDate";
+
 // Accept both Astro collection entry and flat frontmatter object
 const { data, ...rest } = Astro.props;
 const props = data ? data : Astro.props;
 const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
 
 // Format date if it exists
+// This block ensures we always pass a Date object or ISO string to formatDate, which expects (Date | string)
+// Defensive: If the input is a Date, we use as-is; if string, we convert to Date; otherwise, fallback to string
 let formattedDate = '';
 if (date_authored_initial_draft) {
-  // Check if the date is already a string in YYYY-MM-DD format
-  if (typeof date_authored_initial_draft === 'string' && 
-      date_authored_initial_draft.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    formattedDate = date_authored_initial_draft;
-  } else {
-    // Try to format the date
-    try {
-      const date = new Date(date_authored_initial_draft);
-      formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    } catch (e) {
-      console.error('Error formatting date:', e);
-      formattedDate = date_authored_initial_draft?.toString() || '';
+  try {
+    // If already a Date, use as-is; if string, convert to Date; otherwise, fallback
+    const dateObj = typeof date_authored_initial_draft === 'string' ? new Date(date_authored_initial_draft) : date_authored_initial_draft;
+    if (dateObj instanceof Date && !isNaN(dateObj.valueOf())) {
+      // formatDate expects Date or string, so this is safe
+      formattedDate = formatDate(dateObj);
+    } else if (typeof date_authored_initial_draft === 'string') {
+      formattedDate = date_authored_initial_draft;
     }
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    formattedDate = date_authored_initial_draft?.toString() || '';
   }
 }
+
+const hasAuthors = Array.isArray(authors) && authors.length > 0;
+
 ---
 
 <article class="post-card card-hover-effect">
@@ -37,11 +45,21 @@ if (date_authored_initial_draft) {
       <p class="post-card__lede"><span class="text-wrapper">{lede || summary}</span></p>
     </div>
     <div class="post-card__meta">
-      <span class="post-card__authors">{authors?.join(', ')}</span>
-      <span class="post-card__date">{formattedDate}</span>
+      {/*
+        Layout Correction: Author and date are now wrapped in a flex row and spaced apart.
+        - .post-card__meta-row uses justify-content: space-between for polar alignment.
+        - TagCloud is rendered below, never sharing space with author/date.
+        - Aggressive comments clarify structure.
+      */}
+      <div class="post-card__meta-row">
+        <span class="post-card__author">
+          <AuthorHandle authors={authors} showName={true} showRole={false} />
+        </span>
+        <span class="post-card__date">{formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}</span>
+      </div>
       {tags && tags.length > 0 && (
-        <div class="post-card__tags">
-          {tags.map(tag => <span class="post-card__tag">{tag}</span>)}
+        <div class="post-card__meta-tags">
+          <TagCloud tags={tags} />
         </div>
       )}
     </div>
@@ -115,33 +133,35 @@ if (date_authored_initial_draft) {
 
   .post-card__meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.25rem;
     font-size: var(--fs-250);
     color: var(--clr-body);
     margin-top: auto;
   }
 
-  .post-card__authors {
-    font-weight: var(--fw-semi-bold);
-  }
-
-  .post-card__tags {
+  .post-card__meta-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.25rem;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
   }
 
-  .post-card__tag {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 70%
-    );
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: var(--fs-200);
+  .post-card__author,
+  .post-card__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .post-card__meta-tags {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
   }
 
   .post-card__image {

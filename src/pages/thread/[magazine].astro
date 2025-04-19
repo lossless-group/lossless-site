@@ -30,8 +30,41 @@ const { collection, urlPrefix } = collectionMap[magazine] || collectionMap['prom
 // Load all entries from the selected collection
 const entries = await getCollection(collection);
 
-// Transform the entries to include a URL property and flatten the structure for the card components
-const contentThreads = entries.map(entry => {
+// -----------------------------------------------------------------------------
+// FILTER: Only include entries that are published
+// This filter removes any entry where frontmatter contains 'publish: false'.
+// If 'publish' is missing or true, the entry is included by default.
+// -----------------------------------------------------------------------------
+const publishedEntries = entries.filter(entry => {
+  // Defensive: If 'publish' is explicitly false, filter out. Otherwise, include.
+  // This covers: publish: false (hidden), publish: true or missing (shown)
+  return entry.data.publish !== false;
+});
+
+// -----------------------------------------------------------------------------
+// SORT: Order by 'date_authored_current_draft' descending (most recent first)
+// Entries without this property/value are placed at the end of the list.
+// -----------------------------------------------------------------------------
+const sortedPublishedEntries = publishedEntries.slice().sort((a, b) => {
+  const aDate = a.data.date_authored_current_draft;
+  const bDate = b.data.date_authored_current_draft;
+  // If both have dates, compare them (descending)
+  if (aDate && bDate) {
+    // Compare as ISO8601 strings (safe for YYYY-MM-DD)
+    if (aDate > bDate) return -1;
+    if (aDate < bDate) return 1;
+    return 0;
+  }
+  // Only a has date: a comes before b
+  if (aDate && !bDate) return -1;
+  // Only b has date: b comes before a
+  if (!aDate && bDate) return 1;
+  // Neither has date: keep original order
+  return 0;
+});
+
+// Transform the sorted entries to include a URL property and flatten the structure for the card components
+const contentThreads = sortedPublishedEntries.map(entry => {
   // Extract the filename without extension to create a slug
   const pathParts = entry.id.split('/');
   const filename = pathParts[pathParts.length - 1].replace(/\.md$/, '');
