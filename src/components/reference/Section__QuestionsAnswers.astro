@@ -1,0 +1,44 @@
+---
+/**
+ * Section__QuestionsAnswers.astro
+ *
+ * Renders a list of Question & Answer dropdowns (accordion style), using the QuestionAnswerDropdown component.
+ * Accepts a prop `qaList` (array of { question, answer }) and `containerClass` (string for stable dropdown width).
+ *
+ * All logic and state is handled here. Styling matches FAQ1/starwind-accordion. 
+ *
+ * See prompt: content/lost-in-public/prompts/user-interface/Create-a-Simple-Question-Answers-Section.md
+ */
+
+// Import the child dropdown component
+import QuestionAnswerDropdown from './QuestionAnswerDropdown.astro';
+
+// Props
+// qaList: Array<{ question: string; answer: string }>
+// containerClass: string (optional, controls <details> sizing)
+const { qaList = [], containerClass = "" } = Astro.props;
+---
+
+<div class="questions-answers-section">
+  {qaList.map((item) => (
+    <QuestionAnswerDropdown
+      question={item.question}
+      answer={item.answer}
+      containerClass={containerClass}
+    />
+  ))}
+</div>
+<style>
+  .questions-answers-section {
+    margin-top: 1.5rem; /* Adjust spacing as needed */
+    margin-bottom: 1.5rem; /* Adjust spacing as needed */
+    display: flex; /* Or use grid if preferred */
+    flex-direction: column; /* Stack items vertically */
+    gap: 1em; /* Adjust spacing between items */
+  }
+
+  /* Optional: Remove margin from the last child */
+  .questions-answers-section > *:last-child {
+    margin-bottom: 0;
+  }
+</style>

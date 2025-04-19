@@ -1,0 +1,85 @@
+---
+/**
+ * QuestionAnswerDropdown.astro
+ *
+ * Renders a single question and answer as a dropdown/accordion item using native HTML <details> and <summary>.
+ *
+ * Props:
+ *   - question: string (the question text)
+ *   - answer: string (the answer text)
+ *   - triggerClass: string (optional, controls <summary> sizing)
+ *   - containerClass: string (optional, controls <details> sizing)
+ *
+ * Styling and ARIA attributes follow FAQ1/starwind-accordion pattern.
+ *
+ * See parent: Section__QuestionsAnswers.astro
+ *
+ * This component is strictly static/SSR. Do not add any client-side JS, hydration, or framework code.
+ * All interactivity must be handled by HTML/CSS only.
+ *
+ * All code is aggressively commented per .windsurfrules.
+ */
+
+// Destructure all props passed from parent component Section__QuestionsAnswers.astro
+const { question, answer, triggerClass = "", containerClass = "" } = Astro.props;
+
+/**
+ * Render logic for a single Q&A dropdown item:
+ * - The question is rendered as a summary with ARIA attributes for accessibility.
+ * - The answer is shown/hidden based on the open state of the details element.
+ * - Styling matches project conventions and FAQ1/starwind-accordion.
+ * - No client-side JS or hydration.
+ */
+---
+
+
+<!--
+  Render a single Q&A dropdown using <details> and <summary>.
+  - All dropdowns are closed by default.
+  - User can open/close by clicking the summary.
+  - No JS, no hydration, fully accessible and SEO-friendly.
+  - Styling matches starwind-accordion pattern.
+-->
+<details class={`starwind-accordion-item rounded-md border mb-2 group ${containerClass}`}>
+  <summary class={`starwind-accordion-trigger flex items-center justify-between rounded-md px-5 py-4 text-left font-medium transition-all cursor-pointer ${triggerClass}`}>
+    <span>{question}</span>
+    <svg role="img" width="24" height="24" fill="#e8a059" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 shrink-0 transition-transform duration-200 group-open:rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </summary>
+  <div class="answers-container">
+    <div class="starwind-accordion-content overflow-hidden transition-all px-5 py-4 opacity-100 answer-text text-base text-gray-700">
+      <!--
+        ANSWER TEXT SECTION
+        This <p> element displays the answer to the question in the dropdown.
+        It is targeted by the .answer-text p CSS selector below to ensure the correct font is applied.
+        - answer: The answer string passed as a prop to this component
+        - Styling: Uses --ff-legible for font-family, overriding global p selector
+        - All answer text in this component is rendered here
+      -->
+      <p>{answer}</p>
+    </div>
+  </div>
+</details>
+
+<style>
+  /*
+    Override global p selector specificity to ensure answer text uses the correct font.
+    This targets only the answer inside the accordion, following project DRY and modularity rules.
+    - global.css sets p { font-family: var(--ff-base); }
+    - This selector is more specific and will win.
+    - Variable --ff-legible is defined in :root in global.css
+  */
+  .answers-container {
+    padding: .2em;
+  }
+
+  .starwind-accordion-trigger span {
+    font-family: var(--ff-base); /* Replace with your desired font */
+    font-size: 1.3rem; /* Adjust size as needed */
+    font-weight: 400; /* Adjust weight as needed */
+    transition: color 0.3s ease; /* Smooth color transition */
+    color: #e8a059; /* Default color */
+  }
+  .answer-text p {
+    font-family: var(--ff-legible);
+  }
+</style>
