@@ -1,0 +1,147 @@
+---
+/**
+ * /vibe-with/tag/[tag].astro — Unified Tag Filter Page
+ *
+ * Implements cross-collection tag filtering as specified in:
+ *   /content/lost-in-public/prompts/render-logic/Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md
+ *
+ * Follows comprehensive, parallel commenting rules as outlined in:
+ *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
+ *
+ * - Loads all entries from BOTH 'prompts' and 'specs' collections (see content.config.ts for keys)
+ * - Filters for items where tags include the selected tag (case-insensitive)
+ * - Renders a unified list with links to /vibe-with/[collection]/[...slug]
+ * - Handles empty state with a friendly message
+ * - All logic is thoroughly commented and DRY
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import TagChip from '@components/tool-components/TagChip.astro';
+
+// --- PARAMS ---
+// Astro provides the dynamic route param as Astro.params.tag
+const { tag } = Astro.params;
+
+/**
+ * Helper: Case-insensitive check if a tag is present in an array of tags
+ * Ensures robust filtering regardless of tag case in frontmatter
+ */
+function tagMatches(tags: string[], target: string): boolean {
+  return tags.some(t => t.toLowerCase() === target.toLowerCase());
+}
+
+/**
+ * getFilteredEntries — Loads and filters both collections by tag
+ *
+ * - Returns an array of { collection, entry } objects for rendering
+ */
+const prompts = await getCollection('prompts');
+const specs = await getCollection('specs');
+
+// Filter each collection for entries containing the tag
+const filteredPrompts = prompts.filter(entry => Array.isArray(entry.data.tags) && tagMatches(entry.data.tags, tag));
+const filteredSpecs = specs.filter(entry => Array.isArray(entry.data.tags) && tagMatches(entry.data.tags, tag));
+
+// Combine and sort (optional: sort by title)
+const results = [
+  ...filteredPrompts.map(entry => ({ collection: 'prompts', entry })),
+  ...filteredSpecs.map(entry => ({ collection: 'specs', entry })),
+].sort((a, b) => {
+  const at = a.entry.data.title || '';
+  const bt = b.entry.data.title || '';
+  return at.localeCompare(bt);
+});
+
+// --- PAGE RENDERING ---
+---
+
+<Layout title={`Items tagged '${tag}'`}>
+  <h1>Items tagged <TagChip tag={tag} route="vibe-with/tag" /></h1>
+
+  {results.length === 0 ? (
+    <div class="empty-message">
+      <p>No prompts or specs found with the tag <b>{tag}</b>.</p>
+      <p>Try another tag or explore all items.</p>
+    </div>
+  ) : (
+    <ul class="tag-results-list">
+      {results.map(({ collection, entry }) => (
+        <li class="tag-result-item" key={entry.id}>
+          <a
+            href={`/vibe-with/${collection}/${entry.data.slug}`}
+            class="tag-result-link"
+            aria-label={`View ${collection.slice(0, -1)}: ${entry.data.title}`}
+          >
+            <span class="collection-label">{collection === 'prompts' ? 'Prompt' : 'Spec'}:</span>
+            <span class="item-title">{entry.data.title || entry.id.replace(/\.md$/, '')}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</Layout>
+
+<style>
+  h1 {
+    font-size: var(--fs-500);
+    margin-bottom: 1.2em;
+  }
+  .tag-results-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    max-width: 40em;
+  }
+  .tag-result-item {
+    background: var(--clr-lossless-primary-glass--lighter);
+    border-radius: 0.3em;
+    padding: 0.8em 1em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    transition: box-shadow 0.18s;
+  }
+  .tag-result-link {
+    text-decoration: none;
+    color: var(--clr-lossless-primary-darkest);
+    font-size: var(--fs-350);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    width: 100%;
+  }
+  .tag-result-link:hover {
+    color: var(--clr-lossless-accent);
+    text-decoration: underline;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  }
+  .collection-label {
+    font-size: var(--fs-250);
+    background: var(--clr-lossless-primary-dark);
+    color: var(--clr-white, #fff);
+    border-radius: 0.2em;
+    padding: 0.1em 0.6em;
+    margin-right: 0.5em;
+    letter-spacing: 0.03em;
+  }
+  .item-title {
+    font-size: var(--fs-350);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .empty-message {
+    margin-top: 2em;
+    font-size: var(--fs-300);
+    color: var(--clr-lossless-primary-darkest);
+    background: var(--clr-lossless-primary-glass);
+    border-radius: 0.3em;
+    padding: 1.2em 1.5em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    max-width: 32em;
+  }
+</style>

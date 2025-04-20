@@ -9,8 +9,7 @@ import AuthorHandle from "../basics/AuthorHandle.astro";
 import { formatDate } from "@utils/formatDate";
 
 // Accept both Astro collection entry and flat frontmatter object
-const { data, ...rest } = Astro.props;
-const props = data ? data : Astro.props;
+const props = Astro.props.data ? Astro.props.data : Astro.props;
 const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
 
 // Format date if it exists
@@ -35,7 +34,7 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
       {banner_image && (
         <figure class="post-card-feature__figure">
           <img 
-            src={banner_image} 
+            src={String(banner_image)} 
             alt={title} 
             class="post-card-feature__image" 
           />
@@ -46,12 +45,6 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
       <h1 class="post-card-feature__title"><a href={url}><span class="text-wrapper">{title}</span></a></h1>
       <p class="post-card-feature__lede"><span class="text-wrapper">{lede || summary}</span></p>
       <div class="post-card-feature__meta">
-        {/*
-          Layout Correction: Author and date are wrapped in a flex row and spaced apart.
-          - .post-card-feature__meta-row uses justify-content: space-between for polar alignment.
-          - TagCloud is rendered below, never sharing space with author/date.
-          - Aggressive comments clarify structure.
-        */}
         <div class="post-card-feature__meta-row">
           {hasAuthors && (
             <span class="post-card-feature__author">
@@ -70,12 +63,13 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
   </div>
 </article>
 
-<!-- Browser-side debug output for the actual props object -->
+<!-- Browser-side debug output for the actual props object
 <script type="module" is:inline>
   // eslint-disable-next-line no-console
   const props = JSON.parse(`${debugProps}`);
   console.log("[PostCardFeature] Props:", props);
 </script>
+-->
 
 <!--
   PostCardFeature.astro expects to receive either:

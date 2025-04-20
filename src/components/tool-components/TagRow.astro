@@ -16,11 +16,12 @@ const { tags, tagCounts = {}, includeCount = false } = Astro.props;
   
   <div class="tag-row">
     <div class="tags-wrapper">
-      {tags.map(tag => (
+      {tags.map((tag) => (
         <TagChip 
           tag={tag} 
           count={tagCounts[tag]} 
           includeCount={includeCount}
+          route="vibe-with"
         />
       ))}
     </div>

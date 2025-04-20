@@ -197,7 +197,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
               selected={true}
               aria-label={`Remove ${trainCaseToNormalCase(tag)}`}
               title={`Click to remove ${trainCaseToNormalCase(tag)}`}
-              href={`#${tag}`}
+              route="vibe-with"
             />
           ))}
         </div>
@@ -217,7 +217,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
               selected={selectedTags.includes(tag)}
               aria-label={`Click to filter by ${trainCaseToNormalCase(tag)}`}
               title={`Click to filter by ${trainCaseToNormalCase(tag)}`}
-              href={`#${tag}`}
+              route="vibe-with"
             />
           ))
         ) : (
