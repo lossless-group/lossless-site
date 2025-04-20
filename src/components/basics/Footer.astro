@@ -1,18 +1,236 @@
 ---
-import "@styles/global.css";
----
+/**
+ * Footer.astro
+ *
+ * Dynamic, responsive footer component.
+ * - Loads link columns from site/src/content/basics/footerLinks.json
+ * - Loads social icons from site/src/content/footer/socialIcons.json
+ * - Loads org locations from site/src/content/basics/orgLocations.json
+ * - Renders left (social) and right (link columns) sections
+ * - All mapping and layout logic handled here. No hardcoded links or icons.
+ *
+ * Data Flow:
+ *   Footer.astro (entry)
+ *     → Loads footerLinks.json, socialIcons.json, and orgLocations.json
+ *       → Maps links, icons, and locations to columns/rows
+ *         → Renders left and right columns
+ *           → Final HTML output
+ */
 
-<footer>
-  <br />
-  <br />
-  <div class="separator--thin"></div>
-  <h1>Footer</h1>
+import { readFileSync } from 'fs';
+import path from 'path';
+import ThinGradientBleedSeparator from './separators/ThinGradientBleedSeparator.astro';
+
+// Helper to resolve JSON file paths
+const siteRoot = import.meta.env.SITE ? new URL(import.meta.env.SITE).pathname : '';
+const footerLinksPath = path.resolve(siteRoot, 'src/content/basics/footerLinks.json');
+const socialIconsPath = path.resolve(siteRoot, 'src/content/footer/socialIcons.json');
+const orgLocationsPath = path.resolve(siteRoot, 'src/content/basics/orgLocations.json');
+
+// ===============================
+// TypeScript interface for Footer Links JSON
+// ===============================
+/**
+ * FooterLinks interface defines the structure of the footerLinks.json file.
+ * - Each property key is a column header (string)
+ * - Each value is an array of objects, each with a single key-value pair:
+ *   { "Link Label": "/path" }
+ *
+ * Example:
+ * {
+ *   "Column Header": [
+ *     { "Link Label": "/path" },
+ *     ...
+ *   ]
+ * }
+ */
+interface FooterLinks {
+  [header: string]: Array<{ [label: string]: string }>;
+}
+
+// Load and parse JSON data
+let footerLinks: FooterLinks = {};
+let socialIcons = [];
+let orgLocations = { company_name: '', locations: [] };
+try {
+  footerLinks = JSON.parse(readFileSync(footerLinksPath, 'utf-8'));
+  socialIcons = JSON.parse(readFileSync(socialIconsPath, 'utf-8'));
+  orgLocations = JSON.parse(readFileSync(orgLocationsPath, 'utf-8'));
+} catch (err) {
+  console.error('Error loading footer data:', err);
+}
+
+// ===============================
+// No grouping needed: orgLocations.locations will be rendered flat in grid
+// ===============================
+// We rely on CSS grid to handle column/row layout, which is the idiomatic Astro/HTML/CSS approach.
+// This is different from React or JSX, where we would typically use JavaScript to handle layout logic.
+
+---
+<ThinGradientBleedSeparator />
+<footer class="footer-container">
+  <div class="footer-left">
+    <div class="footer-social-row">
+      {socialIcons.map(icon => (
+        <a href={icon.url} aria-label={icon.label} target="_blank" rel="noopener noreferrer" class="footer-social-icon">
+          <img src={icon.icon} alt={icon.label} />
+        </a>
+      ))}
+    </div>
+    <div class="footer-bottom-row">
+      <div class="org-info">
+        <div class="org-company">{orgLocations.company_name}</div>
+        <div class="org-locations">
+          <!-- Render org locations as a flat list; CSS grid handles column/row layout -->
+          <div class="org-locations-grid">
+            {Array.isArray(orgLocations.locations) && orgLocations.locations.map(loc => (
+              <div class="org-location">
+                <div class="org-location-name">{loc.name}</div>
+                <div class="org-address">
+                  {loc.address.street}, {loc.address.city}, {loc.address.state} {loc.address.zip}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-right">
+    {Object.entries(footerLinks).reverse().map(([header, links]) => (
+      <div class="footer-link-column">
+        <div class="footer-link-header">{header}</div>
+        <ul>
+          {/* Defensive: Only map if links is an array */}
+          {Array.isArray(links) && links.map(linkObj => {
+            // Each linkObj is an object with a single key-value pair: { label: url }
+            const [label, url] = Object.entries(linkObj)[0];
+            return <li><a href={url}>{label}</a></li>;
+          })}
+        </ul>
+      </div>
+    ))}
+  </div>
 </footer>
 
 <style>
-  .separator--thin {
-    width: 100%;
-    height: 1px;
-    background-color: var(--clr-lossless-primary-light);
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 2rem 1.5rem;
+  background: var(--footer-bg, #16171a);
+  color: var(--footer-fg, #fff);
+}
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 180px;
+}
+.footer-social-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+.footer-social-icon img {
+  width: 28px;
+  height: 28px;
+  filter: grayscale(0.2) contrast(1.1);
+  transition: filter 0.2s;
+}
+.footer-social-icon:hover img {
+  filter: grayscale(0) contrast(1.4);
+}
+.footer-bottom-row {
+  font-size: 0.95em;
+  color: var(--footer-muted, #bbb);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.org-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.org-company {
+  font-weight: 600;
+  font-size: 1em;
+}
+.org-locations {
+  display: block;
+}
+.org-locations-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, auto);
+  gap: 0.5em 1.5em;
+  /* 
+    This CSS grid setup will create a true 2-row grid with as many columns as needed.
+    The grid-auto-flow: column property tells the grid to automatically create new columns when the grid items exceed the available space in the current row.
+    The grid-template-rows: repeat(2, auto) property sets the grid to have 2 rows with automatic height.
+  */
+}
+.org-locations-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+.org-location-name {
+  font-weight: 500;
+  font-size: 0.98em;
+}
+.org-address {
+  font-size: 0.93em;
+  color: var(--footer-muted, #aaa);
+}
+.footer-right {
+  display: flex;
+  margin-right: 2.5rem;
+  flex-direction: row-reverse;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  /* Align all columns to the right edge of the footer */
+  justify-content: flex-end;
+  text-align: right;
+}
+.footer-link-column {
+  min-width: 140px;
+  /* Ensure the content of each column aligns right */
+  text-align: right;
+}
+.footer-link-header {
+  font-weight: 700;
+  margin-bottom: 0.5em;
+  font-size: 1.07em;
+}
+.footer-link-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-link-column li {
+  margin-bottom: 0.45em;
+}
+.footer-link-column a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-link-column a:hover {
+  color: var(--footer-link-hover, #6cf);
+}
+@media (max-width: 700px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2.5rem;
   }
+  .footer-right {
+    flex-direction: column-reverse;
+    gap: 1.5rem;
+  }
+}
 </style>

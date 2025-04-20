@@ -1,5 +1,6 @@
 ---
 import Header from "@basics/Header.astro";
+import Footer from "@basics/Footer.astro";
 import "@styles/global.css";
 import "@styles/starwind.css";
 import "@styles/callouts.css";
@@ -26,6 +27,7 @@ const { title = "Go Lossless: Innovate and Collaborate", description } = Astro.p
   <body>
     <Header />
     <slot />
+    <Footer />
   </body>
 </html>
 

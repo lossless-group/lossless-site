@@ -1,0 +1,41 @@
+{
+  "company_name": "The Lossless Group",
+  "locations": [
+    {
+      "name": "Austin, TX",
+      "address": {
+        "street": "123 Main St",
+        "city": "City",
+        "state": "State",
+        "zip": "12345"
+      }
+    },
+    {
+      "name": "San Francisco, CA",
+      "address": {
+        "street": "123 Main St",
+        "city": "City",
+        "state": "State",
+        "zip": "12345"
+      }
+    },
+    {
+      "name": "Istanbul, Turkey",
+      "address": {
+        "street": "123 Main St",
+        "city": "City",
+        "state": "State",
+        "zip": "12345"
+      }
+    },
+    {
+      "name": "New York City",
+      "address": {
+        "street": "123 Main St",
+        "city": "New York City",
+        "state": "New York",
+        "zip": "12345"
+      }
+    }
+  ]
+}
