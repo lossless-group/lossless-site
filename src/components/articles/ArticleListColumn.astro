@@ -3,9 +3,16 @@
  * ArticleListColumn.astro
  * A structural component that renders a collection of items in a column layout.
  * Does not make assumptions about the content type.
+ * All mapping and conditional logic is handled in the Astro template (NOT in the script block),
+ * following Astro syntax rules and .windsurfrules requirements.
  */
 import CollectionEntryRow from '../basics/CollectionEntryRow.astro';
 
+/**
+ * Define the component props.
+ * 
+ * @interface Props
+ */
 interface Props {
   // Accept any array of items
   entries: Array<Record<string, any>>;
@@ -17,14 +24,13 @@ const { entries, EntryComponent } = Astro.props;
 ---
 
 <div class="article-list-column">
-  {entries.map(entry => (
+  {EntryComponent && entries.map(entry => (
     <CollectionEntryRow>
-      {EntryComponent ? (
-        <EntryComponent {...entry} />
-      ) : (
-        <slot name="entry" {entry} />
-      )}
+      <EntryComponent {...entry} />
     </CollectionEntryRow>
+  ))}
+  {!EntryComponent && entries.map(entry => (
+    <CollectionEntryRow />
   ))}
 </div>
 

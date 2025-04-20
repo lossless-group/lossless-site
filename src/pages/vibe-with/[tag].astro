@@ -17,6 +17,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import TagChip from '@components/tool-components/TagChip.astro';
+import ArticleListNewsPreview from '@components/articles/ArticleListNewsPreview.astro';
 import { slugify } from '@utils/slugify';
 
 // ================================================================================
@@ -52,6 +53,8 @@ interface CollectionEntry {
  type ResultItem = {
   slug: string;
   title: string;
+  lede: string;
+  banner_image: string;
   tags: string[];
   id: string;
   collection: string;
@@ -93,6 +96,8 @@ const results: ResultItem[] = [
   ...filteredPrompts.map(entry => ({
     slug: slugify(entry.id.split('/').pop()?.replace(/\.md$/, '') ?? ''),
     title: entry.data.title ?? '',
+    lede: String(entry.data.lede ?? ''),
+    banner_image: String(entry.data.banner_image ?? ''),
     tags: entry.data.tags ?? [],
     id: entry.id,
     collection: 'prompts',
@@ -100,6 +105,8 @@ const results: ResultItem[] = [
   ...filteredSpecs.map(entry => ({
     slug: slugify(entry.id.split('/').pop()?.replace(/\.md$/, '') ?? ''),
     title: entry.data.title ?? '',
+    lede: String(entry.data.lede ?? ''),
+    banner_image: String(entry.data.banner_image ?? ''),
     tags: entry.data.tags ?? [],
     id: entry.id,
     collection: 'specs',
@@ -122,20 +129,17 @@ const results: ResultItem[] = [
       <p>Try another tag or explore all items.</p>
     </div>
   ) : (
-    <ul class="tag-results-list">
-      {results.map(({ collection, slug, title, tags, id }) => (
-        <li class="tag-result-item">
-          <a
-            href={`/vibe-with/${collection}/${slug}`}
-            class="tag-result-link"
-            aria-label={`View ${collection.slice(0, -1)}: ${title}`}
-          >
-            <span class="collection-label">{collection === 'prompts' ? 'Prompt' : 'Spec'}:</span>
-            <span class="item-title">{title}</span>
-          </a>
-        </li>
+    <div class="news-preview-list-direct">
+      {/*
+        Directly render ArticleListNewsPreview for each result item, bypassing ArticleListColumn and CollectionEntryRow.
+        This is for debugging and visual isolation of rendering issues.
+        Each result item is spread as props to ArticleListNewsPreview.
+        If additional fields are needed, extend the mapping below.
+      */}
+      {results.map(result => (
+        <ArticleListNewsPreview {...result} data={result} />
       ))}
-    </ul>
+    </div>
   )}
 </Layout>
 
@@ -143,54 +147,6 @@ const results: ResultItem[] = [
   h1 {
     font-size: var(--fs-500);
     margin-bottom: 1.2em;
-  }
-  .tag-results-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75em;
-    max-width: 40em;
-  }
-  .tag-result-item {
-    background: var(--clr-lossless-primary-glass--lighter);
-    border-radius: 0.3em;
-    padding: 0.8em 1em;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    display: flex;
-    align-items: center;
-    gap: 0.8em;
-    transition: box-shadow 0.18s;
-  }
-  .tag-result-link {
-    text-decoration: none;
-    color: var(--clr-lossless-primary-darkest);
-    font-size: var(--fs-350);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.7em;
-    width: 100%;
-  }
-  .tag-result-link:hover {
-    color: var(--clr-lossless-accent);
-    text-decoration: underline;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
-  }
-  .collection-label {
-    font-size: var(--fs-250);
-    background: var(--clr-lossless-primary-dark);
-    color: var(--clr-white, #fff);
-    border-radius: 0.2em;
-    padding: 0.1em 0.6em;
-    margin-right: 0.5em;
-    letter-spacing: 0.03em;
-  }
-  .item-title {
-    font-size: var(--fs-350);
-    font-weight: 600;
-    letter-spacing: 0.01em;
   }
   .empty-message {
     margin-top: 2em;

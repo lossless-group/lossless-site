@@ -1,0 +1,127 @@
+---
+/**
+ * ArticleListNewsPreview.astro
+ * News article preview variant (image left, text right, no card border)
+ * - Mirrors PostCard.astro's robust prop destructuring and direct rendering pattern
+ * - Accepts EITHER a flat frontmatter object OR a collection entry with a `data` property
+ * - Handles missing image/lede gracefully
+ * - All logic is handled in frontmatter, not template
+ * - NO JSX syntax in template
+ */
+
+import { Fragment } from 'astro/jsx-runtime'; // required for slot fallback, but not for image/lede
+
+// Canonical prop passthrough pattern (see PostCard.astro)
+const { data, ...rest } = Astro.props;
+const props = data ? data : Astro.props;
+const { title, lede, banner_image, image_prompt, url, summary } = props;
+
+const resolvedTitle = title || '';
+const resolvedLede = lede || summary || '';
+const resolvedBannerImage = banner_image || '';
+const resolvedImagePrompt = image_prompt || resolvedTitle || 'Article image';
+const resolvedUrl = url || '#';
+const showLede = !!resolvedLede;
+const showImage = !!resolvedBannerImage;
+
+---
+<!--
+  ArticleListNewsPreview.astro
+  - Mirrors PostCard.astro's prop handling, but uses news-preview layout
+  - No string-based HTML injection
+  - All fields destructured from canonical props object
+  - No JSX in template
+-->
+
+<div class="news-preview-entry">
+  <a href={resolvedUrl} class="news-preview-link">
+    <div class="news-preview-img-wrap">
+      {showImage
+        ? <img src={resolvedBannerImage} alt={resolvedImagePrompt} class="news-preview-img" loading="lazy" />
+        : <div class="news-preview-img news-preview-img--fallback">No Image</div>
+      }
+    </div>
+    <div class="news-preview-content">
+      <h2 class="news-preview-title">{resolvedTitle}</h2>
+      {showLede && <p class="news-preview-lede">{resolvedLede}</p>}
+    </div>
+  </a>
+  <div class="news-preview-separator" role="presentation"></div>
+</div>
+
+<style>
+.news-preview-entry {
+  display: flex;
+  flex-direction: column;
+}
+.news-preview-link {
+  display: flex;
+  align-items: stretch;
+  text-decoration: none;
+  color: inherit;
+}
+.news-preview-img-wrap {
+  flex: 0 0 96px;
+  max-width: 96px;
+  min-width: 72px;
+  overflow: hidden;
+  background: #e3edf5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.news-preview-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+.news-preview-img--fallback {
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 0.9em;
+  background: #f5f5f5;
+}
+.news-preview-content {
+  flex: 1;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.news-preview-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+}
+.news-preview-lede {
+  font-size: 0.98rem;
+  color: #555;
+  margin: 0;
+}
+.news-preview-separator {
+  height: 1px;
+  background: linear-gradient(90deg, #e3edf5 0%, #f5f5f5 100%);
+  margin: 0.75rem 0;
+  padding: 0 2rem;
+  border: none;
+}
+@media (max-width: 600px) {
+  .news-preview-link {
+    flex-direction: row;
+  }
+  .news-preview-img-wrap {
+    max-width: 72px;
+    min-width: 56px;
+  }
+  .news-preview-content {
+    padding-left: 0.75rem;
+  }
+}
+</style>
