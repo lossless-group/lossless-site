@@ -16,8 +16,10 @@
  */
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
+import CollectionStructure from '@layouts/CollectionStructure--OneColumn--Scroll.astro';
 import TagChip from '@components/tool-components/TagChip.astro';
 import ArticleListNewsPreview from '@components/articles/ArticleListNewsPreview.astro';
+import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
 import { slugify } from '@utils/slugify';
 
 // ================================================================================
@@ -131,14 +133,10 @@ const results: ResultItem[] = [
   ) : (
     <div class="news-preview-list-direct">
       {/*
-        Directly render ArticleListNewsPreview for each result item, bypassing ArticleListColumn and CollectionEntryRow.
-        This is for debugging and visual isolation of rendering issues.
-        Each result item is spread as props to ArticleListNewsPreview.
-        If additional fields are needed, extend the mapping below.
+        Render ArticleListColumn for all results, passing ArticleListNewsPreview as EntryComponent.
+        This matches the toolkit tag page convention and ensures columnar, DRY rendering.
       */}
-      {results.map(result => (
-        <ArticleListNewsPreview {...result} data={result} />
-      ))}
+      <ArticleListColumn entries={results} EntryComponent={ArticleListNewsPreview} />
     </div>
   )}
 </Layout>
