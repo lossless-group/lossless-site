@@ -9,11 +9,12 @@
       "headshotOf": "/images/staton_headshot.jpeg",
       "socialLinks": {
         "twitter": "https://twitter.com/mpstaton",
-        "github": "https://github.com/mpstaton"
+        "github": "https://github.com/mpstaton",
+        "bluesky": "https://bsky.app/profile/mpstaton.bsky.social"
       },
       "metadata": {
         "createdAt": "2025-04-06T20:32:45-07:00",
-        "updatedAt": "2025-04-06T20:32:45-07:00"
+        "updatedAt": "2025-04-19T20:32:45-07:00"
       }
     },
     {

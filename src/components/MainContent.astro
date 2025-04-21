@@ -30,7 +30,6 @@ const TRADEMARK_CONFIG = {
 
 const toolEntries = await getCollection("tooling");
 const tools = toolEntries.map((entry: any) => entry.data as Tool);
-const featuresData = await getEntry("cards", "features");
 
 const tagFrequencies = tools.reduce(
   (tagCounts: Record<string, number>, tool: Tool) => {
@@ -73,6 +72,7 @@ const qaList = questionsAndAnswersData.page === "main"
         tagFrequencies={tagFrequencies}
         visibleTagRowLimit={4}
         maxWidth="96%"
+        tagRoute="toolkit"
       />
     </div>
     <div id="ribbon-context">

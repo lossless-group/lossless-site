@@ -4,37 +4,36 @@
     {
       "name": "Austin, TX",
       "address": {
-        "street": "123 Main St",
-        "city": "City",
-        "state": "State",
-        "zip": "12345"
+        "street": "1512 S Congress Ave 2nd floor",
+        "city": "Austin, TX",
+        "state": "TX",
+        "zip": "78704"
       }
     },
     {
       "name": "San Francisco, CA",
       "address": {
-        "street": "123 Main St",
-        "city": "City",
-        "state": "State",
-        "zip": "12345"
+        "street": "474 Bryant St",
+        "city": "San Francisco, CA",
+        "state": "CA",
+        "zip": "94107"
       }
     },
     {
       "name": "Istanbul, Turkey",
       "address": {
-        "street": "123 Main St",
-        "city": "City",
-        "state": "State",
-        "zip": "12345"
+        "street": "Bebek, Küçük Bebek Cd. No:74",
+        "city": "Bebek, Istanbul",
+        "state": "34342 Beşiktas"
       }
     },
     {
       "name": "New York City",
       "address": {
-        "street": "123 Main St",
+        "street": "521 E 5th St",
         "city": "New York City",
-        "state": "New York",
-        "zip": "12345"
+        "state": "NY",
+        "zip": "10009"
       }
     }
   ]

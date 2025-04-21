@@ -1,12 +1,12 @@
 [
   {
-    "label": "Notebook Interface",
-    "title": "Training wheels for the command line",
-    "details": "Our advanced notebook interface makes coding and documentation effortless. With real-time preview, syntax highlighting, and intuitive controls, you can focus on your ideas instead of formatting. Perfect for research, experimentation, and technical documentation.",
+    "label": "Master Data Fluidics.",
+    "title": "Data-Driven Development Simplified",
+    "details": "AI requires data not only to exist, but to be orderly, consistent, and fluid. Lossless techniques ensure your data is always ready for AI.",
     "imageSide": "right",
     "ctaText": "Learn More",
     "ctaUrl": "#",
-    "imageUrl": "https://i.imgur.com/ueZ058L.png"
+    "imageUrl": "/visuals/For/imageRep__North-Sea-of-Data.webp"
   },
   {
     "label": "Vibe Coding, Done Right",

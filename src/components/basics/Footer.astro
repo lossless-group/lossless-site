@@ -87,7 +87,8 @@ try {
               <div class="org-location">
                 <div class="org-location-name">{loc.name}</div>
                 <div class="org-address">
-                  {loc.address.street}, {loc.address.city}, {loc.address.state} {loc.address.zip}
+                  {loc.address.street}<br />
+                  {loc.address.city}, {loc.address.state}{loc.address.zip ? ` ${loc.address.zip}` : ''}
                 </div>
               </div>
             ))}

@@ -189,6 +189,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
         <div id="selected-tags-list" class="selected-tags-list">
           {selectedTags.length > 0 && selectedTags.map(tag => (
             <TagChip 
+              tagString={tag}
               tag={tag} 
               count={tagFrequencies[tag]} 
               includeCount={true} 
@@ -209,6 +210,7 @@ const initialSortedTags = getSortedTags(allTags, initialSortType, selectedTags);
         {initialSortedTags.length > 0 ? (
           initialSortedTags.map(tag => (
             <TagChip 
+              tagString={tag}
               tag={tag} 
               count={tagFrequencies[tag]} 
               includeCount={true} 

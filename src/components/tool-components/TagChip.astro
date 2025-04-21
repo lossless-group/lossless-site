@@ -11,10 +11,11 @@
  * - Accepts a `route` prop for dynamic routing (defaults to 'toolkit').
  * - Generates href as `/${route}/${tag}` unless `href` is explicitly provided.
  * - Logs a warning in development if `route` is missing or invalid.
+ * - Accepts a `tagString` prop (renamed from `tag`) to avoid boolean inference bugs.
  */
 
 interface Props {
-  tag: string;
+  tagString: string;
   count?: number;
   selected?: boolean;
   includeCount?: boolean;
@@ -24,16 +25,24 @@ interface Props {
   [key: string]: any; // Allow other HTML attributes such as aria-label, onClick, etc.
 }
 
-// Destructure props, providing defaults for count, includeCount, selected, and route
+// Destructure props, renaming tag to tagString to avoid boolean inference bugs
 const {
-  tag,
+  tagString,
   count = 0,
   includeCount = false,
   selected = false,
   title,
   href,
-  route = 'toolkit' // Default route for backward compatibility
+  route
 } = Astro.props;
+
+// Defensive: Warn if tagString is not a string
+if (typeof tagString !== 'string') {
+  console.warn('[TagChip] Received non-string tag:', tagString, 'Type:', typeof tagString);
+}
+
+// Only use route if it's a non-empty string, otherwise fallback to 'toolkit' for safety
+const routeToUse = typeof route === "string" && route.trim() !== "" ? route : "toolkit";
 
 // Helper function to convert train-case tags to normal case for UI display
 function trainCaseToNormalCase(tag: string): string {
@@ -47,7 +56,7 @@ function trainCaseToNormalCase(tag: string): string {
     .join(' ');
 }
 
-const normalCase = trainCaseToNormalCase(tag);
+const normalCase = trainCaseToNormalCase(tagString);
 // Only use the explicit 'selected' prop, not the legacy 'isSelected' prop
 const isTagSelected = selected;
 
@@ -56,12 +65,11 @@ const isTagSelected = selected;
 // If route is missing or falsy, fallback to 'toolkit' and log a warning in development.
 let computedHref = href;
 if (!href) {
-  let routeToUse = route || 'toolkit';
-  if (!route && import.meta.env.DEV) {
+  if (!routeToUse && import.meta.env.DEV) {
     // Log a warning in development mode if route is not provided
     console.warn('[TagChip.astro] No `route` prop provided. Falling back to "/toolkit". See Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md for details.');
   }
-  computedHref = `/${routeToUse}/${encodeURIComponent(tag)}`;
+  computedHref = `/${routeToUse}/${encodeURIComponent(tagString)}`;
 }
 
 ---
@@ -73,13 +81,14 @@ if (!href) {
   - Displays tag in normal case and count if provided.
   - Applies selected styling if applicable.
   - Accepts additional HTML attributes via ...rest.
+  - Uses tagString for display and href generation.
 -->
 <a 
   href={computedHref} 
   class={`tool-tag${isTagSelected ? ' selected' : ''}`} 
   title={title || `Click to filter by ${normalCase}`}
   aria-label={`Filter by ${normalCase}${isTagSelected ? ' (currently selected)' : ''}`}
-  data-tag={tag}
+  data-tag={tagString}
 >
   <p>{normalCase}</p>
   {count !== undefined && count > 0 ? <span class="count">({count})</span> : null}

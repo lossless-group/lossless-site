@@ -18,6 +18,7 @@ const { tags, tagCounts = {}, includeCount = false } = Astro.props;
     <div class="tags-wrapper">
       {tags.map((tag) => (
         <TagChip 
+          tagString={tag}
           tag={tag} 
           count={tagCounts[tag]} 
           includeCount={includeCount}
