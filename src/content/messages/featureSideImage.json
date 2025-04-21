@@ -1,17 +1,17 @@
 [
   {
     "label": "Master Data Fluidics.",
-    "title": "Data-Driven Development Simplified",
-    "details": "AI requires data not only to exist, but to be orderly, consistent, and fluid. Lossless techniques ensure your data is always ready for AI.",
+    "title": "Prepare Data and Content for AI",
+    "details": "AI requires data not only to exist, but to be orderly, consistent, and fluid. Lossless techniques provide guidance to prepare data and content, as well as keep it ready for AI.",
     "imageSide": "right",
     "ctaText": "Learn More",
     "ctaUrl": "#",
-    "imageUrl": "/visuals/For/imageRep__North-Sea-of-Data.webp"
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp"
   },
   {
     "label": "Vibe Coding, Done Right",
-    "title": "A prompt library for AI-powered coding, battle tested",
-    "details": "Build on our many months of prompt engineering for Vibe Coding. Our prompts have many iteration cycles and work together in concert to help you generate better code faster, and get to working products with less frustration.",
+    "title": "Prompts, Specifications, and Reminders in a library for AI-powered coding, battle tested",
+    "details": "Build on our many months of prompt engineering for Vibe Coding. Our reminders, prompts, and specifications have many iteration cycles and work together in concert to help you generate better code faster, and get to working products with less frustration.",
     "imageSide": "left",
     "ctaText": "Explore Library",
     "ctaUrl": "/thread/prompts",
@@ -24,6 +24,6 @@
     "imageSide": "right",
     "ctaText": "Explore Library",
     "ctaUrl": "/thread/specs",
-    "imageUrl": "https://via.placeholder.com/1200x800/6b3a50/ffffff.png?text=AI+Assistant"
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
   }
 ]

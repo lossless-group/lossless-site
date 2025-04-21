@@ -17,7 +17,16 @@ pnpm dev
 
 ## Why Astro
 
+Astro is the most beloved "Static Site Generator" with considerable support for Markdown, MDX, and Markdown+YAML frontmatter.
 
+Astro also sports an "Islands Architecture" that enables different functionality to be written in different languages and frameworks, as well as ways to "pass state" between them.
+
+## Image Handling:
+While Astro is supposed to handle images extremely well, I find that sometimes there are just "dud rendering" issues that are not immediately apparent. As a result, I have a preference for using image APIs, I'm using [ImageKit](https://imagekit.io) for this.
+
+## Markdown Handling:
+
+There are any number of libraries and plugins that allow Astro to "extend" Markdown and support various kinds of Markdown syntax, rendered as either HMTL or custom components.  Honestly, we're still figuring all this out, and it's been quite the rabbit hole of yak shaving.
 
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
 [![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
