@@ -4,8 +4,8 @@
     {
       "id": "mpstaton",
       "name": "Michael Staton",
-      "role": "Creator",
-      "bio": "Creator of Lossless Group",
+      "role": "Music Editor",
+      "bio": "Coordinator of The Lossless Group",
       "headshotOf": "/images/staton_headshot.jpeg",
       "socialLinks": {
         "twitter": "https://twitter.com/mpstaton",
@@ -29,6 +29,20 @@
       "metadata": {
         "createdAt": "2025-04-06T20:32:45-07:00",
         "updatedAt": "2025-04-06T20:32:45-07:00"
+      }
+    },
+    {
+      "id": "idasobolev",
+      "name": "Ida Soboleva",
+      "role": "Creator",
+      "bio": "Developer @ Lossless Group",
+      "headshotOf": "/images/headshot__Ida-Soboleva.jpeg",
+      "socialLinks": {
+        "github": "https://github.com/dalyaka"
+      },
+      "metadata": {
+        "createdAt": "2025-03-12T20:32:45-07:00",
+        "updatedAt": "2025-04-20T20:32:45-07:00"
       }
     }
   ]

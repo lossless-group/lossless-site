@@ -10,6 +10,7 @@
 
 const { title, description } = Astro.props;
 
+import type { HTMLAttributes } from "astro/types";
 import { getCollection } from "astro:content";
 import path from "path";
 import ChangelogEntry from "@components/changelog/ChangelogEntry.astro";
@@ -20,6 +21,15 @@ import Tabs from "@components/starwind/tabs/Tabs.astro";
 import TabsList from "@components/starwind/tabs/TabsList.astro";
 import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
 import TabsContent from "@components/starwind/tabs/TabsContent.astro";
+
+
+interface Props extends HTMLAttributes<"div"> {
+  title?: string;
+  description?: string;
+  defaultValue?: string;
+  syncKey?: string;
+}
+
 
 // Get both content and code changes
 const contentChanges = await getCollection("changelog--content");
@@ -115,35 +125,20 @@ const normalizeAuthorData = (entry) => {
 
   /* Style the tabs with our brand colors */
   :global(.changelog-tabs-list) {
-    background: var(--clr-lossless-primary-glass);
+    background: var(--clr-lossless-primary-dark);
     border: 1px solid var(--clr-lossless-primary-light);
     border-radius: 0.5rem;
   }
 
   :global(.changelog-tab) {
-    color: var(--clr-lossless-primary-dark);
+    color: var(--clr-body);
     font-family: var(--ff-legible);
     font-weight: var(--fw-semi-bold);
     transition: all 0.2s ease;
   }
 
-  :global(.changelog-tab[data-state="active"]) {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-light),
-      transparent 40%
-    );
-    color: var(--clr-lossless-primary-dark);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
   :global(.changelog-tab:hover) {
     color: var(--clr-lossless-accent--brightest);
-  }
-
-  :global(.changelog-tab[data-state="active"]:hover) {
-    background: var(--clr-lossless-primary-light);
-    color: var(--white--pure);
   }
 
   :global(.changelog-tab-content) {
@@ -156,5 +151,18 @@ const normalizeAuthorData = (entry) => {
     max-width: 1200px;
     margin: 0 auto ;
     padding: 1rem;
+  }
+
+  /*
+    Increase specificity to override Starwind's data-[state=active]:* classes.
+    - Uses double class selector for higher specificity.
+    - Applies !important for guaranteed override if needed.
+    - Uses brand accent color for selected tab background.
+    - Uses a softer text color for accessibility and visual comfort.
+  */
+  :global(.changelog-tabs-list .changelog-tab[data-state="active"]) {
+    background: var(--clr-lossless-attn-action) !important;
+    color: var(--clr-lossless-primary-light) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 </style>

@@ -19,6 +19,9 @@
       }
     ],
     "paths": {
+      "@assets/*": [
+        "./src/assets/*"
+      ],
       "@basics/*": [
         "./src/components/basics/*"
       ],
