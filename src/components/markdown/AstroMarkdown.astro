@@ -1,7 +1,9 @@
 ---
 import {dirname} from 'path'
 import ArticleCallout from './callouts/ArticleCallout.astro';
-import ArticleCitations from './citations/ArticleCitations.astro';
+import ArticleCitationsBlock from './citations/ArticleCitations.astro';
+import ArticleCitation from './citations/ArticleCitation.astro';
+
 
 interface Props {
     node: {
@@ -32,8 +34,6 @@ const handled_types = [
     "paragraph",
     "text",
     "heading",
-    "citations",
-    "citation",
     "image",
     "list",
     "listItem",
@@ -45,6 +45,8 @@ const handled_types = [
     "strong",
     "emphasis",
     "break",
+    "citation",
+    "citations",
     "citationReference",
     "thematicBreak" // Add support for horizontal rules
 ]
@@ -104,11 +106,28 @@ const title = data.id ?
   </em>
 }
 
-{(node.type === 'citationReference') &&
+<!-- === citationReference === -->
+{node.type === 'citationReference' && (
   <sup class="cite-ref">
-    {node.children.map(child => <Astro.self node={child} data={data} />)}
+    <a
+      href={node.data?.hProperties?.href}
+      id={node.data?.hProperties?.id}
+      class="citation-link"
+    >
+      [{node.children?.map(child => <Astro.self node={child} data={data} />)}]
+    </a>
   </sup>
-}
+)}
+
+<!-- === single citation node === -->
+{node.type === 'citation' && (
+  <ArticleCitation node={node} />
+)}
+
+<!-- === citations block === -->
+{node.type === 'citations' && (
+  <ArticleCitationsBlock node={node} />
+)}
 
 {(node.type === "image") &&
     <img src={node.url} />
@@ -218,14 +237,6 @@ const title = data.id ?
   <code class="inline-code">{node.value}</code>
 }
 
-{(node.type === "citations") && 
-    <ArticleCitations node={node} />
-}
-
-{(node.type === "citation") && 
-    <div class="citation">{node.value}</div>
-}
-
 {(node.type === "paragraph") &&
     <div class="paragraph">
         {node.children.map((child: any) => (
@@ -242,8 +253,11 @@ const title = data.id ?
     <span>{node.value}</span>
 }
 
-{other_type && 
-    <div class={`unhandled-${node.type}`}>
-        {JSON.stringify(node)}
-    </div>
-}
+<!-- === Default handling for everything else === -->
+{other_type && (
+  <div class={`unhandled-${node.type}`}>
+    ⚠️ Unhandled node type: <code>{node.type}</code>
+    <pre>{JSON.stringify(node, null, 2)}</pre>
+  </div>
+)}
+

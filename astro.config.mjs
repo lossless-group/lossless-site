@@ -22,12 +22,13 @@ export default defineConfig({
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
         '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        '@tabler/icons': fileURLToPath(new URL('./node_modules/@tabler/icons', import.meta.url)),
+        '@tabler/icons': fileURLToPath(new URL('./src/assets', import.meta.url)),
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
     }
   },
-  experimental: {
-    svg: true,
-  }
+  //this has to be removed to build without failing in pnpm 10.9.0
+  // experimental: {
+  //   svg: true,
+  // }
 });
