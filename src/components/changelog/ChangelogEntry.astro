@@ -2,7 +2,7 @@
 /**
  * ChangelogEntry.astro
  * Renders a single changelog entry using the base CollectionEntryRow component
- * 
+ *
  * @component
  * @example
  * ```astro
@@ -19,6 +19,7 @@
 
 import { formatDate } from "@utils/formatDate";
 import AuthorHandle from "@components/basics/AuthorHandle.astro";
+import { marked } from "marked";
 
 // Props are kept flexible with minimal requirements
 const {
@@ -29,11 +30,13 @@ const {
   contextSetter,
   slug,
   class: className,
-  authors = []
+  authors = [],
+  body,
+  id,
 } = Astro.props;
 
 // Format the date consistently if it exists
-const formattedDate = date ? formatDate(new Date(date)) : '';
+const formattedDate = date ? formatDate(new Date(date)) : "";
 
 // Normalize categories to always be an array
 const normalizeCategories = () => {
@@ -51,54 +54,82 @@ const categoryList = normalizeCategories();
 
 // Only render AuthorHandle if we have authors
 const hasAuthors = Array.isArray(authors) && authors.length > 0;
+
+//Preview the body content
+const tags = marked.lexer(body);
+const preview = tags?.slice(0, 6);
+const rest = tags?.slice(6, tags?.length);
 ---
 
 <div class:list={["changelog-entry", className]}>
-  <div class="changelog-entry__container">
-    <div class="changelog-entry__header">
-      <div class="changelog-entry__meta">
-        {formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}
-        {categoryList.map(cat => (
+  <div class="changelog-entry__meta">
+    {
+      hasAuthors && (
+        <div class="changelog-entry__author">
+          <AuthorHandle authors={authors} showName={true} showRole={false} />
+        </div>
+      )
+    }
+
+    <div class="changelog-entry__tags">
+      {
+        categoryList.map((cat) => (
           <span class="changelog-entry__category">{cat}</span>
-        ))}
-      </div>
-      {contextSetter && <h5 class="changelog-entry__emphasis">{contextSetter}</h5>}
-      {title && (
-        <h5 class="changelog-entry__title">
-          <a href={`/log/${slug || ''}`} class="changelog-entry__link">
-            {title}
-          </a>
-        </h5>
-      )}
+        ))
+      }
     </div>
-    
-    <div class="changelog-entry__content">
-      <slot />
+    <div>
+      {formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}
     </div>
   </div>
-  
-  <div class="changelog-entry__footer">
-    {/* Author handle positioned at bottom left */}
-    {hasAuthors && (
-      <div class="changelog-entry__author">
-        <AuthorHandle authors={authors} showName={true} showRole={false} />
+  <div class="changelog-entry__container">
+    <div class="changelog-entry__header">
+      {
+        contextSetter && (
+          <h5 class="changelog-entry__emphasis">{contextSetter}</h5>
+        )
+      }
+      {
+        title && (
+          <h5 class="changelog-entry__title">
+            <a
+              href={`/log/${slug || ""}`}
+              class="changelog-entry__link"
+              onclick=""
+            >
+              {title}
+            </a>
+          </h5>
+        )
+      }
+    </div>
+
+    <div class="changelog-entry__body">
+      {/* Render the body content */}
+      <div class="changelog-entry__content" set:html={marked.parser(preview)} />
+      <div
+        class="changelog-entry__content hidden"
+        set:html={marked.parser(rest)}
+        id={`content-${id}`}
+      />
+      <div class="changelog-entry__button" id={`toggle-${id}`} ">
+        Read Full Entry →
       </div>
-    )}
-    
-    <a href={`/log/${slug || ''}`} class="changelog-entry__button">
-      Read Full Entry →
-    </a>
+    </div>
   </div>
 </div>
 
 <style>
   .changelog-entry {
     padding: 1rem;
-    border-radius: 0.5rem;
     position: relative;
     display: flex;
-    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    justify-content: center;
     min-height: 200px; /* Ensure minimum height for entries */
+    max-width: 1200px;
+    margin: 0 auto 3rem;
   }
 
   .changelog-entry__container {
@@ -110,20 +141,41 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    margin-top: 0.3rem;
   }
 
   /* Meta Information */
   .changelog-entry__meta {
+    font-family: var(--ff-legible);
+    margin-bottom: 0.5rem;
+    position: sticky;
+    top: 6rem;
+    width: 12rem;
+  }
+
+  @media (max-width: 800px) {
+    .changelog-entry {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+    .changelog-entry__meta {
+      position: relative;
+      top: auto;
+    }
+  }
+
+  .changelog-entry__tags {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    font-family: var(--ff-legible);
-    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   time {
-    color: var(--clr-lossless-accent--brightest);
+    color: var(--white--pure);
     font-weight: var(--fw-semi-bold);
     font-size: var(--fs-200);
   }
@@ -140,6 +192,7 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
   .changelog-entry__author {
     display: flex;
     align-items: center;
+    margin-bottom: 1rem;
   }
 
   /* Style the author handle components */
@@ -167,7 +220,7 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
   }
 
   .changelog-entry__title {
-    font-size: var(--fs-400);
+    font-size: var(--fs-600);
     font-family: var(--ff-legible);
     margin: 0;
     line-height: 1.2;
@@ -177,13 +230,14 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
     color: inherit;
     text-decoration: none;
     transition: color 0.2s ease;
+    color: var(--clr-heading);
   }
 
   .changelog-entry__link:hover {
-    color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-attn-action);
   }
 
-  .changelog-entry__content {
+  .changelog-entry__body {
     margin-top: 1rem;
     color: var(--clr-body);
     flex: 1;
@@ -201,18 +255,55 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
 
   .changelog-entry__button {
     display: inline-block;
-    padding: 0.5rem 1rem;
-    background: var(--clr-lossless-accent--brightest);
-    color: var(--white--pure);
-    text-decoration: none;
+    color: var(--clr-heading);
+    text-decoration: underline;
     border-radius: 0.25rem;
     font-family: var(--ff-legible);
     font-size: var(--fs-300);
     font-weight: var(--fw-semi-bold);
+    cursor: pointer;
     transition: background-color 0.2s ease;
   }
 
-  .changelog-entry__button:hover {
-    background: var(--clr-lossless-accent--bright);
+  .changelog-entry__content :global(h1) {
+    font-size: var(--fs-500);
+    margin: 2rem 0 1rem;
+  }
+
+  .changelog-entry__content :global(h3) {
+    font-size: var(--fs-300);
+    margin: 2rem 0 1rem;
+  }
+
+  .changelog-entry__content :global(h2) {
+    font-size: var(--fs-400);
+    margin: 2rem 0 1rem;
+  }
+
+  .changelog-entry__content :global(p) {
+    margin: 1rem 0;
+  }
+
+  .changelog-entry__content :global(ul) {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .changelog-entry__content :global(li) {
+    margin: 0.5rem 0;
+  }
+
+  .hidden {
+    display: none;
   }
 </style>
+
+<script type="module" is:inline define:vars={{ id }}>
+  const toggleBtn = document.getElementById(`toggle-${id}`);
+  const content = document.getElementById(`content-${id}`);
+
+  toggleBtn.addEventListener("click", () => {
+    content.classList.remove("hidden");
+    toggleBtn.classList.add("hidden");
+  });
+</script>

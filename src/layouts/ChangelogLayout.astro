@@ -1,19 +1,18 @@
 ---
 /**
  * Changelog Layout
- * 
+ *
  * Displays a list of changelog entries in chronological order.
  * Shows both code and content changes in a two-column layout.
- * 
+ *
  * @component
  */
 
 const { title, description } = Astro.props;
 
 import { getCollection } from "astro:content";
-import path from 'path';
-import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
-import ChangelogEntry from '@components/changelog/ChangelogEntry.astro';
+import path from "path";
+import ChangelogEntry from "@components/changelog/ChangelogEntry.astro";
 import Layout from "@layouts/Layout.astro";
 
 // Import Starwind Tabs components
@@ -23,28 +22,28 @@ import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
 import TabsContent from "@components/starwind/tabs/TabsContent.astro";
 
 // Get both content and code changes
-const contentChanges = await getCollection('changelog--content');
-const codeChanges = await getCollection('changelog--code');
+const contentChanges = await getCollection("changelog--content");
+const codeChanges = await getCollection("changelog--code");
 
 // Sort changes by date in descending order, and for same date, by index in descending order
 const sortByDateAndIndex = (a, b) => {
   // Handle both date and date_created fields
   const dateA = new Date(a.data.date || a.data.date_created);
   const dateB = new Date(b.data.date || b.data.date_created);
-  
+
   // If dates are the same, sort by index (extracted from filename)
   if (dateA.getTime() === dateB.getTime()) {
     // Extract index from the filename in the ID (e.g., "changelog--code/2025-04-06_03.md" -> "03")
     const filenameA = path.basename(a.id);
     const filenameB = path.basename(b.id);
-    
-    const indexA = filenameA.split('_').pop()?.split('.')[0] || '0';
-    const indexB = filenameB.split('_').pop()?.split('.')[0] || '0';
-    
+
+    const indexA = filenameA.split("_").pop()?.split(".")[0] || "0";
+    const indexB = filenameB.split("_").pop()?.split(".")[0] || "0";
+
     // Convert to numbers and compare in descending order (higher index first)
     return parseInt(indexB, 10) - parseInt(indexA, 10);
   }
-  
+
   // Otherwise, sort by date in descending order
   return dateB.getTime() - dateA.getTime();
 };
@@ -56,51 +55,62 @@ const sortedCodeChanges = codeChanges.sort(sortByDateAndIndex);
 const normalizeAuthorData = (entry) => {
   // Handle both author (string) and authors (array) fields
   let authorData = [];
-  
+
   if (entry.data.authors) {
     // If authors is already an array, use it
-    authorData = Array.isArray(entry.data.authors) ? entry.data.authors : [entry.data.authors];
+    authorData = Array.isArray(entry.data.authors)
+      ? entry.data.authors
+      : [entry.data.authors];
   } else if (entry.data.author) {
     // If only author is present (string), convert to array
     authorData = [entry.data.author];
   }
-  
+
   return {
     ...entry.data,
-    slug: path.basename(entry.id, '.md'),
-    authors: authorData
+    id: entry.id,
+    body: entry.body,
+    slug: path.basename(entry.id, ".md"),
+    authors: authorData,
   };
 };
-
 ---
+
 <Layout title={title} description={description}>
-  <main>
-    <div class="changelog-header">
-      <Tabs defaultValue="content" class="changelog-tabs">
+  <div class="changelog-content">
+    <Tabs defaultValue="content" class="changelog-tabs">
+      <div class="changelog-tabs_container">
         <TabsList class="changelog-tabs-list">
-          <TabsTrigger value="content" class="changelog-tab">Content Changes</TabsTrigger>
-          <TabsTrigger value="code" class="changelog-tab">Code Changes</TabsTrigger>
+          <TabsTrigger value="content" class="changelog-tab"
+            >Content Changes</TabsTrigger
+          >
+          <TabsTrigger value="code" class="changelog-tab"
+            >Code Changes</TabsTrigger
+          >
         </TabsList>
-        <TabsContent value="content" class="changelog-tab-content">
-          <ArticleListColumn
-            entries={sortedContentChanges.map(entry => normalizeAuthorData(entry))}
-            EntryComponent={ChangelogEntry}
-          />
-        </TabsContent>
-        <TabsContent value="code" class="changelog-tab-content">
-          <ArticleListColumn
-            entries={sortedCodeChanges.map(entry => normalizeAuthorData(entry))}
-            EntryComponent={ChangelogEntry}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
-  </main>
+      </div>
+      <TabsContent value="content" class="changelog-tab-content">
+        {
+          sortedContentChanges
+            .map((entry) => normalizeAuthorData(entry))
+            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} />)
+        }
+      </TabsContent>
+      <TabsContent value="code" class="changelog-tab-content">
+        {
+          sortedCodeChanges
+            .map((entry) => normalizeAuthorData(entry))
+            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} />)
+        }
+      </TabsContent>
+    </Tabs>
+  </div>
 </Layout>
 
 <style>
-  .changelog-header {
+  .changelog-content {
     margin-bottom: 2rem;
+    padding-top: 2rem;
   }
 
   /* Style the tabs with our brand colors */
@@ -118,7 +128,11 @@ const normalizeAuthorData = (entry) => {
   }
 
   :global(.changelog-tab[data-state="active"]) {
-    background: color-mix(in oklab, var(--clr-lossless-primary-light), transparent 40%);
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-light),
+      transparent 40%
+    );
     color: var(--clr-lossless-primary-dark);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
@@ -137,10 +151,10 @@ const normalizeAuthorData = (entry) => {
   }
 
   /* Container styles */
-  main {
+  .changelog-tabs_container {
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0 auto ;
     padding: 1rem;
   }
 </style>

@@ -11,7 +11,8 @@ interface Props {
   description?: string;
 }
 
-const { title = "Go Lossless: Innovate and Collaborate", description } = Astro.props;
+const { title = "Go Lossless: Innovate and Collaborate", description } =
+  Astro.props;
 ---
 
 <!doctype html>
@@ -26,14 +27,20 @@ const { title = "Go Lossless: Innovate and Collaborate", description } = Astro.p
   </head>
   <body>
     <Header />
-    <slot />
+    <main>
+      <slot />
+    </main>
     <Footer />
   </body>
 </html>
 
 <style>
-  body {
+  body, html {
     background-color: var(--clr-primary-bg);
+  }
+
+  main {
+    margin-top: 4.5rem;
   }
   h1 {
     font-family: "Poppins", sans-serif;

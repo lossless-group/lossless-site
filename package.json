@@ -23,6 +23,7 @@
     "gray-matter": "^4.0.3",
     "hast-util-to-html": "^9.0.5",
     "imagekit": "^6.0.0",
+    "marked": "^15.0.9",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-to-hast": "^13.2.0",
     "mdast-util-to-markdown": "^2.1.2",
@@ -63,5 +64,6 @@
       "esbuild",
       "sharp"
     ]
-  }
+  },
+  "packageManager": "pnpm@9.11.0+sha256.1c0e33f70e5df9eede84a357bdfa0b1f9dba6e58194628d48a1055756f553754"
 }
