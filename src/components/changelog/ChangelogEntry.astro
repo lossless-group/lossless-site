@@ -66,7 +66,29 @@ const rest = tags?.slice(6, tags?.length);
     {
       hasAuthors && (
         <div class="changelog-entry__author">
-          <AuthorHandle authors={authors} showName={true} showRole={false} />
+          <!--
+           * AuthorHandle is called here to render the author information for the changelog entry.
+           *
+           * Props passed:
+           * - authors: authors (from changelog entry data)
+           * - showName: true (display author name)
+           * - showRole: false (do not display author role)
+           * - nameClass: "author-name--changelog" (for larger, lighter, stronger name)
+           * - color: "" (not used here)
+           *
+           * NOTE: Do NOT include the base class "author-name" in nameClass; it is always applied by AuthorHandle.
+           * All font size and style for changelog is handled by .author-name--changelog.
+           *
+           * Other places AuthorHandle is called:
+           * - [List all other places as you add them]
+           -->
+          <AuthorHandle 
+            authors={authors} 
+            showName={true} 
+            showRole={false}
+            nameClass="author-name--changelog" 
+            color="" 
+          />
         </div>
       )
     }
@@ -112,9 +134,7 @@ const rest = tags?.slice(6, tags?.length);
         set:html={marked.parser(rest)}
         id={`content-${id}`}
       />
-      <div class="changelog-entry__button" id={`toggle-${id}`} ">
-        Read Full Entry →
-      </div>
+      <div class="changelog-entry__button" id={`toggle-${id}`}>Read Full Entry →</div>
     </div>
   </div>
 </div>
@@ -164,6 +184,17 @@ const rest = tags?.slice(6, tags?.length);
       top: auto;
     }
   }
+
+  .author-name {
+    color: var(--clr-lossless-primary-light);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-200);
+  }
+
+  /*
+   * Custom style for changelog author name variant is now in site/src/styles/avatars.css for global availability.
+   * Remove this local/global style block to prevent confusion and ensure DRYness.
+   */
 
   .changelog-entry__tags {
     display: flex;

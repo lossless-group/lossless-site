@@ -13,6 +13,12 @@
  * - authors: string | string[] - The author(s) of the content
  * - size: "sm" | "md" | "lg" - Optional size of the avatar (default: "md")
  * - variant: "default" | "primary" | "secondary" | etc. - Optional variant of the avatar (default: "default")
+ * - showName: boolean - Optional. Show author name (default: true)
+ * - showRole: boolean - Optional. Show author role (default: true)
+ * - nameClass: string - Optional. Extra CSS classes for the author name span (default: "author-name")
+ * - avatarClass: string - Optional. Custom class for avatar container (default: "avatar-bg-attn avatar-base")
+ * - sizeClass: string - Optional. Extra size class for the author name span. Example: "text-lg"
+ * - color: string - Optional. Color class for the author name span. Example: "text-green-600"
  */
 
 // Import the Starwind Avatar components
@@ -48,6 +54,15 @@ interface Props {
   variant?: "default" | "primary" | "secondary" | "info" | "success" | "warning" | "error";
   showName?: boolean;
   showRole?: boolean;
+  /**
+   * nameClass: Optional. Extra CSS classes for the author name span. Example: "text-primary font-bold"
+   * sizeClass: Optional. Extra size class for the author name span. Example: "text-lg"
+   * color: Optional. Color class for the author name span. Example: "text-green-600"
+   */
+  nameClass?: string;
+  avatarClass?: string;
+  sizeClass?: string;
+  color?: string;
 }
 
 // Get the authors data
@@ -61,7 +76,11 @@ const {
   size = "md", 
   variant = "default",
   showName = true,
-  showRole = true
+  showRole = true,
+  nameClass = "author-name",
+  avatarClass = "avatar-bg-attn avatar-base",
+  sizeClass = "",
+  color = ""
 } = Astro.props;
 
 const authorsList = Array.isArray(authorsProp) 
@@ -116,8 +135,13 @@ const matchedAuthors = authorsList
 <div class="author-handle-container">
   {matchedAuthors.map((author: Author) => (
     <div class="author-handle">
-      <div class="author-avatar">
-        <Avatar size={size} variant={variant}>
+      <div class="author-avatar-container">
+        {/**
+         * Avatar container for author image or fallback.
+         * Passes avatarClass directly to Avatar for border/size control.
+         * Default: avatar-bg-attn avatar-base (see avatars.css)
+         */}
+        <Avatar size={size} variant={variant} class={avatarClass}>
           {author.headshotOf ? (
             <AvatarImage src={author.headshotOf} alt={`${author.name}'s headshot`} />
           ) : null}
@@ -132,7 +156,7 @@ const matchedAuthors = authorsList
       
       {(showName || showRole) && (
         <div class="author-info" style="color: var(--clr-lossless-primary-light);">
-          {showName && <div class="author-name">{author.name}</div>}
+          {showName && <div class={`${nameClass} ${sizeClass} ${color}`.trim()}>{author.name}</div>}
           {showRole && <div class="author-role">{author.role}</div>}
         </div>
       )}
@@ -167,4 +191,10 @@ const matchedAuthors = authorsList
     font-size: var(--fs-200);
     opacity: 0.8;
   }
+
+  /*
+   * .author-name--changelog style REMOVED per project directive:
+   * All custom styles for author name variants should be defined in the parent component (using :global or global CSS),
+   * and passed via the nameClass prop. AuthorHandle.astro should NOT define these variant styles directly.
+   */
 </style>

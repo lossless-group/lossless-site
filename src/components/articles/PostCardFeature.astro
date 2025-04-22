@@ -48,7 +48,24 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
         <div class="post-card-feature__meta-row">
           {hasAuthors && (
             <span class="post-card-feature__author">
-              <AuthorHandle authors={authors} showName={true} showRole={false} />
+              {/**
+               * AuthorHandle is called here to render the author information for the feature article card.
+               * Props passed:
+               * - authors: authors (from article data)
+               * - showName: true (display author name)
+               * - showRole: false (do not display author role)
+               * - nameClass: "author-name--article-card" (for article card-specific styling)
+               * - avatarClass: "avatar-bg-attn avatar-base" (for avatar circle border and size)
+               *
+               * NOTE: Do NOT include the base class "author-name" in nameClass; it is always applied by AuthorHandle.
+               * All font size and style for article cards is handled by .author-name--article-card.
+               * Avatar border and size are handled by avatar-bg-attn/avatar-base (see avatars.css)
+               *
+               * Other places AuthorHandle is called:
+               * - site/src/components/changelog/ChangelogEntry.astro (with nameClass="author-name--changelog")
+               * - site/src/components/articles/PostCard.astro (with nameClass="author-name--article-card")
+               */}
+              <AuthorHandle authors={authors} showName={true} showRole={false} nameClass="author-name--article-card" avatarClass="avatar-bg-attn avatar-lg" />
             </span>
           )}
           <span class="post-card-feature__date">{formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}</span>
