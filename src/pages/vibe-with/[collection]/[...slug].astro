@@ -8,12 +8,12 @@
  * Follows comprehensive, parallel commenting rules as outlined in:
  *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
  *
- * - Fetches content from BOTH the 'prompts' and 'specs' collections (see content.config.ts for exact keys).
+ * - Fetches content from 'prompts', 'specs', and 'reminders' collections (see content.config.ts for exact keys).
  * - Generates static paths for all entries, supporting dynamic tag navigation.
  * - Renders content using Layout, OneArticle, and OneArticleOnPage components.
  * - All logic is thoroughly commented and DRY.
  */
-import { getCollection } from 'astro:content';
+ import { getCollection, getEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
@@ -24,7 +24,7 @@ export const prerender = true;
 /**
  * getStaticPaths — Generates all static paths for the /vibe-with/[collection]/[slug] dynamic route.
  *
- * - Fetches all entries from the 'prompts' and 'specs' collections.
+ * - Fetches all entries from the 'prompts', 'specs', and 'reminders' collections.
  * - For each entry, generates a path with collection and slug params.
  * - Ensures each entry has a slug and title (generates if missing).
  * - Returns array of { params, props } objects for Astro static generation.
@@ -39,84 +39,256 @@ export async function getStaticPaths() {
       .join(' ');
   }
 
-  // Fetch all entries from the 'prompts' and 'specs' collections
+  // Debug helper to see what's actually in the entry objects
+  function debugEntry(entry: any, label: string) {
+    console.log(`DEBUG ${label}:`, {
+      id: entry.id,
+      dataKeys: Object.keys(entry.data || {}),
+      hasTitle: entry.data?.title ? true : false,
+      hasSlug: entry.data?.slug ? true : false,
+      hasTags: Array.isArray(entry.data?.tags),
+      rawData: entry.data
+    });
+  }
+
+  // Fetch all entries from the 'prompts', 'specs', and 'reminders' collections
   const promptsEntries = await getCollection('prompts');
   const specsEntries = await getCollection('specs');
+  const remindersEntries = await getCollection('reminders');
+
+  // Debug first entry from each collection
+  if (promptsEntries.length > 0) debugEntry(promptsEntries[0], 'First prompts entry');
+  if (specsEntries.length > 0) debugEntry(specsEntries[0], 'First specs entry');
+  if (remindersEntries.length > 0) debugEntry(remindersEntries[0], 'First reminders entry');
+
+  // Define the expected shape of entry.data with required properties
+  interface EntryData {
+    title: string;
+    slug: string;
+    tags: any[];
+    [key: string]: any;
+  };
 
   // Map each prompts entry to a static path object
   const promptsPaths = promptsEntries.map(entry => {
+    // Extract just the filename without path and extension
     const filename = entry.id.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    // Dynamically generate slug and title if not present in frontmatter
-    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-    if (!entry.data.slug) entry.data.slug = generatedSlug;
-    if (!entry.data.title) entry.data.title = toProperCase(baseFilename);
-    const slug = entry.data.slug;
+    
+    // Generate slug and title for fallback
+    const generatedSlug = baseFilename.toLowerCase().replace(/\s+/g, '-');
+    const generatedTitle = toProperCase(baseFilename);
+    
+    // Ensure entry.data exists with all required properties
+    const data = (entry.data || { 
+      tags: [], 
+      slug: generatedSlug,
+      title: generatedTitle
+    }) as EntryData;
+    
+    console.log(`DEBUG SLUG for ${entry.id}: Generated=${generatedSlug}, Existing=${data.slug || 'none'}`);
+    
+    // Create a new object with the required shape - Option 2
+    const safeData: EntryData = {
+      ...data,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      slug: data.slug || generatedSlug,
+      title: data.title || generatedTitle
+    };
+    
+    // Now TypeScript knows slug exists
+    const slug = safeData.slug;
+    
+    // Create a new entry object with the safe data
+    const safeEntry = {
+      ...entry,
+      data: safeData
+    };
+    
     return {
       params: { collection: 'prompts', slug },
       props: {
-        entry,
+        entry: safeEntry,
         collection: 'prompts',
       },
     };
   });
 
-  // Map each specs entry to a static path object
+  // Map each specs entry to a static path object - using the same pattern
   const specsPaths = specsEntries.map(entry => {
+    // Extract just the filename without path and extension
     const filename = entry.id.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    // Dynamically generate slug and title if not present in frontmatter
-    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-    if (!entry.data.slug) entry.data.slug = generatedSlug;
-    if (!entry.data.title) entry.data.title = toProperCase(baseFilename);
-    const slug = entry.data.slug;
+    
+    // Generate slug and title for fallback
+    const generatedSlug = baseFilename.toLowerCase().replace(/\s+/g, '-');
+    const generatedTitle = toProperCase(baseFilename);
+    
+    // Ensure entry.data exists with all required properties
+    const data = (entry.data || { 
+      tags: [], 
+      slug: generatedSlug,
+      title: generatedTitle
+    }) as EntryData;
+    
+    console.log(`DEBUG SLUG for ${entry.id}: Generated=${generatedSlug}, Existing=${data.slug || 'none'}`);
+    
+    // Create a new object with the required shape - Option 2
+    const safeData: EntryData = {
+      ...data,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      slug: data.slug || generatedSlug,
+      title: data.title || generatedTitle
+    };
+    
+    // Now TypeScript knows slug exists
+    const slug = safeData.slug;
+    
+    const safeEntry = {
+      ...entry,
+      data: safeData
+    };
+    
     return {
       params: { collection: 'specs', slug },
       props: {
-        entry,
+        entry: safeEntry,
         collection: 'specs',
       },
     };
   });
 
-  // Combine both path arrays
-  return [...promptsPaths, ...specsPaths];
+  // Map each reminders entry to a static path object - using the same pattern
+  const remindersPaths = remindersEntries.map(entry => {
+    // Extract just the filename without path and extension
+    const filename = entry.id.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    
+    // Generate slug and title for fallback
+    const generatedSlug = baseFilename.toLowerCase().replace(/\s+/g, '-');
+    const generatedTitle = toProperCase(baseFilename);
+    
+    // Ensure entry.data exists with all required properties
+    const data = (entry.data || { 
+      tags: [], 
+      slug: generatedSlug,
+      title: generatedTitle
+    }) as EntryData;
+    
+    console.log(`DEBUG SLUG for ${entry.id}: Generated=${generatedSlug}, Existing=${data.slug || 'none'}`);
+    
+    // Create a new object with the required shape - Option 2
+    const safeData: EntryData = {
+      ...data,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      slug: data.slug || generatedSlug,
+      title: data.title || generatedTitle
+    };
+    
+    // Now TypeScript knows slug exists
+    const slug = safeData.slug;
+    
+    const safeEntry = {
+      ...entry,
+      data: safeData
+    };
+    
+    return {
+      params: { collection: 'reminders', slug },
+      props: {
+        entry: safeEntry,
+        collection: 'reminders',
+      },
+    };
+  });
+
+  // Combine all path arrays
+  return [...promptsPaths, ...specsPaths, ...remindersPaths];
 }
 
 /**
  * Props interface for page rendering.
  * Mirrors /more-about/[...slug].astro for consistency.
+ * Supports all three collections: 'prompts', 'specs', and 'reminders'.
  */
 interface Props {
   entry: any;
-  collection: 'prompts' | 'specs';
+  collection: 'prompts' | 'specs' | 'reminders'; // Now supports all three collections
 }
-
-// Destructure props for use in page rendering
-const { entry, collection } = Astro.props;
-
-// Add content type and path to the data object for downstream components
-const contentData = {
-  path: Astro.url.pathname,
-  id: entry.id,
-  collection: collection,
-};
-
 ---
-<!--
-  Layout and Article Rendering Block
-  - Uses Layout for page structure.
-  - Renders OneArticle with OneArticleOnPage for content.
-  - Passes contentData for context.
-  - Mirrors conventions from /more-about/[...slug].astro.
--->
-<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
-  <OneArticle
-    Component={OneArticleOnPage}
-    content={entry.body}
-    markdownFile={entry.id}
-    data={contentData}
-  />
-</Layout>
+
+{/* 
+  All Astro object usage (Astro.params, Astro.url, Astro.props) must be inside the render context 
+  This ensures correct behavior in SSR/build and matches Astro documentation and project rules.
+*/}
+
+{/* Destructure props for use in page rendering */}
+{(async () => {
+  const { entry, collection } = Astro.props;
+  
+  // --- Robust Entry Fetching Logic ---
+  // If entry is missing or incomplete (i.e., only has tags), fetch the entry from the collection using params
+  if (!entry || !entry.data || !entry.data.title) {
+    // This fallback ensures that if the static props did not provide a full entry,
+    // we dynamically load the correct entry using Astro's route params.
+    const allowedCollections = ['prompts', 'specs', 'reminders'] as const;
+    
+    // Type guard function to properly narrow the type
+    function isAllowedCollection(val: string): val is typeof allowedCollections[number] {
+      return allowedCollections.includes(val as any);
+    }
+    
+    const paramCollection = Astro.params.collection;
+    if (!isAllowedCollection(paramCollection)) {
+      throw new Error(`Invalid collection: ${paramCollection}`);
+    }
+    
+    const collection = paramCollection;
+    const slug = Array.isArray(Astro.params.slug) ? Astro.params.slug[0] : Astro.params.slug;
+    
+    // Use getEntry for a unique, efficient lookup
+    const entry = await getEntry(collection, slug);
+    if (!entry) {
+      throw new Error(`No entry found for collection '${collection}' and slug '${slug}'.`);
+    }
+    
+    // Add content type and path to the data object for downstream components
+    const contentData = {
+      path: Astro.url.pathname,
+      id: entry.id,
+      collection: collection,
+    };
+    
+    return (
+      <Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+        <OneArticle
+          Component={OneArticleOnPage}
+          content={entry.body}
+          markdownFile={entry.id}
+          data={contentData}
+        />
+      </Layout>
+    );
+  }
+  
+  // Add content type and path to the data object for downstream components
+  const contentData = {
+    path: Astro.url.pathname,
+    id: entry.id,
+    collection: collection,
+  };
+  
+  return (
+    <Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+      <OneArticle
+        Component={OneArticleOnPage}
+        content={entry.body}
+        markdownFile={entry.id}
+        data={contentData}
+      />
+    </Layout>
+  );
+})()}

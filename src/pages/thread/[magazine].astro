@@ -19,9 +19,11 @@ import { Astro } from 'astro';
 const { magazine } = Astro.params;
 
 // Map route param to Astro collection name and URL prefix
+// ROUTING SPEC: All magazine cards use unified /vibe-with/[collection]/[slug] URLs
 const collectionMap = {
-  prompts: { collection: 'prompts', urlPrefix: '/prompts/' },
-  specs: { collection: 'specs', urlPrefix: '/specs/' }
+  prompts: { collection: 'prompts', urlPrefix: '/vibe-with/prompts/' },
+  specs: { collection: 'specs', urlPrefix: '/vibe-with/specs/' },
+  reminders: { collection: 'reminders', urlPrefix: '/vibe-with/reminders/' }
 };
 
 // Default to prompts if unknown param
@@ -64,6 +66,7 @@ const sortedPublishedEntries = publishedEntries.slice().sort((a, b) => {
 });
 
 // Transform the sorted entries to include a URL property and flatten the structure for the card components
+// ROUTING LOGIC: All card URLs are now /vibe-with/[collection]/[slug] per unified routing spec
 const contentThreads = sortedPublishedEntries.map(entry => {
   // Extract the filename without extension to create a slug
   const pathParts = entry.id.split('/');
@@ -73,7 +76,7 @@ const contentThreads = sortedPublishedEntries.map(entry => {
   return {
     ...entry.data,
     id: entry.id,
-    url: `${urlPrefix}${slug}` // Generate URL from filename and collection
+    url: `${urlPrefix}${slug}` // Unified route: /vibe-with/[collection]/[slug]
     // Include any other properties needed by the card components
   };
 });
