@@ -2,11 +2,18 @@
 import {dirname} from 'path'
 import ArticleCallout from './callouts/ArticleCallout.astro';
 import ArticleCitations from './citations/ArticleCitations.astro';
+import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 
 interface Props {
+    /**
+     * Markdown AST node interface for AstroMarkdown.astro
+     * - 'lang' is present on 'code' nodes and specifies the code language (e.g., 'js', 'python').
+     * - See remark/rehype AST docs for more details.
+     */
     node: {
         type: string;
         value?: string;
+        lang?: string; // <-- Added for code blocks
         children?: any[];
         url?: string;
         depth?: number;
@@ -203,11 +210,9 @@ const title = data.id ?
 }
 
 {(node.type === "code") &&
-  <pre class="code-block">
-    <code class={`language-text`}>
-      {node.value}
-    </code>
-  </pre>
+  // Render code blocks using the BaseCodeblock component for unified styling and copy functionality
+  // node.value contains the code string, node.lang (if present) is the language
+  <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
 }
 
 {(node.type === "blockquote") &&

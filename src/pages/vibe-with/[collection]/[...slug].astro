@@ -93,8 +93,9 @@ export async function getStaticPaths() {
         ...entry,
         data: safeData
       };
+      // Ensure Astro receives 'undefined' for optional slug param, not an empty string (Astro routing requirement)
       return {
-        params: { collection: collectionName, slug },
+        params: { collection: collectionName, slug: slug || undefined },
         props: {
           entry: safeEntry,
           collection: collectionName,
