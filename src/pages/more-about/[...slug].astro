@@ -1,0 +1,115 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import path from 'path';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Helper function to convert filenames to titles while preserving acronym casing
+  function toProperCase(str: string): string {
+    // Replace hyphens and underscores with spaces
+    // Split into words
+    // Capitalize the first letter of each word and keep the rest of the word's casing
+    // Join words back with spaces
+    return str
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  // Get entries from both collections
+  const vocabularyEntries = await getCollection('vocabulary');
+  // Use type assertion to avoid TypeScript errors until Astro regenerates types
+  const conceptsEntries = await getCollection('concepts' as any);
+  
+  // Process vocabulary entries
+  const vocabularyPaths = vocabularyEntries.map(entry => {
+    // Generate slug from the entry ID if not present
+    const filename = entry.id.replace(/\.md$/, '');
+    
+    // Handle nested paths by converting directory structure to URL path
+    // Replace spaces with hyphens and convert to lowercase
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    
+    // Generate title from the filename if not present in the frontmatter
+    // Extract just the filename without the path for the title
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    
+    // Set the title based on the filename if not provided in frontmatter, applying proper casing
+    if (!entry.data.title) {
+      // Apply toProperCase to the base filename
+      entry.data.title = toProperCase(baseFilename);
+    }
+    
+    return {
+      params: { slug },
+      props: { 
+        entry,
+        contentType: 'vocabulary'
+      }
+    };
+  });
+  
+  // Process concepts entries
+  const conceptsPaths = conceptsEntries.map((entry: any) => {
+    // Generate slug from the entry ID if not present
+    const filename = entry.id.replace(/\.md$/, '');
+    
+    // Handle nested paths by converting directory structure to URL path
+    // Replace spaces with hyphens and convert to lowercase
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    
+    // Generate title from the filename if not present in the frontmatter
+    // Extract just the filename without the path for the title
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    
+    // Set the title based on the filename if not provided in frontmatter, applying proper casing
+    if (!entry.data.title) {
+      // Apply toProperCase to the base filename
+      entry.data.title = toProperCase(baseFilename);
+    }
+    
+    return {
+      params: { slug },
+      props: { 
+        entry,
+        contentType: 'concepts'
+      }
+    };
+  });
+  
+  // Combine both path arrays
+  return [...vocabularyPaths, ...conceptsPaths];
+}
+
+// Use a more flexible type definition to avoid TypeScript errors
+interface Props {
+  entry: any;
+  contentType: 'vocabulary' | 'concepts';
+}
+
+const { entry, contentType } = Astro.props;
+
+// Add content type to the data object for potential use in components
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  contentType: contentType
+};
+---
+
+<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

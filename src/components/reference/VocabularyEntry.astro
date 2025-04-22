@@ -1,0 +1,121 @@
+---
+/**
+ * VocabularyEntry.astro
+ * Specialized component for rendering vocabulary entries with Obsidian-style markdown
+ * 
+ * Features:
+ * - Handles wikilinks through remark-asf plugin
+ * - Displays optional frontmatter (aliases, etc)
+ * - Supports embedded images and external links
+ * - Maintains proper heading hierarchy
+ */
+
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'vocabulary'>;
+  content: string;
+}
+
+const { entry, content } = Astro.props;
+const { aliases } = entry.data;
+
+---
+
+<article class="vocabulary-entry">
+  <header>
+    <h1>{entry.data.title || entry.data.slug}</h1>
+    
+    {aliases.length > 0 && (
+      <div class="aliases">
+        Also known as: {aliases.join(', ')}
+      </div>
+    )}
+  </header>
+
+  <div class="content" set:html={content} />
+</article>
+
+<style>
+  .vocabulary-entry {
+    max-width: 65ch;
+    margin: 2rem auto;
+    padding: 1rem;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .aliases {
+    color: var(--text-2);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .content {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .content :global(a) {
+    color: var(--text-1);
+    text-decoration: none;
+    border-bottom: 1px solid var(--text-2);
+  }
+
+  .content :global(a:hover) {
+    color: var(--text-2);
+  }
+
+  .content :global(h2),
+  .content :global(h3),
+  .content :global(h4),
+  .content :global(h5),
+  .content :global(h6) {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .content :global(ul),
+  .content :global(ol) {
+    padding-left: 1.5rem;
+  }
+
+  .content :global(li) {
+    margin: 0.5rem 0;
+  }
+
+  .content :global(blockquote) {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--surface-2);
+    border-left: 4px solid var(--text-2);
+    border-radius: 0.25rem;
+  }
+
+  .content :global(pre) {
+    padding: 1rem;
+    background: var(--surface-1);
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+
+  .content :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+</style>

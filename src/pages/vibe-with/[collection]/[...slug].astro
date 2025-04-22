@@ -1,0 +1,122 @@
+---
+/**
+ * /vibe-with/[collection]/[...slug].astro — Unified Dynamic Route for Vibe-With Content (Multiple Collections)
+ *
+ * Modeled after /more-about/[...slug].astro, per project prompt:
+ *   /content/lost-in-public/prompts/render-logic/Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md
+ *
+ * Follows comprehensive, parallel commenting rules as outlined in:
+ *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
+ *
+ * - Fetches content from BOTH the 'prompts' and 'specs' collections (see content.config.ts for exact keys).
+ * - Generates static paths for all entries, supporting dynamic tag navigation.
+ * - Renders content using Layout, OneArticle, and OneArticleOnPage components.
+ * - All logic is thoroughly commented and DRY.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+/**
+ * getStaticPaths — Generates all static paths for the /vibe-with/[collection]/[slug] dynamic route.
+ *
+ * - Fetches all entries from the 'prompts' and 'specs' collections.
+ * - For each entry, generates a path with collection and slug params.
+ * - Ensures each entry has a slug and title (generates if missing).
+ * - Returns array of { params, props } objects for Astro static generation.
+ */
+export async function getStaticPaths() {
+  // Helper: Convert train-case or hyphen-case to proper case for titles
+  function toProperCase(str: string): string {
+    return str
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  // Fetch all entries from the 'prompts' and 'specs' collections
+  const promptsEntries = await getCollection('prompts');
+  const specsEntries = await getCollection('specs');
+
+  // Map each prompts entry to a static path object
+  const promptsPaths = promptsEntries.map(entry => {
+    const filename = entry.id.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    // Dynamically generate slug and title if not present in frontmatter
+    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+    if (!entry.data.slug) entry.data.slug = generatedSlug;
+    if (!entry.data.title) entry.data.title = toProperCase(baseFilename);
+    const slug = entry.data.slug;
+    return {
+      params: { collection: 'prompts', slug },
+      props: {
+        entry,
+        collection: 'prompts',
+      },
+    };
+  });
+
+  // Map each specs entry to a static path object
+  const specsPaths = specsEntries.map(entry => {
+    const filename = entry.id.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    // Dynamically generate slug and title if not present in frontmatter
+    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+    if (!entry.data.slug) entry.data.slug = generatedSlug;
+    if (!entry.data.title) entry.data.title = toProperCase(baseFilename);
+    const slug = entry.data.slug;
+    return {
+      params: { collection: 'specs', slug },
+      props: {
+        entry,
+        collection: 'specs',
+      },
+    };
+  });
+
+  // Combine both path arrays
+  return [...promptsPaths, ...specsPaths];
+}
+
+/**
+ * Props interface for page rendering.
+ * Mirrors /more-about/[...slug].astro for consistency.
+ */
+interface Props {
+  entry: any;
+  collection: 'prompts' | 'specs';
+}
+
+// Destructure props for use in page rendering
+const { entry, collection } = Astro.props;
+
+// Add content type and path to the data object for downstream components
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  collection: collection,
+};
+
+---
+<!--
+  Layout and Article Rendering Block
+  - Uses Layout for page structure.
+  - Renders OneArticle with OneArticleOnPage for content.
+  - Passes contentData for context.
+  - Mirrors conventions from /more-about/[...slug].astro.
+-->
+<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

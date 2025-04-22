@@ -19,6 +19,9 @@
       }
     ],
     "paths": {
+      "@assets/*": [
+        "./src/assets/*"
+      ],
       "@basics/*": [
         "./src/components/basics/*"
       ],
@@ -48,6 +51,12 @@
       ],
       "@lossless-content/*": [
         "../content/*"
+      ],
+      "@tabler/*": [
+        "./node_modules/@tabler/icons/*"
+      ],
+      "@content/*": [
+        "./src/content/*"
       ]
     },
     "types": ["astro/client"],

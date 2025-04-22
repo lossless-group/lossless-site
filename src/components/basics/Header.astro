@@ -1,8 +1,9 @@
 ---
 import "@styles/global.css";
+import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 ---
 
-<header>
+<header class="header">
   <div class="header-container-row">
     <a href="/" aria-label="Return to homepage">
       <img
@@ -16,6 +17,7 @@ import "@styles/global.css";
       <a href="/about/">About</a>
       <a href="/reader">Reader</a>
       <a href="/toolkit">Toolkit</a>
+      <a href="/more-about">Reference</a>
       <a href="/workflow/changelog">Changelog</a>
       <img src="/visuals/appIcon__Discord.svg" alt="" />
       <img src="/visuals/appIcon__X-Twitter.svg" alt="" />
@@ -23,16 +25,31 @@ import "@styles/global.css";
       <img src="/visuals/appIcon__LinkedIn.svg" alt="" />
     </span>
   </div>
-  <div class="separator--thin"></div>
+  <div class="header-separator">
+    <!-- Use enhanced separator with specific styling for the header -->
+    <ThinGradientBleedSeparator
+      height="2px"
+      color="var(--grd__primary-bg)"
+    />
+  </div>
 </header>
 
 <style>
+  .header {
+    position: fixed;
+    background-color: var(--clr-primary-bg);
+    width: 100%;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
   .logo-box {
     width: auto;
     height: clamp(34px, 8vw, 100px);
     max-height: 4vh;
   }
-  
+
   /* Style for the logo link to ensure it doesn't affect layout */
   .header-container-row > a {
     display: flex;
@@ -40,15 +57,23 @@ import "@styles/global.css";
     padding: 0;
     margin: 0;
   }
-  
+
   .header-container-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 2em 3em;
-    max-height: 6vh;
+    padding: 1.25em 3em 1.25em;
+    /* max-height: 6vh; */
   }
+
+  /* Add spacing for the separator */
+  .header-separator {
+    margin-top: 0;
+    margin-bottom: 0;
+    /* padding-bottom: 1.25em; */
+  }
+
   .connect-with-us-icons {
     display: flex;
     flex-direction: row;

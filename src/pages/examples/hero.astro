@@ -1,0 +1,205 @@
+---
+/**
+ * Hero Component Example Page
+ * 
+ * This page demonstrates different ways to use the Hero component:
+ * 1. Direct usage with props
+ * 2. Data-driven usage with HeroLoader
+ */
+import Layout from "@layouts/Layout.astro";
+import HeroGlassmorphic from "@components/basics/HeroGlassmorphic.astro";
+import HeroLoader from "@components/basics/HeroLoader.astro";
+import ThinGradientBleedSeparator from "@components/basics/separators/ThinGradientBleedSeparator.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+---
+
+<Layout title="Hero Component Examples">
+  <AnimationWrapper>
+    <main>
+      <div class="container" data-animate="fade-in">
+        <h1>Hero Component Examples</h1>
+        <p class="intro">
+          This page demonstrates different ways to use the Hero component, including direct usage with props and data-driven usage with HeroLoader.
+        </p>
+      </div>
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.1">
+        <div class="container">
+          <h2>Example 1: Direct Component Usage</h2>
+          <p>Using the Hero component directly with props:</p>
+        </div>
+        
+        <HeroGlassmorphic
+          title="Build Better Experiences"
+          subtitle="With Lossless Components"
+          description="Our component library helps you create beautiful, accessible interfaces with minimal effort."
+          ctaText="Get Started"
+          ctaUrl="/docs"
+          image={{
+            src: "/visuals/Convey__Picto__Assembly-Line.svg",
+            alt: "Assembly line illustration"
+          }}
+          backgroundStyle="gradient"
+          alignment="left"
+          fullBleed={true}
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.2">
+        <div class="container">
+          <h2>Example 2: Data-Driven Usage</h2>
+          <p>Loading hero content from a JSON file with HeroLoader:</p>
+        </div>
+        
+        <HeroLoader 
+          jsonPath="messages/heroContent.json" 
+          heroId="main-hero" 
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.3">
+        <div class="container">
+          <h2>Example 3: Alternative Style</h2>
+          <p>Using a different background style and alignment:</p>
+        </div>
+        
+        <HeroLoader 
+          jsonPath="messages/heroContent.json" 
+          heroId="features-hero" 
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.4">
+        <div class="container">
+          <h2>Example 4: Custom Hero</h2>
+          <p>A custom hero with glass background and centered alignment:</p>
+        </div>
+        
+        <HeroGlassmorphic
+          title="Customize Your Experience"
+          subtitle="Flexible & Powerful"
+          description="The Hero component supports various styles, layouts, and content configurations to meet your specific needs."
+          ctaText="View Documentation"
+          ctaUrl="/docs/hero"
+          backgroundStyle="glass"
+          alignment="center"
+          fullBleed={false}
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.5">
+        <div class="container">
+          <h2>Example 5: Glassmorphic Style (Direct)</h2>
+          <p>A dark background with subtle gradient blob accents using direct component usage:</p>
+        </div>
+        
+        <HeroGlassmorphic
+          title="Modern Glassmorphic Design"
+          subtitle="Subtle & Elegant"
+          description="This style uses a dark background with subtle gradient blobs to create depth and visual interest while maintaining readability."
+          ctaText="Explore More"
+          ctaUrl="/examples"
+          image={{
+            src: "/visuals/Convey__Picto__Assembly-Line.svg",
+            alt: "Assembly line illustration"
+          }}
+          backgroundStyle="glassmorphic"
+          alignment="left"
+          fullBleed={true}
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.6">
+        <div class="container">
+          <h2>Example 6: Glassmorphic Style (Data-Driven)</h2>
+          <p>Loading a glassmorphic hero from JSON data:</p>
+        </div>
+        
+        <HeroLoader 
+          jsonPath="messages/heroContent.json" 
+          heroId="glassmorphic-hero" 
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.7">
+        <div class="container">
+          <h2>Example 7: Glassmorphic Vivid Style (Direct)</h2>
+          <p>A dark background with more prominent gradient elements using direct component usage:</p>
+        </div>
+        
+        <HeroGlassmorphic
+          title="Vibrant Glassmorphic Design"
+          subtitle="Bold & Striking"
+          description="This enhanced style combines our dark background with more prominent gradient elements for a bolder, more vibrant visual impact."
+          ctaText="See More Examples"
+          ctaUrl="/examples"
+          image={{
+            src: "/visuals/Convey__Picto__Assembly-Line.svg",
+            alt: "Assembly line illustration"
+          }}
+          backgroundStyle="glassmorphic-vivid"
+          alignment="left"
+          fullBleed={true}
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.8">
+        <div class="container">
+          <h2>Example 8: Glassmorphic Vivid Style (Data-Driven)</h2>
+          <p>Loading a vivid glassmorphic hero from JSON data:</p>
+        </div>
+        
+        <HeroLoader 
+          jsonPath="messages/heroContent.json" 
+          heroId="glassmorphic-vivid-hero" 
+        />
+      </section>
+    </main>
+  </AnimationWrapper>
+</Layout>
+
+<style>
+  .container {
+    width: 92%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 0;
+  }
+  
+  h1 {
+    font-size: var(--fs-800);
+    margin-bottom: 1rem;
+  }
+  
+  h2 {
+    font-size: var(--fs-600);
+    margin-bottom: 0.5rem;
+  }
+  
+  .intro {
+    font-size: var(--fs-450);
+    margin-bottom: 2rem;
+  }
+  
+  .example-section {
+    margin: 3rem 0;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+</style>

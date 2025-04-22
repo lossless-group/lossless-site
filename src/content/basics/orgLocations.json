@@ -1,0 +1,40 @@
+{
+  "company_name": "The Lossless Group",
+  "locations": [
+    {
+      "name": "Austin, TX",
+      "address": {
+        "street": "1512 S Congress Ave 2nd floor",
+        "city": "Austin, TX",
+        "state": "TX",
+        "zip": "78704"
+      }
+    },
+    {
+      "name": "San Francisco, CA",
+      "address": {
+        "street": "474 Bryant St",
+        "city": "San Francisco, CA",
+        "state": "CA",
+        "zip": "94107"
+      }
+    },
+    {
+      "name": "Istanbul, Turkey",
+      "address": {
+        "street": "Bebek, Küçük Bebek Cd. No:74",
+        "city": "Bebek, Istanbul",
+        "state": "34342 Beşiktas"
+      }
+    },
+    {
+      "name": "New York City",
+      "address": {
+        "street": "521 E 5th St",
+        "city": "New York City",
+        "state": "NY",
+        "zip": "10009"
+      }
+    }
+  ]
+}

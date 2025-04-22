@@ -98,4 +98,47 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
   .prose :global(li) {
     margin-bottom: 0.5rem;
   }
+
+  .prose :global(.custom-li) {
+    position: relative;
+    padding-left: 1.25em;
+    list-style: none;
+    line-height: 1.5;
+  }
+
+  .prose :global(.custom-li::before) {
+    content: "-"; /* or "•" or "–" */
+    position: absolute;
+    left: 0;
+    color: var(--clr-lossless-accent--brightest);
+    font-size: 1em;
+    line-height: 1;
+  }
+
+ 
+  .md-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .md-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    background-color: transparent;
+  }
+
+  .md-tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .md-td {
+    border: 1px solid red; /* ✅ start with RED for visibility */
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    color: rgb(220, 4, 4);
+  }
+
+
+
 </style>

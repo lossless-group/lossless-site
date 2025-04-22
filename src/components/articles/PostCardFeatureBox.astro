@@ -1,0 +1,155 @@
+---
+// PostCardFeature.astro
+// Accepts a generic prompt object (Astro content entry) as props and destructures to get frontmatter fields.
+// This follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
+// Example usage: <PostCardFeature {...item} />
+
+// Accept both Astro collection entry and flat frontmatter object
+const { data, ...rest } = Astro.props;
+const props = data ? data : Astro.props;
+const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
+
+// Format date if it exists
+let formattedDate = '';
+if (date_authored_initial_draft) {
+  // Check if the date is already a string in YYYY-MM-DD format
+  if (typeof date_authored_initial_draft === 'string' && 
+      date_authored_initial_draft.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    formattedDate = date_authored_initial_draft;
+  } else {
+    // Try to format the date
+    try {
+      const date = new Date(date_authored_initial_draft);
+      formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      formattedDate = date_authored_initial_draft?.toString() || '';
+    }
+  }
+}
+
+// For browser-side debugging, stringify the props
+const debugProps = JSON.stringify(Astro.props);
+---
+
+<article class="post-card-feature card-hover-effect">
+  {banner_image && <img src={banner_image} alt={title} class="post-card-feature__image" />}
+  <h1 class="post-card-feature__title"><a href={url}><span class="text-wrapper">{title}</span></a></h1>
+  <p class="post-card-feature__lede"><span class="text-wrapper">{lede || summary}</span></p>
+  <div class="post-card-feature__meta">
+    <span class="post-card-feature__authors">{authors?.join(', ')}</span>
+    <span class="post-card-feature__date">{formattedDate}</span>
+    <div class="post-card-feature__tags">
+      {tags?.map(tag => <span class="post-card-feature__tag">{tag}</span>)}
+    </div>
+  </div>
+</article>
+
+<!-- Browser-side debug output for the actual props object -->
+<script type="module" is:inline>
+  // eslint-disable-next-line no-console
+  const props = JSON.parse(`${debugProps}`);
+  console.log("[PostCardFeature] Props:", props);
+</script>
+
+<!--
+  PostCardFeature.astro expects to receive either:
+    - a generic prompt object (Astro content entry) with data: {frontmatter fields}
+    - or a flat frontmatter object with all fields at the top level
+  All props are destructured from Astro.props and data; no type enforcement is used.
+  This pattern is explicitly required by project rules and .windsurfrules.
+  If you change the data shape, update this destructure accordingly.
+  Temporary browser-side debug output is included for rapid troubleshooting. Remove after debugging.
+-->
+
+<style>
+  /* Feature card styling aligned with site design system */
+  .post-card-feature {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    color: var(--clr-lossless-primary-light);
+    border-radius: 1em;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .post-card-feature__title {
+    font-size: var(--fs-700);
+    font-weight: var(--fw-bold);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .post-card-feature__title a {
+    color: var(--clr-heading);
+    text-decoration: none;
+  }
+
+  .post-card-feature__title a:hover {
+    text-decoration: underline;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .post-card-feature__lede {
+    font-size: var(--fs-450);
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    margin: 0;
+  }
+
+  .post-card-feature__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: var(--fs-300);
+    color: var(--clr-body);
+  }
+
+  .post-card-feature__authors {
+    font-weight: var(--fw-semi-bold);
+  }
+
+  .post-card-feature__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .post-card-feature__tag {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 70%
+    );
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: var(--fs-250);
+  }
+
+  .post-card-feature__image {
+    width: 100%;
+    border-radius: 0.5rem;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Common text wrapping styles for all text elements */
+  .text-wrapper {
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+</style>

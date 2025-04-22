@@ -1,0 +1,97 @@
+---
+/**
+ * VocabularyPreviewCard.astro
+ * 
+ * This component renders a preview card for a vocabulary term from the vocabulary collection.
+ * It displays the term title and aliases (if any) in a consistent card format.
+ * 
+ * @component
+ * @param {Object} entry - The vocabulary entry object from the content collection
+ * @param {string} entry.id - The ID of the vocabulary entry (filename)
+ * @param {Object} entry.data - The frontmatter data of the vocabulary entry
+ * @param {string} entry.data.title - The title of the vocabulary term
+ * @param {string[]} entry.data.aliases - Optional array of alternative names for the term
+ * @param {string} entry.data.slug - Optional custom slug for the URL
+ */
+
+// Define the props interface for type safety
+interface Props {
+  entry: {
+    id: string;
+    data: {
+      title: string;
+      aliases?: string[];
+      slug?: string;
+    };
+  };
+}
+
+// Destructure the entry from props
+const { entry } = Astro.props;
+
+// Generate the URL for the vocabulary term
+// If a slug is provided in the frontmatter, use it; otherwise, generate from the filename
+const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').replace(/\s+/g, '-')}`;
+---
+
+<div class="vocabulary-card">
+  <h3 class="vocabulary-card__title">
+    <a href={url} class="vocabulary-card__link">
+      {entry.data.title}
+    </a>
+  </h3>
+  {entry.data.aliases && entry.data.aliases.length > 0 && (
+    <p class="vocabulary-card__aliases">
+      Also known as: {entry.data.aliases.join(', ')}
+    </p>
+  )}
+</div>
+
+<style>
+  /**
+   * VocabularyPreviewCard Styles
+   * 
+   * These styles define the appearance of vocabulary term preview cards
+   * using the project's CSS variables for consistent theming.
+   */
+
+  /* Card container */
+  .vocabulary-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent; /* Add transparent border for hover effect */
+    transition: background-color 0.2s ease-in-out, 
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out, /* Note: this affects ALL text color */
+                transform 0.2s ease-in-out;
+  }
+
+  /* Card title */
+  .vocabulary-card__title {
+    font-size: 1rem; /* text-base */
+    font-weight: 400; /* font-bold */
+    margin-bottom: 0.5rem; /* mb-2 */
+  }
+
+  /* Card link */
+  .vocabulary-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  /* Custom hover effect mirroring TagChip */
+  .vocabulary-card:hover {
+    background-color: #3a3a45; /* Subtle darker color from TagChip */
+    border-color: var(--clr-lossless-accent--brightest); /* Accent color border */
+    color: var(--clr-lossless-primary-glass--lighter); /* Slightly lighter text from TagChip */
+    transform: translateY(-2px) scale(1.05); /* Subtle elevation and growth from TagChip */
+  }
+
+  /* Card aliases */
+  .vocabulary-card__aliases {
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 300; /* font-bold */
+    color: var(--white--pure--40p, hsla(0, 0%, 100%, .4)); /* text-gray-400 */
+    margin-bottom: 0.5rem; /* mb-2 */
+  }
+</style>

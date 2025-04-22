@@ -1,0 +1,509 @@
+---
+/**
+ * Hero.astro
+ * 
+ * A visually striking, responsive hero component that showcases the brand identity
+ * with gradient effects and supports various content configurations.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <Hero
+ *   title="Build Better Experiences"
+ *   subtitle="With Lossless Components"
+ *   description="Our component library helps you create beautiful, accessible interfaces with minimal effort."
+ *   ctaText="Get Started"
+ *   ctaUrl="/docs"
+ *   image={{
+ *     src: "/visuals/Heroes/dashboard-example.png",
+ *     alt: "Dashboard interface example"
+ *   }}
+ *   backgroundStyle="gradient"
+ *   alignment="left"
+ *   fullBleed={true}
+ * />
+ * ```
+ */
+
+import "@styles/global.css";
+
+interface Props {
+  /**
+   * Main title of the hero section
+   */
+  title: string;
+  
+  /**
+   * Optional subtitle displayed above the title
+   */
+  subtitle?: string;
+  
+  /**
+   * Optional description text displayed below the title
+   */
+  description?: string;
+  
+  /**
+   * Optional call-to-action button text
+   */
+  ctaText?: string;
+  
+  /**
+   * Optional call-to-action button URL
+   */
+  ctaUrl?: string;
+  
+  /**
+   * Optional image to display in the hero
+   * @example { src: "/path/to/image.jpg", alt: "Description" }
+   */
+  image?: { src: string; alt: string };
+  
+  /**
+   * Background style for the hero
+   * @default "gradient"
+   */
+  backgroundStyle?: 'gradient' | 'dark' | 'glass' | 'glassmorphic' | 'glassmorphic-vivid';
+  
+  /**
+   * Content alignment
+   * @default "left"
+   */
+  alignment?: 'left' | 'center';
+  
+  /**
+   * Whether the hero should extend to the full width of the viewport
+   * @default false
+   */
+  fullBleed?: boolean;
+  
+  /**
+   * Additional CSS classes to apply to the hero
+   */
+  classes?: string;
+
+  /**
+   * Whether to enable animations
+   * @default true
+   */
+  animate?: boolean;
+}
+
+// Destructure props with defaults
+const { 
+  title, 
+  subtitle, 
+  description, 
+  ctaText, 
+  ctaUrl, 
+  image, 
+  backgroundStyle = 'gradient', 
+  alignment = 'left', 
+  fullBleed = false,
+  classes = "",
+  animate = true
+} = Astro.props;
+
+// Determine container classes based on props
+const containerClasses = [
+  "hero-container",
+  `hero-bg--${backgroundStyle}`,
+  `hero-align--${alignment}`,
+  fullBleed ? "hero-full-bleed" : "",
+  classes
+];
+
+// Determine if we have a CTA button
+const hasCta = ctaText && ctaUrl;
+
+// Determine if we have an image
+const hasImage = image && image.src;
+
+// Determine if we're using a glassmorphic style
+const isGlassmorphic = backgroundStyle === 'glassmorphic' || backgroundStyle === 'glassmorphic-vivid';
+
+// Animation attributes based on animate prop
+const animationAttributes = animate ? {
+  'data-animate': 'fade-in',
+  'data-animate-delay': '0'
+} : {};
+
+// Animation attributes for child elements
+const titleAnimationAttributes = animate ? {
+  'data-animate': 'fade-up',
+  'data-animate-delay': '0.1'
+} : {};
+
+const subtitleAnimationAttributes = animate ? {
+  'data-animate': 'fade-up',
+  'data-animate-delay': '0.2'
+} : {};
+
+const descriptionAnimationAttributes = animate ? {
+  'data-animate': 'fade-up',
+  'data-animate-delay': '0.3'
+} : {};
+
+const ctaAnimationAttributes = animate ? {
+  'data-animate': 'fade-up',
+  'data-animate-delay': '0.4'
+} : {};
+
+const imageAnimationAttributes = animate ? {
+  'data-animate': 'fade-in',
+  'data-animate-delay': '0.5'
+} : {};
+
+// Function to generate blob attributes for glassmorphic styles
+const getBlobAttributes = (index: number) => {
+  const isVivid = backgroundStyle === 'glassmorphic-vivid';
+  const baseDelay = isVivid ? 0.1 : 0.2;
+  
+  return animate ? {
+    'data-animate': 'fade-in',
+    'data-animate-delay': `${baseDelay + (index * 0.1)}`
+  } : {};
+};
+
+---
+
+<section class={`hero ${containerClasses.join(' ')}`} {...animationAttributes}>
+  {isGlassmorphic && (
+    <div class:list={["glassmorphic-blobs", { "glassmorphic-blobs--vivid": backgroundStyle === 'glassmorphic-vivid' }]}>
+      <div class="blob blob-1" style="width: 25%; height: 40%; top: -10%; left: 10%; transform: rotate(-15deg);" {...getBlobAttributes(1)}></div>
+      <div class="blob blob-2" style="width: 30%; height: 30%; bottom: -10%; right: 15%; transform: rotate(30deg);" {...getBlobAttributes(2)}></div>
+      <div class="blob blob-3" style="width: 20%; height: 20%; top: 30%; right: 5%; transform: rotate(15deg);" {...getBlobAttributes(3)}></div>
+      <div class="blob blob-4" style="width: 15%; height: 25%; bottom: 20%; left: 5%; transform: rotate(-10deg);" {...getBlobAttributes(4)}></div>
+      {backgroundStyle === 'glassmorphic-vivid' && (
+        <>
+          <div class="blob blob-5" style="width: 35%; height: 15%; top: 50%; left: 30%; transform: rotate(25deg);" {...getBlobAttributes(5)}></div>
+          <div class="blob blob-6" style="width: 40%; height: 20%; bottom: 40%; right: 20%; transform: rotate(-20deg);" {...getBlobAttributes(6)}></div>
+          <div class="gradient-overlay" style="position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(34, 166, 181, 0.05) 20%, rgba(145, 56, 224, 0.05) 40%, rgba(217, 35, 59, 0.05) 60%, rgba(245, 156, 73, 0.05) 80%, transparent 100%);" {...getBlobAttributes(7)}></div>
+        </>
+      )}
+    </div>
+  )}
+  
+  <div class="hero-content">
+    <div class="hero-text">
+      {subtitle && <p class="hero-subtitle" {...subtitleAnimationAttributes}>{subtitle}</p>}
+      <h1 class="hero-title" {...titleAnimationAttributes}>{title}</h1>
+      {description && <p class="hero-description" {...descriptionAnimationAttributes}>{description}</p>}
+      
+      {hasCta && (
+        <div class="hero-cta" {...ctaAnimationAttributes}>
+          <a href={ctaUrl} class="hero-cta-button">{ctaText}</a>
+        </div>
+      )}
+    </div>
+    
+    {hasImage && (
+      <div class="hero-image-container">
+        <div class="hero-image-wrapper">
+          <img 
+            class="hero-image"
+            src={image.src}
+            alt={image.alt || title}
+            loading="eager"
+            {...imageAnimationAttributes}
+          />
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  /* Container */
+  .hero-container {
+    position: relative;
+    width: 100%;
+    padding: 3rem 1.5rem;
+    margin: 0 auto 2rem auto;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  
+  /* Full-bleed styling */
+  .hero-full-bleed {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    border-radius: 0;
+    padding: 4rem 2rem;
+  }
+
+  /* Background styles */
+  .hero-bg--gradient {
+    background: var(--grd--lossless-eastern-crimson);
+    color: var(--clr-lossless-primary-light);
+  }
+  
+  .hero-bg--dark {
+    background-color: var(--clr-lossless-primary-dark);
+    color: var(--clr-lossless-primary-light);
+  }
+  
+  .hero-bg--glass {
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 30%);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--clr-lossless-primary-glass--lighter);
+    color: var(--clr-lossless-primary-light);
+  }
+  
+  /* Glassmorphic style with blobs */
+  .hero-bg--glassmorphic,
+  .hero-bg--glassmorphic-vivid {
+    background-color: var(--clr-lossless-primary-dark);
+    color: var(--clr-lossless-primary-light);
+    position: relative;
+    isolation: isolate;
+  }
+  
+  .glassmorphic-blobs {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+    opacity: 0.7;
+  }
+  
+  .glassmorphic-blobs--vivid {
+    opacity: 1;
+  }
+  
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.15;
+    background: var(--grd--lossless-eastern-crimson);
+  }
+  
+  .glassmorphic-blobs--vivid .blob {
+    opacity: 0.25;
+    filter: blur(60px);
+  }
+  
+  .blob-1 {
+    width: 25%;
+    height: 40%;
+    top: -10%;
+    left: 10%;
+    transform: rotate(-15deg);
+    background: #22A6B5;
+  }
+  
+  .blob-2 {
+    width: 30%;
+    height: 30%;
+    bottom: -10%;
+    right: 15%;
+    transform: rotate(30deg);
+    background: #9138E0;
+  }
+  
+  .blob-3 {
+    width: 20%;
+    height: 20%;
+    top: 30%;
+    right: 5%;
+    transform: rotate(15deg);
+    background: #D9233B;
+  }
+  
+  .blob-4 {
+    width: 15%;
+    height: 25%;
+    bottom: 20%;
+    left: 5%;
+    transform: rotate(-10deg);
+    background: #F59C49;
+  }
+  
+  .blob-5 {
+    width: 35%;
+    height: 15%;
+    top: 50%;
+    left: 30%;
+    transform: rotate(25deg);
+    background: linear-gradient(to right, #22A6B5, #9138E0);
+    opacity: 0.3;
+  }
+  
+  .blob-6 {
+    width: 40%;
+    height: 20%;
+    bottom: 40%;
+    right: 20%;
+    transform: rotate(-20deg);
+    background: linear-gradient(to right, #D9233B, #F59C49);
+    opacity: 0.3;
+  }
+  
+  .gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      transparent 0%,
+      rgba(34, 166, 181, 0.05) 20%,
+      rgba(145, 56, 224, 0.05) 40%,
+      rgba(217, 35, 59, 0.05) 60%,
+      rgba(245, 156, 73, 0.05) 80%,
+      transparent 100%
+    );
+    z-index: 0;
+  }
+
+  /* Content layout */
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Text alignment */
+  .hero-align--left .hero-text {
+    text-align: left;
+  }
+  
+  .hero-align--center .hero-text {
+    text-align: center;
+  }
+
+  /* Typography */
+  .hero-subtitle {
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-title {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-900);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-description {
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-450);
+    line-height: 1.6;
+    opacity: 0.9;
+    max-width: 40ch;
+    margin-bottom: 1.5rem;
+  }
+
+  /* CTA Button */
+  .hero-cta {
+    margin-top: 1.5rem;
+  }
+  
+  .hero-cta-button {
+    display: inline-block;
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-dark);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+  
+  .hero-cta-button:hover {
+    background: transparent;
+    color: var(--clr-lossless-accent--brightest);
+    border-color: var(--clr-lossless-accent--brightest);
+  }
+
+  /* Image */
+  .hero-image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .hero-image-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .hero-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.5rem;
+  }
+
+  /* Responsive styles */
+  @media (min-width: 768px) {
+    .hero-content {
+      flex-direction: row;
+      align-items: center;
+    }
+    
+    .hero-text {
+      flex: 1;
+    }
+    
+    .hero-image-container {
+      flex: 1;
+    }
+    
+    .hero-align--center .hero-content {
+      flex-direction: column;
+    }
+    
+    .hero-align--center .hero-description {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .hero-container {
+      padding: 4rem 2rem;
+    }
+    
+    .hero-full-bleed {
+      padding: 5rem 2rem;
+    }
+    
+    .hero-title {
+      font-size: var(--fs-900);
+    }
+    
+    .hero-description {
+      font-size: var(--fs-500);
+    }
+  }
+  
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cta-button {
+      transition: none;
+    }
+  }
+</style>

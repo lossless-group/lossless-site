@@ -1,12 +1,15 @@
 ---
 import "@styles/global.css";
+import Hero from "@components/basics/Hero.astro";
 import CardGrid from "@basics/CardGrid.astro";
 import TagCloud from "@components/tool-components/TagCloud.astro";
 import { getEntry, getCollection } from "astro:content";
 import TrademarkRibbon from "@components/trademarks/TrademarkRibbon.astro";
-import TubeContainerSVG from "@basics/tube-attempts/TubeContainerSVG.astro";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
+import Section__IconHeaderMessage from "@components/basics/messages/Section__IconHeaderMessage.astro";
+import Section__QuestionsAnswers from "./reference/Section__QuestionsAnswers.astro";
+import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json";
 
 interface Tool {
   url: string;
@@ -27,7 +30,6 @@ const TRADEMARK_CONFIG = {
 
 const toolEntries = await getCollection("tooling");
 const tools = toolEntries.map((entry: any) => entry.data as Tool);
-const featuresData = await getEntry("cards", "features");
 
 const tagFrequencies = tools.reduce(
   (tagCounts: Record<string, number>, tool: Tool) => {
@@ -44,22 +46,25 @@ const allTags = [
     tools.flatMap((tool) => tool.tags || []).filter((tag) => tag) // Remove any undefined/null values
   ),
 ];
+
+// Extract the questionsAndAnswers array for the "main" page
+const qaList = questionsAndAnswersData.page === "main"
+  ? questionsAndAnswersData.questionsAndAnswers
+  : [];
+
 ---
 
-<div id="main-content-col">
+<!-- Full-bleed separator with subtle styling -->
+<ThinGradientBleedSeparator 
+  height="1px" 
+  marginTop="0.5rem" 
+  marginBottom="1rem" 
+  color="var(--grd__primary-bg)" 
+/>
+
+<!-- Content section with tools -->
+<div class="content-wrapper">
   <section>
-    <div id="hero-container">
-      <h1>Here is the Main Content</h1>
-    </div>
-
-    <div class="main-content-element">
-      <TubeContainerSVG />
-    </div>
-    <ThinGradientBleedSeparator />
-
-  </section>
-
-  <section class="main-content-element">
     <h2>Tools</h2>
     <div class="tools-header">
       <TagCloud
@@ -67,28 +72,89 @@ const allTags = [
         tagFrequencies={tagFrequencies}
         visibleTagRowLimit={4}
         maxWidth="96%"
+        tagRoute="toolkit"
       />
     </div>
     <div id="ribbon-context">
       <h2>Tech we're watching.</h2>
     </div>
-    <div id="ribbon-container">
-      <div class="trademark-ribbon-wrapper">
-        <TrademarkRibbon
-          sourceDir={TRADEMARK_CONFIG.sourceDir}
-          width="auto"
-          maxWidth="92%"
-        />
-      </div>
-    </div>
-
   </section>
-  <ThinGradientBleedSeparator />
+</div>
+
+<!-- Full-bleed ribbon container -->
+<div id="ribbon-container">
+  <div class="trademark-ribbon-wrapper">
+    <TrademarkRibbon
+      sourceDir={TRADEMARK_CONFIG.sourceDir}
+      width="auto"
+      maxWidth="92%"
+    />
+  </div>
+</div>
+
+<!-- Full-bleed separator with more prominent styling -->
+<ThinGradientBleedSeparator 
+  height="3px" 
+  marginTop="1.5rem" 
+  marginBottom="1.5rem" 
+  color="var(--grd__primary-bg)" 
+  animate={true}
+/>
+
+<!-- Section: IconHeaderMessage grid for homepage (index instance) -->
+<section class="content-wrapper">
+  <Section__IconHeaderMessage instance="index" />
+</section>
+
+<!-- Content section with alternating side images -->
+<div class="content-wrapper">
   <section>
     <AlternatingSideImageComponent jsonPath="messages/featureSideImage.json" />
-    <ThinGradientBleedSeparator />
   </section>
-  <div class="main-content-element">
+</div>
+
+<!-- Full-bleed separator with standard styling -->
+<ThinGradientBleedSeparator 
+  height="2px" 
+  marginTop="1rem" 
+  marginBottom="1rem" 
+  color="var(--grd__primary-bg)" 
+/>
+
+<!-- Q&A Section (Accordion) -->
+<div class="content-wrapper">
+  <section>
+    <h2>Frequently Asked Questions</h2>
+    <Section__QuestionsAnswers qaList={qaList} containerClass="w-[80vw]" />
+  </section>
+</div>
+
+
+<!-- Full-bleed separator with more prominent styling -->
+<ThinGradientBleedSeparator 
+  height="3px" 
+  marginTop="1.5rem" 
+  marginBottom="1.5rem" 
+  color="var(--grd__primary-bg)" 
+  animate={true}
+/>
+
+<section class="example-section" data-animate="fade-up" data-animate-delay="0.2">
+  <Hero
+    title="Customize Your Experience"
+    subtitle="Flexible & Powerful"
+    description="The Hero component supports various layouts and content configurations to meet your specific needs."
+    ctaText="View Documentation"
+    ctaUrl="/docs/hero"
+    alignment="center"
+    fullBleed={false}
+    animate={true}
+  />
+</section>
+
+<!-- Content section with card grid -->
+<div class="content-wrapper">
+  <section>
     {
       tools && tools.length > 0 ? (
         <CardGrid gap="2rem" tools={tools} />
@@ -96,7 +162,7 @@ const allTags = [
         <p>No tools found</p>
       )
     }
-  </div>
+  </section>
 </div>
 
 <style>
@@ -105,37 +171,40 @@ const allTags = [
     margin-top: 1rem;
   }
 
+  /* Content wrapper with consistent 92% max-width */
+  .content-wrapper {
+    width: 92%;
+    max-width: 92%;
+    margin: 0 auto;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
   .tools-header {
     margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 2rem;
+    width: 100%;
   }
 
-  #main-content-col {
-    width: 94%;
-    padding: 2rem 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: visible;
-    justify-content: center;
-    margin: 0 auto;
-  }
   #hero-container {
     display: flex;
     background: var(--grd--lossless-eastern-crimson);
     padding: 2rem;
     border-radius: 1rem;
-    width: 92%;
+    width: 100%;
     justify-content: center;
     align-items: center;
   }
 
-  .main-content-element {
-    width: 92%;
-    margin: 4% auto;
+  section {
+    width: 100%;
+    margin: 0 auto;
     padding: 1rem 0;
     display: flex;
     flex-direction: column;
@@ -144,11 +213,12 @@ const allTags = [
   }
 
   #ribbon-context {
-    width: 92%;
+    width: 100%;
     text-align: center;
     margin: 0 auto 1rem auto;
   }
 
+  /* Full-bleed container for the ribbon */
   #ribbon-container {
     width: 100vw;
     position: relative;

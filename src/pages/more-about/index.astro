@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface ReferenceItem {
+  id: string;
+  slug: string;
+  collection: 'vocabulary' | 'concepts';
+  data: {
+    title: string;
+    slug?: string;
+    aliases?: string[];
+    description?: string;
+  };
+}
+
+const vocabularyEntries = await getCollection('vocabulary');
+const conceptsEntries = await getCollection('concepts');
+
+// Helper function to convert filenames to titles, preserving acronym casing
+function toProperCase(str: string): string {
+  return str
+    .replace(/[-_]/g, ' ') // Replace hyphens/underscores with spaces
+    .split(' ')           // Split into words
+    .map(word => {
+      if (!word) return ''; // Handle empty strings if they occur
+      const firstChar = word.charAt(0).toUpperCase(); // Capitalize the first letter
+      const restOfWord = word.slice(1); // Get the rest of the word *as is*
+      return firstChar + restOfWord; // Combine them
+    })
+    .join(' ');           // Join words back with spaces
+}
+
+// Process entries to add titles from filenames if missing and sort
+function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
+  entries.forEach(entry => {
+    // Remove the check again: always generate title from filename
+    const filename = entry.id.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    (entry.data as any).title = toProperCase(baseFilename);
+  });
+  entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
+  return entries;
+}
+
+const processedVocabularyEntries = processEntries(vocabularyEntries);
+const processedConceptsEntries = processEntries(conceptsEntries);
+
+const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => ({
+  id: entry.id,
+  slug: (entry as any).slug, // Cast to any to access Astro-generated slug
+  collection: entry.collection,
+  data: entry.data as ReferenceItem['data'], // Assert data structure matches
+}));
+
+const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => ({
+  id: entry.id,
+  slug: (entry as any).slug, // Cast to any to access Astro-generated slug
+  collection: entry.collection,
+  data: entry.data as ReferenceItem['data'], // Assert data structure matches
+}));
+---
+
+<Layout title="Reference - Vocabulary & Concepts">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">Reference Library</h1>
+    <p class="text-lg mb-8">Browse our collection of vocabulary terms and conceptual frameworks.</p>
+
+    <div class="flex gap-4 mb-8">
+      <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
+      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
+      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Concepts</a>
+    </div>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
+      <p class="mb-6">Terms and definitions used throughout our work.</p>
+
+      <ReferenceGrid items={vocabularyItems} />
+    </section>
+
+    <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+
+    <section>
+      <h2 class="text-2xl font-bold mb-4">Concepts</h2>
+      <p class="mb-6">Important ideas and frameworks we use in our work.</p>
+
+      <ReferenceGrid items={conceptItems} />
+    </section>
+
+  </div>
+</Layout>

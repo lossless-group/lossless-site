@@ -1,0 +1,59 @@
+{
+  "max_columns": 3,
+  "index": [
+    {
+      "icon": "./node_modules/@tabler/icons/icons/filled/windmill.svg",
+      "title": "A universe of cognitive, collaborative tooling",
+      "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
+      "iconClass": "text-blue-500",
+      "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
+      "messageClass": "",
+      "animationClass": ""
+    },
+    {
+      "icon": "./node_modules/@tabler/icons/icons/filled/shield.svg",
+      "title": "Assure your strategy keeps you ahead",
+      "message": "Your data is protected with industry-leading encryption.",
+      "iconClass": "text-green-600",
+      "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
+      "messageClass": "",
+      "animationClass": "aos-fade-up"
+    },
+    {
+      "icon": "./node_modules/@tabler/icons/icons/filled/alien.svg",
+      "title": "Real-time insights at your fingertips",
+      "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
+      "iconClass": "text-blue-500",
+      "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
+      "messageClass": "text-sm",
+      "animationClass": "aos-fade-up"
+    },
+    {
+      "icon": "./node_modules/@tabler/icons/icons/filled/apple.svg",
+      "title": "Real-time insights at your fingertips",
+      "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
+      "iconClass": "text-blue-500",
+      "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
+      "messageClass": "text-sm",
+      "animationClass": "aos-fade-up"
+    },
+    {
+      "icon": "./node_modules/@tabler/icons/icons/filled/artboard.svg",
+      "title": "Real-time insights at your fingertips",
+      "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
+      "iconClass": "text-blue-500",
+      "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
+      "messageClass": "text-sm",
+      "animationClass": "aos-fade-up"
+    },
+    {
+      "icon": "./node_modules/@tabler/icons/icons/filled/basket.svg",
+      "title": "Multi-modal, multimedia, content automation",
+      "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
+      "iconClass": "text-blue-500",
+      "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
+      "messageClass": "text-sm",
+      "animationClass": "aos-fade-up"
+    }
+  ]
+}

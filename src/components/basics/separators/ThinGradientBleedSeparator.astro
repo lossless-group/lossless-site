@@ -1,32 +1,110 @@
 ---
+/**
+ * ThinGradientBleedSeparator.astro
+ * 
+ * A full-width separator component that breaks out of its container while maintaining document flow.
+ * Uses a wrapper + absolute positioning technique to create elements that span the full viewport width
+ * while the main content remains constrained.
+ * 
+ * @component
+ * @example
+ * <ThinGradientBleedSeparator />
+ * <ThinGradientBleedSeparator height="4px" color="var(--clr-accent)" marginTop="2rem" marginBottom="2rem" />
+ */
+
+// Import global styles
 import "@styles/global.css";
+
+// Define component props with defaults
+interface Props {
+  /**
+   * Height of the separator line
+   * @default "2px"
+   */
+  height?: string;
+  
+  /**
+   * Background color or gradient for the separator
+   * @default "var(--grd__primary-bg)"
+   */
+  color?: string;
+  
+  /**
+   * Top margin for the separator wrapper
+   * @default "0"
+   */
+  marginTop?: string;
+  
+  /**
+   * Bottom margin for the separator wrapper
+   * @default "0"
+   */
+  marginBottom?: string;
+  
+  /**
+   * Enable animation for the separator
+   * @default false
+   */
+  animate?: boolean;
+}
+
+// Set default values for props
+const {
+  height = "2px",
+  color = "var(--grd__primary-bg)",
+  marginTop = "0",
+  marginBottom = "0",
+  animate = false
+} = Astro.props;
 ---
 
-<div class="full-bleed separator--primary-bg-grd"></div>
+<!-- 
+  Separator wrapper maintains position in document flow
+  Inner element is positioned absolutely to span full viewport width
+-->
+<div class="separator-wrapper" style={`margin-top: ${marginTop}; margin-bottom: ${marginBottom};`}>
+  <div 
+    class={`separator--full-width ${animate ? 'separator--animate' : ''}`} 
+    style={`height: ${height}; background: ${color};`}
+  ></div>
+</div>
 
 <style>
-  .separator--thin {
-    width: 100%;
-    height: 1px;
-    background-color: var(--clr-lossless-primary-light);
-  }
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  /* Separator with full-bleed pattern */
-  .separator--primary-bg-grd {
-    width: 100vw !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    left: 50%;
-    right: 50%;
-    transform: translateX(-50%);
-    height: 2px;
-    background: var(--grd__primary-bg);
+  /**
+   * Wrapper element that maintains its place in document flow
+   * Position is relative to serve as positioning context for absolute child
+   */
+  .separator-wrapper {
     position: relative;
+    width: 100%;
+    height: var(--separator-height, 2px);
+    overflow: visible;
+  }
+
+  /**
+   * Absolutely positioned child that breaks out of container
+   * Uses left: 50% and transform: translateX(-50%) to center
+   * Width: 100vw ensures it spans the full viewport width
+   */
+  .separator--full-width {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: 2px; /* Default, overridden by inline style */
+    background: var(--grd__primary-bg); /* Default, overridden by inline style */
+  }
+  
+  /**
+   * Optional animation effect for the separator
+   * Only applied when animate prop is true
+   */
+  .separator--animate {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
+  .separator--animate:hover {
+    opacity: 0.8;
+    transform: translateX(-50%) scaleY(1.5);
   }
 </style>

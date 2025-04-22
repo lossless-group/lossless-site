@@ -5,8 +5,12 @@ import TagCloud from "./TagCloud.astro";
 interface Tool {
   site_name?: string;
   title?: string;
+  zinger?: string;
+  og_title?: string;
   url: string;
   image?: string;
+  og_image?: string;
+  og_image_url?: string;
   favicon?: string;
   description?: string;
   description_site_cp?: string;
@@ -20,8 +24,12 @@ interface Props {
   // Support for direct properties
   site_name?: string;
   title?: string;
+  zinger?: string;
+  og_title?: string;
   url?: string;
   image?: string;
+  og_image?: string;
+  og_image_url?: string;
   favicon?: string;
   description?: string;
   description_site_cp?: string;
@@ -36,8 +44,12 @@ const { tool, ...directProps } = Astro.props;
 const {
   site_name = directProps.site_name,
   title = directProps.title,
+  zinger = directProps.zinger,
+  og_title = directProps.og_title,
   url = directProps.url,
   image = directProps.image,
+  og_image = directProps.og_image,
+  og_image_url = directProps.og_image_url,
   favicon = directProps.favicon,
   description = directProps.description,
   description_site_cp = directProps.description_site_cp,
@@ -52,8 +64,11 @@ const safeTags = tags || [];
 // Get the effective site name using the utility function
 const effectiveSiteName = getEffectiveSiteName(site_name, filename, url);
 
-// Only set displayTitle if title exists, otherwise leave it blank
-const displayTitle = title ? filterTitle(title, effectiveSiteName || "") : "";
+// Get the effective title with fallback order: zinger → title → og_title
+const effectiveTitle = zinger || title || og_title || "";
+
+// Only filter the title if it exists, otherwise leave it blank
+const displayTitle = effectiveTitle ? filterTitle(effectiveTitle, effectiveSiteName || "") : "";
 
 // More robust description handling
 const hasDescriptionSiteCp =
@@ -88,15 +103,15 @@ const effectiveDescription = hasDescriptionSiteCp
 }); */
 ---
 
-<div class="tool-card">
+<div class="tool-card card card-hover-effect" data-tags={JSON.stringify(safeTags)}>
   <div class="content-wrapper">
     {
-      (image || og_screenshot_url) && (
+      (image || og_image || og_image_url || og_screenshot_url) && (
         <div class="tool-card-image">
           <img
-            src={image || og_screenshot_url}
+            src={image || og_image || og_image_url || og_screenshot_url}
             alt={displayTitle}
-            data-primary-image={image}
+            data-primary-image={image || og_image || og_image_url}
             data-screenshot-url={og_screenshot_url}
           />
         </div>
@@ -106,14 +121,17 @@ const effectiveDescription = hasDescriptionSiteCp
       <div class="tool-card__site-name">
         {favicon && <img class="tool-favicon" src={favicon} alt="" />}
         <a href={url} target="_blank" rel="noopener noreferrer">
-          <h2>{effectiveSiteName}</h2>
+          <h2><span class="text-wrapper">{effectiveSiteName}</span></h2>
         </a>
       </div>
-      <h4>{displayTitle}</h4>
+      <h4><span class="text-wrapper">{displayTitle}</span></h4>
     </div>
     {
       effectiveDescription && (
-        <p class="tool-description">{effectiveDescription}</p>
+        <p class="tool-description">
+          <!-- Wrap the description in a span to ensure proper text handling -->
+          <span class="description-text">{effectiveDescription}</span>
+        </p>
       )
     }
     <TagCloud tags={tags} />
@@ -183,7 +201,7 @@ const effectiveDescription = hasDescriptionSiteCp
     color: aliceblue;
     padding: 0.15em;
     border-radius: 1em;
-    transition: all 0.2s ease-in-out;
+    /* Removed transition property - now handled by card-hover-effect class */
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -204,17 +222,9 @@ const effectiveDescription = hasDescriptionSiteCp
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%; /* Ensure content wrapper takes full width */
     padding: 0.5em;
-  }
-
-  .tool-card:hover {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 20%
-    );
-    transform: translateY(-2px);
-    margin-bottom: 0;
+    box-sizing: border-box; /* Include padding in width calculation */
   }
 
   .tool-card-image {
@@ -228,11 +238,17 @@ const effectiveDescription = hasDescriptionSiteCp
     height: 180px;
     object-fit: cover;
     border-radius: 0.5em;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .tool-card:hover .tool-card-image img {
+    transform: scale(1.1);
   }
 
   .tool-card__header {
-    display: block;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     gap: 0.5em;
     margin-bottom: 0.5em;
   }
@@ -241,11 +257,14 @@ const effectiveDescription = hasDescriptionSiteCp
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
+    width: 100%; /* Ensure it takes full width */
   }
 
   .tool-card__site-name h2 {
     margin: 0;
     line-height: 1;
+    width: 100%; /* Ensure it takes full width */
+    overflow: hidden; /* Prevent overflow */
   }
 
   .tool-favicon {
@@ -269,9 +288,50 @@ const effectiveDescription = hasDescriptionSiteCp
     font-size: var(--fs-300);
     margin-bottom: 0.5em;
     flex-grow: 1;
+    width: 100%; /* Ensure it takes full width */
+    max-width: 100%; /* Prevent overflow */
+    word-wrap: break-word; /* Allow long words to break */
+    word-break: break-word; /* Handle long strings without spaces */
+    hyphens: auto; /* Enable hyphenation for better text wrapping */
+    overflow-wrap: break-word; /* Modern property for word wrapping */
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+  }
+
+  .description-text {
+    display: inline-block;
+    width: 100%;
+    white-space: normal; /* Ensure text wraps */
+  }
+
+  /* Common text wrapping styles for all text elements */
+  .text-wrapper {
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Apply text wrapping to headings */
+  .tool-card h2, 
+  .tool-card h4 {
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .tool-card h4 {
+    color: var(--clr-heading);
+    font-size: var(--fs-350);
+    margin: 0;
+    flex-grow: 1;
   }
 </style>

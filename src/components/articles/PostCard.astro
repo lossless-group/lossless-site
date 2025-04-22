@@ -1,0 +1,202 @@
+---
+// PostCard.astro
+// Accepts a generic object as props and deconstructs only the needed fields.
+// This follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
+// Example usage: <PostCard {...item} />
+
+import TagCloud from "../tool-components/TagCloud.astro";
+import AuthorHandle from "../basics/AuthorHandle.astro";
+import { formatDate } from "@utils/formatDate";
+
+// Accept both Astro collection entry and flat frontmatter object
+const { data, ...rest } = Astro.props;
+const props = data ? data : Astro.props;
+const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
+
+// Format date if it exists
+// This block ensures we always pass a Date object or ISO string to formatDate, which expects (Date | string)
+// Defensive: If the input is a Date, we use as-is; if string, we convert to Date; otherwise, fallback to string
+let formattedDate = '';
+if (date_authored_initial_draft) {
+  try {
+    // If already a Date, use as-is; if string, convert to Date; otherwise, fallback
+    const dateObj = typeof date_authored_initial_draft === 'string' ? new Date(date_authored_initial_draft) : date_authored_initial_draft;
+    if (dateObj instanceof Date && !isNaN(dateObj.valueOf())) {
+      // formatDate expects Date or string, so this is safe
+      formattedDate = formatDate(dateObj);
+    } else if (typeof date_authored_initial_draft === 'string') {
+      formattedDate = date_authored_initial_draft;
+    }
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    formattedDate = date_authored_initial_draft?.toString() || '';
+  }
+}
+
+const hasAuthors = Array.isArray(authors) && authors.length > 0;
+
+---
+
+<article class="post-card card-hover-effect">
+  {banner_image && <img src={banner_image} alt={title} class="post-card__image" />}
+  <div class="content-wrapper">
+    <div class="post-card__header">
+      <h2 class="post-card__title"><a href={url}><span class="text-wrapper">{title}</span></a></h2>
+      <p class="post-card__lede"><span class="text-wrapper">{lede || summary}</span></p>
+    </div>
+    <div class="post-card__meta">
+      {/*
+        Layout Correction: Author and date are now wrapped in a flex row and spaced apart.
+        - .post-card__meta-row uses justify-content: space-between for polar alignment.
+        - TagCloud is rendered below, never sharing space with author/date.
+        - Aggressive comments clarify structure.
+      */}
+      <div class="post-card__meta-row">
+        <span class="post-card__author">
+          {/**
+           * AuthorHandle is called here to render the author information for the article card.
+           * Props passed:
+           * - authors: authors (from article data)
+           * - showName: true (display author name)
+           * - showRole: false (do not display author role)
+           * - nameClass: "author-name--article-card" (for article card-specific styling)
+           * - avatarClass: "avatar-bg-attn avatar-base" (for avatar circle border and size)
+           *
+           * NOTE: Do NOT include the base class "author-name" in nameClass; it is always applied by AuthorHandle.
+           * All font size and style for article cards is handled by .author-name--article-card.
+           * Avatar border and size are handled by avatar-bg-attn/avatar-base (see avatars.css)
+           *
+           * Other places AuthorHandle is called:
+           * - site/src/components/changelog/ChangelogEntry.astro (with nameClass="author-name--changelog")
+           * - site/src/components/articles/PostCardFeature.astro (with nameClass="author-name--article-card")
+           */}
+          <AuthorHandle authors={authors} showName={true} showRole={false} nameClass="author-name--article-card" avatarClass="avatar-bg-attn avatar-base" />
+        </span>
+        <span class="post-card__date">{formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}</span>
+      </div>
+      {tags && tags.length > 0 && (
+        <div class="post-card__meta-tags">
+          <TagCloud tags={tags} />
+        </div>
+      )}
+    </div>
+  </div>
+</article>
+
+<!--
+  PostCard.astro expects to receive either:
+    - a generic prompt object (Astro content entry) with data: {frontmatter fields}
+    - or a flat frontmatter object with all fields at the top level
+  All props are destructured from Astro.props and data; no type enforcement is used.
+  This pattern is explicitly required by project rules and .windsurfrules.
+-->
+
+<style>
+  /* Standard card styling aligned with site design system */
+  .post-card {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    color: var(--clr-lossless-primary-light);
+    padding: 1rem;
+    border-radius: 1em;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .post-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .post-card__title {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-bold);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .post-card__title a {
+    color: var(--clr-heading);
+    text-decoration: none;
+  }
+
+  .post-card__title a:hover {
+    text-decoration: underline;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .post-card__lede {
+    font-size: var(--fs-350);
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .post-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: var(--fs-250);
+    color: var(--clr-body);
+    margin-top: auto;
+  }
+
+  .post-card__meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .post-card__author,
+  .post-card__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .post-card__meta-tags {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .post-card__image {
+    width: 100%;
+    border-radius: 0.5rem;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Common text wrapping styles for all text elements */
+  .text-wrapper {
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+</style>

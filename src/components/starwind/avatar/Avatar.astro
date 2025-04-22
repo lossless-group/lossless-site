@@ -2,10 +2,18 @@
 import type { HTMLAttributes } from "astro/types";
 import { tv, type VariantProps } from "tailwind-variants";
 
+/**
+ * Avatar component that allows for parent-driven border and size control.
+ * 
+ * The `avatarClass` prop from the parent component can be merged into the inner `<figure>` element.
+ * 
+ * @example
+ * <Avatar avatarClass="bg-image" />
+ */
 interface Props extends HTMLAttributes<"div">, VariantProps<typeof avatar> {}
 
 const avatar = tv({
-	base: "text-foreground bg-muted relative overflow-hidden rounded-full border-2",
+	base: "text-foreground relative overflow-hidden rounded-full border-2",
 	variants: {
 		variant: {
 			default: "border-border",

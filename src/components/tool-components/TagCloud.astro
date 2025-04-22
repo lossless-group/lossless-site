@@ -6,6 +6,10 @@ interface Props {
   tagFrequencies?: Record<string, number>;
   visibleTagRowLimit?: number;
   maxWidth?: string;
+  /**
+   * The route to use for each tag chip. Defaults to "vibe-with" if not provided.
+   */
+  tagRoute?: string;
 }
 
 const {
@@ -13,10 +17,14 @@ const {
   tagFrequencies = {},
   visibleTagRowLimit = 4,
   maxWidth = "100%",
+  tagRoute
 } = Astro.props;
 
 // Ensure tags is always an array
 const tags = rawTags ?? [];
+
+// Use the provided tagRoute, or fallback to "vibe-with" if not set or not a string
+const routeForTags = typeof tagRoute === "string" && tagRoute.trim() !== "" ? tagRoute : "vibe-with";
 
 // Calculate approximate row height based on tag chip height + gap
 const rowHeight = 26; // Tag height (22px) + gap (6px)
@@ -31,9 +39,14 @@ const maxHeight = visibleTagRowLimit * rowHeight;
     {
       tags.map((tag) => (
         <TagChip
+          tagString={tag}
           tag={tag}
-          count={tagFrequencies[tag] || 0}
-          includeCount={true}
+          count={tagFrequencies && tagFrequencies[tag] > 0 ? tagFrequencies[tag] : undefined}
+          includeCount={!!tagFrequencies}
+          /**
+           * Use the resolved routeForTags so the tag destination is always dynamic and correct.
+           */
+          route={routeForTags}
         />
       ))
     }
@@ -44,7 +57,7 @@ const maxHeight = visibleTagRowLimit * rowHeight;
   .tool-cloud {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6em;
+    gap: 0.2em;
     width: 100%;
     justify-content: space-between;
   }
@@ -52,18 +65,20 @@ const maxHeight = visibleTagRowLimit * rowHeight;
   .tool-tags {
     display: flex;
     flex-flow: row wrap;
-    gap: 0.5em;
+    gap: 0.2em;
     width: 100%;
     overflow-y: hidden;
-    padding: 0.6em 1em;
+    padding: 0.4em 0.6em;
     justify-content: space-between; /* Add space for potential scrollbar */
   }
 
   /* Show scrollbar on hover if content overflows */
   .tool-tags:hover {
-    background: calc(var(--clr-lossless-primary-dark) * 80%);
+    background: var(--clr-lossless-primary-dark-80);
     border: 0.1em solid var(--clr-lossless-primary-glass);
     border-radius: 1em;
+    overflow-y: auto; /* Change from hidden to auto on hover */
+    z-index: 5; /* Lower z-index to ensure tag chips appear above */
   }
 
   /* Customize scrollbar */

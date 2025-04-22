@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
+
+// Get entries from concepts collection
+// Use type assertion to avoid TypeScript errors until Astro regenerates types
+const conceptsEntries = await getCollection('concepts' as any) as any[];
+
+// Helper function to convert filename to proper case
+function toProperCase(str) {
+  // Handle hyphenated or underscored filenames
+  return str
+    .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+// Process entries to ensure they all have titles
+// For entries without titles, use the filename as the title in proper case
+conceptsEntries.forEach(entry => {
+  if (!entry.data.title) {
+    const filename = entry.id.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    entry.data.title = toProperCase(baseFilename);
+  }
+});
+
+// Sort entries alphabetically by title
+conceptsEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<Layout title="Concepts">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">Concepts</h1>
+    <p class="mb-6">Important ideas and frameworks we use in our work.</p>
+    
+    <!-- Navigation tabs -->
+    <div class="flex gap-4 mb-8">
+      <a href="/more-about" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">All Reference</a>
+      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
+      <a href="/more-about/concepts" class="px-4 py-2 bg-blue-600 text-white rounded-md">Concepts</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {conceptsEntries.map(entry => (
+        <ConceptPreviewCard entry={entry} />
+      ))}
+    </div>
+  </div>
+</Layout>

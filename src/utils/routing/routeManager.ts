@@ -18,9 +18,21 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'more-about'
   },
   {
-    contentPath: 'lost-in-public/prompts',
-    routePath: 'prompts'
+    contentPath: 'concepts',
+    routePath: 'more-about'
   },
+  {
+    contentPath: 'lost-in-public/prompts',
+    routePath: 'thread/prompts'
+  },
+  {
+    contentPath: 'content/visuals',
+    routePath: 'content/visuals'
+  },
+  {
+    contentPath: 'assets',
+    routePath: 'assets'
+  }
   // Add more mappings as needed
 ];
 

@@ -1,8 +1,26 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import ThreeColumnFrame from "@layouts/ThreeColumnFrame.astro";
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 ---
 
 <Layout>
+  <AnimationWrapper>
+    <Hero
+      title="Level Up the Whole Organization"
+      subtitle="With technology accelerating exponentially"
+      description="With the right tools, mindset, processes, and culture, any organization can upskill everyone for the era of AI"
+      ctaText="Explore Components"
+      ctaUrl="/examples"
+      image={{
+        src: "/visuals/Convey__Picto__Assembly-Line.svg",
+        alt: "Assembly line illustration"
+      }}
+      alignment="left"
+      fullBleed={true}
+      animate={true}
+    />
+  </AnimationWrapper>
   <ThreeColumnFrame />
 </Layout>

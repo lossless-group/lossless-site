@@ -1,0 +1,62 @@
+/*
+ * Global style for changelog author name variant.
+ * This class is used by passing nameClass="author-name--changelog" to AuthorHandle.
+ * To update appearance, edit this file. This ensures styles are always available regardless of Astro component boundaries.
+ */
+.author-name--changelog {
+   font-family: var(--ff-base);
+  font-size: .7rem;
+  font-weight: 400;
+  color: #f7fafc;
+  letter-spacing: 0.01em;
+}
+
+/*
+ * Global style for article card author name variant.
+ * This class is used by passing nameClass="author-name--article-card" to AuthorHandle.
+ * For use in PostCard.astro and PostCardFeature.astro.
+ * To update appearance, edit this file. This ensures styles are always available regardless of Astro component boundaries.
+ *
+ * Current usages:
+ * - PostCard.astro (site/src/components/articles/PostCard.astro)
+ * - PostCardFeature.astro (site/src/components/articles/PostCardFeature.astro)
+ */
+.author-name--article-card {
+  font-family: var(--ff-base);
+  font-size: var(--fs-200);
+  font-weight: var(--fw-semi-bold);
+  color: var(--clr-body);
+  letter-spacing: 0.01em;
+}
+
+/*
+ * Avatar with attention/action border color and size variants.
+ * .avatar-bg-attn sets the border color (no background).
+ * Use one of the size classes below for sizing:
+ *   - .avatar-base (default)
+ *   - .avatar-lg
+ *   - .avatar-sm
+ *
+ * To apply: <figure class="avatar-bg-attn avatar-base">...</figure>
+ *
+ * Sizing is DRY and matches the default avatar sizes in the Avatar.astro component.
+ */
+.avatar-bg-attn {
+  border-color: var(--clr-lossless-attn-action) !important;
+  background: none !important;
+}
+.avatar-base {
+  height: 2.5rem; /* 40px */
+  width: 2.5rem;  /* 40px */
+  font-size: 1rem;
+}
+.avatar-lg {
+  height: 3rem;   /* 48px */
+  width: 3rem;    /* 48px */
+  font-size: 1.25rem;
+}
+.avatar-sm {
+  height: 2rem;   /* 32px */
+  width: 2rem;    /* 32px */
+  font-size: 0.875rem;
+}

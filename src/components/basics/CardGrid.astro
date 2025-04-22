@@ -48,24 +48,37 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
 </div>
 
 <script is:inline>
-  // Handle mouse position for cards
-  const handleMouseMove = (e) => {
+  // PERFORMANCE OPTIMIZATION: Remove mousemove event for all cards.
+  // Instead, only update hovered card using pointerenter/leave for GPU compositing.
+  // This avoids layout thrash and paint storms from updating all cards on every mousemove.
+
+  // Helper to set and unset mouse position CSS vars on a card
+  function setCardMouseVars(card, x, y) {
+    card.style.setProperty("--mouse-x", `${x}px`);
+    card.style.setProperty("--mouse-y", `${y}px`);
+  }
+  function clearCardMouseVars(card) {
+    card.style.removeProperty("--mouse-x");
+    card.style.removeProperty("--mouse-y");
+  }
+
+  // Attach listeners after DOMContentLoaded
+  document.addEventListener("DOMContentLoaded", () => {
     const cards = document.getElementsByClassName("card");
-
     for (const card of cards) {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      card.style.setProperty("--mouse-x", `${x}px`);
-      card.style.setProperty("--mouse-y", `${y}px`);
+      card.addEventListener("pointerenter", (e) => {
+        const rect = card.getBoundingClientRect();
+        setCardMouseVars(card, e.clientX - rect.left, e.clientY - rect.top);
+      });
+      card.addEventListener("pointermove", (e) => {
+        const rect = card.getBoundingClientRect();
+        setCardMouseVars(card, e.clientX - rect.left, e.clientY - rect.top);
+      });
+      card.addEventListener("pointerleave", () => {
+        clearCardMouseVars(card);
+      });
     }
-  };
-
-  // Add event listener when the document is ready
-  document
-    .querySelector(".cards-container")
-    ?.addEventListener("mousemove", handleMouseMove);
+  });
 </script>
 
 <style define:vars={{ gap }}>
@@ -137,23 +150,7 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
     pointer-events: none;
   }
 
-  :global(.card)::before {
-    background: radial-gradient(
-      800px circle at var(--mouse-x) var(--mouse-y),
-      var(--clr-lossless-primary-glass),
-      transparent 40%
-    );
-    z-index: -1;
-  }
-
-  :global(.card)::after {
-    background: radial-gradient(
-      600px circle at var(--mouse-x) var(--mouse-y),
-      rgba(174, 215, 245, 0.468),
-      transparent 40%
-    );
-    z-index: -1;
-  }
+  /* Radial gradient hover effect removed for performance. Previously, :global(.card)::before and ::after used radial-gradient backgrounds with mouse tracking, which caused page lag. This is now removed per user request. */
 
   :global(.card:hover)::before {
     opacity: 1;

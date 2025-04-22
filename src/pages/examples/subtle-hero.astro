@@ -1,0 +1,122 @@
+---
+/**
+ * Subtle Hero Component Example Page
+ * 
+ * This page demonstrates the subtle Hero component with its clean, minimalist design.
+ */
+import Layout from "@layouts/Layout.astro";
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+import ThinGradientBleedSeparator from "@components/basics/separators/ThinGradientBleedSeparator.astro";
+---
+
+<Layout title="Subtle Hero Component Examples">
+  <AnimationWrapper>
+    <main>
+      <div class="container" data-animate="fade-in">
+        <h1>Subtle Hero Component Examples</h1>
+        <p class="intro">
+          This page demonstrates the subtle Hero component with its clean, minimalist design and smooth animations.
+        </p>
+      </div>
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.1">
+        <div class="container">
+          <h2>Example 1: Left-Aligned with Image</h2>
+          <p>Using the subtle Hero component with left alignment and an image:</p>
+        </div>
+        
+        <Hero
+          title="Build Better Experiences"
+          subtitle="With Lossless Components"
+          description="Our component library helps you create beautiful, accessible interfaces with minimal effort."
+          ctaText="Get Started"
+          ctaUrl="/docs"
+          image={{
+            src: "/visuals/Convey__Picto__Assembly-Line.svg",
+            alt: "Assembly line illustration"
+          }}
+          alignment="left"
+          fullBleed={true}
+          animate={true}
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.2">
+        <div class="container">
+          <h2>Example 2: Center-Aligned without Image</h2>
+          <p>A center-aligned hero without an image:</p>
+        </div>
+        
+        <Hero
+          title="Customize Your Experience"
+          subtitle="Flexible & Powerful"
+          description="The Hero component supports various layouts and content configurations to meet your specific needs."
+          ctaText="View Documentation"
+          ctaUrl="/docs/hero"
+          alignment="center"
+          fullBleed={false}
+          animate={true}
+        />
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <section class="example-section" data-animate="fade-up" data-animate-delay="0.3">
+        <div class="container">
+          <h2>Example 3: Animations Disabled</h2>
+          <p>The same hero with animations disabled:</p>
+        </div>
+        
+        <Hero
+          title="Accessibility First"
+          subtitle="For Everyone"
+          description="All components are designed with accessibility in mind, including the option to disable animations."
+          ctaText="Learn More"
+          ctaUrl="/docs/accessibility"
+          image={{
+            src: "/visuals/Convey__Picto__Assembly-Line.svg",
+            alt: "Assembly line illustration"
+          }}
+          alignment="left"
+          fullBleed={true}
+          animate={false}
+        />
+      </section>
+    </main>
+  </AnimationWrapper>
+</Layout>
+
+<style>
+  .container {
+    width: 92%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 0;
+  }
+  
+  h1 {
+    font-size: var(--fs-800);
+    margin-bottom: 1rem;
+  }
+  
+  h2 {
+    font-size: var(--fs-600);
+    margin-bottom: 0.5rem;
+  }
+  
+  .intro {
+    font-size: var(--fs-450);
+    margin-bottom: 2rem;
+  }
+  
+  .example-section {
+    margin: 3rem 0;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+</style>

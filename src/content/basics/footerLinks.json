@@ -1,0 +1,12 @@
+{
+  "Column Header One": [
+    {"Link Label 1": "/path-1"},
+    {"Link Label 2": "/path-2"},
+    {"Link Label 3": "/path-3"}
+  ],
+  "Column Header Two": [
+    {"Link Label 4": "/path-4"},
+    {"Link Label 5": "/path-5"},
+    {"Link Label 6": "/path-6"}
+  ]
+}
