@@ -179,10 +179,7 @@ const title = data.id ?
         border: 1px solid rgb(255, 255, 255);
         padding: 0.5rem 0.75rem;
         text-align: left;
-        colrgb(255, 255, 255);
     }
-
-
   </style>
 }
 
@@ -210,12 +207,6 @@ const title = data.id ?
 }
 
 {(node.type === "code") &&
-  /*
-    Render code blocks using the BaseCodeblock component for unified styling and copy functionality.
-    The language header (e.g., 'bash', 'js') is rendered ONLY by BaseCodeblock.astro.
-    DO NOT render the language header here to avoid duplication.
-    Single Source of Truth: site/src/components/codeblocks/BaseCodeblock.astro
-  */
   <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
 }
 

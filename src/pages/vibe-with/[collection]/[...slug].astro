@@ -59,6 +59,9 @@ export async function getStaticPaths() {
         .join(' ');
     }
 
+    // DEBUG: Print out all slugs for this collection
+    console.log(`[STATIC PATHS] ${collectionName}:`, entries.map(e => ({ id: e.id, slug: e.data?.slug })));
+
     return entries.map(entry => {
       // Extract just the filename without path and extension
       const filename = entry.id.replace(/\.md$/, '');
@@ -116,6 +119,7 @@ export async function getStaticPaths() {
   const remindersPaths = createStaticPathsForCollection(remindersEntries, 'reminders'); // [EntryData enforced]
 
   // Combine all path arrays
+  console.log('--- SPECS STATIC PATHS ---', specsPaths.map(p => p.params));
   return [...promptsPaths, ...specsPaths, ...remindersPaths];
 }
 

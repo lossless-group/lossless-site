@@ -9,15 +9,9 @@ import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
 import node from '@astrojs/node';
+import rehypeMermaid from 'rehype-mermaid';
+import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
-
-// ---
-// Syntax Highlighting Configuration (Shiki)
-// See: https://docs.astro.build/en/guides/syntax-highlighting/
-//
-// This configures Shiki as the syntax highlighter for all Markdown/MDX code blocks.
-// Custom themes and languages can be set here.
-// ---
 
 /** @type {ShikiLang[]} */
 const langs = [
@@ -35,6 +29,25 @@ export default defineConfig({
     },
     remarkPlugins: [
       /** @type {any} */ (normalizeShellLangs),
+    ],
+    remarkRehype: {
+      allowDangerousHtml: true,
+      // If you have custom handlers, add them here (e.g., defListHastHandlers)
+      // handlers: defListHastHandlers,
+    },
+    // rehypePlugins array added to enable HTML transformations on Markdown
+    rehypePlugins: [
+      // rehypeRaw must come first to process raw HTML nodes in markdown
+      rehypeRaw,
+      // rehype-mermaid for UML/Mermaid diagrams
+      [
+        rehypeMermaid,
+        {
+          strategy: 'img-svg',
+          dark: true
+        }
+      ],
+      // rehypeModifyMermaidGraphs, // Uncomment if/when available
     ]
   },
   output: "server",
@@ -57,10 +70,5 @@ export default defineConfig({
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
     }
-  },
-  experimental: {
-    svg: true,
   }
 });
-// Using Astro's built-in Shiki integration for syntax highlighting (SSR/static compatible)
-// No Prism integration needed. Shiki handles all syntax highlighting.
