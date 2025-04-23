@@ -184,19 +184,10 @@ const toolCollection = defineCollection({
 
 const specsCollection = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "../content/specs" }),
-  schema: z.object({}).passthrough().transform((data, context) => {
-    // Extract filename without extension for slug
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    return {
-      ...data,
-      // Always normalize tags to an array
-      tags: Array.isArray(data.tags)
-        ? data.tags
-        : data.tags ? [data.tags] : [],
-      // Add slug for routing/lookup
-      slug: filename.toLowerCase().replace(/\s+/g, '-')
-    };
-  })
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    tags: Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : []
+  }))
 });
 
 // ========================================
