@@ -1,0 +1,49 @@
+---
+/* ===================================> 
+/* Bare variant of ArticlePreview--Row.astro for minimal, unstyled, and layout-agnostic article previews. */
+
+interface Props {
+  pageName: string;
+  relativePath: string;
+  frontmatter: {
+    title?: string;
+    date_created?: string;
+    date_authored_initial_draft?: string;
+    authors?: string[];
+    category?: string;
+    description?: string;
+    tags?: string[];
+    [key: string]: any;
+  }
+}
+
+// Destructure props as in ArticlePreview--Row.astro
+const { pageName, relativePath, frontmatter }: { pageName: string; relativePath: string; frontmatter: any } = Astro.props;
+
+// Use fallbacks for optional fields
+const title = frontmatter.title || pageName;
+const date = frontmatter.date_created || frontmatter.date_authored_initial_draft || '';
+const authors = Array.isArray(frontmatter.authors) ? frontmatter.authors : (typeof frontmatter.authors === 'string' ? [frontmatter.authors] : []);
+const description = frontmatter.description || frontmatter.synopsis || '';
+const category = frontmatter.category || '';
+
+---
+
+<!-- ===================================================================== -->
+<!-- Bare, layout-agnostic article preview row. No default grid, color, or spacing. -->
+<!-- Only outputs core article info. Style externally as needed. -->
+<!-- ===================================================================== -->
+<div>
+  <h3><a href={relativePath}>{title}</a></h3>
+  {date && <div>{date}</div>}
+  {authors.length > 0 && (
+    <div>{authors.join(', ')}</div>
+  )}
+  {category && <div>{category}</div>}
+  {description && <div>{description}</div>}
+  {frontmatter.tags && frontmatter.tags.length > 0 && (
+    <div>{frontmatter.tags.map((tag: string) => <span>{tag}</span>)}</div>
+  )}
+</div>
+
+<!-- No <style> block: all styling is left to parent/container. -->

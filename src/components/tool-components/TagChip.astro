@@ -12,6 +12,7 @@
  * - Generates href as `/${route}/${tag}` unless `href` is explicitly provided.
  * - Logs a warning in development if `route` is missing or invalid.
  * - Accepts a `tagString` prop (renamed from `tag`) to avoid boolean inference bugs.
+ * - Accepts an optional `fontSize` prop to customize the font size of the tag label.
  */
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
   title?: string;
   href?: string;
   route?: string; // NEW: dynamic route context for tag links
+  fontSize?: string; // Optional: custom font size for tag label
   [key: string]: any; // Allow other HTML attributes such as aria-label, onClick, etc.
 }
 
@@ -33,7 +35,8 @@ const {
   selected = false,
   title,
   href,
-  route
+  route,
+  fontSize // New optional prop for font size
 } = Astro.props;
 
 // Defensive: Warn if tagString is not a string
@@ -90,7 +93,7 @@ if (!href) {
   aria-label={`Filter by ${normalCase}${isTagSelected ? ' (currently selected)' : ''}`}
   data-tag={tagString}
 >
-  <p>{normalCase}</p>
+  <p style={fontSize ? `font-size: ${fontSize};` : undefined}>{normalCase}</p>
   {count !== undefined && count > 0 ? <span class="count">({count})</span> : null}
 </a>
 
@@ -121,7 +124,8 @@ if (!href) {
 
   /* Count styling */
   .tool-tag .count {
-    font-size: var(--fs-200) !important;
+    /* Inherit font-size from parent (the tag label), so count scales with tag chip size. */
+    font-size: inherit;
     margin-left: 0.3em;
     opacity: 0.8;
     display: inline-block;
