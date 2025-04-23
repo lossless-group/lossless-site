@@ -1,16 +1,47 @@
 // @ts-check
+
+/**
+ * @typedef {string | { id: string; [key: string]: any }} ShikiLang
+ */
+
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
 import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
+import node from '@astrojs/node';
+import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
+
+// ---
+// Syntax Highlighting Configuration (Shiki)
+// See: https://docs.astro.build/en/guides/syntax-highlighting/
+//
+// This configures Shiki as the syntax highlighter for all Markdown/MDX code blocks.
+// Custom themes and languages can be set here.
+// ---
+
+/** @type {ShikiLang[]} */
+const langs = [
+  'javascript',
+  'typescript',
+  'python'
+];
 
 export default defineConfig({
+  markdown: {
+    syntaxHighlight: 'shiki',
+    shikiConfig: {
+      theme: 'github-dark',
+      langs: /** @type {any} */ (langs)
+    },
+    remarkPlugins: [
+      /** @type {any} */ (normalizeShellLangs),
+    ]
+  },
   output: "server",
   adapter: node({
     mode: 'standalone',
   }),
-  integrations: [mdx()],
+  integrations: [mdx()], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
     resolve: {
@@ -31,3 +62,5 @@ export default defineConfig({
     svg: true,
   }
 });
+// Using Astro's built-in Shiki integration for syntax highlighting (SSR/static compatible)
+// No Prism integration needed. Shiki handles all syntax highlighting.

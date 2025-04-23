@@ -1,0 +1,35 @@
+/*
+  Shiki GitHub Dark theme CSS
+  Source: https://raw.githubusercontent.com/shikijs/shiki/main/packages/themes/github-dark.css
+  (This is a copy for local use. If you update your Shiki theme, re-download the matching CSS.)
+*/
+
+.shiki {
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+.shiki .line {
+  display: block;
+  min-height: 1.2em;
+  padding: 0 0.5em;
+}
+.shiki .line.highlighted {
+  background-color: #161b22;
+}
+.shiki .token.comment { color: #8b949e; }
+.shiki .token.string { color: #a5d6ff; }
+.shiki .token.number { color: #b5cea8; }
+.shiki .token.keyword { color: #ff7b72; }
+.shiki .token.function { color: #d2a8ff; }
+.shiki .token.type { color: #79c0ff; }
+.shiki .token.class { color: #ffa657; }
+.shiki .token.constant { color: #79c0ff; }
+.shiki .token.tag { color: #7ee787; }
+.shiki .token.attribute { color: #d2a8ff; }
+.shiki .token.punctuation { color: #c9d1d9; }
+.shiki .token.operator { color: #ff7b72; }
+.shiki .token.variable { color: #ffa657; }
+.shiki .token.regex { color: #7ee787; }
+.shiki .token.symbol { color: #ffa657; }
+.shiki .token.property { color: #79c0ff; }
+.shiki .token.namespace { color: #b5cea8; }

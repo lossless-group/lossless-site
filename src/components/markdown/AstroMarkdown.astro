@@ -210,8 +210,12 @@ const title = data.id ?
 }
 
 {(node.type === "code") &&
-  // Render code blocks using the BaseCodeblock component for unified styling and copy functionality
-  // node.value contains the code string, node.lang (if present) is the language
+  /*
+    Render code blocks using the BaseCodeblock component for unified styling and copy functionality.
+    The language header (e.g., 'bash', 'js') is rendered ONLY by BaseCodeblock.astro.
+    DO NOT render the language header here to avoid duplication.
+    Single Source of Truth: site/src/components/codeblocks/BaseCodeblock.astro
+  */
   <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
 }
 
