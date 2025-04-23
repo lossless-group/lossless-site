@@ -6,6 +6,10 @@ import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 
 interface Props {
     /**
+     * Accepts compiledContent HTML (rehype output, e.g. with mermaid diagrams) if provided.
+     */
+    compiledContent?: string;
+    /**
      * Markdown AST node interface for AstroMarkdown.astro
      * - 'lang' is present on 'code' nodes and specifies the code language (e.g., 'js', 'python').
      * - See remark/rehype AST docs for more details.

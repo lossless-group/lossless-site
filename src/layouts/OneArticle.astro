@@ -14,6 +14,9 @@ import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import remarkCitations from '@utils/markdown/remarkCitations';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
+import remarkRehype from 'remark-rehype';
+import rehypeMermaid from 'rehype-mermaid';
+import rehypeStringify from 'rehype-stringify';
 
 interface Props {
   Component: any;
@@ -23,6 +26,38 @@ interface Props {
 }
 
 const { Component, data, content, markdownFile } = Astro.props;
+
+// === BEGIN: Mermaid Variable Interpolation ===
+// Helper function: interpolate variables in mermaid code blocks in Markdown
+function interpolateMermaidVariables(markdown, variables = {}) {
+  // Defensive: always coerce markdown to string
+  const safeMarkdown = typeof markdown === 'string' ? markdown : '';
+  // Replace variables in all mermaid code blocks
+  return safeMarkdown.replace(/```mermaid([\s\S]*?)```/g, (_unused, code) => {
+    // Defensive: ensure code is always a string fallback
+    let interpolated = typeof code === 'string' ? code : '';
+    // Replace ${variable} and [...variable] patterns
+    interpolated = interpolated
+      // Replace ${variable} patterns
+      .replace(/\$\{([a-zA-Z0-9_\-\.]+)\}/g, (_m, varName) => {
+        return Object.prototype.hasOwnProperty.call(variables, varName) ? String(variables[varName]) : '';
+      })
+      // Replace [...variable] patterns
+      .replace(/\[\.\.\.([a-zA-Z0-9_\-\.]+)\]/g, (_m, varName) => {
+        return Object.prototype.hasOwnProperty.call(variables, varName) ? String(variables[varName]) : '';
+      });
+    // Remove [variable] and [...variable] only when inside a path or label (i.e., after / or .)
+    interpolated = interpolated.replace(/([/.])\[(?:\.\.\.)?[a-zA-Z0-9_\-\.]+\]/g, '$1');
+    // Normalize all non-breaking and exotic spaces to standard space (U+0020)
+    interpolated = interpolated.replace(/[\u00A0\u202F]/g, ' ');
+    return `\`\`\`mermaid${interpolated}\`\`\``;
+  });
+}
+// === END: Mermaid Variable Interpolation ===
+
+// Get variables from data or context (expand as needed)
+const variables = { tag: data?.tag || '', collection: data?.collection || '' };
+const preprocessedContent = interpolateMermaidVariables(content, variables);
 
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
@@ -34,22 +69,46 @@ const processor = unified()
   .use(remarkCallouts)       
 
 // First parse to MDAST
-const mdast = processor.parse(content || '');
+const mdast = processor.parse(preprocessedContent || '');
 // console.log("=== Raw MDAST ===", JSON.stringify(mdast, null, 2));
 
 const transformedMdast = await processor.run(mdast);
+
+// Generate HTML with only rehype and rehype-mermaid (no remark plugins)
+const astroCompiledHTML = await unified()
+  .use(remarkParse) // Add parser for Markdown
+  .use(remarkRehype) 
+  .use(rehypeMermaid)
+  .use(rehypeStringify) 
+  .process(preprocessedContent || '');
 
 // Debug output to see AST structure
 markdownDebugger.log('OneArticle.astro Debug');
 markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
 markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
+
+const html = astroCompiledHTML.toString();
+const mermaidBlocks = [];
+const mermaidRegex = /<div class="mermaid">([\s\S]*?)<\/div>/g;
+let match;
+while ((match = mermaidRegex.exec(html)) !== null) {
+  mermaidBlocks.push(match[0]); // full <div class="mermaid">...</div>
+}
+
 ---
 
 <div class="one-article">
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
+  {/* Render only the extracted mermaid blocks here */}
+  <section class="mermaid-blocks">
+    {mermaidBlocks.map((block) => (
+      <div class="mermaid-block" set:html={block}></div>
+    ))}
+  </section>
   <Component 
     content={transformedMdast}
+    compiledContent={astroCompiledHTML.toString()}
     data={data}
   >
     <slot />
