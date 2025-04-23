@@ -1,0 +1,106 @@
+---
+/**
+ * IconHeaderMessageCardGrid.astro
+ *
+ * Renders a responsive grid of IconHeaderMessageCard components.
+ * Loads card data from a JSON file (relative to src/content/).
+ *
+ * PROPS:
+ * - jsonPath (string, required): Path to the JSON file, relative to src/content
+ *   Example: "messages/vibeCodingIconHeaderMessages.json"
+ * - classes (string, optional): Additional CSS classes for the grid container
+ * - style (string, optional): Optional inline style to apply to the grid container
+ *
+ * JSON FORMAT:
+ * [
+ *   {
+ *     "title": "...",
+ *     "description": "...",
+ *     "badge": "...",           // optional
+ *     "verified": true,          // optional
+ *     "icon": "svg string"      // required: SVG markup as a string
+ *   },
+ *   ...
+ * ]
+ */
+import fs from "node:fs";
+import path from "node:path";
+import IconHeaderMessageCard from "./IconHeaderMessageCard.astro";
+
+interface CardData {
+  title: string;
+  description: string;
+  badge?: string;
+  verified?: boolean;
+  icon: string; // SVG markup as string
+  to_path?: string;
+}
+
+interface Props {
+  jsonPath: string;
+  classes?: string;
+  /**
+   * Optional inline style to apply to the grid container
+   */
+  style?: string;
+}
+
+const { jsonPath, classes = "", style = "" } = Astro.props;
+
+// Resolve and load the JSON data file
+const fullPath = path.join(process.cwd(), "src/content", jsonPath);
+let cards: CardData[] = [];
+
+try {
+  const fileContent = fs.readFileSync(fullPath, "utf-8");
+  cards = JSON.parse(fileContent);
+  console.log(`Loaded ${cards.length} cards from ${jsonPath}`);
+} catch (error) {
+  console.error(`Error loading cards from ${fullPath}:`, error);
+}
+---
+
+<!--
+  IconHeaderMessageCardGrid
+  Renders a grid of IconHeaderMessageCard components from JSON data.
+  Aggressive block comments for clarity and maintainability.
+-->
+<div class={"icon-header-message-card-grid " + classes} style={style}>
+  {cards.map(card => (
+    <IconHeaderMessageCard
+      title={card.title}
+      description={card.description}
+      badge={card.badge}
+      verified={card.verified}
+      to_path={card.to_path}
+    >
+      {card.icon && card.icon.trim().endsWith('.svg') ? (
+        <img src={card.icon} alt={card.title} width="64" height="64" loading="lazy" />
+      ) : (
+        <span set:html={card.icon} />
+      )}
+    </IconHeaderMessageCard>
+  ))}
+</div>
+
+<style>
+/*
+  IconHeaderMessageCardGrid.astro
+  Responsive grid for IconHeaderMessageCard components.
+  Designed to display 1-3 columns depending on screen size.
+  
+  CRITICAL NOTE:
+  To ensure the grid is always centered horizontally within its parent container,
+  use `margin: 2rem auto;` instead of `margin: 2rem 0;`. This applies automatic left and right margins,
+  making the grid visually centered regardless of the parent width or layout context.
+*/
+.icon-header-message-card-grid {
+  display: grid;
+  max-width: 76vw;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(1rem, 4vw, 2.5rem);
+  width: 100%;
+  place-items: center stretch;
+  margin: 2rem auto;
+}
+</style>

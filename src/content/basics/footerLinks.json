@@ -5,7 +5,7 @@
     {"Link Label 3": "/path-3"}
   ],
   "Vibe Coding Resources": [
-    {"Reminders": "thread/reminders"},
+    {"Reminders": "/thread/reminders"},
     {"Prompts": "/thread/prompts"},
     {"Specifications": "/thread/specs"}
   ]

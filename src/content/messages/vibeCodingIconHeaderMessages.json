@@ -1,0 +1,26 @@
+[
+   {
+     "title": "Reminders",
+     "description": "Reminders are prompts that need to be run more or less all the time to inform the frustratingly limited context window.",
+     "badge": "Routine",
+     "verified": true,
+     "icon": "/visuals/repVector__Reminder.svg",
+     "to_path": "/thread/reminders"
+   },
+   {
+     "title": "Prompts",
+     "description": "Prompts are instructions for a task at hand. Some come up often, some are one-and-done.",
+     "badge": "As Needed",
+     "verified": true,
+     "icon": "/visuals/repVector__Prompt.svg",
+     "to_path": "thread/prompts"
+   },
+   {
+     "title": "Specifications",
+     "description": "Specifications are comprehensive documentation that covers an interrelated set of code. They go through cycles of revision and use.",
+     "badge": "Evolving",
+     "verified": true,
+     "icon": "/visuals/repVector__Specification.svg",
+     "to_path": "thread/specs"
+   }
+ ]
