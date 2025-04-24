@@ -26,6 +26,9 @@ interface FeatureData {
   ctaText: string;
   ctaUrl: string;
   imageUrl: string;
+  imageClasses?: string; // Optional CSS classes for the image container
+  maskHeight?: string;   // Optional height for the image mask (e.g., "300px", "50%")
+  maskWidth?: string;    // Optional width for the image mask (e.g., "100%", "400px")
 }
 
 interface Props {
@@ -77,6 +80,9 @@ const processedFeatures = features.map(feature => ({
       details={feature.details}
       image={feature.processedImage}
       imageSide={feature.imageSide}
+      classes={feature.imageClasses}
+      maskHeight={feature.maskHeight}
+      maskWidth={feature.maskWidth}
     >
       <div slot="content-footer" class="cta-container">
         <a href={feature.ctaUrl} class="cta-button">{feature.ctaText}</a>

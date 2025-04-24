@@ -10,6 +10,7 @@ import AlternatingSideImageComponent from "@components/basics/messages/Alternati
 import Section__IconHeaderMessage from "@components/basics/messages/Section__IconHeaderMessage.astro";
 import Section__QuestionsAnswers from "./reference/Section__QuestionsAnswers.astro";
 import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json";
+import Section__VibeCodeWithUs from "@components/basics/messages/Section__VibeCodeWithUs.astro";
 
 interface Tool {
   url: string;
@@ -61,6 +62,8 @@ const qaList = questionsAndAnswersData.page === "main"
   marginBottom="1rem" 
   color="var(--grd__primary-bg)" 
 />
+
+<Section__VibeCodeWithUs />
 
 <!-- Content section with tools -->
 <div class="content-wrapper">
