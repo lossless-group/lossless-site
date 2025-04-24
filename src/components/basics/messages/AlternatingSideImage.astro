@@ -13,6 +13,8 @@
  */
 
 import FeatureSideImage from "@components/basics/FeatureSideImage.astro";
+import ButtonLoud from "@components/basics/cta/ButtonLoud.astro";
+import TextCTA from "@components/basics/cta/TextCTA.astro";
 import path from "node:path";
 import fs from "node:fs";
 import { getImageForPath } from "@utils/imageMapping";
@@ -85,7 +87,7 @@ const processedFeatures = features.map(feature => ({
       maskWidth={feature.maskWidth}
     >
       <div slot="content-footer" class="cta-container">
-        <a href={feature.ctaUrl} class="cta-button">{feature.ctaText}</a>
+        <TextCTA href={feature.ctaUrl} text={feature.ctaText} />
       </div>
     </FeatureSideImage>
   ))}
@@ -101,25 +103,8 @@ const processedFeatures = features.map(feature => ({
     margin: 0 auto;
   }
   
-  /* These styles will be inherited by the FeatureSideImage components */
+  /* Maintain spacing for the CTA container */
   :global(.cta-container) {
-    margin-top: 1.5rem;
-  }
-  
-  :global(.cta-button) {
-    display: inline-block;
-    background: var(--clr-lossless-accent--brightest);
-    color: var(--white--pure);
-    font-family: var(--ff-legible);
-    font-weight: var(--fw-semi-bold);
-    font-size: var(--fs-400);
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-  }
-  
-  :global(.cta-button:hover) {
-    background: var(--clr-lossless-attn-action);
+    margin-top: 1rem;
   }
 </style>

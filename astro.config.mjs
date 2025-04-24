@@ -57,9 +57,6 @@ export default defineConfig({
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
     }
-  },
-  experimental: {
-    svg: true,
   }
 });
 // Using Astro's built-in Shiki integration for syntax highlighting (SSR/static compatible)

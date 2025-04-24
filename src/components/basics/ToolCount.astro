@@ -1,0 +1,60 @@
+---
+/**
+ * ToolCount.astro
+ * 
+ * A component that dynamically displays the number of tools in the tooling collection.
+ * Can be used inline within text or as a standalone element.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <p>We have <ToolCount /> tools available.</p>
+ * ```
+ */
+
+import { getCollection } from "astro:content";
+
+interface Props {
+  /**
+   * Optional CSS classes to apply to the count
+   */
+  class?: string;
+  
+  /**
+   * Whether to show the count as a badge (default: false)
+   */
+  asBadge?: boolean;
+}
+
+const { class: className = "", asBadge = false } = Astro.props;
+
+// Get the tooling collection
+const toolEntries = await getCollection("tooling");
+const toolCount = toolEntries.length;
+---
+
+{asBadge ? (
+  <span class:list={["tool-count-badge", className]}>
+    {toolCount}
+  </span>
+) : (
+  <span class:list={["tool-count", className]}>
+    {toolCount}
+  </span>
+)}
+
+<style>
+  .tool-count {
+    font-weight: var(--fw-semi-bold);
+  }
+  
+  .tool-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white--pure);
+    font-weight: var(--fw-semi-bold);
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+  }
+</style>
