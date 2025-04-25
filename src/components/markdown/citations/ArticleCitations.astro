@@ -13,7 +13,7 @@ interface Props {
         children?: Array<{
           type: string;
           value: string;
-        }>;
+        }>; 
       }>;
     }>;
   };
@@ -24,6 +24,8 @@ const citations = node.children || [];
 ---
 
 <div class="citations">
+  <h2 class="citations-header">Footnotes and Citations</h2>
+
   {citations.map((citation) => {
     if (citation.type === 'citation-attribution') {
       return (
@@ -43,6 +45,13 @@ const citations = node.children || [];
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid var(--clr-lossless-accent--brightest);
+  }
+
+  .citations-header {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-primary-light);
   }
 
   .citation-attribution {

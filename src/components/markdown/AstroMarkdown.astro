@@ -1,7 +1,8 @@
 ---
 import {dirname} from 'path'
 import ArticleCallout from './callouts/ArticleCallout.astro';
-import ArticleCitations from './citations/ArticleCitations.astro';
+import ArticleCitationsBlock from './citations/ArticleCitations.astro';
+import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 
@@ -41,8 +42,6 @@ const handled_types = [
     "paragraph",
     "text",
     "heading",
-    "citations",
-    "citation",
     "image",
     "list",
     "listItem",
@@ -54,7 +53,12 @@ const handled_types = [
     "strong",
     "emphasis",
     "break",
+    "html",
+    "citation",
+    "citations",
     "citationReference",
+    "footnoteReference",
+    "footnoteDefinition",    
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -113,11 +117,6 @@ const title = data.id ?
   </em>
 }
 
-{(node.type === 'citationReference') &&
-  <sup class="cite-ref">
-    {node.children.map(child => <Astro.self node={child} data={data} />)}
-  </sup>
-}
 
 {(node.type === "image") &&
     <img src={node.url} />
@@ -217,6 +216,9 @@ const title = data.id ?
     : <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
 )}
 
+{(node.type === "html") &&
+  <div class="raw-html" set:html={node.value} />
+}
 
 
 {(node.type === "blockquote") &&
@@ -227,13 +229,77 @@ const title = data.id ?
   <code class="inline-code">{node.value}</code>
 }
 
-{(node.type === "citations") && 
-    <ArticleCitations node={node} />
-}
+<!-- Anything citation-* is custom made -->
+<!-- === citationReference === -->
+{node.type === 'citationReference' && (
+  <sup class="cite-ref">
+    <a
+      href={node.data?.hProperties?.href}
+      id={node.data?.hProperties?.id}
+      class="citation-link"
+    >
+      [{node.children?.map(child => <Astro.self node={child} data={data} />)}]
+    </a>
+  </sup>
+)}
 
-{(node.type === "citation") && 
-    <div class="citation">{node.value}</div>
-}
+<!-- === single citation node === -->
+{node.type === 'citation' && (
+  <ArticleCitation node={node} />
+)}
+
+<!-- === citations block === -->
+{node.type === 'citations' && (
+  <ArticleCitationsBlock node={node} />
+)}
+
+<!-- footnoteReference and footnoteDefinition are from standard Markdown library -->
+{node.type === 'footnoteReference' && (
+  <sup class="footnote-ref">
+    <a href={`#${node.label}`} id={`ref-${node.label}`}>
+      [{node.label}]
+    </a>
+  </sup>
+  <style>
+  .footnote-ref {
+    font-size: 0.6em;
+    vertical-align: super;
+    top: 0px;
+  }
+
+  .footnote-definition {
+    font-size: 0.9em;
+    margin-top: 1em;
+    border-top: 1px solid #666;
+    padding-top: 0.5em;
+  }
+
+</style>
+
+)}
+
+{node.type === 'footnoteDefinition' && (
+  <div id={node.label} class="footnote-definition">
+    {node.children.length === 1 && node.children[0].type === 'paragraph' ? (
+      <p>
+        <strong><a href={`#ref-${node.label}`}>[{node.label}]</a></strong>{' '}
+        {node.children[0].children.map(child => (
+          <Astro.self node={child} data={data} />
+        ))}{' '}
+      </p>
+    ) : (
+      <>
+        <strong>[{node.label}]</strong>
+        {node.children.map(child => (
+          <Astro.self node={child} data={data} />
+        ))}
+      </>
+    )}
+  </div>
+)}
+
+
+
 
 {(node.type === "paragraph") &&
     <div class="paragraph">
