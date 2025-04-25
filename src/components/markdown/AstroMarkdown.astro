@@ -84,223 +84,236 @@ const title = data.id ?
 
 ---
 
-{(node.type === "root") && 
-    <>
+// === Render compiledContent as HTML if present, else render AST ===
+/**
+ * If compiledContent (HTML string) is provided, render it directly.
+ * This ensures that HTML output from rehype plugins (e.g., rehype-mermaid, rehype-stringify)
+ * is rendered as intended, including inline SVGs and other HTML features.
+ *
+ * If compiledContent is not present, fall back to recursive AST rendering.
+ */
+{Astro.props.compiledContent ? (
+  <div class="astro-markdown-html-output" set:html={Astro.props.compiledContent} />
+) : (
+  <div>
+    {(node.type === "root") && 
+      <div>
         <h1>{title}</h1>
         {node.children.map((child) => (
+          <Astro.self node={child} data={data} />
+        ))}
+      </div>
+    }
+
+    {(node.type === "heading") &&
+      <div>
+        {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>}
+        {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>}
+        {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>}
+        {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>}
+        {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>}
+        {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>}
+      </div>
+    }
+
+    {(node.type === "strong") &&
+      <strong>
+        {node.children.map(child => (
+          <Astro.self node={child} data={data} />
+        ))}
+      </strong>
+    }
+
+    {(node.type === "emphasis") &&
+      <em>
+        {node.children.map(child => (
+          <Astro.self node={child} data={data} />
+        ))}
+      </em>
+    }
+
+    {(node.type === "html") &&
+      <div class="raw-html" set:html={node.value} />
+    }
+
+    <!-- Anything citation-* is custom made -->
+    <!-- === citationReference === -->
+    {node.type === 'citationReference' && (
+      <sup class="cite-ref">
+        <a
+          href={node.data?.hProperties?.href}
+          id={node.data?.hProperties?.id}
+          class="citation-link"
+        >
+          [{node.children?.map(child => <Astro.self node={child} data={data} />)}]
+        </a>
+      </sup>
+    )}
+
+    <!-- === single citation node === -->
+    {node.type === 'citation' && (
+      <ArticleCitation node={node} />
+    )}
+
+    <!-- === citations block === -->
+    {node.type === 'citations' && (
+      <ArticleCitationsBlock node={node} />
+    )}
+
+    <!-- footnoteRefernce and footnoteDefinition are from standard Markdown library -->
+    {node.type === 'footnoteReference' && (
+      <sup class="footnote-ref">
+        <a href={`#${node.label}`} id={`ref-${node.label}`}>
+          [{node.label}]
+        </a>
+      </sup>
+      <style>
+      .footnote-ref {
+        font-size: 0.8em;
+        vertical-align: super;
+      }
+
+      .footnote-definition {
+        font-size: 0.9em;
+        margin-top: 1em;
+        border-top: 1px solid #ccc;
+        padding-top: 0.5em;
+      }
+    </style>
+
+    )}
+
+    {node.type === 'footnoteDefinition' && (
+      <div id={node.label} class="footnote-definition">
+        <p>
+          <strong>[{node.label}]</strong>{' '}
+          {node.children.map(child => <Astro.self node={child} data={data} />)}
+        </p>
+      </div>
+    )}
+
+    {(node.type === "image") &&
+      <img src={node.url} />
+    }
+
+    {(node.type === "list") &&
+      <div>
+        {node['ordered']
+          ? <ol>
+            {node.children.map((item) => (
+              <Astro.self node={item} data={data} />
+            ))}
+          </ol>
+          : <ul>
+            {node.children.map((item) => (
+              <Astro.self node={item} data={data} />
+            ))}
+          </ul>
+        }
+      </div>
+    }
+
+    {(node.type === "listItem") &&
+      <li class="custom-li">
+        <span class="li-content">
+          {node.children.map(child => (
             <Astro.self node={child} data={data} />
-        ))}
-    </>
-}
-
-{(node.type === "heading") &&
-  <>
-    {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>}
-    {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>}
-    {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>}
-    {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>}
-    {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>}
-    {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>}
-  </>
-}
-
-{(node.type === "strong") &&
-  <strong>
-    {node.children.map(child => (
-      <Astro.self node={child} data={data} />
-    ))}
-  </strong>
-}
-
-{(node.type === "emphasis") &&
-  <em>
-    {node.children.map(child => (
-      <Astro.self node={child} data={data} />
-    ))}
-  </em>
-}
-
-{(node.type === "html") &&
-  <div class="raw-html" set:html={node.value} />
-}
-
-<!-- Anything citation-* is custom made -->
-<!-- === citationReference === -->
-{node.type === 'citationReference' && (
-  <sup class="cite-ref">
-    <a
-      href={node.data?.hProperties?.href}
-      id={node.data?.hProperties?.id}
-      class="citation-link"
-    >
-      [{node.children?.map(child => <Astro.self node={child} data={data} />)}]
-    </a>
-  </sup>
-)}
-
-<!-- === single citation node === -->
-{node.type === 'citation' && (
-  <ArticleCitation node={node} />
-)}
-
-<!-- === citations block === -->
-{node.type === 'citations' && (
-  <ArticleCitationsBlock node={node} />
-)}
-
-<!-- footnoteRefernce and footnoteDefinition are from standard Markdown library -->
-{node.type === 'footnoteReference' && (
-  <sup class="footnote-ref">
-    <a href={`#${node.label}`} id={`ref-${node.label}`}>
-      [{node.label}]
-    </a>
-  </sup>
-  <style>
-  .footnote-ref {
-    font-size: 0.8em;
-    vertical-align: super;
-  }
-
-  .footnote-definition {
-    font-size: 0.9em;
-    margin-top: 1em;
-    border-top: 1px solid #ccc;
-    padding-top: 0.5em;
-  }
-</style>
-
-)}
-
-{node.type === 'footnoteDefinition' && (
-  <div id={node.label} class="footnote-definition">
-    <p>
-      <strong>[{node.label}]</strong>{' '}
-      {node.children.map(child => <Astro.self node={child} data={data} />)}
-    </p>
-  </div>
-)}
-
-{(node.type === "image") &&
-    <img src={node.url} />
-}
-
-{(node.type === "list") &&
-  <>
-    {node['ordered']
-      ? <ol>
-          {node.children.map((item) => (
-            <Astro.self node={item} data={data} />
           ))}
-        </ol>
-      : <ul>
-          {node.children.map((item) => (
-            <Astro.self node={item} data={data} />
-          ))}
-        </ul>
+        </span>
+      </li>
     }
-  </>
-}
 
-{(node.type === "listItem") &&
-  <li class="custom-li">
-    <span class="li-content">
-      {node.children.map(child => (
-        <Astro.self node={child} data={data} />
-      ))}
-    </span>
-  </li>
-}
+    {(node.type === "table") &&
+      <div class="md-table-wrapper">
+        <table class="md-table">
+          <tbody>
+            {node.children.map(row => (
+              <Astro.self node={row} data={data} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <style>
+        .md-table-wrapper {
+          overflow-x: auto;
+          margin-bottom: 1.5rem;
+        }
 
-{(node.type === "table") &&
-  <div class="md-table-wrapper">
-    <table class="md-table">
-      <tbody>
-        {node.children.map(row => (
-          <Astro.self node={row} data={data} />
+        .md-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.95rem;
+          background-color: transparent;
+        }
+
+        .md-tr:nth-child(even) {
+          background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .md-td {
+          border: 1px solid rgb(255, 255, 255);
+          padding: 0.5rem 0.75rem;
+          text-align: left;
+        }
+      </style>
+    }
+
+    {(node.type === "tableRow") &&
+      <tr class="md-tr">
+        {node.children.map(cell => (
+          <Astro.self node={cell} data={data} />
         ))}
-      </tbody>
-    </table>
-  </div>
-  <style>
-     .md-table-wrapper {
-        overflow-x: auto;
-        margin-bottom: 1.5rem;
+      </tr>
     }
 
-    .md-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.95rem;
-        background-color: transparent;
+    {(node.type === "tableCell") &&
+      <td class="md-td">
+        {node.children.map(child => (
+          <Astro.self node={child} data={data} />
+        ))}
+      </td>
     }
 
-    .md-tr:nth-child(even) {
-        background-color: rgba(255, 255, 255, 0.03);
-    }
-
-    .md-td {
-        border: 1px solid rgb(255, 255, 255);
-        padding: 0.5rem 0.75rem;
-        text-align: left;
-    }
-  </style>
-}
-
-{(node.type === "tableRow") &&
-  <tr class="md-tr">
-    {node.children.map(cell => (
-      <Astro.self node={cell} data={data} />
-    ))}
-  </tr>
-}
-
-{(node.type === "tableCell") &&
-  <td class="md-td">
-    {node.children.map(child => (
-      <Astro.self node={child} data={data} />
-    ))}
-  </td>
-}
-
-
-{(node.type === "link") && 
-    <a href={node.url} {...node.data?.hProperties}>
+    {(node.type === "link") && 
+      <a href={node.url} {...node.data?.hProperties}>
         {node.children[0].value}
-    </a>
-}
+      </a>
+    }
 
-{(node.type === "code") &&
-  <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
-}
+    {(node.type === "code") &&
+      <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
+    }
 
-{(node.type === "blockquote") &&
-    <ArticleCallout node={node} />
-}
+    {(node.type === "blockquote") &&
+      <ArticleCallout node={node} />
+    }
 
-{(node.type === "inlineCode") &&
-  <code class="inline-code">{node.value}</code>
-}
+    {(node.type === "inlineCode") &&
+      <code class="inline-code">{node.value}</code>
+    }
 
-{(node.type === "paragraph") &&
-    <div class="paragraph">
+    {(node.type === "paragraph") &&
+      <div class="paragraph">
         {node.children.map((child: any) => (
-            <Astro.self node={child} data={data} />
+          <Astro.self node={child} data={data} />
         ))}
-    </div>
-}
+      </div>
+    }
 
-{(node.type === "thematicBreak") && 
-    <hr />
-}
+    {(node.type === "thematicBreak") && 
+      <hr />
+    }
 
-{(node.type === "text") && 
-    <span>{node.value}</span>
-}
+    {(node.type === "text") && 
+      <span>{node.value}</span>
+    }
 
-<!-- === Default handling for everything else === -->
-{other_type && (
-  <div class={`unhandled-${node.type}`}>
-    ⚠️ Unhandled node type: <code>{node.type}</code>
-    <pre>{JSON.stringify(node, null, 2)}</pre>
+    <!-- === Default handling for everything else === -->
+    {other_type && (
+      <div class={`unhandled-${node.type}`}>
+        ⚠️ Unhandled node type: <code>{node.type}</code>
+        <pre>{JSON.stringify(node, null, 2)}</pre>
+      </div>
+    )}
   </div>
 )}
