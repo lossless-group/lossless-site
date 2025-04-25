@@ -1,0 +1,131 @@
+---
+/**
+ * /toolkit/[...slug].astro — Dynamic Route for Tooling Collection Content
+ *
+ * Modeled after /more-about/[...slug].astro and /vibe-with/[collection]/[...slug].astro
+ * 
+ * - Fetches content from the 'tooling' collection (from the 'tooling' directory)
+ * - Uses the relative path from the tooling directory as the slug
+ * - Generates static paths for all entries
+ * - Renders content using Layout, OneArticle, and OneArticleOnPage components
+ * - All logic is thoroughly commented and follows project conventions
+ */
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import path from 'path';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+/**
+ * Define a type for the expected entry data structure
+ * This helps TypeScript understand what properties are available
+ */
+interface ToolingEntryData {
+  title?: string;
+  slug?: string;
+  tags: string[];
+  [key: string]: any;
+}
+
+export async function getStaticPaths() {
+  /**
+   * Helper function to convert filenames to titles while preserving acronym casing
+   * 
+   * @param str - The string to convert to proper case
+   * @returns The string in proper case with first letter of each word capitalized
+   */
+  function toProperCase(str: string): string {
+    return str
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  // Get all entries from the tooling collection
+  const toolingEntries = await getCollection('tooling');
+  
+  // Debug: Log the number of entries found
+  console.log(`Found ${toolingEntries.length} entries in the tooling collection`);
+  
+  // Process tooling entries to create static paths
+  return toolingEntries.map(entry => {
+    // Generate slug from the entry ID (relative path from tooling directory)
+    const filename = entry.id.replace(/\.md$/, '');
+    
+    // Extract just the filename without the path for the title
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    
+    // Use the full path as the slug, preserving directory structure
+    // This allows for nested routes like /toolkit/AI-Toolkit/AI-Infrastructure/Groq
+    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+    
+    // Safely access entry data with proper type casting
+    const entryData = entry.data as ToolingEntryData;
+    
+    // Create a safe data object with fallbacks for required properties
+    const safeData = {
+      // Ensure all required properties exist with fallbacks
+      title: entryData.title || toProperCase(baseFilename),
+      slug: entryData.slug || generatedSlug,
+      tags: entryData.tags, // Already guaranteed to be an array by the schema transform
+      // Include all other properties from entry.data
+      ...entryData
+    };
+    
+    // Create a safe entry with the validated data
+    const safeEntry = {
+      ...entry,
+      data: safeData
+    };
+    
+    // Debug: Log the generated path
+    console.log(`Generated path: /toolkit/${safeData.slug}`);
+    
+    return {
+      params: { slug: safeData.slug },
+      props: { 
+        entry: safeEntry,
+        contentType: 'tooling'
+      }
+    };
+  });
+}
+
+// Define the props interface for type safety
+interface Props {
+  entry: {
+    id: string;
+    body: string;
+    data: {
+      title: string;
+      slug: string;
+      tags: string[];
+      [key: string]: any;
+    }
+  };
+  contentType: 'tooling';
+}
+
+const { entry, contentType } = Astro.props;
+
+// Add content metadata for downstream components
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  contentType: contentType
+};
+---
+
+<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>
