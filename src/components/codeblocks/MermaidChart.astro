@@ -1,15 +1,245 @@
 ---
 const { code } = Astro.props;
----
+const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
+import Image from 'astro:assets';
+import ExpandIcon from '@assets/Icons/arrows-maximize.svg';
+import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 
-<div class="mermaid">
-  {code}
+---
+<div id={chartId} class="mermaid-breakout" tabindex="0">
+  <div class="mermaid-chart-shell">
+    <!-- Accessible, pure HTML/CSS expand/collapse toggle for Mermaid chart -->
+    <input type="checkbox" id={`toggle-${chartId}`} class="mermaid-toggle-checkbox" hidden>
+    <label for={`toggle-${chartId}`} class="mermaid-expand-toggle" tabindex="0" aria-label="Expand/collapse chart">
+      <span class="expand-icon">
+        <ExpandIcon class="icon-expand" />
+        <CollapseIcon class="icon-collapse" />
+      </span>
+    </label>
+    <div class="mermaid">{code}</div>
+  </div>
+</div>
+
+<!-- Fullscreen modal markup will be injected by JS when needed -->
+
+<!-- Hidden template for CollapseIcon SVG, guaranteed to be in DOM for JS to use -->
+<div id={`${chartId}-collapse-icon-template`} style="display:none">
+  <CollapseIcon />
 </div>
 
 <script is:inline>
+/**
+ * MermaidChart expand/collapse logic
+ * - When expand is triggered, clones the chart markup and appends a fullscreen modal to body
+ * - When collapse is triggered, removes the modal from body
+ * - Handles Escape key for collapse
+ * - Ensures only one modal per chartId
+ */
+window.toggleMermaidExpand = function(chartId, expand) {
+  const chartRoot = document.getElementById(chartId);
+  const existingModal = document.getElementById(chartId + '-fullscreen');
+  if (expand) {
+    if (existingModal) return; // Already expanded
+    // Clone the chart markup for fullscreen
+    const modal = document.createElement('div');
+    modal.id = chartId + '-fullscreen';
+    modal.className = 'mermaid-fullscreen-modal';
+    modal.tabIndex = 0;
+    // Use CollapseIcon for the collapse button in fullscreen modal
+    // Render the imported Astro CollapseIcon component to a string and inject it
+    const collapseIconMarkup = document.getElementById(`${chartId}-collapse-icon-template`)?.innerHTML || '';
+    modal.innerHTML = `
+      <button class="mermaid-collapse-toggle" aria-label="Collapse chart" tabindex="0" data-collapse-icon>
+        <span class="collapse-icon">${collapseIconMarkup}</span>
+      </button>
+      <div class="mermaid">${chartRoot.querySelector('.mermaid').innerHTML}</div>
+    `;
+    // Collapse button logic
+    modal.querySelector('.mermaid-collapse-toggle').onclick = function() {
+      window.toggleMermaidExpand(chartId, false);
+    };
+    // Escape key handler
+    const escHandler = function(e) {
+      if (e.key === 'Escape') {
+        window.toggleMermaidExpand(chartId, false);
+        window.removeEventListener('keydown', escHandler);
+      }
+    };
+    window.addEventListener('keydown', escHandler);
+    document.body.appendChild(modal);
+    modal.focus();
+  } else {
+    if (existingModal) {
+      existingModal.parentNode.removeChild(existingModal);
+    }
+  }
+};
+</script>
+
+<style>
+.mermaid-breakout {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  box-sizing: border-box;
+}
+.mermaid-chart-shell {
+  position: relative;
+  min-width: 600px;
+  width: 80vw;
+  max-width: 1000px;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  background: var(--bastille);
+  box-shadow: 0 4px 48px rgba(0,0,0,0.25);
+  border-radius: 10px;
+  border: 2px solid var(--lossless-accent--brightest);
+  margin: 0 auto;
+  display: block;
+  padding: 1rem;
+}
+.mermaid {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.mermaid-chart-shell .mermaid-expand-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.5rem;
+  z-index: 10;
+  background: none;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.mermaid-chart-shell .mermaid-expand-toggle:hover, .mermaid-chart-shell .mermaid-expand-toggle:focus {
+  opacity: 1;
+  outline: 2px solid #88f;
+}
+/* Only show ExpandIcon when NOT checked */
+.icon-collapse { display: none; }
+.mermaid-toggle-checkbox:checked + .mermaid-expand-toggle .icon-expand { display: none; }
+.mermaid-toggle-checkbox:checked + .mermaid-expand-toggle .icon-collapse { display: inline; }
+</style>
+
+<style is:global>
+/*
+  Fullscreen modal overlay for Mermaid chart
+  - Always overlays the entire viewport
+  - Very high z-index to ensure it is above all other content
+  - Removes all margin/padding, and uses fixed positioning
+  - No parent context can restrict its stacking
+*/
+.mermaid-fullscreen-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  background: var(--bastille) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  overflow: auto !important;
+  border: 2px solid var(--lossless-accent--brightest) !important;
+}
+.mermaid-fullscreen-modal .mermaid {
+  width: 98vw;
+  height: 92vh;
+  max-width: 100vw;
+  max-height: 92vh;
+  margin: 0 auto;
+  display: block;
+  overflow: auto;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+.mermaid-collapse-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.5rem;
+  z-index: 100000 !important;
+  background: none;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.mermaid-collapse-toggle:hover, .mermaid-collapse-toggle:focus {
+  opacity: 1;
+  outline: 2px solid #88f;
+}
+</style>
+
+<!-- SVG symbols for icons -->
+<svg style="display:none">
+  <symbol id="collapse-icon-symbol" viewBox="0 0 24 24">
+    <CollapseIcon />
+  </symbol>
+  <symbol id="expand-icon-symbol" viewBox="0 0 24 24">
+    <ExpandIcon />
+  </symbol>
+</svg>
+
+<script is:inline>
+  // Mermaid rendering logic (custom base theme, transparent background)
+  // Dynamically resolve CSS variable for primary text color at runtime
+  function getCssVar(name, fallback) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  }
+
+  const bodyColor = getCssVar('--clr-body', '#e0e0e0');
+  const primaryNodeBg = getCssVar('--clr-primary-bg', '#181818');
+  const secondaryNodeBg = getCssVar('#64F4a4');
+  const edgeLabelBg = getCssVar('--clr-aquamarine', '#64d4a4');
+  const hippieBlue = getCssVar('--clr-hippie-blue', '#50a3b3');
+  const secondaryTextClr = getCssVar('--clr-hippie-blue', '#50a3b3');
+  const clusterBkg = getCssVar('--clr-gunmetal', '#283139');
+  const lineClr = getCssVar('--clr-aqua-brightest', '#69e2e3');
+  const fontFmly = 'Open Sans, sans-serif';
+
   const mermaidConfig = {
     startOnLoad: true,
-    theme: 'dark'  // 👈 force dark mode
+    theme: 'base', // Use base for full customizability
+    themeVariables: {
+      darkMode: true,
+      background: 'transparent', // No background for SVG/chart
+      primaryColor: primaryNodeBg,
+      primaryBorderColor: '#6fffd6',
+      primaryTextColor: bodyColor,
+      secondaryColor: '#BF23F7',
+      secondaryTextColor: secondaryTextClr,
+      clusterBkg: clusterBkg,
+      lineColor: lineClr,
+      fontFamily: fontFmly,
+      // Add more custom variables here as needed
+    }
   };
 
   if (!window.__MERMAID_LOADED__) {
@@ -26,9 +256,3 @@ const { code } = Astro.props;
     window.mermaid?.run();
   }
 </script>
-
-<style>
-  .mermaid {
-    margin: 1rem 0;
-  }
-</style>
