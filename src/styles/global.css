@@ -43,6 +43,7 @@
     --clr-lossless-attn-action: var(--purple-heart);
     --clr-lossless-ui-btn-border: var(--clr-lossless-primary-light);
     --grd--lossless-eastern-crimson: linear-gradient(107deg, #22A6B5 5.36%, #9138E0 23.14%, #D9233B 47.56%, #F59C49 72.33%);
+    --grd--lossless-shamrock-fountain: linear-gradient(90deg, #32C6AB 0%, #4CA7B6 100%);
 
     --clr-primary-bg: var(--clr-stolen--github--dark);
     --clr-secondary-bg: var(--white--pure--20p);
@@ -54,6 +55,7 @@
     --clr-link: var(--clr-lossless-accent--brightest);
     --clr-btn-label: var(--clr-lossless-primary-light);
     --clr-btn-hover: var(--clr-lossless-attn-action);
+    --grd-text-cta: var(--grd--lossless-shamrock-fountain);
 
     --ff-base: 'Poppins', sans-serif;
     --ff-legible: 'Krub', sans-serif;
@@ -93,4 +95,3 @@ a, p {
     color: var(--clr-body);
     font-family: var(--ff-base);
 }
-

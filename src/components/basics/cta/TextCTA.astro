@@ -1,0 +1,170 @@
+---
+/**
+ * TextCTA.astro
+ * 
+ * A subtle, text-based call-to-action component with an arrow icon.
+ * Features elegant typography with letter spacing and a smooth hover animation.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <TextCTA href="/learn-more" text="Learn more" />
+ * ```
+ */
+
+interface Props {
+  /**
+   * The URL to navigate to when clicked (makes it an <a> tag)
+   * If not provided, a <button> element will be used instead
+   */
+  href?: string;
+  
+  /**
+   * The text to display on the CTA
+   */
+  text: string;
+  
+  /**
+   * Whether to show the arrow icon (default: true)
+   */
+  showArrow?: boolean;
+  
+  /**
+   * Optional CSS classes to apply to the CTA
+   */
+  class?: string;
+  
+  /**
+   * Optional onClick handler (string of JavaScript)
+   */
+  onClick?: string;
+}
+
+const { 
+  href, 
+  text, 
+  showArrow = true, 
+  class: className = "", 
+  onClick 
+} = Astro.props;
+---
+
+{href ? (
+  <a 
+    href={href} 
+    class:list={["text-cta", className]} 
+    {...onClick ? { onclick: onClick } : {}}
+  >
+    <span class="text-cta-content">
+      <span class="text-cta-text">{text}</span>
+      {showArrow && (
+        <span class="text-cta-arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </span>
+      )}
+    </span>
+  </a>
+) : (
+  <button 
+    class:list={["text-cta", className]} 
+    {...onClick ? { onclick: onClick } : {}}
+  >
+    <span class="text-cta-content">
+      <span class="text-cta-text">{text}</span>
+      {showArrow && (
+        <span class="text-cta-arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </span>
+      )}
+    </span>
+  </button>
+)}
+
+<style>
+  /* Base styles for the text CTA */
+  .text-cta {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-300);
+    font-kerning: none;
+    color: var(--clr-body); /* Fallback color */
+    text-decoration: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  /* Container for text and arrow */
+  .text-cta-content {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  /* Text styling with letter spacing */
+  .text-cta-text {
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    position: relative;
+    background: var(--grd-text-cta);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  /* Underline effect on hover */
+  .text-cta-text::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background: var(--grd-text-cta);
+    transition: width 0.3s ease;
+  }
+  
+  /* Arrow icon styling */
+  .text-cta-arrow {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    transform: translateX(0);
+    opacity: 0.7;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    color: var(--clr-lossless-accent--brightest);
+  }
+  
+  /* Hover effects */
+  .text-cta:hover .text-cta-text {
+    opacity: 0.9;
+  }
+  
+  .text-cta:hover .text-cta-text::after {
+    width: 100%;
+  }
+  
+  .text-cta:hover .text-cta-arrow {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+  
+  /* Focus styles for accessibility */
+  .text-cta:focus {
+    outline: none;
+  }
+  
+  .text-cta:focus-visible {
+    outline: 2px solid var(--clr-lossless-accent);
+    outline-offset: 2px;
+  }
+</style>

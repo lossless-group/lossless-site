@@ -3,6 +3,7 @@ import "@styles/global.css";
 import Hero from "@components/basics/Hero.astro";
 import CardGrid from "@basics/CardGrid.astro";
 import TagCloud from "@components/tool-components/TagCloud.astro";
+import ToolCount from "@components/basics/ToolCount.astro";
 import { getEntry, getCollection } from "astro:content";
 import TrademarkRibbon from "@components/trademarks/TrademarkRibbon.astro";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
@@ -68,8 +69,13 @@ const qaList = questionsAndAnswersData.page === "main"
 <!-- Content section with tools -->
 <div class="content-wrapper">
   <section>
-    <h2>Tools</h2>
     <div class="tools-header">
+      <h2>We're tracking
+        <ToolCount asBadge={true} />
+        tools.
+      </h2>
+    </div>
+    <div class="tools-tag-cloud">
       <TagCloud
         tags={allTags}
         tagFrequencies={tagFrequencies}
@@ -78,14 +84,14 @@ const qaList = questionsAndAnswersData.page === "main"
         tagRoute="toolkit"
       />
     </div>
-    <div id="ribbon-context">
-      <h2>Tech we're watching.</h2>
-    </div>
   </section>
 </div>
 
 <!-- Full-bleed ribbon container -->
 <div id="ribbon-container">
+  <div id="ribbon-context">
+    <h2>Tech we're watching.</h2>
+  </div>
   <div class="trademark-ribbon-wrapper">
     <TrademarkRibbon
       sourceDir={TRADEMARK_CONFIG.sourceDir}
@@ -187,12 +193,17 @@ const qaList = questionsAndAnswersData.page === "main"
   }
 
   .tools-header {
-    margin-bottom: 2rem;
-    display: flex;
+    margin-bottom: 1rem;
+    display: block;
     flex-direction: column;
     justify-content: center;
     gap: 2rem;
     width: 100%;
+    & > h2 {
+      text-align: center;
+      font-size: var(--fs-500);
+      font-weight: var(--fw-semi-bold);
+    }
   }
 
   #hero-container {
@@ -218,7 +229,7 @@ const qaList = questionsAndAnswersData.page === "main"
   #ribbon-context {
     width: 100%;
     text-align: center;
-    margin: 0 auto 1rem auto;
+    margin: 0 auto 0 auto;
   }
 
   /* Full-bleed container for the ribbon */
