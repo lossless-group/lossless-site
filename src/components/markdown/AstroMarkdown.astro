@@ -7,12 +7,12 @@ import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 
 interface Props {
     /**
-     * Accepts compiledContent HTML (rehype output, e.g. with mermaid diagrams) if provided.
+     * Accepts a mapping of mermaidId to SVG strings for inlining Mermaid diagrams.
      */
-    compiledContent?: string;
+    mermaidSvgs?: Record<string, string>;
     /**
      * Markdown AST node interface for AstroMarkdown.astro
-     * - 'lang' is present on 'code' nodes and specifies the code language (e.g., 'js', 'python').
+     * - Supports both Markdown (MDAST) and HTML (HAST) element nodes.
      * - See remark/rehype AST docs for more details.
      */
     node: {
@@ -25,7 +25,12 @@ interface Props {
         label?: string; // Added for footnoteReference nodes
         data?: {
             hProperties?: Record<string, any>;
+            isMermaid?: boolean;
+            mermaidId?: string;
         };
+        // --- HAST element node support ---
+        tagName?: string;
+        properties?: Record<string, any>;
     };
     data: {
         path: string;
@@ -34,7 +39,7 @@ interface Props {
     };
 }
 
-const {node, data} = Astro.props;
+const {node, data, mermaidSvgs = {}} = Astro.props;
 
 // List of node types we handle with specific components
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
@@ -56,13 +61,13 @@ const handled_types: string[] = [
     "strong",
     "emphasis",
     "break",
-    "html",
     "citation",
     "citations",
     "citationReference",
     "footnoteReference",
     "footnoteDefinition",
-    "thematicBreak" // Add support for horizontal rules
+    "thematicBreak", // Add support for horizontal rules
+    "element" // Add support for HAST element nodes
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -77,243 +82,324 @@ const title = data.id ?
     .join(' ')
   : '';
 
-// Debug output to see AST structure
-// console.log(`=== AstroMarkdown Debug ===`)
-// console.log(`Node type: ${node.type}`)
-// console.log('Node structure:', JSON.stringify(node, null, 2))
-
+// === AST Rendering Logic ===
 ---
 
-// === Render compiledContent as HTML if present, else render AST ===
-/**
- * If compiledContent (HTML string) is provided, render it directly.
- * This ensures that HTML output from rehype plugins (e.g., rehype-mermaid, rehype-stringify)
- * is rendered as intended, including inline SVGs and other HTML features.
- *
- * If compiledContent is not present, fall back to recursive AST rendering.
- */
-{Astro.props.compiledContent ? (
-  <div class="astro-markdown-html-output" set:html={Astro.props.compiledContent} />
-) : (
-  <div>
-    {(node.type === "root") && 
-      <div>
-        <h1>{title}</h1>
-        {node.children.map((child) => (
-          <Astro.self node={child} data={data} />
-        ))}
-      </div>
-    }
+<div>
+  {(node.type === "root") && 
+    <div>
+      <h1>{title}</h1>
+      {node.children.map((child) => (
+        <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />
+      ))}
+    </div>
+  }
 
-    {(node.type === "heading") &&
-      <div>
-        {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>}
-        {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>}
-        {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>}
-        {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>}
-        {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>}
-        {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>}
-      </div>
-    }
+  {(node.type === "heading") &&
+    <div>
+      {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}</h1>}
+      {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}</h2>}
+      {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}</h3>}
+      {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}</h4>}
+      {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}</h5>}
+      {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}</h6>}
+    </div>
+  }
 
-    {(node.type === "strong") &&
-      <strong>
+  {(node.type === "strong") &&
+    <strong>
+      {node.children.map(child => (
+        <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />
+      ))}
+    </strong>
+  }
+
+  {(node.type === "emphasis") &&
+    <em>
+      {node.children.map(child => (
+        <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />
+      ))}
+    </em>
+  }
+
+  {(node.type === "paragraph") &&
+    <p>
+      {node.children.map(child => (
+        <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />
+      ))}
+    </p>
+  }
+
+  {(node.type === "image") &&
+    <img src={node.url} />
+  }
+
+  {(node.type === "list") &&
+    <div>
+      {node['ordered']
+        ? <ol>
+          {node.children.map((item) => (
+            <Astro.self node={item} data={data} mermaidSvgs={mermaidSvgs} />
+          ))}
+        </ol>
+        : <ul>
+          {node.children.map((item) => (
+            <Astro.self node={item} data={data} mermaidSvgs={mermaidSvgs} />
+          ))}
+        </ul>
+      }
+    </div>
+  }
+
+  {(node.type === "listItem") &&
+    <li class="custom-li">
+      <span class="li-content">
         {node.children.map(child => (
-          <Astro.self node={child} data={data} />
+          <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />
         ))}
-      </strong>
-    }
+      </span>
+    </li>
+  }
 
-    {(node.type === "emphasis") &&
-      <em>
-        {node.children.map(child => (
-          <Astro.self node={child} data={data} />
-        ))}
-      </em>
-    }
-
-    {(node.type === "html") &&
-      <div class="raw-html" set:html={node.value} />
-    }
-
-    <!-- Anything citation-* is custom made -->
-    <!-- === citationReference === -->
-    {node.type === 'citationReference' && (
-      <sup class="cite-ref">
-        <a
-          href={node.data?.hProperties?.href}
-          id={node.data?.hProperties?.id}
-          class="citation-link"
-        >
-          [{node.children?.map(child => <Astro.self node={child} data={data} />)}]
-        </a>
-      </sup>
-    )}
-
-    <!-- === single citation node === -->
-    {node.type === 'citation' && (
-      <ArticleCitation node={node} />
-    )}
-
-    <!-- === citations block === -->
-    {node.type === 'citations' && (
-      <ArticleCitationsBlock node={node} />
-    )}
-
-    <!-- footnoteRefernce and footnoteDefinition are from standard Markdown library -->
-    {node.type === 'footnoteReference' && (
-      <sup class="footnote-ref">
-        <a href={`#${node.label}`} id={`ref-${node.label}`}>
-          [{node.label}]
-        </a>
-      </sup>
-      <style>
-      .footnote-ref {
-        font-size: 0.8em;
-        vertical-align: super;
+  {(node.type === "table") &&
+    <div class="md-table-wrapper">
+      <table class="md-table">
+        <tbody>
+          {node.children.map(row => (
+            <Astro.self node={row} data={data} mermaidSvgs={mermaidSvgs} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <style>
+      .md-table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
       }
 
-      .footnote-definition {
-        font-size: 0.9em;
-        margin-top: 1em;
-        border-top: 1px solid #ccc;
-        padding-top: 0.5em;
+      .md-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        background-color: transparent;
+      }
+
+      .md-tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.03);
+      }
+
+      .md-td {
+        border: 1px solid rgb(255, 255, 255);
+        padding: 0.5rem 0.75rem;
+        text-align: left;
       }
     </style>
+  }
 
-    )}
+  {(node.type === "tableRow") &&
+    <tr class="md-tr">
+      {node.children.map(cell => (
+        <Astro.self node={cell} data={data} mermaidSvgs={mermaidSvgs} />
+      ))}
+    </tr>
+  }
 
-    {node.type === 'footnoteDefinition' && (
-      <div id={node.label} class="footnote-definition">
-        <p>
-          <strong>[{node.label}]</strong>{' '}
-          {node.children.map(child => <Astro.self node={child} data={data} />)}
-        </p>
-      </div>
-    )}
+  {(node.type === "tableCell") &&
+    <td class="md-td">
+      {node.children.map(child => (
+        <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />
+      ))}
+    </td>
+  }
 
-    {(node.type === "image") &&
-      <img src={node.url} />
-    }
+  {(node.type === "link") && 
+    <a href={node.url} {...node.data?.hProperties}>
+      {node.children[0].value}
+    </a>
+  }
 
-    {(node.type === "list") &&
-      <div>
-        {node['ordered']
-          ? <ol>
-            {node.children.map((item) => (
-              <Astro.self node={item} data={data} />
-            ))}
-          </ol>
-          : <ul>
-            {node.children.map((item) => (
-              <Astro.self node={item} data={data} />
-            ))}
-          </ul>
-        }
-      </div>
-    }
+  {(node.type === "code") && (
+    node.data?.isMermaid && node.data?.mermaidId && mermaidSvgs && mermaidSvgs[node.data.mermaidId]
+      ? <div class="mermaid-diagram" set:html={mermaidSvgs[node.data.mermaidId]} />
+      : <pre><code class={`language-${node.lang ?? "text"}`}>{node.value}</code></pre>
+  )}
 
-    {(node.type === "listItem") &&
-      <li class="custom-li">
-        <span class="li-content">
-          {node.children.map(child => (
-            <Astro.self node={child} data={data} />
-          ))}
-        </span>
-      </li>
-    }
+  {(node.type === "blockquote") &&
+    <ArticleCallout node={node} />
+  }
 
-    {(node.type === "table") &&
-      <div class="md-table-wrapper">
-        <table class="md-table">
-          <tbody>
-            {node.children.map(row => (
-              <Astro.self node={row} data={data} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <style>
-        .md-table-wrapper {
-          overflow-x: auto;
-          margin-bottom: 1.5rem;
-        }
+  {(node.type === "inlineCode") &&
+    <code class="inline-code">{node.value}</code>
+  }
 
-        .md-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 0.95rem;
-          background-color: transparent;
-        }
-
-        .md-tr:nth-child(even) {
-          background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .md-td {
-          border: 1px solid rgb(255, 255, 255);
-          padding: 0.5rem 0.75rem;
-          text-align: left;
-        }
-      </style>
-    }
-
-    {(node.type === "tableRow") &&
-      <tr class="md-tr">
-        {node.children.map(cell => (
-          <Astro.self node={cell} data={data} />
-        ))}
-      </tr>
-    }
-
-    {(node.type === "tableCell") &&
-      <td class="md-td">
-        {node.children.map(child => (
-          <Astro.self node={child} data={data} />
-        ))}
-      </td>
-    }
-
-    {(node.type === "link") && 
-      <a href={node.url} {...node.data?.hProperties}>
-        {node.children[0].value}
+  {(node.type === "citationReference") && (
+    <sup class="cite-ref">
+      <a
+        href={node.data?.hProperties?.href}
+        id={node.data?.hProperties?.id}
+        class="citation-link"
+      >
+        [{node.children?.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}]
       </a>
-    }
+    </sup>
+  )}
 
-    {(node.type === "code") &&
-      <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
-    }
+  {(node.type === 'citation') && (
+    <ArticleCitation node={node} />
+  )}
 
-    {(node.type === "blockquote") &&
-      <ArticleCallout node={node} />
-    }
+  {(node.type === 'citations') && (
+    <ArticleCitationsBlock node={node} />
+  )}
 
-    {(node.type === "inlineCode") &&
-      <code class="inline-code">{node.value}</code>
+  {(node.type === 'footnoteReference') && (
+    <sup class="footnote-ref">
+      <a href={`#${node.label}`} id={`ref-${node.label}`}>
+        [{node.label}]
+      </a>
+    </sup>
+    <style>
+    .footnote-ref {
+      font-size: 0.8em;
+      vertical-align: super;
     }
-
-    {(node.type === "paragraph") &&
-      <div class="paragraph">
-        {node.children.map((child: any) => (
-          <Astro.self node={child} data={data} />
-        ))}
-      </div>
+    .footnote-definition {
+      font-size: 0.9em;
+      margin-top: 1em;
+      border-top: 1px solid #ccc;
+      padding-top: 0.5em;
     }
+  </style>
+  )}
 
-    {(node.type === "thematicBreak") && 
-      <hr />
-    }
+  {(node.type === 'footnoteDefinition') && (
+    <div id={node.label} class="footnote-definition">
+      <p>
+        <strong>[{node.label}]</strong>{' '}
+        {node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+      </p>
+    </div>
+  )}
 
-    {(node.type === "text") && 
-      <span>{node.value}</span>
-    }
+  {(node.type === "thematicBreak") && 
+    <hr />
+  }
 
-    <!-- === Default handling for everything else === -->
-    {other_type && (
-      <div class={`unhandled-${node.type}`}>
-        ⚠️ Unhandled node type: <code>{node.type}</code>
-        <pre>{JSON.stringify(node, null, 2)}</pre>
-      </div>
-    )}
-  </div>
-)}
+  {(node.type === "text") && 
+    <span>{node.value}</span>
+  }
+
+  {(node.type === "element" && node.tagName === "h1") && (
+    <h1 {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </h1>
+  )}
+  {(node.type === "element" && node.tagName === "h2") && (
+    <h2 {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </h2>
+  )}
+  {(node.type === "element" && node.tagName === "h3") && (
+    <h3 {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </h3>
+  )}
+  {(node.type === "element" && node.tagName === "h4") && (
+    <h4 {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </h4>
+  )}
+  {(node.type === "element" && node.tagName === "h5") && (
+    <h5 {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </h5>
+  )}
+  {(node.type === "element" && node.tagName === "h6") && (
+    <h6 {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </h6>
+  )}
+  {(node.type === "element" && node.tagName === "pre") && (
+    node.children && node.children[0] && node.children[0].type === "element" && node.children[0].tagName === "code"
+      ? <pre {...node.properties}>
+          <code {...node.children[0].properties}>
+            {node.children[0].children && node.children[0].children[0] && node.children[0].children[0].value}
+          </code>
+        </pre>
+      : <pre {...node.properties}>
+          {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+        </pre>
+  )}
+  {(node.type === "element" && node.tagName === "p") && (
+    <p {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </p>
+  )}
+  {(node.type === "element" && node.tagName === "span") && (
+    <span {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </span>
+  )}
+  {(node.type === "element" && node.tagName === "div") && (
+    <div {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </div>
+  )}
+  {(node.type === "element" && node.tagName === "ul") && (
+    <ul {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </ul>
+  )}
+  {(node.type === "element" && node.tagName === "ol") && (
+    <ol {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </ol>
+  )}
+  {(node.type === "element" && node.tagName === "li") && (
+    <li {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </li>
+  )}
+  {(node.type === "element" && node.tagName === "table") && (
+    <table {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </table>
+  )}
+  {(node.type === "element" && node.tagName === "thead") && (
+    <thead {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </thead>
+  )}
+  {(node.type === "element" && node.tagName === "tbody") && (
+    <tbody {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </tbody>
+  )}
+  {(node.type === "element" && node.tagName === "tr") && (
+    <tr {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </tr>
+  )}
+  {(node.type === "element" && node.tagName === "td") && (
+    <td {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </td>
+  )}
+  {(node.type === "element" && node.tagName === "th") && (
+    <th {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </th>
+  )}
+  {(node.type === "element" && node.tagName === "svg") && (
+    <svg {...node.properties}>
+      {node.children && node.children.map(child => <Astro.self node={child} data={data} mermaidSvgs={mermaidSvgs} />)}
+    </svg>
+  )}
+
+  {other_type && (
+    <div class={`unhandled-${node.type}`}>
+      ⚠️ Unhandled node type: <code>{node.type}</code>
+      <pre>{JSON.stringify(node, null, 2)}</pre>
+    </div>
+  )}
+</div>

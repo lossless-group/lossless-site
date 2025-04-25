@@ -23,6 +23,7 @@
     "dotenv": "^16.3.1",
     "glob": "^10.3.10",
     "gray-matter": "^4.0.3",
+    "hast-util-from-html": "^2.0.3",
     "hast-util-to-html": "^9.0.5",
     "imagekit": "^6.0.0",
     "marked": "^15.0.9",
@@ -48,7 +49,6 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "playwright": "^1.43.1",
     "@cdransf/astro-tabler-icons": "^1.4.0",
     "@nasa-gcn/remark-rehype-astro": "^1.1.4",
     "@portaljs/remark-wiki-link": "^1.2.0",
@@ -56,6 +56,7 @@
     "@types/mdast": "^4.0.4",
     "husky": "^9.1.7",
     "mdast-util-to-string": "^4.0.0",
+    "playwright": "^1.43.1",
     "rehype-stringify": "^10.0.1",
     "remark-images": "^4.1.0",
     "remark-stringify": "^11.0.0",
@@ -70,5 +71,5 @@
       "sharp"
     ]
   },
-  "packageManager": "pnpm@9.11.0+sha256.1c0e33f70e5df9eede84a357bdfa0b1f9dba6e58194628d48a1055756f553754"
+  "packageManager": "pnpm@10.9.0"
 }

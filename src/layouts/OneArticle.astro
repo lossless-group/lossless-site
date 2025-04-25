@@ -19,12 +19,14 @@ import rehypeMermaid from 'rehype-mermaid';
 import rehypeStringify from 'rehype-stringify';
 import remarkMermaidTag from '@utils/markdown/remark-mermaid-tag';
 import rehypeMermaidInline from '@utils/markdown/rehype-mermaid-inline';
+import { visit } from 'unist-util-visit';
+import { fromHtml } from 'hast-util-from-html';
+import { toHtml } from 'hast-util-to-html';
 
 /**
  * Helper rehype plugin to transfer mermaidId from MDAST node.data to HAST code/pre properties.
  * Ensures the ID is available for rehype-mermaid-inline to map SVGs correctly.
  */
-import { visit } from 'unist-util-visit';
 function rehypePreserveMermaidId() {
   return (tree) => {
     visit(tree, 'element', (node) => {
@@ -97,13 +99,8 @@ const processor = unified()
       }
     }
   })
-  // DEBUG: Output HAST after rehypeMermaid, before rehypeMermaidInline
-  .use(() => (tree) => {
-    markdownDebugger.writeDebugFile('hast-after-rehypeMermaid', tree);
-    console.log('=== HAST after rehypeMermaid ===', JSON.stringify(tree, null, 2));
-  })
   .use(rehypeMermaidInline) // Inline SVGs at codeblock position
-  .use(rehypeStringify)
+  .use(rehypeStringify);
 
 // First parse to MDAST
 const mdast = processor.parse(preprocessedContent || '');
@@ -111,20 +108,36 @@ const mdast = processor.parse(preprocessedContent || '');
 
 const transformedMdast = await processor.run(mdast);
 
+// Helper: Extract mapping of mermaidId -> SVG string from HAST (after rehypeMermaidInline)
+function extractMermaidSvgs(hastTree) {
+  const svgMap = {};
+  visit(hastTree, 'element', (node) => {
+    // Mermaid SVGs are inserted as <svg data-mermaid-id="...">
+    if (node.tagName === 'svg' && node.properties && node.properties['data-mermaid-id']) {
+      const id = node.properties['data-mermaid-id'];
+      // Convert node back to HTML string (rehype-stringify already ran, so we can use innerHTML)
+      // Defensive: If node.children exists, reconstruct HTML string
+      // We'll use rehype-stringify for this node only
+      svgMap[id] = toHtml(node);
+    }
+  });
+  return svgMap;
+}
+
 // Generate HTML with only rehype and rehype-mermaid (no remark plugins)
 const astroCompiledHTML = await processor.process(preprocessedContent || '');
+const hastFromHtml = fromHtml(astroCompiledHTML.toString(), { fragment: true });
+const mermaidSvgs = extractMermaidSvgs(hastFromHtml);
 
 // Debug output to see AST structure
 markdownDebugger.log('OneArticle.astro Debug');
 markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
 markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
-const html = astroCompiledHTML.toString();
-
 // DEBUG: Output the compiled HTML to the server-side console for immediate inspection
-console.log('Compiled HTML:', html);
+console.log('Compiled HTML:', astroCompiledHTML.toString());
 
-markdownDebugger.verbose('Compiled HTML:', html);
+markdownDebugger.verbose('Compiled HTML:', astroCompiledHTML.toString());
 
 ---
 
@@ -136,8 +149,8 @@ markdownDebugger.verbose('Compiled HTML:', html);
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
   <Component 
     content={transformedMdast}
-    compiledContent={astroCompiledHTML.toString()}
     data={data}
+    mermaidSvgs={mermaidSvgs}
   >
     <slot />
   </Component>
