@@ -11,7 +11,7 @@ import remarkGfm from 'remark-gfm';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCallouts from '@utils/markdown/remark-callout-handler';
-import remarkCitations from '@utils/markdown/remarkCitations';
+import remarkCitations from '@utils/markdown/remark-citations';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 import remarkRehype from 'remark-rehype';
@@ -64,9 +64,9 @@ const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
   .use(remarkGfm)
   .use(remarkImages)         
-  .use(remarkBacklinks)       
-  .use(remarkCitations)       
-  .use(remarkCallouts)       
+  .use(remarkBacklinks)          
+  // .use(remarkCallouts)      
+  .use(remarkCitations)
 
 
 // First parse to MDAST
