@@ -281,6 +281,13 @@ const title = data.id ?
   <code class="inline-code">{node.value}</code>
 }
 
+{(node.type === "code" && node.lang === "mermaid") &&
+  <div class="mermaid-rendered" set:html={node.value} />
+}
+
+{(node.type === "code" && node.lang !== "mermaid") &&
+  <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
+}
 {(node.type === "paragraph") &&
     <div class="paragraph">
         {node.children.map((child: any) => (
