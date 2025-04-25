@@ -1,0 +1,34 @@
+---
+const { code } = Astro.props;
+---
+
+<div class="mermaid">
+  {code}
+</div>
+
+<script is:inline>
+  const mermaidConfig = {
+    startOnLoad: true,
+    theme: 'dark'  // 👈 force dark mode
+  };
+
+  if (!window.__MERMAID_LOADED__) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
+      .then((mermaid) => {
+        mermaid.default.initialize(mermaidConfig);
+        mermaid.default.run();
+        window.mermaid = mermaid.default;
+        window.__MERMAID_LOADED__ = true;
+      })
+      .catch(console.error);
+  } else {
+    window.mermaid?.initialize(mermaidConfig);
+    window.mermaid?.run();
+  }
+</script>
+
+<style>
+  .mermaid {
+    margin: 1rem 0;
+  }
+</style>
