@@ -27,7 +27,7 @@ const {node, data} = Astro.props;
 
 // List of node types we handle with specific components
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
-const handled_types = [
+const handled_types: string[] = [
     "root",
     "link",        // Handle standard MDAST link nodes
     "blockquote",  // Handle blockquotes before paragraphs since they contain paragraphs
@@ -45,9 +45,12 @@ const handled_types = [
     "strong",
     "emphasis",
     "break",
+    "html",
     "citation",
     "citations",
     "citationReference",
+    "footnoteReference",
+    "footnoteDefinition",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -106,6 +109,11 @@ const title = data.id ?
   </em>
 }
 
+{(node.type === "html") &&
+  <div class="raw-html" set:html={node.value} />
+}
+
+<!-- Anything citation-* is custom made -->
 <!-- === citationReference === -->
 {node.type === 'citationReference' && (
   <sup class="cite-ref">
@@ -127,6 +135,38 @@ const title = data.id ?
 <!-- === citations block === -->
 {node.type === 'citations' && (
   <ArticleCitationsBlock node={node} />
+)}
+
+<!-- footnoteRefernce and footnoteDefinition are from standard Markdown library -->
+{node.type === 'footnoteReference' && (
+  <sup class="footnote-ref">
+    <a href={`#${node.label}`} id={`ref-${node.label}`}>
+      [{node.label}]
+    </a>
+  </sup>
+  <style>
+  .footnote-ref {
+    font-size: 0.8em;
+    vertical-align: super;
+  }
+
+  .footnote-definition {
+    font-size: 0.9em;
+    margin-top: 1em;
+    border-top: 1px solid #ccc;
+    padding-top: 0.5em;
+  }
+</style>
+
+)}
+
+{node.type === 'footnoteDefinition' && (
+  <div id={node.label} class="footnote-definition">
+    <p>
+      <strong>[{node.label}]</strong>{' '}
+      {node.children.map(child => <Astro.self node={child} data={data} />)}
+    </p>
+  </div>
 )}
 
 {(node.type === "image") &&
