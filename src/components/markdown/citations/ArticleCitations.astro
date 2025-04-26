@@ -1,40 +1,22 @@
 ---
+import ArticleCitation from './ArticleCitation.astro';
+
 interface Props {
-    node: {
-        type?: string;
+  node: {
+    type: string;
+    children?: Array<{
+      type: string;
+      children?: Array<{
+        type: string;
+        value?: string;
+        url?: string;
         children?: Array<{
-            type: string;
-            value?: string;
-            url?: string;
-            children?: Array<{
-                type: string;
-                value?: string;
-                url?: string;
-                children?: Array<{
-                    type: string;
-                    value: string;
-                }>;
-                data?: {
-                    hName?: string;
-                    hProperties?: {
-                        className?: string;
-                        href?: string;
-                        target?: string;
-                        rel?: string;
-                    };
-                };
-            }>;
-            data?: {
-                hName?: string;
-                hProperties?: {
-                    className?: string;
-                };
-            };
-        }>;
-        data?: {
-            hProperties?: Record<string, any>;
-        };
-    };
+          type: string;
+          value: string;
+        }>; 
+      }>;
+    }>;
+  };
 }
 
 const { node } = Astro.props;
@@ -42,64 +24,44 @@ const citations = node.children || [];
 ---
 
 <div class="citations">
-    {citations.map((citation) => (
-        <div class={citation.type === 'citation-attribution' ? 'citation-attribution' : 'citation'}>
-            {citation.children?.map((child) => {
-                if (child.type === 'link') {
-                    return (
-                        <a href={child.url} target="_blank" rel="noopener noreferrer">
-                            {child.children?.[0].value}
-                        </a>
-                    );
-                }
-                return child.value;
-            })}
+  <h2 class="citations-header">Footnotes and Citations</h2>
+
+  {citations.map((citation) => {
+    if (citation.type === 'citation-attribution') {
+      return (
+        <div class="citation-attribution">
+          {citation.children?.map(child => child.value).join('')}
         </div>
-    ))}
+      );
+    }
+
+    return <ArticleCitation node={citation} />;
+  })}
 </div>
 
 <style>
-    .citations {
-        display: block;
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--clr-lossless-accent--brightest);
-    }
+  .citations {
+    display: block;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--clr-lossless-accent--brightest);
+  }
 
-    .citation {
-        display: block;
-        font-size: 0.9rem;
-        color: var(--clr-lossless-primary-light);
-        opacity: 0.9;
-        line-height: 1.8;
-        padding-left: 2rem;
-        text-indent: -2rem;
-        margin-bottom: 0.5rem;
-    }
+  .citations-header {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-primary-light);
+  }
 
-    .citation-attribution {
-        display: block;
-        font-size: 0.85rem;
-        color: var(--clr-lossless-primary-light);
-        opacity: 0.8;
-        font-style: italic;
-        margin-top: 1rem;
-        padding-top: 0.5rem;
-        border-top: 1px solid var(--clr-lossless-accent);
-    }
-
-    .citation:last-child {
-        margin-bottom: 0;
-    }
-
-    .citation a {
-        color: var(--clr-lossless-accent);
-        text-decoration: none;
-        transition: color 0.2s ease;
-    }
-
-    .citation a:hover {
-        color: var(--clr-lossless-accent--brightest);
-        text-decoration: underline;
-    }
+  .citation-attribution {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light);
+    opacity: 0.8;
+    font-style: italic;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--clr-lossless-accent);
+  }
 </style>

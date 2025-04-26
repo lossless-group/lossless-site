@@ -8,7 +8,10 @@
     --cyan-aqua--brightest: rgb(4, 229, 229);
     --white-catskill: hsla(184, 35%, 92%, 1.00);
     --purple-heart: hsla(272, 73%, 55%, 1.00);
+    --aquamarine: #6FFFD6;
     --white--pure: #FFFFFF;
+    --gunmetal: #283139;
+    --hippie-blue: #50a3b3;
     --white--pure--90p: hsla(0, 0%, 100%, .9);
     --white--pure--80p: hsla(0, 0%, 100%, .8);
     --white--pure--70p: hsla(0, 0%, 100%, .7);
@@ -32,6 +35,9 @@
 
     --clr-lossless-primary-dark: var(--bastille);
     --clr-lossless-accent--brightest: var(--cyan-aqua--brightest);
+    --clr-lossless-accent--aquamarine: var(--aquamarine);
+    --clr-lossless-gloss--aquamarine: var(--gunmetal);
+    --clr-lossless-gloss--hippie-blue: var(--hippie-blue);
     --clr-lossless-primary-light: var(--white-catskill);
     --clr-lossless-primary-glass: hsla(184, 35%, 92%, .40);
     --clr-lossless-primary-glass--lighter: hsla(184, 35%, 92%, .60);
@@ -43,17 +49,22 @@
     --clr-lossless-attn-action: var(--purple-heart);
     --clr-lossless-ui-btn-border: var(--clr-lossless-primary-light);
     --grd--lossless-eastern-crimson: linear-gradient(107deg, #22A6B5 5.36%, #9138E0 23.14%, #D9233B 47.56%, #F59C49 72.33%);
+    --grd--lossless-shamrock-fountain: linear-gradient(90deg, #32C6AB 0%, #4CA7B6 100%);
 
     --clr-primary-bg: var(--clr-stolen--github--dark);
     --clr-secondary-bg: var(--white--pure--20p);
     --grd__primary-bg: var(--grd--lossless-eastern-crimson);
+    --clr-bg-alt--bastille: var(--bastille);
+    --clr-lightest-bg: var(--clr-lossless-primary-light);
 
 
     --clr-heading: var(--clr-lossless-accent--brightest);
+    --clr-heading--secondary: var(--clr-lossless-hippie-blue);
     --clr-body: var(--clr-lossless-primary-light);
     --clr-link: var(--clr-lossless-accent--brightest);
     --clr-btn-label: var(--clr-lossless-primary-light);
     --clr-btn-hover: var(--clr-lossless-attn-action);
+    --grd-text-cta: var(--grd--lossless-shamrock-fountain);
 
     --ff-base: 'Poppins', sans-serif;
     --ff-legible: 'Krub', sans-serif;
@@ -93,4 +104,3 @@ a, p {
     color: var(--clr-body);
     font-family: var(--ff-base);
 }
-

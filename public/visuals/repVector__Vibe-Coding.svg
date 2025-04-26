@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.46 428.34" id="Robotichelp">
+  <circle cx="244.97" cy="181.77" r="163.96" fill="#e4f1f2" class="colore7ecf7 svgShape"></circle>
+  <path fill="#d6f6f8" stroke="#383838" stroke-miterlimit="10" stroke-width=".82" d="M66.15,229.53c-26.28,32-48.21,153.38-21.64,172.34S128,316.16,128,316.16l-48-83.56Z" class="colorffffff svgShape colorStroke313440 svgStroke"></path>
+  <path fill="#29879c" d="M71.67,230.67l8.41,1.88,48,83.56s-32.43,59.65-59.76,80.72c-4.9,1.8-9.44,1.72-13.32-1.05C30.16,378,47.76,270.65,71.67,230.67Z" class="color33bac1 svgShape"></path>
+  <path fill="#d6f6f8" stroke="#383838" stroke-miterlimit="10" stroke-width=".82" d="M290.61,228.12c30,28.65,66.37,146.44,42.29,168.47s-93.19-75-93.19-75l37.59-88.74Z" class="colorffffff svgShape colorStroke313440 svgStroke"></path>
+  <path fill="#29879c" d="M285.27,229.92l-8.12,2.88-37.58,88.74s39.39,55.31,69.06,72.93c5.08,1.19,9.58.57,13.1-2.65C344.26,371.2,313.83,266.72,285.27,229.92Z" class="color33bac1 svgShape"></path>
+  <path fill="#19bda3" stroke="#383838" stroke-miterlimit="10" stroke-width=".82" d="M186.88,427.06H174.21c-32.09,0-58.1-7.55-58.1-39.64H245C245,419.51,219,427.06,186.88,427.06Z" class="color33b8c0 svgShape colorStroke313440 svgStroke"></path>
+  <rect width="4.5" height="61.83" x="57.87" y="58.4" fill="#29879c" rx=".26" class="color33bac1 svgShape"></rect>
+  <rect width="4.5" height="7.81" x="57.87" y="47.54" fill="#29879c" rx=".26" class="color33bac1 svgShape"></rect>
+  <path fill="#009bb1" d="M57.11,140.91H70.84v-33H57.11a11.75,11.75,0,0,0-11.75,11.75v9.47A11.76,11.76,0,0,0,57.11,140.91Z" class="color313440 svgShape"></path>
+  <rect width="4.5" height="61.83" x="295.06" y="58.4" fill="#29879c" rx=".26" class="color33bac1 svgShape"></rect>
+  <rect width="4.5" height="7.81" x="295.06" y="47.54" fill="#29879c" rx=".26" class="color33bac1 svgShape"></rect>
+  <path fill="#009bb1" d="M300.32,140.91H286.59v-33h13.73a11.76,11.76,0,0,1,11.76,11.75v9.47A11.77,11.77,0,0,1,300.32,140.91Z" class="color313440 svgShape"></path>
+  <rect width="38.97" height="43.47" x="158.96" y="189.37" fill="#009bb1" class="color313440 svgShape"></rect>
+  <rect width="38.97" height="3.75" x="158.96" y="214.48" fill="#363636" class="color333333 svgShape"></rect>
+  <rect width="220.35" height="139.41" x="68.27" y="57.71" fill="#d6f6f8" stroke="#383838" stroke-miterlimit="10" stroke-width=".82" rx="36.85" class="colorffffff svgShape colorStroke313440 svgStroke"></rect>
+  <rect width="187.3" height="118.49" x="86.27" y="67.13" fill="#009bb1" rx="33.41" class="color313440 svgShape"></rect>
+  <circle cx="187.36" cy="246.59" r="8.62" fill="#d6f6f8" transform="rotate(-13.28 187.39 246.62)" class="colorffffff svgShape"></circle>
+  <path fill="#d6f6f8" stroke="#383838" stroke-miterlimit="10" stroke-width=".82" d="M293.39,230.2c-10.05-14-87.3-18.56-112.17-19.69.05,0,.07-.1.11-.14l-1.74.07-1.74-.07s.07.1.11.14c-24.86,1.13-102.12,5.73-112.17,19.69-12,16.66,2.67,138.65,57.33,166l.09.05c10.16,6.46,29.75,14.83,55.51,14.55h1.75c25.76.28,45.34-8.09,55.5-14.55l.1-.05C290.73,368.85,305.39,246.86,293.39,230.2Z" class="colorffffff svgShape colorStroke313440 svgStroke"></path>
+  <path fill="#009bb1" d="M287.3,315.87l-61.86-13a1,1,0,0,0-1.07.48l-27.05,46.83H158.48l-27.71-47.5a1,1,0,0,0-1.15-.46L71.7,319.78c.19.64.37,1.29.57,1.93l57.17-17.33L157,351.69a1,1,0,0,0,.86.5h40a1,1,0,0,0,.87-.5l27-46.71,61,12.81C286.92,317.15,287.12,316.51,287.3,315.87Z" class="color313440 svgShape"></path>
+  <circle cx="177.17" cy="259.14" r="8.62" fill="#29879c" transform="rotate(-9.22 177.144 259.063)" class="color33bac1 svgShape"></circle>
+  <circle cx="143.82" cy="259.14" r="8.62" fill="#bc4e29" transform="rotate(-45 143.827 259.135)" class="colorf05923 svgShape"></circle>
+  <circle cx="208.9" cy="259.14" r="8.62" fill="#f69883" transform="rotate(-13.28 208.955 259.186)" class="colorfcb036 svgShape"></circle>
+  <rect width="7.97" height="13.48" x="224.21" y="106.72" fill="#19bda3" class="color33b8c0 svgShape"></rect>
+  <polygon fill="#19bda3" points="239.75 119.69 236.19 119.69 236.19 115.79 228.22 115.79 228.22 115.79 220.24 115.79 220.24 119.69 217.54 119.69 217.54 128.73 220.24 128.73 220.24 133.88 224.21 133.88 224.21 142.62 232.18 142.62 232.18 133.88 236.19 133.88 236.19 128.73 239.75 128.73 239.75 119.69" class="color33b8c0 svgShape"></polygon>
+  <rect width="7.97" height="16.63" x="123.8" y="106.72" fill="#19bda3" class="color33b8c0 svgShape"></rect>
+  <polygon fill="#19bda3" points="139.34 119.69 135.78 119.69 135.78 115.79 127.81 115.79 127.81 115.79 119.84 115.79 119.84 119.69 117.14 119.69 117.14 128.73 119.84 128.73 119.84 133.88 123.8 133.88 123.8 142.62 131.77 142.62 131.77 133.88 135.78 133.88 135.78 128.73 139.34 128.73 139.34 119.69" class="color33b8c0 svgShape"></polygon>
+  <rect width="7.34" height="7.34" x="185.09" y="141.04" fill="#19bda3" class="color33b8c0 svgShape"></rect>
+  <rect width="7.34" height="7.34" x="178.47" y="147.31" fill="#19bda3" class="color33b8c0 svgShape"></rect>
+  <rect width="7.34" height="7.34" x="171.21" y="147.31" fill="#19bda3" class="color33b8c0 svgShape"></rect>
+  <rect width="7.34" height="7.34" x="164.23" y="141.13" fill="#19bda3" class="color33b8c0 svgShape"></rect>
+  <path fill="none" stroke="#7dbdb5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" d="m404.25 193.75-1 40L381.92 240l.19 35.27M396.62 236.75l-.3 27.46" class="colorStroke7d89bd svgStroke"></path>
+  <path fill="none" stroke="#7dbdb5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" d="m392.93 194.64-.54 28.7L369 230.59l.17 18.45M419.57 195.72 418 247.08l10.23 13.33-1 45.41" class="colorStroke7d89bd svgStroke"></path>
+  <path fill="none" stroke="#4adcc5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" d="M427.55,276.61l-9.62,5.8-.35,12.48" class="colorStroke4aa7dc svgStroke"></path>
+  <path fill="none" stroke="#7dbdb5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" d="M418.15,237.38l-10.86,5.35-.87,21.1" class="colorStroke7d89bd svgStroke"></path>
+  <path fill="#fdb4a2" d="M417.62,291.69a3.23,3.23,0,1,1-3.23,3.24A3.23,3.23,0,0,1,417.62,291.69Z" class="color4aa7dc svgShape"></path>
+  <path fill="none" stroke="#4adcc5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" d="M428.23,281.68l15.47,15.94-.35,12.49" class="colorStroke4aa7dc svgStroke"></path>
+  <path fill="#fdb4a2" d="M443.39 306.91a3.23 3.23 0 1 1-3.24 3.23A3.23 3.23 0 0 1 443.39 306.91ZM426.35 304.46a3.23 3.23 0 1 1-3.23 3.22A3.23 3.23 0 0 1 426.35 304.46Z" class="color4aa7dc svgShape"></path>
+  <path fill="#87ddfd" d="M428.21 257.23a3.24 3.24 0 1 1-3.23 3.23A3.23 3.23 0 0 1 428.21 257.23ZM428.21 236.4a3.24 3.24 0 1 1-3.23 3.23A3.23 3.23 0 0 1 428.21 236.4ZM407.23 259.75A3.24 3.24 0 1 1 404 263 3.24 3.24 0 0 1 407.23 259.75ZM407.23 240.41a3.24 3.24 0 1 1-3.24 3.24A3.24 3.24 0 0 1 407.23 240.41ZM396.25 260.19a3.23 3.23 0 1 1-3.24 3.23A3.23 3.23 0 0 1 396.25 260.19ZM381.68 237a3.23 3.23 0 1 1-3.23 3.23A3.24 3.24 0 0 1 381.68 237ZM369.8 245.38a3.23 3.23 0 1 1-3.24 3.23A3.23 3.23 0 0 1 369.8 245.38Z" class="color7d89bd svgShape"></path>
+  <path fill="#fdb4a2" d="M372 213.32a3.24 3.24 0 1 1-3.24 3.23A3.22 3.22 0 0 1 372 213.32ZM382.09 271.63a3.23 3.23 0 1 1-3.23 3.23A3.22 3.22 0 0 1 382.09 271.63Z" class="color4aa7dc svgShape"></path>
+  <path fill="#87ddfd" d="M396.25,232.59a3.23,3.23,0,1,1-3.24,3.23A3.23,3.23,0,0,1,396.25,232.59Z" class="color7d89bd svgShape"></path>
+  <line x1="371.62" x2="392.72" y1="216.55" y2="210.46" fill="none" stroke="#4adcc5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" class="colorStroke4aa7dc svgStroke"></line>
+  <line x1="418.63" x2="429.85" y1="227.78" y2="241.57" fill="none" stroke="#7dbdb5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" class="colorStroke7d89bd svgStroke"></line>
+  <rect width="164.33" height="137.17" x="320.96" y="87.03" fill="#009bb1" rx="10.79" class="color313440 svgShape"></rect>
+  <rect width="164.33" height="137.17" x="320.96" y="273.63" fill="#009bb1" rx="10.79" class="color313440 svgShape"></rect>
+  <rect width="164.33" height="137.17" x="325.6" y="270.38" fill="#d6f6f8" stroke="#383838" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" rx="10.79" class="colorffffff svgShape colorStroke313440 svgStroke"></rect>
+  <rect width="30.75" height="30.75" x="397.26" y="286.34" fill="#f69883" class="colorfcb036 svgShape"></rect>
+  <rect width="30.75" height="30.75" x="397.26" y="326.73" fill="#f69883" class="colorfcb036 svgShape"></rect>
+  <rect width="30.75" height="30.75" x="397.26" y="365.26" fill="#f69883" class="colorfcb036 svgShape"></rect>
+  <circle cx="358.91" cy="302.41" r="16.71" fill="#bc4e29" transform="rotate(-45 358.905 302.417)" class="colorf05923 svgShape"></circle>
+  <circle cx="358.91" cy="341.41" r="16.71" fill="#bc4e29" transform="rotate(-45 358.905 341.407)" class="colorf05923 svgShape"></circle>
+  <circle cx="358.91" cy="379.7" r="16.71" fill="#bc4e29" transform="rotate(-45 358.909 379.705)" class="colorf05923 svgShape"></circle>
+  <polygon fill="#29879c" points="450.19 316.61 441.32 301.25 450.19 285.89 467.93 285.89 476.8 301.25 467.93 316.61 450.19 316.61" class="color33bac1 svgShape"></polygon>
+  <polygon fill="#29879c" points="450.19 355.61 441.32 340.25 450.19 324.89 467.93 324.89 476.8 340.25 467.93 355.61 450.19 355.61" class="color33bac1 svgShape"></polygon>
+  <polygon fill="#29879c" points="450.19 393.67 441.32 378.31 450.19 362.95 467.93 362.95 476.8 378.31 467.93 393.67 450.19 393.67" class="color33bac1 svgShape"></polygon>
+  <rect width="164.33" height="137.17" x="325.6" y="83.78" fill="#d6f6f8" stroke="#383838" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.39" rx="10.79" class="colorffffff svgShape colorStroke313440 svgStroke"></rect>
+  <rect width="30.75" height="30.75" x="440.03" y="169.31" fill="#f69883" class="colorfcb036 svgShape"></rect>
+  <rect width="30.75" height="30.75" x="367.15" y="128.34" fill="#f69883" transform="rotate(50.23 382.537 143.731)" class="colorfcb036 svgShape"></rect>
+  <rect width="30.75" height="30.75" x="427.84" y="101.76" fill="#f69883" transform="rotate(81.38 443.216 117.136)" class="colorfcb036 svgShape"></rect>
+  <circle cx="418.79" cy="160.37" r="16.71" fill="#bc4e29" transform="rotate(-13.28 418.881 160.382)" class="colorf05923 svgShape"></circle>
+  <circle cx="358.91" cy="114.41" r="16.71" fill="#bc4e29" transform="rotate(-45 358.912 114.414)" class="colorf05923 svgShape"></circle>
+  <circle cx="364.48" cy="189.61" r="16.71" fill="#bc4e29" class="colorf05923 svgShape"></circle>
+  <polygon fill="#29879c" points="392.16 210.31 383.3 194.95 392.16 179.59 409.9 179.59 418.77 194.95 409.9 210.31 392.16 210.31" class="color33bac1 svgShape"></polygon>
+  <polygon fill="#29879c" points="387.46 117.7 392.66 100.74 409.94 96.76 422.03 109.74 416.84 126.7 399.55 130.68 387.46 117.7" class="color33bac1 svgShape"></polygon>
+  <polygon fill="#29879c" points="334.6 160.86 339.05 146.34 353.85 142.93 364.2 154.05 359.75 168.57 344.95 171.98 334.6 160.86" class="color33bac1 svgShape"></polygon>
+  <polygon fill="#29879c" points="441.37 152.51 445.82 137.99 460.62 134.58 470.97 145.69 466.52 160.21 451.72 163.62 441.37 152.51" class="color33bac1 svgShape"></polygon>
+  <path fill="#262626" d="M83.11,373.68a5.92,5.92,0,0,0-5.92-5.91H16.88A5.92,5.92,0,0,0,11,373.68v17.6a35.74,35.74,0,0,0,3.8,16c22.05-7,45.64-9.71,68.35-17.77Z" class="colorf15a28 svgShape"></path>
+  <path fill="#262626" d="M14.76,407.3a36.05,36.05,0,0,0,68.35-16v-1.75C60.4,397.59,36.81,400.28,14.76,407.3Z" class="colorf15a28 svgShape"></path>
+  <path fill="#009bb1" d="M80,372.18c0-1.86-14.24-3.36-31.81-3.36s-31.82,1.5-31.82,3.36,14.25,3.36,31.82,3.36S80,374,80,372.18Z" class="color313440 svgShape"></path>
+  <path fill="#87ddfd" d="M45.32,312.62c.67-.9,10.53-28.88-1.35-31.35s-16.8,7.61-18.59,20.83,2.91,30,.67,30.67-5.38-8.06-11.43-3.36-.67,13,3.81,17.47,4.26,6.27,3.36,6.27-5.6-2.69-8.29,1.12-2.69,13.43,13,18.36c0,0,12.77,3.35,21.51-.23S45.32,312.62,45.32,312.62Z" class="color8b9e57 svgShape"></path>
+  <path fill="#9c3411" d="M48,373.22c1.79,0,13.74,1.2,18.82-1.49s18.52-22.09,14.34-26.87S73.1,341,73.1,341s16.13-17.32,7.77-19.7-11.06,1.79-11.06,1.79,11.65-35.83-6.27-34.93-8.07,34.63-8.07,34.63-3-13.73-12.54-11.35-7.77,20-2.69,33.14c0,0-6.28-5.37-9.86,1.2S48,373.22,48,373.22Z" class="coloraec36b svgShape"></path>
+  <path fill="#009bb1" d="M59.43 362.16a.46.46 0 0 1-.33-.13.51.51 0 0 1-.05-.71c.08-.09 7.84-9 5.74-14.26a3.92 3.92 0 0 0-2.39-2.49c-2.28-.7-5.13 1.14-5.15 1.16a.5.5 0 0 1-.55 0 .53.53 0 0 1-.24-.5c0-.16 2.18-15.86-1.52-24.36a.5.5 0 0 1 .92-.4c3.31 7.59 2.16 20.23 1.73 23.9a7.28 7.28 0 0 1 5.11-.77 4.85 4.85 0 0 1 3 3.08c2.32 5.81-5.58 14.91-5.92 15.29A.49.49 0 0 1 59.43 362.16ZM41.73 367.31a.48.48 0 0 1-.36-.16c-.61-.63-14.78-15.56-11.43-21.64a6.32 6.32 0 0 1 3.89-3.26c3.2-.89 6.45 1 6.59 1.05a.51.51 0 0 1 .18.69.53.53 0 0 1-.69.19s-3-1.73-5.81-1A5.41 5.41 0 0 0 30.82 346c-2.48 4.51 7.3 16.3 11.28 20.46a.5.5 0 0 1 0 .71A.52.52 0 0 1 41.73 367.31ZM63.91 318.27a.52.52 0 0 1-.31-.1.51.51 0 0 1-.09-.71c.05-.07 5-6.5 4.16-9.83a2.12 2.12 0 0 0-1.28-1.49 3.15 3.15 0 0 0-2.74-.07c-2.59 1.17-3.95 5.53-4 5.58a.49.49 0 0 1-.63.33.5.5 0 0 1-.34-.62c.06-.21 1.52-4.86 4.52-6.21a4.14 4.14 0 0 1 3.57.07 3.13 3.13 0 0 1 1.84 2.17c.94 3.8-4.12 10.41-4.34 10.69A.5.5 0 0 1 63.91 318.27ZM26.94 343.58a.51.51 0 0 1-.47-.34c0-.11-1-2.79 1.91-5.68a4.06 4.06 0 0 1 2.9-1.28 4.59 4.59 0 0 1 3 1.54.52.52 0 0 1-.06.71.5.5 0 0 1-.71-.06 3.65 3.65 0 0 0-2.27-1.18 3.09 3.09 0 0 0-2.15 1c-2.4 2.4-1.7 4.53-1.67 4.62a.5.5 0 0 1-.31.64A.47.47 0 0 1 26.94 343.58Z" class="color313440 svgShape"></path>
+  <path fill="#9c3411" d="M84.08,342.17c3,3.21,13.89-10.74,9-12.31S80,337.92,84.08,342.17Z" class="coloraec36b svgShape"></path>
+  <path fill="#87ddfd" d="M13.82,309.93c-4.22,1.3,3.46,17.22,7.06,13.5S19.43,308.21,13.82,309.93Z" class="color8b9e57 svgShape"></path>
+  <path fill="#9c3411" d="M78.92,308.14c2.35,1.17,3.14-3.13,1.8-3.58S77.13,307.25,78.92,308.14Z" class="coloraec36b svgShape"></path>
+  <path fill="#87ddfd" d="M12.16 326.05c2.34 1.18 3.13-3.13 1.79-3.58S10.36 325.16 12.16 326.05ZM54.05 283.74c4.29.42 2.92-10.75.45-10.75S49.57 283.29 54.05 283.74ZM10.36 348.44s-.44-6.94-6.27-5.82-1.57 14.11 3.14 13.21S10.36 348.44 10.36 348.44Z" class="color8b9e57 svgShape"></path>
+  <path fill="#d6f6f8" d="M83.2,386.69c-.54-.06-1.08-.14-1.61-.18-3.93-.31-8.57,1.17-9.45,5.22a9.22,9.22,0,0,0,.36,4.33q.14.49.24,1c.24,1.12.11,2.12-.31,2.42s-1.82-.29-2.55-1.33a17.52,17.52,0,0,1-.95-1.56,10.91,10.91,0,0,0-2.84-3.66,6.77,6.77,0,0,0-10.21,3.38,10.84,10.84,0,0,0-.32,1.7,8.62,8.62,0,0,1-.2,1.13,3.27,3.27,0,0,1-2.89,2.3,3.37,3.37,0,0,1-3.09-2,8.41,8.41,0,0,1-.38-2.22,12.11,12.11,0,0,0-.56-3.05,7.21,7.21,0,0,0-11.22-2.77,11.79,11.79,0,0,0-2.49,3.72c-.25.49-.49,1-.76,1.45-.61,1-1.7,2-2.52,1.81s-1.49-1.88-2-3.32l-.13-.37a10.49,10.49,0,0,0-3.59-5.32,6.14,6.14,0,0,0-7.22-.14A8,8,0,0,0,16.94,391c-.17.23-.33.46-.51.67a4.69,4.69,0,0,1-4.25,1.44,5.09,5.09,0,0,1-1.12-.27v1.32c0,.8.06,1.58.12,2.37.19,0,.36.11.56.14a8.25,8.25,0,0,0,7.45-2.7c.23-.28.45-.58.66-.88a5.61,5.61,0,0,1,.89-1.06,2.61,2.61,0,0,1,2.9.24A7.12,7.12,0,0,1,26,395.84l.12.35c.71,2.08,1.69,4.92,4.5,5.63s5.28-1.42,6.49-3.46c.32-.55.6-1.11.88-1.68a8.89,8.89,0,0,1,1.7-2.66,3.26,3.26,0,0,1,3-.6,3.3,3.3,0,0,1,2.41,1.93,9.12,9.12,0,0,1,.35,2.16A11.23,11.23,0,0,0,46,400.7,6.9,6.9,0,0,0,52.35,405h.29a6.89,6.89,0,0,0,6.17-4.9,11.14,11.14,0,0,0,.3-1.63,7.63,7.63,0,0,1,.21-1.16,3.22,3.22,0,0,1,4.62-1.53,8.24,8.24,0,0,1,1.87,2.56A20.71,20.71,0,0,0,67,400.21c1.74,2.46,5,4,7.54,2.19,1.66-1.17,2.32-3.45,1.76-6.09-.08-.38-.18-.76-.27-1.13a6.39,6.39,0,0,1-.34-2.69c.4-1.83,3.22-2.61,5.65-2.41.63.05,1.27.14,1.91.22Z" class="colorffffff svgShape"></path>
+  <path fill="#2f64a7" d="m46.7 44 13.55-4.58L46.53 35a11.14 11.14 0 0 1-8.22-8.33L33.61 6.32 29.33 26.43A11.16 11.16 0 0 1 20.93 35L8.18 39.63l12.46 4.14a11.15 11.15 0 0 1 8.61 8.72l4 19.74 4.85-19.91A11.15 11.15 0 0 1 46.7 44ZM25.63 86.5l8.58-2.9-8.68-2.79a7.06 7.06 0 0 1-5.22-5.28l-3-12.91L14.63 75.36a7.08 7.08 0 0 1-5.32 5.41l-8.08 3 7.89 2.62a7.07 7.07 0 0 1 5.46 5.53l2.5 12.5 3.07-12.62A7.08 7.08 0 0 1 25.63 86.5Z" class="colorfbaf32 svgShape"></path>
+  <path fill="#29879c" d="M238,30.71,249,27l-11.17-3.59a9.07,9.07,0,0,1-6.7-6.78L227.32,0l-3.49,16.38a9.07,9.07,0,0,1-6.84,7L206.6,27.13l10.15,3.37a9.09,9.09,0,0,1,7,7.11L227,53.69l4-16.23A9.06,9.06,0,0,1,238,30.71Z" class="color33bac1 svgShape"></path>
+  <path fill="#2f64a7" d="M493.19,248.38l8.59-2.9-8.69-2.78a7.07,7.07,0,0,1-5.21-5.28l-3-12.91-2.71,12.73a7.06,7.06,0,0,1-5.32,5.42l-8.08,2.94,7.9,2.62a7.06,7.06,0,0,1,5.45,5.53l2.5,12.5,3.07-12.61A7.09,7.09,0,0,1,493.19,248.38Z" class="colorfbaf32 svgShape"></path>
+  <rect width="2.16" height="29.63" x="350.35" y="5.38" fill="#262626" rx=".13" class="colorf15a28 svgShape"></rect>
+  <rect width="2.16" height="3.74" x="350.32" fill="#262626" rx=".13" class="colorf15a28 svgShape"></rect>
+  <path fill="#009bb1" d="M350,44.92h6.58V29.12H350a5.63,5.63,0,0,0-5.63,5.63v4.54A5.63,5.63,0,0,0,350,44.92Z" class="color313440 svgShape"></path>
+  <rect width="2.16" height="29.63" x="464.02" y="5.38" fill="#262626" rx=".13" class="colorf15a28 svgShape"></rect>
+  <rect width="2.16" height="3.74" x="464" fill="#262626" rx=".13" class="colorf15a28 svgShape"></rect>
+  <path fill="#009bb1" d="M466.54,44.92H460V29.12h6.58a5.64,5.64,0,0,1,5.64,5.63v4.54A5.64,5.64,0,0,1,466.54,44.92Z" class="color313440 svgShape"></path>
+  <rect width="105.61" height="66.81" x="355.33" y="5.05" fill="#d6f6f8" stroke="#383838" stroke-miterlimit="10" stroke-width=".8" rx="17.66" class="colorffffff svgShape colorStroke313440 svgStroke"></rect>
+  <rect width="89.76" height="56.79" x="363.95" y="9.56" fill="#009bb1" rx="16.01" class="color313440 svgShape"></rect>
+  <rect width="3.89" height="6.58" x="430.52" y="28.22" fill="#262626" class="colorf15a28 svgShape"></rect>
+  <polygon fill="#262626" points="438.11 34.55 436.37 34.55 436.37 32.65 432.47 32.65 432.47 32.65 428.58 32.65 428.58 34.55 427.26 34.55 427.26 38.97 428.58 38.97 428.58 41.49 430.51 41.49 430.51 45.75 434.41 45.75 434.41 41.49 436.37 41.49 436.37 38.97 438.11 38.97 438.11 34.55" class="colorf15a28 svgShape"></polygon>
+  <rect width="3.89" height="8.12" x="381.47" y="28.22" fill="#262626" class="colorf15a28 svgShape"></rect>
+  <polygon fill="#262626" points="389.06 34.55 387.33 34.55 387.33 32.65 383.43 32.65 383.43 32.65 379.54 32.65 379.54 34.55 378.22 34.55 378.22 38.97 379.54 38.97 379.54 41.49 381.48 41.49 381.48 45.75 385.37 45.75 385.37 41.49 387.33 41.49 387.33 38.97 389.06 38.97 389.06 34.55" class="colorf15a28 svgShape"></polygon>
+  <rect width="3.59" height="3.59" x="411.41" y="44.98" fill="#262626" class="colorf15a28 svgShape"></rect>
+  <rect width="3.59" height="3.59" x="408.17" y="48.05" fill="#262626" class="colorf15a28 svgShape"></rect>
+  <rect width="3.59" height="3.59" x="404.63" y="48.05" fill="#262626" class="colorf15a28 svgShape"></rect>
+  <rect width="3.59" height="3.59" x="401.22" y="45.03" fill="#262626" class="colorf15a28 svgShape"></rect>
+  <line x1="208.18" x2="276.08" y1="427.06" y2="427.06" fill="none" stroke="#5d7d79" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.46" class="colorStroke545e7d svgStroke"></line>
+  <line x1="1.23" x2="197.5" y1="427.06" y2="427.11" fill="none" stroke="#5d7d79" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.46" class="colorStroke545e7d svgStroke"></line>
+  <line x1="304.91" x2="509.23" y1="427.06" y2="427.06" fill="none" stroke="#5d7d79" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.46" class="colorStroke545e7d svgStroke"></line>
+</svg>

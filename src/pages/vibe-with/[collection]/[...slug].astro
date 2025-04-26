@@ -8,12 +8,12 @@
  * Follows comprehensive, parallel commenting rules as outlined in:
  *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
  *
- * - Fetches content from BOTH the 'prompts' and 'specs' collections (see content.config.ts for exact keys).
+ * - Fetches content from 'prompts', 'specs', and 'reminders' collections (see content.config.ts for exact keys).
  * - Generates static paths for all entries, supporting dynamic tag navigation.
  * - Renders content using Layout, OneArticle, and OneArticleOnPage components.
  * - All logic is thoroughly commented and DRY.
  */
-import { getCollection } from 'astro:content';
+ import { getCollection, getEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
@@ -24,12 +24,136 @@ export const prerender = true;
 /**
  * getStaticPaths — Generates all static paths for the /vibe-with/[collection]/[slug] dynamic route.
  *
- * - Fetches all entries from the 'prompts' and 'specs' collections.
+ * - Fetches all entries from the 'prompts', 'specs', and 'reminders' collections.
  * - For each entry, generates a path with collection and slug params.
  * - Ensures each entry has a slug and title (generates if missing).
  * - Returns array of { params, props } objects for Astro static generation.
  */
 export async function getStaticPaths() {
+  /**
+   * Helper function to create static paths for any collection.
+   * DRY, robust, and typesafe: Ensures every entry has slug, title, tags.
+   *
+   * @param entries - Array of collection entries (from getCollection)
+   * @param collectionName - Name of the collection ('prompts', 'specs', 'reminders')
+   * @returns Array of static path objects for Astro static generation
+   */
+  function createStaticPathsForCollection(entries: any[], collectionName: string) {
+    /**
+     * EntryData — Interface defining the expected shape of entry.data with required properties
+     * All fields are required and must be strings or arrays as appropriate.
+     */
+    interface EntryData {
+      title: string;
+      slug: string;
+      tags: any[];
+      [key: string]: any;
+    }
+
+    // Helper: Convert train-case or hyphen-case to proper case for titles
+    function toProperCase(str: string): string {
+      return str
+        .replace(/[-_]/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+
+    // DEBUG: Print out all slugs for this collection
+    console.log(`[STATIC PATHS] ${collectionName}:`, entries.map(e => ({ id: e.id, slug: e.data?.slug })));
+
+    return entries.map(entry => {
+      // Extract just the filename without path and extension
+      const filename = entry.id.replace(/\.md$/, '');
+      const filenameParts = filename.split('/');
+      const baseFilename = filenameParts[filenameParts.length - 1];
+
+      // Generate slug and title for fallback (ALWAYS STRINGS)
+      const generatedSlug: string = baseFilename.toLowerCase().replace(/\s+/g, '-');
+      const generatedTitle: string = toProperCase(baseFilename);
+      // INLINE FALLBACK OBJECT, ALWAYS COMPLETE
+      const data = (entry.data && typeof entry.data === 'object' && entry.data !== null)
+        ? {
+            tags: [],
+            slug: typeof generatedSlug === 'string' ? generatedSlug : '',
+            title: typeof generatedTitle === 'string' ? generatedTitle : '',
+            ...entry.data
+          }
+        : {
+            tags: [],
+            slug: typeof generatedSlug === 'string' ? generatedSlug : '',
+            title: typeof generatedTitle === 'string' ? generatedTitle : ''
+          };
+      // Type enforcement (final guarantee)
+      const safeData: EntryData = {
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        slug: typeof data.slug === 'string' ? data.slug : '',
+        title: typeof data.title === 'string' ? data.title : '',
+        ...data
+      };
+      const slug: string = safeData.slug;
+      const safeEntry = {
+        ...entry,
+        data: safeData
+      };
+      // Ensure Astro receives 'undefined' for optional slug param, not an empty string (Astro routing requirement)
+      return {
+        params: { collection: collectionName, slug: slug || undefined },
+        props: {
+          entry: safeEntry,
+          collection: collectionName,
+        },
+      };
+    });
+  }
+
+  // Fetch all entries from the 'prompts', 'specs', and 'reminders' collections
+  const promptsEntries = await getCollection('prompts');
+  const specsEntries = await getCollection('specs');
+  const remindersEntries = await getCollection('reminders');
+
+  // --- Static Path Generation for All Collections ---
+  // Use the single DRY helper for all collections
+  const promptsPaths = createStaticPathsForCollection(promptsEntries, 'prompts'); // [EntryData enforced]
+  const specsPaths = createStaticPathsForCollection(specsEntries, 'specs');       // [EntryData enforced]
+  const remindersPaths = createStaticPathsForCollection(remindersEntries, 'reminders'); // [EntryData enforced]
+
+  // Combine all path arrays
+  console.log('--- SPECS STATIC PATHS ---', specsPaths.map(p => p.params));
+  return [...promptsPaths, ...specsPaths, ...remindersPaths];
+}
+
+/**
+ * Props interface for page rendering.
+ * Mirrors /more-about/[...slug].astro for consistency.
+ * Supports all three collections: 'prompts', 'specs', and 'reminders'.
+ */
+interface Props {
+  entry: any;
+  collection: 'prompts' | 'specs' | 'reminders'; // Now supports all three collections
+}
+---
+
+{/* 
+  All Astro object usage (Astro.params, Astro.url, Astro.props) must be inside the render context 
+  This ensures correct behavior in SSR/build and matches Astro documentation and project rules.
+*/}
+
+{/* Destructure props for use in page rendering */}
+{(async () => {
+  const { entry, collection } = Astro.props;
+
+  /**
+   * EntryData — Interface defining the expected shape of entry.data with required properties
+   * All fields are required and must be strings or arrays as appropriate.
+   */
+  interface EntryData {
+    title: string;
+    slug: string;
+    tags: any[];
+    [key: string]: any;
+  }
+
   // Helper: Convert train-case or hyphen-case to proper case for titles
   function toProperCase(str: string): string {
     return str
@@ -39,84 +163,84 @@ export async function getStaticPaths() {
       .join(' ');
   }
 
-  // Fetch all entries from the 'prompts' and 'specs' collections
-  const promptsEntries = await getCollection('prompts');
-  const specsEntries = await getCollection('specs');
-
-  // Map each prompts entry to a static path object
-  const promptsPaths = promptsEntries.map(entry => {
-    const filename = entry.id.replace(/\.md$/, '');
+  // Helper to produce a fully typesafe EntryData object from any entry-like object
+  function ensureSafeEntryData(entryObj: any): EntryData {
+    const filename = entryObj.id ? entryObj.id.replace(/\.md$/, '') : 'untitled';
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    // Dynamically generate slug and title if not present in frontmatter
-    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-    if (!entry.data.slug) entry.data.slug = generatedSlug;
-    if (!entry.data.title) entry.data.title = toProperCase(baseFilename);
-    const slug = entry.data.slug;
+    const generatedSlug: string = baseFilename.toLowerCase().replace(/\s+/g, '-');
+    const generatedTitle: string = toProperCase(baseFilename);
+    // INLINE FALLBACK OBJECT, ALWAYS COMPLETE
+    const data = (entryObj.data && typeof entryObj.data === 'object' && entryObj.data !== null)
+      ? {
+          tags: [],
+          slug: typeof generatedSlug === 'string' ? generatedSlug : '',
+          title: typeof generatedTitle === 'string' ? generatedTitle : '',
+          ...entryObj.data
+        }
+      : {
+          tags: [],
+          slug: typeof generatedSlug === 'string' ? generatedSlug : '',
+          title: typeof generatedTitle === 'string' ? generatedTitle : ''
+        };
+    // Type enforcement (final guarantee)
     return {
-      params: { collection: 'prompts', slug },
-      props: {
-        entry,
-        collection: 'prompts',
-      },
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      slug: typeof data.slug === 'string' ? data.slug : '',
+      title: typeof data.title === 'string' ? data.title : '',
+      ...data
     };
-  });
+  }
 
-  // Map each specs entry to a static path object
-  const specsPaths = specsEntries.map(entry => {
-    const filename = entry.id.replace(/\.md$/, '');
-    const filenameParts = filename.split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-    // Dynamically generate slug and title if not present in frontmatter
-    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-    if (!entry.data.slug) entry.data.slug = generatedSlug;
-    if (!entry.data.title) entry.data.title = toProperCase(baseFilename);
-    const slug = entry.data.slug;
-    return {
-      params: { collection: 'specs', slug },
-      props: {
-        entry,
-        collection: 'specs',
-      },
+  // --- If entry is missing or incomplete, fetch it using route params ---
+  let processedEntry = entry;
+  let finalCollection = collection;
+  if (!entry || !entry.data || typeof entry.data.title !== 'string' || typeof entry.data.slug !== 'string') {
+    // Fallback: dynamically load the correct entry using Astro's route params.
+    const allowedCollections = ['prompts', 'specs', 'reminders'] as const;
+    function isAllowedCollection(val: string): val is typeof allowedCollections[number] {
+      return allowedCollections.includes(val as any);
+    }
+    const paramCollection = Astro.params.collection;
+    if (!isAllowedCollection(paramCollection)) {
+      throw new Error(`Invalid collection: ${paramCollection}`);
+    }
+    // Minimal, direct fix: cast paramCollection as any after runtime validation
+    finalCollection = paramCollection;
+    const slug = Array.isArray(Astro.params.slug) ? Astro.params.slug[0] : Astro.params.slug;
+    const fetchedEntry = await getEntry(finalCollection as any, slug);
+    if (!fetchedEntry) {
+      throw new Error(`No entry found for collection '${finalCollection}' and slug '${slug}'.`);
+    }
+    // Typesafe fallback for data
+    const safeData = ensureSafeEntryData(fetchedEntry);
+    processedEntry = {
+      ...fetchedEntry,
+      data: safeData
     };
-  });
+  } else {
+    // Even if entry is present, ensure its data is typesafe
+    processedEntry = {
+      ...entry,
+      data: ensureSafeEntryData(entry)
+    };
+  }
 
-  // Combine both path arrays
-  return [...promptsPaths, ...specsPaths];
-}
+  // Add content type and path to the data object for downstream components
+  const contentData = {
+    path: Astro.url.pathname,
+    id: processedEntry.id,
+    collection: finalCollection,
+  };
 
-/**
- * Props interface for page rendering.
- * Mirrors /more-about/[...slug].astro for consistency.
- */
-interface Props {
-  entry: any;
-  collection: 'prompts' | 'specs';
-}
-
-// Destructure props for use in page rendering
-const { entry, collection } = Astro.props;
-
-// Add content type and path to the data object for downstream components
-const contentData = {
-  path: Astro.url.pathname,
-  id: entry.id,
-  collection: collection,
-};
-
----
-<!--
-  Layout and Article Rendering Block
-  - Uses Layout for page structure.
-  - Renders OneArticle with OneArticleOnPage for content.
-  - Passes contentData for context.
-  - Mirrors conventions from /more-about/[...slug].astro.
--->
-<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
-  <OneArticle
-    Component={OneArticleOnPage}
-    content={entry.body}
-    markdownFile={entry.id}
-    data={contentData}
-  />
-</Layout>
+  return (
+    <Layout title={processedEntry.data.title || processedEntry.id.replace(/\.md$/, '')}>
+      <OneArticle
+        Component={OneArticleOnPage}
+        content={processedEntry.body}
+        markdownFile={processedEntry.id}
+        data={contentData}
+      />
+    </Layout>
+  );
+})()}

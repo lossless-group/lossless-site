@@ -22,7 +22,7 @@
       "name": "Tanuj Siripurapu",
       "role": "Creator",
       "bio": "Developer @ Lossless Group",
-      "headshotOf": "/images/tanuj_headshot.jpg",
+      "headshotOf": "/images/headshot__Tanuj-S.jpeg",
       "socialLinks": {
         "github": "https://github.com/tanujks"
       },
@@ -39,6 +39,20 @@
       "headshotOf": "/images/headshot__Ida-Soboleva.jpeg",
       "socialLinks": {
         "github": "https://github.com/dalyaka"
+      },
+      "metadata": {
+        "createdAt": "2025-03-10T20:32:45-07:00",
+        "updatedAt": "2025-04-20T20:32:45-07:00"
+      }
+    },
+    {
+      "id": "sslava",
+      "name": "Sergey Sobolev",
+      "role": "Creator",
+      "bio": "Developer @ Lossless Group",
+      "headshotOf": "/images/headshot__Sergey-Sobolev.jpeg",
+      "socialLinks": {
+        "github": "https://github.com/sslava"
       },
       "metadata": {
         "createdAt": "2025-03-12T20:32:45-07:00",

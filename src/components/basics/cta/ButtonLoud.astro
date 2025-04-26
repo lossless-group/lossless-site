@@ -1,0 +1,77 @@
+---
+/**
+ * Button--Loud.astro
+ * 
+ * A loud call-to-action button component that stands out visually.
+ * Can be used as a link (<a>) or a button (<button>) depending on the href prop.
+ * 
+ * @component
+ * @example
+ * ```astro
+ * <ButtonLoud href="/contact" text="Contact Us" />
+ * ```
+ */
+
+interface Props {
+  /**
+   * The URL to navigate to when clicked (makes it an <a> tag)
+   * If not provided, a <button> element will be used instead
+   */
+  href?: string;
+  
+  /**
+   * The text to display on the button
+   */
+  text: string;
+  
+  /**
+   * Optional CSS classes to apply to the button
+   */
+  class?: string;
+  
+  /**
+   * Optional onClick handler (string of JavaScript)
+   */
+  onClick?: string;
+}
+
+const { href, text, class: className = "", onClick } = Astro.props;
+---
+
+{href ? (
+  <a 
+    href={href} 
+    class:list={["cta-button", className]} 
+    {...onClick ? { onclick: onClick } : {}}
+  >
+    {text}
+  </a>
+) : (
+  <button 
+    class:list={["cta-button", className]} 
+    {...onClick ? { onclick: onClick } : {}}
+  >
+    {text}
+  </button>
+)}
+
+<style>
+  .cta-button {
+    display: inline-block;
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--white--pure);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .cta-button:hover {
+    background: var(--clr-lossless-attn-action);
+  }
+</style>

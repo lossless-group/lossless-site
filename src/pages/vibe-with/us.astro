@@ -1,0 +1,103 @@
+---
+/**
+ * /vibe-with/us
+ *
+ * Base page rendering a grid of feature/app cards using IconHeaderMessageCardGrid.
+ * Uses the site-wide Layout.astro wrapper for consistency.
+ *
+ * Aggressive block comments clarify structure and intent.
+ */
+import Layout from "@layouts/Layout.astro";
+import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
+---
+
+<!--
+  /vibe-with/us
+  Page for showcasing featured coding tools or messages in a grid layout.
+  Wrapped in Layout.astro for site-wide navigation, SEO, and styling.
+-->
+<Layout>
+
+  <!-- Inline, page-specific Hero for /vibe-with/us.astro -->
+  <section class="hero vibe-hero--local">
+    <div class="hero-content">
+      <div class="hero-text">
+        <p class="hero-subtitle">Our Systems have come a long way.</p>
+        <h1 class="hero-title">Vibe Code with Us</h1>
+        <p class="hero-description">
+          We've been down the rabbit holes, shaved our yaks, and present our tender, love, care, and the results of untold frustration for you here.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="vibe-with-us-section" style="--vibe-section-top-margin: 0.5rem;">
+    <IconHeaderMessageCardGrid 
+      jsonPath="messages/vibeCodingIconHeaderMessages.json"
+      style="margin-top: 0; margin-bottom: 0;"
+    />
+  </section>
+</Layout>
+
+<style>
+.vibe-with-us-section {
+  padding: 0 0 3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: var(--vibe-section-top-margin, 2.5rem);
+}
+
+/* Page-local Hero styles for /vibe-with/us.astro */
+.hero.vibe-hero--local {
+  margin-bottom: 0;
+  margin-top: 0.25rem;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1rem;
+  background: var(--clr-primary-bg);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.hero.vibe-hero--local .hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.hero.vibe-hero--local .hero-text {
+  text-align: center;
+}
+.hero.vibe-hero--local .hero-subtitle {
+  font-family: var(--ff-legible);
+  font-weight: var(--fw-semi-bold);
+  font-size: var(--fs-400);
+  color: var(--clr-lossless-accent--brightest);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+.hero.vibe-hero--local .hero-title {
+  font-family: var(--ff-base);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-900);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, var(--clr-lossless-primary-light) 0%, var(--clr-lossless-accent--brightest) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+.hero.vibe-hero--local .hero-description {
+  font-family: var(--ff-legible);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-450);
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 60ch;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>

@@ -1,0 +1,187 @@
+---
+/**
+ * IconHeaderMessageCard.astro
+ *
+ * Modular, reusable card component for displaying an icon, a headline, and a description.
+ * Designed to be used in a grid or standalone for feature/app highlights.
+ *
+ * PROPS:
+ * - icon (Astro slot, required): SVG or image for the card icon
+ * - title (string, required): Headline text for the card
+ * - description (string, required): Description or supporting text
+ * - badge (string, optional): Badge label (e.g., "Copilot")
+ * - verified (boolean, optional): If true, shows a checkmark next to the title
+ * - to_path (string, optional): If provided, the card is rendered as a link to this path
+ *
+ * EXAMPLE USAGE:
+ * <IconHeaderMessageCard title="Stack Overflow" description="Get answers..." to_path="/vibe-with/prompts">
+ *   <svg ... />
+ * </IconHeaderMessageCard>
+ */
+
+interface Props {
+  title: string;
+  description: string;
+  badge?: string;
+  verified?: boolean;
+  to_path?: string; // Optional: Path to navigate to on click
+}
+
+const { title, description, badge = '', verified = false, to_path = '' } = Astro.props;
+
+console.log('IconHeaderMessageCard props:', Astro.props);
+---
+
+<!--
+  IconHeaderMessageCard
+  Modular card for feature/app highlights with icon, title, badge, and description.
+  If 'to_path' is provided, the entire card is rendered as an anchor tag for navigation.
+  This ensures robust, accessible, and idiomatic navigation (matching project patterns).
+-->
+{to_path ? (
+  <a
+    href={to_path}
+    class="icon-header-message-card"
+    tabindex="0"
+    role="button"
+    aria-pressed="false"
+    style="cursor:pointer; text-decoration: none; color: inherit;"
+  >
+    <!-- Badge (top right) -->
+    {badge && (
+      <span class="icon-header-message-card__badge">{badge}</span>
+    )}
+    <!-- Icon slot (centered at top) -->
+    <div class="icon-header-message-card__icon">
+      <slot />
+    </div>
+    <!-- Title with optional verified checkmark -->
+    <div class="icon-header-message-card__title-row">
+      <span class="icon-header-message-card__title">{title}</span>
+      {verified && (
+        <span class="icon-header-message-card__verified" title="Verified">
+          <!-- Simple checkmark SVG -->
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="4 11 8 15 16 6" />
+          </svg>
+        </span>
+      )}
+    </div>
+    <!-- Description -->
+    <div class="icon-header-message-card__description">{description}</div>
+  </a>
+) : (
+  <div
+    class="icon-header-message-card"
+  >
+    <!-- Badge (top right) -->
+    {badge && (
+      <span class="icon-header-message-card__badge">{badge}</span>
+    )}
+    <!-- Icon slot (centered at top) -->
+    <div class="icon-header-message-card__icon">
+      <slot />
+    </div>
+    <!-- Title with optional verified checkmark -->
+    <div class="icon-header-message-card__title-row">
+      <span class="icon-header-message-card__title">{title}</span>
+      {verified && (
+        <span class="icon-header-message-card__verified" title="Verified">
+          <!-- Simple checkmark SVG -->
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="4 11 8 15 16 6" />
+          </svg>
+        </span>
+      )}
+    </div>
+    <!-- Description -->
+    <div class="icon-header-message-card__description">{description}</div>
+  </div>
+)}
+
+<style>
+/*
+  IconHeaderMessageCard.astro
+  Styles for modular app/feature card with icon, headline, badge, and description.
+  Designed for dark backgrounds, but easily themeable.
+*/
+.icon-header-message-card {
+  position: relative;
+  background: var(--clr-card-bg, #181a20);
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 340px; /* Prevents a single card from stretching too wide */
+  width: 100%;
+  transition: box-shadow 0.2s, border 0.25s;
+  border: 1.5px solid rgba(255,255,255,0.06); /* default border for smooth transition */
+}
+.icon-header-message-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+  border-image: var(--grd--lossless-eastern-crimson) 1;
+  border-width: 2.5px;
+  border-style: solid;
+}
+.icon-header-message-card__badge {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.2rem;
+  background: var(--clr-badge-bg, #22242a);
+  color: var(--clr-badge-text, #b3c0d1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2em 0.8em;
+  border-radius: 1em;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+.icon-header-message-card__icon {
+  margin-top: 0.5rem;
+  margin-bottom: .5rem;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-header-message-card__icon svg,
+.icon-header-message-card__icon img {
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+.icon-header-message-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.icon-header-message-card__title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--clr-title, #eaf2fb);
+  letter-spacing: 0.01em;
+}
+.icon-header-message-card__verified {
+  color: var(--clr-verified, #4aa96c);
+  display: flex;
+  align-items: center;
+}
+.icon-header-message-card__verified svg {
+  width: 1em;
+  height: 1em;
+}
+.icon-header-message-card__description {
+  font-size: 1rem;
+  color: var(--clr-desc, #b3c0d1);
+  text-align: center;
+  margin-top: 0.2rem;
+  line-height: 1.5;
+}
+</style>

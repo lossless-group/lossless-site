@@ -1,0 +1,95 @@
+---
+import TagChip from "@components/tool-components/TagChip.astro";
+
+interface Props {
+  tags: string[];
+  tagRoute?: string;
+  maxWidth?: string;
+}
+const {
+  tags = [],
+  tagRoute = "vibe-with",
+  maxWidth = "88%"
+} = Astro.props;
+---
+<div class="tag-scroller-wrapper">
+  <button class="tag-scroll-btn left" aria-label="Scroll tags left" type="button" id="tagScrollLeft">&#8592;</button>
+  <div class="tag-scroller-viewport" style={`max-width: calc(5 * var(--tag-chip-width, 120px)); width: 100%; overflow: auto;`}>
+    <div class="tag-scroller-row" id="tagScrollerRow">
+      {tags.map((tag, i) => (
+        <div class="tag-scroller-snap">
+          <TagChip tagString={tag} route={tagRoute} />
+        </div>
+      ))}
+    </div>
+  </div>
+  <button class="tag-scroll-btn right" aria-label="Scroll tags right" type="button" id="tagScrollRight">&#8594;</button>
+</div>
+
+<style>
+  :root {
+    --tag-chip-width: 120px;
+  }
+  .tag-scroller-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 0.2em;
+  }
+  .tag-scroller-viewport {
+    flex: 1 1 0%;
+    overflow-x: auto;
+    white-space: nowrap;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+    min-width: 0;
+    display: block;
+    max-width: calc(5 * var(--tag-chip-width, 120px));
+  }
+  .tag-scroller-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.2em;
+    align-items: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+    max-width: 100%;
+    scroll-snap-type: x mandatory;
+  }
+  .tag-scroller-snap {
+    flex: 0 0 var(--tag-chip-width, 120px);
+    scroll-snap-align: start;
+    display: flex;
+  }
+  .tag-scroll-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0 0.25em;
+    color: var(--clr-lossless-primary, #b3b3ff);
+    transition: color 0.2s;
+  }
+  .tag-scroll-btn:disabled {
+    color: #555;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const row = document.getElementById('tagScrollerRow');
+  const btnLeft = document.getElementById('tagScrollLeft');
+  const btnRight = document.getElementById('tagScrollRight');
+  if (!row || !btnLeft || !btnRight) return;
+  const chipWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tag-chip-width')) || 120;
+  btnLeft.addEventListener('click', () => {
+    row.scrollBy({ left: -chipWidth, behavior: 'smooth' });
+  });
+  btnRight.addEventListener('click', () => {
+    row.scrollBy({ left: chipWidth, behavior: 'smooth' });
+  });
+});
+</script>

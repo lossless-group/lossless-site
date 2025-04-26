@@ -11,6 +11,9 @@
  * <BaseCodeblock code="console.log('hello')" lang="js" />
  */
 
+
+import { Code } from 'astro/components';
+
 interface Props {
   code: string;
   lang: string;
@@ -18,8 +21,8 @@ interface Props {
 
 const { code, lang = 'text' } = Astro.props;
 
-// We don't need to manually import Shiki or call getHighlighter
-// Astro handles this for us through its built-in integration
+// Import Shiki syntax highlighting utilities (handled by Astro's built-in renderer or markdown config)
+
 ---
 
 <div class="codeblock-container">
@@ -33,9 +36,22 @@ const { code, lang = 'text' } = Astro.props;
     </button>
   </div>
   
-  {/* Use Astro's built-in syntax highlighting by using set:html */}
-  <pre class="codeblock" data-language={lang}><code set:html={code} /></pre>
-  
+  <!--
+    Code Rendering Section
+    Uses Astro's built-in syntax highlighting (Shiki) for code blocks.
+    The code is rendered as HTML with syntax highlighting in markdown/remark pipeline.
+    The language label is rendered ONLY in the header above, never duplicated below.
+  -->
+  <div class="codeblock-content">
+    <!-- Use Astro's built-in <Code /> component for robust Shiki highlighting -->
+    <Code code={code} lang={lang as any} />
+  </div>
+  <!--
+    DO NOT render the language header (codeblock-language) inside the <pre> or <code> block.
+    The language label should ONLY appear in the header above the code block, not inside.
+    This is the single source of truth for the language label.
+    If you see a language header inside the code area, check your Markdown plugins or input for extra markup.
+  -->
   <slot />
 </div>
 
@@ -51,7 +67,7 @@ const { code, lang = 'text' } = Astro.props;
       if (!container) return;
       
       // Get the code content
-      const codeElement = container.querySelector('code');
+      const codeElement = container.querySelector('pre code');
       if (!codeElement) return;
       
       // Copy to clipboard - get the text content to avoid HTML tags
@@ -121,7 +137,7 @@ const { code, lang = 'text' } = Astro.props;
   }
   
   /* Style the Shiki-highlighted code */
-  .codeblock {
+  .codeblock-content {
     margin: 0;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -130,10 +146,24 @@ const { code, lang = 'text' } = Astro.props;
     background-color: var(--clr-code-bg, #1e1e1e);
   }
   
-  .codeblock code {
-    display: block;
-    white-space: pre;
-    word-wrap: normal;
-    overflow-x: auto;
+  /*
+    Hide any language label injected inside the <pre> or <code> block by Markdown plugins or syntax highlighters.
+    We want the language label to appear ONLY in the header above the code block, not inside.
+    This targets any span, div, or element with a class containing 'language-'.
+  */
+  .codeblock-content [class*="language-"] {
+    display: none !important;
+  }
+  
+  /*
+    Hide any "before" or "after" labels or elements injected by Markdown plugins or syntax highlighters.
+    This includes pseudo-elements, classes, or even non-standard HTML tags.
+    Covers: ::before, ::after, [class*="before"], [class*="after"], and any literal <::before> or <::after> tags.
+  */
+  .codeblock-content ::before,
+  .codeblock-content ::after,
+  .codeblock-content [class*="before"],
+  .codeblock-content [class*="after"] {
+    display: none !important;
   }
 </style>

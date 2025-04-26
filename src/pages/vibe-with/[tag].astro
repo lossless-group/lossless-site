@@ -123,8 +123,15 @@ const results: ResultItem[] = [
 ---
 
 <Layout title={`Items tagged '${tag}'`}>
-  <h1>Items tagged <TagChip tag={tag} route="vibe-with" /></h1>
-
+  <!-- Display tag header as a semantic header, with all styling handled in CSS for maintainability and clarity. -->
+  <header class="display-by-tag-row">
+    <h1>Items tagged:</h1>
+    <!-- 
+      Pass results.length as count to TagChip for accurate tag count display.
+      This ensures the tag chip displays the correct number of results for the tag.
+    -->
+    <TagChip tagString={tag} route="vibe-with" fontSize="var(--fs-400)" includeCount={true} count={results.length}/>
+  </header>
   {results.length === 0 ? (
     <div class="empty-message">
       <p>No prompts or specs found with the tag <b>{tag}</b>.</p>
@@ -142,9 +149,21 @@ const results: ResultItem[] = [
 </Layout>
 
 <style>
+  header {
+    padding: 2rem 1rem 1rem 1rem;
+  }
+  .display-by-tag-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75em;
+    margin-bottom: 1.5em;
+  }
   h1 {
-    font-size: var(--fs-500);
-    margin-bottom: 1.2em;
+    font-size: var(--fs-400);
+    margin: 0;
+    padding: -4px;
+    line-height: 1.2;
   }
   .empty-message {
     margin-top: 2em;
@@ -155,5 +174,12 @@ const results: ResultItem[] = [
     padding: 1.2em 1.5em;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     max-width: 32em;
+  }
+  .news-preview-list-direct {
+    max-width: 88vw;
+    /* Center the news preview list horizontally in the page */
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
   }
 </style>

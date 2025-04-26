@@ -1,0 +1,71 @@
+---
+interface Props {
+  node: {
+    type: string;
+    children?: Array<{
+      type: string;
+      value?: string;
+      url?: string;
+      children?: Array<{
+        type: string;
+        value: string;
+      }>;
+    }>;
+  };
+}
+
+const { node } = Astro.props;
+
+const citationNumber = node.children?.[0]?.value?.match(/\((\d+)\)/)?.[1] ?? '1';
+---
+
+<div class="citation">
+  <a href={`#ref-${citationNumber}`} id={`citation-${citationNumber}`} class="citation-backlink">
+    ({citationNumber})
+  </a>{' '}
+  {node.children?.slice(1).map((child) => {
+    if (child.type === 'link') {
+      return (
+        <a
+          href={child.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {child.children?.[0]?.value}
+        </a>
+      );
+    }
+    return child.value;
+  })}
+</div>
+
+<style>
+  .citation {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light);
+    opacity: 0.9;
+    line-height: 1.8;
+    padding-left: 2rem;
+    text-indent: -2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .citation-backlink {
+    font-weight: bold;
+    text-decoration: none;
+    margin-right: 0.25rem;
+    color: var(--clr-lossless-primary-light);
+  }
+
+  .citation a {
+    color: var(--clr-lossless-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .citation a:hover {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: underline;
+  }
+</style>

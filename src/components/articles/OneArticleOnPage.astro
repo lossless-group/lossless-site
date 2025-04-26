@@ -8,9 +8,10 @@ interface Props {
     path: string;
     id?: string;  // File ID (e.g., 'Agile.md')
   };
+  compiledContent: string;
 }
 
-const { content, data = { path: Astro.url.pathname } } = Astro.props;
+const { content, data = { path: Astro.url.pathname }, compiledContent } = Astro.props;
 
 ---
 
@@ -24,6 +25,7 @@ const { content, data = { path: Astro.url.pathname } } = Astro.props;
       }
     }} 
     data={data} 
+    compiledContent={compiledContent}
   />
 </article>
 
