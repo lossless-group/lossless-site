@@ -70,8 +70,5 @@ export default defineConfig({
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
     }
-  },
-  experimental: {
-    svg: true,
   }
 });
