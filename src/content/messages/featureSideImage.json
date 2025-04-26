@@ -6,7 +6,10 @@
     "imageSide": "right",
     "ctaText": "Learn More",
     "ctaUrl": "#",
-    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp"
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
   },
   {
     "label": "Vibe Coding, Done Right",

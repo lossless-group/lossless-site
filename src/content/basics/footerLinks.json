@@ -4,9 +4,9 @@
     {"Link Label 2": "/path-2"},
     {"Link Label 3": "/path-3"}
   ],
-  "Column Header Two": [
-    {"Link Label 4": "/path-4"},
-    {"Link Label 5": "/path-5"},
-    {"Link Label 6": "/path-6"}
+  "Vibe Coding Resources": [
+    {"Reminders": "/thread/reminders"},
+    {"Prompts": "/thread/prompts"},
+    {"Specifications": "/thread/specs"}
   ]
 }

@@ -116,6 +116,17 @@ const promptsCollection = defineCollection({
   }))
 });
 
+const remindersCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/reminders"}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags
+      : data.tags ? [data.tags]
+      : []
+  }))
+});
+
 const changelogContentCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/changelog--content"}),
   schema: z.object({}).passthrough().transform((data) => ({
@@ -126,6 +137,7 @@ const changelogContentCollection = defineCollection({
       : []
   }))
 });
+
 
 const changelogCodeCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "../content/changelog--code"}),
@@ -172,19 +184,10 @@ const toolCollection = defineCollection({
 
 const specsCollection = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "../content/specs" }),
-  schema: z.object({}).passthrough().transform((data, context) => {
-    // Extract filename without extension for slug
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    return {
-      ...data,
-      // Always normalize tags to an array
-      tags: Array.isArray(data.tags)
-        ? data.tags
-        : data.tags ? [data.tags] : [],
-      // Add slug for routing/lookup
-      slug: filename.toLowerCase().replace(/\s+/g, '-')
-    };
-  })
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    tags: Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : []
+  }))
 });
 
 // ========================================
@@ -202,6 +205,7 @@ export const paths = {
   'tooling': '../content/tooling',
   'vocabulary': '../content/vocabulary',
   'prompts': '../content/lost-in-public/prompts',
+  'reminders': '../content/lost-in-public/reminders',
   'specs': '../content/specs',
 };
 
@@ -216,5 +220,6 @@ export const collections = {
   'pages': pagesCollection,
   'tooling': toolCollection,
   'prompts': promptsCollection,
+  'reminders': remindersCollection,
   'specs': specsCollection,
 };

@@ -13,6 +13,11 @@
 
 ??-- Rendered In:
    //---- pages/more-about/[more-about].astro
+// Import TagChip component from @components/tool-components/TagChip.astro
+// This import is necessary to resolve the 'Cannot find name TagChip' error
+// and to enable the rendering of tags with proper tag routing and display logic
+import TagChip from '@components/tool-components/TagChip.astro';
+
 interface Props {
   pageName: string;
   relativePath: string;
@@ -61,10 +66,12 @@ const category = frontmatter.category || 'Uncategorized';
     <div class="text-box preview-text description line-clamp">
       <p>{description}</p>
     </div>
+    // Render tags using TagChip.astro for proper tag routing and display logic
     {frontmatter.tags && frontmatter.tags.length > 0 && (
       <div class="tags">
         {frontmatter.tags.map((tag: string) => (
-          <span class="tag">{tag}</span>
+          // TagChip.astro expects tagString, not tag, and handles undefined
+          <TagChip tagString={tag} route="vibe-with" />
         ))}
       </div>
     )}
@@ -128,13 +135,6 @@ const category = frontmatter.category || 'Uncategorized';
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-  }
-
-  .tag {
-    padding: 0.25rem 0.5rem;
-    background: var(--tag-bg, #f0f0f0);
-    border-radius: 4px;
-    font-size: 0.8rem;
   }
 
   .category {

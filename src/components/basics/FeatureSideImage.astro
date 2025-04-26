@@ -28,6 +28,8 @@ interface Props {
   };
   imageSide: "left" | "right"; // Which side the image appears on
   classes?: string;         // Additional CSS classes
+  maskHeight?: string;      // Optional height for the image mask (e.g., "300px", "50%")
+  maskWidth?: string;       // Optional width for the image mask (e.g., "100%", "400px")
 }
 
 const { 
@@ -36,7 +38,9 @@ const {
   title, 
   details, 
   imageSide = "right", 
-  classes = "" 
+  classes = "",
+  maskHeight = "300px",
+  maskWidth = "100%"
 } = Astro.props;
 
 // Determine if we need to reorder content for left-side images
@@ -45,9 +49,22 @@ const imageAnimationDirection = imageSide === "left" ? "right" : "left";
 
 // Check if this is a placeholder image
 const isPlaceholder = image.src.includes('placeholder.com');
+
+// Generate a unique ID for this component instance
+const uniqueId = Math.random().toString(36).substring(2, 9);
+
+// Determine if we're using the mask effect
+const isMasked = classes.includes('image-mask');
+
+// Create inline styles for the mask
+// For percentage heights, we need a fixed container height as a reference
+const maskStyle = isMasked ? 
+  `height: ${maskHeight.includes('%') ? '300px' : maskHeight}; width: ${maskWidth};` : 
+  '';
+
 ---
 
-<div class:list={["feature-side-image", classes]}>
+<div class:list={["feature-side-image", classes]} id={`feature-${uniqueId}`}>
   <!-- Text Content -->
   <div class:list={["feature-content", contentOrderClass]}>
     <div class="feature-label-container">
@@ -59,7 +76,7 @@ const isPlaceholder = image.src.includes('placeholder.com');
   </div>
 
   <!-- Image -->
-  <div class="feature-image-container">
+  <div class="feature-image-container" style={maskStyle}>
     <div class:list={["feature-image-wrapper", { "feature-image-wrapper--placeholder": isPlaceholder }]}>
       <img 
         class="feature-image"
@@ -70,6 +87,72 @@ const isPlaceholder = image.src.includes('placeholder.com');
     </div>
   </div>
 </div>
+
+{isMasked && (
+  <script define:vars={{ uniqueId, useTextHeight: maskHeight === 'auto', maskHeight, maskWidth }}>
+    // Simple function to match the image container height to the text content
+    function adjustImageHeight() {
+      const container = document.getElementById(`feature-${uniqueId}`);
+      if (!container) return;
+      
+      const textContent = container.querySelector('.feature-content');
+      const imageContainer = container.querySelector('.feature-image-container');
+      
+      if (!textContent || !imageContainer) return;
+      
+      if (window.innerWidth >= 768) {
+        // Handle percentage-based heights
+        if (maskHeight.includes('%')) {
+          const textHeight = textContent.offsetHeight;
+          const percentValue = parseFloat(maskHeight);
+          if (!isNaN(percentValue)) {
+            const calculatedHeight = (textHeight * percentValue) / 100;
+            imageContainer.style.height = `${calculatedHeight}px`;
+          }
+        } 
+        // Handle auto height (match text content)
+        else if (maskHeight === 'auto') {
+          const textHeight = textContent.offsetHeight;
+          imageContainer.style.height = `${textHeight}px`;
+        }
+        // For fixed heights, the CSS inline style is already applied
+      } else if (window.innerWidth < 768) {
+        // On mobile, use a fixed height
+        imageContainer.style.height = '250px';
+      }
+      
+      // Handle percentage-based widths
+      if (maskWidth.includes('%') && parseInt(maskWidth) > 100) {
+        const containerWidth = container.offsetWidth / 2; // Assuming 2-column layout
+        const percentValue = parseFloat(maskWidth);
+        if (!isNaN(percentValue)) {
+          const calculatedWidth = (containerWidth * percentValue) / 100;
+          imageContainer.style.width = `${calculatedWidth}px`;
+          // Center the wider container
+          imageContainer.style.transform = 'translateX(-50%)';
+          imageContainer.style.position = 'relative';
+          imageContainer.style.left = '50%';
+        }
+      }
+    }
+    
+    // Run on load
+    if (document.readyState === 'complete') {
+      adjustImageHeight();
+    } else {
+      window.addEventListener('load', adjustImageHeight);
+    }
+    
+    // Run on resize
+    window.addEventListener('resize', adjustImageHeight);
+    
+    // Run after images load (which might change layout)
+    window.addEventListener('load', () => {
+      // Small delay to ensure everything is rendered
+      setTimeout(adjustImageHeight, 100);
+    });
+  </script>
+)}
 
 <style>
   /* Container */
@@ -121,7 +204,6 @@ const isPlaceholder = image.src.includes('placeholder.com');
   /* Image */
   .feature-image-container {
     width: 100%;
-    height: 100%;
     max-width: 100%;
     margin: 0 auto;
     display: flex;
@@ -138,6 +220,84 @@ const isPlaceholder = image.src.includes('placeholder.com');
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* Image sizing and positioning utility classes */
+  .image-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .image-contain {
+    height: 100%;
+    width: 100%;
+  }
+
+  .image-contain .feature-image {
+    object-fit: contain;
+    max-height: 100%;
+    max-width: 100%;
+  }
+
+  .image-cover {
+    height: 100%;
+    width: 100%;
+  }
+
+  .image-cover .feature-image {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+
+  .image-fixed-height {
+    height: 400px;
+  }
+
+  .image-fixed-height .feature-image {
+    max-height: 100%;
+  }
+
+  /* Mask/window effect - shows a portion of the image through a fixed viewport */
+  .feature-side-image.image-mask .feature-image-container {
+    overflow: hidden;
+    border-radius: 1rem;
+  }
+
+  .feature-side-image.image-mask .feature-image-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .feature-side-image.image-mask .feature-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Responsive */
+  @media (min-width: 768px) {
+    .feature-side-image {
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    .feature-content--order-last {
+      order: 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .feature-side-image {
+      gap: 5rem;
+    }
   }
 
   /* Only apply gradient background and overlay to placeholder images */
@@ -168,23 +328,5 @@ const isPlaceholder = image.src.includes('placeholder.com');
     border-radius: 1rem;
     object-fit: contain;
     border: 1px solid transparent;
-  }
-
-  /* Responsive */
-  @media (min-width: 768px) {
-    .feature-side-image {
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-    }
-
-    .feature-content--order-last {
-      order: 2;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .feature-side-image {
-      gap: 5rem;
-    }
   }
 </style>

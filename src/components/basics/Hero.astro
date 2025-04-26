@@ -21,6 +21,7 @@
  *   alignment="left"
  *   fullBleed={true}
  *   animate={true}
+ *   noBottomMargin={true}
  * />
  * ```
  */
@@ -77,15 +78,25 @@ interface Props {
   fullBleed?: boolean;
   
   /**
-   * Additional CSS classes to apply to the hero
+   * Optional CSS classes to apply to the hero section
    */
   classes?: string;
+
+  /**
+   * Optional inline styles to apply to the hero section
+   */
+  style?: string;
 
   /**
    * Whether to enable animations
    * @default true
    */
   animate?: boolean;
+
+  /**
+   * If true, removes all bottom margin from child elements for a tight layout
+   */
+  noBottomMargin?: boolean;
 }
 
 // Destructure props with defaults
@@ -99,7 +110,9 @@ const {
   alignment = 'left', 
   fullBleed = false,
   classes = "",
-  animate = true
+  style = "",
+  animate = true,
+  noBottomMargin = false
 } = Astro.props;
 
 // Determine container classes based on props
@@ -149,7 +162,11 @@ const imageAnimationAttributes = animate ? {
 } : {};
 ---
 
-<section class={`hero ${containerClasses.join(' ')}`} {...animationAttributes}>
+<section 
+  class={`hero ${containerClasses.join(' ')}${classes ? ` ${classes}` : ''}${noBottomMargin ? ' no-bottom-margin' : ''}`} 
+  style={`--hero-margin-top: 0; ${style}`}
+  {...animationAttributes}
+>
   <div class="hero-content">
     <div class="hero-text">
       {subtitle && <p class="hero-subtitle" {...subtitleAnimationAttributes}>{subtitle}</p>}
@@ -184,12 +201,13 @@ const imageAnimationAttributes = animate ? {
     position: relative;
     width: 100%;
     padding: 3rem 1.5rem;
-    margin: 0 auto 2rem auto;
+    margin: 0 auto;
     border-radius: 1rem;
     overflow: hidden;
     background-color: var(--clr-primary-bg);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    margin-top: var(--hero-margin-top, 0);
   }
   
   /* Full-bleed styling */
@@ -308,6 +326,11 @@ const imageAnimationAttributes = animate ? {
     height: auto;
     object-fit: contain;
     border-radius: 0.5rem;
+  }
+
+  /* Only collapse bottom margin of the last child in hero-text for no-bottom-margin */
+  .hero.no-bottom-margin .hero-text > *:last-child {
+    margin-bottom: 0 !important;
   }
 
   /* Responsive styles */
