@@ -1,4 +1,5 @@
 ---
+// As far as I can tell this isn't being used anywhere right now...
 import { Debug } from 'astro:components';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
@@ -6,8 +7,6 @@ import remarkRehype from 'remark-rehype';
 import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
-import remarkCallouts from '@utils/markdown/remark-callout-handler';
-import type { Root as MdastRoot } from 'mdast';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
 interface Props {
@@ -37,7 +36,6 @@ if (enabled) {
 
   calloutsAst = await unified()
     .use(remarkParse)
-    .use(remarkCallouts)
     .parse(content);
   markdownDebugger.writeDebugFile('2-callouts-ast', calloutsAst);
 
@@ -67,7 +65,6 @@ if (enabled) {
 
   calloutsHastAst = await unified()
     .use(remarkParse)
-    .use(remarkCallouts)
     .use(remarkRehype)
     .parse(content);
   markdownDebugger.writeDebugFile('7-callouts-hast-ast', calloutsHastAst);
