@@ -19,14 +19,14 @@ export function listVisualAssets(directoryPath) {
   console.log("Scanning files in", directoryPath)
   try {
     const files = readdirSync(directoryPath);
-    return files.map(file => `/visuals/${file}`);
+    return files.map(file => `${directoryPath}/${file}`);
   } catch (err) {
     console.error('Error reading visuals directory:', err);
     return [];
   }
 }
 
-console.log(listVisualAssets(join(process.cwd(), 'public', 'visuals')));
+console.log(listVisualAssets(join(process.cwd(), 'public', 'visuals', 'Tooling-Trademarks', 'usable--darkmode')));
 
 interface Tool {
   url: string;
