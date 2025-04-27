@@ -2,7 +2,7 @@
   "max_columns": 3,
   "index": [
     {
-      "icon": "./node_modules/@tabler/icons/icons/filled/windmill.svg",
+      "icon": "src/assets/Icons/windmill.svg",
       "title": "A universe of cognitive, collaborative tooling",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
       "iconClass": "text-blue-500",
@@ -11,7 +11,7 @@
       "animationClass": ""
     },
     {
-      "icon": "./node_modules/@tabler/icons/icons/filled/shield.svg",
+      "icon": "src/assets/Icons/shield.svg",
       "title": "Assure your strategy keeps you ahead",
       "message": "Your data is protected with industry-leading encryption.",
       "iconClass": "text-green-600",
@@ -20,7 +20,7 @@
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "./node_modules/@tabler/icons/icons/filled/alien.svg",
+      "icon": "src/assets/Icons/alien.svg",
       "title": "Real-time insights at your fingertips",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
       "iconClass": "text-blue-500",
@@ -29,7 +29,7 @@
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "./node_modules/@tabler/icons/icons/filled/apple.svg",
+      "icon": "src/assets/Icons/apple.svg",
       "title": "Real-time insights at your fingertips",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
       "iconClass": "text-blue-500",
@@ -38,7 +38,7 @@
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "./node_modules/@tabler/icons/icons/filled/artboard.svg",
+      "icon": "src/assets/Icons/artboard.svg",
       "title": "Real-time insights at your fingertips",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
       "iconClass": "text-blue-500",
@@ -47,7 +47,7 @@
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "./node_modules/@tabler/icons/icons/filled/basket.svg",
+      "icon": "src/assets/Icons/basket.svg",
       "title": "Multi-modal, multimedia, content automation",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
       "iconClass": "text-blue-500",
