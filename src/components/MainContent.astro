@@ -12,6 +12,22 @@ import Section__IconHeaderMessage from "@components/basics/messages/Section__Ico
 import Section__QuestionsAnswers from "./reference/Section__QuestionsAnswers.astro";
 import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json";
 import Section__VibeCodeWithUs from "@components/basics/messages/Section__VibeCodeWithUs.astro";
+import { readdirSync } from 'fs';
+import { join } from 'path';
+
+export function listVisualAssets(directoryPath) {
+  console.log("Scanning files in", directoryPath)
+  try {
+    const files = readdirSync(directoryPath);
+    return files.map(file => `/visuals/${file}`);
+  } catch (err) {
+    console.error('Error reading visuals directory:', err);
+    return [];
+  }
+}
+
+console.log(listVisualAssets(join(process.cwd(), 'public', 'visuals')));
+console.log(listVisualAssets(join(process.cwd(), 'visuals')));
 
 interface Tool {
   url: string;
@@ -25,7 +41,7 @@ interface Tool {
 }
 
 const TRADEMARK_CONFIG = {
-  sourceDir: "public/visuals/Tooling-Trademarks/usable--darkmode",
+  sourceDir: "visuals/Tooling-Trademarks/usable--darkmode",
 };
 
 // ... existing type definitions ...
