@@ -12,6 +12,7 @@ import node from '@astrojs/node';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
+import vercel from '@astrojs/vercel';
 
 /** @type {ShikiLang[]} */
 const langs = [
@@ -51,9 +52,7 @@ export default defineConfig({
     ]
   },
   output: "server",
-  adapter: node({
-    mode: 'standalone',
-  }),
+  adapter: vercel(),
   integrations: [mdx()], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
@@ -66,7 +65,6 @@ export default defineConfig({
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
         '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        '@tabler/icons': fileURLToPath(new URL('./src/assets', import.meta.url)),
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
     }

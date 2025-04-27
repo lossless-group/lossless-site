@@ -1,0 +1,558 @@
+{
+  "type": "root",
+  "children": [
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "A behavior of [[Relational Database]]",
+          "position": {
+            "start": {
+              "line": 1,
+              "column": 1,
+              "offset": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 38,
+              "offset": 37
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 1,
+          "column": 1,
+          "offset": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 38,
+          "offset": 37
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "[[organizations/Perplexity AI]] explains [[ACID Transactions]]\r\nACID transactions are a foundational concept in relational databases, ensuring reliability and consistency in data operations. The acronym stands for ",
+          "position": {
+            "start": {
+              "line": 3,
+              "column": 1,
+              "offset": 41
+            },
+            "end": {
+              "line": 4,
+              "column": 151,
+              "offset": 255
+            }
+          }
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "value": "Atomicity, Consistency, Isolation, and Durability",
+              "position": {
+                "start": {
+                  "line": 4,
+                  "column": 153,
+                  "offset": 257
+                },
+                "end": {
+                  "line": 4,
+                  "column": 202,
+                  "offset": 306
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 4,
+              "column": 151,
+              "offset": 255
+            },
+            "end": {
+              "line": 4,
+              "column": 204,
+              "offset": 308
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": ", each addressing a critical aspect of transaction management:",
+          "position": {
+            "start": {
+              "line": 4,
+              "column": 204,
+              "offset": 308
+            },
+            "end": {
+              "line": 4,
+              "column": 266,
+              "offset": 370
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 3,
+          "column": 1,
+          "offset": 41
+        },
+        "end": {
+          "line": 4,
+          "column": 266,
+          "offset": 370
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "start": 1,
+      "spread": true,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Atomicity",
+                      "position": {
+                        "start": {
+                          "line": 6,
+                          "column": 6,
+                          "offset": 379
+                        },
+                        "end": {
+                          "line": 6,
+                          "column": 15,
+                          "offset": 388
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 6,
+                      "column": 4,
+                      "offset": 377
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 17,
+                      "offset": 390
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Ensures that a transaction is treated as a single, indivisible unit. If any part of the transaction fails, the entire operation is rolled back, preventing partial updates and maintaining database integrity[1][3].",
+                  "position": {
+                    "start": {
+                      "line": 6,
+                      "column": 17,
+                      "offset": 390
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 231,
+                      "offset": 604
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 6,
+                  "column": 4,
+                  "offset": 377
+                },
+                "end": {
+                  "line": 6,
+                  "column": 231,
+                  "offset": 604
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 6,
+              "column": 1,
+              "offset": 374
+            },
+            "end": {
+              "line": 6,
+              "column": 231,
+              "offset": 604
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Consistency",
+                      "position": {
+                        "start": {
+                          "line": 8,
+                          "column": 6,
+                          "offset": 616
+                        },
+                        "end": {
+                          "line": 8,
+                          "column": 17,
+                          "offset": 627
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 8,
+                      "column": 4,
+                      "offset": 614
+                    },
+                    "end": {
+                      "line": 8,
+                      "column": 19,
+                      "offset": 629
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Guarantees that a transaction transforms the database from one valid state to another while adhering to all predefined rules and constraints. This ensures the database remains accurate and reliable[2][3].",
+                  "position": {
+                    "start": {
+                      "line": 8,
+                      "column": 19,
+                      "offset": 629
+                    },
+                    "end": {
+                      "line": 8,
+                      "column": 225,
+                      "offset": 835
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 8,
+                  "column": 4,
+                  "offset": 614
+                },
+                "end": {
+                  "line": 8,
+                  "column": 225,
+                  "offset": 835
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 8,
+              "column": 1,
+              "offset": 611
+            },
+            "end": {
+              "line": 8,
+              "column": 225,
+              "offset": 835
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Isolation",
+                      "position": {
+                        "start": {
+                          "line": 10,
+                          "column": 6,
+                          "offset": 844
+                        },
+                        "end": {
+                          "line": 10,
+                          "column": 15,
+                          "offset": 853
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 10,
+                      "column": 4,
+                      "offset": 842
+                    },
+                    "end": {
+                      "line": 10,
+                      "column": 17,
+                      "offset": 855
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Ensures that concurrent transactions do not interfere with each other. Each transaction appears to execute independently, avoiding conflicts in high-concurrency environments[1][3].",
+                  "position": {
+                    "start": {
+                      "line": 10,
+                      "column": 17,
+                      "offset": 855
+                    },
+                    "end": {
+                      "line": 10,
+                      "column": 199,
+                      "offset": 1037
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 10,
+                  "column": 4,
+                  "offset": 842
+                },
+                "end": {
+                  "line": 10,
+                  "column": 199,
+                  "offset": 1037
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 10,
+              "column": 1,
+              "offset": 839
+            },
+            "end": {
+              "line": 10,
+              "column": 199,
+              "offset": 1037
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Durability",
+                      "position": {
+                        "start": {
+                          "line": 12,
+                          "column": 6,
+                          "offset": 1046
+                        },
+                        "end": {
+                          "line": 12,
+                          "column": 16,
+                          "offset": 1056
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 12,
+                      "column": 4,
+                      "offset": 1044
+                    },
+                    "end": {
+                      "line": 12,
+                      "column": 18,
+                      "offset": 1058
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Ensures that once a transaction is committed, its changes are permanently stored, even in the event of system failures[1][3].",
+                  "position": {
+                    "start": {
+                      "line": 12,
+                      "column": 18,
+                      "offset": 1058
+                    },
+                    "end": {
+                      "line": 12,
+                      "column": 145,
+                      "offset": 1185
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 12,
+                  "column": 4,
+                  "offset": 1044
+                },
+                "end": {
+                  "line": 12,
+                  "column": 145,
+                  "offset": 1185
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 12,
+              "column": 1,
+              "offset": 1041
+            },
+            "end": {
+              "line": 12,
+              "column": 145,
+              "offset": 1185
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 6,
+          "column": 1,
+          "offset": 374
+        },
+        "end": {
+          "line": 12,
+          "column": 145,
+          "offset": 1185
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Experts assess ACID properties when evaluating databases because they are critical for maintaining data integrity, especially in applications like banking or e-commerce where accuracy and reliability are paramount. While relational databases typically implement ACID fully, some NoSQL systems may relax these guarantees to achieve higher scalability and performance[4][6].",
+          "position": {
+            "start": {
+              "line": 14,
+              "column": 1,
+              "offset": 1189
+            },
+            "end": {
+              "line": 14,
+              "column": 373,
+              "offset": 1561
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 14,
+          "column": 1,
+          "offset": 1189
+        },
+        "end": {
+          "line": 14,
+          "column": 373,
+          "offset": 1561
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Sources\r\n[1] ACID Transactions - Redis https://redis.io/glossary/acid-transactions/\r\n[2] What Is the ACID Test in Database Security? - Blue Goat Cyber https://bluegoatcyber.com/blog/what-is-the-acid-test-in-database-security/\r\n[3] What Are ACID Transactions? A Complete Guide for Beginners https://www.datacamp.com/blog/acid-transactions\r\n[4] ACID Transactions: The Cornerstone of Database Integrity - Yugabyte https://www.yugabyte.com/acid/acid-transactions/\r\n[5] Understanding and Implementing ACID Properties in Databases. https://www.xcubelabs.com/blog/product-engineering-blog/understanding-and-implementing-acid-properties-in-databases/\r\n[6] What Is Database ACID? - Pure Storage https://www.purestorage.com/knowledge/what-is-database-acid.html\r\n[7] ACID - Wikipedia https://en.wikipedia.org/wiki/ACID\r\n[8] Quiz & Worksheet - ACID Properties in DBMS - Study.com https://study.com/academy/practice/quiz-worksheet-acid-properties-in-dbms.html\r\n[9] An introduction to ACID guarantees and transaction processing https://www.ververica.com/blog/an-introduction-to-acid-guarantees-and-transaction-processing",
+          "position": {
+            "start": {
+              "line": 16,
+              "column": 1,
+              "offset": 1565
+            },
+            "end": {
+              "line": 25,
+              "column": 159,
+              "offset": 2671
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 16,
+          "column": 1,
+          "offset": 1565
+        },
+        "end": {
+          "line": 25,
+          "column": 159,
+          "offset": 2671
+        }
+      }
+    }
+  ],
+  "position": {
+    "start": {
+      "line": 1,
+      "column": 1,
+      "offset": 0
+    },
+    "end": {
+      "line": 25,
+      "column": 159,
+      "offset": 2671
+    }
+  }
+}
