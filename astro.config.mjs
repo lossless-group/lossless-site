@@ -14,8 +14,6 @@ import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
 import vercel from '@astrojs/vercel';
 
-import vercel from '@astrojs/vercel';
-
 /** @type {ShikiLang[]} */
 const langs = [
   'javascript',

@@ -1,0 +1,3 @@
+[submodule "src/generated-content"]
+	path = src/generated-content
+	url = https://github.com/lossless-group/lossless-content.git
