@@ -12,6 +12,7 @@ import node from '@astrojs/node';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
+import vercel from '@astrojs/vercel';
 
 import vercel from '@astrojs/vercel';
 

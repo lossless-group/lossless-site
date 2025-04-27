@@ -13,8 +13,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-pnpm-lock.yaml
-package-lock.json
+.vercel
+.vercel/
+.vercel/*
+.vercel/output/*
+
 
 
 # environment variables
