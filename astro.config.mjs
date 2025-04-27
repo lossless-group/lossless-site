@@ -51,7 +51,7 @@ export default defineConfig({
       // rehypeModifyMermaidGraphs, // Uncomment if/when available
     ]
   },
-  output: "server",
+  output: 'server',
   adapter: vercel(),
   integrations: [mdx()], // Shiki is the default highlighter for markdown/code blocks
   vite: {
