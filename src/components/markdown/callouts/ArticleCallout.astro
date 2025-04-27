@@ -5,6 +5,7 @@ import { unified } from 'unified';
 import remarkRehype from 'remark-rehype';
 import { toHtml } from 'hast-util-to-html';
 import remarkCitations from '@utils/markdown/remark-citations';
+import AstroMarkdown from '../AstroMarkdown.astro';
 
 interface Props {
   node: {
@@ -18,158 +19,64 @@ interface Props {
   data?: Record<string, unknown>;
 }
 
-const { node } = Astro.props;
+const { node, data = { path: '/default-path' } } = Astro.props;
 
-// Debug: Log just the essential parts
 console.log('=== ArticleCallout Debug ===');
 console.log('Node type:', node?.type);
 console.log('Children:', node?.children?.map(child => ({type: child.type})));
 
-// Extract callout metadata from first paragraph
+// Default values
 let calloutType = 'info';
 let calloutTitle = '';
+
 let contentNode: Root = { 
   type: 'root',
   children: node.children || []
 };
 
-if (node.children && node.children.length > 0) {
-  const firstParagraph = node.children[0] as Paragraph;
-  if (firstParagraph.type === 'paragraph' && firstParagraph.children && firstParagraph.children.length > 0) {
-    const firstChild = firstParagraph.children[0] as PhrasingContent & { value?: string };
-    if (firstChild.value) {
-      const match = firstChild.value.match(/^\[!([^\]]+)\]\s*(.*)$/);
+// ====== TITLE EXTRACTION LOGIC ======
+
+if (contentNode.children.length > 0) {
+  const firstChild = contentNode.children[0];
+
+  if (firstChild.type === 'paragraph' && Array.isArray(firstChild.children)) {
+    const textNode = firstChild.children.find(child => child.type === 'text');
+
+    if (textNode && typeof textNode.value === 'string') {
+      const match = textNode.value.match(/^\[!(.*?)\]/);
       if (match) {
-        calloutType = match[1].trim();
-        calloutTitle = match[2].trim() || calloutType;
-        // Remove the first paragraph from content
-        contentNode = {
-          type: 'root',
-          children: node.children.slice(1)
-        };
+        calloutTitle = match[1].trim();
+
+        // Remove the [!Title] from the paragraph text
+        textNode.value = textNode.value.replace(/^\[!(.*?)\]\s*/, '');
+
+        // If the paragraph is now empty after removing, delete it
+        const isParagraphEmpty = firstChild.children.every(child => 
+          child.type === 'text' && child.value.trim() === ''
+        );
+        if (isParagraphEmpty) {
+          contentNode.children.shift(); // Remove the first child
+        }
       }
     }
   }
 }
 
-console.log('Extracted:', { calloutType, calloutTitle });
-
-// First process citations
-const citationsResult = await unified()
-  .use(remarkCitations)
-  .run(contentNode);
-
-// Convert unified result to Root type
-const citationsRoot = {
-  type: 'root',
-  children: (citationsResult as unknown as Root).children
-};
-
-// Get citations nodes if any were found
-const citationsNodes = citationsRoot.children.filter((node): node is CitationNode | CitationsNode => 
-  node.type === 'citations' || node.type === 'citation'
-);
-
-// Remove citations nodes from content before converting to HTML
-const contentWithoutCitations: Root = {
-  type: 'root',
-  children: citationsRoot.children.filter((node) => {
-    // Filter out citations and citation nodes
-    if (node.type === 'citations' || node.type === 'citation') {
-      return false;
-    }
-    
-    // Filter out the "Citations:" header node (could be heading or paragraph)
-    if (node.type === 'heading' || node.type === 'paragraph') {
-      // Check if this node contains "Citations:" text
-      const hasOnlyChildWithCitationsText = node.children?.length === 1 && 
-        node.children[0].type === 'text' && 
-        node.children[0].value === 'Citations:';
-      
-      if (hasOnlyChildWithCitationsText) {
-        return false;
-      }
-    }
-    
-    // Keep all other nodes
-    return true;
-  })
-};
-
-// Convert remaining content to HTML
-const processedContent = await unified()
-  .use(remarkRehype)
-  .run(contentWithoutCitations)
-  .then((result) => toHtml(result as unknown as HastRoot));
-
-console.log('Extracted citations:', citationsNodes);
-
-// Convert citations nodes to HTML
-const citationsHtml = await Promise.all(citationsNodes.map(async (node) => {
-  const rootNode: Root = {
-    type: 'root',
-    children: [node]
-  };
-  const citationHtml = await unified()
-    .use(remarkRehype)
-    .run(rootNode)
-    .then(result => toHtml(result as unknown as HastRoot));
-  return citationHtml;
-}));
-
-console.log('Citations HTML:', citationsHtml);
-
+// ====== End title extraction ======
 ---
 
 <article class={`callout callout-${calloutType.toLowerCase()}`} data-debug-enabled>
-  <header class="callout-header">{calloutTitle}</header>
-  <div class="callout-content" set:html={processedContent}>
+  {calloutTitle && (
+    <div class="callout-header">
+      {calloutTitle}
+    </div>
+  )}
+  <div class="callout-content">
+    {contentNode.children.map(child => (
+      <AstroMarkdown node={child} data={data} />
+    ))}
   </div>
-  {citationsNodes.map((citationNode) => {
-    const nodeForSelf = {
-      type: citationNode.type,
-      children: 'children' in citationNode ? citationNode.children : undefined,
-      value: 'value' in citationNode ? citationNode.value : undefined,
-      data: citationNode.data
-    } as Props['node'];
-    return <Astro.self node={nodeForSelf} data={{}} />;
-  })}
 </article>
-
-<script>
-  interface CalloutDebugData {
-    type: string;
-    header: string | undefined;
-    content: string | undefined;
-    astNode: any | undefined;
-  }
-
-  declare global {
-    interface Window {
-      calloutDebug: CalloutDebugData[];
-    }
-  }
-
-  // Make callout data available in browser console
-  const callouts = document.querySelectorAll('.callout[data-debug-enabled]');
-  
-  callouts.forEach((callout, index) => {
-    const debugData = {
-      type: callout.classList.toString().split('callout-')[1],
-      header: callout.querySelector('.callout-header')?.textContent,
-      content: callout.querySelector('.callout-content')?.innerHTML,
-      astNode: callout.getAttribute('data-ast') ? JSON.parse(callout.getAttribute('data-ast') || '') : undefined
-    };
-    
-    // Add to window object for console access
-    if (!window.calloutDebug) {
-      window.calloutDebug = [];
-    }
-    window.calloutDebug[index] = debugData;
-  });
-
-  console.log('Callout debug data available at window.calloutDebug');
-</script>
 
 <style>
   .callout {
@@ -184,9 +91,42 @@ console.log('Citations HTML:', citationsHtml);
     font-weight: bold;
     margin-bottom: 0.5rem;
     color: var(--clr-lossless-accent--brightest);
+    font-size: 1.1rem;
   }
 
-  .callout-content {
-    color: var(--clr-lossless-primary-light);
-  }
+ .callout {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--clr-lossless-primary-dark);
+  border: 1px solid var(--clr-lossless-accent--brightest);
+  overflow: hidden; /* NEW: basic clipping */
+}
+
+.callout-content {
+  color: var(--clr-lossless-primary-light);
+  overflow-x: auto; /* NEW: allow horizontal scroll if needed */
+  max-width: 100%;   /* NEW: prevent growing beyond container */
+}
+
+/* OPTIONAL: Style iframes inside callouts */
+.callout-content iframe {
+  max-width: 100%;
+  height: auto;
+  border: none;
+}
+
+/* OPTIONAL: Wrap tables nicely inside callouts */
+.callout-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Ensure images shrink inside callouts */
+.callout-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 </style>
