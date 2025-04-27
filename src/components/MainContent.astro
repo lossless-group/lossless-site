@@ -27,7 +27,6 @@ export function listVisualAssets(directoryPath) {
 }
 
 console.log(listVisualAssets(join(process.cwd(), 'public', 'visuals')));
-console.log(listVisualAssets(join(process.cwd(), 'visuals')));
 
 interface Tool {
   url: string;
@@ -41,7 +40,7 @@ interface Tool {
 }
 
 const TRADEMARK_CONFIG = {
-  sourceDir: "visuals/Tooling-Trademarks/usable--darkmode",
+  sourceDir: "./public/visuals/Tooling-Trademarks/usable--darkmode",
 };
 
 // ... existing type definitions ...
