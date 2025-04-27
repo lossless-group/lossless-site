@@ -13,8 +13,6 @@ import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
 
-import vercel from '@astrojs/vercel';
-
 /** @type {ShikiLang[]} */
 const langs = [
   'javascript',
@@ -53,9 +51,16 @@ export default defineConfig({
     ]
   },
   output: "server",
-  adapter: vercel(),
+  adapter: node({
+    mode: 'standalone',
+  }),
   integrations: [mdx()], // Shiki is the default highlighter for markdown/code blocks
   vite: {
+    ssr: {
+      noExternal: [
+        'astro-component-lib',
+      ]
+    },
     plugins: [tailwindcss()],
     resolve: {
       alias: {
