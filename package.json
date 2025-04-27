@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "postinstall": "pnpx playwright-core install --with-deps chromium"
+    "postinstall": "[ \"$CI\" != \"true\" ] && pnpx playwright-core install --with-deps chromium || echo 'Skipping Playwright install in CI'"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.4",
@@ -70,5 +70,5 @@
       "sharp"
     ]
   },
-  "packageManager": "pnpm@9.11.0+sha256.1c0e33f70e5df9eede84a357bdfa0b1f9dba6e58194628d48a1055756f553754"
+  "packageManager": "pnpm@latest"
 }
