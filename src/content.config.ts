@@ -105,6 +105,38 @@ const conceptsCollection = defineCollection({
   })
 });
 
+// Concepts collection - follows same pattern as vocabulary
+const essaysCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/essays"}),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]), // Single string -> array with one string
+      z.array(z.string()),                // Already an array
+      z.null(),                          // Handle null values
+      z.undefined()                      // Handle undefined values
+    ]).transform(val => {
+      if (!val) return [];              // Transform null/undefined to empty array
+      return val;                       // Keep arrays and transformed strings as-is
+    }).default([])                      // Default to empty array if missing
+  }).passthrough().transform((data, context) => {
+    // Get the filename without extension
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Convert filename to title case for display
+    const titleCase = filename
+      .split(/[\s-]+/)  // Split on spaces or dashes
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    // Merge our computed values into the data object
+    return {
+      ...data,  // Start with existing data
+      title: titleCase,  // Override with computed title
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
+    };
+  })
+});
+
 const promptsCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: "./src/generated-content/lost-in-public/prompts"}),
   schema: z.object({}).passthrough().transform((data) => ({
@@ -200,6 +232,7 @@ export const paths = {
   'cards': 'cards',
   'changelog--content': './src/generated-content/changelog--content',
   'changelog--code': './src/generated-content/changelog--code',
+  'essays': './src/generated-content/essays',
   'concepts': './src/generated-content/concepts',
   'reports': './src/generated-content/reports',
   'tooling': './src/generated-content/tooling',
@@ -213,6 +246,7 @@ export const paths = {
 export const collections = {
   'cards': cardCollection,
   'concepts': conceptsCollection,
+  'essays': essaysCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,

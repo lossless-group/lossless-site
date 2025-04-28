@@ -1,0 +1,87 @@
+---
+// site/src/reader/index.astro
+// This page renders a grid of essays from the essaysCollection, styled and structured to match
+// the approach of site/src/pages/more-about/index.astro, per project rules.
+// Aggressive, detailed commenting is used throughout.
+
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+import PostCard from '@components/articles/PostCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+/**
+ * Interface for an essay item, matching the data structure output by essaysCollection
+ * (see src/content.config.ts for schema and transforms)
+ *
+ * NOTE: The 'published' property is not part of the global schema, but we extend the type locally here
+ * to allow TypeScript-safe access. This keeps content.config.ts simple for the content team.
+ */
+interface EssayFrontmatter {
+  title: string;
+  slug?: string;
+  lede?: string;
+  summary?: string;
+  authors?: string[];
+  tags?: string[];
+  date_authored_initial_draft?: string;
+  banner_image?: string;
+  published?: boolean;
+  // ...any other frontmatter fields
+}
+
+interface EssayItem {
+  id: string;
+  slug: string;
+  data: EssayFrontmatter;
+}
+
+// Fetch all essays from the essays collection
+const essayEntries = await getCollection('essays');
+
+// Filter out essays where published === false (default is published unless explicitly false)
+// We assert the type to include 'published' for TypeScript safety, as this property is not globally defined.
+const publishedEssays = essayEntries.filter(entry => {
+  const data = entry.data as EssayFrontmatter; // Type assertion for local safety
+  return data.published !== false;
+});
+
+// Sort essays by title (or another property if desired)
+publishedEssays.sort((a, b) => (a.data.title || '').localeCompare(b.data.title || ''));
+
+// Map entries to EssayItem objects for use with PostCard
+const essayItems: EssayItem[] = publishedEssays.map(entry => ({
+  id: entry.id,
+  slug: (entry as any).slug, // Astro-generated slug
+  data: entry.data as EssayFrontmatter,
+}));
+
+// Render the page with the filtered and sorted essays
+---
+
+<Layout title="The Losslesss Reader">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">Reader: Essays</h1>
+    <p class="text-lg mb-8">Browse essays and longform writing from our library.</p>
+
+    <div class="flex gap-4 mb-8">
+      <a href="/reader" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Essays</a>
+      <!-- Add more navigation as needed -->
+    </div>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Essays</h2>
+      <p class="mb-6">Longform writing, research, and commentary.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {essayItems.map(item => (
+          // PostCard expects either a flat frontmatter object or an Astro entry with data
+          <PostCard {...item.data} url={item.slug ? `/reader/${item.slug}` : undefined} />
+        ))}
+      </div>
+    </section>
+
+    <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+
+    <!-- You can add additional sections or features here if desired -->
+  </div>
+</Layout>
