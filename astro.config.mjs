@@ -67,6 +67,20 @@ export default defineConfig({
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
+    },
+    // --- Vite server.fs.allow fix for dev-toolbar/entrypoint.js error ---
+    // This allows Vite to serve files from the project root and node_modules, preventing
+    // 'outside of Vite serving allow list' errors when dependencies are resolved with absolute paths.
+    // If you are in a monorepo, add the monorepo root (e.g., '../') as needed.
+    server: {
+      fs: {
+        allow: [
+          '.', // always allow project root
+          '../', // allow serving from parent directory
+          'node_modules', // allow serving from node_modules
+          // '../', // uncomment if you need to allow the monorepo root
+        ]
+      }
     }
   }
 });
