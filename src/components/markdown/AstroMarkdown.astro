@@ -60,6 +60,7 @@ const handled_types = [
     "citationReference",
     "footnoteReference",
     "footnoteDefinition",    
+    "tableOfContents",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -82,25 +83,37 @@ const title = data.id ?
 
 ---
 
-{(node.type === "root") && 
-    <>
-        <h1>{title}</h1>
-        {node.children.map((child) => (
-            <Astro.self node={child} data={data} />
-        ))}
-    </>
-}
-
-{(node.type === "heading") &&
+{node.type === "root" && 
   <>
-    {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>}
-    {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>}
-    {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>}
-    {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>}
-    {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>}
-    {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>}
+    {data?.renderingToC !== true && <h1>{title}</h1>}
+    {node.children.map((child) => (
+        <Astro.self node={child} data={data} />
+    ))}
   </>
 }
+
+{node.type === "heading" && (() => {
+  function generateHeadingId(node) {
+    return node.children
+      .filter(child => child.type === 'text')
+      .map(child => child.value)
+      .join('')
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+  }
+
+  const HeadingTag = `h${node.depth}`;
+  const id = generateHeadingId(node);
+
+  return (
+    <HeadingTag id={id}>
+      {node.children.map(child => <Astro.self node={child} data={data} />)}
+    </HeadingTag>
+  );
+})()}
+
 
 {(node.type === "strong") &&
   <strong>
@@ -300,6 +313,41 @@ const title = data.id ?
 )}
 
 
+{node.type === "tableOfContents" && node.data?.map && (
+  <aside class="toc-sidebar">
+    <Astro.self node={node.data.map} data={data} />
+  </aside>
+
+  <style>
+    .toc-sidebar {
+      position: sticky;
+      top: 4rem;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      font-size: 0.9rem;
+      padding-right: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .toc-sidebar ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .toc-sidebar li {
+      margin: 0.3rem 0;
+    }
+
+    .toc-sidebar a {
+      text-decoration: none;
+      color: #ccc;
+    }
+
+    .toc-sidebar a:hover {
+      color: white;
+    }
+  </style>
+)}
 
 
 {(node.type === "paragraph") &&
