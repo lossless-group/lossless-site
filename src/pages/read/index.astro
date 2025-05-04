@@ -7,8 +7,10 @@
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
-import PostCard from '@components/articles/PostCard.astro';
-import type { CollectionEntry } from 'astro:content';
+// Importing the CollectionEntryRow component for rendering each essay entry in the grid below
+import CollectionEntryRow from '@components/basics/CollectionEntryRow.astro';
+import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
+import ArticleListNewsPreview from '@components/articles/ArticleListNewsPreview.astro';
 
 /**
  * Interface for an essay item, matching the data structure output by essaysCollection
@@ -33,7 +35,13 @@ interface EssayFrontmatter {
 interface EssayItem {
   id: string;
   slug: string;
+  title?: string;
+  lede?: string;
+  banner_image?: string;
+  tags?: string[];
+  summary?: string;
   data: EssayFrontmatter;
+  url: string;
 }
 
 // Fetch all essays from the essays collection
@@ -49,12 +57,35 @@ const publishedEssays = essayEntries.filter(entry => {
 // Sort essays by title (or another property if desired)
 publishedEssays.sort((a, b) => (a.data.title || '').localeCompare(b.data.title || ''));
 
-// Map entries to EssayItem objects for use with PostCard
-const essayItems: EssayItem[] = publishedEssays.map(entry => ({
-  id: entry.id,
-  slug: (entry as any).slug, // Astro-generated slug
-  data: entry.data as EssayFrontmatter,
-}));
+// Map entries to EssayItem objects for use with CollectionEntryRow
+const essayItems: EssayItem[] = publishedEssays.map(entry => {
+  // Always generate slug using the same logic as content.config.ts (filename, lowercased, spaces to dash)
+  const filename = String(entry.id).split("/").pop()?.replace(/\.md$/, "") || "";
+  const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+  // Use title and lede directly from frontmatter, fallback to Title Case filename if title is missing or blank
+  let { title, lede = '', banner_image = '', tags = [], summary = '' } = entry.data as EssayFrontmatter;
+  if (!title || title.trim() === '') {
+    title = filename
+      .split(/[-_\s]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  return {
+    id: entry.id,
+    slug: generatedSlug,
+    title,
+    lede,
+    banner_image,
+    tags,
+    summary,
+    data: entry.data as EssayFrontmatter,
+    // url property for downstream components (e.g., ArticleListNewsPreview)
+    url: `/read/essays/${generatedSlug}`,
+    tagRoute: `read/more-on`
+  };
+});
+
+console.log(essayItems);
 
 // Render the page with the filtered and sorted essays
 ---
@@ -72,12 +103,13 @@ const essayItems: EssayItem[] = publishedEssays.map(entry => ({
     <section class="mb-12">
       <h2 class="text-2xl font-bold mb-4">Essays</h2>
       <p class="mb-6">Longform writing, research, and commentary.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {essayItems.map(item => (
-          // PostCard expects either a flat frontmatter object or an Astro entry with data
-          <PostCard {...item.data} url={item.slug ? `/reader/${item.slug}` : undefined} />
-        ))}
-      </div>
+      {/*
+        Render ArticleListColumn for all essays, passing ArticleListNewsPreview as EntryComponent.
+        This mirrors the columnar, DRY rendering pattern from the [tag].astro page for consistency.
+        - entries: essayItems (array of essay data)
+        - EntryComponent: ArticleListNewsPreview (renders each essay row)
+      */}
+      <ArticleListColumn entries={essayItems} EntryComponent={ArticleListNewsPreview} />
     </section>
 
     <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
