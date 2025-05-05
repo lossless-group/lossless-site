@@ -9,9 +9,9 @@ import AuthorHandle from "../basics/AuthorHandle.astro";
 import { formatDate } from "@utils/formatDate";
 
 // Accept both Astro collection entry and flat frontmatter object
-const { data, ...rest } = Astro.props;
+const { data, imageContainerStyle, ...rest } = Astro.props;
 const props = data ? data : Astro.props;
-const { title, lede, authors, tags, date_authored_initial_draft, url, summary, banner_image } = props;
+const { title, lede, authors, tags, date_authored_initial_draft, url, summary, portrait_image } = props;
 
 // Format date if it exists
 // This block ensures we always pass a Date object or ISO string to formatDate, which expects (Date | string)
@@ -35,50 +35,74 @@ if (date_authored_initial_draft) {
 
 const hasAuthors = Array.isArray(authors) && authors.length > 0;
 
+// Defensive: Ensure tags is always an array, split on comma or hyphen, deduplicate
+let safeTags = tags;
+if (typeof safeTags === 'string') {
+  safeTags = safeTags
+    .split(/[,\-]/) // split on comma or hyphen
+    .map(t => t.trim())
+    .filter(Boolean);
+}
+if (!Array.isArray(safeTags)) {
+  safeTags = [];
+}
+// Remove duplicates
+safeTags = [...new Set(safeTags)];
+
 ---
 
 <article class="post-card card-hover-effect">
-  {banner_image && <img src={banner_image} alt={title} class="post-card__image" />}
-  <div class="content-wrapper">
-    <div class="post-card__header">
-      <h2 class="post-card__title"><a href={url}><span class="text-wrapper">{title}</span></a></h2>
-      <p class="post-card__lede"><span class="text-wrapper">{lede || summary}</span></p>
-    </div>
-    <div class="post-card__meta">
-      {/*
-        Layout Correction: Author and date are now wrapped in a flex row and spaced apart.
-        - .post-card__meta-row uses justify-content: space-between for polar alignment.
-        - TagCloud is rendered below, never sharing space with author/date.
-        - Aggressive comments clarify structure.
-      */}
-      <div class="post-card__meta-row">
-        <span class="post-card__author">
-          {/**
-           * AuthorHandle is called here to render the author information for the article card.
-           * Props passed:
-           * - authors: authors (from article data)
-           * - showName: true (display author name)
-           * - showRole: false (do not display author role)
-           * - nameClass: "author-name--article-card" (for article card-specific styling)
-           * - avatarClass: "avatar-bg-attn avatar-base" (for avatar circle border and size)
-           *
-           * NOTE: Do NOT include the base class "author-name" in nameClass; it is always applied by AuthorHandle.
-           * All font size and style for article cards is handled by .author-name--article-card.
-           * Avatar border and size are handled by avatar-bg-attn/avatar-base (see avatars.css)
-           *
-           * Other places AuthorHandle is called:
-           * - site/src/components/changelog/ChangelogEntry.astro (with nameClass="author-name--changelog")
-           * - site/src/components/articles/PostCardFeature.astro (with nameClass="author-name--article-card")
-           */}
-          <AuthorHandle authors={authors} showName={true} showRole={false} nameClass="author-name--article-card" avatarClass="avatar-bg-attn avatar-base" />
-        </span>
-        <span class="post-card__date">{formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}</span>
+  <!--
+    Row grid layout: image left, content right
+    - .post-card__row uses CSS grid for two columns
+  -->
+  <div class="post-card__row">
+    {portrait_image && (
+      <div class="post-card__image-container" style={imageContainerStyle}>
+        <img src={portrait_image} alt={title} class="post-card__image" />
       </div>
-      {tags && tags.length > 0 && (
-        <div class="post-card__meta-tags">
-          <TagCloud tags={tags} />
+    )}
+    <div class="content-wrapper">
+      <div class="post-card__header">
+        <h2 class="post-card__title"><a href={url}><span class="text-wrapper">{title}</span></a></h2>
+        <p class="post-card__lede krub-regular"><span class="text-wrapper">{lede || summary}</span></p>
+      </div>
+      <div class="post-card__meta">
+        <!--
+          Layout Correction: Author and date are now wrapped in a flex row and spaced apart.
+          - .post-card__meta-row uses justify-content: space-between for polar alignment.
+          - TagCloud is rendered below, never sharing space with author/date.
+          - Aggressive comments clarify structure.
+        -->
+        <div class="post-card__meta-row">
+          <span class="post-card__author">
+            <!--
+              AuthorHandle is called here to render the author information for the article card.
+              Props passed:
+                - authors: authors (from article data)
+                - showName: true (display author name)
+                - showRole: false (do not display author role)
+                - nameClass: "author-name--article-card" (for article card-specific styling)
+                - avatarClass: "avatar-bg-attn avatar-base" (for avatar circle border and size)
+
+              NOTE: Do NOT include the base class "author-name" in nameClass; it is always applied by AuthorHandle.
+              All font size and style for article cards is handled by .author-name--article-card.
+              Avatar border and size are handled by avatar-bg-attn/avatar-base (see avatars.css)
+
+              Other places AuthorHandle is called:
+                - site/src/components/changelog/ChangelogEntry.astro (with nameClass="author-name--changelog")
+                - site/src/components/articles/PostCardFeature.astro (with nameClass="author-name--article-card")
+            -->
+            <AuthorHandle authors={authors} showName={true} showRole={false} nameClass="author-name--article-card" avatarClass="avatar-bg-attn avatar-base" />
+          </span>
+          <span class="post-card__date">{formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}</span>
         </div>
-      )}
+        {safeTags && safeTags.length > 0 && (
+          <div class="post-card__meta-tags">
+            <TagCloud tags={safeTags} />
+          </div>
+        )}
+      </div>
     </div>
   </div>
 </article>
@@ -99,96 +123,90 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
       var(--clr-lossless-primary-glass),
       var(--clr-lossless-primary-dark) 90%
     );
-    border: 1px solid var(--clr-lossless-ui-btn-border);
+    border: 1.5px solid var(--clr-lossless-ui-btn-border);
     color: var(--clr-lossless-primary-light);
-    padding: 1rem;
-    border-radius: 1em;
+    padding: 1.5rem 1.25rem;
+    border-radius: 1.25em;
+    box-shadow: 0 4px 20px 0 rgba(30, 40, 90, 0.08), 0 1.5px 4px 0 rgba(30, 40, 90, 0.03);
     display: flex;
     flex-direction: column;
     height: 100%;
-    box-sizing: border-box;
+    min-width: 40rem;
+    transition: box-shadow 0.18s cubic-bezier(.4,0,.2,1), transform 0.16s cubic-bezier(.4,0,.2,1);
+    will-change: box-shadow, transform;
   }
-
-  .content-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    gap: 0.75rem;
+  .post-card:hover, .post-card:focus-within {
+    box-shadow: 0 8px 32px 0 rgba(30, 40, 90, 0.16), 0 2.5px 8px 0 rgba(30, 40, 90, 0.06);
+    transform: translateY(-2px) scale(1.015);
+    border-color: var(--clr-lossless-accent--brightest);
+    z-index: 2;
   }
-
   .post-card__header {
-    display: flex;
-    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 0.25rem;
+  }
+  .post-card__lede {
+    margin-bottom: 0.5rem;
+    color: var(--clr-body);
+    font-size: var(--fs-300);
+    line-height: 1.5;
+    min-height: 2.2em;
+    max-height: 4.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+  .post-card__meta {
     gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--clr-lossless-ui-btn-border);
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 85%);
   }
-
+  .post-card__meta-tags {
+    margin-top: 0.25rem;
+    padding: 0.25rem 0 0.1rem 0;
+    background: transparent;
+    gap: 0.35rem;
+  }
   .post-card__title {
-    font-size: var(--fs-500);
-    font-weight: var(--fw-bold);
-    margin: 0;
-    line-height: 1.2;
+    font-size: var(--fs-600);
+    line-height: 1.15;
+    margin-bottom: 0.15em;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
   }
-
   .post-card__title a {
     color: var(--clr-heading);
     text-decoration: none;
+    transition: color 0.14s cubic-bezier(.4,0,.2,1);
   }
-
   .post-card__title a:hover {
-    text-decoration: underline;
     color: var(--clr-lossless-accent--brightest);
+    text-decoration: underline;
   }
-
-  .post-card__lede {
-    font-size: var(--fs-350);
-    color: var(--clr-body);
-    font-family: var(--ff-legible);
-    margin: 0;
-    flex-grow: 1;
-  }
-
-  .post-card__meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: var(--fs-250);
-    color: var(--clr-body);
-    margin-top: auto;
-  }
-
-  .post-card__meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    gap: 1rem;
-  }
-
-  .post-card__author,
   .post-card__date {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
+    font-size: var(--fs-200);
+    color: var(--clr-body);
   }
-
-  .post-card__meta-tags {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+  @media (max-width: 700px) {
+    .post-card {
+      padding: 1.1rem 0.7rem;
+      border-radius: 0.85em;
+    }
+    .post-card__row {
+      gap: 0.7rem;
+    }
+    .post-card__title {
+      font-size: var(--fs-450);
+    }
   }
-
-  .post-card__image {
-    width: 100%;
-    border-radius: 0.5rem;
-    aspect-ratio: 16/9;
-    object-fit: cover;
-    margin-bottom: 0.75rem;
-  }
-
   /* Common text wrapping styles for all text elements */
   .text-wrapper {
     display: inline-block;
@@ -198,5 +216,53 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
     word-break: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+  }
+  /* =============================
+   * Row grid for PostCard: image left, content right
+   * ============================= */
+  .post-card__row {
+    display: grid;
+    grid-template-columns: minmax(120px, 16vw) 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+  .post-card__image-container {
+    height: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    display: block;
+    position: relative;
+  }
+  .post-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* border-radius is kept here for image corners, but container can override */
+    border-radius: 0.5rem;
+  }
+  /* =============================
+   * Meta row for PostCard: author left, date right
+   * ============================= */
+  .post-card__meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 0.5em;
+    margin-bottom: 0.25em;
+    margin-right: 1em;
+    padding-right: 1em;
+  }
+  /* Ensure the author stays left and date right */
+  .post-card__author {
+    flex: 1 1 auto;
+    text-align: left;
+  }
+  .post-card__date {
+    flex: 0 0 auto;
+    text-align: right;
+    margin-left: 1em;
   }
 </style>

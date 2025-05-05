@@ -7,7 +7,6 @@
 import Layout from '@layouts/Layout.astro';
 import PostCardContentLayout from '../../layouts/PostCardContentLayout.astro';
 import { getCollection } from 'astro:content';
-import { Astro } from 'astro';
 
 // ***
 // Open: Dynamic Collection Loader for Magazine-Style Layout
@@ -73,8 +72,18 @@ const contentThreads = sortedPublishedEntries.map(entry => {
   const filename = pathParts[pathParts.length - 1].replace(/\.md$/, '');
   const slug = filename.toLowerCase().replace(/\s+/g, '-');
 
+  // Defensive: If entry.data.tags is a string, convert to array
+  let tags = entry.data.tags;
+  if (typeof tags === 'string') {
+    tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+  }
+  if (!Array.isArray(tags)) {
+    tags = [];
+  }
+
   return {
     ...entry.data,
+    tags, // always an array
     id: entry.id,
     url: `${urlPrefix}${slug}` // Unified route: /vibe-with/[collection]/[slug]
     // Include any other properties needed by the card components
