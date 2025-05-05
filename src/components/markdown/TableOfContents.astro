@@ -1,0 +1,65 @@
+---
+import AstroMarkdown from './AstroMarkdown.astro';
+/**
+ * TableOfContents.astro
+ * Renders the Table of Contents from a remark-toc MDAST node
+ * - Expects a node of type 'tableOfContents' with data.map as a MDAST list node
+ * - Props:
+ *   - node: the 'tableOfContents' node from the MDAST
+ *   - data: the parent article metadata (for context, e.g. file id)
+ */
+interface Props {
+  node: {
+    type: string;
+    data?: {
+      hProperties?: Record<string, any>;
+      map?: any;
+    };
+  };
+  data: {
+    id?: string;
+    [key: string]: any;
+  };
+}
+const { node, data } = Astro.props;
+
+// =============================
+// Defensive: Render TOC if map is a list node, fallback otherwise
+// =============================
+const isValidToc = node.data?.map?.type === 'list';
+---
+{isValidToc ? (
+  <aside class="toc-sidebar">
+    <AstroMarkdown node={node.data.map} data={data} />
+    <style>
+      .toc-sidebar {
+        position: sticky;
+        top: 4rem;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+        font-size: 0.9rem;
+        padding-right: 1rem;
+        margin-bottom: 2rem;
+      }
+      .toc-sidebar ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .toc-sidebar li {
+        margin: 0.3rem 0;
+      }
+      .toc-sidebar a {
+        text-decoration: none;
+        color: #ccc;
+      }
+      .toc-sidebar a:hover {
+        color: white;
+      }
+    </style>
+  </aside>
+) : (
+  <aside class="toc-sidebar">
+    <h1>{data?.id ? data.id.replace(/\.md$/, '') : 'Untitled'}</h1>
+    <p>No Table of Contents available.</p>
+  </aside>
+)}

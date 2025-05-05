@@ -42,6 +42,14 @@ const hProperties: Record<string, any> =
     : {};
 
 // =============================
+// DEBUG: Output children node types to verify TOC injection
+// =============================
+console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
+// DEBUG: Output full tableOfContents node structure
+const tocNode = children.find(child => child.type === 'tableOfContents');
+console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
+
+// =============================
 // Comprehensive comments for AstroMarkdown usage
 // =============================
 // AstroMarkdown is called twice:

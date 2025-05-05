@@ -11,7 +11,7 @@ import remarkGfm from 'remark-gfm';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCitations from '@utils/markdown/remark-citations';
-import remarkExtractToc from '@utils/markdown/remark-toc';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
@@ -31,7 +31,7 @@ const processor = unified()
   .use(remarkImages)         
   .use(remarkBacklinks)          
   .use(remarkCitations)
-  .use(remarkExtractToc)
+  .use(remarkTableOfContents)
 
 // First parse to MDAST
 const mdast = processor.parse(content || '');

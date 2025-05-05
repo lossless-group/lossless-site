@@ -5,6 +5,7 @@ import ArticleCitationsBlock from './citations/ArticleCitations.astro';
 import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
+import TableOfContents from './TableOfContents.astro';
 
 interface Props {
     /**
@@ -325,67 +326,10 @@ const title = data.id ?
   </div>
 )}
 
-{node.type === "tableOfContents" && Array.isArray(node.data?.map) && node.data.map.length > 0 && (
-  <aside class="toc-sidebar">
-    {node.data.map.map((tocNode, i) => (
-      <Astro.self node={tocNode} data={data} />
-    ))}
-    <style>
-      .toc-sidebar {
-        position: sticky;
-        top: 4rem;
-        max-height: calc(100vh - 4rem);
-        overflow-y: auto;
-        font-size: 0.9rem;
-        padding-right: 1rem;
-        margin-bottom: 2rem;
-      }
-      .toc-sidebar ul {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      .toc-sidebar li {
-        margin: 0.3rem 0;
-      }
-      .toc-sidebar a {
-        text-decoration: none;
-        color: #ccc;
-      }
-      .toc-sidebar a:hover {
-        color: white;
-      }
-    </style>
-  </aside>
-)}
-{node.type === "tableOfContents" && (!Array.isArray(node.data?.map) || node.data.map.length === 0) && (
-  <aside class="toc-sidebar">
-    <h1>{data?.id ? data.id.replace(/\.md$/, '') : 'Untitled'}</h1>
-    <style>
-      .toc-sidebar {
-        position: sticky;
-        top: 4rem;
-        max-height: calc(100vh - 4rem);
-        overflow-y: auto;
-        font-size: 0.9rem;
-        padding-right: 1rem;
-        margin-bottom: 2rem;
-      }
-      .toc-sidebar ul {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      .toc-sidebar li {
-        margin: 0.3rem 0;
-      }
-      .toc-sidebar a {
-        text-decoration: none;
-        color: #ccc;
-      }
-      .toc-sidebar a:hover {
-        color: white;
-      }
-    </style>
-  </aside>
+<!-- Table of Contents Rendering Logic -->
+<!-- Now delegated to TableOfContents.astro for modularity and maintainability -->
+{node.type === "tableOfContents" && (
+  <TableOfContents node={node} data={data} />
 )}
 
 {(node.type === "paragraph") &&
