@@ -96,19 +96,35 @@ const title = data.id ?
 
 {node.type === "heading" && (() => {
   function generateHeadingId(node, data) {
-    // Compose a unique id using the heading text and file id (if available)
-    const base = (Array.isArray(node.children)
-      ? node.children.filter(child => child.type === 'text').map(child => child.value).join('')
-      : '')
+    /*
+      Compose a unique id for markdown headings using ONLY the main heading text.
+      - This function takes a heading MDAST node and returns a slugified version of the primary text content.
+      - It does NOT include the file name, any prefix, or subtitle/lead-in text.
+      - Example: 'A Parable of Directionality' → 'a-parable-of-directionality'
+      - This logic matches ToC anchor links for in-page navigation.
+      - Aggressively commented: update here and at all call sites if logic changes.
+    */
+    // Extract only the first text node (primary heading text)
+    let mainText = '';
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) {
+        if (child.type === 'text') {
+          mainText = child.value;
+          break; // Only use the first text node for the id
+        }
+      }
+    }
+    const base = mainText
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .trim()
       .replace(/\s+/g, '-');
-    // Add file id (without extension) as prefix if available
-    const prefix = data?.id ? data.id.replace(/\.md$/, '') + '-' : '';
-    return `${prefix}${base}`;
+    return base;
   }
 
+  // === Heading Rendering Logic ===
+  // The generateHeadingId function is called here for all heading depths (h1-h6).
+  // The id will be based ONLY on the main heading text, not the filename or subtitle.
   const id = generateHeadingId(node, data);
 
   if (node.depth === 1) {
