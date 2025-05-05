@@ -7,6 +7,16 @@ import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 import TableOfContents from './TableOfContents.astro';
 
+    /*
+      Compose a unique id for markdown headings using ONLY the main heading text.
+      - This function takes a heading MDAST node and returns a slugified version of the primary text content.
+      - It does NOT include the file name, any prefix, or subtitle/lead-in text.
+      - Example: 'A Parable of Directionality' → 'a-parable-of-directionality'
+      - This logic matches ToC anchor links for in-page navigation.
+      - Aggressively commented: update here and at all call sites if logic changes.
+    */
+    // Extract only the first text node (primary heading text)
+
 interface Props {
     /**
      * Markdown AST node interface for AstroMarkdown.astro
@@ -96,15 +106,6 @@ const title = data.id ?
 
 {node.type === "heading" && (() => {
   function generateHeadingId(node, data) {
-    /*
-      Compose a unique id for markdown headings using ONLY the main heading text.
-      - This function takes a heading MDAST node and returns a slugified version of the primary text content.
-      - It does NOT include the file name, any prefix, or subtitle/lead-in text.
-      - Example: 'A Parable of Directionality' → 'a-parable-of-directionality'
-      - This logic matches ToC anchor links for in-page navigation.
-      - Aggressively commented: update here and at all call sites if logic changes.
-    */
-    // Extract only the first text node (primary heading text)
     let mainText = '';
     if (Array.isArray(node.children)) {
       for (const child of node.children) {
