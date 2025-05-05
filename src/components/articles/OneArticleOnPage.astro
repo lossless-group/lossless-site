@@ -15,19 +15,34 @@ const { content, data = { path: Astro.url.pathname }, compiledContent } = Astro.
 
 ---
 
-<article class="prose mx-auto">
-  <AstroMarkdown 
-    node={{
-      type: 'root',
-      children: content.children || [],
-      data: {
-        hProperties: content.data?.hProperties || {}
-      }
-    }} 
-    data={data} 
-    compiledContent={compiledContent}
-  />
-</article>
+<div class="content-wrapper">
+  <div class="content-inner">
+    <article class="prose main-content">
+      <AstroMarkdown 
+        node={{
+          type: 'root',
+          children: content.children.filter(child => child.type !== 'tableOfContents'),
+          data: { hProperties: content.data?.hProperties || {} }
+        }} 
+        data={data} 
+        compiledContent={compiledContent}
+      />
+    </article>
+  </div>
+
+  <aside class="toc-sidebar">
+    <h2 class="toc-title">Table of Contents</h2>
+    <div class="toc-scroll-area">
+      <AstroMarkdown 
+        node={content.children.find(child => child.type === 'tableOfContents') || { type: 'root', children: [] }}
+        data={{ ...data, renderingToC: true }}
+        compiledContent={compiledContent}
+      />
+    </div>
+  </aside>
+</div>
+
+
 
 <style>
   .prose {
@@ -141,6 +156,78 @@ const { content, data = { path: Astro.url.pathname }, compiledContent } = Astro.
     color: rgb(220, 4, 4);
   }
 
+  .content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: visible; /* 🚨 necessary */
+    position: relative;
+  }
+
+
+  .content-inner {
+    max-width: 65ch;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  .toc-sidebar {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    width: 220px;
+    flex-shrink: 0;
+  }
+
+
+  .toc-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .toc-scroll-area {
+    overflow-y: auto;
+    max-height: calc(100vh - 4rem); /* 2rem top offset + some padding */
+    padding-right: 0.5rem;
+    border-left: 1px solid var(--clr-lossless-accent--brightest);
+    padding-left: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+
+  @media (max-width: 1024px) {
+    .toc-sidebar {
+      display: none;
+    }
+  }
+
+    
+
+  .toc-sidebar ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .toc-sidebar li {
+    margin: 0.3rem 0;
+  }
+
+  .toc-sidebar a {
+    color: var(--clr-lossless-primary-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .toc-sidebar a:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
 
 
 </style>
