@@ -20,28 +20,28 @@ interface ReferenceItem {
 const vocabularyEntries = await getCollection('vocabulary');
 const conceptsEntries = await getCollection('concepts');
 
-// Helper function to convert filenames to titles, preserving acronym casing
-function toProperCase(str: string): string {
+// Helper function to convert filenames to human-readable titles, preserving original casing
+// - Removes .md extension
+// - Replaces dashes/underscores with spaces
+// - Does NOT change the case of any letters (e.g., 'AI' stays 'AI')
+// - Used for all vocabulary/concept title rendering
+function filenameToTitle(str: string): string {
   return str
-    .replace(/[-_]/g, ' ') // Replace hyphens/underscores with spaces
-    .split(' ')           // Split into words
-    .map(word => {
-      if (!word) return ''; // Handle empty strings if they occur
-      const firstChar = word.charAt(0).toUpperCase(); // Capitalize the first letter
-      const restOfWord = word.slice(1); // Get the rest of the word *as is*
-      return firstChar + restOfWord; // Combine them
-    })
-    .join(' ');           // Join words back with spaces
+    .replace(/\.md$/, '') // Remove .md extension
+    .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
+    .replace(/\s+/g, ' ') // Collapse multiple spaces to single
+    .trim();               // Remove leading/trailing whitespace
 }
 
 // Process entries to add titles from filenames if missing and sort
+// Aggressively commented: If logic changes, update all call sites and this block.
 function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
   entries.forEach(entry => {
-    // Remove the check again: always generate title from filename
+    // Always generate title from filename, preserving original case
     const filename = entry.id.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    (entry.data as any).title = toProperCase(baseFilename);
+    (entry.data as any).title = filenameToTitle(baseFilename);
   });
   entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
   return entries;

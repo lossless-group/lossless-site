@@ -4,6 +4,7 @@
 // the approach of site/src/pages/more-about/index.astro, per project rules.
 // Aggressive, detailed commenting is used throughout.
 
+import path from 'node:path';
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
@@ -11,7 +12,6 @@ import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradie
 import CollectionEntryRow from '@components/basics/CollectionEntryRow.astro';
 import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
 import ArticleListNewsPreview from '@components/articles/ArticleListNewsPreview.astro';
-
 /**
  * Interface for an essay item, matching the data structure output by essaysCollection
  * (see src/content.config.ts for schema and transforms)
@@ -59,20 +59,26 @@ publishedEssays.sort((a, b) => (a.data.title || '').localeCompare(b.data.title |
 
 // Map entries to EssayItem objects for use with CollectionEntryRow
 const essayItems: EssayItem[] = publishedEssays.map(entry => {
-  // Always generate slug using the same logic as content.config.ts (filename, lowercased, spaces to dash)
-  const filename = String(entry.id).split("/").pop()?.replace(/\.md$/, "") || "";
-  const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-  // Use title and lede directly from frontmatter, fallback to Title Case filename if title is missing or blank
+  // Use Node.js path module to robustly extract the filename (preserving case)
+  // - entry.id is always the relative path from the collection root, with original casing
+  // - path.basename is safer and clearer than split/pop
+  const filename = path.basename(entry.id, '.md'); // Preserves original case
+  const slug = filename.toLowerCase().replace(/\s+/g, '-');
+  // Use title and lede directly from frontmatter, fallback to filename (preserving case, dashes/underscores to space)
   let { title, lede = '', banner_image = '', tags = [], summary = '' } = entry.data as EssayFrontmatter;
   if (!title || title.trim() === '') {
+    // Use the filename as the fallback title, preserving original casing
+    // - Replace dashes/underscores with spaces
+    // - Collapse multiple spaces
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
     title = filename
-      .split(/[-_\s]+/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .replace(/[-_]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
   return {
     id: entry.id,
-    slug: generatedSlug,
+    slug,
     title,
     lede,
     banner_image,
@@ -80,7 +86,7 @@ const essayItems: EssayItem[] = publishedEssays.map(entry => {
     summary,
     data: entry.data as EssayFrontmatter,
     // url property for downstream components (e.g., ArticleListNewsPreview)
-    url: `/read/essays/${generatedSlug}`,
+    url: `/read/essays/${slug}`,
     tagRoute: `read/more-on`
   };
 });

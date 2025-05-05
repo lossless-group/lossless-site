@@ -268,8 +268,19 @@ const title = data.id ?
 
 
 {(node.type === "link") && 
+    /*
+      Defensive rendering for Markdown link nodes (including ToC links):
+      - Handles cases where node.children is missing, empty, or child nodes have no value.
+      - This prevents runtime errors when rendering ToC nodes with malformed or empty link children.
+      - If children[0].value is missing, renders an empty string instead of crashing.
+      - Update this block and all call sites if link rendering logic changes.
+      - Aggressive commenting per project rules.
+      - Called from TableOfContents.astro and anywhere else Markdown links are rendered.
+    */
     <a href={node.url} {...(node.data?.hProperties ?? {})}>
-        {node.children[0].value}
+        {(node.children && node.children.length > 0 && typeof node.children[0].value === 'string')
+            ? node.children[0].value
+            : ''}
     </a>
 }
 
