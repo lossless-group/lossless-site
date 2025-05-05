@@ -184,7 +184,25 @@ const title = data.id ?
   </>
 }
 
-{(node.type === "listItem") &&
+{(node.type === "listItem" && data?.renderingToC) && (() => {
+  // Determine ToC depth for styling classes
+  let depth = 1;
+  let parent = data?.parent;
+  while (parent) {
+    if (parent.type === 'list') depth++;
+    parent = parent.parent;
+  }
+  const depthClass = `toc-depth-${depth}`;
+  return (
+    <li class={depthClass}>
+      {node.children.map(child => (
+        <Astro.self node={child} data={{...data, parent: node}} />
+      ))}
+    </li>
+  );
+})()}
+
+{(node.type === "listItem" && !data?.renderingToC) &&
   <li class="custom-li">
     <span class="li-content">
       {node.children.map(child => (

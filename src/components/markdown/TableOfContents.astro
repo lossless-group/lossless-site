@@ -18,6 +18,7 @@ interface Props {
   };
   data: {
     id?: string;
+    path?: string;
     [key: string]: any;
   };
 }
@@ -27,103 +28,11 @@ const { node, data } = Astro.props;
 // Defensive: Render TOC if map is a list node, fallback otherwise
 // =============================
 const isValidToc = node.data?.map?.type === 'list';
-const tocMap = isValidToc ? node.data.map : null;
-const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
 
-/**
- * Pure Astro/HTML recursive ToC rendering
- * - All recursion and HTML is in the template block below.
- * - No JSX, no function components, no string-building.
- * - Aggressively commented for clarity and maintainability.
- */
 ---
 {isValidToc ? (
   <aside class="toc-sidebar">
-    {/** Recursive ToC rendering using Astro/HTML only. */}
-    {tocMap && (
-      <ul>
-        {tocMap.children.map((itemNode, idx) => {
-          if (!itemNode || itemNode.type !== 'listItem') return null;
-          // Find the first paragraph child (should contain the link)
-          const para = Array.isArray(itemNode.children)
-            ? itemNode.children.find(child => child.type === 'paragraph')
-            : null;
-          // Find the link node inside the paragraph
-          const link = para && Array.isArray(para.children)
-            ? para.children.find(child => child.type === 'link')
-            : null;
-          // Render nested lists (for sub-headings)
-          const nestedList = Array.isArray(itemNode.children)
-            ? itemNode.children.find(child => child.type === 'list')
-            : null;
-          return (
-            <li class={`toc-depth-1`}>
-              {link && <a href={link.url}>{link.children && link.children[0]?.value}</a>}
-              {nestedList && (
-                <ul>
-                  {nestedList.children.map((subItem, subIdx) => {
-                    if (!subItem || subItem.type !== 'listItem') return null;
-                    const para2 = Array.isArray(subItem.children)
-                      ? subItem.children.find(child => child.type === 'paragraph')
-                      : null;
-                    const link2 = para2 && Array.isArray(para2.children)
-                      ? para2.children.find(child => child.type === 'link')
-                      : null;
-                    const nestedList2 = Array.isArray(subItem.children)
-                      ? subItem.children.find(child => child.type === 'list')
-                      : null;
-                    return (
-                      <li class={`toc-depth-2`}>
-                        {link2 && <a href={link2.url}>{link2.children && link2.children[0]?.value}</a>}
-                        {nestedList2 && (
-                          <ul>
-                            {nestedList2.children.map((subSubItem, subSubIdx) => {
-                              if (!subSubItem || subSubItem.type !== 'listItem') return null;
-                              const para3 = Array.isArray(subSubItem.children)
-                                ? subSubItem.children.find(child => child.type === 'paragraph')
-                                : null;
-                              const link3 = para3 && Array.isArray(para3.children)
-                                ? para3.children.find(child => child.type === 'link')
-                                : null;
-                              const nestedList3 = Array.isArray(subSubItem.children)
-                                ? subSubItem.children.find(child => child.type === 'list')
-                                : null;
-                              return (
-                                <li class={`toc-depth-3`}>
-                                  {link3 && <a href={link3.url}>{link3.children && link3.children[0]?.value}</a>}
-                                  {nestedList3 && (
-                                    <ul>
-                                      {nestedList3.children.map((subSubSubItem, subSubSubIdx) => {
-                                        if (!subSubSubItem || subSubSubItem.type !== 'listItem') return null;
-                                        const para4 = Array.isArray(subSubSubItem.children)
-                                          ? subSubSubItem.children.find(child => child.type === 'paragraph')
-                                          : null;
-                                        const link4 = para4 && Array.isArray(para4.children)
-                                          ? para4.children.find(child => child.type === 'link')
-                                          : null;
-                                        return (
-                                          <li class={`toc-depth-4`}>
-                                            {link4 && <a href={link4.url}>{link4.children && link4.children[0]?.value}</a>}
-                                          </li>
-                                        );
-                                      })}
-                                    </ul>
-                                  )}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    )}
+    <AstroMarkdown node={node.data.map} data={{...data, renderingToC: true, path: data.path}} />
     <style>
       .toc-sidebar {
         position: sticky;
@@ -138,29 +47,38 @@ const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
         list-style-type: none;
         padding-left: 0;
       }
-      /* Depth-based styling for ToC levels */
+      .toc-sidebar li {
+        margin: 0.3rem 0;
+      }
       .toc-depth-1 {
         font-size: 1.05em;
-        font-weight: 500;
+        font-weight: 400;
         margin-left: 0;
       }
       .toc-depth-2 {
         font-size: 1em;
         font-weight: 400;
-        margin-left: 1.25em;
+        margin-left: .25em;
       }
       .toc-depth-3 {
         font-size: 0.95em;
         font-weight: 350;
-        margin-left: 2em;
+        margin-left: .5em;
       }
       .toc-depth-4 {
         font-size: 0.92em;
-        font-weight: 350;
-        margin-left: 2.75em;
+        font-weight: 300;
+        margin-left: .75em;
       }
-      .toc-sidebar li {
-        margin: 0.3rem 0;
+      .toc-depth-5 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: 1em;
+      }
+      .toc-depth-6 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: 1.25em;
       }
       .toc-sidebar a {
         text-decoration: none;
@@ -173,7 +91,7 @@ const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
   </aside>
 ) : (
   <aside class="toc-sidebar">
-    <h1>{fallbackTitle}</h1>
+    <h1>{data?.id ? data.id.replace(/\.md$/, '') : 'Untitled'}</h1>
     <p>No Table of Contents available.</p>
   </aside>
 )}
