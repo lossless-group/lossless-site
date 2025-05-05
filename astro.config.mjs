@@ -12,6 +12,8 @@ import node from '@astrojs/node';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
+import remarkTableOfContents from './src/utils/markdown/remark-toc';
+import vercel from '@astrojs/vercel';
 
 /** @type {ShikiLang[]} */
 const langs = [
@@ -29,6 +31,7 @@ export default defineConfig({
     },
     remarkPlugins: [
       /** @type {any} */ (normalizeShellLangs),
+      /** @type {any} */ (remarkTableOfContents),
     ],
     remarkRehype: {
       allowDangerousHtml: true,
@@ -51,9 +54,7 @@ export default defineConfig({
     ]
   },
   output: "server",
-  adapter: node({
-    mode: 'standalone',
-  }),
+  adapter: vercel(),
   integrations: [mdx()], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
@@ -66,8 +67,21 @@ export default defineConfig({
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
         '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        '@tabler/icons': fileURLToPath(new URL('./src/assets', import.meta.url)),
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
+      }
+    },
+    // --- Vite server.fs.allow fix for dev-toolbar/entrypoint.js error ---
+    // This allows Vite to serve files from the project root and node_modules, preventing
+    // 'outside of Vite serving allow list' errors when dependencies are resolved with absolute paths.
+    // If you are in a monorepo, add the monorepo root (e.g., '../') as needed.
+    server: {
+      fs: {
+        allow: [
+          '.', // always allow project root
+          '../', // allow serving from parent directory
+          'node_modules', // allow serving from node_modules
+          // '../', // uncomment if you need to allow the monorepo root
+        ]
       }
     }
   }

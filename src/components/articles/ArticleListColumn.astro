@@ -12,21 +12,35 @@ import CollectionEntryRow from '../basics/CollectionEntryRow.astro';
  * Define the component props.
  * 
  * @interface Props
+ *
+ * Aggressive, parallel commenting (see /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md):
+ * - `EntryComponentProps` is an optional object of props to be spread into every EntryComponent instance rendered.
+ * - This enables DRY, flexible prop-passing for dynamic column rendering.
+ * - All usages of EntryComponent must spread both entry and EntryComponentProps.
  */
 interface Props {
   // Accept any array of items
   entries: Array<Record<string, any>>;
   // Optional component to render each entry
   EntryComponent?: any;
+  // Optional: Additional props to forward to every EntryComponent instance
+  EntryComponentProps?: Record<string, any>;
 }
 
-const { entries, EntryComponent } = Astro.props;
+// Destructure EntryComponentProps with default to empty object
+const { entries, EntryComponent, EntryComponentProps = {} } = Astro.props;
 ---
 
 <div class="article-list-column">
   {EntryComponent && entries.map(entry => (
     <CollectionEntryRow>
-      <EntryComponent {...entry} />
+      {/*
+        Aggressive commenting:
+        - Spread both entry and EntryComponentProps into EntryComponent.
+        - This ensures all additional props (e.g., tagRoute) are passed to every rendered component.
+        - See /src/pages/read/more-on/[tag].astro for usage.
+      */}
+      <EntryComponent {...entry} {...EntryComponentProps} data={entry} />
     </CollectionEntryRow>
   ))}
   {!EntryComponent && entries.map(entry => (

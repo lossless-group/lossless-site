@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import path from 'path';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Helper function to convert filenames to titles while preserving acronym casing
+  function toProperCase(str: string): string {
+    return str
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  // Get entries from the essays collection
+  const essaysEntries = await getCollection('essays');
+
+  // Process essays entries
+  const essaysPaths = essaysEntries.map(entry => {
+    const filename = entry.id.replace(/\.md$/, '');
+    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    if (!entry.data.title) {
+      entry.data.title = toProperCase(baseFilename);
+    }
+    return {
+      params: { slug },
+      props: {
+        entry,
+        contentType: 'essays'
+      }
+    };
+  });
+
+  return essaysPaths;
+}
+
+interface Props {
+  entry: any;
+  contentType: 'essays';
+}
+
+const { entry, contentType } = Astro.props;
+
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  contentType: contentType
+};
+---
+
+<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

@@ -1,0 +1,97 @@
+---
+import AstroMarkdown from './AstroMarkdown.astro';
+/**
+ * TableOfContents.astro
+ * Renders the Table of Contents from a remark-toc MDAST node
+ * - Expects a node of type 'tableOfContents' with data.map as a MDAST list node
+ * - Props:
+ *   - node: the 'tableOfContents' node from the MDAST
+ *   - data: the parent article metadata (for context, e.g. file id)
+ */
+interface Props {
+  node: {
+    type: string;
+    data?: {
+      hProperties?: Record<string, any>;
+      map?: any;
+    };
+  };
+  data: {
+    id?: string;
+    path?: string;
+    [key: string]: any;
+  };
+}
+const { node, data } = Astro.props;
+
+// =============================
+// Defensive: Render TOC if map is a list node, fallback otherwise
+// =============================
+const isValidToc = node.data?.map?.type === 'list';
+
+---
+{isValidToc ? (
+  <aside class="toc-sidebar">
+    <AstroMarkdown node={node.data.map} data={{...data, renderingToC: true, path: data.path}} />
+    <style>
+      .toc-sidebar {
+        position: sticky;
+        top: 4rem;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+        font-size: 0.9rem;
+        padding-right: 1rem;
+        margin-bottom: 2rem;
+      }
+      .toc-sidebar ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .toc-sidebar li {
+        margin: 0.3rem 0;
+      }
+      .toc-depth-1 {
+        font-size: 1.05em;
+        font-weight: 400;
+        margin-left: 0;
+      }
+      .toc-depth-2 {
+        font-size: 1em;
+        font-weight: 400;
+        margin-left: .25em;
+      }
+      .toc-depth-3 {
+        font-size: 0.95em;
+        font-weight: 350;
+        margin-left: .5em;
+      }
+      .toc-depth-4 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: .75em;
+      }
+      .toc-depth-5 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: 1em;
+      }
+      .toc-depth-6 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: 1.25em;
+      }
+      .toc-sidebar a {
+        text-decoration: none;
+        color: #ccc;
+      }
+      .toc-sidebar a:hover {
+        color: white;
+      }
+    </style>
+  </aside>
+) : (
+  <aside class="toc-sidebar">
+    <h1>{data?.id ? data.id.replace(/\.md$/, '') : 'Untitled'}</h1>
+    <p>No Table of Contents available.</p>
+  </aside>
+)}

@@ -10,7 +10,7 @@ const cardCollection = defineCollection({
 });
 
 const visualsCollection = defineCollection({
-  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: "../content/visuals"}),  // Explicitly list image extensions
+  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: "./src/generated-content/visuals"}),  // Explicitly list image extensions
   schema: z.object({
     // Define base fields that all images should have
     id: z.string().optional(),
@@ -41,7 +41,7 @@ const visualsCollection = defineCollection({
 });
 
 const vocabularyCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/vocabulary"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/vocabulary"}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -74,7 +74,7 @@ const vocabularyCollection = defineCollection({
 
 // Concepts collection - follows same pattern as vocabulary
 const conceptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/concepts"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/concepts"}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -105,8 +105,40 @@ const conceptsCollection = defineCollection({
   })
 });
 
+// Concepts collection - follows same pattern as vocabulary
+const essaysCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/essays"}),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]), // Single string -> array with one string
+      z.array(z.string()),                // Already an array
+      z.null(),                          // Handle null values
+      z.undefined()                      // Handle undefined values
+    ]).transform(val => {
+      if (!val) return [];              // Transform null/undefined to empty array
+      return val;                       // Keep arrays and transformed strings as-is
+    }).default([])                      // Default to empty array if missing
+  }).passthrough().transform((data, context) => {
+    // Get the filename without extension
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Convert filename to title case for display
+    const titleCase = filename
+      .split(/[\s-]+/)  // Split on spaces or dashes
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    // Merge our computed values into the data object
+    return {
+      ...data,  // Start with existing data
+      title: titleCase,  // Override with computed title
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
+    };
+  })
+});
+
 const promptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/prompts"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/lost-in-public/prompts"}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -117,7 +149,7 @@ const promptsCollection = defineCollection({
 });
 
 const remindersCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/reminders"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/lost-in-public/reminders"}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -128,7 +160,7 @@ const remindersCollection = defineCollection({
 });
 
 const changelogContentCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/changelog--content"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/changelog--content"}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -140,7 +172,7 @@ const changelogContentCollection = defineCollection({
 
 
 const changelogCodeCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/changelog--code"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/changelog--code"}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -163,7 +195,7 @@ const pagesCollection = defineCollection({
 
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/tooling"}),
+  loader: glob({pattern: "**/*.md", base: "./src/generated-content/tooling"}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -183,7 +215,7 @@ const toolCollection = defineCollection({
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 const specsCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "../content/specs" }),
+  loader: glob({ pattern: "**/*.md", base: "./src/generated-content/specs" }),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     tags: Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : []
@@ -198,21 +230,23 @@ const specsCollection = defineCollection({
 // Define where to find the content - using relative paths from src/content
 export const paths = {
   'cards': 'cards',
-  'changelog--content': '../content/changelog--content',
-  'changelog--code': '../content/changelog--code',
-  'concepts': '../content/concepts',
-  'reports': '../content/reports',
-  'tooling': '../content/tooling',
-  'vocabulary': '../content/vocabulary',
-  'prompts': '../content/lost-in-public/prompts',
-  'reminders': '../content/lost-in-public/reminders',
-  'specs': '../content/specs',
+  'changelog--content': './src/generated-content/changelog--content',
+  'changelog--code': './src/generated-content/changelog--code',
+  'essays': './src/generated-content/essays',
+  'concepts': './src/generated-content/concepts',
+  'reports': './src/generated-content/reports',
+  'tooling': './src/generated-content/tooling',
+  'vocabulary': './src/generated-content/vocabulary',
+  'prompts': './src/generated-content/lost-in-public/prompts',
+  'reminders': './src/generated-content/lost-in-public/reminders',
+  'specs': './src/generated-content/specs',
 };
 
 // Export the collections
 export const collections = {
   'cards': cardCollection,
   'concepts': conceptsCollection,
+  'essays': essaysCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,

@@ -111,7 +111,7 @@ function generateToolkitPath(): string {
   if (effectiveSiteName) {
     try {
       // Get the content directory path
-      const contentDir = path.resolve('../content/tooling');
+      const contentDir = path.resolve('./src/generated-content/tooling');
       
       // Function to find a file with the given site name (case-insensitive)
       function findFileWithSiteName(dir: string, siteName: string, relativePath = ''): string | null {

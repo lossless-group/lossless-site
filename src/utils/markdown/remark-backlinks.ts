@@ -18,6 +18,7 @@ function transformPath(path: string): string {
 export default function remarkBacklinks() {
   return async function transformer(tree: Root) {
     markdownDebugger.startPlugin('Backlinks');
+    console.log('=== remarkBacklinks: Starting transformation ===');
 
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
@@ -26,7 +27,7 @@ export default function remarkBacklinks() {
       const matches = Array.from(value.matchAll(backlinkRegex));
       
       if (matches.length > 0) {
-        markdownDebugger.log(`\n🔍 Found ${matches.length} backlinks in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
+        console.log(`\n🔍 Found ${matches.length} backlinks in text:`, value.slice(0, 50) + (value.length > 50 ? '...' : ''));
         
         const newNodes = [];
         let lastIndex = 0;
@@ -46,7 +47,7 @@ export default function remarkBacklinks() {
           const transformedPath = transformContentPathToRoute(path);
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
-          markdownDebugger.verbose(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
+          console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
           
           // Create a standard MDAST link node instead of a custom backLink node
           newNodes.push({

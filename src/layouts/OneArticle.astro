@@ -5,13 +5,13 @@
  * Handles markdown processing with remark plugins
  */
 
- import { unified } from 'unified';
+import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
-import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
@@ -30,8 +30,8 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkImages)         
   .use(remarkBacklinks)          
-  // .use(remarkCallouts)      
   .use(remarkCitations)
+  .use(remarkTableOfContents)
 
 // First parse to MDAST
 const mdast = processor.parse(content || '');
