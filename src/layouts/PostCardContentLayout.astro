@@ -24,9 +24,12 @@ const { contentThreads = [] } = Astro.props;
     
     {/* Regular cards in a grid layout */}
     {contentThreads.length > 1 && (
-      <div class="magazine-grid">
+      <div class="magazine-grid polished-magazine-grid responsive-magazine-grid">
         {contentThreads.slice(1).map((item) => (
-          <PostCard {...item} />
+          <PostCard 
+            {...item} 
+            imageContainerStyle="overflow: hidden; aspect-ratio: 12/9; max-width: 16vw; border-radius: 0.5rem;"
+          />
         ))}
       </div>
     )}
@@ -86,5 +89,32 @@ const { contentThreads = [] } = Astro.props;
     text-align: center;
     font-size: 1.25rem;
     margin: 2rem 0;
+  }
+
+  /* Polished magazine grid */
+  .polished-magazine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2.25rem 1.5rem;
+    padding: 1.5rem 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: stretch;
+  }
+  /* Responsive override for grid columns */
+  .responsive-magazine-grid {
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  }
+  @media (max-width: 1100px) {
+    .responsive-magazine-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem 1rem;
+    }
+  }
+  @media (max-width: 800px) {
+    .responsive-magazine-grid {
+      grid-template-columns: 1fr;
+      gap: 1.1rem 0.5rem;
+    }
   }
 </style>

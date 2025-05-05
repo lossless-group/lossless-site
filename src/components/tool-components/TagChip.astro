@@ -44,8 +44,17 @@ if (typeof tagString !== 'string') {
   console.warn('[TagChip] Received non-string tag:', tagString, 'Type:', typeof tagString);
 }
 
-// Only use route if it's a non-empty string, otherwise fallback to 'toolkit' for safety
-const routeToUse = typeof route === "string" && route.trim() !== "" ? route : "toolkit";
+// --- ROUTE NORMALIZATION LOGIC ---
+// Ensure routeToUse never includes a leading slash, as this would break relative routing in Astro.
+// If a leading slash is detected, strip it and log a warning in development mode.
+let normalizedRoute = typeof route === "string" ? route.replace(/^\/+/, "") : "";
+if (route && route.startsWith("/") && import.meta.env.DEV) {
+  console.warn(
+    `[TagChip.astro] Received route prop with leading slash: '${route}'. Stripping leading slash for correct relative routing. See Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md for details.`
+  );
+}
+// Only use normalizedRoute if it's a non-empty string, otherwise fallback to 'toolkit' for safety
+const routeToUse = normalizedRoute && normalizedRoute.trim() !== "" ? normalizedRoute : "toolkit";
 
 // Helper function to convert train-case tags to normal case for UI display
 function trainCaseToNormalCase(tag: string): string {
@@ -64,8 +73,9 @@ const normalCase = trainCaseToNormalCase(tagString);
 const isTagSelected = selected;
 
 // --- DYNAMIC HREF LOGIC ---
-// If `href` is provided, use it. Otherwise, generate href using route and tag.
-// If route is missing or falsy, fallback to 'toolkit' and log a warning in development.
+// If `href` is provided, use it. Otherwise, generate href using routeToUse and tagString.
+// If routeToUse is missing or falsy, fallback to 'toolkit' and log a warning in development.
+// NOTE: routeToUse is always normalized to have no leading slash (see above for normalization logic).
 let computedHref = href;
 if (!href) {
   if (!routeToUse && import.meta.env.DEV) {

@@ -5,7 +5,17 @@ import ArticleCitationsBlock from './citations/ArticleCitations.astro';
 import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
+import TableOfContents from './TableOfContents.astro';
 
+    /*
+      Compose a unique id for markdown headings using ONLY the main heading text.
+      - This function takes a heading MDAST node and returns a slugified version of the primary text content.
+      - It does NOT include the file name, any prefix, or subtitle/lead-in text.
+      - Example: 'A Parable of Directionality' → 'a-parable-of-directionality'
+      - This logic matches ToC anchor links for in-page navigation.
+      - Aggressively commented: update here and at all call sites if logic changes.
+    */
+    // Extract only the first text node (primary heading text)
 
 interface Props {
     /**
@@ -22,6 +32,7 @@ interface Props {
         depth?: number;
         data?: {
             hProperties?: Record<string, any>;
+            map?: any[];
         };
         label?: string;
     };
@@ -30,9 +41,10 @@ interface Props {
         id?: string;  // File ID (e.g., 'Agile.md')
         [key: string]: any;
     };
+    compiledContent?: string;
 }
 
-const {node, data} = Astro.props;
+const {node, data, compiledContent} = Astro.props;
 
 // List of node types we handle with specific components
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
@@ -60,6 +72,7 @@ const handled_types = [
     "citationReference",
     "footnoteReference",
     "footnoteDefinition",    
+    "tableOfContents",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -82,25 +95,56 @@ const title = data.id ?
 
 ---
 
-{(node.type === "root") && 
-    <>
-        <h1>{title}</h1>
-        {node.children.map((child) => (
-            <Astro.self node={child} data={data} />
-        ))}
-    </>
-}
-
-{(node.type === "heading") &&
+{node.type === "root" && 
   <>
-    {node.depth === 1 && <h1>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>}
-    {node.depth === 2 && <h2>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>}
-    {node.depth === 3 && <h3>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>}
-    {node.depth === 4 && <h4>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>}
-    {node.depth === 5 && <h5>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>}
-    {node.depth === 6 && <h6>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>}
+    {data?.renderingToC !== true && <h1>{title}</h1>}
+    {node.children.map((child) => (
+        <Astro.self node={child} data={data} />
+    ))}
   </>
 }
+
+{node.type === "heading" && (() => {
+  function generateHeadingId(node, data) {
+    let mainText = '';
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) {
+        if (child.type === 'text') {
+          mainText = child.value;
+          break; // Only use the first text node for the id
+        }
+      }
+    }
+    const base = mainText
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+    return base;
+  }
+
+  // === Heading Rendering Logic ===
+  // The generateHeadingId function is called here for all heading depths (h1-h6).
+  // The id will be based ONLY on the main heading text, not the filename or subtitle.
+  const id = generateHeadingId(node, data);
+
+  if (node.depth === 1) {
+    return <h1 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>;
+  } else if (node.depth === 2) {
+    return <h2 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>;
+  } else if (node.depth === 3) {
+    return <h3 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>;
+  } else if (node.depth === 4) {
+    return <h4 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>;
+  } else if (node.depth === 5) {
+    return <h5 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>;
+  } else if (node.depth === 6) {
+    return <h6 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>;
+  } else {
+    // Fallback for unexpected heading depths
+    return <div>{node.children.map(child => <Astro.self node={child} data={data} />)}</div>;
+  }
+})()}
 
 {(node.type === "strong") &&
   <strong>
@@ -140,7 +184,25 @@ const title = data.id ?
   </>
 }
 
-{(node.type === "listItem") &&
+{(node.type === "listItem" && data?.renderingToC) && (() => {
+  // Determine ToC depth for styling classes
+  let depth = 1;
+  let parent = data?.parent;
+  while (parent) {
+    if (parent.type === 'list') depth++;
+    parent = parent.parent;
+  }
+  const depthClass = `toc-depth-${depth}`;
+  return (
+    <li class={depthClass}>
+      {node.children.map(child => (
+        <Astro.self node={child} data={{...data, parent: node}} />
+      ))}
+    </li>
+  );
+})()}
+
+{(node.type === "listItem" && !data?.renderingToC) &&
   <li class="custom-li">
     <span class="li-content">
       {node.children.map(child => (
@@ -206,7 +268,7 @@ const title = data.id ?
 
 
 {(node.type === "link") && 
-    <a href={node.url} {...node.data?.hProperties}>
+    <a href={node.url} {...(node.data?.hProperties ?? {})}>
         {node.children[0].value}
     </a>
 }
@@ -235,8 +297,8 @@ const title = data.id ?
 {node.type === 'citationReference' && (
   <sup class="cite-ref">
     <a
-      href={node.data?.hProperties?.href}
-      id={node.data?.hProperties?.id}
+      href={node.data?.hProperties?.href ?? ''}
+      id={node.data?.hProperties?.id ?? ''}
       class="citation-link"
     >
       [{node.children?.map(child => <Astro.self node={child} data={data} />)}]
@@ -299,8 +361,11 @@ const title = data.id ?
   </div>
 )}
 
-
-
+<!-- Table of Contents Rendering Logic -->
+<!-- Now delegated to TableOfContents.astro for modularity and maintainability -->
+{node.type === "tableOfContents" && (
+  <TableOfContents node={node} data={data} />
+)}
 
 {(node.type === "paragraph") &&
     <div class="paragraph">

@@ -11,23 +11,89 @@ interface Props {
   compiledContent: string;
 }
 
+// =============================
+// Defensive destructuring of props
+// =============================
+// Accepts content (mdast Root), data (optional), and compiledContent (string)
+// Defensive: If content or children is missing, fallback to empty root node
 const { content, data = { path: Astro.url.pathname }, compiledContent } = Astro.props;
+
+// Define a type for data that may have hProperties
+interface DataWithHProperties {
+  hProperties?: unknown;
+  [key: string]: any;
+}
+
+// Defensive: Ensure content is always an object with a children array
+const safeContent = typeof content === 'object' && Array.isArray(content?.children)
+  ? content
+  : { type: 'root', children: [], data: {} };
+
+// Defensive: Always provide a valid children array for filtering/finding
+const children = Array.isArray(safeContent.children) ? safeContent.children : [];
+
+// Defensive: Always provide a valid data object, typed for hProperties
+const safeData: DataWithHProperties = typeof safeContent.data === 'object' && safeContent.data !== null ? safeContent.data : {};
+
+// Defensive: Always provide a valid hProperties object for downstream usage
+const hProperties: Record<string, any> =
+  typeof safeData.hProperties === 'object' && safeData.hProperties !== null
+    ? safeData.hProperties as Record<string, any>
+    : {};
+
+// =============================
+// DEBUG: Output children node types to verify TOC injection
+// =============================
+console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
+// DEBUG: Output full tableOfContents node structure
+const tocNode = children.find(child => child.type === 'tableOfContents');
+console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
+
+// =============================
+// Comprehensive comments for AstroMarkdown usage
+// =============================
+// AstroMarkdown is called twice:
+// 1. For main content (excluding ToC):
+//    - node: root node with children excluding 'tableOfContents'
+//    - data: passed through
+//    - compiledContent: passed through
+// 2. For Table of Contents:
+//    - node: first child of type 'tableOfContents', or empty root node
+//    - data: passed through with renderingToC flag
+//    - compiledContent: passed through
+//
+// Defensive: If children array is empty or no ToC, will not fail
 
 ---
 
-<article class="prose mx-auto">
-  <AstroMarkdown 
-    node={{
-      type: 'root',
-      children: content.children || [],
-      data: {
-        hProperties: content.data?.hProperties || {}
-      }
-    }} 
-    data={data} 
-    compiledContent={compiledContent}
-  />
-</article>
+<div class="content-wrapper">
+  <div class="content-inner">
+    <article class="prose main-content">
+      <AstroMarkdown 
+        node={{
+          type: 'root',
+          children: children.filter(child => child.type !== 'tableOfContents'),
+          data: { hProperties }
+        }} 
+        data={data} 
+        compiledContent={compiledContent}
+        />
+    </article>
+  </div>
+
+  <aside class="toc-sidebar">
+    <h2 class="toc-title">Table of Contents</h2>
+    <div class="toc-scroll-area">
+      <AstroMarkdown 
+        node={children.find(child => child.type === 'tableOfContents') || { type: 'root', children: [] }}
+        data={{ ...data, renderingToC: true }}
+        compiledContent={compiledContent}
+      />
+    </div>
+  </aside>
+</div>
+
+
 
 <style>
   .prose {
@@ -141,6 +207,78 @@ const { content, data = { path: Astro.url.pathname }, compiledContent } = Astro.
     color: rgb(220, 4, 4);
   }
 
+  .content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: visible; /* 🚨 necessary */
+    position: relative;
+  }
+
+
+  .content-inner {
+    max-width: 65ch;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  .toc-sidebar {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    width: 220px;
+    flex-shrink: 0;
+  }
+
+
+  .toc-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .toc-scroll-area {
+    overflow-y: auto;
+    max-height: calc(100vh - 4rem); /* 2rem top offset + some padding */
+    padding-right: 0.5rem;
+    border-left: 1px solid var(--clr-lossless-accent--brightest);
+    padding-left: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+
+  @media (max-width: 1024px) {
+    .toc-sidebar {
+      display: none;
+    }
+  }
+
+    
+
+  .toc-sidebar ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .toc-sidebar li {
+    margin: 0.3rem 0;
+  }
+
+  .toc-sidebar a {
+    color: var(--clr-lossless-primary-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .toc-sidebar a:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
 
 
 </style>
