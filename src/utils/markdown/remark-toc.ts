@@ -1,7 +1,6 @@
 // plugins/remarkTableOfContents.ts
 import { toc } from 'mdast-util-toc';
-import type { Root, Content } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Root, RootContent } from 'mdast';
 import type { Plugin } from 'unified';
 
 /**
@@ -12,7 +11,7 @@ const remarkTableOfContents: Plugin<[], Root> = () => (tree: Root) => {
   const result = toc(tree, { maxDepth: 3, heading: null });
 
   if (result.map) {
-    const tocNode: Content = {
+    const tocNode: RootContent = {
       type: 'tableOfContents',
       data: {
         hName: 'TableOfContents', // Optional: helpful if rendering via custom component

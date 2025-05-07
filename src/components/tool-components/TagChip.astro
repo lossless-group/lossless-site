@@ -97,16 +97,29 @@ if (!href) {
   - Uses tagString for display and href generation.
 -->
 <a 
-  href={computedHref} 
-  class={`tool-tag${isTagSelected ? ' selected' : ''}`} 
+  href={computedHref}
+  class={`tool-tag${isTagSelected ? ' selected' : ''}`}
   title={title || `Click to filter by ${normalCase}`}
   aria-label={`Filter by ${normalCase}${isTagSelected ? ' (currently selected)' : ''}`}
   data-tag={tagString}
+  role="button"
+  onclick="event.preventDefault();"
 >
   <p style={fontSize ? `font-size: ${fontSize};` : undefined}>{normalCase}</p>
   {count !== undefined && count > 0 ? <span class="count">({count})</span> : null}
 </a>
 
+
+<script>
+  document.querySelectorAll('.tool-tag').forEach(tagChip => {
+  tagChip.addEventListener('click', (e) => {
+    e.preventDefault();
+    const tag = tagChip.getAttribute('data-tag');
+    if (tag) toggleTagSelection(tag);
+  });
+});
+
+</script>
 <style>
   /* Container to handle the hover effect */
   .tool-tag {

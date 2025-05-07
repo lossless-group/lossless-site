@@ -24,16 +24,19 @@ const visualsCollection = defineCollection({
     const filename = String(context.path).split('/').pop()?.replace(/\.[^.]+$/, '') || '';
     const extension = String(context.path).split('.').pop()?.toLowerCase() || '';
     
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Use the filename as the display title, preserving original case
+    // - Replace dashes/underscores with spaces
+    // - Collapse multiple spaces
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
+    const displayTitle = filename
+      .replace(/[-_]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     
     return {
       ...data,
       id: filename,  // Original filename as id
-      title: data.title || titleCase,  // Use provided title or computed one
+      title: data.title || displayTitle,  // Use provided title or computed one
       format: extension as 'png' | 'jpg' | 'jpeg' | 'gif' | 'webp' | 'svg',
       slug: filename.toLowerCase().replace(/\s+/g, '-')  // Add computed slug
     };
@@ -56,16 +59,19 @@ const vocabularyCollection = defineCollection({
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
     
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Use the filename as the display title, preserving original case
+    // - Replace dashes/underscores with spaces
+    // - Collapse multiple spaces
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
+    const displayTitle = filename
+      .replace(/[-_]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     
     // Merge our computed values into the data object
     return {
       ...data,  // Start with existing data
-      title: titleCase,  // Override with computed title
+      title: displayTitle,  // Override with computed title
       slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
       aliases: data.aliases || []  // Ensure aliases exists
     };
@@ -89,16 +95,19 @@ const conceptsCollection = defineCollection({
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
     
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Use the filename as the display title, preserving original case
+    // - Replace dashes/underscores with spaces
+    // - Collapse multiple spaces
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
+    const displayTitle = filename
+      .replace(/[-_]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     
     // Merge our computed values into the data object
     return {
       ...data,  // Start with existing data
-      title: titleCase,  // Override with computed title
+      title: displayTitle,  // Override with computed title
       slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
       aliases: data.aliases || []  // Ensure aliases exists
     };
@@ -122,16 +131,22 @@ const essaysCollection = defineCollection({
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
     
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Title fallback logic for essaysCollection:
+    // - If frontmatter provides a title, use it as-is (preserve all casing).
+    // - If missing, generate a title from the filename by replacing dashes/underscores with spaces.
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API', 'AI' stays 'AI').
+    // - This preserves the author's intended casing from the filename.
+    const displayTitle = data.title
+      ? data.title
+      : filename
+          .replace(/[-_]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
     
     // Merge our computed values into the data object
     return {
       ...data,  // Start with existing data
-      title: titleCase,  // Override with computed title
+      title: displayTitle,  // Override with computed title
       slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
     };
   })

@@ -4,17 +4,15 @@ import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import path from 'path';
+import { getReferenceSlug } from "@utils/referenceSlugMap";
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
 export async function getStaticPaths() {
-  // Helper function to convert filenames to titles while preserving acronym casing
+  // Import the single-source-of-truth slug/filename mapping utility
+
   function toProperCase(str: string): string {
-    // Replace hyphens and underscores with spaces
-    // Split into words
-    // Capitalize the first letter of each word and keep the rest of the word's casing
-    // Join words back with spaces
     return str
       .replace(/[-_]/g, ' ')
       .split(' ')
@@ -22,69 +20,45 @@ export async function getStaticPaths() {
       .join(' ');
   }
 
-  // Get entries from both collections
   const vocabularyEntries = await getCollection('vocabulary');
-  // Use type assertion to avoid TypeScript errors until Astro regenerates types
-  const conceptsEntries = await getCollection('concepts' as any);
-  
-  // Process vocabulary entries
+  const conceptsEntries = await getCollection('concepts');
+
+  // Use shared utility for slug generation
   const vocabularyPaths = vocabularyEntries.map(entry => {
-    // Generate slug from the entry ID if not present
-    const filename = entry.id.replace(/\.md$/, '');
-    
-    // Handle nested paths by converting directory structure to URL path
-    // Replace spaces with hyphens and convert to lowercase
-    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
-    
-    // Generate title from the filename if not present in the frontmatter
-    // Extract just the filename without the path for the title
-    const filenameParts = filename.split('/');
+    const filename = entry.id.replace(/.*\//, '').replace(/\.md$/, '');
+    const slug = getReferenceSlug(filename, entry.data.slug);
+    const filenameParts = entry.id.replace(/\.md$/, '').split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    
-    // Set the title based on the filename if not provided in frontmatter, applying proper casing
     if (!entry.data.title) {
-      // Apply toProperCase to the base filename
       entry.data.title = toProperCase(baseFilename);
     }
-    
     return {
       params: { slug },
-      props: { 
+      props: {
         entry,
         contentType: 'vocabulary'
       }
     };
   });
-  
-  // Process concepts entries
-  const conceptsPaths = conceptsEntries.map((entry: any) => {
-    // Generate slug from the entry ID if not present
-    const filename = entry.id.replace(/\.md$/, '');
-    
-    // Handle nested paths by converting directory structure to URL path
-    // Replace spaces with hyphens and convert to lowercase
-    const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
-    
-    // Generate title from the filename if not present in the frontmatter
-    // Extract just the filename without the path for the title
-    const filenameParts = filename.split('/');
+
+  // Only declare conceptsPaths ONCE to avoid block-scoped redeclaration errors.
+  // Use ONLY the shared getReferenceSlug logic for conceptsPaths. No local slug logic allowed.
+  const conceptsPaths = conceptsEntries.map(entry => {
+    const filename = entry.id.replace(/.*\//, '').replace(/\.md$/, '');
+    const slug = getReferenceSlug(filename, entry.data.slug);
+    const filenameParts = entry.id.replace(/\.md$/, '').split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    
-    // Set the title based on the filename if not provided in frontmatter, applying proper casing
     if (!entry.data.title) {
-      // Apply toProperCase to the base filename
       entry.data.title = toProperCase(baseFilename);
     }
-    
     return {
       params: { slug },
-      props: { 
+      props: {
         entry,
         contentType: 'concepts'
       }
     };
   });
-  
   // Combine both path arrays
   return [...vocabularyPaths, ...conceptsPaths];
 }

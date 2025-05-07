@@ -1,0 +1,43 @@
+---
+import MainContent from "@components/MainContent.astro";
+---
+
+<div class="single-column-layout">
+  <div class="main-content">
+    <MainContent />
+  </div>
+</div>
+
+<style>
+  .single-column-layout {
+    width: 100vw;
+    min-height: calc(100vh - 120px); /* Adjust based on header/footer height */
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1rem;
+    margin: 0 auto;
+    transition: margin 0.3s ease;
+    position: relative;
+    overflow-x: visible;
+  }
+  .main-content > :global(*) {
+    max-width: 100%;
+  }
+  .main-content > :global(.full-bleed) {
+    width: 100vw !important;
+    margin-left: calc(30% - 50vw) !important;
+    margin-right: calc(30% - 50vw) !important;
+    left: 50%;
+    right: 50%;
+    transform: translateX(-50%);
+    position: relative;
+  }
+</style>

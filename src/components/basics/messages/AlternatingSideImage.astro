@@ -107,4 +107,10 @@ const processedFeatures = features.map(feature => ({
   :global(.cta-container) {
     margin-top: 1rem;
   }
+  /* Mobile: Reduce vertical gap for proportional spacing */
+  @media (max-width: 768px) {
+    .alternating-side-image-container {
+      gap: 2rem;
+    }
+  }
 </style>

@@ -2,300 +2,53 @@
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
 import { getCollection } from "astro:content";
+import ToolCard from "@components/tool-components/ToolCard.astro";
 import CardGrid from "@basics/CardGrid.astro";
 import TagColumn from "@components/tool-components/TagColumn.astro";
 
-// Get all entries from the tools collection
 const toolEntries = await getCollection("tooling");
-
-const {
-  title = "Toolkit",
-  description = "A curated collection of tools",
-  columns = 3,
-  gap = "1rem",
-  minCardWidth = "300px",
-  filterTag
-} = Astro.props;
-
-// Filter entries by tag if filterTag is provided
-const filteredEntries = filterTag
-  ? toolEntries.filter(entry => entry.data.tags?.includes(filterTag))
-  : toolEntries;
-
-// Get all unique tags
-const allTags = Array.from(
-  new Set(
-    toolEntries.flatMap(entry => entry.data.tags || [])
-  )
-).sort();
-
-// Map entries to tools format with filePath
-const toolsWithFilePath = filteredEntries.map(entry => ({
-  ...entry.data,
-  id: entry.id,
-  filePath: `../content/tooling/${entry.id}`,
-}));
-
+const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id }));
 ---
 
-<Layout title={title} description={description}>
+<Layout title="Toolkit" description="A curated collection of tools">
   <main>
-    <div class="toolkit-container">
-      <div class="sidebar">
-        <TagColumn 
-          allRenderedTags={allTags} 
-          tools={toolEntries.map(entry => entry.data)} 
-        />
-      </div>
-      <div class="tools-container">
-        <CardGrid
-          tools={toolsWithFilePath}
-          gap={gap}
-          minCardWidth={minCardWidth}
-        />
-      </div>
+    <div class="toolkit-layout" client:load>
+      <aside class="sidebar">
+        <TagColumn tools={tools} />
+      </aside>
+      <section class="main-content">
+        <CardGrid tools={tools} />
+      </section>
     </div>
   </main>
 </Layout>
 
-<script>
-  // This script handles the communication between TagColumn and CardGrid
-  document.addEventListener('DOMContentLoaded', () => {
-    // Function to update card visibility based on selected tags
-    function updateCardVisibility() {
-      // Get selected tags from URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const selectedTags = urlParams.has('tags') ? urlParams.get('tags').split(',') : [];
-      
-      // Log the selected tags for debugging
-      console.log('Selected tags:', selectedTags);
-      
-      // Get all tool cards
-      const toolCards = document.querySelectorAll('.tool-card');
-      console.log('Total tool cards found:', toolCards.length);
-      
-      // Get the parent containers for cards
-      const cardContainers = document.querySelectorAll('.card-grid, .bare-tools-grid');
-      if (cardContainers.length === 0) return;
-      
-      // Reset all cards to their original containers and display state
-      // This ensures we start from a clean state each time
-      const originalContainers = new Map();
-      
-      // First, record which cards belong to which containers
-      toolCards.forEach(card => {
-        const container = card.closest('.card-grid, .bare-tools-grid');
-        if (container) {
-          if (!originalContainers.has(container)) {
-            originalContainers.set(container, []);
-          }
-          originalContainers.get(container).push(card);
-        }
-      });
-      
-      // If no tags selected, show all cards in their original order and exit
-      if (selectedTags.length === 0 || selectedTags[0] === '') {
-        console.log('No tags selected, showing all cards');
-        
-        // Reset all cards to their original containers
-        originalContainers.forEach((cards, container) => {
-          // Remove all cards first to ensure proper order
-          container.querySelectorAll('.tool-card').forEach(card => {
-            // Don't actually remove the card, just detach it
-            if (card.parentNode) {
-              card.parentNode.removeChild(card);
-            }
-          });
-          
-          // Add them back in their original order
-          cards.forEach(card => {
-            // Ensure the card is visible
-            (card as HTMLElement).style.display = '';
-            card.removeAttribute('data-match-count');
-            container.appendChild(card);
-          });
-        });
-        
-        // Dispatch a custom event to notify that cards have been reset
-        window.dispatchEvent(new CustomEvent('cardsFiltered', {
-          detail: { selectedTags: [] }
-        }));
-        
-        return;
-      }
-      
-      // Create an array to track cards and their match counts
-      const cardMatches = [];
-      
-      // Filter cards based on selected tags
-      toolCards.forEach(card => {
-        // Get the card's tags
-        const cardTagsStr = card.getAttribute('data-tags');
-        if (!cardTagsStr) return;
-        
-        try {
-          const cardTags = JSON.parse(cardTagsStr);
-          
-          // Count how many selected tags match this card's tags
-          const matchCount = selectedTags.filter(tag => cardTags.includes(tag)).length;
-          
-          // If the card has at least one matching tag, add it to our array with its match count
-          if (matchCount > 0) {
-            cardMatches.push({
-              card: card,
-              matchCount
-            });
-          } else {
-            // Hide cards with no matches
-            (card as HTMLElement).style.display = 'none';
-          }
-        } catch (e) {
-          console.error('Error parsing card tags:', e);
-        }
-      });
-      
-      // Sort cards by match count (descending)
-      cardMatches.sort((a, b) => b.matchCount - a.matchCount);
-      
-      // Create a map to store cards by their container
-      const containerToCards = new Map();
-      
-      // Initialize the map
-      cardContainers.forEach(container => {
-        containerToCards.set(container, []);
-      });
-      
-      // Group cards by their container
-      cardMatches.forEach(({card, matchCount}) => {
-        const container = card.closest('.card-grid, .bare-tools-grid');
-        if (container) {
-          const cards = containerToCards.get(container) || [];
-          cards.push({card, matchCount});
-          containerToCards.set(container, cards);
-        }
-      });
-      
-      // Reorder cards within each container
-      containerToCards.forEach((cards, container) => {
-        // Remove all cards from this container
-        container.querySelectorAll('.tool-card').forEach(card => card.remove());
-        
-        // Add cards back in the new sorted order
-        cards.forEach(({card, matchCount}) => {
-          // Show the card
-          (card as HTMLElement).style.display = '';
-          
-          // Add a data attribute showing the match count
-          card.setAttribute('data-match-count', matchCount.toString());
-          
-          // Add the card back to the container
-          container.appendChild(card);
-        });
-      });
-      
-      // Dispatch a custom event to notify that cards have been filtered
-      window.dispatchEvent(new CustomEvent('cardsFiltered', {
-        detail: { selectedTags }
-      }));
-    }
-    
-    // Listen for URL changes (which happen when tags are selected/deselected)
-    window.addEventListener('popstate', updateCardVisibility);
-    
-    // Also listen for custom events from TagColumn
-    window.addEventListener('tagsUpdated', updateCardVisibility);
-    
-    // Initial update based on URL
-    updateCardVisibility();
-  });
-</script>
-
 <style>
-  .toolkit-container {
-    width: 92%;
-    margin: 0 auto;
-    padding: 2rem;
+  .toolkit-layout {
     display: flex;
+    flex-direction: row;
     gap: 2rem;
-    overflow: visible; /* Allow overflow for hover effects */
+    padding: 2rem;
+    width: 100%;
   }
 
   .sidebar {
-    flex: 0 0 250px;
-    position: relative; /* Ensure proper stacking context */
-    overflow: visible; /* Allow overflow for hover effects */
+    width: 250px;
+    flex-shrink: 0;
   }
 
-  .tools-container {
+  .main-content {
     flex: 1;
-  }
-
-  .toolkit-header {
-    margin-bottom: 3rem;
-    text-align: center;
-  }
-
-  .toolkit-header h1 {
-    font-size: var(--fs-800);
-    color: var(--clr-heading);
-    margin-bottom: 1rem;
-  }
-
-  .toolkit-description {
-    font-size: var(--fs-400);
-    color: var(--clr-body);
-    max-width: 800px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  .toolkit-content {
-    display: flex;
-    gap: 2rem;
-    width: 100%;
-    position: relative;
+    min-width: 0;
   }
 
   @media (max-width: 768px) {
-    .toolkit-container {
-      padding: 1rem;
+    .toolkit-layout {
       flex-direction: column;
     }
 
     .sidebar {
-      flex: none;
       width: 100%;
-      overflow: visible; /* Allow overflow for hover effects */
     }
-
-    .toolkit-header {
-      margin-bottom: 2rem;
-    }
-
-    .toolkit-content {
-      flex-direction: column;
-    }
-
-    .bare-tools-section {
-      padding: 1rem;
-    }
-
-    .bare-tools-grid {
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    }
-  }
-
-  .filter-notice {
-    font-size: var(--fs-300);
-    color: var(--clr-body);
-    opacity: 0.8;
-    margin-top: 0.5rem;
-  }
-
-  .no-tools {
-    text-align: center;
-    color: var(--clr-body);
-    font-style: italic;
-    padding: 2rem;
   }
 </style>

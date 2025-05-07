@@ -329,4 +329,10 @@ const maskStyle = isMasked ?
     object-fit: contain;
     border: 1px solid transparent;
   }
+  /* Mobile: Reduce vertical margin for proportional spacing */
+  @media (max-width: 768px) {
+    .feature-side-image {
+      margin: 1.5rem auto;
+    }
+  }
 </style>
