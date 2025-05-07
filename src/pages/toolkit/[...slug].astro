@@ -55,41 +55,17 @@ export async function getStaticPaths() {
   return toolingEntries.map(entry => {
     // Generate slug from the entry ID (relative path from tooling directory)
     const filename = entry.id.replace(/\.md$/, '');
-    
-    // Extract just the filename without the path for the title
-    const filenameParts = filename.split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-    
-    // Use the full path as the slug, preserving directory structure
-    // This allows for nested routes like /toolkit/AI-Toolkit/AI-Infrastructure/Groq
+    // Use the full path as the slug, preserving directory structure for nested routes
     const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-    
-    // Safely access entry data with proper type casting
-    const entryData = entry.data as ToolingEntryData;
-    
-    // Create a safe data object with fallbacks for required properties
-    const safeData = {
-      // Ensure all required properties exist with fallbacks
-      title: entryData.title || toProperCase(baseFilename),
-      slug: entryData.slug || generatedSlug,
-      tags: entryData.tags, // Already guaranteed to be an array by the schema transform
-      // Include all other properties from entry.data
-      ...entryData
-    };
-    
-    // Create a safe entry with the validated data
-    const safeEntry = {
-      ...entry,
-      data: safeData
-    };
-    
+
     // Debug: Log the generated path
-    console.log(`Generated path: /toolkit/${safeData.slug}`);
-    
+    console.log(`Generated path: /toolkit/${generatedSlug}`);
+
+    // Return plain entry and contentType; downstream logic now handles id/title
     return {
-      params: { slug: safeData.slug },
-      props: { 
-        entry: safeEntry,
+      params: { slug: generatedSlug },
+      props: {
+        entry,
         contentType: 'tooling'
       }
     };
@@ -111,13 +87,17 @@ interface Props {
   contentType: 'tooling';
 }
 
+// Destructure only what is sent in props
 const { entry, contentType } = Astro.props;
 
 // Add content metadata for downstream components
+// Always use entry.data.title as the single source of truth for the display title
 const contentData = {
   path: Astro.url.pathname,
-  id: entry.id,
-  contentType: contentType
+  // Only use the filename (no directory, no extension), preserving exact casing
+  id: entry.id.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, ''),
+  contentType: contentType,
+  title: entry.data.title,
 };
 ---
 

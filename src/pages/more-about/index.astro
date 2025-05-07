@@ -5,9 +5,10 @@ import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradie
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import type { CollectionEntry } from 'astro:content';
 
+// ReferenceItem now includes originalFilename (filename with original casing, no extension)
 interface ReferenceItem {
-  id: string;
-  slug: string;
+  id: string; // Full collection-relative path, e.g., 'vocabulary/Acceptance Testing.md'
+  slug: string; // Astro-generated slug (may be lowercased)
   collection: 'vocabulary' | 'concepts';
   data: {
     title: string;
@@ -15,6 +16,7 @@ interface ReferenceItem {
     aliases?: string[];
     description?: string;
   };
+  originalFilename: string; // The filename, in original casing, no extension
 }
 
 const vocabularyEntries = await getCollection('vocabulary');
@@ -50,19 +52,58 @@ function processEntries<T extends 'vocabulary' | 'concepts'>(entries: Collection
 const processedVocabularyEntries = processEntries(vocabularyEntries);
 const processedConceptsEntries = processEntries(conceptsEntries);
 
-const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => ({
-  id: entry.id,
-  slug: (entry as any).slug, // Cast to any to access Astro-generated slug
-  collection: entry.collection,
-  data: entry.data as ReferenceItem['data'], // Assert data structure matches
-}));
+// ---
+// Build a mapping of slug -> original filename (original casing, no extension) using the same logic as getStaticPaths in [...slug].astro
+// This ensures that even if Astro lowercases id or slug elsewhere, we can always recover the original filename for display
+// This is the single source of truth for original filename casing in the reference grid and preview cards
+// ---
+// Import the single source of truth for slug and filename mapping
+import path from 'node:path';
+import { getOriginalFilenameMap, getReferenceSlug } from "@utils/referenceSlugMap";
 
-const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => ({
-  id: entry.id,
-  slug: (entry as any).slug, // Cast to any to access Astro-generated slug
-  collection: entry.collection,
-  data: entry.data as ReferenceItem['data'], // Assert data structure matches
-}));
+// ---
+// Always use the absolute path to the true content directories (not site/src/content!)
+// This guarantees correct casing on all platforms
+const vocabularyDir = path.join(process.cwd(), 'src/generated-content/vocabulary');
+const conceptsDir = path.join(process.cwd(), 'src/generated-content/concepts');
+
+const vocabularySlugToOriginal = getOriginalFilenameMap(processedVocabularyEntries, vocabularyDir);
+const conceptSlugToOriginal = getOriginalFilenameMap(processedConceptsEntries, conceptsDir);
+// ---
+
+// Correct assignment: use full relative path (minus .md) for slug generation and lookup
+const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => {
+  const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
+  const slug = getReferenceSlug(filename, entry.data.slug);
+  return {
+    id: entry.id,
+    slug,
+    collection: entry.collection,
+    data: entry.data as ReferenceItem['data'],
+    originalFilename: vocabularySlugToOriginal[slug],
+  };
+});
+
+// DEBUG: Log the entire conceptSlugToOriginal map to see all keys and values
+console.log('[DEBUG] conceptSlugToOriginal keys:', Object.keys(conceptSlugToOriginal));
+console.log('[DEBUG] conceptSlugToOriginal full map:', conceptSlugToOriginal);
+
+const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
+  const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
+  const slug = getReferenceSlug(filename, entry.data.slug);
+  
+  // DEBUG: Log each entry's id, filename, and resulting slug
+  console.log(`[DEBUG] Processing entry: id=${entry.id}, filename=${filename}, slug=${slug}`);
+  console.log(`[DEBUG] Looking up originalFilename with slug=${slug}, found:`, conceptSlugToOriginal[slug]);
+  
+  return {
+    id: entry.id,
+    slug,
+    collection: entry.collection,
+    data: entry.data as ReferenceItem['data'],
+    originalFilename: conceptSlugToOriginal[slug],
+  };
+});
 ---
 
 <Layout title="Reference - Vocabulary & Concepts">

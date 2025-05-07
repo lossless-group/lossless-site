@@ -17,8 +17,11 @@
     "details": "Build on our many months of prompt engineering for Vibe Coding. Our reminders, prompts, and specifications have many iteration cycles and work together in concert to help you generate better code faster, and get to working products with less frustration.",
     "imageSide": "left",
     "ctaText": "Explore Library",
-    "ctaUrl": "/thread/prompts",
-    "imageUrl": "/visuals/Convey__Picto__Assembly-Line.svg"
+    "ctaUrl": "/vibe-with/us",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
   },
   {
     "label": "Derisk Product Development",

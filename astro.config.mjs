@@ -19,6 +19,9 @@ import vercel from '@astrojs/vercel';
 const langs = [
   'javascript',
   'typescript',
+  'html',
+  'css',
+  'shellscript',
   'python'
 ];
 

@@ -23,6 +23,7 @@ interface Tool {
 }
 
 interface Props {
+  [key: string]: any; // Allow arbitrary HTML attributes (class, data-*, aria-*, etc.)
   tool?: Tool;
   // Support for direct properties
   site_name?: string;
@@ -39,6 +40,7 @@ interface Props {
   tags?: string[];
   filename?: string;
   og_screenshot_url?: string;
+  filePath?: string; // Allow filePath to be passed as a prop
 }
 
 const { tool, ...directProps } = Astro.props;

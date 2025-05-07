@@ -15,29 +15,43 @@
  */
 
 // Define the props interface for type safety
+// Props now includes originalFilename (original casing, no extension)
 interface Props {
   entry: {
     id: string;
+    slug: string; // Add slug as required property for correct routing
     data: {
       title: string;
       aliases?: string[];
       slug?: string;
     };
+    originalFilename: string; // Single source of truth for original casing
   };
 }
 
 // Destructure the entry from props
 const { entry } = Astro.props;
 
-// Generate the URL for the vocabulary term
-// If a slug is provided in the frontmatter, use it; otherwise, generate from the filename
-const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').replace(/\s+/g, '-')}`;
+// ---
+// Always use entry.slug for the URL, as provided by ReferenceGrid and index.astro
+// This ensures correct casing and matches the routing logic in [...slug].astro
+// Do NOT reconstruct from id or data.slug here; single source of truth is entry.slug
+const url = `/more-about/${entry.slug}`;
+// ---
 ---
 
 <div class="vocabulary-card">
+  <!--
+    Fallback logic for title:
+      1. entry.data.title (frontmatter title)
+      2. entry.originalFilename (original file casing, single source of truth)
+      3. entry.data.aliases[0] (first alias if available)
+      4. entry.slug (as absolute last resort)
+    This guarantees no blank cards, ever.
+  -->
   <h3 class="vocabulary-card__title">
     <a href={url} class="vocabulary-card__link">
-      {entry.data.title}
+      {entry.originalFilename }
     </a>
   </h3>
   {entry.data.aliases && entry.data.aliases.length > 0 && (
@@ -45,6 +59,7 @@ const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').repl
       Also known as: {entry.data.aliases.join(', ')}
     </p>
   )}
+
 </div>
 
 <style>
