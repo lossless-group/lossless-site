@@ -184,25 +184,7 @@ const title = data.id ?
   </>
 }
 
-{(node.type === "listItem" && data?.renderingToC) && (() => {
-  // Determine ToC depth for styling classes
-  let depth = 1;
-  let parent = data?.parent;
-  while (parent) {
-    if (parent.type === 'list') depth++;
-    parent = parent.parent;
-  }
-  const depthClass = `toc-depth-${depth}`;
-  return (
-    <li class={depthClass}>
-      {node.children.map(child => (
-        <Astro.self node={child} data={{...data, parent: node}} />
-      ))}
-    </li>
-  );
-})()}
-
-{(node.type === "listItem" && !data?.renderingToC) &&
+{(node.type === "listItem") &&
   <li class="custom-li">
     <span class="li-content">
       {node.children.map(child => (
@@ -268,19 +250,8 @@ const title = data.id ?
 
 
 {(node.type === "link") && 
-    /*
-      Defensive rendering for Markdown link nodes (including ToC links):
-      - Handles cases where node.children is missing, empty, or child nodes have no value.
-      - This prevents runtime errors when rendering ToC nodes with malformed or empty link children.
-      - If children[0].value is missing, renders an empty string instead of crashing.
-      - Update this block and all call sites if link rendering logic changes.
-      - Aggressive commenting per project rules.
-      - Called from TableOfContents.astro and anywhere else Markdown links are rendered.
-    */
     <a href={node.url} {...(node.data?.hProperties ?? {})}>
-        {(node.children && node.children.length > 0 && typeof node.children[0].value === 'string')
-            ? node.children[0].value
-            : ''}
+        {node.children[0].value}
     </a>
 }
 
