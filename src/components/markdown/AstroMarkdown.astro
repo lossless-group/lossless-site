@@ -93,6 +93,12 @@ const title = data.id ?
 // console.log(`Node type: ${node.type}`)
 // console.log('Node structure:', JSON.stringify(node, null, 2))
 
+// Aggressively commented:
+// - The injected <h1> always uses the robust title logic above.
+// - For the tooling collection, this ensures the display title is the filename (e.g., 'Hugging Face'), not the directory or a transformed path.
+// - For other collections, parent components can pass data.title for full control.
+
+
 ---
 
 {node.type === "root" && 

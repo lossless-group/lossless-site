@@ -31,6 +31,8 @@ const TRADEMARK_CONFIG = {
   sourceDir: "./public/visuals/Tooling-Trademarks/usable--darkmode",
 };
 
+const TOOL_CARDGRID_LIMIT = 6;
+
 // ... existing type definitions ...
 
 const toolEntries = await getCollection("tooling");
@@ -169,7 +171,7 @@ const qaList = questionsAndAnswersData.page === "main"
   <section>
     {
       tools && tools.length > 0 ? (
-        <CardGrid gap="2rem" tools={tools} />
+        <CardGrid gap="2rem" tools={tools.slice(0, TOOL_CARDGRID_LIMIT)} />
       ) : (
         <p>No tools found</p>
       )
