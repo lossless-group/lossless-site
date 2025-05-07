@@ -192,6 +192,8 @@ const toolkitPath = generateToolkitPath();
             alt={displayTitle}
             data-primary-image={image || og_image || og_image_url}
             data-screenshot-url={og_screenshot_url}
+            loading="lazy"
+            decoding="async"
           />
         </div>
       )
