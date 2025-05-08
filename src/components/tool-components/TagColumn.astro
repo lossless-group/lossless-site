@@ -23,7 +23,7 @@ function trainCaseToNormalCase(tag: string): string {
 const tagCounts = tools.reduce((acc, tool) => {
   (tool.tags || []).forEach(tag => {
     acc[tag] = (acc[tag] || 0) + 1;
-  });
+  }); 
   return acc;
 }, {});
 
@@ -132,8 +132,15 @@ const tagCounts = tools.reduce((acc, tool) => {
 
     clearBtn?.addEventListener('click', () => {
       selectedTags = [];
+      searchInput.value = ''; // ✅ Clear the search input
       filterCards();
+
+      // Also show all tags again
+      document.querySelectorAll('.tool-tag').forEach(tag => {
+        tag.style.display = '';
+      });
     });
+
 
     document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
       currentSort = 'alpha-asc';
