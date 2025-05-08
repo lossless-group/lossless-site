@@ -124,52 +124,98 @@ const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
         })}
       </ul>
     )}
-    <style>
-      .toc-sidebar {
-        position: sticky;
-        top: 4rem;
-        max-height: calc(100vh - 4rem);
-        overflow-y: auto;
-        font-size: 0.9rem;
-        padding-right: 1rem;
-        margin-bottom: 2rem;
-      }
-      .toc-sidebar ul {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      /* Depth-based styling for ToC levels */
-      .toc-depth-1 {
-        font-size: 1.05em;
-        font-weight: 500;
-        margin-left: 0;
-      }
-      .toc-depth-2 {
-        font-size: 1em;
-        font-weight: 400;
-        margin-left: 1.25em;
-      }
-      .toc-depth-3 {
-        font-size: 0.95em;
-        font-weight: 350;
-        margin-left: 2em;
-      }
-      .toc-depth-4 {
-        font-size: 0.92em;
-        font-weight: 350;
-        margin-left: 2.75em;
-      }
-      .toc-sidebar li {
-        margin: 0.3rem 0;
-      }
-      .toc-sidebar a {
-        text-decoration: none;
-        color: #ccc;
-      }
-      .toc-sidebar a:hover {
-        color: white;
-      }
+      <style>
+        .toc-sidebar {
+          position: sticky;
+          top: 2rem; /* ✅ unified top value */
+          align-self: flex-start;
+          width: 220px;
+          flex-shrink: 0;
+          font-size: 0.9rem;
+          padding-right: 2rem;
+          margin-bottom: 2rem;
+          overflow: visible;       /* ✅ no internal scrollbars */
+          max-height: none;        /* ✅ allow full height */
+        }
+
+        .toc-sidebar a {
+          display: inline-block;        /* allow padding to take effect properly */
+          padding: 0.2rem 0.25rem;      /* ✅ small padding around text */
+          word-break: break-word;       /* ✅ wrap long words instead of overflowing */
+          color: var(--clr-lossless-primary-light);
+          text-decoration: none;
+          font-size: 0.9rem;
+          line-height: 1.4;
+          max-width: 100%;
+        }
+        .toc-title {
+          font-size: 1rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          color: var(--clr-lossless-accent--brightest);
+        }
+
+        .toc-scroll-area {
+          overflow-y: visible;
+          max-height: none;
+          padding-left: 1rem;
+          padding-right: 20rem;
+          border-left: 1px solid var(--clr-lossless-accent--brightest);
+          background: rgba(255, 255, 255, 0.02);
+        }
+
+        .toc-sidebar ul {
+          list-style-type: none;
+          padding-left: 0;
+        }
+
+        .toc-sidebar li {
+          margin: 0.3rem 0;
+        }
+
+        .toc-sidebar a {
+          color: var(--clr-lossless-primary-light); /* unified color scheme */
+          text-decoration: none;
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+
+        .toc-sidebar a:hover {
+          color: var(--clr-lossless-accent--brightest); /* unified hover */
+        }
+
+        /* Depth-based styling for ToC levels */
+        .toc-depth-1 {
+          font-size: 1.05em;
+          font-weight: 500;
+          margin-left: 0;
+        }
+
+        .toc-depth-2 {
+          font-size: 1em;
+          font-weight: 400;
+          margin-left: 1.25em;
+        }
+
+        .toc-depth-3 {
+          font-size: 0.95em;
+          font-weight: 350;
+          margin-left: 2em;
+        }
+
+        .toc-depth-4 {
+          font-size: 0.92em;
+          font-weight: 350;
+          margin-left: 2.75em;
+        }
+
+        @media (max-width: 1024px) {
+          .toc-sidebar {
+            display: none;
+          }
+        }
     </style>
+
   </aside>
 ) : (
   <aside class="toc-sidebar">

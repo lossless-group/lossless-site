@@ -10,10 +10,13 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
   <div class="mermaid-chart-shell">
     <!-- Accessible, pure HTML/CSS expand/collapse toggle for Mermaid chart -->
     <input type="checkbox" id={`toggle-${chartId}`} class="mermaid-toggle-checkbox" hidden>
-    <label for={`toggle-${chartId}`} class="mermaid-expand-toggle" tabindex="0" aria-label="Expand/collapse chart">
+    <label 
+      for={`toggle-${chartId}`} 
+      class="mermaid-expand-toggle"
+      onclick={`toggleMermaidExpand('${chartId}', true)`}
+    >
       <span class="expand-icon">
         <ExpandIcon class="icon-expand" />
-        <CollapseIcon class="icon-collapse" />
       </span>
     </label>
     <div class="mermaid">{code}</div>
@@ -22,119 +25,103 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 
 <!-- Fullscreen modal markup will be injected by JS when needed -->
 
-<!-- Hidden template for CollapseIcon SVG, guaranteed to be in DOM for JS to use -->
-<div id={`${chartId}-collapse-icon-template`} style="display:none">
-  <CollapseIcon />
-</div>
-
 <script is:inline>
-/**
- * MermaidChart expand/collapse logic
- * - When expand is triggered, clones the chart markup and appends a fullscreen modal to body
- * - When collapse is triggered, removes the modal from body
- * - Handles Escape key for collapse
- * - Ensures only one modal per chartId
- */
-window.toggleMermaidExpand = function(chartId, expand) {
-  const chartRoot = document.getElementById(chartId);
-  const existingModal = document.getElementById(chartId + '-fullscreen');
-  if (expand) {
-    if (existingModal) return; // Already expanded
-    // Clone the chart markup for fullscreen
-    const modal = document.createElement('div');
-    modal.id = chartId + '-fullscreen';
-    modal.className = 'mermaid-fullscreen-modal';
-    modal.tabIndex = 0;
-    // Use CollapseIcon for the collapse button in fullscreen modal
-    // Render the imported Astro CollapseIcon component to a string and inject it
-    const collapseIconMarkup = document.getElementById(`${chartId}-collapse-icon-template`)?.innerHTML || '';
-    modal.innerHTML = `
-      <button class="mermaid-collapse-toggle" aria-label="Collapse chart" tabindex="0" data-collapse-icon>
-        <span class="collapse-icon">${collapseIconMarkup}</span>
-      </button>
-      <div class="mermaid">${chartRoot.querySelector('.mermaid').innerHTML}</div>
-    `;
-    // Collapse button logic
-    modal.querySelector('.mermaid-collapse-toggle').onclick = function() {
-      window.toggleMermaidExpand(chartId, false);
-    };
-    // Escape key handler
-    const escHandler = function(e) {
-      if (e.key === 'Escape') {
-        window.toggleMermaidExpand(chartId, false);
-        window.removeEventListener('keydown', escHandler);
+  function toggleMermaidExpand(chartId, expand = true) {
+    const existingModal = document.getElementById(`${chartId}-lightbox`);
+    if (expand) {
+      if (existingModal) return; // Already open
+  
+      const originalChart = document.getElementById(chartId);
+      if (!originalChart) return;
+  
+      const chartContent = originalChart.querySelector('.mermaid-chart-shell .mermaid')?.innerHTML;
+  
+      // Create modal container
+      const modal = document.createElement('div');
+      modal.id = `${chartId}-lightbox`;
+      modal.className = 'mermaid-fullscreen-modal';
+      modal.tabIndex = 0;
+  
+      modal.innerHTML = `
+        <div class="lightbox-content">
+          <button class="mermaid-collapse-toggle" aria-label="Close chart" tabindex="0">
+            <span class="collapse-icon">&times;</span>
+          </button>
+          <div class="mermaid">${chartContent}</div>
+        </div>
+      `;
+  
+      // Append to body
+      document.body.appendChild(modal);
+      modal.focus();
+  
+      // Collapse handler
+      modal.querySelector('.mermaid-collapse-toggle').onclick = () => toggleMermaidExpand(chartId, false);
+  
+      // Escape key closes modal
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          toggleMermaidExpand(chartId, false);
+          window.removeEventListener('keydown', escHandler);
+        }
+      };
+      window.addEventListener('keydown', escHandler);
+    } else {
+      // Close logic
+      if (existingModal) {
+        existingModal.remove();
       }
-    };
-    window.addEventListener('keydown', escHandler);
-    document.body.appendChild(modal);
-    modal.focus();
-  } else {
-    if (existingModal) {
-      existingModal.parentNode.removeChild(existingModal);
     }
   }
-};
 </script>
+  
 
 <style>
-.mermaid-breakout {
-  position: relative;
-  left: 50%;
-  right: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-  max-width: 100vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  box-sizing: border-box;
-}
-.mermaid-chart-shell {
-  position: relative;
-  min-width: 600px;
-  width: 80vw;
-  max-width: 1000px;
-  margin: 1.25rem 0;
-  overflow-x: auto;
-  background: var(--bastille);
-  box-shadow: 0 4px 48px rgba(0,0,0,0.25);
-  border-radius: 10px;
-  border: 2px solid var(--lossless-accent--brightest);
-  margin: 0 auto;
-  display: block;
-  padding: 1rem;
-}
-.mermaid {
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-.mermaid-chart-shell .mermaid-expand-toggle {
-  position: absolute;
-  top: 0.75rem;
-  right: 1.5rem;
-  z-index: 10;
-  background: none;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-.mermaid-chart-shell .mermaid-expand-toggle:hover, .mermaid-chart-shell .mermaid-expand-toggle:focus {
-  opacity: 1;
-  outline: 2px solid #88f;
-}
-/* Only show ExpandIcon when NOT checked */
-.icon-collapse { display: none; }
-.mermaid-toggle-checkbox:checked + .mermaid-expand-toggle .icon-expand { display: none; }
-.mermaid-toggle-checkbox:checked + .mermaid-expand-toggle .icon-collapse { display: inline; }
+    .mermaid-breakout {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      margin: 0 auto;
+    }
+
+    .mermaid-chart-shell {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      position: relative;
+      background: var(--bastille);
+      box-shadow: 0 4px 48px rgba(0,0,0,0.25);
+      border-radius: 10px;
+      border: 2px solid var(--lossless-accent--brightest);
+      margin: 1.25rem 0;
+      padding: 1rem;
+    }
+
+    .mermaid {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .mermaid-chart-shell .mermaid-expand-toggle {
+      position: absolute;
+      top: 0.75rem;
+      right: 1.5rem;
+      z-index: 10;
+      background: none;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .mermaid-chart-shell .mermaid-expand-toggle:hover, .mermaid-chart-shell .mermaid-expand-toggle:focus {
+      opacity: 1;
+      outline: 2px solid #88f;
+    }
 </style>
 
 <style is:global>
@@ -146,55 +133,59 @@ window.toggleMermaidExpand = function(chartId, expand) {
   - No parent context can restrict its stacking
 */
 .mermaid-fullscreen-modal {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 99999 !important;
-  background: var(--bastille) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 10px !important;
-  overflow: auto !important;
-  border: 2px solid var(--lossless-accent--brightest) !important;
-}
-.mermaid-fullscreen-modal .mermaid {
-  width: 98vw;
-  height: 92vh;
-  max-width: 100vw;
-  max-height: 92vh;
-  margin: 0 auto;
-  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
   overflow: auto;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
 }
+
+.lightbox-content {
+  position: relative;
+  background: var(--bastille, #121212);
+  border: 2px solid var(--lossless-accent--brightest, #64f4a4);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 1200px;      /* Optional: cap to keep readable */
+  max-height: 90vh;
+  overflow: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.mermaid-fullscreen-modal .mermaid {
+  flex-grow: 1;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  max-width: 100%;
+  display: block;
+}
+
+
 .mermaid-collapse-toggle {
   position: absolute;
   top: 0.75rem;
-  right: 1.5rem;
-  z-index: 100000 !important;
+  right: 0.75rem;
   background: none;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
+  font-size: 1.5rem;
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
 }
-.mermaid-collapse-toggle:hover, .mermaid-collapse-toggle:focus {
+
+.mermaid-collapse-toggle:hover {
   opacity: 1;
-  outline: 2px solid #88f;
 }
+
 </style>
 
 <!-- SVG symbols for icons -->
