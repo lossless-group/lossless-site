@@ -5,7 +5,6 @@ import ArticleCitationsBlock from './citations/ArticleCitations.astro';
 import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
-import TableOfContents from './TableOfContents.astro';
 
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
@@ -72,7 +71,6 @@ const handled_types = [
     "citationReference",
     "footnoteReference",
     "footnoteDefinition",    
-    "tableOfContents",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -349,11 +347,6 @@ const title = data.id ?
   </div>
 )}
 
-<!-- Table of Contents Rendering Logic -->
-<!-- Now delegated to TableOfContents.astro for modularity and maintainability -->
-{node.type === "tableOfContents" && (
-  <TableOfContents node={node} data={data} />
-)}
 
 {(node.type === "paragraph") &&
     <div class="paragraph">

@@ -1,6 +1,7 @@
 ---
 import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import type { Root } from 'mdast';
+import TableOfContents from '../markdown/TableOfContents.astro';
 
 interface Props {
   content: Root;
@@ -95,16 +96,11 @@ console.log("Frontmatter data:", JSON.stringify(data))
     </article>
   </div>
 
-  <aside class="toc-sidebar">
-    <h2 class="toc-title">Table of Contents</h2>
-    <div class="toc-scroll-area">
-      <AstroMarkdown 
-        node={children.find(child => child.type === 'tableOfContents') || { type: 'root', children: [] }}
-        data={{ ...data, renderingToC: true }}
-        compiledContent={compiledContent}
-      />
-    </div>
-  </aside>
+  <TableOfContents 
+    node={tocNode || { type: 'root', children: [] }} 
+    data={data}
+  />
+
 </div>
 
 
@@ -235,7 +231,27 @@ console.log("Frontmatter data:", JSON.stringify(data))
     width: 100%;
   }
 
+  .toc-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--clr-lossless-accent--brightest);
+  } 
 
+  .toc-sidebar {
+      position: sticky;
+      top: 2rem; /* ✅ unified top value */
+      align-self: flex-start;
+      width: 220px;
+      flex-shrink: 0;
+      font-size: 0.9rem;
+      padding-right: 2rem;
+      margin-bottom: 2rem;
+      overflow: visible;       /* ✅ no internal scrollbars */
+      max-height: none;        /* ✅ allow full height */
+    }
+
+   
   .info-sidebar {
     position: sticky;
     top: 2rem;

@@ -1,14 +1,9 @@
 ---
-import AstroMarkdown from './AstroMarkdown.astro';
 /**
  * TableOfContents.astro
- * Renders the Table of Contents from a remark-toc MDAST node
- * - Expects a node of type 'tableOfContents' with data.map as a MDAST list node
- * - Props:
- *   - node: the 'tableOfContents' node from the MDAST
- *   - data: the parent article metadata (for context, e.g. file id)
+ * Renders the Table of Contents from a remark-toc MDAST node.
  */
-interface Props {
+ interface Props {
   node: {
     type: string;
     data?: {
@@ -23,97 +18,35 @@ interface Props {
 }
 const { node, data } = Astro.props;
 
-// =============================
-// Defensive: Render TOC if map is a list node, fallback otherwise
-// =============================
+// Determine if a valid TOC map is available
 const isValidToc = node.data?.map?.type === 'list';
 const tocMap = isValidToc ? node.data.map : null;
 const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
-
-/**
- * Pure Astro/HTML recursive ToC rendering
- * - All recursion and HTML is in the template block below.
- * - No JSX, no function components, no string-building.
- * - Aggressively commented for clarity and maintainability.
- */
 ---
-{isValidToc ? (
-  <aside class="toc-sidebar">
-    {/** Recursive ToC rendering using Astro/HTML only. */}
-    {tocMap && (
+
+<aside class="toc-sidebar">
+  <h2 class="toc-title">Table of Contents</h2>
+
+  <div class="toc-scroll-area">
+    {isValidToc && tocMap ? (
       <ul>
-        {tocMap.children.map((itemNode, idx) => {
+        {tocMap.children.map((itemNode) => {
           if (!itemNode || itemNode.type !== 'listItem') return null;
-          // Find the first paragraph child (should contain the link)
-          const para = Array.isArray(itemNode.children)
-            ? itemNode.children.find(child => child.type === 'paragraph')
-            : null;
-          // Find the link node inside the paragraph
-          const link = para && Array.isArray(para.children)
-            ? para.children.find(child => child.type === 'link')
-            : null;
-          // Render nested lists (for sub-headings)
-          const nestedList = Array.isArray(itemNode.children)
-            ? itemNode.children.find(child => child.type === 'list')
-            : null;
+          const para = itemNode.children?.find(child => child.type === 'paragraph');
+          const link = para?.children?.find(child => child.type === 'link');
+          const nestedList = itemNode.children?.find(child => child.type === 'list');
           return (
-            <li class={`toc-depth-1`}>
-              {link && <a href={link.url}>{link.children && link.children[0]?.value}</a>}
+            <li class="toc-depth-1">
+              {link && <a href={link.url}>{link.children?.[0]?.value}</a>}
               {nestedList && (
                 <ul>
-                  {nestedList.children.map((subItem, subIdx) => {
+                  {nestedList.children.map((subItem) => {
                     if (!subItem || subItem.type !== 'listItem') return null;
-                    const para2 = Array.isArray(subItem.children)
-                      ? subItem.children.find(child => child.type === 'paragraph')
-                      : null;
-                    const link2 = para2 && Array.isArray(para2.children)
-                      ? para2.children.find(child => child.type === 'link')
-                      : null;
-                    const nestedList2 = Array.isArray(subItem.children)
-                      ? subItem.children.find(child => child.type === 'list')
-                      : null;
+                    const para2 = subItem.children?.find(child => child.type === 'paragraph');
+                    const link2 = para2?.children?.find(child => child.type === 'link');
                     return (
-                      <li class={`toc-depth-2`}>
-                        {link2 && <a href={link2.url}>{link2.children && link2.children[0]?.value}</a>}
-                        {nestedList2 && (
-                          <ul>
-                            {nestedList2.children.map((subSubItem, subSubIdx) => {
-                              if (!subSubItem || subSubItem.type !== 'listItem') return null;
-                              const para3 = Array.isArray(subSubItem.children)
-                                ? subSubItem.children.find(child => child.type === 'paragraph')
-                                : null;
-                              const link3 = para3 && Array.isArray(para3.children)
-                                ? para3.children.find(child => child.type === 'link')
-                                : null;
-                              const nestedList3 = Array.isArray(subSubItem.children)
-                                ? subSubItem.children.find(child => child.type === 'list')
-                                : null;
-                              return (
-                                <li class={`toc-depth-3`}>
-                                  {link3 && <a href={link3.url}>{link3.children && link3.children[0]?.value}</a>}
-                                  {nestedList3 && (
-                                    <ul>
-                                      {nestedList3.children.map((subSubSubItem, subSubSubIdx) => {
-                                        if (!subSubSubItem || subSubSubItem.type !== 'listItem') return null;
-                                        const para4 = Array.isArray(subSubSubItem.children)
-                                          ? subSubSubItem.children.find(child => child.type === 'paragraph')
-                                          : null;
-                                        const link4 = para4 && Array.isArray(para4.children)
-                                          ? para4.children.find(child => child.type === 'link')
-                                          : null;
-                                        return (
-                                          <li class={`toc-depth-4`}>
-                                            {link4 && <a href={link4.url}>{link4.children && link4.children[0]?.value}</a>}
-                                          </li>
-                                        );
-                                      })}
-                                    </ul>
-                                  )}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        )}
+                      <li class="toc-depth-2">
+                        {link2 && <a href={link2.url}>{link2.children?.[0]?.value}</a>}
                       </li>
                     );
                   })}
@@ -123,103 +56,94 @@ const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
           );
         })}
       </ul>
+    ) : (
+      <p>No Table of Contents available.</p>
     )}
-      <style>
-        .toc-sidebar {
-          position: sticky;
-          top: 2rem; /* ✅ unified top value */
-          align-self: flex-start;
-          width: 220px;
-          flex-shrink: 0;
-          font-size: 0.9rem;
-          padding-right: 2rem;
-          margin-bottom: 2rem;
-          overflow: visible;       /* ✅ no internal scrollbars */
-          max-height: none;        /* ✅ allow full height */
-        }
+  </div>
+</aside>
 
-        .toc-sidebar a {
-          display: inline-block;        /* allow padding to take effect properly */
-          padding: 0.2rem 0.25rem;      /* ✅ small padding around text */
-          word-break: break-word;       /* ✅ wrap long words instead of overflowing */
-          color: var(--clr-lossless-primary-light);
-          text-decoration: none;
-          font-size: 0.9rem;
-          line-height: 1.4;
-          max-width: 100%;
-        }
-        .toc-title {
-          font-size: 1rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-          color: var(--clr-lossless-accent--brightest);
-        }
 
-        .toc-scroll-area {
-          overflow-y: visible;
-          max-height: none;
-          padding-left: 1rem;
-          padding-right: 20rem;
-          border-left: 1px solid var(--clr-lossless-accent--brightest);
-          background: rgba(255, 255, 255, 0.02);
-        }
+<style>
+  .toc-sidebar {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    width: 220px;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    overflow: visible;
+    max-height: none;
+  }
 
-        .toc-sidebar ul {
-          list-style-type: none;
-          padding-left: 0;
-        }
+  .toc-scroll-area {
+    overflow-y: visible;
+    max-height: none;
+    padding: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 2rem;
+    border-left: 1px solid var(--clr-lossless-accent--brightest);
+    background: rgba(255, 255, 255, 0.02);
+  }
 
-        .toc-sidebar li {
-          margin: 0.3rem 0;
-        }
+  .toc-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
 
-        .toc-sidebar a {
-          color: var(--clr-lossless-primary-light); /* unified color scheme */
-          text-decoration: none;
-          font-size: 0.9rem;
-          line-height: 1.4;
-        }
+  .toc-sidebar ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
 
-        .toc-sidebar a:hover {
-          color: var(--clr-lossless-accent--brightest); /* unified hover */
-        }
+  .toc-sidebar li {
+    margin: 0.3rem 0;
+  }
 
-        /* Depth-based styling for ToC levels */
-        .toc-depth-1 {
-          font-size: 1.05em;
-          font-weight: 500;
-          margin-left: 0;
-        }
+  .toc-sidebar a {
+    display: inline-block;
+    padding: 0.2rem 0.25rem;
+    word-break: break-word;
+    color: var(--clr-lossless-primary-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 100%;
+  }
 
-        .toc-depth-2 {
-          font-size: 1em;
-          font-weight: 400;
-          margin-left: 1.25em;
-        }
+  .toc-sidebar a:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
 
-        .toc-depth-3 {
-          font-size: 0.95em;
-          font-weight: 350;
-          margin-left: 2em;
-        }
+  .toc-depth-1 {
+    font-size: 1.05em;
+    font-weight: 500;
+    margin-left: 0;
+  }
 
-        .toc-depth-4 {
-          font-size: 0.92em;
-          font-weight: 350;
-          margin-left: 2.75em;
-        }
+  .toc-depth-2 {
+    font-size: 1em;
+    font-weight: 400;
+    margin-left: 1.25em;
+  }
 
-        @media (max-width: 1024px) {
-          .toc-sidebar {
-            display: none;
-          }
-        }
-    </style>
+  .toc-depth-3 {
+    font-size: 0.95em;
+    font-weight: 350;
+    margin-left: 2em;
+  }
 
-  </aside>
-) : (
-  <aside class="toc-sidebar">
-    <h1>{fallbackTitle}</h1>
-    <p>No Table of Contents available.</p>
-  </aside>
-)}
+  .toc-depth-4 {
+    font-size: 0.92em;
+    font-weight: 350;
+    margin-left: 2.75em;
+  }
+
+  @media (max-width: 1024px) {
+    .toc-sidebar {
+      display: none;
+    }
+  }
+</style>
