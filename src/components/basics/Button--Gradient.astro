@@ -1,0 +1,69 @@
+---
+// TODO: Make this button use the gradient with padding box and border box
+const btnVarieties = {
+  default: "btn--default",
+  icon: "btn--icon",
+};
+
+const {
+  classes,
+  variety = "default",
+  isBordered,
+  background = "var(--clr-lossless-primary-glass)",
+  color = "var(--clr-heading)",
+  ...rest
+} = Astro.props;
+---
+
+<button
+  class:list={[
+    "btn",
+    classes,
+    btnVarieties[variety as keyof typeof btnVarieties],
+    { border: isBordered }
+  ]}
+  {...rest}
+>
+  <slot />
+</button>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.5em 1em;
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-300);
+    color: var(--clr-heading);
+    /* trick from https://youtu.be/bssZTv3BgkE?si=BwSEgmkwEXKmBqvs */
+    background:
+      linear-gradient(white, white) padding-box,
+      linear-gradient(var(--grd-primary-bg)) border-box;
+    border: none;
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .btn:hover {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 20%
+    );
+    transform: translateY(-2px);
+  }
+
+  .btn.border {
+    border: 1px solid var(--clr-lossless-primary-dark);
+  }
+
+  .btn--icon {
+    padding: 0.5em;
+    border-radius: 50%;
+    aspect-ratio: 1;
+  }
+</style>
