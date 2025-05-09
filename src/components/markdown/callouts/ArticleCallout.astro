@@ -1,5 +1,10 @@
 ---
 import type { Root, RootContent, Parent, PhrasingContent, Paragraph, CitationNode, CitationsNode } from 'mdast';
+import type { Root as HastRoot } from 'hast';
+import { unified } from 'unified';
+import remarkRehype from 'remark-rehype';
+import { toHtml } from 'hast-util-to-html';
+import remarkCitations from '@utils/markdown/remark-citations';
 import AstroMarkdown from '../AstroMarkdown.astro';
 
 interface Props {

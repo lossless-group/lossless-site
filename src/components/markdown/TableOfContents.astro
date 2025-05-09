@@ -1,9 +1,14 @@
 ---
+import AstroMarkdown from './AstroMarkdown.astro';
 /**
  * TableOfContents.astro
- * Renders the Table of Contents from a remark-toc MDAST node.
+ * Renders the Table of Contents from a remark-toc MDAST node
+ * - Expects a node of type 'tableOfContents' with data.map as a MDAST list node
+ * - Props:
+ *   - node: the 'tableOfContents' node from the MDAST
+ *   - data: the parent article metadata (for context, e.g. file id)
  */
- interface Props {
+interface Props {
   node: {
     type: string;
     data?: {
@@ -13,137 +18,80 @@
   };
   data: {
     id?: string;
+    path?: string;
     [key: string]: any;
   };
 }
 const { node, data } = Astro.props;
 
-// Determine if a valid TOC map is available
+// =============================
+// Defensive: Render TOC if map is a list node, fallback otherwise
+// =============================
 const isValidToc = node.data?.map?.type === 'list';
-const tocMap = isValidToc ? node.data.map : null;
-const fallbackTitle = data?.id ? data.id.replace(/\.md$/, '') : 'Untitled';
+
 ---
-
-<aside class="toc-sidebar">
-  <h2 class="toc-title">Table of Contents</h2>
-
-  <div class="toc-scroll-area">
-    {isValidToc && tocMap ? (
-      <ul>
-        {tocMap.children.map((itemNode) => {
-          if (!itemNode || itemNode.type !== 'listItem') return null;
-          const para = itemNode.children?.find(child => child.type === 'paragraph');
-          const link = para?.children?.find(child => child.type === 'link');
-          const nestedList = itemNode.children?.find(child => child.type === 'list');
-          return (
-            <li class="toc-depth-1">
-              {link && <a href={link.url}>{link.children?.[0]?.value}</a>}
-              {nestedList && (
-                <ul>
-                  {nestedList.children.map((subItem) => {
-                    if (!subItem || subItem.type !== 'listItem') return null;
-                    const para2 = subItem.children?.find(child => child.type === 'paragraph');
-                    const link2 = para2?.children?.find(child => child.type === 'link');
-                    return (
-                      <li class="toc-depth-2">
-                        {link2 && <a href={link2.url}>{link2.children?.[0]?.value}</a>}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    ) : (
-      <p>No Table of Contents available.</p>
-    )}
-  </div>
-</aside>
-
-
-<style>
-  .toc-sidebar {
-    position: sticky;
-    top: 2rem;
-    align-self: flex-start;
-    width: 220px;
-    flex-shrink: 0;
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
-    overflow: visible;
-    max-height: none;
-  }
-
-  .toc-scroll-area {
-    overflow-y: visible;
-    max-height: none;
-    padding: 0.5rem;
-    padding-left: 1rem;
-    padding-right: 2rem;
-    border-left: 1px solid var(--clr-lossless-accent--brightest);
-    background: rgba(255, 255, 255, 0.02);
-  }
-
-  .toc-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .toc-sidebar ul {
-    list-style-type: none;
-    padding-left: 0;
-  }
-
-  .toc-sidebar li {
-    margin: 0.3rem 0;
-  }
-
-  .toc-sidebar a {
-    display: inline-block;
-    padding: 0.2rem 0.25rem;
-    word-break: break-word;
-    color: var(--clr-lossless-primary-light);
-    text-decoration: none;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    max-width: 100%;
-  }
-
-  .toc-sidebar a:hover {
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .toc-depth-1 {
-    font-size: 1.05em;
-    font-weight: 500;
-    margin-left: 0;
-  }
-
-  .toc-depth-2 {
-    font-size: 1em;
-    font-weight: 400;
-    margin-left: 1.25em;
-  }
-
-  .toc-depth-3 {
-    font-size: 0.95em;
-    font-weight: 350;
-    margin-left: 2em;
-  }
-
-  .toc-depth-4 {
-    font-size: 0.92em;
-    font-weight: 350;
-    margin-left: 2.75em;
-  }
-
-  @media (max-width: 1024px) {
-    .toc-sidebar {
-      display: none;
-    }
-  }
-</style>
+{isValidToc ? (
+  <aside class="toc-sidebar">
+    <AstroMarkdown node={node.data.map} data={{...data, renderingToC: true, path: data.path}} />
+    <style>
+      .toc-sidebar {
+        position: sticky;
+        top: 4rem;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+        font-size: 0.9rem;
+        padding-right: 1rem;
+        margin-bottom: 2rem;
+      }
+      .toc-sidebar ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .toc-sidebar li {
+        margin: 0.3rem 0;
+      }
+      .toc-depth-1 {
+        font-size: 1.05em;
+        font-weight: 400;
+        margin-left: 0;
+      }
+      .toc-depth-2 {
+        font-size: 1em;
+        font-weight: 400;
+        margin-left: .25em;
+      }
+      .toc-depth-3 {
+        font-size: 0.95em;
+        font-weight: 350;
+        margin-left: .5em;
+      }
+      .toc-depth-4 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: .75em;
+      }
+      .toc-depth-5 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: 1em;
+      }
+      .toc-depth-6 {
+        font-size: 0.92em;
+        font-weight: 300;
+        margin-left: 1.25em;
+      }
+      .toc-sidebar a {
+        text-decoration: none;
+        color: #ccc;
+      }
+      .toc-sidebar a:hover {
+        color: white;
+      }
+    </style>
+  </aside>
+) : (
+  <aside class="toc-sidebar">
+    <h1>{data?.id ? data.id.replace(/\.md$/, '') : 'Untitled'}</h1>
+    <p>No Table of Contents available.</p>
+  </aside>
+)}

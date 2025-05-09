@@ -1,7 +1,6 @@
 ---
 import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import type { Root } from 'mdast';
-import TableOfContents from '../markdown/TableOfContents.astro';
 
 interface Props {
   content: Root;
@@ -47,7 +46,25 @@ const hProperties: Record<string, any> =
 // =============================
 console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
 // DEBUG: Output full tableOfContents node structure
-const tocNode = children.find(child => child.type === 'tableOfContents');
+function sanitizeTOCNode(toc: any): any {
+  if (!toc?.data?.map?.children) return toc;
+
+  toc.data.map.children = toc.data.map.children.filter(item => {
+    const link = item.children?.[0]?.children?.[0];
+    return link?.type === 'link' && link.children?.length > 0;
+  });
+
+  return toc;
+}
+
+const tocNode = sanitizeTOCNode(
+  children.find(child => child.type === 'tableOfContents')
+);
+
+function createEmptyRoot(): Root {
+  return { type: 'root', children: [], data: {}, position: {} };
+}
+
 console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
 
 // =============================
@@ -64,24 +81,10 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
 //    - compiledContent: passed through
 //
 // Defensive: If children array is empty or no ToC, will not fail
-console.log("Frontmatter data:", JSON.stringify(data))
+
 ---
 
 <div class="content-wrapper">
-  <!-- 📌 New Sticky Info Sidebar -->
-  <aside class="info-sidebar">
-    <h2 class="info-title">Document Info</h2>
-    <div class="info-scroll-area">
-      <ul class="info-list">
-        {data?.id && <li><strong>ID:</strong> {data.id}</li>}
-        {data?.path && <li><strong>Path:</strong> {data.path}</li>}
-        {data?.date_created && <li><strong>Created:</strong> {data.date_created}</li>}
-        {data?.author && <li><strong>Author:</strong> {data.author}</li>}
-        {/* Add more metadata fields as needed */}
-      </ul>
-    </div>
-  </aside>
-
   <div class="content-inner">
     <article class="prose main-content">
       <AstroMarkdown 
@@ -89,27 +92,31 @@ console.log("Frontmatter data:", JSON.stringify(data))
           type: 'root',
           children: children.filter(child => child.type !== 'tableOfContents'),
           data: { hProperties }
-        }} 
+        }}         
         data={data} 
         compiledContent={compiledContent}
-      />
+        />
     </article>
   </div>
 
-  <TableOfContents 
-    node={tocNode || { type: 'root', children: [] }} 
-    data={data}
-  />
-
+  <aside class="toc-sidebar">
+    <h2 class="toc-title">Table of Contents</h2>
+    <div class="toc-scroll-area">
+      <AstroMarkdown 
+        node={tocNode || createEmptyRoot()}
+        data={{ ...data, renderingToC: true }}
+        compiledContent={compiledContent}
+      />
+    </div>
+  </aside>
 </div>
-
 
 
 
 <style>
   .prose {
     color: var(--clr-lossless-primary-light);
-    max-width: 75ch;
+    max-width: 65ch;
     padding: 1rem;
   }
 
@@ -211,6 +218,12 @@ console.log("Frontmatter data:", JSON.stringify(data))
     background-color: rgba(255, 255, 255, 0.03);
   }
 
+  .md-td {
+    border: 1px solid red; /* ✅ start with RED for visibility */
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    color: rgb(220, 4, 4);
+  }
 
   .content-wrapper {
     display: flex;
@@ -222,7 +235,7 @@ console.log("Frontmatter data:", JSON.stringify(data))
 
 
   .content-inner {
-    /* max-width: 85ch; */
+    max-width: 65ch;
     width: 100%;
     padding: 0 1rem;
   }
@@ -231,61 +244,59 @@ console.log("Frontmatter data:", JSON.stringify(data))
     width: 100%;
   }
 
-  .toc-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--clr-lossless-accent--brightest);
-  } 
-
   .toc-sidebar {
-      position: sticky;
-      top: 2rem; /* ✅ unified top value */
-      align-self: flex-start;
-      width: 220px;
-      flex-shrink: 0;
-      font-size: 0.9rem;
-      padding-right: 2rem;
-      margin-bottom: 2rem;
-      overflow: visible;       /* ✅ no internal scrollbars */
-      max-height: none;        /* ✅ allow full height */
-    }
-
-   
-  .info-sidebar {
     position: sticky;
     top: 2rem;
     align-self: flex-start;
     width: 220px;
     flex-shrink: 0;
-    padding: 1rem;
-    border-right: 1px solid var(--clr-lossless-accent--brightest);
-    background: rgba(255, 255, 255, 0.02);
   }
 
-  .info-title {
+
+  .toc-title {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
     color: var(--clr-lossless-accent--brightest);
   }
 
-  .info-list {
-    list-style: none;
-    padding-left: 0;
-    font-size: 0.9rem;
-    color: var(--clr-lossless-primary-light);
+  .toc-scroll-area {
+    overflow-y: auto;
+    max-height: calc(100vh - 4rem); /* 2rem top offset + some padding */
+    padding-right: 0.5rem;
+    border-left: 1px solid var(--clr-lossless-accent--brightest);
+    padding-left: 1rem;
+    background: rgba(255, 255, 255, 0.02);
   }
 
-  .info-list li {
-    margin: 0.5rem 0;
-    line-height: 1.4;
-  }
 
   @media (max-width: 1024px) {
-    .info-sidebar {
+    .toc-sidebar {
       display: none;
     }
   }
+
+    
+
+  .toc-sidebar ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .toc-sidebar li {
+    margin: 0.3rem 0;
+  }
+
+  .toc-sidebar a {
+    color: var(--clr-lossless-primary-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .toc-sidebar a:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
+
 
 </style>

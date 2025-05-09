@@ -5,6 +5,7 @@ import ArticleCitationsBlock from './citations/ArticleCitations.astro';
 import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
+import TableOfContents from './TableOfContents.astro';
 
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
@@ -71,6 +72,7 @@ const handled_types = [
     "citationReference",
     "footnoteReference",
     "footnoteDefinition",    
+    "tableOfContents",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -90,12 +92,6 @@ const title = data.id ?
 // console.log(`=== AstroMarkdown Debug ===`)
 // console.log(`Node type: ${node.type}`)
 // console.log('Node structure:', JSON.stringify(node, null, 2))
-
-// Aggressively commented:
-// - The injected <h1> always uses the robust title logic above.
-// - For the tooling collection, this ensures the display title is the filename (e.g., 'Hugging Face'), not the directory or a transformed path.
-// - For other collections, parent components can pass data.title for full control.
-
 
 ---
 
@@ -188,7 +184,25 @@ const title = data.id ?
   </>
 }
 
-{(node.type === "listItem") &&
+{(node.type === "listItem" && data?.renderingToC) && (() => {
+  // Determine ToC depth for styling classes
+  let depth = 1;
+  let parent = data?.parent;
+  while (parent) {
+    if (parent.type === 'list') depth++;
+    parent = parent.parent;
+  }
+  const depthClass = `toc-depth-${depth}`;
+  return (
+    <li class={depthClass}>
+      {node.children.map(child => (
+        <Astro.self node={child} data={{...data, parent: node}} />
+      ))}
+    </li>
+  );
+})()}
+
+{(node.type === "listItem" && !data?.renderingToC) &&
   <li class="custom-li">
     <span class="li-content">
       {node.children.map(child => (
@@ -347,6 +361,11 @@ const title = data.id ?
   </div>
 )}
 
+<!-- Table of Contents Rendering Logic -->
+<!-- Now delegated to TableOfContents.astro for modularity and maintainability -->
+{node.type === "tableOfContents" && (
+  <TableOfContents node={node} data={data} />
+)}
 
 {(node.type === "paragraph") &&
     <div class="paragraph">
