@@ -1,0 +1,102 @@
+---
+// site/src/components/articles/PostCard--Bare.astro
+/**
+ * PostCard--Bare Component
+ *
+ * Displays a compact article preview with an image, title, date, and optional description.
+ * It constructs its link dynamically from a provided slug and base path.
+ *
+ * Props:
+ * - slug: string - The article slug (e.g., 'my-article-slug').
+ * - imageSrc: string - Source URL for the article's preview image.
+ * - imageAlt: string - Alt text for the preview image.
+ * - title: string - The title of the article.
+ * - date: string | Date - The publication date of the article (expected as string or Date object).
+ * - description?: string - Optional short description or lede of the article.
+ * - imgWidth?: number | string - Optional width for the image.
+ * - imgHeight?: number | string - Optional height for the image.
+ * - class?: string - Optional additional CSS classes for the root <a> element.
+ * - All other attributes are passed to the root <a> element.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { formatDate } from "@utils/formatDate";
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
+  slug: string;
+  imageSrc: string;
+  imageAlt: string;
+  title: string;
+  date?: string | Date;
+  description?: string;
+  imgWidth?: number | string;
+  imgHeight?: number | string;
+  class?: string; 
+  [key: string]: any;
+}
+
+const {
+  slug,
+  imageSrc,
+  imageAlt,
+  title,
+  date,
+  description,
+  imgWidth,
+  imgHeight,
+  class: customClasses,
+  ...attrs 
+} = Astro.props as Props;
+
+// Log the received description prop's value and type
+console.log(`PostCard--Bare ('${title}'): Received description - Value:`, description, `Type:`, typeof description);
+
+const collectionBasePath = 'issue-resolution'; 
+const href = `/learn-with/${collectionBasePath}/${slug}`;
+
+// Format the date consistently if it exists
+// Ensure date is treated as Date object for formatting
+let displayDate = "";
+if (date) {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    displayDate = formatDate(dateObj);
+  } catch (error) {
+    console.error(`Error formatting date for PostCard--Bare ('${title}'):`, error);
+    // Fallback to original date string if formatting fails or if it's already a pre-formatted string
+    displayDate = typeof date === 'string' ? date : date.toLocaleDateString(); 
+  }
+} else {
+  displayDate = ""; // Or some default like 'Date not available'
+}
+
+---
+
+<a
+  class:list={["flex flex-col group", customClasses]}
+  href={href}
+  {...attrs}
+>
+  <div class="dark:border-base-600/60 border rounded-md border-base-300 justify-center overflow-hidden shrink-0 sm:justify-normal">
+    <figure>
+      <img
+        src={imageSrc}
+        alt={imageAlt}
+        class="w-full transition-all duration-500 group-hover:scale-[1.02] h-auto max-h-96 object-cover"
+        decoding="async"
+        loading="lazy"
+        width={imgWidth}
+        height={imgHeight}
+      />
+    </figure>
+  </div>
+  <div class="w-full pt-1"> 
+    <h2 class="mt-1 font-semibold text-lg md:text-xl">{title}</h2>
+    {description && <p class="mt-1 text-sm opacity-80 line-clamp-2">{description}</p>}
+    <p class="mt-1 opacity-70 text-sm whitespace-nowrap">{displayDate}</p> 
+  </div>
+</a>
+<style>
+  h2 {
+    font-size: 1.6em;
+  }
+</style>

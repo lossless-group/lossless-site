@@ -1,0 +1,96 @@
+---
+// site/src/pages/learn-with/[collection]/[...slug].astro
+// This dynamic page renders individual articles from collections under /learn-with/.
+
+export const prerender = true;
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { slugify } from '../../../utils/slugify'; // Adjusted path/ To be created
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+export async function getStaticPaths() {
+  // Define which collections this dynamic route should handle.
+  // For now, hardcoding 'issue-resolution'. This can be expanded.
+  const collectionsToProcess = ['issue-resolution'];
+  const paths = [];
+
+  for (const collectionName of collectionsToProcess) {
+    const entries: CollectionEntry<any>[] = await getCollection(collectionName as any); // 'as any' for flexibility during dev
+    for (const entry of entries) {
+      // Access entry.data.title directly; entry.data is 'any' from CollectionEntry<any>
+      const titleSlug = slugify(entry.data.title || 'Untitled Issue');
+      paths.push({
+        params: { collection: collectionName, slug: titleSlug },
+        props: { entry, collection: collectionName }, // Pass collection name in props
+      });
+    }
+  }
+  return paths;
+}
+
+// Define an interface for the props passed by getStaticPaths
+interface Props {
+  entry: CollectionEntry<any>; // Using <any> as collectionName can vary.
+                               // Astro should correctly infer CollectionEntry<'issue-resolution'> etc. at build time.
+  collection: string; // Added collection to Props
+}
+
+// Explicitly cast Astro.props, then assign to typed variables
+const astroProps = Astro.props as Props;
+const entry: CollectionEntry<any> = astroProps.entry;
+const collection: string = astroProps.collection;
+const data = entry.data; // 'data' is 'any' due to CollectionEntry<any>
+
+// Helper function to normalize fields that might be a single string or an array of strings.
+// Also handles cases where keys might be singular (e.g., 'author') instead of plural ('authors').
+const normalizeToArray = (sourceData: any, singularKey: string, pluralKey: string): string[] => {
+  let value = sourceData[pluralKey] || sourceData[singularKey];
+  if (typeof value === 'string') {
+    return value.trim() ? [value.trim()] : [];
+  }
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+      .map(item => item.trim());
+  }
+  return [];
+};
+
+// Prepare data for the layout and components
+const articleData = {
+  title: data.title || 'Untitled Article',
+  // The main content of the article will be passed via <Content />
+  date: data.date_reported || data.date_created || data.date_modified || new Date(),
+  authors: normalizeToArray(data, 'author', 'authors'),
+  tags: normalizeToArray(data, 'tag', 'tags'),
+  categories: normalizeToArray(data, 'category', 'categories'),
+  banner_image: data.banner_image || data.portrait_image || '/images/placeholders/default-banner.jpg',
+  lede: data.lede || data.excerpt || '', // For description
+};
+
+const pageTitle = articleData.title;
+const pageDescription = articleData.lede || 'Detailed article view.';
+
+// Data for the OneArticle component, similar to vibe-with pattern
+const contentDataForOneArticle = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  collection: collection, // collection name from Astro.props
+};
+
+---
+{(async () => {
+  return (
+    <Layout title={pageTitle} description={pageDescription}>
+      <OneArticle
+        Component={OneArticleOnPage}
+        content={entry.body} {/* Pass raw Markdown body */}
+        markdownFile={entry.id}
+        data={contentDataForOneArticle}
+        {...articleData} {/* Spread articleData props to OneArticle */}
+      />
+    </Layout>
+  );
+})()}
