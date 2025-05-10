@@ -1,13 +1,16 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import ArticlesLayout from "@layouts/Articles.astro";
+import ArticleGrid from "@components/articles/ArticleGrid.astro";
 ---
 
 <Layout>
 <ArticlesLayout
   title="Notes from the near future"
   description="A collection of articles and resources about the future of software development."
-/>
+>
+<ArticleGrid posts={posts} />
+</ArticlesLayout>
 </Layout>
 
 <style>

@@ -1,0 +1,84 @@
+---
+// site/src/pages/learn-with/us.astro
+// This page serves as an overview for various collections under /learn-with/.
+// Initially, it's hardcoded to display the 'issue-resolution' collection.
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import MagazineIndexLayout from '../../layouts/MagazineIndexLayout.astro'; // To be created
+import { slugify } from '../../utils/slugify'; // Import the custom slugify function
+
+// Define the collection to display. Hardcoded to 'issue-resolution' for now.
+// This will generate the page for the URL: /learn-with/issue-resolution
+const collectionName = 'issue-resolution'; 
+
+// Fetch all entries from the specified collection.
+// 'issue-resolution' should be a key in the `collections` export of `src/content/config.ts`.
+const allEntries = await getCollection('issue-resolution');
+
+
+
+// Transform the raw collection entries into a format suitable for the ArticleGrid component.
+const articles = allEntries.map((entry) => {
+  const data = entry.data as Record<string, any>; // Use Record<string, any> for flexible frontmatter access
+
+  // Helper function to normalize fields that might be a single string or an array of strings.
+  // Also handles cases where keys might be singular (e.g., 'author') instead of plural ('authors').
+  const normalizeToArray = (singularKey: string, pluralKey: string): string[] => {
+    let value = data[pluralKey] || data[singularKey];
+    if (typeof value === 'string') {
+      // If it's a non-empty string, put it into an array.
+      return value.trim() ? [value.trim()] : [];
+    }
+    if (Array.isArray(value)) {
+      // Filter out non-strings or empty strings from the array.
+      return value
+        .filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+        .map(item => item.trim());
+    }
+    return []; // Default to an empty array if the field is missing or not a string/array.
+  };
+
+  // Generate a custom slug using the imported slugify function. 
+  // The slug will be generated from the article's title.
+  const customSlug = slugify(data.title || 'Untitled Issue'); 
+
+  // Construct the full slug for the article page using the custom slug.
+  // const articleUrl = `/learn-with/${collectionName}/${customSlug}`; // Kept for reference, but ArticleGrid will use raw slug
+
+  // Determine the display date, falling back through various date fields or to current date.
+  let dateValue = data.date_reported || data.date_created || data.date_modified;
+  if (dateValue instanceof Date) {
+    dateValue = dateValue.toISOString();
+  } else if (!dateValue) {
+    dateValue = new Date().toISOString();
+  }
+  // If dateValue was already a string from frontmatter, it remains a string.
+
+  return {
+    id: entry.id, // Pass the entry id
+    title: data.title || 'Untitled Issue',
+    slug: customSlug, // Pass the raw slug
+    // url: articleUrl, // Not passing full URL if PostCardBare reconstructs it
+    banner_image: data.banner_image, // Pass banner_image directly
+    portrait_image: data.portrait_image, // Pass portrait_image directly
+    imageAlt: `Image for ${data.title || 'Untitled Issue'}`, // Generated imageAlt
+    date: dateValue, // Ensured to be a string
+    lede: data.lede || '', // Pass lede directly, fallback to empty string
+    tags: normalizeToArray('tag', 'tags'),
+    authors: normalizeToArray('author', 'authors'),
+    categories: normalizeToArray('category', 'categories'),
+    // collection: collectionName, // Optional: Pass collection context to components if needed
+  };
+});
+
+// Define page metadata. This can be made dynamic if 'us.astro' handles multiple collections in the future.
+const pageTitle = "Issue Resolutions"; // Specific to 'issue-resolution' for now
+const pageDescription = "An overview of resolved issues and their detailed analysis."; // Specific for now
+---
+
+<MagazineIndexLayout
+  title={pageTitle} 
+  description={pageDescription}
+  articles={articles}
+  collectionDisplayName={pageTitle} 
+/>

@@ -1,0 +1,76 @@
+---
+// site/src/components/articles/PostCard--Bare.astro
+/**
+ * PostCard--Bare Component
+ *
+ * Displays a compact article preview with an image, title, date, and optional description.
+ * It constructs its link dynamically from a provided slug and base path.
+ *
+ * Props:
+ * - slug: string - The article slug (e.g., 'my-article-slug').
+ * - imageSrc: string - Source URL for the article's preview image.
+ * - imageAlt: string - Alt text for the preview image.
+ * - title: string - The title of the article.
+ * - date: string - The publication date of the article (expected as string).
+ * - description?: string - Optional short description or lede of the article.
+ * - imgWidth?: number | string - Optional width for the image.
+ * - imgHeight?: number | string - Optional height for the image.
+ * - class?: string - Optional additional CSS classes for the root <a> element.
+ * - All other attributes are passed to the root <a> element.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
+  slug: string;
+  imageSrc: string;
+  imageAlt: string;
+  title: string;
+  date: string;
+  description?: string;
+  imgWidth?: number | string;
+  imgHeight?: number | string;
+  class?: string; 
+  [key: string]: any;
+}
+
+const {
+  slug,
+  imageSrc,
+  imageAlt,
+  title,
+  date,
+  description,
+  imgWidth,
+  imgHeight,
+  class: customClasses,
+  ...attrs 
+} = Astro.props as Props;
+
+const collectionBasePath = 'issue-resolution'; 
+const href = `/learn-with/${collectionBasePath}/${slug}`;
+---
+
+<a
+  class:list={["flex flex-col group", customClasses]}
+  href={href}
+  {...attrs}
+>
+  <div class="dark:border-base-600/60 border rounded-md border-base-300 justify-center overflow-hidden shrink-0 sm:justify-normal">
+    <figure>
+      <img
+        src={imageSrc}
+        alt={imageAlt}
+        class="w-full transition-all duration-500 group-hover:scale-[1.02] h-auto max-h-96 object-cover"
+        decoding="async"
+        loading="lazy"
+        width={imgWidth}
+        height={imgHeight}
+      />
+    </figure>
+  </div>
+  <div class="w-full pt-1"> 
+    <h2 class="mt-1 font-medium text-lg md:text-xl">{title}</h2>
+    {description && <p class="mt-1 text-sm opacity-80 line-clamp-2">{description}</p>}
+    <p class="mt-1 opacity-70 text-sm whitespace-nowrap">{date}</p>
+  </div>
+</a>
