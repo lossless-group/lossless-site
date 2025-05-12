@@ -1,0 +1,137 @@
+---
+// site/src/components/articles/EntryListItemPreview--Base.astro
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets'; // For optimized images
+import { formatDate } from "@utils/formatDate"; // Import date utility
+
+// Define the properties that this component accepts
+interface Props {
+  entry: CollectionEntry<'essays'>;
+  isActive: boolean;
+}
+
+const { entry, isActive } = Astro.props;
+// Access data defensively
+const data = entry.data as Record<string, any>; // Treat data as a generic object for passthrough fields
+
+// Destructure known fields (title should be guaranteed by schema transform)
+const title = data.title || 'Untitled Essay'; 
+
+// Process optional fields defensively
+const lede = data.lede || '';
+const category = data.category || '';
+const authors = Array.isArray(data.authors) ? data.authors : (data.authors ? [data.authors] : []);
+const authorsString = authors.join(', ') || 'N/A';
+
+// Process dates
+let formattedUpdateDate = '';
+if (data.date_last_updated) {
+  try {
+    const dateObj = typeof data.date_last_updated === 'string' ? new Date(data.date_last_updated) : data.date_last_updated;
+    if (dateObj instanceof Date && !isNaN(dateObj.valueOf())) {
+      formattedUpdateDate = formatDate(dateObj);
+    }
+  } catch (e) { /* ignore errors, fallback below */ }
+}
+
+let formattedCreateDate = '';
+if (data.date_created) {
+  try {
+    const dateObj = typeof data.date_created === 'string' ? new Date(data.date_created) : data.date_created;
+    if (dateObj instanceof Date && !isNaN(dateObj.valueOf())) {
+      formattedCreateDate = formatDate(dateObj);
+    }
+  } catch (e) { /* ignore errors, fallback below */ }
+}
+const displayDate = formattedUpdateDate || formattedCreateDate || 'N/A';
+
+// Process tags
+let safeTags = data.tags;
+if (typeof safeTags === 'string') {
+  safeTags = safeTags.split(/[,\-]/).map((t: string) => t.trim()).filter(Boolean);
+}
+if (!Array.isArray(safeTags)) {
+  safeTags = [];
+}
+safeTags = [...new Set(safeTags)]; // Remove duplicates
+const tagsString = safeTags.length > 0 ? safeTags.join(', ') : 'N/A';
+
+// Determine the image source, prioritizing banner_image, then portrait_image, then a default placeholder
+// Ensure placeholder path is correct relative to /public directory
+// Check if banner_image/portrait_image are OptimizeResult objects (from image()) or strings
+const bannerImageSrc = typeof data.banner_image === 'object' && data.banner_image?.src ? data.banner_image.src : (typeof data.banner_image === 'string' ? data.banner_image : undefined);
+const portraitImageSrc = typeof data.portrait_image === 'object' && data.portrait_image?.src ? data.portrait_image.src : (typeof data.portrait_image === 'string' ? data.portrait_image : undefined);
+const imageSrc = portraitImageSrc || '/images/placeholders/default-banner-300x200.png'; 
+const imageAlt = bannerImageSrc ? data.banner_image.alt : `Visual representation for ${title}`; // Use data.imageAlt
+
+// Styling for the active state
+const activeClasses = isActive ? 'border-sky-500 dark:border-sky-400 ring-2 ring-sky-500 dark:ring-sky-400 shadow-lg' : 'border-neutral-300 dark:border-neutral-700';
+
+// Prepare tooltip content using processed variables
+const tooltipContent = `Authors: ${authorsString}\nUpdated: ${displayDate}\nTags: ${tagsString}`;
+
+---
+
+<article 
+  class={`preview-base p-3 transition-all duration-200 ease-in-out ${activeClasses} flex items-center gap-3`}
+  title={tooltipContent} 
+  aria-current={isActive ? 'page' : 'false'}
+>
+  {/* Column 1: Image container */}
+  {imageSrc && (
+    <div class="flex-shrink-0 w-20 rounded overflow-hidden"> 
+      {(typeof data.banner_image === 'object' || typeof data.portrait_image === 'object') && imageSrc !== '/images/placeholders/default-banner-300x200.png' ? (
+        <Image 
+          src={typeof data.portrait_image === 'object' ? data.portrait_image :  data.banner_image}
+          alt={imageAlt}
+          width={76}  
+          height={76  } 
+          format="webp" 
+          quality={75} 
+          class="w-full h-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <img 
+          src={imageSrc} 
+          alt={imageAlt}
+          class="w-full h-full object-cover"
+          loading="lazy"
+          width="76" 
+          height="76" 
+        />
+      )}
+    </div>
+  )}
+  
+  {/* Column 2: Text content */}
+  <div class="text-content flex-grow"> 
+    {category && (
+      <p class="text-xs font-medium text-sky-600 dark:text-sky-400 mb-1">{category}</p>
+    )}
+    <h3 class="text-md font-semibold leading-tight mb-1 text-neutral-800 dark:text-neutral-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+      {title}
+    </h3>
+    {lede && (
+      <p class="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2">{lede}</p>
+    )}
+  </div>
+
+  {/* 
+    Advanced Tooltip/Popover (Placeholder - requires client-side JS library or custom implementation):
+    Uses processed variables
+    <div class="absolute top-0 left-full ml-2 p-2 bg-black text-white text-xs rounded hidden group-hover:block">
+      Authors: {authorsString}<br/>
+      Updated: {displayDate}<br/>
+      Tags: {tagsString}
+    </div>
+  */}
+</article>
+
+<style>
+  /* Add any specific styles for EntryListItemPreview--Base.astro here */
+  .preview-base.is-active-preview {
+    /* This class is added by ContentNavSidebar's script, matches 'activeClasses' for consistency */
+    /* border-color: var(--theme-primary, blue); */
+  }
+</style>

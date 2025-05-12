@@ -5,10 +5,11 @@
 
 import Layout from '@layouts/Layout.astro'; // Main site layout
 import ArticleGrid from '@components/articles/ArticleGrid.astro'; // Grid component for articles
+import type { ArticleData } from '../types/article'; // Import the shared type
 
 // Explicitly define the Props interface for this layout component
 export interface Props {
-  articles: Array<Record<string, any>>; // Array of article objects
+  articles: ArticleData[]; // Use the specific ArticleData type
   title: string; // Page title, passed to main Layout
   description?: string; // Optional page description
   collectionDisplayName?: string; // Optional H1 heading for the collection
@@ -23,12 +24,15 @@ const {
 ---
 <Layout title={title} description={description}>
   <main class="magazine-index-container">
+    <!-- Slot for hero content to be injected from the page using this layout -->
+    <slot name="hero-content" />
+    <!-- Collection name and description 
     {(collectionDisplayName || description) && (
       <header class="magazine-index-header">
         {collectionDisplayName && <h1 class="collection-title">{collectionDisplayName}</h1>}
         {description && <p class="collection-description">{description}</p>}
       </header>
-    )}
+    )} -->
 
     {articles.length > 0 ? (
       <ArticleGrid articles={articles} />

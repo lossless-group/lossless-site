@@ -1,0 +1,45 @@
+---
+// site/src/components/articles/EntryListColumn.astro
+import type { CollectionEntry } from 'astro:content';
+import EntryListItemPreviewBase from '@components/articles/EntryListItemPreview--Base.astro';
+
+// Define the properties that this component accepts
+interface Props {
+  essays: CollectionEntry<'essays'>[];
+  currentSlug: string | null; // The slug of the essay currently active in the reader
+}
+
+const { essays, currentSlug } = Astro.props;
+---
+
+<div class="entry-list-column space-y-2 md:space-y-3">
+  {essays.map((entry) => {
+    const isActive = entry.data.slug === currentSlug;
+    return (
+      <div class="preview-item-wrapper" data-slug={entry.data.slug}>
+        <EntryListItemPreviewBase entry={entry} isActive={isActive} />
+      </div>
+    );
+  })}
+  {essays.length === 0 && (
+    <p class="text-neutral-500 dark:text-neutral-400 italic">
+      No essays found in this collection.
+    </p>
+  )}
+</div>
+
+<style>
+  /* Styles for EntryListColumn, if any are needed beyond Tailwind classes */
+  /* For example, a subtle hover effect on preview-item-wrapper if desired */
+  .preview-item-wrapper {
+    /* transition: background-color 0.2s ease-in-out; */
+  }
+  /*
+  .preview-item-wrapper:hover {
+    background-color: rgba(0,0,0,0.03);
+  }
+  .dark .preview-item-wrapper:hover {
+    background-color: rgba(255,255,255,0.03);
+  }
+  */
+</style>

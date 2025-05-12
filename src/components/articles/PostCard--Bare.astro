@@ -47,9 +47,6 @@ const {
   ...attrs 
 } = Astro.props as Props;
 
-// Log the received description prop's value and type
-console.log(`PostCard--Bare ('${title}'): Received description - Value:`, description, `Type:`, typeof description);
-
 const collectionBasePath = 'issue-resolution'; 
 const href = `/learn-with/${collectionBasePath}/${slug}`;
 

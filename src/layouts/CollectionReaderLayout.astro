@@ -1,0 +1,67 @@
+---
+// site/src/layouts/CollectionReaderLayout.astro
+import type { CollectionEntry } from 'astro:content';
+import ContentNavSidebar from '@components/articles/ContentNavSidebar.astro';
+import EntryListItemReader from '@components/articles/EntryListItemReader.astro';
+
+interface Props {
+  essays: CollectionEntry<'essays'>[];
+}
+
+const { essays } = Astro.props;
+const initialEssay = essays && essays.length > 0 ? essays[0] : null;
+const initialEssaySlug = initialEssay ? initialEssay.data.slug : null;
+---
+
+<div class="collection-reader-layout flex flex-col md:flex-row h-screen">
+  <aside class="sidebar w-full md:w-1/3 lg:w-1/4 p-2 md:p-4 border-r border-neutral-300 dark:border-neutral-700 overflow-y-auto">
+    <ContentNavSidebar essays={essays} currentSlug={initialEssaySlug} />
+  </aside>
+
+  <main class="reader-pane flex-1 p-2 md:p-4 overflow-y-auto">
+    <div id="reader-content-wrapper">
+      {initialEssay ? (
+        <EntryListItemReader entry={initialEssay} />
+      ) : (
+        <p>No essay selected or available.</p>
+      )}
+    </div>
+  </main>
+</div>
+
+<script define:vars={{ essays }}>
+  document.addEventListener('astro:page-load', () => {
+    const sidebarElement = document.querySelector('.sidebar');
+    const readerContentWrapper = document.getElementById('reader-content-wrapper');
+
+    if (!sidebarElement || !readerContentWrapper) {
+      console.error('Cascade Error: Sidebar or reader wrapper not found. Updates will fail.');
+      return;
+    }
+
+    sidebarElement.addEventListener('select-essay', async (event) => {
+      const slugFromEvent = event.detail.slug;
+      const selectedEssay = essays.find(e => e.data.slug === slugFromEvent);
+
+      if (selectedEssay) {
+        // Placeholder: For full Astro component re-rendering, use View Transitions or fetch pre-rendered HTML.
+        readerContentWrapper.innerHTML = `
+          <article class="prose dark:prose-invert max-w-none">
+            <h1 class="text-2xl font-bold">${selectedEssay.data.title}</h1>
+            <p class="text-sm">Category: ${selectedEssay.data.category}</p>
+            <p class="mt-2 p-1 border border-dashed border-orange-400">
+              Dev Note: Dynamic content placeholder. Full rendering needs advanced Astro techniques.
+            </p>
+          </article>
+        `;
+        
+        // Dispatch an event to tell the sidebar to update its active item display
+        const updateActiveEvent = new CustomEvent('essay-activated', { detail: { slug: selectedEssay.data.slug } });
+        sidebarElement.dispatchEvent(updateActiveEvent);
+
+      } else {
+        readerContentWrapper.innerHTML = `<p>Error: Essay with slug '${slugFromEvent}' not found.</p>`;
+      }
+    });
+  });
+</script>

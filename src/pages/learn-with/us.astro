@@ -7,6 +7,8 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import MagazineIndexLayout from '../../layouts/MagazineIndexLayout.astro'; 
 import { slugify } from '../../utils/slugify'; 
 import { collectionPublishingDefaults } from '../../content.config'; 
+import Hero from '../../components/basics/Hero.astro';
+import AnimationWrapper from '../../components/basics/AnimationWrapper.astro';
 
 // Define the collection to display. Hardcoded to 'issue-resolution' for now.
 // This will generate the page for the URL: /learn-with/issue-resolution
@@ -72,7 +74,6 @@ const articles = allEntries.map((entry) => {
     id: entry.id, 
     title: data.title || 'Untitled Issue',
     slug: customSlug, 
-    // url: articleUrl, 
     banner_image: data.banner_image, 
     portrait_image: data.portrait_image, 
     imageAlt: `Image for ${data.title || 'Untitled Issue'}`, 
@@ -81,7 +82,6 @@ const articles = allEntries.map((entry) => {
     tags: normalizeToArray('tag', 'tags'),
     authors: normalizeToArray('author', 'authors'),
     categories: normalizeToArray('category', 'categories'),
-    // collection: collectionName, 
   };
 });
 
@@ -96,4 +96,17 @@ const pageDescription = "An overview of resolved issues and their detailed analy
   description={pageDescription}
   articles={articles}
   collectionDisplayName={pageTitle} 
-/>
+>
+  <div slot="hero-content">
+    <AnimationWrapper>
+      <Hero
+        title="Explore Issue Resolutions"
+        subtitle="Insights & Solutions"
+        description="A little frustration for a lot of issues. Worked through, resolved, and documented to share."
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+      />
+    </AnimationWrapper>
+  </div>
+</MagazineIndexLayout>

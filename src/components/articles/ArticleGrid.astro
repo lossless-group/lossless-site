@@ -30,25 +30,7 @@
  */
 import PostCardBare from './PostCard--Bare.astro';
 import type { HTMLAttributes } from 'astro/types';
-
-// Define the structure of individual article data objects, as prepared by us.astro
-interface ArticleData {
-  id: string;
-  title: string;
-  slug: string; 
-  banner_image?: string;
-  portrait_image?: string;
-  imageAlt: string;
-  date: string; // us.astro ensures this is a string
-  lede?: string;
-  tags: string[];
-  authors: string[];
-  categories: string[];
-  imgWidth?: number | string;
-  imgHeight?: number | string;
-  class?: string; // For PostCardBare
-  [key: string]: any; // Allows for other passthrough attributes
-}
+import type { ArticleData } from '../../types/article';
 
 interface Props extends Omit<HTMLAttributes<'div'>, 'class'> {
   articles: ArticleData[]; 

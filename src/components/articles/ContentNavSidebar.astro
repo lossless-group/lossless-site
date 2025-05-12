@@ -1,0 +1,85 @@
+---
+// site/src/components/articles/ContentNavSidebar.astro
+import type { CollectionEntry } from 'astro:content';
+import EntryListColumn from '@components/articles/EntryListColumn.astro';
+
+// Define the properties that this component accepts
+interface Props {
+  essays: CollectionEntry<'essays'>[];
+  currentSlug: string | null; // The slug of the essay currently displayed in the reader
+}
+
+const { essays, currentSlug } = Astro.props;
+
+// This reactive variable will hold the slug of the currently active essay in the sidebar.
+// It's initialized with currentSlug and updated by client-side script.
+let activeSlug = currentSlug;
+---
+
+<div class="content-nav-sidebar">
+  <EntryListColumn essays={essays} currentSlug={activeSlug} />
+</div>
+
+<script define:vars={{ initialActiveSlug: currentSlug }}>
+  // Client-side script for ContentNavSidebar
+  // Manages dispatching 'select-essay' events and updating highlighting based on 'essay-activated' events.
+  
+  // Reactive state for the currently active slug in the sidebar
+  let activeSlug = initialActiveSlug;
+
+  // Get the sidebar element itself to dispatch events from and listen on
+  const sidebarDiv = document.querySelector('.content-nav-sidebar');
+
+  if (!sidebarDiv) {
+    console.error('Cascade Error: .content-nav-sidebar element not found. Event handling will fail.');
+  } else {
+    // Event listener for clicks within the sidebar, looking for preview items
+    sidebarDiv.addEventListener('click', (event) => {
+      // Traverse up the DOM tree from the click target to find an element with 'data-slug'
+      const previewItem = event.target.closest('[data-slug]');
+      
+      if (previewItem) {
+        const slugToSelect = previewItem.dataset.slug;
+        console.log('ContentNavSidebar: Clicked preview for slug:', slugToSelect);
+
+        // Dispatch a custom event 'select-essay' that the parent layout (CollectionReaderLayout) will listen for.
+        // This signals that a new essay should be displayed in the reader pane.
+        const selectEvent = new CustomEvent('select-essay', {
+          bubbles: true, // Allow event to bubble up to parent elements if needed
+          composed: true, // Allow event to cross shadow DOM boundaries (though not strictly necessary here)
+          detail: { slug: slugToSelect }
+        });
+        sidebarDiv.dispatchEvent(selectEvent);
+      }
+    });
+
+    // Listen for 'essay-activated' event dispatched by CollectionReaderLayout
+    // This event signifies that the reader pane has been updated with a new essay.
+    sidebarDiv.addEventListener('essay-activated', (event) => {
+      const newlyActiveSlug = event.detail.slug;
+      console.log('ContentNavSidebar: Event "essay-activated" received for slug:', newlyActiveSlug);
+      
+      if (activeSlug !== newlyActiveSlug) {
+        activeSlug = newlyActiveSlug;
+        // At this point, if EntryListColumn was a client-side component, we'd pass the new activeSlug to it.
+        // Since Astro components are server-rendered, direct prop update isn't possible client-side.
+        // The highlighting logic will be handled by EntryListColumn re-evaluating its 'currentSlug' prop
+        // if the page re-renders (e.g. via View Transitions) or by EntryListColumn having its own client script
+        // to update highlights based on this 'essay-activated' event as well, or by manually updating classes here.
+
+        // For now, let's manually update highlighting on existing items.
+        // This is a simple approach; more robust would be for EntryListColumn to handle its own item states.
+        const allPreviews = sidebarDiv.querySelectorAll('[data-slug]');
+        allPreviews.forEach(preview => {
+          if (preview.dataset.slug === activeSlug) {
+            preview.classList.add('is-active-preview'); // Define .is-active-preview in your CSS
+            preview.setAttribute('aria-current', 'true');
+          } else {
+            preview.classList.remove('is-active-preview');
+            preview.removeAttribute('aria-current');
+          }
+        });
+      }
+    });
+  }
+</script>
