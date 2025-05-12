@@ -1,0 +1,27 @@
+---
+// TODO: Figure out the Tube effect using only CSS.
+---
+
+ <div class="rounded-edge-sides"></div> 
+ <div class="rounded-edge-top-bottom"></div>
+
+<style>
+.rounded-edge-sides {
+  width: 200px;
+  aspect-ratio: 2/3;
+   /* update the 85% to control the curvature */
+  clip-path: ellipse(50% 85%);
+  /* or clip-path: ellipse(50% 85% at 50% 50%) if you want to adjust the position */
+  background: #CC2A41;
+}
+
+
+.rounded-edge-top-bottom {
+  height: 200px;
+  aspect-ratio: 3/2;
+   /* update the 85% to control the curvature */
+  clip-path: ellipse(85% 50%);
+  /* or clip-path: ellipse(85% 50% at 50% 50%) if you want to adjust the position */
+  background: #CC2A41;
+}
+</style>

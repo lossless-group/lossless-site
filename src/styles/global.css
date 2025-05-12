@@ -95,7 +95,7 @@
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--ff-base);
     font-weight: var(--fw-semi-bold);
-    font-size: var(--fs-800);
+    /* font-size: var(--fs-800); */ /* Allow Tailwind to control this in components */
     color: var(--clr-lossless-primary-light);
 }
 

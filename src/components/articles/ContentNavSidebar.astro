@@ -1,0 +1,23 @@
+---
+// site/src/components/articles/ContentNavSidebar.astro
+import type { CollectionEntry } from 'astro:content';
+import EntryListColumn from '@components/articles/EntryListColumn.astro';
+
+// Define the properties that this component accepts
+interface Props {
+  essays: CollectionEntry<'essays'>[];
+  currentSlug: string | null; // The slug of the essay currently displayed in the reader
+}
+
+const { essays, currentSlug } = Astro.props;
+
+// This reactive variable will hold the slug of the currently active essay in the sidebar.
+// It's initialized with currentSlug and updated by client-side script.
+let activeSlug = currentSlug;
+---
+
+<div class="content-nav-sidebar">
+  <EntryListColumn essays={essays} currentSlug={activeSlug} />
+</div>
+
+{/* Removed conflicting client-side script */}

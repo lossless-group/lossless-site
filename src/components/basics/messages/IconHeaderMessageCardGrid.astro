@@ -66,7 +66,9 @@ try {
   Aggressive block comments for clarity and maintainability.
 -->
 <div class={"icon-header-message-card-grid " + classes} style={style}>
+
   {cards.map(card => (
+      <div class="card-container">
     <IconHeaderMessageCard
       title={card.title}
       description={card.description}
@@ -80,6 +82,7 @@ try {
         <span set:html={card.icon} />
       )}
     </IconHeaderMessageCard>
+    </div>
   ))}
 </div>
 
@@ -94,13 +97,41 @@ try {
   use `margin: 2rem auto;` instead of `margin: 2rem 0;`. This applies automatic left and right margins,
   making the grid visually centered regardless of the parent width or layout context.
 */
+.card-container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  /* Ensure the container takes up the full grid cell width */
+  width: 100%;
+  min-width: 0; /* Prevent overflow in grid cells */
+}
+
 .icon-header-message-card-grid {
   display: grid;
-  max-width: 76vw;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: clamp(1rem, 4vw, 2.5rem);
-  width: 100%;
-  place-items: center stretch;
+  max-width: 1200px;
+  width: 95%;
+  gap: 1.5rem;
   margin: 2rem auto;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .icon-header-message-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Center the third item when there are exactly 3 items */
+  .icon-header-message-card-grid:has(.card-container:nth-child(3):last-child) .card-container:last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 640px) {
+  .icon-header-message-card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,4 +1,8 @@
 ---
+import SortAscLetters from '@assets/Icons/sort-ascending-letters.svg';
+import SortDescLetters from '@assets/Icons/sort-descending-letters.svg';
+import SortAscNumbers from '@assets/Icons/sort-ascending-numbers.svg';
+import SortDescNumbers from '@assets/Icons/sort-descending-numbers.svg';
 interface Props {
   tools: any[];
 }
@@ -14,6 +18,13 @@ function trainCaseToNormalCase(tag: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
+
+const tagCounts = tools.reduce((acc, tool) => {
+  (tool.tags || []).forEach(tag => {
+    acc[tag] = (acc[tag] || 0) + 1;
+  }); 
+  return acc;
+}, {});
 ---
 
 <div class="tag-panel">
@@ -25,16 +36,29 @@ function trainCaseToNormalCase(tag: string): string {
     placeholder="Search tags..."
     class="tag-search"
     aria-label="Search tags"
+    list="tag-options"
   />
+  <datalist id="tag-options">
+    {allTags.map(tag => (
+      <option value={trainCaseToNormalCase(tag)} />
+    ))}
+  </datalist>
+  
 
   <div class="tag-actions">
+    <button id="sort-alpha-asc" class="sort-btn" title="Sort A → Z"><SortAscLetters /></button>
+    <button id="sort-alpha-desc" class="sort-btn" title="Sort Z → A"><SortDescLetters /></button>
+    <button id="sort-count-desc" class="sort-btn" title="Sort by Count ↓"><SortDescNumbers /></button>
+    <button id="sort-count-asc" class="sort-btn" title="Sort by Count ↑"><SortAscNumbers /></button>
+  
     <button id="clear-tags" class="clear-tags-btn">Clear All</button>
   </div>
+  
 
   <div class="tag-list" id="tag-list">
     {allTags.map(tag => (
-      <span class="tool-tag" data-tag={tag} role="button" tabindex="0">
-        <p>{trainCaseToNormalCase(tag)}</p>
+     <span class="tool-tag" data-tag={tag} data-count={tagCounts[tag]} role="button" tabindex="0">
+          <p>{trainCaseToNormalCase(tag)} ({tagCounts[tag]})</p>
       </span>
     ))}
   </div>
@@ -47,6 +71,23 @@ function trainCaseToNormalCase(tag: string): string {
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
     let selectedTags = [];
+    let currentSort = 'alpha-asc'; // default
+
+    function renderTags(sortBy = currentSort) {
+        const tagList = document.getElementById('tag-list');
+        const tags = [...tagList.querySelectorAll('.tool-tag')];
+
+        const sortFuncs = {
+          'alpha-asc': (a, b) => a.dataset.tag.localeCompare(b.dataset.tag),
+          'alpha-desc': (a, b) => b.dataset.tag.localeCompare(a.dataset.tag),
+          'count-asc': (a, b) => Number(a.dataset.count) - Number(b.dataset.count),
+          'count-desc': (a, b) => Number(b.dataset.count) - Number(a.dataset.count),
+        };
+
+        tags.sort(sortFuncs[sortBy]);
+        tagList.innerHTML = '';
+        tags.forEach(tag => tagList.appendChild(tag));
+    }
 
     function filterCards() {
       allCards.forEach(card => {
@@ -88,7 +129,31 @@ function trainCaseToNormalCase(tag: string): string {
 
     clearBtn?.addEventListener('click', () => {
       selectedTags = [];
+      searchInput.value = ''; // ✅ Clear the search input
       filterCards();
+
+      // Also show all tags again
+      document.querySelectorAll('.tool-tag').forEach(tag => {
+        tag.style.display = '';
+      });
+    });
+
+
+    document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
+      currentSort = 'alpha-asc';
+      renderTags();
+    });
+    document.getElementById('sort-alpha-desc')?.addEventListener('click', () => {
+      currentSort = 'alpha-desc';
+      renderTags();
+    });
+    document.getElementById('sort-count-asc')?.addEventListener('click', () => {
+      currentSort = 'count-asc';
+      renderTags();
+    });
+    document.getElementById('sort-count-desc')?.addEventListener('click', () => {
+      currentSort = 'count-desc';
+      renderTags();
     });
   });
 </script>
@@ -121,7 +186,7 @@ function trainCaseToNormalCase(tag: string): string {
 
   .tag-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 
   .clear-tags-btn {
@@ -185,6 +250,29 @@ function trainCaseToNormalCase(tag: string): string {
     box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
   }
 
+  .sort-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sort-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor; /* ✅ forces color based on parent text color */
+    transition: transform 0.2s;
+    display: inline-block;
+    color: white;
+  }
+
+
+  .sort-btn:hover svg {
+    transform: scale(1.1);
+  }
   @media (max-width: 768px) {
     .tag-panel {
       max-height: 300px;

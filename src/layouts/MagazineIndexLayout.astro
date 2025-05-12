@@ -1,0 +1,86 @@
+---
+// site/src/layouts/MagazineIndexLayout.astro
+// Provides the layout for collection overview/index pages.
+// Modeled loosely on PostCardContentLayout.astro, but uses ArticleGrid.astro for content display.
+
+import Layout from '@layouts/Layout.astro'; // Main site layout
+import ArticleGrid from '@components/articles/ArticleGrid.astro'; // Grid component for articles
+import type { ArticleData } from '../types/article'; // Import the shared type
+
+// Explicitly define the Props interface for this layout component
+export interface Props {
+  articles: ArticleData[]; // Use the specific ArticleData type
+  title: string; // Page title, passed to main Layout
+  description?: string; // Optional page description
+  collectionDisplayName?: string; // Optional H1 heading for the collection
+}
+
+const { 
+  articles = [], 
+  title, 
+  description,
+  collectionDisplayName
+} = Astro.props as Props; // Cast Astro.props to our defined Props interface
+---
+<Layout title={title} description={description}>
+  <main class="magazine-index-container">
+    <!-- Slot for hero content to be injected from the page using this layout -->
+    <slot name="hero-content" />
+    <!-- Collection name and description 
+    {(collectionDisplayName || description) && (
+      <header class="magazine-index-header">
+        {collectionDisplayName && <h1 class="collection-title">{collectionDisplayName}</h1>}
+        {description && <p class="collection-description">{description}</p>}
+      </header>
+    )} -->
+
+    {articles.length > 0 ? (
+      <ArticleGrid articles={articles} />
+    ) : (
+      <div class="magazine-empty">No articles found in this collection.</div>
+    )}
+  </main>
+</Layout>
+
+<style>
+  .magazine-index-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem); /* Consistent gap */
+    margin: 2rem auto; /* Centering and top/bottom margin */
+    padding: 0 var(--spacing-4, 1rem); /* Horizontal padding */
+    max-width: var(--max-width-container, 1200px); /* Consistent max width */
+  }
+
+  .magazine-index-header {
+    text-align: center;
+    margin-bottom: var(--spacing-6, 1.5rem);
+    padding: var(--spacing-4, 1rem) 0;
+    border-bottom: 1px solid var(--color-border-subtle, #e0e0e0);
+  }
+
+  .collection-title {
+    font-size: var(--font-size-xxl, 2.5rem); /* Large, prominent title */
+    font-weight: var(--font-weight-bold, 700);
+    color: var(--color-text-primary, #333);
+    margin-bottom: var(--spacing-2, 0.5rem);
+  }
+
+  .collection-description {
+    font-size: var(--font-size-md, 1.125rem);
+    color: var(--color-text-secondary, #555);
+    max-width: 80ch; /* Limit width for readability */
+    margin: 0 auto; /* Center description */
+  }
+
+  .magazine-empty {
+    color: var(--color-text-secondary, #555);
+    background-color: var(--color-background-muted, #f9f9f9);
+    border: 1px dashed var(--color-border-default, #ccc);
+    border-radius: var(--border-radius-md, 0.5rem);
+    padding: var(--spacing-8, 2rem) var(--spacing-6, 1.5rem);
+    text-align: center;
+    font-size: var(--font-size-lg, 1.25rem);
+    margin-top: var(--spacing-8, 2rem);
+  }
+</style>

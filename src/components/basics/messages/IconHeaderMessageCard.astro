@@ -106,7 +106,7 @@ console.log('IconHeaderMessageCard props:', Astro.props);
   Designed for dark backgrounds, but easily themeable.
 */
 .icon-header-message-card {
-  position: relative;
+  position: relative; /* Needed for badge positioning */
   background: var(--clr-card-bg, #181a20);
   border-radius: 1rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.18);
@@ -115,7 +115,7 @@ console.log('IconHeaderMessageCard props:', Astro.props);
   flex-direction: column;
   align-items: center;
   max-width: 340px; /* Prevents a single card from stretching too wide */
-  width: 100%;
+  width: 100%; /* Fill the container */
   transition: box-shadow 0.2s, border 0.25s;
   border: 1.5px solid rgba(255,255,255,0.06); /* default border for smooth transition */
 }
