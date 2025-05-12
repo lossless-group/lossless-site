@@ -1,0 +1,68 @@
+---
+// site/src/pages/read/through/[collection]/[...slug].astro
+
+import type { GetStaticPaths } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import path from 'node:path'; 
+import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
+import Layout from '@layouts/Layout.astro';
+
+// Enable prerendering
+export const prerender = true;
+
+// Define the expected props for this page component
+interface Props {
+  entry: CollectionEntry<'essays'>; // The specific entry for this page
+  essays: CollectionEntry<'essays'>[]; // All essays for the sidebar
+  // collection name is implicitly available via entry.collection
+}
+
+export const getStaticPaths: GetStaticPaths = async ({}) => {
+  const ALLOWED_COLLECTIONS = ['essays']; // Add other collection names here if needed
+  const paths = [];
+
+  for (const collectionName of ALLOWED_COLLECTIONS) {
+    // Type assertion needed for dynamic collection names
+    const allEntries = await getCollection(collectionName as 'essays'); 
+
+    // Filter for published entries 
+    const publishedEntries = allEntries.filter(
+      entry => (entry.data as any).publish !== false 
+    );
+
+    console.log(`[STATIC PATHS] ${collectionName}:`, publishedEntries.map(e => ({ id: e.id, slug: e.data?.slug })));
+
+    if (publishedEntries.length === 0) continue; 
+
+    // Generate paths for each published entry
+    for (const entry of publishedEntries) {
+      const filename = path.basename(entry.id);
+      const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
+
+      paths.push({
+        params: { collection: collectionName, slug: derivedSlug },
+        // Pass the SPECIFIC entry for this page AND the full list for the sidebar
+        props: { 
+            entry: entry, // Pass the single entry object
+            essays: publishedEntries // Pass the full list
+        }, 
+      });
+    }
+  }
+
+  return paths;
+};
+
+// Get the specific entry and the full list from props
+const { entry, essays } = Astro.props as Props; 
+
+---
+<Layout title={`Reader: ${entry.data.title || entry.id}`}>
+  {/* Pass the required props to the layout */}
+  <CollectionReaderLayout 
+    collection={entry.collection} 
+    entry={entry} 
+    essays={essays} 
+  />
+</Layout>

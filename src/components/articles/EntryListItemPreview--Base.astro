@@ -8,9 +8,10 @@ import { formatDate } from "@utils/formatDate"; // Import date utility
 interface Props {
   entry: CollectionEntry<'essays'>;
   isActive: boolean;
+  derivedSlug: string;
 }
 
-const { entry, isActive } = Astro.props;
+const { entry, isActive, derivedSlug } = Astro.props;
 // Access data defensively
 const data = entry.data as Record<string, any>; // Treat data as a generic object for passthrough fields
 
@@ -65,68 +66,104 @@ const imageSrc = portraitImageSrc || '/images/placeholders/default-banner-300x20
 const imageAlt = bannerImageSrc ? data.banner_image.alt : `Visual representation for ${title}`; // Use data.imageAlt
 
 // Styling for the active state
-const activeClasses = isActive ? 'border-sky-500 dark:border-sky-400 ring-2 ring-sky-500 dark:ring-sky-400 shadow-lg' : 'border-neutral-300 dark:border-neutral-700';
+const activeClasses = isActive ? 'border-sky-500 dark:border-sky-400 ring-2 ring-sky-500 dark:ring-sky-400 shadow-lg' : ''; // Inactive has no specific border/ring
+
+// Generate a unique ID for this component instance for JS targeting
+const uniqueId = `preview-${Math.random().toString(36).substring(2, 9)}`;
 
 // Prepare tooltip content using processed variables
 const tooltipContent = `Authors: ${authorsString}\nUpdated: ${displayDate}\nTags: ${tagsString}`;
 
 ---
 
-<article 
-  class={`preview-base p-3 transition-all duration-200 ease-in-out ${activeClasses} flex items-center gap-3`}
-  title={tooltipContent} 
-  aria-current={isActive ? 'page' : 'false'}
->
-  {/* Column 1: Image container */}
-  {imageSrc && (
-    <div class="flex-shrink-0 w-20 rounded overflow-hidden"> 
-      {(typeof data.banner_image === 'object' || typeof data.portrait_image === 'object') && imageSrc !== '/images/placeholders/default-banner-300x200.png' ? (
-        <Image 
-          src={typeof data.portrait_image === 'object' ? data.portrait_image :  data.banner_image}
-          alt={imageAlt}
-          width={76}  
-          height={76  } 
-          format="webp" 
-          quality={75} 
-          class="w-full h-full object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <img 
-          src={imageSrc} 
-          alt={imageAlt}
-          class="w-full h-full object-cover"
-          loading="lazy"
-          width="76" 
-          height="76" 
-        />
+<a href={`/read/through/${entry.collection}/${derivedSlug}`} class="block hover:no-underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 rounded-md" aria-label={`Read ${title}`}>
+  <article 
+    id={uniqueId}
+    class:list={[
+      "preview-base p-3 transition-all duration-200 ease-in-out flex items-center gap-3",
+      activeClasses
+    ]}
+    title={tooltipContent} 
+    aria-current={isActive ? 'page' : 'false'}
+  >
+    {/* Column 1: Image container */}
+    {imageSrc && (
+      <div class="image-wrapper flex-shrink-0 w-20 rounded overflow-hidden relative"> 
+        {(typeof data.banner_image === 'object' || typeof data.portrait_image === 'object') && imageSrc !== '/images/placeholders/default-banner-300x200.png' ? (
+          <Image 
+            src={typeof data.portrait_image === 'object' ? data.portrait_image :  data.banner_image}
+            alt={imageAlt}
+            format="webp" 
+            quality={75} 
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <img 
+            src={imageSrc} 
+            alt={imageAlt}
+            class="w-full h-full object-cover"
+            loading="lazy"
+            width="76" 
+            height="76" 
+          />
+        )}
+      </div>
+    )}
+    
+    {/* Column 2: Text content */}
+    <div class="text-content flex-grow"> 
+      {category && (
+        <p class="text-xs font-medium text-sky-600 dark:text-sky-400 mb-1">{category}</p>
+      )}
+      <h3 class="text-md font-semibold leading-tight mb-1 text-neutral-800 dark:text-neutral-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{title}</h3>
+      {lede && (
+        <p class="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2">{lede}</p>
       )}
     </div>
-  )}
-  
-  {/* Column 2: Text content */}
-  <div class="text-content flex-grow"> 
-    {category && (
-      <p class="text-xs font-medium text-sky-600 dark:text-sky-400 mb-1">{category}</p>
-    )}
-    <h3 class="text-md font-semibold leading-tight mb-1 text-neutral-800 dark:text-neutral-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-      {title}
-    </h3>
-    {lede && (
-      <p class="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2">{lede}</p>
-    )}
-  </div>
 
-  {/* 
-    Advanced Tooltip/Popover (Placeholder - requires client-side JS library or custom implementation):
-    Uses processed variables
-    <div class="absolute top-0 left-full ml-2 p-2 bg-black text-white text-xs rounded hidden group-hover:block">
-      Authors: {authorsString}<br/>
-      Updated: {displayDate}<br/>
-      Tags: {tagsString}
-    </div>
-  */}
-</article>
+    {/* 
+      Advanced Tooltip/Popover (Placeholder - requires client-side JS library or custom implementation):
+      Uses processed variables
+      <div class="absolute top-0 left-full ml-2 p-2 bg-black text-white text-xs rounded hidden group-hover:block">
+        Authors: {authorsString}<br/>
+        Updated: {displayDate}<br/>
+        Tags: {tagsString}
+      </div>
+    */}
+  </article>
+</a>
+
+<script define:vars={{ uniqueId }}>
+  function adjustImageHeight() {
+    const container = document.getElementById(uniqueId);
+    if (!container) return;
+
+    const textContent = container.querySelector('.text-content');
+    const imageWrapper = container.querySelector('.image-wrapper');
+
+    if (!textContent || !imageWrapper) return;
+
+    // Measure text height and apply to image wrapper
+    const textHeight = textContent.offsetHeight;
+    imageWrapper.style.height = `${textHeight}px`;
+  }
+
+  // Run on initial load
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    // Use requestAnimationFrame for better timing after layout calculation
+    requestAnimationFrame(adjustImageHeight);
+  } else {
+    window.addEventListener('load', () => requestAnimationFrame(adjustImageHeight));
+  }
+
+  // Run on resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => requestAnimationFrame(adjustImageHeight), 100); // Debounce resize
+  });
+</script>
 
 <style>
   /* Add any specific styles for EntryListItemPreview--Base.astro here */

@@ -1,67 +1,144 @@
 ---
 // site/src/layouts/CollectionReaderLayout.astro
-import type { CollectionEntry } from 'astro:content';
-import ContentNavSidebar from '@components/articles/ContentNavSidebar.astro';
-import EntryListItemReader from '@components/articles/EntryListItemReader.astro';
+console.log('[Layout] Script Start');
 
+import type { CollectionEntry } from 'astro:content';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkImages from 'remark-images';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkCitations from '@utils/markdown/remark-citations';
+import type { Root} from 'mdast';
+// Note: AstroMarkdown is commented out for debugging
+// import AstroMarkdown from '~/components/markdown/AstroMarkdown.astro'; 
+import CollectionSidebar from '@components/articles/ContentNavSidebar.astro';
+
+console.log('[Layout] Imports Done');
+
+// --- Component Props ---
 interface Props {
+  collection: string; 
+  entry: CollectionEntry<'essays'>;
   essays: CollectionEntry<'essays'>[];
 }
 
-const { essays } = Astro.props;
-const initialEssay = essays && essays.length > 0 ? essays[0] : null;
-const initialEssaySlug = initialEssay ? initialEssay.data.slug : null;
----
+// Destructure props, getting pageSlug from the specific entry passed
+const { collection, entry: currentEntry, essays } = Astro.props;
+console.log('[Layout] Raw Astro.props:', Astro.props);
+console.log('[Layout] Direct Access Astro.props.entry:', Astro.props.entry); // Attempt direct access
+console.log('[Layout] Props Destructured:', { collection, currentEntryId: currentEntry?.id, essaysCount: essays?.length });
 
-<div class="collection-reader-layout flex flex-col md:flex-row h-screen">
-  <aside class="sidebar w-full md:w-1/3 lg:w-1/4 p-2 md:p-4 border-r border-neutral-300 dark:border-neutral-700 overflow-y-auto">
-    <ContentNavSidebar essays={essays} currentSlug={initialEssaySlug} />
+// Use optional chaining for safety, though the error suggests 'entry' itself is missing
+const pageSlug = currentEntry?.id;
+console.log('[Layout] pageSlug defined:', pageSlug);
+
+// --- Helper Types --- 
+interface DataWithHProperties {
+  hProperties?: unknown; 
+  [key: string]: any;
+}
+interface AstroMarkdownData {
+  path: string;
+  id?: string;
+  [key: string]: any; 
+}
+
+// --- Essay Selection Logic --- 
+// Use the entry passed directly from the page route
+const displayEssay = currentEntry; 
+console.log('[Layout] displayEssay assigned:', displayEssay?.id);
+
+// --- MDAST Processing --- 
+let processedMdastNode: Root | null = null;
+let markdownDataForRenderer: AstroMarkdownData;
+
+console.log('[Layout] Before if (displayEssay)');
+if (displayEssay) {
+  console.log('[Layout] Inside if (displayEssay)');
+  // Initialize the unified processor
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkImages)
+    .use(remarkBacklinks)
+    .use(remarkCitations);
+
+  // Parse and run processors
+  console.log('[Layout] Before processor.parse');
+  const mdast = processor.parse(displayEssay.body || '');
+  console.log('[Layout] Before processor.run');
+  const transformedMdast = await processor.run(mdast) as Root; 
+  console.log('[Layout] After processor.run');
+
+  // Directly assign the processed node
+  processedMdastNode = transformedMdast; 
+  console.log('[Layout] processedMdastNode assigned:', !!processedMdastNode);
+
+  // Prepare the data object *inside* the if block
+  markdownDataForRenderer = {
+    ...(displayEssay.data || {}),
+    // Construct path using collection and id (which is the slug for essays)
+    path: `/read/through/${displayEssay.collection}/${displayEssay.id || ''}`,
+    id: displayEssay.id // Pass the file ID (e.g., 'some-essay.md')
+  };
+  console.log('[Layout] markdownDataForRenderer assigned:', !!markdownDataForRenderer);
+
+}
+console.log('[Layout] After if (displayEssay)');
+---
+<script is:inline>
+  // This will run in the browser, confirming the template started rendering
+  console.log('[Layout TEMPLATE] Rendering Started');
+</script>
+<div class="collection-reader-layout">
+  <aside class="sidebar w-full md:w-1/3 lg:w-1/4 p-2 md:p-4 border-r border-neutral-300 dark:border-neutral-700 overflow-y-auto flex flex-col">
+    <CollectionSidebar essays={essays} currentSlug={pageSlug} />
   </aside>
 
-  <main class="reader-pane flex-1 p-2 md:p-4 overflow-y-auto">
+  <main class="reader-pane flex-1 p-2 md:p-4 lg:p-6 overflow-y-auto">
     <div id="reader-content-wrapper">
-      {initialEssay ? (
-        <EntryListItemReader entry={initialEssay} />
-      ) : (
-        <p>No essay selected or available.</p>
-      )}
+      <h2>Simplified Debug Output:</h2>
+      <p>--- START MAIN RENDER ---</p>
+      <hr />
+      <h3>Page Slug (from currentEntry.id):</h3>
+      <pre>{pageSlug || 'pageSlug is not defined'}</pre>
+      <hr />
+      <h3>Display Essay ID:</h3>
+      <pre>{displayEssay ? displayEssay.id : 'No displayEssay found'}</pre>
+      <hr />
+      <h3>Processing Ran:</h3>
+      <pre>{processedMdastNode ? 'Yes (Node object exists)' : 'No (Node object is null)'}</pre>
+      <hr />
+      <h3>Data Exists:</h3>
+      <pre>{typeof markdownDataForRenderer !== 'undefined' ? 'Yes (Data object exists)' : 'No (Data object undefined)'}</pre>
+      <hr />
+      <p>--- END MAIN RENDER ---</p>
+
+      {/* Original Complex Debug Output Commented Out
+      <h2>Debug Output:</h2>
+      <hr />
+      <h3>Page Slug:</h3>
+      <pre>{pageSlug || 'pageSlug is not defined'}</pre>
+      <hr />
+      <h3>Display Essay ID:</h3>
+      <pre>{displayEssay ? displayEssay.id : 'No displayEssay found'}</pre>
+      <hr />
+      <h3>Processed MDAST Node:</h3>
+      <pre style="white-space: pre-wrap; word-wrap: break-word;">
+        {processedMdastNode ? JSON.stringify(processedMdastNode, null, 2) : 'processedMdastNode is null'}
+      </pre>
+      <hr />
+      <h3>Markdown Data for Renderer:</h3>
+      <pre style="white-space: pre-wrap; word-wrap: break-word;">
+        {typeof markdownDataForRenderer !== 'undefined' ? JSON.stringify(markdownDataForRenderer, null, 2) : 'markdownDataForRenderer is undefined (displayEssay might be null or processing failed)'}
+      </pre>
+      <hr />
+      */}
+
+      {/* Original rendering logic commented out
+{{ ... }}
+      */}
     </div>
   </main>
 </div>
-
-<script define:vars={{ essays }}>
-  document.addEventListener('astro:page-load', () => {
-    const sidebarElement = document.querySelector('.sidebar');
-    const readerContentWrapper = document.getElementById('reader-content-wrapper');
-
-    if (!sidebarElement || !readerContentWrapper) {
-      console.error('Cascade Error: Sidebar or reader wrapper not found. Updates will fail.');
-      return;
-    }
-
-    sidebarElement.addEventListener('select-essay', async (event) => {
-      const slugFromEvent = event.detail.slug;
-      const selectedEssay = essays.find(e => e.data.slug === slugFromEvent);
-
-      if (selectedEssay) {
-        // Placeholder: For full Astro component re-rendering, use View Transitions or fetch pre-rendered HTML.
-        readerContentWrapper.innerHTML = `
-          <article class="prose dark:prose-invert max-w-none">
-            <h1 class="text-2xl font-bold">${selectedEssay.data.title}</h1>
-            <p class="text-sm">Category: ${selectedEssay.data.category}</p>
-            <p class="mt-2 p-1 border border-dashed border-orange-400">
-              Dev Note: Dynamic content placeholder. Full rendering needs advanced Astro techniques.
-            </p>
-          </article>
-        `;
-        
-        // Dispatch an event to tell the sidebar to update its active item display
-        const updateActiveEvent = new CustomEvent('essay-activated', { detail: { slug: selectedEssay.data.slug } });
-        sidebarElement.dispatchEvent(updateActiveEvent);
-
-      } else {
-        readerContentWrapper.innerHTML = `<p>Error: Essay with slug '${slugFromEvent}' not found.</p>`;
-      }
-    });
-  });
-</script>

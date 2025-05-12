@@ -2,6 +2,7 @@
 // site/src/components/articles/EntryListColumn.astro
 import type { CollectionEntry } from 'astro:content';
 import EntryListItemPreviewBase from '@components/articles/EntryListItemPreview--Base.astro';
+import path from 'node:path';
 
 // Define the properties that this component accepts
 interface Props {
@@ -14,10 +15,14 @@ const { essays, currentSlug } = Astro.props;
 
 <div class="entry-list-column space-y-2 md:space-y-3">
   {essays.map((entry) => {
-    const isActive = entry.data.slug === currentSlug;
+    // Derive slug for this specific item
+    const itemSlug = path.basename(entry.id, '.md').toLowerCase().replace(/\s+/g, '-');
+    // Compare derived slug with currentSlug
+    const isActive = itemSlug === currentSlug; 
     return (
-      <div class="preview-item-wrapper" data-slug={entry.data.slug}>
-        <EntryListItemPreviewBase entry={entry} isActive={isActive} />
+      // Use derived slug in data-slug and pass it down
+      <div class="preview-item-wrapper" data-slug={itemSlug}> 
+        <EntryListItemPreviewBase entry={entry} isActive={isActive} derivedSlug={itemSlug} /> 
       </div>
     );
   })}
