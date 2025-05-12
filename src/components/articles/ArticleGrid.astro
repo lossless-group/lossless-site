@@ -1,0 +1,85 @@
+---
+// site/src/components/articles/ArticleGrid.astro
+/**
+ * ArticleGrid Component
+ *
+ * Renders a responsive grid of article previews using the PostCard--Bare component.
+ *
+ * Props:
+ * - articles: Array<ArticleData> - An array of article objects from us.astro.
+ *   Each ArticleData object should conform to (as provided by us.astro):
+ *   {
+ *     id: string;
+ *     title: string;
+ *     slug: string;         // raw slug from us.astro
+ *     banner_image?: string;
+ *     portrait_image?: string;
+ *     imageAlt: string;
+ *     date: string;         // Date as string from us.astro
+ *     lede?: string;         // Lede/excerpt from us.astro
+ *     tags: string[];
+ *     authors: string[];
+ *     categories: string[];
+ *     imgWidth?: number | string;
+ *     imgHeight?: number | string;
+ *     class?: string;        // Optional class for the PostCardBare itself
+ *   }
+ * - gridClass?: string - Optional additional CSS classes for the grid container div.
+ * - class?: string - Optional CSS classes for the root grid div element.
+ * - All other attributes are passed to the root grid div element.
+ */
+import PostCardBare from './PostCard--Bare.astro';
+import type { HTMLAttributes } from 'astro/types';
+import type { ArticleData } from '../../types/article';
+
+interface Props extends Omit<HTMLAttributes<'div'>, 'class'> {
+  articles: ArticleData[]; 
+  gridClass?: string; 
+  class?: string; 
+}
+
+const { articles, gridClass, class: customRootClass, ...attrs } = Astro.props as Props;
+
+const defaultGridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+
+const processedArticles = articles.map(article => {
+  const passthroughAttrs: { [key: string]: any } = {};
+  // Define props that PostCardBare will receive directly based on ArticleData fields
+  // These are the source field names from ArticleData that are used to form PostCardBare props.
+  const definedProps = [
+    'slug', 'banner_image', 'portrait_image', 'imageAlt', 'title', 'date', 'lede', 
+    'imgWidth', 'imgHeight', 'class'
+    // id, tags, authors, categories will go into passthroughAttrs if not listed here
+  ];
+
+  for (const key in article) {
+    if (Object.prototype.hasOwnProperty.call(article, key) && !definedProps.includes(key)) {
+      const value = article[key];
+      passthroughAttrs[key] = value;
+    }
+  }
+  return {
+    ...article, 
+    passthroughAttrs,
+  };
+});
+---
+
+<div class:list={[defaultGridClasses, gridClass, customRootClass]} {...attrs}>
+  {processedArticles.map(p => {
+    return (
+      <PostCardBare
+        slug={p.slug}       
+        imageSrc={p.banner_image || p.portrait_image || '/images/placeholders/default-banner.jpg'}
+        imageAlt={p.imageAlt}
+        title={p.title}
+        date={p.date}
+        description={p.lede}
+        imgWidth={p.imgWidth}
+        imgHeight={p.imgHeight}
+        class={p.class} 
+        {...p.passthroughAttrs}
+      />
+    );
+  })}
+</div>

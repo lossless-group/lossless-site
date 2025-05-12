@@ -1,0 +1,225 @@
+---
+// site/src/components/articles/EntryListItemPreview--Base.astro
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets'; // For optimized images
+import { formatDate } from "@utils/formatDate"; // Import date utility
+
+// Define the properties that this component accepts
+interface Props {
+  entry: CollectionEntry<'essays'>;
+  isActive: boolean;
+  derivedSlug: string;
+}
+
+const { entry, isActive, derivedSlug } = Astro.props;
+// Access data defensively
+const data = entry.data as Record<string, any>; // Treat data as a generic object for passthrough fields
+
+// Destructure known fields (title should be guaranteed by schema transform)
+const title = data.title || 'Untitled Essay'; 
+
+// Process optional fields defensively
+const lede = data.lede || '';
+const category = data.category || '';
+const authors = Array.isArray(data.authors) ? data.authors : (data.authors ? [data.authors] : []);
+const authorsString = authors.join(', ') || 'N/A';
+
+// Process dates
+let formattedUpdateDate = '';
+if (data.date_last_updated) {
+  try {
+    const dateObj = typeof data.date_last_updated === 'string' ? new Date(data.date_last_updated) : data.date_last_updated;
+    if (dateObj instanceof Date && !isNaN(dateObj.valueOf())) {
+      formattedUpdateDate = formatDate(dateObj);
+    }
+  } catch (e) { /* ignore errors, fallback below */ }
+}
+
+let formattedCreateDate = '';
+if (data.date_created) {
+  try {
+    const dateObj = typeof data.date_created === 'string' ? new Date(data.date_created) : data.date_created;
+    if (dateObj instanceof Date && !isNaN(dateObj.valueOf())) {
+      formattedCreateDate = formatDate(dateObj);
+    }
+  } catch (e) { /* ignore errors, fallback below */ }
+}
+const displayDate = formattedUpdateDate || formattedCreateDate || 'N/A';
+
+// Process tags
+let safeTags = data.tags;
+if (typeof safeTags === 'string') {
+  safeTags = safeTags.split(/[,\-]/).map((t: string) => t.trim()).filter(Boolean);
+}
+if (!Array.isArray(safeTags)) {
+  safeTags = [];
+}
+safeTags = [...new Set(safeTags)]; // Remove duplicates
+const tagsString = safeTags.length > 0 ? safeTags.join(', ') : 'N/A';
+
+// Determine the image source, prioritizing banner_image, then portrait_image, then a default placeholder
+// Ensure placeholder path is correct relative to /public directory
+// Check if banner_image/portrait_image are OptimizeResult objects (from image()) or strings
+const bannerImageSrc = typeof data.banner_image === 'object' && data.banner_image?.src ? data.banner_image.src : (typeof data.banner_image === 'string' ? data.banner_image : undefined);
+const portraitImageSrc = typeof data.portrait_image === 'object' && data.portrait_image?.src ? data.portrait_image.src : (typeof data.portrait_image === 'string' ? data.portrait_image : undefined);
+const imageSrc = portraitImageSrc || '/images/placeholders/default-banner-300x200.png'; 
+const imageAlt = bannerImageSrc ? data.banner_image.alt : `Visual representation for ${title}`; // Use data.imageAlt
+
+// Styling for the active state
+// Use a custom class for active items instead of Tailwind classes
+const activeClasses = isActive ? 'active-preview-item shadow-lg' : ''; // Inactive has no specific border/ring
+
+// Generate a unique ID for this component instance for JS targeting
+const uniqueId = `preview-${Math.random().toString(36).substring(2, 9)}`;
+
+// Prepare tooltip content using processed variables
+const tooltipContent = `Authors: ${authorsString}\nUpdated: ${displayDate}\nTags: ${tagsString}`;
+
+---
+
+<a href={`/read/through/${entry.collection}/${derivedSlug}`} class="block hover:no-underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 rounded-md" aria-label={`Read ${title}`}>
+  <article 
+    id={uniqueId}
+    class:list={[
+      "preview-base p-3 transition-all duration-200 ease-in-out flex items-center gap-3",
+      activeClasses
+    ]}
+    title={tooltipContent} 
+    aria-current={isActive ? 'page' : 'false'}
+  >
+    {/* Column 1: Image container */}
+    {imageSrc && (
+      <div class="image-wrapper flex-shrink-0 w-20 rounded overflow-hidden relative"> 
+        {(typeof data.banner_image === 'object' || typeof data.portrait_image === 'object') && imageSrc !== '/images/placeholders/default-banner-300x200.png' ? (
+          <Image 
+            src={typeof data.portrait_image === 'object' ? data.portrait_image :  data.banner_image}
+            alt={imageAlt}
+            format="webp" 
+            quality={75} 
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <img 
+            src={imageSrc} 
+            alt={imageAlt}
+            class="w-full h-full object-cover"
+            loading="lazy"
+            width="76" 
+            height="76" 
+          />
+        )}
+      </div>
+    )}
+    
+    {/* Column 2: Text content */}
+    <div class="text-content flex-grow"> 
+      {category && (
+        <p class="text-xs font-medium text-sky-600 dark:text-sky-400 mb-1">{category}</p>
+      )}
+      <h3 class="text-md font-semibold leading-tight mb-1 text-neutral-800 dark:text-neutral-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{title}</h3>
+      {lede && (
+        <p class="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2">{lede}</p>
+      )}
+    </div>
+
+    {/* 
+      Advanced Tooltip/Popover (Placeholder - requires client-side JS library or custom implementation):
+      Uses processed variables
+      <div class="absolute top-0 left-full ml-2 p-2 bg-black text-white text-xs rounded hidden group-hover:block">
+        Authors: {authorsString}<br/>
+        Updated: {displayDate}<br/>
+        Tags: {tagsString}
+      </div>
+    */}
+  </article>
+</a>
+
+<script define:vars={{ uniqueId }}>
+  function adjustImageHeight() {
+    const container = document.getElementById(uniqueId);
+    if (!container) return;
+
+    const textContent = container.querySelector('.text-content');
+    const imageWrapper = container.querySelector('.image-wrapper');
+
+    if (!textContent || !imageWrapper) return;
+
+    // Measure text height and apply to image wrapper
+    const textHeight = textContent.offsetHeight;
+    imageWrapper.style.height = `${textHeight}px`;
+  }
+
+  // Run on initial load
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    // Use requestAnimationFrame for better timing after layout calculation
+    requestAnimationFrame(adjustImageHeight);
+  } else {
+    window.addEventListener('load', () => requestAnimationFrame(adjustImageHeight));
+  }
+
+  // Run on resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => requestAnimationFrame(adjustImageHeight), 100); // Debounce resize
+  });
+</script>
+
+<style>
+  /* Add any specific styles for EntryListItemPreview--Base.astro here */
+  .preview-base {
+    position: relative;
+    border: none; /* Remove default border */
+    transition: all 0.2s ease-in-out;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  
+  /* Gradient borders for active items using the brand gradient - top and bottom only */
+  .preview-base.active-preview-item::before,
+  .preview-base.active-preview-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--grd--lossless-eastern-crimson);
+  }
+  
+  .preview-base.active-preview-item::before {
+    top: 0;
+  }
+  
+  .preview-base.active-preview-item::after {
+    bottom: 0;
+  }
+  
+  /* Add subtle left indicator for active item */
+  .preview-base.active-preview-item {
+    background-color: rgba(14, 165, 233, 0.05); /* Very subtle sky blue background */
+  }
+  
+  /* For backwards compatibility with any script that might add this class */
+  .preview-base.is-active-preview::before,
+  .preview-base.is-active-preview::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--grd--lossless-eastern-crimson);
+  }
+  
+  .preview-base.is-active-preview::before {
+    top: 0;
+  }
+  
+  .preview-base.is-active-preview::after {
+    bottom: 0;
+  }
+  
+  .preview-base.is-active-preview {
+    background-color: rgba(14, 165, 233, 0.05);
+  }
+</style>

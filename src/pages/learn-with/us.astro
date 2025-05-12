@@ -1,0 +1,112 @@
+---
+// site/src/pages/learn-with/us.astro
+// This page serves as an overview for various collections under /learn-with/.
+// Initially, it's hardcoded to display the 'issue-resolution' collection.
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import MagazineIndexLayout from '../../layouts/MagazineIndexLayout.astro'; 
+import { slugify } from '../../utils/slugify'; 
+import { collectionPublishingDefaults } from '../../content.config'; 
+import Hero from '../../components/basics/Hero.astro';
+import AnimationWrapper from '../../components/basics/AnimationWrapper.astro';
+
+// Define the collection to display. Hardcoded to 'issue-resolution' for now.
+// This will generate the page for the URL: /learn-with/issue-resolution
+const collectionName = 'issue-resolution' as keyof typeof collectionPublishingDefaults; 
+
+// Fetch all entries from the specified collection.
+// 'issue-resolution' should be a key in the `collections` export of `src/content/config.ts`.
+const allEntriesUnfiltered = await getCollection('issue-resolution'); 
+
+// Apply publishing filter logic
+const defaultPublishBehavior = collectionPublishingDefaults[collectionName]?.publishByDefault ?? true;
+
+const allEntries = allEntriesUnfiltered.filter((entry) => {
+  const itemPublishFlag = (entry.data as Record<string, any>).publish; 
+
+  if (defaultPublishBehavior === true) {
+    // Collection publishes by default. Hide only if item has publish: false.
+    return itemPublishFlag !== false;
+  }
+  // Collection does NOT publish by default. Show only if item has publish: true.
+  return itemPublishFlag === true;
+});
+
+
+// Transform the raw collection entries into a format suitable for the ArticleGrid component.
+const articles = allEntries.map((entry) => {
+  const data = entry.data as Record<string, any>; 
+
+  // Helper function to normalize fields that might be a single string or an array of strings.
+  // Also handles cases where keys might be singular (e.g., 'author') instead of plural ('authors').
+  const normalizeToArray = (singularKey: string, pluralKey: string): string[] => {
+    let value = data[pluralKey] || data[singularKey];
+    if (typeof value === 'string') {
+      // If it's a non-empty string, put it into an array.
+      return value.trim() ? [value.trim()] : [];
+    }
+    if (Array.isArray(value)) {
+      // Filter out non-strings or empty strings from the array.
+      return value
+        .filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+        .map(item => item.trim());
+    }
+    return []; // Default to an empty array if the field is missing or not a string/array.
+  };
+
+  // Generate a custom slug using the imported slugify function. 
+  // The slug will be generated from the article's title.
+  const customSlug = slugify(data.title || 'Untitled Issue'); 
+
+  // Construct the full slug for the article page using the custom slug.
+  // const articleUrl = `/learn-with/${collectionName}/${customSlug}`; // Kept for reference, but ArticleGrid will use raw slug
+
+  // Determine the display date, falling back through various date fields or to current date.
+  let dateValue = data.date_reported || data.date_created || data.date_modified;
+  if (dateValue instanceof Date) {
+    dateValue = dateValue.toISOString();
+  } else if (!dateValue) {
+    dateValue = new Date().toISOString();
+  }
+  // If dateValue was already a string from frontmatter, it remains a string.
+
+  return {
+    id: entry.id, 
+    title: data.title || 'Untitled Issue',
+    slug: customSlug, 
+    banner_image: data.banner_image, 
+    portrait_image: data.portrait_image, 
+    imageAlt: `Image for ${data.title || 'Untitled Issue'}`, 
+    date: dateValue, 
+    lede: data.lede || '', 
+    tags: normalizeToArray('tag', 'tags'),
+    authors: normalizeToArray('author', 'authors'),
+    categories: normalizeToArray('category', 'categories'),
+  };
+});
+
+// Define page metadata. This can be made dynamic if 'us.astro' handles multiple collections in the future.
+const pageTitle = "Issue Resolutions"; 
+const pageDescription = "An overview of resolved issues and their detailed analysis."; 
+
+---
+
+<MagazineIndexLayout
+  title={pageTitle} 
+  description={pageDescription}
+  articles={articles}
+  collectionDisplayName={pageTitle} 
+>
+  <div slot="hero-content">
+    <AnimationWrapper>
+      <Hero
+        title="Explore Issue Resolutions"
+        subtitle="Insights & Solutions"
+        description="A little frustration for a lot of issues. Worked through, resolved, and documented to share."
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+      />
+    </AnimationWrapper>
+  </div>
+</MagazineIndexLayout>

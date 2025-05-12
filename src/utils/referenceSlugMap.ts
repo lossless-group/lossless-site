@@ -56,7 +56,7 @@ export function getOriginalFilenameMap(
     console.log('\n[getOriginalFilenameMap] Processing entry.id:', entry.id);
     console.log('[getOriginalFilenameMap] entry.data.slug:', entry.data.slug);
 
-    // Aggressively comment: Use the FULL relative path (minus .md, lowercased) from Astro's id for nested files.
+// Use the FULL relative path (minus .md, lowercased) from Astro's id for nested files.
     // This fixes the bug where nested concepts (e.g., Explainers for AI/AI Hallucinations.md) were not mapped correctly.
     // Astro's entry.id is relative to the content root (e.g., concepts/Explainers for AI/AI Hallucinations.md)
     // Remove the collectionDir prefix, then remove .md and lowercase for matching.

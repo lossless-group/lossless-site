@@ -1,5 +1,5 @@
 [
   { "label": "X", "icon": "/visuals/appIcon__X-Twitter.svg", "url": "https://twitter.com/lossless_group" },
-  { "label": "GitHub", "icon": "/visuals/trademark(_Git-Hub_)--Lightest.svg", "url": "https://github.com/lossless-group" },
-  { "label": "LinkedIn", "icon": "/visuals/appIcon__LinkedIn--Lighter.svg", "url": "https://linkedin.com/company/lossless-group" }
+  { "label": "GitHub", "icon": "/visuals/appIcon__GitHub--Lighter.svg", "url": "https://github.com/lossless-group" },
+  { "label": "LinkedIn", "icon": "/visuals/appIcon__LinkedIn.svg", "url": "https://linkedin.com/company/lossless-group" }
 ]

@@ -46,7 +46,32 @@ const hProperties: Record<string, any> =
 // =============================
 console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
 // DEBUG: Output full tableOfContents node structure
-const tocNode = children.find(child => child.type === 'tableOfContents');
+function sanitizeTOCNode(toc: any): any {
+  if (!toc?.data?.map?.children) return toc;
+
+  toc.data.map.children = toc.data.map.children.filter(item => {
+    const link = item.children?.[0]?.children?.[0];
+    return link?.type === 'link' && link.children?.length > 0;
+  });
+
+  return toc;
+}
+
+const tocNode = sanitizeTOCNode(
+  children.find(child => child.type === 'tableOfContents')
+);
+
+function createEmptyRoot(): Root {
+  return { 
+    type: 'root', 
+    children: [], 
+    data: {}, 
+    position: { 
+      start: { line: 1, column: 1, offset: 0 },
+      end: { line: 1, column: 1, offset: 0 }
+    } 
+  };
+}
 console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
 
 // =============================
@@ -74,7 +99,7 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
           type: 'root',
           children: children.filter(child => child.type !== 'tableOfContents'),
           data: { hProperties }
-        }} 
+        }}         
         data={data} 
         compiledContent={compiledContent}
         />
@@ -85,7 +110,7 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
     <h2 class="toc-title">Table of Contents</h2>
     <div class="toc-scroll-area">
       <AstroMarkdown 
-        node={children.find(child => child.type === 'tableOfContents') || { type: 'root', children: [] }}
+        node={tocNode || createEmptyRoot()}
         data={{ ...data, renderingToC: true }}
         compiledContent={compiledContent}
       />

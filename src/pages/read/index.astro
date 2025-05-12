@@ -1,14 +1,10 @@
 ---
-/**
- * site/src/pages/read/index.astro
- * This page renders a grid of essays from the essaysCollection, styled and structured to match
- * the approach of site/src/pages/more-about/index.astro, per project rules.
- * Aggressive, detailed commenting is used throughout.
- */
+// site/src/reader/index.astro
+// This page renders a grid of essays from the essaysCollection, styled and structured to match
+// the approach of site/src/pages/more-about/index.astro, per project rules.
+// Aggressive, detailed commenting is used throughout.
 
-// Using Node.js path module for robust filename extraction
-// Standard path module import - more compatible with TypeScript in Astro
-import { basename } from 'path';
+import path from 'node:path';
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
@@ -46,7 +42,6 @@ interface EssayItem {
   summary?: string;
   data: EssayFrontmatter;
   url: string;
-  tagRoute?: string;
 }
 
 // Fetch all essays from the essays collection
@@ -60,10 +55,10 @@ const publishedEssays = essayEntries.filter(entry => {
 });
 
 // Sort essays by title (or another property if desired)
+// Add type assertions to ensure title properties are treated as strings
 publishedEssays.sort((a, b) => {
-  // Type assertion to ensure TypeScript recognizes these as strings
-  const titleA = (a.data as EssayFrontmatter).title || '';
-  const titleB = (b.data as EssayFrontmatter).title || '';
+  const titleA = (a.data.title || '') as string;
+  const titleB = (b.data.title || '') as string;
   return titleA.localeCompare(titleB);
 });
 
@@ -71,8 +66,8 @@ publishedEssays.sort((a, b) => {
 const essayItems: EssayItem[] = publishedEssays.map(entry => {
   // Use Node.js path module to robustly extract the filename (preserving case)
   // - entry.id is always the relative path from the collection root, with original casing
-  // - basename is safer and clearer than split/pop
-  const filename = basename(entry.id, '.md'); // Preserves original case
+  // - path.basename is safer and clearer than split/pop
+  const filename = path.basename(entry.id, '.md'); // Preserves original case
   const slug = filename.toLowerCase().replace(/\s+/g, '-');
   // Use title and lede directly from frontmatter, fallback to filename (preserving case, dashes/underscores to space)
   let { title, lede = '', banner_image = '', tags = [], summary = '' } = entry.data as EssayFrontmatter;
@@ -112,7 +107,7 @@ console.log(essayItems);
     <p class="text-lg mb-8">Browse essays and longform writing from our library.</p>
 
     <div class="flex gap-4 mb-8">
-      <a href="/reader" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Essays</a>
+      <a href="/read/through" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Essays</a>
       <!-- Add more navigation as needed -->
     </div>
 

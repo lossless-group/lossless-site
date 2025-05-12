@@ -1,8 +1,8 @@
 {
-  "Lost in Public": [
-    {"Issue Resolutions": "/thread/issue-resolutions"},
-    {"Link Label 2": "/path-2"},
-    {"Link Label 3": "/path-3"}
+  "Learn With Us": [
+    {"Issue Resolutions": "/learn-with/us"},
+    {"Essays": "/read/through"},
+    {"Reference": "/more-about"}
   ],
   "Vibe Coding Resources": [
     {"Reminders": "/thread/reminders"},

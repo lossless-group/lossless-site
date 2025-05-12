@@ -1,5 +1,6 @@
 import { defineCollection, z, getCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
+import { basename, dirname, extname } from 'node:path';
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
@@ -242,6 +243,39 @@ const specsCollection = defineCollection({
 // Close: Specs Collection Definition
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+// ***
+// Open: Issue Resolution Collection Definition (Ultra-Minimalist, following example)
+// Type: Content Collection
+// Purpose: For magazine-style articles detailing issue resolutions.
+// Schema: Permissive, passes through all frontmatter.
+// Transform: Passes data through. Astro will auto-generate id and slug.
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const issueResolutionCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/generated-content/lost-in-public/issue-resolution" }),
+  schema: z.object({
+    publish: z.boolean().optional(), // Allows individual entries to override collection default
+  }).passthrough().transform((data) => ({
+    ...data // Pass through all original frontmatter fields.
+            // Astro will automatically create 'id' and 'slug' properties for the entry.
+            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
+  }))
+});
+
+// ========================================
+// Close: Issue Resolution Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ---- NEW: Configuration for Publishing Defaults ----
+export const collectionPublishingDefaults = {
+  'issue-resolution': {
+    publishByDefault: true, // true = publish all EXCEPT items with publish: false
+                            // false = publish none EXCEPT items with publish: true
+  },
+  // Add other collections here as needed
+};
+// ---- END NEW ----
+
 // Define where to find the content - using relative paths from src/content
 export const paths = {
   'cards': 'cards',
@@ -255,6 +289,7 @@ export const paths = {
   'prompts': './src/generated-content/lost-in-public/prompts',
   'reminders': './src/generated-content/lost-in-public/reminders',
   'specs': './src/generated-content/specs',
+  'issue-resolution': './src/generated-content/lost-in-public/issue-resolution',
 };
 
 // Export the collections
@@ -271,4 +306,5 @@ export const collections = {
   'prompts': promptsCollection,
   'reminders': remindersCollection,
   'specs': specsCollection,
+  'issue-resolution': issueResolutionCollection,
 };
