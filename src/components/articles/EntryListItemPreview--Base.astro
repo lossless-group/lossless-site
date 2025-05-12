@@ -66,7 +66,8 @@ const imageSrc = portraitImageSrc || '/images/placeholders/default-banner-300x20
 const imageAlt = bannerImageSrc ? data.banner_image.alt : `Visual representation for ${title}`; // Use data.imageAlt
 
 // Styling for the active state
-const activeClasses = isActive ? 'border-sky-500 dark:border-sky-400 ring-2 ring-sky-500 dark:ring-sky-400 shadow-lg' : ''; // Inactive has no specific border/ring
+// Use a custom class for active items instead of Tailwind classes
+const activeClasses = isActive ? 'active-preview-item shadow-lg' : ''; // Inactive has no specific border/ring
 
 // Generate a unique ID for this component instance for JS targeting
 const uniqueId = `preview-${Math.random().toString(36).substring(2, 9)}`;
@@ -167,8 +168,58 @@ const tooltipContent = `Authors: ${authorsString}\nUpdated: ${displayDate}\nTags
 
 <style>
   /* Add any specific styles for EntryListItemPreview--Base.astro here */
+  .preview-base {
+    position: relative;
+    border: none; /* Remove default border */
+    transition: all 0.2s ease-in-out;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  
+  /* Gradient borders for active items using the brand gradient - top and bottom only */
+  .preview-base.active-preview-item::before,
+  .preview-base.active-preview-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--grd--lossless-eastern-crimson);
+  }
+  
+  .preview-base.active-preview-item::before {
+    top: 0;
+  }
+  
+  .preview-base.active-preview-item::after {
+    bottom: 0;
+  }
+  
+  /* Add subtle left indicator for active item */
+  .preview-base.active-preview-item {
+    background-color: rgba(14, 165, 233, 0.05); /* Very subtle sky blue background */
+  }
+  
+  /* For backwards compatibility with any script that might add this class */
+  .preview-base.is-active-preview::before,
+  .preview-base.is-active-preview::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--grd--lossless-eastern-crimson);
+  }
+  
+  .preview-base.is-active-preview::before {
+    top: 0;
+  }
+  
+  .preview-base.is-active-preview::after {
+    bottom: 0;
+  }
+  
   .preview-base.is-active-preview {
-    /* This class is added by ContentNavSidebar's script, matches 'activeClasses' for consistency */
-    /* border-color: var(--theme-primary, blue); */
+    background-color: rgba(14, 165, 233, 0.05);
   }
 </style>
