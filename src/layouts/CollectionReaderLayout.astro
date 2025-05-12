@@ -1,50 +1,86 @@
 ---
 // site/src/layouts/CollectionReaderLayout.astro
+/**
+ * CollectionReaderLayout.astro
+ * Layout for displaying collection entries with a sidebar navigation
+ * Processes markdown content and renders it using AstroMarkdown component
+ */
+
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
-import remarkImages from 'remark-images'; 
+import remarkImages from '@utils/markdown/remark-images'; 
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
+import type { Root } from 'mdast';
 
 import CollectionSidebar from '@components/articles/ContentNavSidebar.astro';
+import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
+import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
 // Define the expected props structure for type safety and clarity
 interface Props {
-  collection: string; 
-  entry: any; 
+  collection: string;
+  entry: any;
   essays: any[];
 }
 
 // Destructure props passed from the page component
 const { collection, entry, essays } = Astro.props as Props;
 
-// Initialize MDAST node variable and rendered HTML string
+// Initialize MDAST node variable
 let mdastNode = null;
-let renderedHtml = '';
+let tocNode = null;
 
 // Process markdown content only if a specific entry is being displayed
 if (entry) {
-  // Use the pre-rendered HTML from the entry object
-  // This assumes `entry.rendered.html` is passed from getStaticPaths
-  renderedHtml = entry.rendered?.html || '';
-
-  // Optionally, re-process the body if needed for other reasons,
-  // but primarily rely on the pre-rendered HTML.
-  // The unified processing logic can remain for potential future use
-  // or if we need to extract specific data from the MDAST.
+  // Initialize the unified processor
   const processor = unified()
-    .use(remarkParse) 
-    .use(remarkGfm) 
+    .use(remarkParse)
+    .use(remarkGfm)
     .use(remarkImages) 
     .use(remarkBacklinks)
-    .use(remarkCitations); 
+    .use(remarkCitations)
+    .use(remarkTableOfContents);
 
   // Parse the markdown content into an MDAST tree
   const mdast = processor.parse(entry.body || '');
+  
   // Run transformations on the MDAST tree
   mdastNode = await processor.run(mdast);
+  
+  // Debug output to help troubleshoot
+  markdownDebugger.log('CollectionReaderLayout.astro Debug');
+  markdownDebugger.writeDebugFile('collection-reader-mdast', mdastNode);
+  markdownDebugger.verbose('MDAST structure:', mdastNode);
+  
+  // Extract the Table of Contents node if it exists
+  if (mdastNode && Array.isArray(mdastNode.children)) {
+    tocNode = mdastNode.children.find(child => child.type === 'tableOfContents');
+  }
+}
 
+// Prepare the data object for AstroMarkdown component
+// This matches the expected structure in AstroMarkdown.astro
+const contentData = entry ? {
+  path: entry.id, // Path to the markdown file
+  id: entry.id,   // ID of the entry
+  collection: collection,
+  ...entry.data   // Include all frontmatter data
+} : null;
+
+// Create an empty root node function for fallback
+function createEmptyRoot(): Root {
+  return { 
+    type: 'root', 
+    children: [], 
+    data: {}, 
+    position: { 
+      start: { line: 1, column: 1, offset: 0 },
+      end: { line: 1, column: 1, offset: 0 }
+    } 
+  };
 }
 
 ---
@@ -54,16 +90,147 @@ if (entry) {
   </aside>
 
   <main class="reader-pane flex-1 p-2 md:p-4 lg:p-6 overflow-y-auto">
-    <div id="reader-content-wrapper">
-      {entry ? (
-        <div>
-          <h2>{entry.data.title}</h2>
-          {/* Use Astro's directive to render HTML */}
-          <div set:html={renderedHtml} />
-        </div>
-      ) : (
-        <h2>Collection: {collection}</h2>
+    <div class="content-wrapper">
+      <div class="content-inner">
+        {entry ? (
+          <div>
+            <h2>{entry.data.title}</h2>
+            {/* Use AstroMarkdown component to render the AST node */}
+            {mdastNode && contentData && (
+              <article class="prose main-content">
+                <AstroMarkdown 
+                  node={{
+                    type: 'root',
+                    children: mdastNode.children ? mdastNode.children.filter(child => child.type !== 'tableOfContents') : [],
+                    data: mdastNode.data || {}
+                  }}
+                  data={contentData}
+                  compiledContent={entry.body}
+                />
+              </article>
+            )}
+          </div>
+        ) : (
+          <h2>Collection: {collection}</h2>
+        )}
+      </div>
+      
+      {/* Table of Contents sidebar */}
+      {tocNode && (
+        <aside class="toc-sidebar">
+          <h2 class="toc-title">Table of Contents</h2>
+          <div class="toc-scroll-area">
+            <AstroMarkdown 
+              node={tocNode || createEmptyRoot()}
+              data={{ ...contentData, renderingToC: true }}
+              compiledContent={entry?.body || ''}
+            />
+          </div>
+        </aside>
       )}
     </div>
   </main>
 </div>
+
+<style>
+  .prose {
+    color: var(--clr-lossless-primary-light);
+    max-width: 65ch;
+    padding: 1rem;
+  }
+
+  .prose > :global(h1:first-child) {  
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .prose :global(h2) {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h3) {
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(p), .prose :global(.paragraph) {
+    margin-bottom: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .prose :global(a) {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: none;
+  }
+
+  .prose :global(a:hover) {
+    text-decoration: underline;
+  }
+
+  .content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: visible;
+    position: relative;
+  }
+
+  .content-inner {
+    max-width: 65ch;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  .toc-sidebar {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    width: 220px;
+    flex-shrink: 0;
+  }
+
+  .toc-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .toc-scroll-area {
+    overflow-y: auto;
+    max-height: calc(100vh - 4rem);
+    padding-right: 0.5rem;
+    border-left: 1px solid var(--clr-lossless-accent--brightest);
+    padding-left: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .toc-sidebar :global(ul) {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .toc-sidebar :global(li) {
+    margin: 0.3rem 0;
+  }
+
+  .toc-sidebar :global(a) {
+    color: var(--clr-lossless-primary-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .toc-sidebar :global(a:hover) {
+    color: var(--clr-lossless-accent--brightest);
+  }
+</style>
