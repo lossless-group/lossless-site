@@ -1,11 +1,33 @@
 ---
 import "@styles/global.css";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
+
+// Import social icons data
+import socialIconsData from "@content/basics/socialIcons.json";
+
+// Add Discord URL (not in the JSON) and ensure Twitter icon uses the Lightest version
+const socialIcons = [
+  { label: "Discord", icon: "/visuals/appIcon__Discord--Lighter.svg", url: "https://discord.gg/lossless" },
+  // Adjust Twitter icon to use the Lightest version that was previously used
+  { label: "X", icon: "/visuals/appIcon__X-Twitter--Lightest.svg", url: "https://twitter.com/lossless_group" },
+  { label: "GitHub", icon: "/visuals/appIcon__GitHub--Lighter.svg", url: "https://github.com/lossless-group" },
+  { label: "LinkedIn", icon: "/visuals/appIcon__LinkedIn.svg", url: "https://linkedin.com/company/lossless-group" }
+];
+
+// Define navigation links for reuse in both desktop and mobile menus
+const navLinks = [
+  { href: "/about/", label: "About" },
+  { href: "/read/through", label: "Reader" },
+  { href: "/toolkit", label: "Toolkit" },
+  { href: "/more-about", label: "Reference" },
+  { href: "/workflow/changelog", label: "Changelog" }
+];
 ---
 
 <header class="header">
   <div class="header-container-row">
-    <a href="/" aria-label="Return to homepage">
+    <!-- Logo section -->
+    <a href="/" class="logo-link" aria-label="Return to homepage">
       <img
         class="logo-box"
         src="/visuals/trademark__Lossless.svg"
@@ -13,18 +35,46 @@ import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSepa
         has dramatic impacts on potential performance later."
       />
     </a>
-    <span class="connect-with-us-icons">
-      <a href="/about/">About</a>
-      <a href="/read/through">Reader</a>
-      <a href="/toolkit">Toolkit</a>
-      <a href="/more-about">Reference</a>
-      <a href="/workflow/changelog">Changelog</a>
-      <img src="/visuals/appIcon__Discord.svg" alt="" />
-      <img src="/visuals/appIcon__X-Twitter.svg" alt="" />
-      <img src="/visuals/appIcon__GitHub--Lighter.svg" alt="" />
-      <img src="/visuals/appIcon__LinkedIn.svg" alt="" />
-    </span>
+    
+    <!-- Desktop navigation (hidden on mobile) -->
+    <nav class="site-navigation desktop-only">
+      {navLinks.map(link => (
+        <a href={link.href}>{link.label}</a>
+      ))}
+    </nav>
+    
+    <!-- Social icons container (hidden on mobile) -->
+    <div class="social-icons desktop-only">
+      {socialIcons.map(icon => (
+        <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
+          <img src={icon.icon} alt={icon.label} />
+        </a>
+      ))}
+    </div>
+    
+    <!-- Mobile hamburger menu button -->
+    <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+      <span class="hamburger-icon"></span>
+    </button>
   </div>
+  
+  <!-- Mobile navigation menu (hidden by default) -->
+  <div class="mobile-menu" id="mobile-menu">
+    <nav class="mobile-navigation">
+      {navLinks.map(link => (
+        <a href={link.href}>{link.label}</a>
+      ))}
+    </nav>
+    
+    <div class="mobile-social-icons">
+      {socialIcons.map(icon => (
+        <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
+          <img src={icon.icon} alt={icon.label} />
+        </a>
+      ))}
+    </div>
+  </div>
+  
   <div class="header-separator">
     <!-- Use enhanced separator with specific styling for the header -->
     <ThinGradientBleedSeparator
@@ -35,6 +85,7 @@ import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSepa
 </header>
 
 <style>
+  /* Base header styles */
   .header {
     position: fixed;
     background-color: var(--clr-primary-bg);
@@ -44,53 +95,53 @@ import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSepa
     left: 0;
     right: 0;
   }
+  
+  /* Responsive logo sizing */
   .logo-box {
     width: auto;
-    height: clamp(34px, 8vw, 100px);
-    max-height: 4vh;
+    height: clamp(34px, 4vw, 50px); /* Slightly adjusted for better mobile display */
+    transition: height 0.3s ease; /* Smooth transition when resizing */
   }
 
-  /* Style for the logo link to ensure it doesn't affect layout */
-  .header-container-row > a {
+  /* Style for the logo link */
+  .logo-link {
     display: flex;
     text-decoration: none;
     padding: 0;
     margin: 0;
   }
 
+  /* Main header row container */
   .header-container-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25em 3em 1.25em;
-    /* max-height: 6vh; */
+    padding: clamp(0.75em, 2vw, 1.25em) clamp(1em, 5vw, 3em);
+    transition: padding 0.3s ease; /* Smooth transition when resizing */
   }
 
-  /* Add spacing for the separator */
+  /* Separator styling */
   .header-separator {
     margin-top: 0;
     margin-bottom: 0;
-    /* padding-bottom: 1.25em; */
   }
 
-  .connect-with-us-icons {
+  /* Desktop navigation styles */
+  .site-navigation {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    gap: 2vw;
+    justify-content: center;
+    gap: clamp(1vw, 2vw, 2.5vw); /* Responsive spacing */
+    margin-right: 2vw;
 
-    & img {
-      width: clamp(14px, 3vw, 32px);
-      height: clamp(14px, 3vw, 32px);
-      object-fit: contain;
-      aspect-ratio: 1 / 1;
-    }
     & a {
       text-decoration: none;
       color: var(--clr-lossless-primary-light);
-      font-size: 1em;
+      font-size: clamp(0.9em, 1.1vw, 1.25em); /* Increased max font size */
+      transition: font-size 0.3s ease, color 0.2s ease; /* Smooth transitions */
+      white-space: nowrap; /* Prevent text wrapping */
 
       &:hover,
       &:focus-visible {
@@ -98,4 +149,184 @@ import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSepa
       }
     }
   }
+
+  /* Social icons styles */
+  .social-icons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: clamp(0.5vw, 1vw, 1.5vw); /* Responsive spacing */
+
+    & a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    & img {
+      width: clamp(14px, 2.5vw, 28px); /* Responsive icon sizing */
+      height: clamp(14px, 2.5vw, 28px);
+      object-fit: contain;
+      aspect-ratio: 1 / 1;
+      transition: width 0.3s ease, height 0.3s ease; /* Smooth transitions */
+    }
+  }
+  
+  /* Hamburger menu button (hidden on desktop) */
+  .mobile-menu-toggle {
+    display: none; /* Hidden by default on desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+  }
+  
+  /* Hamburger icon styling */
+  .hamburger-icon {
+    display: block;
+    position: relative;
+    width: 24px;
+    height: 2px;
+    background-color: var(--clr-lossless-primary-light);
+    transition: background-color 0.3s ease;
+    
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 2px;
+      background-color: var(--clr-lossless-primary-light);
+      transition: transform 0.3s ease;
+    }
+    
+    &::before {
+      top: -8px;
+    }
+    
+    &::after {
+      bottom: -8px;
+    }
+  }
+  
+  /* Active state for hamburger icon (when menu is open) */
+  .mobile-menu-toggle.active .hamburger-icon {
+    background-color: transparent;
+    
+    &::before {
+      transform: translateY(8px) rotate(45deg);
+    }
+    
+    &::after {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+  }
+  
+  /* Mobile menu container (hidden by default) */
+  .mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--clr-primary-bg);
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease;
+  }
+  
+  /* Mobile menu active state */
+  .mobile-menu.active {
+    display: block;
+    max-height: 100vh;
+  }
+  
+  /* Mobile navigation styling */
+  .mobile-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    
+    & a {
+      text-decoration: none;
+      color: var(--clr-lossless-primary-light);
+      font-size: 1.2rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &:hover,
+      &:focus-visible {
+        color: var(--clr-link);
+      }
+    }
+  }
+  
+  /* Mobile social icons styling */
+  .mobile-social-icons {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    & img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  
+  /* Media query for tablet and mobile devices */
+  @media (max-width: 768px) {
+    /* Hide desktop navigation and social icons */
+    .desktop-only {
+      display: none;
+    }
+    
+    /* Show mobile menu toggle button */
+    .mobile-menu-toggle {
+      display: block;
+    }
+    
+    /* Adjust header padding for mobile */
+    .header-container-row {
+      padding: 0.75em 1.5em;
+    }
+  }
 </style>
+
+<script>
+  // Wait for document to be fully loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get references to elements
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileNavLinks = document.querySelectorAll('.mobile-navigation a');
+    
+    // Toggle mobile menu when hamburger is clicked
+    mobileMenuToggle?.addEventListener('click', () => {
+      mobileMenuToggle.classList.toggle('active');
+      mobileMenu?.classList.toggle('active');
+    });
+    
+    // Close mobile menu when a nav link is clicked
+    mobileNavLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenuToggle?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+      });
+    });
+  });
+</script>

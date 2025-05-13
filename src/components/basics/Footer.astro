@@ -116,13 +116,13 @@ try {
 
 <style>
 .footer-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
   padding: 2rem 1.5rem;
-  background: var(--footer-bg, #16171a);
   color: var(--footer-fg, #fff);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 .footer-left {
   display: flex;
@@ -188,14 +188,12 @@ try {
   color: var(--footer-muted, #aaa);
 }
 .footer-right {
-  display: flex;
-  margin-right: 2.5rem;
-  flex-direction: row-reverse;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
   gap: 2.5rem;
-  flex-wrap: wrap;
-  /* Align all columns to the right edge of the footer */
-  justify-content: flex-end;
+  justify-content: end;
   text-align: right;
+  justify-self: end; /* Align to the right side of the grid cell */
 }
 .footer-link-column {
   min-width: 140px;
@@ -223,15 +221,52 @@ try {
 .footer-link-column a:hover {
   color: var(--footer-link-hover, #6cf);
 }
-@media (max-width: 700px) {
+/* Mobile breakpoint */
+@media (max-width: 768px) {
   .footer-container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 2rem;
   }
+  
+  /* Reverse the order of grid items on mobile */
+  .footer-left {
+    grid-row: 2;
+  }
+  
   .footer-right {
-    flex-direction: column-reverse;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
+    margin-right: 0;
+    text-align: left;
+    justify-self: start;
+  }
+  
+  .footer-link-column {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .footer-link-header {
+    font-size: clamp(1em, 4vw, 1.1em);
+  }
+  
+  .footer-link-column a {
+    font-size: clamp(0.85em, 3.5vw, 0.95em);
+  }
+  
+  .org-company {
+    font-size: clamp(0.95em, 4vw, 1.1em);
+  }
+  
+  .org-location-name {
+    font-size: clamp(0.9em, 3.5vw, 0.98em);
+  }
+  
+  .org-address {
+    font-size: clamp(0.85em, 3vw, 0.93em);
   }
 }
 </style>
