@@ -4,6 +4,7 @@ import { NODE_ENV, isProduction, isDevelopment } from './src/utils/envUtils.js';
 
 // Now import other dependencies
 import { defineConfig } from 'astro/config';
+import svelte from '@astrojs/svelte';
 import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
@@ -15,6 +16,7 @@ import vercel from '@astrojs/vercel';
 import fs from 'fs';
 import path from 'path';
 import icon from 'astro-icon';
+import sitemap from '@astrojs/sitemap';
 
 // Debug log environment
 console.log('Environment in astro.config.mjs:', {
@@ -29,6 +31,7 @@ console.log('Environment in astro.config.mjs:', {
  * @typedef {string | { id: string; [key: string]: any }} ShikiLang
  */
 
+
 /** @type {ShikiLang[]} */
 const langs = [
   'javascript',
@@ -39,27 +42,34 @@ const langs = [
   'python'
 ];
 
-// Default content path for production (Docker)
-let contentBasePath = '/lossless-monorepo/content';
+// Determine content path based on environment
+let contentBasePath;
 
-if (process.env.NODE_ENV !== 'production') {
-  // For development, check for monorepo content first
-  const monorepoContent = path.resolve(process.cwd(), '..', 'content');
-  const generatedContent = path.resolve(process.cwd(), 'src/generated_content');
-  
-  if (fs.existsSync(monorepoContent)) {
-    contentBasePath = monorepoContent;
-    console.log('Using monorepo content directory');
-  } else if (fs.existsSync(generatedContent)) {
-    contentBasePath = generatedContent;
-    console.log('Using generated content directory');
-  } else {
-    console.log('Using production content path (fallback)');
-  }
+switch (process.env.DEPLOY_ENV) {
+  case 'LocalSiteOnly':
+    contentBasePath = path.resolve(process.cwd(), 'src/generated-content');
+    break;
+  case 'LocalMonorepo':
+    contentBasePath = path.resolve(process.cwd(), '..', 'content');
+    break;
+  case 'Vercel':
+    contentBasePath = path.resolve(process.cwd(), 'src/generated-content');
+    break;
+  case 'Railway':
+    contentBasePath = '/app/content';
+    break;
+  default:
+    contentBasePath = '/lossless-monorepo/content';
 }
 
-console.log(`Content path resolved to: ${contentBasePath}`);
-console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+// Log the configuration
+console.log('Content configuration:', {
+  isProduction,
+  contentBasePath,
+  cwd: process.cwd(),
+  resolvedPath: path.resolve(contentBasePath),
+  DEPLOY_ENV: process.env.DEPLOY_ENV || 'Not set'
+});
 
 // Verify the content directory exists
 if (!fs.existsSync(contentBasePath)) {
@@ -69,6 +79,7 @@ if (!fs.existsSync(contentBasePath)) {
 export default defineConfig({
   markdown: {
     syntaxHighlight: 'shiki',
+    // Syntax Highlighting with Shiki in codeblocks
     shikiConfig: {
       theme: 'github-dark',
       langs: /** @type {any} */ (langs)
@@ -104,7 +115,9 @@ export default defineConfig({
     mdx(),
     icon({
       iconDir: "src/assets/Icons"
-    })
+    }),
+    svelte({ extensions: ['.svelte'] }),
+    sitemap()
   ], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
@@ -125,8 +138,7 @@ export default defineConfig({
         '@content-root': contentBasePath
       }
     },
-    // --- Vite server.fs.allow fix for dev-toolbar/entrypoint.js error ---
-    // This allows Vite to serve files from the project root and node_modules, preventing
+    // server.fs.allow: Vite will serve files from the project root and node_modules, preventing
     // 'outside of Vite serving allow list' errors when dependencies are resolved with absolute paths.
     // If you are in a monorepo, add the monorepo root (e.g., '../') as needed.
     server: {
