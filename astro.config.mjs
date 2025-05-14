@@ -5,6 +5,7 @@
  */
 
 import { defineConfig } from 'astro/config';
+import svelte from '@astrojs/svelte';
 import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
@@ -16,6 +17,8 @@ import remarkTableOfContents from './src/utils/markdown/remark-toc';
 import vercel from '@astrojs/vercel';
 
 import db from '@astrojs/db';
+
+import sitemap from '@astrojs/sitemap';
 
 /** @type {ShikiLang[]} */
 const langs = [
@@ -30,6 +33,7 @@ const langs = [
 export default defineConfig({
   markdown: {
     syntaxHighlight: 'shiki',
+    // Syntax Highlighting with Shiki in codeblocks
     shikiConfig: {
       theme: 'github-dark',
       langs: /** @type {any} */ (langs)
@@ -60,7 +64,7 @@ export default defineConfig({
   },
   output: "server",
   adapter: vercel(),
-  integrations: [mdx(), db()], // Shiki is the default highlighter for markdown/code blocks
+  integrations: [mdx(), db(), svelte({ extensions: ['.svelte'] }), sitemap()], 
   vite: {
     plugins: [tailwindcss()],
     resolve: {
@@ -75,8 +79,7 @@ export default defineConfig({
         '@content': fileURLToPath(new URL('./src/content', import.meta.url))
       }
     },
-    // --- Vite server.fs.allow fix for dev-toolbar/entrypoint.js error ---
-    // This allows Vite to serve files from the project root and node_modules, preventing
+    // server.fs.allow: Vite will serve files from the project root and node_modules, preventing
     // 'outside of Vite serving allow list' errors when dependencies are resolved with absolute paths.
     // If you are in a monorepo, add the monorepo root (e.g., '../') as needed.
     server: {
