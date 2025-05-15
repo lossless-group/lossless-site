@@ -10,8 +10,8 @@ const CitedSources = defineTable({
     id: column.text({ primaryKey: true }),
     
     // Timestamps
-    created_at: column.date({ default: () => new Date() }),
-    updated_at: column.date({ default: () => new Date() }),
+    created_at: column.date(),
+    updated_at: column.date(),
     
     // Basic citation metadata
     unique_source_url: column.text(),
@@ -26,11 +26,11 @@ const CitedSources = defineTable({
     companion_markdown_file_for_source: column.text(),
     
     // Array of files that reference this citation
-    referenced_in_instances: column.json({ default: () => [] }),
+    referenced_in_instances: column.json({ default: [] }),
     
     // Relationships (stored as JSON arrays)
-    children_source_ids: column.json({ default: () => [] }),
-    parent_source_ids: column.json({ default: () => [] }),
+    children_source_ids: column.json({ default: [] }),
+    parent_source_ids: column.json({ default: [] }),
   }
 });
 
