@@ -1,0 +1,160 @@
+---
+/**
+ * Dynamic slide deck renderer for markdown-based presentations
+ * Uses RevealJS to render presentations from markdown content collections
+ * 
+ * This component creates a specialized presentation layout for slide decks
+ * that doesn't use the standard site header/footer/navigation
+ */
+
+// Import content collection utilities
+import { getCollection } from 'astro:content';
+
+// Get the collection and slug from the URL parameters
+const { collection, slug } = Astro.params;
+
+// Title for the presentation
+let title = 'Presentation';
+let presentationContent = null;
+
+// Validate that we have the required parameters
+if (!collection || !slug) {
+  return Astro.redirect('/404');
+}
+
+// Fetch the presentation content from the collection
+try {
+  // Convert the slug array to a path
+  const slidePath = Array.isArray(slug) ? slug.join('/') : slug;
+  title = `${collection}/${slidePath}`;
+  
+  // Get all entries from the specified collection
+  const entries = await getCollection(collection as any);
+  
+  // Find the matching entry by slug
+  const entry = entries.find(entry => {
+    // Get the entry slug and compare with the requested path
+    const entrySlug = entry.slug || '';
+    return entrySlug === slidePath;
+  });
+  
+  if (entry) {
+    // Get the rendered content if entry exists
+    const { Content } = await entry.render();
+    presentationContent = Content;
+    
+    // If the entry has a title in its data, use that
+    if (entry.data && entry.data.title) {
+      title = entry.data.title;
+    }
+  }
+} catch (error) {
+  console.error(`Error loading slide deck: ${error.message}`);
+}
+
+// RevealJS configuration options
+const revealOptions = {
+  controls: true,
+  progress: true,
+  slideNumber: true,
+  history: true,
+  keyboard: true,
+  overview: true,
+  center: true,
+  touch: true,
+  loop: false,
+  fragments: true,
+  transition: 'slide',
+  transitionSpeed: 'default',
+  backgroundTransition: 'fade',
+  theme: 'black'
+};
+
+// Convert options to a JSON string for client-side use
+const revealOptionsJson = JSON.stringify(revealOptions);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentation: {collection}/{slug}</title>
+  
+  <!-- RevealJS styles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.min.css" id="theme">
+  
+  <!-- Syntax highlighting for code blocks -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.min.css">
+  
+  <style>
+    /* Custom styles for presentations */
+    .reveal .slides {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    
+    /* Code blocks styling */
+    .reveal pre {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
+    
+    /* Custom slide background for title slides */
+    .title-slide {
+      background-color: #2c3e50 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <!-- Content will be rendered here -->
+      {slideContent && <slideContent />}
+      
+      <!-- Fallback if no content is available -->
+      {!slideContent && (
+        <section>
+          <h1>Presentation Not Found</h1>
+          <p>The requested presentation could not be loaded.</p>
+        </section>
+      )}
+    </div>
+  </div>
+
+  <!-- RevealJS scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.js"></script>
+  
+  <!-- RevealJS plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.min.js"></script>
+  
+  <script>
+    // Initialize RevealJS with configuration options
+    document.addEventListener('DOMContentLoaded', () => {
+      // Parse the options from the frontmatter
+      const options = JSON.parse('{JSON.stringify(revealOptions)}');
+      
+      // Initialize RevealJS
+      const deck = new Reveal(options);
+      
+      // Initialize plugins
+      deck.initialize({
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealNotes,
+          RevealZoom
+        ]
+      });
+    });
+  </script>
+</body>
+</html>
