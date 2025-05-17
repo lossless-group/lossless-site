@@ -1,6 +1,7 @@
 @import url("structure.css");
 @import url("fonts--google.css");
 @import url("animations.css");
+@import url("lossless-theme.css");
 
 :root {
     --elephant: hsl(191, 75%, 17%);
@@ -33,7 +34,6 @@
     --clr-elephant-primary-dark: var(--elephant);
     --clr-elephant-accent--brightest: var(--cyan-aqua--brightest);
 
-    --clr-lossless-primary-dark: var(--bastille);
     --clr-lossless-accent--brightest: var(--cyan-aqua--brightest);
     --clr-lossless-accent--aquamarine: var(--aquamarine);
     --clr-lossless-gloss--aquamarine: var(--gunmetal);

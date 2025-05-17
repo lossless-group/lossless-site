@@ -15,6 +15,8 @@ import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
 import remarkTableOfContents from './src/utils/markdown/remark-toc';
 import vercel from '@astrojs/vercel';
 
+import icon from 'astro-icon';
+
 /** @type {ShikiLang[]} */
 const langs = [
   'javascript',
@@ -58,7 +60,12 @@ export default defineConfig({
   },
   output: "server",
   adapter: vercel(),
-  integrations: [mdx()], // Shiki is the default highlighter for markdown/code blocks
+  integrations: [
+    mdx(),
+    icon({
+      iconDir: "src/assets/Icons"
+    })
+  ], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
     resolve: {

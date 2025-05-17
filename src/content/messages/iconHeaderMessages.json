@@ -5,52 +5,52 @@
       "icon": "src/assets/Icons/windmill.svg",
       "title": "A universe of cognitive, collaborative tooling",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
-      "iconClass": "text-blue-500",
+      "iconClass": "shade-mystic-turquoise",
       "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
       "messageClass": "",
       "animationClass": ""
     },
     {
-      "icon": "src/assets/Icons/shield.svg",
+      "icon": "src/assets/Icons/road.svg",
       "title": "Strategies that lead to entrepreneurial action",
       "message": "Your best people already have the ability and the attitude. Lossless surfaces strategies with toolkits to lead to faster results.",
-      "iconClass": "text-green-600",
+      "iconClass": "shade-eastern-blue",
       "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
       "messageClass": "text-sm",
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "src/assets/Icons/alien.svg",
+      "icon": "src/assets/Icons/radar.svg",
       "title": "Interfaces for deploying organization-wide data use.",
       "message": "Data is often in silos, in legacy formats, with unclear naming conventions. Lossless helps you deploy data use organization-wide.",
-      "iconClass": "text-blue-500",
+      "iconClass": "shade-purple-heart",
       "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
       "messageClass": "text-sm",
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "src/assets/Icons/apple.svg",
+      "icon": "src/assets/Icons/rocket.svg",
       "title": "AI Implementations for small teams to make exponential impact.",
       "message": "Give small teams the power tools to make exponential impact.",
-      "iconClass": "text-blue-500",
+      "iconClass": "shade-alazarin-crimson",
       "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
       "messageClass": "text-sm",
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "src/assets/Icons/artboard.svg",
+      "icon": "src/assets/Icons/chart-arrows.svg",
       "title": "Unify the organization around a Concept Model",
       "message": "Data Models and Content Models, built in isolation, need to map to a single source of truth.",
-      "iconClass": "text-blue-500",
+      "iconClass": "shade-jelly-bean",
       "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
       "messageClass": "text-sm",
       "animationClass": "aos-fade-up"
     },
     {
-      "icon": "src/assets/Icons/basket.svg",
+      "icon": "src/assets/Icons/mood-spark.svg",
       "title": "Multi-modal, multimedia, content automation",
       "message": "Data syncs across your team instantly. Real-time access, with 99.9% uptime.",
-      "iconClass": "text-blue-500",
+      "iconClass": "shade-porsche-orange",
       "headerClass": "text-xl font-bold text-primary-800 dark:text-primary-200 tracking-tight mb-1",
       "messageClass": "text-sm",
       "animationClass": "aos-fade-up"
