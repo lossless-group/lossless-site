@@ -14,6 +14,8 @@ import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
 import remarkTableOfContents from './src/utils/markdown/remark-toc';
 import vercel from '@astrojs/vercel';
+import fs from 'fs';
+import path from 'path';
 
 import icon from 'astro-icon';
 
@@ -26,6 +28,24 @@ const langs = [
   'shellscript',
   'python'
 ];
+
+// Determine if we're in a Docker/production environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Determine the content path based on environment
+// In production (Docker), content is at /lossless-monorepo/content
+// In development, content is at ../content (relative to site directory)
+const contentBasePath = isProduction 
+  ? '/lossless-monorepo/content'
+  : path.resolve(process.cwd(), '../content');
+
+console.log(`Content path resolved to: ${contentBasePath}`);
+console.log(`Environment: ${isProduction ? 'Production' : 'Development'}`);
+
+// Verify the content directory exists
+if (!fs.existsSync(contentBasePath)) {
+  console.warn(`WARNING: Content directory not found at ${contentBasePath}`);
+}
 
 export default defineConfig({
   markdown: {
@@ -77,7 +97,9 @@ export default defineConfig({
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
         '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        '@content': fileURLToPath(new URL('./src/content', import.meta.url))
+        '@content': fileURLToPath(new URL('./src/content', import.meta.url)),
+        // Add content root alias that points to the correct location in both environments
+        '@content-root': contentBasePath
       }
     },
     // --- Vite server.fs.allow fix for dev-toolbar/entrypoint.js error ---
@@ -90,7 +112,8 @@ export default defineConfig({
           '.', // always allow project root
           '../', // allow serving from parent directory
           'node_modules', // allow serving from node_modules
-          // '../', // uncomment if you need to allow the monorepo root
+          contentBasePath, // explicitly allow the content directory
+          '/lossless-monorepo', // allow the entire monorepo in production
         ]
       }
     }

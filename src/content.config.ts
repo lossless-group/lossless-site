@@ -1,6 +1,34 @@
 import { defineCollection, z, getCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
-import { basename, dirname, extname } from 'node:path';
+import { basename, dirname, extname, join, resolve } from 'node:path';
+import fs from 'fs';
+
+// Determine if we're in a Docker/production environment
+const isProduction = process.env.NODE_ENV === 'production' ||
+                     process.env.RAILWAY_ENVIRONMENT === 'production' ||
+                     process.env.RAILWAY_ENV === 'production';
+
+
+// Determine the content path based on environment
+// In production (Docker), content is at /lossless-monorepo/content
+// In development, content is at ../content (relative to site directory)
+const contentBasePath = isProduction 
+  ? '/lossless-monorepo/content'
+  : resolve(process.cwd(), '../content');
+
+// Function to resolve content paths based on environment
+function resolveContentPath(relativePath: string) {
+  // If the path already starts with ./src/generated-content, use it as is
+  if (relativePath.startsWith('./src/generated-content')) {
+    return relativePath;
+  }
+  
+  // Otherwise, resolve against the content base path
+  return join(contentBasePath, relativePath);
+}
+
+// Log the content paths for debugging
+console.log(`Content base path: ${contentBasePath}`);
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
@@ -11,7 +39,7 @@ const cardCollection = defineCollection({
 });
 
 const visualsCollection = defineCollection({
-  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: "./src/generated-content/visuals"}),  // Explicitly list image extensions
+  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
   schema: z.object({
     // Define base fields that all images should have
     id: z.string().optional(),
@@ -45,7 +73,7 @@ const visualsCollection = defineCollection({
 });
 
 const vocabularyCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/vocabulary"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("vocabulary")}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -81,7 +109,7 @@ const vocabularyCollection = defineCollection({
 
 // Concepts collection - follows same pattern as vocabulary
 const conceptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/concepts"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("concepts")}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -117,7 +145,7 @@ const conceptsCollection = defineCollection({
 
 // Concepts collection - follows same pattern as vocabulary
 const essaysCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/essays"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("essays")}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -154,7 +182,7 @@ const essaysCollection = defineCollection({
 });
 
 const promptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/lost-in-public/prompts"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/prompts")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -165,7 +193,7 @@ const promptsCollection = defineCollection({
 });
 
 const remindersCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/lost-in-public/reminders"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/reminders")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -176,7 +204,7 @@ const remindersCollection = defineCollection({
 });
 
 const changelogContentCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/changelog--content"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--content")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -188,7 +216,7 @@ const changelogContentCollection = defineCollection({
 
 
 const changelogCodeCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/changelog--code"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--code")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -211,7 +239,7 @@ const pagesCollection = defineCollection({
 
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "./src/generated-content/tooling"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("tooling")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -224,19 +252,22 @@ const toolCollection = defineCollection({
 // ***
 // Open: Specs Collection Definition
 // Type: Content Collection
+
+const specsCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("specs")}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags
+      : data.tags ? [data.tags]
+      : []
+  }))
+});
 // Includes:
 //   - specsCollection (defineCollection)
 //   - glob loader for ../content/specs
 //   - Flexible schema with normalization
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-const specsCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/generated-content/specs" }),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    tags: Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : []
-  }))
-});
 
 // ========================================
 // Affects: [specsCollection, collections export, paths export]
@@ -252,7 +283,7 @@ const specsCollection = defineCollection({
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 const issueResolutionCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/generated-content/lost-in-public/issue-resolution" }),
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/issue-resolution") }),
   schema: z.object({
     publish: z.boolean().optional(), // Allows individual entries to override collection default
   }).passthrough().transform((data) => ({
@@ -276,20 +307,20 @@ export const collectionPublishingDefaults = {
 };
 // ---- END NEW ----
 
-// Define where to find the content - using relative paths from src/content
+// Define where to find the content - using environment-aware paths
 export const paths = {
   'cards': 'cards',
-  'changelog--content': './src/generated-content/changelog--content',
-  'changelog--code': './src/generated-content/changelog--code',
-  'essays': './src/generated-content/essays',
-  'concepts': './src/generated-content/concepts',
-  'reports': './src/generated-content/reports',
-  'tooling': './src/generated-content/tooling',
-  'vocabulary': './src/generated-content/vocabulary',
-  'prompts': './src/generated-content/lost-in-public/prompts',
-  'reminders': './src/generated-content/lost-in-public/reminders',
-  'specs': './src/generated-content/specs',
-  'issue-resolution': './src/generated-content/lost-in-public/issue-resolution',
+  'changelog--content': resolveContentPath('changelog--content'),
+  'changelog--code': resolveContentPath('changelog--code'),
+  'essays': resolveContentPath('essays'),
+  'concepts': resolveContentPath('concepts'),
+  'reports': resolveContentPath('reports'),
+  'tooling': resolveContentPath('tooling'),
+  'vocabulary': resolveContentPath('vocabulary'),
+  'prompts': resolveContentPath('lost-in-public/prompts'),
+  'reminders': resolveContentPath('lost-in-public/reminders'),
+  'specs': resolveContentPath('specs'),
+  'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
 };
 
 // Export the collections
