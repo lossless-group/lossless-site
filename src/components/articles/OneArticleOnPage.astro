@@ -85,6 +85,19 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
 ---
 
 <div class="content-wrapper">
+    <aside class="info-sidebar">
+    <h2 class="info-title">Document Info</h2>
+    <div class="info-scroll-area">
+      <ul class="info-list">
+        {data?.id && <li><strong>ID:</strong> {data.id}</li>}
+        {data?.path && <li><strong>Path:</strong> {data.path}</li>}
+        {data?.date_created && <li><strong>Created:</strong> {data.date_created}</li>}
+        {data?.author && <li><strong>Author:</strong> {data.author}</li>}
+        {/* Add more metadata fields as needed */}
+      </ul>
+    </div>
+  </aside>
+
   <div class="content-inner">
     <article class="prose main-content">
       <AstroMarkdown 
@@ -116,7 +129,7 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
 <style>
   .prose {
     color: var(--clr-lossless-primary-light);
-    max-width: 65ch;
+    max-width: 75ch;
     padding: 1rem;
   }
 
@@ -235,7 +248,6 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
 
 
   .content-inner {
-    max-width: 65ch;
     width: 100%;
     padding: 0 1rem;
   }
@@ -298,5 +310,34 @@ console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(toc
     color: var(--clr-lossless-accent--brightest);
   }
 
+  .info-sidebar {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    width: 220px;
+    flex-shrink: 0;
+    padding: 1rem;
+    border-right: 1px solid var(--clr-lossless-accent--brightest);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .info-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .info-list {
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light);
+  }
+
+  .info-list li {
+    margin: 0.5rem 0;
+    line-height: 1.4;
+  }
 
 </style>

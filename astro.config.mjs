@@ -31,7 +31,6 @@ const langs = [
 
 // Determine if we're in a Docker/production environment
 const isProduction = process.env.NODE_ENV === 'production';
-
 // Determine the content path based on environment
 // In production (Docker), content is at /lossless-monorepo/content
 // In development, content is at ../content (relative to site directory)
