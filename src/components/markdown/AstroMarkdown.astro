@@ -6,6 +6,7 @@ import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 import TableOfContents from './TableOfContents.astro';
+import ImageGallery from './ImageGallery.astro';
 
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
@@ -73,6 +74,7 @@ const handled_types = [
     "footnoteReference",
     "footnoteDefinition",    
     "tableOfContents",
+    "imageGallery",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -273,11 +275,20 @@ const title = data.title || (data.id ?
     </a>
 }
 
-{(node.type === "code") && (
-  node.lang === "mermaid"
-    ? <MermaidChart code={node.value} />
-    : <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
-)}
+{node.type === "code" && (() => {
+  const { lang, value } = node;
+
+  if (lang === "mermaid") {
+    return <MermaidChart code={value} />;
+  }
+
+  if (lang === "imageGallery") {
+    return <ImageGallery code={value} dirpath={data.dirpath} />;
+  }
+
+  return <BaseCodeblock code={value} lang={lang ?? 'text'} />;
+})()}
+
 
 {(node.type === "html") &&
   <div class="raw-html" set:html={node.value} />

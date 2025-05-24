@@ -53,6 +53,7 @@ export default defineConfig({
       theme: 'github-dark',
       langs: /** @type {any} */ (langs)
     },
+    // TODO: Check if this is actually doing anything. 90% this is already being ran in AstroMarkdown.astro. As a rule of thumb, we have moved away from using remarkPlugins
     remarkPlugins: [
       /** @type {any} */ (normalizeShellLangs),
       /** @type {any} */ (remarkTableOfContents),
