@@ -314,6 +314,8 @@ const toolkitPath = generateToolkitPath();
   .tool-card .content-wrapper {
     display: flex;
     flex-direction: column;
+    justify-content: space-between; /* 👈 even out content */
+    flex-grow: 1;
     height: 100%;
     width: 100%; /* Ensure content wrapper takes full width */
     padding: 0.5em;

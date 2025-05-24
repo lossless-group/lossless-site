@@ -14,8 +14,8 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2)}`; // unique id
 ---
 
 <div class="gallery-container" id={galleryId}>
-  <button class="toggle-button" onclick={`toggleGallery('${galleryId}')`}>
-    Click to expand
+  <button class="toggle-button" onclick={`toggleImageGallery('${galleryId}')`}>
+      {expanded ? 'Click to close' : 'Click to expand'}
   </button>
 
   <div class="image-gallery-scroll" style={`display: ${expanded ? 'flex' : 'none'}`}>
@@ -80,24 +80,24 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2)}`; // unique id
 </style>
 
 <script type="module">
-  function toggleGallery(id) {
+  function toggleImageGallery(id) {
     const container = document.getElementById(id);
     const gallery = container.querySelector('.image-gallery-scroll');
     const button = container.querySelector('.toggle-button');
 
     const isVisible = gallery.style.display !== 'none';
+    console.log("Is Visible:", isVisible)
     gallery.style.display = isVisible ? 'none' : 'flex';
     button.textContent = isVisible ? 'Click to expand' : 'Click to close';
 
-    // ✅ Re-scan the DOM now that gallery is visible
     if (!isVisible && window.initPhotoSwipe) {
       requestAnimationFrame(() => {
-        window.initPhotoSwipe(); // now calls refresh() internally
+        window.initPhotoSwipe(); 
       });
     }
   }
 
-  window.toggleGallery = toggleGallery;
+  window.toggleImageGallery = toggleImageGallery;
 </script>
 
 
