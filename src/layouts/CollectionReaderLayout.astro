@@ -84,14 +84,16 @@ function createEmptyRoot(): Root {
 }
 
 ---
-<div class="collection-reader-layout grid grid-cols-1 md:grid-cols-[1fr_2fr] lg:grid-cols-[1fr_3fr] gap-8">
-  <aside class="sidebar w-full p-2 md:p-4 border-r border-neutral-300 dark:border-neutral-700 overflow-y-auto flex flex-col h-[calc(100vh-6rem)] sticky top-16">
-    <CollectionSidebar essays={essays} currentSlug={entry ? entry.id : null} />
+<div class="collection-reader-layout flex w-full h-full overflow-visible">
+  <aside class="sidebar group w-[300px] hover:w-[500px] min-w-[300px] max-w-[800px] p-2 md:p-4 border-r border-neutral-300 dark:border-neutral-700 overflow-y-auto flex-shrink-0 h-[calc(100vh-6rem)] sticky top-16 transition-all duration-300 ease-in-out">
+    <div class="w-full min-w-0">
+      <CollectionSidebar essays={essays} currentSlug={entry ? entry.id : null} />
+    </div>
   </aside>
 
-  <main class="reader-pane flex-1 p-2 md:p-4 lg:p-6 overflow-y-auto">
-    <div class="content-wrapper">
-      <div class="content-inner">
+  <main class="reader-pane flex-1 p-2 md:p-4 lg:p-6 overflow-y-auto min-w-0">
+    <div class="content-wrapper w-full max-w-full">
+      <div class="content-inner w-full max-w-full">
         {entry ? (
           <div>
             {/* Use AstroMarkdown component to render the AST node */}
@@ -177,6 +179,11 @@ function createEmptyRoot(): Root {
     align-items: flex-start;
     overflow: visible;
     position: relative;
+    transition: margin-left 0.3s ease-in-out;
+  }
+  
+  .sidebar {
+    transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
   }
 
   .content-inner {

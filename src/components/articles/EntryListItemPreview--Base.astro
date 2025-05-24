@@ -81,7 +81,7 @@ const tooltipContent = `Authors: ${authorsString}\nUpdated: ${displayDate}\nTags
   <article 
     id={uniqueId}
     class:list={[
-      "preview-base p-3 transition-all duration-200 ease-in-out flex items-center gap-3",
+      "preview-base p-3 transition-all duration-200 ease-in-out flex items-start gap-3 w-full",
       activeClasses
     ]}
     title={tooltipContent} 
@@ -113,14 +113,18 @@ const tooltipContent = `Authors: ${authorsString}\nUpdated: ${displayDate}\nTags
     )}
     
     {/* Column 2: Text content */}
-    <div class="text-content flex-grow"> 
-      {category && (
-        <p class="text-xs font-medium text-sky-600 dark:text-sky-400 mb-1">{category}</p>
-      )}
-      <h3 class="text-md font-semibold leading-tight mb-1 text-neutral-800 dark:text-neutral-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{title}</h3>
-      {lede && (
-        <p class="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2">{lede}</p>
-      )}
+    <div class="text-content flex-grow min-w-0 w-full">
+      <div class="w-full">
+        {category && (
+          <p class="inline-block text-xs font-medium text-white dark:text-white px-2 py-0.25 rounded-sm mb-1" style="background-color: var(--clr-lossless-attn-action, var(--purple-heart));">
+            {category}
+          </p>
+        )}
+        <h3 class="text-md font-semibold leading-tight mb-1 text-neutral-800 dark:text-neutral-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors break-words w-full">{title}</h3>
+        {lede && (
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2 break-words w-full">{lede}</p>
+        )}
+      </div>
     </div>
 
     {/* 
