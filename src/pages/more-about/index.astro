@@ -27,17 +27,18 @@ const conceptsEntries = await getCollection('concepts');
 // - Replaces dashes/underscores with spaces
 // - Does NOT change the case of any letters (e.g., 'AI' stays 'AI')
 // - Used for all vocabulary/concept title rendering
-function filenameToTitle(str: string): string {
-  return str
-    .replace(/\.md$/, '') // Remove .md extension
-    .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
-    .replace(/\s+/g, ' ') // Collapse multiple spaces to single
-    .trim();               // Remove leading/trailing whitespace
-}
 
 // Process entries to add titles from filenames if missing and sort
 // Aggressively commented: If logic changes, update all call sites and this block.
-function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
+export function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
+  function filenameToTitle(str: string): string {
+    return str
+      .replace(/\.md$/, '') // Remove .md extension
+      .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
+      .replace(/\s+/g, ' ') // Collapse multiple spaces to single
+      .trim();               // Remove leading/trailing whitespace
+  }
+
   entries.forEach(entry => {
     // Always generate title from filename, preserving original case
     const filename = entry.id.replace(/\.md$/, '');
@@ -85,8 +86,8 @@ const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry =>
 });
 
 // DEBUG: Log the entire conceptSlugToOriginal map to see all keys and values
-console.log('[DEBUG] conceptSlugToOriginal keys:', Object.keys(conceptSlugToOriginal));
-console.log('[DEBUG] conceptSlugToOriginal full map:', conceptSlugToOriginal);
+// console.log('[DEBUG] conceptSlugToOriginal keys:', Object.keys(conceptSlugToOriginal));
+// console.log('[DEBUG] conceptSlugToOriginal full map:', conceptSlugToOriginal);
 
 const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
   const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension

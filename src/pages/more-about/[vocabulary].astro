@@ -3,7 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-
+import { capitalizeTitle } from "@utils/slugify"
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
@@ -13,7 +13,11 @@ export async function getStaticPaths() {
     // Generate slug and title from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
-    const title = entry.data.title || filename;
+
+    if (!entry.data.title) {
+      entry.data.title = capitalizeTitle(filename.replace("-", " "));
+    }
+
     return {
       params: { vocabulary: slug },
       props: { entry }
@@ -29,7 +33,7 @@ const { entry } = Astro.props;
 
 ---
 
-<Layout title={entry.data.title || entry.data.slug}>
+<Layout title={entry.data.title}>
   <OneArticle
     Component={OneArticleOnPage}
     content={entry.body}

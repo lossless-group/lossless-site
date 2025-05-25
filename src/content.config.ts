@@ -4,23 +4,8 @@ import { basename, dirname, extname, join, resolve } from 'node:path';
 import fs from 'fs';
 
 // Import environment utilities
-import { NODE_ENV, isProduction, isDevelopment } from './utils/envUtils.js';
+import { contentBasePath } from './utils/envUtils.js';
 
-// Debug log environment
-console.log('Content Config Environment:', {
-  NODE_ENV,
-  isProduction,
-  isDevelopment,
-  CWD: process.cwd()
-});
-
-
-// Determine the content path based on environment
-// In production (Docker), content is at /lossless-monorepo/content
-// In development, content is at ../content (relative to site directory)
-const contentBasePath = isProduction 
-  ? '/lossless-monorepo/content'
-  : resolve(process.cwd(), '../content');
 
 // Function to resolve content paths based on environment
 function resolveContentPath(relativePath: string) {
@@ -32,14 +17,6 @@ function resolveContentPath(relativePath: string) {
   // Otherwise, resolve against the content base path
   return join(contentBasePath, relativePath);
 }
-
-// Log the content paths for debugging
-console.log('Content configuration:', {
-  isProduction,
-  contentBasePath,
-  cwd: process.cwd(),
-  resolvedPath: resolve(process.cwd(), '../content')
-});
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({

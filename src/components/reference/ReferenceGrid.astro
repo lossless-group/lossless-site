@@ -28,7 +28,7 @@ const { items, class: className } = Astro.props;
 // FIX: Define renderedGridItems in the frontmatter so it is available to the template below.
 const renderedGridItems = items.map((item) => {
   // DEBUG: Print the item as passed to the preview card, to verify originalFilename and all fields
-  console.log('[ReferenceGrid] Passing item to card:', item);
+  // console.log('[ReferenceGrid] Passing item to card:', item);
   return {
     collection: item.collection,
     entry: item,

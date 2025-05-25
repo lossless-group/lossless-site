@@ -6,8 +6,11 @@
 import { slugify } from './slugify';
 
 export function getReferenceSlug(filename: string, frontmatterSlug?: string): string {
-  // Match getStaticPaths: use frontmatter slug if present, else slugify the filename
-  return frontmatterSlug || slugify(filename);
+  if (frontmatterSlug) return frontmatterSlug;
+
+  const parts = filename.split('/');
+  const slugifiedParts = parts.map(p => slugify(p));
+  return slugifiedParts.join('/');
 }
 
 import fs from 'fs';

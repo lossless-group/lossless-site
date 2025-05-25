@@ -1,5 +1,5 @@
 // Load environment variables
-import { NODE_ENV, isProduction, isDevelopment } from './src/utils/envUtils.js';
+import { NODE_ENV, isProduction, isDevelopment, contentBasePath } from './src/utils/envUtils.js';
 
 
 // Now import other dependencies
@@ -42,34 +42,6 @@ const langs = [
   'python'
 ];
 
-// Determine content path based on environment
-let contentBasePath;
-
-switch (process.env.DEPLOY_ENV) {
-  case 'LocalSiteOnly':
-    contentBasePath = path.resolve(process.cwd(), 'src/generated-content');
-    break;
-  case 'LocalMonorepo':
-    contentBasePath = path.resolve(process.cwd(), '..', 'content');
-    break;
-  case 'Vercel':
-    contentBasePath = path.resolve(process.cwd(), 'src/generated-content');
-    break;
-  case 'Railway':
-    contentBasePath = '/app/content';
-    break;
-  default:
-    contentBasePath = '/lossless-monorepo/content';
-}
-
-// Log the configuration
-console.log('Content configuration:', {
-  isProduction,
-  contentBasePath,
-  cwd: process.cwd(),
-  resolvedPath: path.resolve(contentBasePath),
-  DEPLOY_ENV: process.env.DEPLOY_ENV || 'Not set'
-});
 
 // Verify the content directory exists
 if (!fs.existsSync(contentBasePath)) {

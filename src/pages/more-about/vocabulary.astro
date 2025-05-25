@@ -1,34 +1,33 @@
 ---
 import { getCollection } from 'astro:content';
+import { processEntries } from './index.astro';
 import Layout from '@layouts/Layout.astro';
 import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
+import { getOriginalFilenameMap, getReferenceSlug } from "@utils/referenceSlugMap";
+import path from 'node:path';
 
 // Get entries from vocabulary collection
 const vocabularyEntries = await getCollection('vocabulary');
+const vocabularyDir = path.join(process.cwd(), 'src/generated-content/vocabulary');
 
-// Helper function to convert filename to proper case
-function toProperCase(str) {
-  // Handle hyphenated or underscored filenames
-  return str
-    .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
+const processedEntires = processEntries(vocabularyEntries)
 
-// Process entries to ensure they all have titles
-// For entries without titles, use the filename as the title in proper case
-vocabularyEntries.forEach(entry => {
-  if (!entry.data.title) {
-    const filename = entry.id.replace(/\.md$/, '');
-    const filenameParts = filename.split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-    entry.data.title = toProperCase(baseFilename);
-  }
+const vocabularySlugToOriginal = getOriginalFilenameMap(processedEntires, vocabularyDir);
+
+const vocabularyItems = processedEntires.map(entry => {
+  const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
+  const slug = getReferenceSlug(filename, entry.data.slug);
+
+  return {
+    id: entry.id,
+    slug: slug,
+    collection: entry.collection,
+    data: entry.data,
+    originalFilename: vocabularySlugToOriginal[slug],
+  };
 });
 
-// Sort entries alphabetically by title
-vocabularyEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
+
 ---
 
 <Layout title="Vocabulary">
@@ -44,7 +43,7 @@ vocabularyEntries.sort((a, b) => a.data.title.localeCompare(b.data.title));
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {vocabularyEntries.map(entry => (
+      {vocabularyItems.map(entry => (
         <VocabularyPreviewCard entry={entry} />
       ))}
     </div>
