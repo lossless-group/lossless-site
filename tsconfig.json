@@ -13,6 +13,8 @@
     "allowJs": true,
     "moduleResolution": "node",
     "module": "ESNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "plugins": [
       {
         "name": "@astrojs/tsplugin"

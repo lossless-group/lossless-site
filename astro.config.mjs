@@ -1,14 +1,12 @@
-// @ts-check
+// Load environment variables
+import { NODE_ENV, isProduction, isDevelopment } from './src/utils/envUtils.js';
 
-/**
- * @typedef {string | { id: string; [key: string]: any }} ShikiLang
- */
 
+// Now import other dependencies
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
-import node from '@astrojs/node';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
@@ -16,8 +14,20 @@ import remarkTableOfContents from './src/utils/markdown/remark-toc';
 import vercel from '@astrojs/vercel';
 import fs from 'fs';
 import path from 'path';
-
 import icon from 'astro-icon';
+
+// Debug log environment
+console.log('Environment in astro.config.mjs:', {
+  NODE_ENV,
+  isProduction,
+  isDevelopment,
+  CWD: process.cwd(),
+  ENV_FILE: fs.existsSync(path.resolve(process.cwd(), '.env')) ? 'Found' : 'Not found'
+});
+
+/**
+ * @typedef {string | { id: string; [key: string]: any }} ShikiLang
+ */
 
 /** @type {ShikiLang[]} */
 const langs = [
@@ -29,17 +39,27 @@ const langs = [
   'python'
 ];
 
-// Determine if we're in a Docker/production environment
-const isProduction = process.env.NODE_ENV === 'production';
-// Determine the content path based on environment
-// In production (Docker), content is at /lossless-monorepo/content
-// In development, content is at ../content (relative to site directory)
-const contentBasePath = isProduction 
-  ? '/lossless-monorepo/content'
-  : path.resolve(process.cwd(), '../content');
+// Default content path for production (Docker)
+let contentBasePath = '/lossless-monorepo/content';
+
+if (process.env.NODE_ENV !== 'production') {
+  // For development, check for monorepo content first
+  const monorepoContent = path.resolve(process.cwd(), '..', 'content');
+  const generatedContent = path.resolve(process.cwd(), 'src/generated_content');
+  
+  if (fs.existsSync(monorepoContent)) {
+    contentBasePath = monorepoContent;
+    console.log('Using monorepo content directory');
+  } else if (fs.existsSync(generatedContent)) {
+    contentBasePath = generatedContent;
+    console.log('Using generated content directory');
+  } else {
+    console.log('Using production content path (fallback)');
+  }
+}
 
 console.log(`Content path resolved to: ${contentBasePath}`);
-console.log(`Environment: ${isProduction ? 'Production' : 'Development'}`);
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
 // Verify the content directory exists
 if (!fs.existsSync(contentBasePath)) {
@@ -88,6 +108,9 @@ export default defineConfig({
   ], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
+    rollupOptions: {
+      external: ['astro:content/loaders']
+    },
     resolve: {
       alias: {
         '@basics': fileURLToPath(new URL('./src/components/basics', import.meta.url)),

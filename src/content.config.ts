@@ -3,10 +3,16 @@ import { file, glob } from 'astro/loaders';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import fs from 'fs';
 
-// Determine if we're in a Docker/production environment
-const isProduction = process.env.NODE_ENV === 'production' ||
-                     process.env.RAILWAY_ENVIRONMENT === 'production' ||
-                     process.env.RAILWAY_ENV === 'production';
+// Import environment utilities
+import { NODE_ENV, isProduction, isDevelopment } from './utils/envUtils.js';
+
+// Debug log environment
+console.log('Content Config Environment:', {
+  NODE_ENV,
+  isProduction,
+  isDevelopment,
+  CWD: process.cwd()
+});
 
 
 // Determine the content path based on environment
@@ -28,7 +34,12 @@ function resolveContentPath(relativePath: string) {
 }
 
 // Log the content paths for debugging
-console.log(`Content base path: ${contentBasePath}`);
+console.log('Content configuration:', {
+  isProduction,
+  contentBasePath,
+  cwd: process.cwd(),
+  resolvedPath: resolve(process.cwd(), '../content')
+});
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
