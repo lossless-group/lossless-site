@@ -94,8 +94,8 @@ const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
   const slug = getReferenceSlug(filename, entry.data.slug);
   
   // DEBUG: Log each entry's id, filename, and resulting slug
-  console.log(`[DEBUG] Processing entry: id=${entry.id}, filename=${filename}, slug=${slug}`);
-  console.log(`[DEBUG] Looking up originalFilename with slug=${slug}, found:`, conceptSlugToOriginal[slug]);
+  // console.log(`[DEBUG] Processing entry: id=${entry.id}, filename=${filename}, slug=${slug}`);
+  // console.log(`[DEBUG] Looking up originalFilename with slug=${slug}, found:`, conceptSlugToOriginal[slug]);
   
   return {
     id: entry.id,

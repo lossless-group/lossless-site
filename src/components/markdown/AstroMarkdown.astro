@@ -85,7 +85,6 @@ const other_type = !handled_types.includes(node.type)
 data.dirpath = dirname(data.path)
 
 // Use provided title or generate from ID if not provided
-console.log(JSON.stringify(data))
 const title = data.title || (data.id ? 
   data.id
     .replace(/\.md$/, '')
