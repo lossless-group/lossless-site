@@ -1,0 +1,104 @@
+---
+// src/components/gallery/ImageGallery.astro
+import { yaml_to_grid_images } from './grid_utils.js';
+
+interface Props {
+  code: string;
+  dirpath: string;
+  expanded?: boolean;
+}
+
+const { code, dirpath, expanded = true } = Astro.props;
+const imagesUrls = await yaml_to_grid_images(code, dirpath);
+const galleryId = `gallery-${Math.random().toString(36).slice(2)}`; // unique id per gallery
+---
+
+<div class="gallery-container" id={galleryId}>
+  <button class="toggle-button" onclick={`toggleImageGallery('${galleryId}')`}>
+      {expanded ? 'Click to close' : 'Click to expand'}
+  </button>
+
+  <div class="image-gallery-scroll" style={`display: ${expanded ? 'flex' : 'none'}`}>
+    {imagesUrls.map((image) => (
+      <a
+        href={image.url}
+        class="item"
+        itemscope
+        itemtype="http://schema.org/ImageGallery"
+        data-pswp-width={image.width}
+        data-pswp-height={image.height}
+      >
+        <img src={image.url} alt={image.name} />
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+.gallery-container {
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.toggle-button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: left;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.image-gallery-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 1rem;
+  gap: 0.25rem;
+}
+
+.image-gallery-scroll .item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-gallery-scroll img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+</style>
+
+<script type="module">
+  function toggleImageGallery(id) {
+    const container = document.getElementById(id);
+    const gallery = container.querySelector('.image-gallery-scroll');
+    const button = container.querySelector('.toggle-button');
+
+    const isVisible = gallery.style.display !== 'none';
+    console.log("Is Visible:", isVisible)
+    gallery.style.display = isVisible ? 'none' : 'flex';
+    button.textContent = isVisible ? 'Click to expand' : 'Click to close';
+
+    if (!isVisible && window.initPhotoSwipe) {
+      requestAnimationFrame(() => {
+        window.initPhotoSwipe(); 
+      });
+    }
+  }
+
+  window.toggleImageGallery = toggleImageGallery;
+</script>
+
+
+<script src="./gallery.js" />

@@ -6,6 +6,9 @@ import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 import TableOfContents from './TableOfContents.astro';
+import ImageGallery from './ImageGallery.astro';
+import ToolingGallery from './ToolingGallery.astro';
+import { getCollection } from "astro:content";
 
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
@@ -16,6 +19,7 @@ import TableOfContents from './TableOfContents.astro';
       - Aggressively commented: update here and at all call sites if logic changes.
     */
     // Extract only the first text node (primary heading text)
+
 
 interface Props {
     /**
@@ -41,10 +45,9 @@ interface Props {
         id?: string;  // File ID (e.g., 'Agile.md')
         [key: string]: any;
     };
-    compiledContent?: string;
 }
 
-const {node, data, compiledContent} = Astro.props;
+const { node, data } = Astro.props;
 
 // List of node types we handle with specific components
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
@@ -73,6 +76,8 @@ const handled_types = [
     "footnoteReference",
     "footnoteDefinition",    
     "tableOfContents",
+    "imageGallery",
+    "toolingGallery",
     "thematicBreak" // Add support for horizontal rules
 ]
 
@@ -88,6 +93,30 @@ const title = data.title || (data.id ?
     .join(' ')
   : '');
 
+//This logic has to be done up here because it's async work
+// Only apply if it's a toolGallery code block
+let toolGalleryTools = null;
+let toolGalleryErrors: string[] = [];
+
+if (node.type === 'code' && node.lang === 'toolingGallery') {
+   const ids = node.value
+    .split('\n')
+    .map(line => line.replace(/^- /, '').trim())
+    .filter(Boolean); // ['agentic-ai', 'invalid-tool-id']
+
+  const allTools = await getCollection('tooling');
+  const toolMap = new Map(allTools.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  toolGalleryTools = ids.map(id => {
+    const match = toolMap.get(id);
+    if (!match) toolGalleryErrors.push(id);
+    return match;
+  }).filter(Boolean);
+}
 // Debug output to see AST structure
 // console.log(`=== AstroMarkdown Debug ===`)
 // console.log(`Node type: ${node.type}`)
@@ -273,11 +302,55 @@ const title = data.title || (data.id ?
     </a>
 }
 
-{(node.type === "code") && (
-  node.lang === "mermaid"
-    ? <MermaidChart code={node.value} />
-    : <BaseCodeblock code={node.value} lang={node.lang ?? 'text'} />
+{node.type === "code" && (() => {
+  const { lang, value } = node;
+
+  if (lang === "toolingGallery") {
+    return
+  }
+
+  if (lang === "mermaid") {
+    return <MermaidChart code={value} />;
+  }
+
+  if (lang === "imageGallery") {
+    return <ImageGallery code={value} dirpath={data.dirpath} />;
+  }
+
+  return <BaseCodeblock code={value} lang={lang ?? 'text'} />;
+})()}
+
+{toolGalleryTools && (
+  <>
+    <ToolingGallery tools={toolGalleryTools} />
+    {toolGalleryErrors.length > 0 && (
+      <div class="tool-gallery-error">
+        ⚠️ Tool(s) not found:
+        <ul>
+          {toolGalleryErrors.map(id => <li><code>{id}</code></li>)}
+        </ul>
+      </div>
+
+      <style>
+        .tool-gallery-error {
+            color: #ff6b6b;
+            background-color: rgba(255, 0, 0, 0.05);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            padding: 0.75rem;
+            margin-top: 2rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+          }
+
+          .tool-gallery-error ul {
+            margin: 0.5rem 0 0;
+            padding-left: 1.25rem;
+          }
+      </style>
+    )}
+  </>
 )}
+
 
 {(node.type === "html") &&
   <div class="raw-html" set:html={node.value} />
