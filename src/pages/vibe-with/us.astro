@@ -7,8 +7,10 @@
  *
  * Aggressive block comments clarify structure and intent.
  */
+import { Image } from "astro:assets";
 import Layout from "@layouts/Layout.astro";
 import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
+import Einstein from "@assets/visuals/imageOf/imageOf__Albert-Einstein.png";
 ---
 
 <!--
@@ -18,6 +20,22 @@ import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMes
 -->
 <Layout>
 
+  <section class="think-harder">
+    <div class="think-harder-container">
+      <div class="image-left think-harder-image">
+        <Image
+          src={Einstein}
+          alt="Image of Albert Einstein thinking"
+          class="clamp-40%"
+        />
+      </div>
+      <div class="think-harder-copy">
+        <h1>The Resurgence of Old School</h1>
+        <p>Back to the future, back to the roots, back to the basics.</p>
+        <p>The Hacker era will be left in the dust.</p>
+      </div>
+    </div>
+  </section>
   <!-- Inline, page-specific Hero for /vibe-with/us.astro -->
   <section class="hero vibe-hero--local">
     <div class="hero-content">
@@ -39,6 +57,61 @@ import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMes
 </Layout>
 
 <style>
+
+.think-harder {
+  padding: 4rem 4rem 1rem 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.think-harder-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  
+  @media (max-width: 860px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 2rem;
+    
+    .think-harder-image,
+    .think-harder-copy {
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+}
+.think-harder-image {
+  max-width: 40%;
+}
+.think-harder-copy {
+  max-width: 50%;
+  & h1 {
+    font-size: var(--fs-800);
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  & p {
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-450);
+    line-height: 1.6;
+    opacity: 0.9;
+    max-width: 60ch;
+    margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 .vibe-with-us-section {
   padding: 0 0 3rem 0;
   display: flex;
