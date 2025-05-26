@@ -3,19 +3,24 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { capitalizeTitle } from "@utils/slugify"
+import { toProperCase } from "@utils/slugify"
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
-  return vocabularyEntries.map(entry => {
+  const conceptsEntries = await getCollection('concepts');
+  const entries = vocabularyEntries.concat(conceptsEntries)
+
+  console.log("First vocab entry", JSON.stringify(vocabularyEntries[0]))
+  return entries.map(entry => {
     // Generate slug and title from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    //TODO: Have one centralized slugify func somewhere
 
     if (!entry.data.title) {
-      entry.data.title = capitalizeTitle(filename.replace("-", " "));
+      entry.data.title = toProperCase(filename.replace("-", " "));
     }
 
     return {
@@ -31,6 +36,8 @@ interface Props {
 
 const { entry } = Astro.props;
 
+const vocabularyEntries = await getCollection('vocabulary');
+console.log("First vocab entry", JSON.stringify(vocabularyEntries[0]))
 ---
 
 <Layout title={entry.data.title}>

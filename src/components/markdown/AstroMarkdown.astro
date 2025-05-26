@@ -85,13 +85,8 @@ const other_type = !handled_types.includes(node.type)
 data.dirpath = dirname(data.path)
 
 // Use provided title or generate from ID if not provided
-const title = data.title || (data.id ? 
-  data.id
-    .replace(/\.md$/, '')
-    .split('-')
-    .map(word => word.charAt(0) + word.slice(1))
-    .join(' ')
-  : '');
+console.log(JSON.stringify(data))
+const title = data.title || data.id;
 
 //This logic has to be done up here because it's async work
 // Only apply if it's a toolGallery code block

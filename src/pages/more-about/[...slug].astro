@@ -3,22 +3,14 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import path from 'path';
 import { getReferenceSlug } from "@utils/referenceSlugMap";
+import { toProperCase } from "@utils/slugify"
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
 export async function getStaticPaths() {
   // Import the single-source-of-truth slug/filename mapping utility
-
-  function toProperCase(str: string): string {
-    return str
-      .replace(/[-_]/g, ' ')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
 
   const vocabularyEntries = await getCollection('vocabulary');
   const conceptsEntries = await getCollection('concepts');
@@ -79,7 +71,7 @@ const contentData = {
 };
 ---
 
-<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+<Layout title={entry.data.title}>
   <OneArticle
     Component={OneArticleOnPage}
     content={entry.body}
