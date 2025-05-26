@@ -28,13 +28,11 @@ export function slugify(input: string): string {
  * @param input - The string to capitalize
  * @returns The capitalized string
  */
-export function capitalizeTitle(input: string): string {
-  return input
-    .split(' ')
-    .map(word =>
-      word.length > 0
-        ? word[0].toUpperCase() + word.slice(1).toLowerCase()
-        : ''
-    )
-    .join(' ');
+export function toProperCase(str: string): string {
+  return str
+    .replace(/[-_]/g, ' ') // replace hyphens and underscores with space
+    .split(' ')            // split into words
+    .filter(word => word.length > 0) // remove empty strings
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // capitalize
+    .join(' ');            // join back into a sentence
 }

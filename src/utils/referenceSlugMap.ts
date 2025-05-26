@@ -43,7 +43,7 @@ export function getOriginalFilenameMap(
   // DEBUG: Print collectionDir and files
   console.log('[getOriginalFilenameMap] collectionDir:', collectionDir);
   const files = getAllMarkdownFiles(collectionDir, collectionDir);
-  console.log('[getOriginalFilenameMap] files:', files);
+  // console.log('[getOriginalFilenameMap] files:', files);
 
   // Aggressively comment: This function guarantees slug -> true original filename (with correct casing)
   // by reading ALL .md filenames directly from the filesystem, recursively.
@@ -56,8 +56,8 @@ export function getOriginalFilenameMap(
   
   for (const entry of entries) {
     // DEBUG: Print entry.id and entry.data.slug
-    console.log('\n[getOriginalFilenameMap] Processing entry.id:', entry.id);
-    console.log('[getOriginalFilenameMap] entry.data.slug:', entry.data.slug);
+    // console.log('\n[getOriginalFilenameMap] Processing entry.id:', entry.id);
+    // console.log('[getOriginalFilenameMap] entry.data.slug:', entry.data.slug);
 
     // Astro's entry.id is relative to the content root (e.g., concepts/Explainers for AI/AI Hallucinations.md)
     // Remove the collectionDir prefix, then remove .md and lowercase for matching.
@@ -74,20 +74,20 @@ export function getOriginalFilenameMap(
     
     const entryNorm = normalize(entry.id);
     // DEBUG: Print entryNorm
-    console.log('[getOriginalFilenameMap] entryNorm:', entryNorm);
+    // console.log('[getOriginalFilenameMap] entryNorm:', entryNorm);
     
     // DEBUG: Show all normalized files for comparison
-    console.log('[getOriginalFilenameMap] Looking for match among normalized files:');
+    // console.log('[getOriginalFilenameMap] Looking for match among normalized files:');
     const normalizedFiles = files.map(f => ({ original: f, normalized: normalize(f) }));
     normalizedFiles.forEach(nf => {
       const isMatch = nf.normalized === entryNorm;
-      console.log(`  ${isMatch ? '✓' : '✗'} ${nf.normalized} (from ${nf.original})`);
+      // console.log(`  ${isMatch ? '✓' : '✗'} ${nf.normalized} (from ${nf.original})`);
     });
     
     // Find the real file from the filesystem list by matching normalized path
     const realFile = files.find(f => normalize(f) === entryNorm);
     // DEBUG: Print realFile
-    console.log('[getOriginalFilenameMap] realFile found:', realFile);
+    // console.log('[getOriginalFilenameMap] realFile found:', realFile);
     
     if (realFile) {
       // Extract only the filename (no directory, no extension, original casing) for the map value
@@ -98,10 +98,10 @@ export function getOriginalFilenameMap(
       // This ensures the key used for lookup matches the key created here
       // We use the normalized entry.id as the key, which matches how index.astro generates slugs
       const slug = getReferenceSlug(entry.id, entry.data.slug);
-      console.log(`[getOriginalFilenameMap] Using entry.id for slug key: ${slug}`);
+      // console.log(`[getOriginalFilenameMap] Using entry.id for slug key: ${slug}`);
       map[slug] = filenameNoExt;
       // DEBUG: Print the final mapping for this slug
-      console.log(`[getOriginalFilenameMap] ADDED TO MAP: map[${slug}] = ${filenameNoExt}`);
+      // console.log(`[getOriginalFilenameMap] ADDED TO MAP: map[${slug}] = ${filenameNoExt}`);
     } else {
       console.log(`[getOriginalFilenameMap] ⚠️ NO MATCH FOUND for entry.id: ${entry.id}`);
       console.log(`[getOriginalFilenameMap] This entry will have undefined originalFilename`);
@@ -109,10 +109,10 @@ export function getOriginalFilenameMap(
   }
   
   // DEBUG: Show final map contents
-  console.log('\n[getOriginalFilenameMap] Final map contents:');
-  Object.entries(map).forEach(([k, v]) => {
-    console.log(`  map[${k}] = ${v}`);
-  });
+  // console.log('\n[getOriginalFilenameMap] Final map contents:');
+  // Object.entries(map).forEach(([k, v]) => {
+  //   console.log(`  map[${k}] = ${v}`);
+  // });
   
   return map;
 }
