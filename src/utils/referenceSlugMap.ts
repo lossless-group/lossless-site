@@ -49,62 +49,57 @@ export function getOriginalFilenameMap(
   // by reading ALL .md filenames directly from the filesystem, recursively.
   // This supports concepts in nested folders (e.g., CARBS/Explainers for AI/ etc).
   // Do not trust Astro's id or slug for casing!
-  const map: Record<string, string> = {};
+  const map: Record<string, string> = {}
   
   // DEBUG: Enhanced logging
   console.log(`[getOriginalFilenameMap] Processing ${entries.length} entries against ${files.length} files`);
   
+  // Create a map of normalized paths to their original paths for faster lookups
+  const normalizedFileMap = new Map<string, string>();
+  for (const file of files) {
+    const normalized = file.toLowerCase().replace(/\.[^/.]+$/, '').replace(/[\s_]+/g, '-');
+    normalizedFileMap.set(normalized, file);
+  }
+  
   for (const entry of entries) {
-    // DEBUG: Print entry.id and entry.data.slug
-    // console.log('\n[getOriginalFilenameMap] Processing entry.id:', entry.id);
-    // console.log('[getOriginalFilenameMap] entry.data.slug:', entry.data.slug);
+    // Skip processing if entry.id is empty or invalid
+    if (!entry?.id) {
+      console.log(`[getOriginalFilenameMap] ⚠️ Invalid entry.id for entry:`, entry);
+      continue;
+    }
 
-    // Astro's entry.id is relative to the content root (e.g., concepts/Explainers for AI/AI Hallucinations.md)
-    // Remove the collectionDir prefix, then remove .md and lowercase for matching.
-    // Robust normalization: lowercase, replace spaces/dashes with dashes, strip .md
-    // This allows matching between Astro's slugified id and the original filesystem path
-    const normalize = (s: string) => {
-      const result = s
-        .replace(/\.md$/, '')
-        .toLowerCase()
-        .replace(/[\s_]+/g, '-')
-        .replace(/-+/g, '-');
-      return result;
-    };
+    // Normalize the entry ID for comparison - remove .md extension and normalize separators
+    const normalizedEntryId = entry.id
+      .replace(/\.md$/, '')
+      .toLowerCase()
+      .replace(/[\\/]/g, '/')  // Normalize path separators
+      .replace(/[\s_]+/g, '-'); // Replace spaces/underscores with hyphens
     
-    const entryNorm = normalize(entry.id);
-    // DEBUG: Print entryNorm
-    // console.log('[getOriginalFilenameMap] entryNorm:', entryNorm);
+    // Try to find a matching file
+    let matchedFile = normalizedFileMap.get(normalizedEntryId);
     
-    // DEBUG: Show all normalized files for comparison
-    // console.log('[getOriginalFilenameMap] Looking for match among normalized files:');
-    const normalizedFiles = files.map(f => ({ original: f, normalized: normalize(f) }));
-    normalizedFiles.forEach(nf => {
-      const isMatch = nf.normalized === entryNorm;
-      // console.log(`  ${isMatch ? '✓' : '✗'} ${nf.normalized} (from ${nf.original})`);
-    });
+    // If no direct match, try removing collection name prefix (e.g., 'concepts/' or 'vocabulary/')
+    if (!matchedFile && normalizedEntryId.includes('/')) {
+      const parts = normalizedEntryId.split('/');
+      const withoutCollection = parts.slice(1).join('/');
+      matchedFile = normalizedFileMap.get(withoutCollection);
+    }
     
-    // Find the real file from the filesystem list by matching normalized path
-    const realFile = files.find(f => normalize(f) === entryNorm);
-    // DEBUG: Print realFile
-    // console.log('[getOriginalFilenameMap] realFile found:', realFile);
-    
-    if (realFile) {
-      // Extract only the filename (no directory, no extension, original casing) for the map value
-      // Example: 'Explainers for AI/World Foundation Models.md' -> 'World Foundation Models'
-      const filenameNoExt = path.basename(realFile, '.md');
-      
-      // CRITICAL FIX: Use the SAME slug generation logic that's used in index.astro
-      // This ensures the key used for lookup matches the key created here
-      // We use the normalized entry.id as the key, which matches how index.astro generates slugs
-      const slug = getReferenceSlug(entry.id, entry.data.slug);
-      // console.log(`[getOriginalFilenameMap] Using entry.id for slug key: ${slug}`);
+    if (matchedFile) {
+      // Extract only the filename (no directory, no extension, original casing)
+      const filenameNoExt = path.basename(matchedFile, '.md');
+      // Use the same slug generation logic as in index.astro
+      const slug = getReferenceSlug(entry.id, entry.data?.slug);
       map[slug] = filenameNoExt;
-      // DEBUG: Print the final mapping for this slug
-      // console.log(`[getOriginalFilenameMap] ADDED TO MAP: map[${slug}] = ${filenameNoExt}`);
     } else {
       console.log(`[getOriginalFilenameMap] ⚠️ NO MATCH FOUND for entry.id: ${entry.id}`);
       console.log(`[getOriginalFilenameMap] This entry will have undefined originalFilename`);
+      
+      // Fallback: Use the entry ID as the filename (without .md)
+      const fallbackName = entry.id.replace(/\.md$/, '').split('/').pop() || entry.id;
+      const slug = getReferenceSlug(entry.id, entry.data?.slug);
+      map[slug] = fallbackName;
+      console.log(`[getOriginalFilenameMap] Using fallback name: ${fallbackName} for slug: ${slug}`);
     }
   }
   
