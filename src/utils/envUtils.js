@@ -60,13 +60,19 @@ const getContentBasePath = () => {
   return contentPath;
 };
 
+const toBool = (val) => typeof val === 'string' && val.toLowerCase() === 'true';
+
 // Export environment variables
-export const NODE_ENV = process.env.NODE_ENV;
-export const APP_ENV = process.env.APP_ENV;
-export const DEPLOY_ENV = process.env.DEPLOY_ENV;
+export const NODE_ENV = envVars.NODE_ENV;
+export const APP_ENV = envVars.APP_ENV;
+export const DEPLOY_ENV = envVars.DEPLOY_ENV;
 export const isProduction = NODE_ENV === 'production';
 export const isDevelopment = !isProduction;
 export const contentBasePath = getContentBasePath();
+export const DEBUG_AST = toBool(envVars.DEBUG_AST);
+export const DEBUG_ARTICLE = toBool(envVars.DEBUG_ARTICLE);
+export const DEBUG_CITATIONS = toBool(envVars.DEBUG_CITATIONS)
+export const DEBUG_BACKLINKS = toBool(envVars.DEBUG_BACKLINKS)
 
 // Log environment info
 console.log('Environment Configuration:', {
@@ -76,7 +82,12 @@ console.log('Environment Configuration:', {
   isProduction,
   isDevelopment,
   contentBasePath,
+  DEBUG_AST,
+  DEBUG_ARTICLE,
+  DEBUG_CITATIONS,
+  DEBUG_BACKLINKS,
   resolvedContentPath: path.resolve(contentBasePath),
   envFile: envFileExists ? envPath : 'Not found',
   cwd: process.cwd()
 });
+

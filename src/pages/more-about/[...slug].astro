@@ -3,8 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { getReferenceSlug } from "@utils/referenceSlugMap";
-import { toProperCase } from "@utils/slugify"
+import { toProperCase, unslugify, getReferenceSlug } from "@utils/slugify"
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
@@ -21,9 +20,11 @@ export async function getStaticPaths() {
     const slug = getReferenceSlug(filename, entry.data.slug);
     const filenameParts = entry.id.replace(/\.md$/, '').split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
+
     if (!entry.data.title) {
       entry.data.title = toProperCase(baseFilename);
     }
+
     return {
       params: { slug },
       props: {
@@ -40,9 +41,11 @@ export async function getStaticPaths() {
     const slug = getReferenceSlug(filename, entry.data.slug);
     const filenameParts = entry.id.replace(/\.md$/, '').split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
+
     if (!entry.data.title) {
       entry.data.title = toProperCase(baseFilename);
     }
+    
     return {
       params: { slug },
       props: {

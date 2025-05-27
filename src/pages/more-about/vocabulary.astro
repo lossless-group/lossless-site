@@ -3,27 +3,24 @@ import { getCollection } from 'astro:content';
 import { processEntries } from './index.astro';
 import Layout from '@layouts/Layout.astro';
 import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
-import { getOriginalFilenameMap, getReferenceSlug } from "@utils/referenceSlugMap";
-import path from 'node:path';
-
+import { getReferenceSlug, unslugify } from '@utils/slugify';
 // Get entries from vocabulary collection
 const vocabularyEntries = await getCollection('vocabulary');
-const vocabularyDir = path.join(process.cwd(), 'src/generated-content/vocabulary');
 
 const processedEntires = processEntries(vocabularyEntries)
-
-const vocabularySlugToOriginal = getOriginalFilenameMap(processedEntires, vocabularyDir);
 
 const vocabularyItems = processedEntires.map(entry => {
   const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
   const slug = getReferenceSlug(filename, entry.data.slug);
+  const filenameParts = filename.split('/');
+  const baseFilename = filenameParts[filenameParts.length - 1];
 
   return {
     id: entry.id,
     slug: slug,
     collection: entry.collection,
     data: entry.data,
-    originalFilename: vocabularySlugToOriginal[slug],
+    originalFilename: unslugify(baseFilename),
   };
 });
 

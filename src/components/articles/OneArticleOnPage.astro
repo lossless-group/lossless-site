@@ -1,6 +1,7 @@
 ---
 import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import type { Root } from 'mdast';
+import { DEBUG_ARTICLE } from '@utils/envUtils'
 
 interface Props {
   content: Root;
@@ -44,7 +45,9 @@ const hProperties: Record<string, any> =
 // =============================
 // DEBUG: Output children node types to verify TOC injection
 // =============================
-console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
+if (DEBUG_ARTICLE) {
+  console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
+}
 // DEBUG: Output full tableOfContents node structure
 function sanitizeTOCNode(toc: any): any {
   if (!toc?.data?.map?.children) return toc;
@@ -65,7 +68,9 @@ function createEmptyRoot(): Root {
   return { type: 'root', children: [], data: {}, position: {} };
 }
 
-console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
+if (DEBUG_ARTICLE) {
+  console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
+}
 
 // =============================
 // Comprehensive comments for AstroMarkdown usage

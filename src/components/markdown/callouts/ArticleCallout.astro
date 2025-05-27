@@ -16,9 +16,6 @@ interface Props {
 
 const { node, data = { path: '/default-path' } } = Astro.props;
 
-console.log('=== ArticleCallout Debug ===');
-console.log('Node type:', node?.type);
-console.log('Children:', node?.children?.map(child => ({type: child.type})));
 
 // Default values
 let calloutType = 'info';

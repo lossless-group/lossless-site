@@ -59,29 +59,19 @@ const processedConceptsEntries = processEntries(conceptsEntries);
 // This is the single source of truth for original filename casing in the reference grid and preview cards
 // ---
 // Import the single source of truth for slug and filename mapping
-import path from 'node:path';
-import { getOriginalFilenameMap, getReferenceSlug } from "@utils/referenceSlugMap";
-
-// ---
-// Always use the absolute path to the true content directories (not site/src/content!)
-// This guarantees correct casing on all platforms
-const vocabularyDir = path.join(process.cwd(), 'src/generated-content/vocabulary');
-const conceptsDir = path.join(process.cwd(), 'src/generated-content/concepts');
-
-const vocabularySlugToOriginal = getOriginalFilenameMap(processedVocabularyEntries, vocabularyDir);
-const conceptSlugToOriginal = getOriginalFilenameMap(processedConceptsEntries, conceptsDir);
-// ---
+import { getReferenceSlug, unslugify, } from '@utils/slugify'
 
 // Correct assignment: use full relative path (minus .md) for slug generation and lookup
 const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => {
   const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
   const slug = getReferenceSlug(filename, entry.data.slug);
+
   return {
     id: entry.id,
     slug,
     collection: entry.collection,
     data: entry.data as ReferenceItem['data'],
-    originalFilename: vocabularySlugToOriginal[slug],
+    originalFilename: unslugify(slug),
   };
 });
 
@@ -102,7 +92,7 @@ const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
     slug,
     collection: entry.collection,
     data: entry.data as ReferenceItem['data'],
-    originalFilename: conceptSlugToOriginal[slug],
+    originalFilename: unslugify(slug),
   };
 });
 ---

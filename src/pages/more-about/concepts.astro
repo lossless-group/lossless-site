@@ -3,19 +3,18 @@ import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
 import { processEntries } from './index.astro';
-import { getOriginalFilenameMap, getReferenceSlug } from "@utils/referenceSlugMap";
+import { getReferenceSlug, unslugify } from '@utils/slugify';
 import path from 'node:path';
 // Get entries from concepts collection
 // Use type assertion to avoid TypeScript errors until Astro regenerates types
 const conceptsEntries = await getCollection('concepts' as any) as any[];
-const conceptsDir = path.join(process.cwd(), 'src/generated-content/concepts');
 
 const processedEntires = processEntries(conceptsEntries)
 
-const conceptsSlugToOriginal = getOriginalFilenameMap(processedEntires, conceptsDir);
-
 const conceptItems = processedEntires.map(entry => {
   const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
+  const filenameParts = filename.split('/');
+  const baseFilename = filenameParts[filenameParts.length - 1];
   const slug = getReferenceSlug(filename, entry.data.slug);
   
   return {
@@ -23,7 +22,7 @@ const conceptItems = processedEntires.map(entry => {
     slug: slug,
     collection: entry.collection,
     data: entry.data,
-    originalFilename: conceptsSlugToOriginal[slug],
+    originalFilename: unslugify(baseFilename),
   };
 });
 ---

@@ -9,11 +9,10 @@ export const prerender = true;
 
 export async function getStaticPaths() {
   const vocabularyEntries = await getCollection('vocabulary');
-  const conceptsEntries = await getCollection('concepts');
-  const entries = vocabularyEntries.concat(conceptsEntries)
+  // const conceptsEntries = await getCollection('concepts');
+  // const entries = vocabularyEntries.concat(conceptsEntries)
 
-  console.log("First vocab entry", JSON.stringify(vocabularyEntries[0]))
-  return entries.map(entry => {
+  return vocabularyEntries.map(entry => {
     // Generate slug and title from the entry ID if not present
     const filename = entry.id.replace(/\.md$/, '');
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
@@ -36,8 +35,6 @@ interface Props {
 
 const { entry } = Astro.props;
 
-const vocabularyEntries = await getCollection('vocabulary');
-console.log("First vocab entry", JSON.stringify(vocabularyEntries[0]))
 ---
 
 <Layout title={entry.data.title}>
