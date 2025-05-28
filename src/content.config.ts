@@ -85,9 +85,9 @@ const vocabularyCollection = defineCollection({
       .replace(/\s+/g, ' ')
       .trim();
     
-    console.log("Original Name", filename)
-    console.log("Display Name", displayTitle)
-    console.log("\n\n")
+    // console.log("Original Name", filename)
+    // console.log("Display Name", displayTitle)
+    // console.log("\n\n")
     // Merge our computed values into the data object
     return {
       ...data,  // Start with existing data

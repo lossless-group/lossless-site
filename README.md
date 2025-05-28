@@ -21,14 +21,27 @@ pnpm dev
 
 # BEFORE PROCEEDING
 
+## Environment Variables
 Copy the example.env text file and rename it to .env. Fill in the values for the environment variables.
 ```shellscript
 NODE_ENV=development
 APP_ENV=development
+
+DEPLOY_ENV=LocalSiteOnly
 ```
 Lossless has one deployment on Vercel, which uses only the astro project as the root directory, and the content is in the 'generated_content' directory in `src` as a git submodule.
 
 The team that also manages the content uses the lossless-monorepo, which has the astro project as the 'site' submodule. The content is then in the 'content' submodule.
+
+The DEPLOY_ENV setting is used to determine the content location, and runs on a conditional swtich statement in the `astro.config.mjs` file.
+
+## Inspect Build Output with tee
+
+Because we've worked through so many issues, the build output is comically long. Yet, it can be very helpful for troubleshooting. So, we just pipe the output to a log file where we can search and find the parts of interest. 
+
+```bash
+pnpm build 2>&1 | tee build_output.log
+```
 
 # Stack Rationale
 
@@ -45,7 +58,11 @@ Bookmark [Astro documentation](https://docs.astro.build). To troubleshoot, go to
 
 The content is in the 'generated_content' directory in `src` as a git submodule.
 
-The team that also manages the content uses the lossless-monorepo, which has the astro project as the 'site' submodule. The content is then developed from the 'content' submodule.  Settings in the .env file are used to determine the content location. The logic is in  the `content.config.ts` and `astro.config.ts` files.
+The team that also manages the content uses the [lossless-monorepo](https://github.com/lossless-group/lossless-monorepo), which has the astro project as the 'site' submodule. The content is then developed from the 'content' submodule.  Settings in the .env file are used to determine the content location. The logic is in  the `content.config.ts` and `astro.config.ts` files.
+
+If you want to experience content development the Lossless way, download [Obsidian](https://obsidian.md) and use the `content` directory in the monorepo, which is a git submodule pointing to [lossless-content](https://github.com/lossless-group/lossless-content).
+
+Once you have the content submodule cloned, use symbolic links to point from the content submodule directories into the Obsidian vault directory.
 
 ## Image Handling:
 While Astro is supposed to handle images extremely well, I find that sometimes there are just "dud rendering" issues that are not immediately apparent. As a result, I have a preference for using image APIs, I'm using [ImageKit](https://imagekit.io) for this.
