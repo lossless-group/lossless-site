@@ -37,9 +37,11 @@ export async function getStaticPaths() {
   // Only declare conceptsPaths ONCE to avoid block-scoped redeclaration errors.
   // Use ONLY the shared getReferenceSlug logic for conceptsPaths. No local slug logic allowed.
   const conceptsPaths = conceptsEntries.map(entry => {
-    const filename = entry.id.replace(/.*\//, '').replace(/\.md$/, '');
-    const slug = getReferenceSlug(filename, entry.data.slug);
-    const filenameParts = entry.id.replace(/\.md$/, '').split('/');
+  const filename = entry.id.replace(/\.md$/, '');
+  const filenameParts = entry.id.replace(/\.md$/, '').split('/');
+ 
+  const slug = getReferenceSlug(filename, entry.data.slug);
+  console.log("Slug:", slug); // ✅ this should be a string
     const baseFilename = filenameParts[filenameParts.length - 1];
 
     if (!entry.data.title) {
@@ -70,6 +72,7 @@ const { entry, contentType } = Astro.props;
 const contentData = {
   path: Astro.url.pathname,
   id: entry.id,
+  title: entry.data.title,
   contentType: contentType
 };
 ---

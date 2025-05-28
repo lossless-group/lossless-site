@@ -85,7 +85,7 @@ const other_type = !handled_types.includes(node.type)
 data.dirpath = dirname(data.path)
 
 // Use provided title or generate from ID if not provided
-const title = data.title || data.id;
+const title = data.title;
 
 //This logic has to be done up here because it's async work
 // Only apply if it's a toolGallery code block
