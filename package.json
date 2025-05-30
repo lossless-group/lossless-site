@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro preview",
-    "prebuild": "git lfs install && git lfs pull",
     "build": "node -e \"require('dotenv').config({ path: '.env' }); require('child_process').execSync('astro build --remote', { stdio: 'inherit' });\"",
     "preview": "astro preview",
     "astro": "astro",
