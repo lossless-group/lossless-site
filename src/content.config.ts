@@ -1,22 +1,23 @@
 import { defineCollection, z, getCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { basename, dirname, extname, join, resolve } from 'node:path';
-import fs from 'fs';
+import { pathToFileURL } from 'url';
 
 // Import environment utilities
 import { contentBasePath } from './utils/envUtils.js';
-import { exit } from 'node:process';
 
 
 // Function to resolve content paths based on environment
-function resolveContentPath(relativePath: string) {
-  // If the path already starts with ./src/generated-content, use it as is
+function resolveContentPath(relativePath: string): string {
+  // If already within generated-content, return as-is
   if (relativePath.startsWith('./src/generated-content')) {
     return relativePath;
   }
-  
-  // Otherwise, resolve against the content base path
-  return join(contentBasePath, relativePath);
+
+  const absolutePath = join(contentBasePath, relativePath);
+
+  // Convert to file:// URL
+  return pathToFileURL(absolutePath).href;
 }
 
 // Cards collection - respects JSON structure with cards array
