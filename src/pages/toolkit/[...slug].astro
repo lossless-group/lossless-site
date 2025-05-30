@@ -14,21 +14,10 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import path from 'path';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
-/**
- * Define a type for the expected entry data structure
- * This helps TypeScript understand what properties are available
- */
-interface ToolingEntryData {
-  title?: string;
-  slug?: string;
-  tags: string[];
-  [key: string]: any;
-}
 
 export async function getStaticPaths() {
   /**
