@@ -5,6 +5,7 @@ import fs from 'fs';
 
 // Import environment utilities
 import { contentBasePath } from './utils/envUtils.js';
+import { exit } from 'node:process';
 
 
 // Function to resolve content paths based on environment
@@ -72,29 +73,6 @@ const vocabularyCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  }).passthrough().transform((data, context) => {
-    // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Use the filename as the display title, preserving original case
-    // - Replace dashes/underscores with spaces
-    // - Collapse multiple spaces
-    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
-    const displayTitle = filename
-      .replace(/[-_]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    // console.log("Original Name", filename)
-    // console.log("Display Name", displayTitle)
-    // console.log("\n\n")
-    // Merge our computed values into the data object
-    return {
-      ...data,  // Start with existing data
-      title: displayTitle,  // Override with computed title
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
-      aliases: data.aliases || []  // Ensure aliases exists
-    };
   })
 });
 
@@ -111,26 +89,6 @@ const conceptsCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  }).passthrough().transform((data, context) => {
-    // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Use the filename as the display title, preserving original case
-    // - Replace dashes/underscores with spaces
-    // - Collapse multiple spaces
-    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
-    const displayTitle = filename
-      .replace(/[-_]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    // Merge our computed values into the data object
-    return {
-      ...data,  // Start with existing data
-      title: displayTitle,  // Override with computed title
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
-      aliases: data.aliases || []  // Ensure aliases exists
-    };
   })
 });
 

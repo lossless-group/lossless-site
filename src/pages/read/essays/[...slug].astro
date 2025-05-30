@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import path from 'path';
 
 export const prerender = true;
 
@@ -26,9 +25,11 @@ export async function getStaticPaths() {
     const slug = entry.data.slug || filename.toLowerCase().replace(/\s+/g, '-');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
+    
     if (!entry.data.title) {
       entry.data.title = toProperCase(baseFilename);
     }
+
     return {
       params: { slug },
       props: {

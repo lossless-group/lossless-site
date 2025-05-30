@@ -84,8 +84,6 @@ const handled_types = [
 const other_type = !handled_types.includes(node.type)
 data.dirpath = dirname(data.path)
 
-// Use provided title or generate from ID if not provided
-const title = data.title;
 
 //This logic has to be done up here because it's async work
 // Only apply if it's a toolGallery code block
@@ -120,7 +118,7 @@ if (node.type === 'code' && node.lang === 'toolingGallery') {
 
 {node.type === "root" && 
   <>
-    {data?.renderingToC !== true && <h1>{title}</h1>}
+    {data?.renderingToC !== true && <h1>{data.title}</h1>}
     {node.children.map((child) => (
         <Astro.self node={child} data={data} />
     ))}

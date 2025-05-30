@@ -21,17 +21,8 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
 }
 
-export function unslugify(slug: string): string {
-  return slug
-    .replace(/-/g, ' ')                    // Replace dashes with spaces
-    .split(' ')                            // Split into words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-    .join(' ');                            // Join back into a proper title
-}
 
-export function getReferenceSlug(filename: string, frontmatterSlug?: string): string {
-  if (frontmatterSlug) return frontmatterSlug;
-
+export function getReferenceSlug(filename: string): string {
   const parts = filename.split('/');
   const slugifiedParts = parts.map(p => slugify(p));
   return slugifiedParts.join('/');

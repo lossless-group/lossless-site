@@ -3,28 +3,9 @@ import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
 import { processEntries } from './index.astro';
-import { getReferenceSlug, unslugify } from '@utils/slugify';
-import path from 'node:path';
-// Get entries from concepts collection
-// Use type assertion to avoid TypeScript errors until Astro regenerates types
+
 const conceptsEntries = await getCollection('concepts' as any) as any[];
-
 const processedEntires = processEntries(conceptsEntries)
-
-const conceptItems = processedEntires.map(entry => {
-  const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
-  const filenameParts = filename.split('/');
-  const baseFilename = filenameParts[filenameParts.length - 1];
-  const slug = getReferenceSlug(filename, entry.data.slug);
-  
-  return {
-    id: entry.id,
-    slug: slug,
-    collection: entry.collection,
-    data: entry.data,
-    originalFilename: unslugify(baseFilename),
-  };
-});
 ---
 
 <Layout title="Concepts">
@@ -40,7 +21,7 @@ const conceptItems = processedEntires.map(entry => {
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {conceptItems.map(entry => (
+      {processedEntires.map(entry => (
         <ConceptPreviewCard entry={entry} />
       ))}
     </div>

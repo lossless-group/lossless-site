@@ -4,97 +4,32 @@ import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import type { CollectionEntry } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
 
-// ReferenceItem now includes originalFilename (filename with original casing, no extension)
-interface ReferenceItem {
-  id: string; // Full collection-relative path, e.g., 'vocabulary/Acceptance Testing.md'
-  slug: string; // Astro-generated slug (may be lowercased)
-  collection: 'vocabulary' | 'concepts';
-  data: {
-    title: string;
-    slug?: string;
-    aliases?: string[];
-    description?: string;
-  };
-  originalFilename: string; // The filename, in original casing, no extension
-}
 
 const vocabularyEntries = await getCollection('vocabulary');
 const conceptsEntries = await getCollection('concepts');
 
-// Helper function to convert filenames to human-readable titles, preserving original casing
-// - Removes .md extension
-// - Replaces dashes/underscores with spaces
-// - Does NOT change the case of any letters (e.g., 'AI' stays 'AI')
-// - Used for all vocabulary/concept title rendering
 
 // Process entries to add titles from filenames if missing and sort
 // Aggressively commented: If logic changes, update all call sites and this block.
 export function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
-  function filenameToTitle(str: string): string {
-    return str
-      .replace(/\.md$/, '') // Remove .md extension
-      .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
-      .replace(/\s+/g, ' ') // Collapse multiple spaces to single
-      .trim();               // Remove leading/trailing whitespace
-  }
-
   entries.forEach(entry => {
     // Always generate title from filename, preserving original case
-    const filename = entry.id.replace(/\.md$/, '');
+    const filename = entry.filePath.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    (entry.data as any).title = filenameToTitle(baseFilename);
+    entry.data.title = entry.rendered?.metadata?.frontmatter?.title || baseFilename;
+
+    entry.slug = getReferenceSlug(entry.id)
   });
+
   entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
   return entries;
 }
 
 const processedVocabularyEntries = processEntries(vocabularyEntries);
 const processedConceptsEntries = processEntries(conceptsEntries);
-
-// ---
-// Build a mapping of slug -> original filename (original casing, no extension) using the same logic as getStaticPaths in [...slug].astro
-// This ensures that even if Astro lowercases id or slug elsewhere, we can always recover the original filename for display
-// This is the single source of truth for original filename casing in the reference grid and preview cards
-// ---
-// Import the single source of truth for slug and filename mapping
-import { getReferenceSlug, unslugify, } from '@utils/slugify'
-
-// Correct assignment: use full relative path (minus .md) for slug generation and lookup
-const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => {
-  const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
-  const slug = getReferenceSlug(filename, entry.data.slug);
-
-  return {
-    id: entry.id,
-    slug,
-    collection: entry.collection,
-    data: entry.data as ReferenceItem['data'],
-    originalFilename: unslugify(slug),
-  };
-});
-
-// DEBUG: Log the entire conceptSlugToOriginal map to see all keys and values
-// console.log('[DEBUG] conceptSlugToOriginal keys:', Object.keys(conceptSlugToOriginal));
-// console.log('[DEBUG] conceptSlugToOriginal full map:', conceptSlugToOriginal);
-
-const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
-  const filename = entry.id.replace(/\.md$/, ''); // full relative path, no extension
-  const slug = getReferenceSlug(filename, entry.data.slug);
-  
-  // DEBUG: Log each entry's id, filename, and resulting slug
-  // console.log(`[DEBUG] Processing entry: id=${entry.id}, filename=${filename}, slug=${slug}`);
-  // console.log(`[DEBUG] Looking up originalFilename with slug=${slug}, found:`, conceptSlugToOriginal[slug]);
-  
-  return {
-    id: entry.id,
-    slug,
-    collection: entry.collection,
-    data: entry.data as ReferenceItem['data'],
-    originalFilename: unslugify(slug),
-  };
-});
 ---
 
 <Layout title="Reference - Vocabulary & Concepts">
@@ -112,7 +47,7 @@ const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
       <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
       <p class="mb-6">Terms and definitions used throughout our work.</p>
 
-      <ReferenceGrid items={vocabularyItems} />
+      <ReferenceGrid items={processedVocabularyEntries} />
     </section>
 
     <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
@@ -121,7 +56,7 @@ const conceptItems: ReferenceItem[] = processedConceptsEntries.map(entry => {
       <h2 class="text-2xl font-bold mb-4">Concepts</h2>
       <p class="mb-6">Important ideas and frameworks we use in our work.</p>
 
-      <ReferenceGrid items={conceptItems} />
+      <ReferenceGrid items={processedConceptsEntries} />
     </section>
 
   </div>

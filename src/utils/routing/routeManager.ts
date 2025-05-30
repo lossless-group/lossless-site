@@ -56,7 +56,7 @@ function isValidContentFile(contentPath: string): boolean {
 
 function resolveWithMappings(normalizedPath: string): string {
   if (DEBUG_BACKLINKS) {
-    console.log("Detected full path. Using", normalizedPath)
+    console.log("[routeManager] Detected full path. Using", normalizedPath)
   }
 
   const segments = normalizedPath.split('/');
@@ -89,20 +89,20 @@ export function transformContentPathToRoute(input: string): string {
   const allMappings = [...customRouteMappings, ...defaultRouteMappings];
   
   if (DEBUG_BACKLINKS) {
-    console.log("Not path provided! Searching...")
+    console.log("[routeManager] No path provided! Searching...")
   }
 
   for (const mapping of allMappings) {
     const candidate = `${mapping.contentPath}/${input}`;
     
     if (DEBUG_BACKLINKS) {
-      console.log("Trying", candidate)
+      console.log("[routeManager] Trying", candidate)
     }
 
     if (isValidContentFile(candidate)) {
 
       if (DEBUG_BACKLINKS) {
-        console.log("Found!", candidate)
+        console.log("[routeManager] Found!", candidate)
       }
 
       return transformContentPathToRoute(candidate); // Recurse as if it's a full path

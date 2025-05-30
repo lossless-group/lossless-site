@@ -3,7 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { toProperCase, unslugify, getReferenceSlug } from "@utils/slugify"
+import { processEntries } from './index.astro';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
@@ -12,21 +12,14 @@ export async function getStaticPaths() {
   // Import the single-source-of-truth slug/filename mapping utility
 
   const vocabularyEntries = await getCollection('vocabulary');
+  const processedVocabularyEntires = processEntries(vocabularyEntries)
+
   const conceptsEntries = await getCollection('concepts');
+  const processedConceptsEntries = processEntries(conceptsEntries)
 
-  // Use shared utility for slug generation
-  const vocabularyPaths = vocabularyEntries.map(entry => {
-    const filename = entry.id.replace(/.*\//, '').replace(/\.md$/, '');
-    const slug = getReferenceSlug(filename, entry.data.slug);
-    const filenameParts = entry.id.replace(/\.md$/, '').split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-
-    if (!entry.data.title) {
-      entry.data.title = toProperCase(baseFilename);
-    }
-
+  const vocabularyPaths = processedVocabularyEntires.map(entry => {
     return {
-      params: { slug },
+      params: { slug: entry.slug },
       props: {
         entry,
         contentType: 'vocabulary'
@@ -36,19 +29,9 @@ export async function getStaticPaths() {
 
   // Only declare conceptsPaths ONCE to avoid block-scoped redeclaration errors.
   // Use ONLY the shared getReferenceSlug logic for conceptsPaths. No local slug logic allowed.
-  const conceptsPaths = conceptsEntries.map(entry => {
-      const filename = entry.id.replace(/\.md$/, '');
-      const filenameParts = entry.id.replace(/\.md$/, '').split('/');
-    
-      const slug = getReferenceSlug(filename, entry.data.slug);
-      const baseFilename = filenameParts[filenameParts.length - 1];
-
-      if (!entry.data.title) {
-        entry.data.title = toProperCase(baseFilename);
-      }
-      
+  const conceptsPaths = processedConceptsEntries.map(entry => {
       return {
-        params: { slug },
+        params: { slug: entry.slug },
         props: {
           entry,
           contentType: 'concepts'

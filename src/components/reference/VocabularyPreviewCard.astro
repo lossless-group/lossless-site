@@ -51,7 +51,7 @@ const url = `/more-about/${entry.slug}`;
   -->
   <h3 class="vocabulary-card__title">
     <a href={url} class="vocabulary-card__link">
-      { entry.originalFilename }
+      { entry.data.title }
     </a>
   </h3>
   {entry.data.aliases && entry.data.aliases.length > 0 && (
