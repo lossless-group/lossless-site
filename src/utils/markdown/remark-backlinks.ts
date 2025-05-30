@@ -6,11 +6,6 @@ import { DEBUG_BACKLINKS } from '@utils/envUtils';
 // Match [[...]] but skip if it's a visual path
 const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
 
-// This function is kept for backward compatibility but uses the route manager internally
-function transformPath(path: string): string {
-  return transformContentPathToRoute(path);
-}
-
 /**
  * Transform wiki-style backlinks [[Page]] into markdown links
  * Skips any paths containing 'visuals' as those are handled by remark-images

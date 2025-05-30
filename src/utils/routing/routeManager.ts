@@ -1,6 +1,5 @@
 /**
  * Route Manager for content paths
- * 
  * This module provides a centralized way to map content paths to web routes.
  * It allows for custom route mappings to be defined for different content types.
  */
@@ -45,43 +44,73 @@ let customRouteMappings: RouteMapping[] = [];
  * @param path - The content path to transform (e.g., "vocabulary/Software Development")
  * @returns The transformed web route (e.g., "/more-about/software-development")
  */
-export function transformContentPathToRoute(path: string): string {
-  // Normalize the path: lowercase and replace spaces with hyphens
-  const normalizedPath = path.toLowerCase().replace(/ /g, '-');
-  
-  // Check if the path has a directory structure
-  const segments = normalizedPath.split('/');
-  
-  // If there's no directory structure, just return the normalized path
-  if (segments.length === 1) {
-    return `/${normalizedPath}`;
+
+import { existsSync } from 'fs';
+import path from 'path';
+import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
+
+function isValidContentFile(contentPath: string): boolean {
+  const fullPath = path.resolve(contentBasePath, `${contentPath}.md`);
+  return existsSync(fullPath);
+}
+
+function resolveWithMappings(normalizedPath: string): string {
+  if (DEBUG_BACKLINKS) {
+    console.log("Detected full path. Using", normalizedPath)
   }
-  
-  // Get the content type (first segment of the path)
+
+  const segments = normalizedPath.split('/');
   const contentType = segments[0];
-  
-  // Check if there's a mapping for this content type
+
   const allMappings = [...customRouteMappings, ...defaultRouteMappings];
-  const mapping = allMappings.find(m => {
-    // Handle both exact matches and prefix matches
-    return contentType === m.contentPath || 
-           normalizedPath.startsWith(`${m.contentPath}/`);
-  });
-  
+  const mapping = allMappings.find(m =>
+    contentType === m.contentPath ||
+    normalizedPath.startsWith(`${m.contentPath}/`)
+  );
+
   if (mapping) {
-    // If the content path is exactly the mapping path, use the route path directly
-    if (contentType === mapping.contentPath) {
-      // Return the route with the rest of the path
-      return `/${mapping.routePath}/${segments.slice(1).join('/')}`;
-    }
-    
-    // If the content path starts with the mapping path, replace the prefix
-    const relativePath = normalizedPath.substring(mapping.contentPath.length + 1); // +1 for the slash
+    const relativePath = normalizedPath.substring(mapping.contentPath.length + 1);
     return `/${mapping.routePath}/${relativePath}`;
   }
+
+  return `/not-found?path=${encodeURIComponent(normalizedPath)}`;
+}
+
+export function transformContentPathToRoute(input: string): string {
+  const normalizedInput = input.toLowerCase().replace(/ /g, '-');
+  const segments = normalizedInput.split('/');
+
+  // Case 1: Full path (contains slash)
+  if (segments.length > 1) {
+    return resolveWithMappings(normalizedInput);
+  }
+
+  // Case 2: Try fallback resolution from known mappings
+  const allMappings = [...customRouteMappings, ...defaultRouteMappings];
   
-  // Default fallback: use /content/ prefix if no mapping is found
-  return `/content/${normalizedPath}`;
+  if (DEBUG_BACKLINKS) {
+    console.log("Not path provided! Searching...")
+  }
+
+  for (const mapping of allMappings) {
+    const candidate = `${mapping.contentPath}/${input}`;
+    
+    if (DEBUG_BACKLINKS) {
+      console.log("Trying", candidate)
+    }
+
+    if (isValidContentFile(candidate)) {
+
+      if (DEBUG_BACKLINKS) {
+        console.log("Found!", candidate)
+      }
+
+      return transformContentPathToRoute(candidate); // Recurse as if it's a full path
+    }
+  }
+
+  // Fallback
+  return `/not-found?path=${encodeURIComponent(input)}`;
 }
 
 /**
