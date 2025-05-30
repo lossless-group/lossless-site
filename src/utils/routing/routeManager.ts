@@ -24,14 +24,14 @@ const defaultRouteMappings: RouteMapping[] = [
     contentPath: 'lost-in-public/prompts',
     routePath: 'thread/prompts'
   },
-  {
-    contentPath: 'content/visuals',
-    routePath: 'content/visuals'
-  },
-  {
-    contentPath: 'assets',
-    routePath: 'assets'
-  }
+  // {
+  //   contentPath: 'content/visuals',
+  //   routePath: 'content/visuals'
+  // },
+  // {
+  //   contentPath: 'assets',
+  //   routePath: 'assets'
+  // }
   // Add more mappings as needed
 ];
 
@@ -45,7 +45,7 @@ let customRouteMappings: RouteMapping[] = [];
  * @returns The transformed web route (e.g., "/more-about/software-development")
  */
 
-import { existsSync } from 'fs';
+import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
 
@@ -56,7 +56,7 @@ function isValidContentFile(contentPath: string): boolean {
 
 function resolveWithMappings(normalizedPath: string): string {
   if (DEBUG_BACKLINKS) {
-    console.log("[routeManager] Detected full path. Using", normalizedPath)
+    console.log("[routeManager] Found path", normalizedPath)
   }
 
   const segments = normalizedPath.split('/');
@@ -76,6 +76,43 @@ function resolveWithMappings(normalizedPath: string): string {
   return `/not-found?path=${encodeURIComponent(normalizedPath)}`;
 }
 
+function collectAllMappingPaths(): RouteMapping[] {
+  const all: RouteMapping[] = [];
+
+  for (const mapping of [...customRouteMappings, ...defaultRouteMappings]) {
+    const root = path.resolve(contentBasePath, mapping.contentPath);
+
+    function walk(currentPath: string, relativePath = '') {
+      const entries = readdirSync(currentPath);
+
+      let foundMarkdown = false;
+
+      for (const entry of entries) {
+        const fullPath = path.join(currentPath, entry);
+        const relative = path.join(relativePath, entry);
+
+        if (statSync(fullPath).isDirectory()) {
+          walk(fullPath, relative); // go deeper
+        } else if (fullPath.endsWith('.md')) {
+          foundMarkdown = true;
+        }
+      }
+
+      if (foundMarkdown) {
+        const contentPath = path.join(mapping.contentPath, relativePath).replace(/\\/g, '/');
+        all.push({
+          contentPath,
+          routePath: mapping.routePath
+        });
+      }
+    }
+
+    walk(root);
+  }
+
+  return all;
+}
+
 export function transformContentPathToRoute(input: string): string {
   const normalizedInput = input.toLowerCase().replace(/ /g, '-');
   const segments = normalizedInput.split('/');
@@ -86,7 +123,7 @@ export function transformContentPathToRoute(input: string): string {
   }
 
   // Case 2: Try fallback resolution from known mappings
-  const allMappings = [...customRouteMappings, ...defaultRouteMappings];
+  const allMappings = collectAllMappingPaths();
   
   if (DEBUG_BACKLINKS) {
     console.log("[routeManager] No path provided! Searching...")
@@ -100,15 +137,13 @@ export function transformContentPathToRoute(input: string): string {
     }
 
     if (isValidContentFile(candidate)) {
-
-      if (DEBUG_BACKLINKS) {
-        console.log("[routeManager] Found!", candidate)
-      }
-
       return transformContentPathToRoute(candidate); // Recurse as if it's a full path
     }
   }
 
+  if (DEBUG_BACKLINKS) {
+    console.log("No path found for path", input, "\n\n")
+  }
   // Fallback
   return `/not-found?path=${encodeURIComponent(input)}`;
 }
