@@ -81,7 +81,7 @@ export default defineConfig({
       // rehypeModifyMermaidGraphs, // Uncomment if/when available
     ]
   },
-  output: "server",
+  output: "static",
   adapter: vercel(),
   integrations: [
     mdx(),
