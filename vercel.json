@@ -1,0 +1,10 @@
+{
+  "build": {
+    "env": {
+      "GIT_LFS_SKIP_SMUDGE": "0"
+    }
+  },
+  "hooks": {
+    "prebuild": "git lfs install && git lfs pull"
+  }
+}
