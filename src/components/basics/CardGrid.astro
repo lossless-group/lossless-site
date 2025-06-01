@@ -12,6 +12,12 @@ const { gap = "2rem", tools = [] } = Astro.props;
 
 const toolsWithImages = tools.filter(tool => tool.image);
 const toolsWithoutImages = tools.filter(tool => !tool.image);
+
+toolsWithImages.forEach(tool => {
+  if (!tool.id) throw new Error("Missing tool.id in CardGrid");
+});
+
+
 ---
 
 <div class="cards-container">
@@ -20,6 +26,7 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
       {toolsWithImages.map(tool => (
         <ToolCard 
           {...tool} 
+          id={tool.id}
           filePath={tool.filePath} 
           class="tool-card" 
           data-tags={JSON.stringify(tool.tags || [])} 

@@ -7,6 +7,11 @@ import TagColumn from "@components/tool-components/TagColumn.astro";
 
 const toolEntries = await getCollection("tooling");
 const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id }));
+
+tools.forEach(tool => {
+  if (!tool.id) throw new Error("Missing tool.id in toolkit layout");
+});
+
 ---
 
 <Layout title="Toolkit" description="A curated collection of tools">

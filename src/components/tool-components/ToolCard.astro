@@ -2,8 +2,6 @@
 import { filterTitle, getEffectiveSiteName } from "@utils/toolUtils";
 import TagCloud from "./TagCloud.astro";
 import TextCTA from "@components/basics/cta/TextCTA.astro";
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { getReferenceSlug } from "@utils/slugify";
 
 interface Tool {
@@ -44,25 +42,30 @@ interface Props {
   filePath?: string; // Allow filePath to be passed as a prop
 }
 
-const { tool, ...directProps } = Astro.props;
-
-// Use tool props if provided, otherwise use direct props
 const {
-  site_name = directProps.site_name,
-  title = directProps.title,
-  zinger = directProps.zinger,
-  og_title = directProps.og_title,
-  url = directProps.url,
-  image = directProps.image,
-  og_image = directProps.og_image,
-  og_image_url = directProps.og_image_url,
-  favicon = directProps.favicon,
-  description = directProps.description,
-  description_site_cp = directProps.description_site_cp,
-  tags = directProps.tags || [],
-  filename = directProps.filename,
-  og_screenshot_url = directProps.og_screenshot_url,
-} = tool || directProps;
+  id,
+  site_name,
+  title,
+  zinger,
+  og_title,
+  url,
+  image,
+  og_image,
+  og_image_url,
+  favicon,
+  description,
+  description_site_cp,
+  tags = [],
+  filename,
+  og_screenshot_url,
+  filePath,
+  // Allow all other HTML attributes like class, data-*, aria-*
+  ...rest
+} = Astro.props;
+
+if (!id) {
+  throw new Error(`Missing tooling ID in ToolCard.astro.\n\nProps: ${JSON.stringify(Astro.props, null, 2)}`);
+}
 
 // Ensure tags is always an array
 const safeTags = tags || [];
@@ -110,7 +113,7 @@ const effectiveDescription = hasDescriptionSiteCp
 
 // Generate a toolkit path that preserves the directory structure
 function generateToolkitPath(): string {
-  return `/toolkit/${getReferenceSlug(directProps.id)}`;
+  return `/toolkit/${getReferenceSlug(id)}`;
 }
 
 // Get the toolkit path for this tool

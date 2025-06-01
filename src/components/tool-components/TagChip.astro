@@ -60,3 +60,49 @@ const isTagSelected = selected;
   });
 </script>
 
+
+<style is:global>
+  .tool-tag {
+    background: var(--clr-lossless-primary-dark, #2a2a30);
+    color: var(--clr-lossless-primary-glass, #ccc);
+    border-radius: 0.25em;
+    white-space: nowrap;
+    padding: 0.1em 0.1em;
+    display: inline-block;
+    height: fit-content;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    margin: 3px;
+    overflow: visible;
+  }
+
+  .tool-tag p {
+    font-size: var(--fs-250, 0.85rem);
+    margin: 0.1em 0.3em;
+    display: inline-block;
+  }
+
+  .tool-tag .count {
+    font-size: inherit;
+    margin-left: 0.3em;
+    opacity: 0.8;
+    display: inline-block;
+  }
+
+  .tool-tag:hover {
+    background-color: #3a3a45;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .tool-tag.selected {
+    background-color: var(--clr-lossless-primary-glass, #444);
+    color: var(--clr-white, #fff);
+    border-color: var(--clr-lossless-primary-glass, #666);
+    box-shadow: 0 0 5px rgba(100, 100, 100, 0.5);
+  }
+</style>
