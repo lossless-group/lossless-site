@@ -11,7 +11,7 @@ const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id }));
 
 <Layout title="Toolkit" description="A curated collection of tools">
   <main>
-    <div class="toolkit-layout" client:load>
+    <div class="toolkit-layout">
       <aside class="sidebar">
         <TagColumn tools={tools} />
       </aside>

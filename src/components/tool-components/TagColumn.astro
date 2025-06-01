@@ -297,6 +297,11 @@ function renderSelectedTags() {
     gap: 0.4rem;
     max-height: 60vh;
     overflow-y: auto;
+    overflow-x: hidden;       /* ✅ Prevent horizontal scroll */
+    width: 100%;              /* ✅ Ensure it doesn't overflow its container */
+    box-sizing: border-box;   /* ✅ Respect padding within width */
+    border-bottom: 5px solid var(--clr-lossless-ui-btn-border);
+
   }
 
 

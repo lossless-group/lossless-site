@@ -14,25 +14,14 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { getReferenceSlug } from '@utils/slugify';
+import { DEBUG_TOOLING } from '@utils/envUtils';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
 
 export async function getStaticPaths() {
-  /**
-   * Helper function to convert filenames to titles while preserving acronym casing
-   * 
-   * @param str - The string to convert to proper case
-   * @returns The string in proper case with first letter of each word capitalized
-   */
-  function toProperCase(str: string): string {
-    return str
-      .replace(/[-_]/g, ' ')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
 
   // Get all entries from the tooling collection
   const toolingEntries = await getCollection('tooling');
@@ -42,15 +31,11 @@ export async function getStaticPaths() {
   
   // Process tooling entries to create static paths
   return toolingEntries.map(entry => {
-    // Generate slug from the entry ID (relative path from tooling directory)
-    const filename = entry.id.replace(/\.md$/, '');
-    // Use the full path as the slug, preserving directory structure for nested routes
-    const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+    const generatedSlug = getReferenceSlug(entry.id)
+    if (DEBUG_TOOLING) {
+      console.log(`Generated path: /toolkit/${generatedSlug}`);
+    }
 
-    // Debug: Log the generated path
-    console.log(`Generated path: /toolkit/${generatedSlug}`);
-
-    // Return plain entry and contentType; downstream logic now handles id/title
     return {
       params: { slug: generatedSlug },
       props: {
