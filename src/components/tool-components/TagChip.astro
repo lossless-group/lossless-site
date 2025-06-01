@@ -1,66 +1,27 @@
 ---
-/**
- * TagChip.astro — Dynamic Tag Routing Component
- *
- * Implements dynamic routing for tags as specified in:
- *   /content/lost-in-public/prompts/render-logic/Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md
- *
- * Follows comprehensive, parallel commenting rules as outlined in:
- *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
- *
- * - Accepts a `route` prop for dynamic routing (defaults to 'toolkit').
- * - Generates href as `/${route}/${tag}` unless `href` is explicitly provided.
- * - Logs a warning in development if `route` is missing or invalid.
- * - Accepts a `tagString` prop (renamed from `tag`) to avoid boolean inference bugs.
- * - Accepts an optional `fontSize` prop to customize the font size of the tag label.
- */
-
 interface Props {
   tagString: string;
   count?: number;
   selected?: boolean;
   includeCount?: boolean;
   title?: string;
-  href?: string;
-  route?: string; // NEW: dynamic route context for tag links
-  fontSize?: string; // Optional: custom font size for tag label
+  fontSize?: string;
   [key: string]: any; // Allow other HTML attributes such as aria-label, onClick, etc.
 }
 
-// Destructure props, renaming tag to tagString to avoid boolean inference bugs
 const {
   tagString,
   count = 0,
   includeCount = false,
   selected = false,
   title,
-  href,
-  route,
-  fontSize // New optional prop for font size
+  fontSize,
 } = Astro.props;
 
-// Defensive: Warn if tagString is not a string
-if (typeof tagString !== 'string') {
-  console.warn('[TagChip] Received non-string tag:', tagString, 'Type:', typeof tagString);
-}
-
-// --- ROUTE NORMALIZATION LOGIC ---
-// Ensure routeToUse never includes a leading slash, as this would break relative routing in Astro.
-// If a leading slash is detected, strip it and log a warning in development mode.
-let normalizedRoute = typeof route === "string" ? route.replace(/^\/+/, "") : "";
-if (route && route.startsWith("/") && import.meta.env.DEV) {
-  console.warn(
-    `[TagChip.astro] Received route prop with leading slash: '${route}'. Stripping leading slash for correct relative routing. See Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md for details.`
-  );
-}
-// Only use normalizedRoute if it's a non-empty string, otherwise fallback to 'toolkit' for safety
-const routeToUse = normalizedRoute && normalizedRoute.trim() !== "" ? normalizedRoute : "toolkit";
-
-// Helper function to convert train-case tags to normal case for UI display
 function trainCaseToNormalCase(tag: string): string {
   if (typeof tag !== 'string') {
-    console.error('[TagChip] trainCaseToNormalCase received non-string tag:', tag, 'Type:', typeof tag);
-    return String(tag); // or return '' as a fallback
+    console.error('[TagChip] trainCaseToNormalCase received non-string tag:', tag);
+    return String(tag);
   }
   return tag
     .split('-')
@@ -69,105 +30,33 @@ function trainCaseToNormalCase(tag: string): string {
 }
 
 const normalCase = trainCaseToNormalCase(tagString);
-// Only use the explicit 'selected' prop, not the legacy 'isSelected' prop
 const isTagSelected = selected;
-
-// --- DYNAMIC HREF LOGIC ---
-// If `href` is provided, use it. Otherwise, generate href using routeToUse and tagString.
-// If routeToUse is missing or falsy, fallback to 'toolkit' and log a warning in development.
-// NOTE: routeToUse is always normalized to have no leading slash (see above for normalization logic).
-let computedHref = href;
-if (!href) {
-  if (!routeToUse && import.meta.env.DEV) {
-    // Log a warning in development mode if route is not provided
-    console.warn('[TagChip.astro] No `route` prop provided. Falling back to "/toolkit". See Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md for details.');
-  }
-  computedHref = `/${routeToUse}/${encodeURIComponent(tagString)}`;
-}
-
 ---
 
-<!--
-  TagChip.astro Render Block
-
-  - Renders a clickable tag chip with dynamic href.
-  - Displays tag in normal case and count if provided.
-  - Applies selected styling if applicable.
-  - Accepts additional HTML attributes via ...rest.
-  - Uses tagString for display and href generation.
--->
-<a 
-  href={computedHref}
+<span
   class={`tool-tag${isTagSelected ? ' selected' : ''}`}
   title={title || `Click to filter by ${normalCase}`}
   aria-label={`Filter by ${normalCase}${isTagSelected ? ' (currently selected)' : ''}`}
   data-tag={tagString}
+  data-count={count}
   role="button"
-  onclick="event.preventDefault();"
+  tabindex="0"
 >
   <p style={fontSize ? `font-size: ${fontSize};` : undefined}>{normalCase}</p>
-  {count !== undefined && count > 0 ? <span class="count">({count})</span> : null}
-</a>
-
+  {includeCount && count > 0 ? <span class="count">({count})</span> : null}
+</span>
 
 <script>
-  document.querySelectorAll('.tool-tag').forEach(tagChip => {
-  tagChip.addEventListener('click', (e) => {
-    e.preventDefault();
-    const tag = tagChip.getAttribute('data-tag');
-    if (tag) toggleTagSelection(tag);
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.tool-tag').forEach(tagChip => {
+      tagChip.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tag = tagChip.getAttribute('data-tag');
+        if (tag && typeof toggleTagSelection === 'function') {
+          toggleTagSelection(tag);
+        }
+      });
+    });
   });
-});
-
 </script>
-<style>
-  /* Container to handle the hover effect */
-  .tool-tag {
-    background: var(--clr-lossless-primary-dark);
-    color: var(--clr-lossless-primary-glass);
-    border-radius: 0.25em;
-    white-space: nowrap;
-    padding: 0.1em 0.1em;
-    display: inline-block;
-    height: fit-content;
-    position: relative;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s ease-in-out;
-    margin: 3px;
-    overflow: visible;
-  }
 
-  /* Content styling */
-  .tool-tag p {
-    font-size: var(--fs-250);
-    margin: 0.1em 0.3em;
-    display: inline-block;
-  }
-
-  /* Count styling */
-  .tool-tag .count {
-    /* Inherit font-size from parent (the tag label), so count scales with tag chip size. */
-    font-size: inherit;
-    margin-left: 0.3em;
-    opacity: 0.8;
-    display: inline-block;
-  }
-
-  /* Direct hover style in the component to ensure it works */
-  .tool-tag:hover {
-    background-color: #3a3a45;
-    border-color: var(--clr-lossless-accent--brightest);
-    color: var(--clr-lossless-primary-glass--lighter);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Selected state styling */
-  .tool-tag.selected {
-    background-color: var(--clr-lossless-accent);
-    color: var(--clr-white, #ffffff);
-    border-color: var(--clr-lossless-accent);
-    box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
-  }
-</style>

@@ -3,6 +3,7 @@ import SortAscLetters from '@assets/Icons/sort-ascending-letters.svg';
 import SortDescLetters from '@assets/Icons/sort-descending-letters.svg';
 import SortAscNumbers from '@assets/Icons/sort-ascending-numbers.svg';
 import SortDescNumbers from '@assets/Icons/sort-descending-numbers.svg';
+import TagChip from '@components/tool-components/TagChip.astro';
 
 interface Props {
   tools: any[];
@@ -56,21 +57,27 @@ const tagCounts = tools.reduce((acc, tool) => {
     <button id="clear-tags" class="clear-tags-btn">Clear All</button>
   </div>
   
+  <div class="selected-tags" id="selected-tags"></div>
+
 
   <div class="tag-list" id="tag-list">
     {allTags.map(tag => (
-     <span class="tool-tag" data-tag={tag} data-count={tagCounts[tag]} role="button" tabindex="0">
-          <p>{trainCaseToNormalCase(tag)} ({tagCounts[tag]})</p>
-      </span>
+      <TagChip 
+        tagString={tag} 
+        count={tagCounts[tag]} 
+        includeCount={true} 
+        data-tag={tag} 
+        data-count={tagCounts[tag]} 
+      />
     ))}
   </div>
+
   
 </div>
 
 <script type="module">
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('tag-search');
-    const tagList = document.getElementById('tag-list');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
     let selectedTags = [];
@@ -80,13 +87,14 @@ const tagCounts = tools.reduce((acc, tool) => {
         const tagList = document.getElementById('tag-list');
         const tags = [...tagList.querySelectorAll('.tool-tag')];
 
-        const sortFuncs = {
+         const sortFuncs = {
           'alpha-asc': (a, b) => a.dataset.tag.localeCompare(b.dataset.tag),
           'alpha-desc': (a, b) => b.dataset.tag.localeCompare(a.dataset.tag),
-          'count-asc': (a, b) => Number(a.dataset.count) - Number(b.dataset.count),
-          'count-desc': (a, b) => Number(b.dataset.count) - Number(a.dataset.count),
+          'count-asc': (a, b) =>
+            (parseInt(a.dataset.count || '0', 10)) - (parseInt(b.dataset.count || '0', 10)),
+          'count-desc': (a, b) =>
+            (parseInt(b.dataset.count || '0', 10)) - (parseInt(a.dataset.count || '0', 10)),
         };
-
         tags.sort(sortFuncs[sortBy]);
         tagList.innerHTML = '';
         tags.forEach(tag => tagList.appendChild(tag));
@@ -103,7 +111,35 @@ const tagCounts = tools.reduce((acc, tool) => {
         const tag = chip.dataset.tag;
         chip.classList.toggle('selected', selectedTags.includes(tag));
       });
+
+      renderSelectedTags();
     }
+
+function renderSelectedTags() {
+  const container = document.getElementById('selected-tags');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  selectedTags.forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'tool-tag selected';
+    chip.setAttribute('data-tag', tag);
+    chip.setAttribute('role', 'button');
+    chip.setAttribute('tabindex', '0');
+
+    const p = document.createElement('p');
+    p.textContent = tag
+      .split('-')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    chip.appendChild(p);
+    container.appendChild(chip);
+  });
+}
+
+
 
     function toggleTag(tag) {
       if (selectedTags.includes(tag)) {
@@ -162,6 +198,52 @@ const tagCounts = tools.reduce((acc, tool) => {
   });
 </script>
 
+<style is:global>
+  .tool-tag {
+    background: var(--clr-lossless-primary-dark, #2a2a30);
+    color: var(--clr-lossless-primary-glass, #ccc);
+    border-radius: 0.25em;
+    white-space: nowrap;
+    padding: 0.1em 0.1em;
+    display: inline-block;
+    height: fit-content;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    margin: 3px;
+    overflow: visible;
+  }
+
+  .tool-tag p {
+    font-size: var(--fs-250, 0.85rem);
+    margin: 0.1em 0.3em;
+    display: inline-block;
+  }
+
+  .tool-tag .count {
+    font-size: inherit;
+    margin-left: 0.3em;
+    opacity: 0.8;
+    display: inline-block;
+  }
+
+  .tool-tag:hover {
+    background-color: #3a3a45;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .tool-tag.selected {
+    background-color: var(--clr-lossless-primary-glass, #444);
+    color: var(--clr-white, #fff);
+    border-color: var(--clr-lossless-primary-glass, #666);
+    box-shadow: 0 0 5px rgba(100, 100, 100, 0.5);
+  }
+</style>
+
 <style>
   .tag-panel {
     padding: 1rem;
@@ -217,42 +299,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     overflow-y: auto;
   }
 
-  .tool-tag {
-    background: var(--clr-lossless-primary-dark);
-    color: var(--clr-lossless-primary-glass);
-    border-radius: 0.25em;
-    white-space: nowrap;
-    padding: 0.1em 0.1em;
-    display: inline-block;
-    height: fit-content;
-    position: relative;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s ease-in-out;
-    margin: 2px;
-    overflow: visible;
-  }
-
-  .tool-tag p {
-    font-size: var(--fs-250);
-    margin: 0.1em 0.3em;
-    display: inline-block;
-  }
-
-  .tool-tag:hover {
-    background-color: #3a3a45;
-    border-color: var(--clr-lossless-accent--brightest);
-    color: var(--clr-lossless-primary-glass--lighter);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-
-  .tool-tag.selected {
-    background-color: var(--clr-lossless-accent);
-    color: white;
-    border-color: var(--clr-lossless-accent);
-    box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
-  }
 
   .sort-btn {
     background: none;
@@ -277,6 +323,19 @@ const tagCounts = tools.reduce((acc, tool) => {
   .sort-btn:hover svg {
     transform: scale(1.1);
   }
+
+  .selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-top: 1px solid var(--clr-lossless-ui-btn-border);
+  border-bottom: 1px solid var(--clr-lossless-ui-btn-border);
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 
   @media (max-width: 768px) {
     .tag-panel {
