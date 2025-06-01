@@ -24,6 +24,10 @@ const defaultRouteMappings: RouteMapping[] = [
     contentPath: 'lost-in-public/prompts',
     routePath: 'thread/prompts'
   },
+  {
+    contentPath: 'tooling',
+    routePath: 'toolkit'
+  }
   // {
   //   contentPath: 'content/visuals',
   //   routePath: 'content/visuals'

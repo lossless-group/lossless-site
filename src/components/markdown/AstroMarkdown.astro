@@ -9,7 +9,9 @@ import TableOfContents from './TableOfContents.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
 import { getCollection } from "astro:content";
-
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+import { DEBUG_AST } from '@utils/envUtils';
+import { slugify } from '@utils/slugify';
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
       - This function takes a heading MDAST node and returns a slugified version of the primary text content.
@@ -90,11 +92,29 @@ data.dirpath = dirname(data.path)
 let toolGalleryTools = null;
 let toolGalleryErrors: string[] = [];
 
+
+async function resolveToolId(input: string, allTools: any[]): Promise<string | null> {
+  // 1. Try exact match
+  const directMatch = allTools.find(tool => tool.id === input);
+  if (directMatch) return directMatch.id;
+
+  // 2. Try normalized match
+  const normalized = slugify(input);
+  const normMatch = allTools.find(tool => slugify(tool.id) === normalized);
+  if (normMatch) return normMatch.id;
+
+  // 3. Try recursive routeManager resolution
+  const route = transformContentPathToRoute(input);
+  const finalSlug = route.split('/').pop();
+  const finalMatch = allTools.find(tool => slugify(tool.id).endsWith(finalSlug || ''));
+  return finalMatch?.id || null;
+}
+
 if (node.type === 'code' && node.lang === 'toolingGallery') {
-   const ids = node.value
+  const rawIds = node.value
     .split('\n')
     .map(line => line.replace(/^- /, '').trim())
-    .filter(Boolean); // ['agentic-ai', 'invalid-tool-id']
+    .filter(Boolean);
 
   const allTools = await getCollection('tooling');
   const toolMap = new Map(allTools.map(entry => [entry.id, {
@@ -103,17 +123,40 @@ if (node.type === 'code' && node.lang === 'toolingGallery') {
     filePath: entry.id,
   }]));
 
-  toolGalleryTools = ids.map(id => {
-    const match = toolMap.get(id);
-    if (!match) toolGalleryErrors.push(id);
-    return match;
-  }).filter(Boolean);
+  const tools: any[] = [];
+  const toolGalleryErrors: string[] = [];
+
+  for (const input of rawIds) {
+    let id = input;
+
+    // Handle wiki-style links [[...]]
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolveToolId(id, allTools);
+    if (resolvedId && toolMap.has(resolvedId)) {
+      tools.push(toolMap.get(resolvedId));
+    } else {
+      toolGalleryErrors.push(input);
+    }
+  }
+
+  if (toolGalleryErrors.length > 0) {
+    console.warn('[toolingGallery] Missing tools for IDs:', toolGalleryErrors);
+  }
+
+  toolGalleryTools = tools;
+
+
 }
 // Debug output to see AST structure
-// console.log(`=== AstroMarkdown Debug ===`)
-// console.log(`Node type: ${node.type}`)
-// console.log('Node structure:', JSON.stringify(node, null, 2))
-
+if (DEBUG_AST) {
+  console.log(`=== AstroMarkdown Debug ===`)
+  console.log(`Node type: ${node.type}`)
+  console.log('Node structure:', JSON.stringify(node, null, 2))
+}
 ---
 
 {node.type === "root" && 
