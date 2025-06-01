@@ -13,7 +13,7 @@ const resolveAbsoluteSrcPath = (relativeSrcPath) => {
   return resolve('public', '.' + relativeSrcPath); // path to actual image on disk
 };
 
-export async function yaml_to_grid_images(code) {
+export async function yaml_to_grid_images(code, dirpath) {
   const entries = yaml.load(code);
   if (!Array.isArray(entries)) {
     throw new Error('Expected a YAML array of image paths.');
@@ -24,8 +24,24 @@ export async function yaml_to_grid_images(code) {
   for (const src of entries) {
     if (typeof src !== 'string') continue;
 
-    const absPath = resolveAbsoluteSrcPath(src);
-    console.log(`[grid_utils] Processing image: ${absPath}`);
+    const isRemote = /^https?:\/\//.test(src);
+    const name = getFilenameWithoutExtension(src);
+    const ext = extname(src).toLowerCase();
+
+    if (isRemote) {
+      result.push({
+        url: src,
+        name,
+        ext,
+        width: undefined,
+        height: undefined,
+        ratio: undefined
+      });
+      continue;
+    }
+
+    const absPath = resolveAbsoluteSrcPath(src, dirpath);
+    console.log(`[grid_utils] Processing local image: ${absPath}`);
 
     try {
       const metadata = await sharp(absPath).metadata();
@@ -36,9 +52,9 @@ export async function yaml_to_grid_images(code) {
       }
 
       result.push({
-        url: src, // public-facing URL
-        name: getFilenameWithoutExtension(src),
-        ext: extname(src).toLowerCase(),
+        url: src,
+        name,
+        ext,
         width,
         height,
         ratio: width / height
@@ -50,6 +66,7 @@ export async function yaml_to_grid_images(code) {
 
   return result;
 }
+
 
 export function select_masonry(images) {
   const wideCount = images.filter(img => img.ratio >= 1).length;
