@@ -266,7 +266,9 @@ if (DEBUG_ARTICLE) {
     width: 100%;
   }
 
+  
   .toc-sidebar {
+    overflow: visible;
     position: sticky;
     top: 2rem;
     align-self: flex-start;
@@ -283,8 +285,8 @@ if (DEBUG_ARTICLE) {
   }
 
   .toc-scroll-area {
-    overflow-y: auto;
-    max-height: calc(100vh - 4rem); /* 2rem top offset + some padding */
+    overflow: visible; /* ← changed from 'auto' to 'visible' */
+    max-height: none;  /* ← removes height restriction causing scroll */
     padding-right: 0.5rem;
     border-left: 1px solid var(--clr-lossless-accent--brightest);
     padding-left: 1rem;

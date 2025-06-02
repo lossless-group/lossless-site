@@ -1,81 +1,57 @@
 ---
-// Props: chartId, code, CollapseIcon
-const { chartId, code, CollapseIcon } = Astro.props;
+// Fullscreen test — no toggles
+const { code } = Astro.props;
 ---
-<!-- Fullscreen (modal) Mermaid chart with collapse button -->
-<div class="mermaid-fullscreen-modal" tabindex="0">
-  <button
-    class="mermaid-collapse-toggle"
-    aria-label="Collapse chart"
-    tabindex="0"
-    onclick={`window.toggleMermaidCollapse('${chartId}')`}
-    data-collapse-icon
-  >
-    <span class="collapse-icon"><CollapseIcon /></span>
-  </button>
-  <div class="mermaid">{code}</div>
-</div>
-<style>
-.mermaid-fullscreen-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-  background: var(--bastille);
-  margin: 0;
-  padding: 0;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  overflow: auto;
-  border: 2px solid var(--lossless-accent--brightest);
-}
-.mermaid {
-  width: 98vw;
-  height: 92vh;
-  max-width: 100vw;
-  max-height: 92vh;
-  margin: 0 auto;
-  display: block;
-  overflow: auto;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-}
-.mermaid-collapse-toggle {
-  position: absolute;
-  top: 0.75rem;
-  right: 1.5rem;
-  z-index: 10;
-  background: none;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-.mermaid-collapse-toggle:hover, .mermaid-collapse-toggle:focus {
-  opacity: 1;
-  outline: 2px solid #88f;
-}
-</style>
-<script is:inline>
-window.toggleMermaidCollapse = function(id) {
-  // Dispatch a custom event to the parent to collapse
-  window.dispatchEvent(new CustomEvent('mermaid:collapse', { detail: { id } }));
-};
-// Add Escape key handler
-window.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    window.dispatchEvent(new CustomEvent('mermaid:collapse', { detail: { id: null } }));
-  }
-});
-</script>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fullscreen Mermaid Test</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #1e1e1e;
+        color: white;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+
+      .fullscreen-mermaid {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mermaid {
+        width: 95vw;
+        height: 95vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fullscreen-mermaid">
+      <div class="mermaid">
+        {code}
+      </div>
+    </div>
+
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+          background: 'transparent',
+        },
+      });
+
+      mermaid.run();
+    </script>
+  </body>
+</html>
