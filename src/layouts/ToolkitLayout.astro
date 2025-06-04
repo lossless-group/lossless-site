@@ -5,6 +5,15 @@ import { getCollection } from "astro:content";
 import CardGrid from "@basics/CardGrid.astro";
 import TagColumn from "@components/tool-components/TagColumn.astro";
 
+// Props
+export interface Props {
+  title?: string;
+  description?: string;
+  filterTag?: string;
+}
+
+const { title = "Toolkit", description = "A curated collection of tools", filterTag } = Astro.props;
+
 const toolEntries = await getCollection("tooling");
 const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id }));
 
@@ -14,14 +23,15 @@ tools.forEach(tool => {
 
 ---
 
-<Layout title="Toolkit" description="A curated collection of tools">
+<Layout title={title} description={description}>
   <main>
+    <slot name="header" />
     <div class="toolkit-layout">
       <aside class="sidebar">
         <TagColumn tools={tools} />
       </aside>
       <section class="main-content">
-        <CardGrid tools={tools} />
+        <CardGrid tools={tools} filterTag={filterTag} />
       </section>
     </div>
   </main>

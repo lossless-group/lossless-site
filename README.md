@@ -21,6 +21,10 @@ pnpm dev
 
 # BEFORE PROCEEDING
 
+```bash
+brew install git-lfs
+```
+
 ## Environment Variables
 Copy the example.env text file and rename it to .env. Fill in the values for the environment variables.
 ```shellscript

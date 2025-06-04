@@ -6,12 +6,20 @@ interface Props {
   gap?: string;
   minCardWidth?: string;
   tools: Array<Record<string, any>>;
+  filterTag?: string;
 }
 
-const { gap = "2rem", tools = [] } = Astro.props;
+const { gap = "2rem", tools = [], filterTag } = Astro.props;
 
-const toolsWithImages = tools.filter(tool => tool.image);
-const toolsWithoutImages = tools.filter(tool => !tool.image);
+// Filter tools by tag if filterTag is provided
+const filteredTools = filterTag
+  ? tools.filter(tool => 
+      tool.tags?.some((tag: string) => tag === filterTag)
+    )
+  : tools;
+
+const toolsWithImages = filteredTools.filter(tool => tool.image);
+const toolsWithoutImages = filteredTools.filter(tool => !tool.image);
 
 toolsWithImages.forEach(tool => {
   if (!tool.id) throw new Error("Missing tool.id in CardGrid");

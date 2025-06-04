@@ -3,6 +3,7 @@ import ToolkitLayout from "@layouts/ToolkitLayout.astro";
 import { getCollection } from "astro:content";
 import ToolCard from "@components/tool-components/ToolCard.astro";
 import TagColumn from "@components/tool-components/TagColumn.astro";
+import ToolCount from '@components/basics/ToolCount.astro';
 
 // Get the tag from the URL parameters
 const tag = "AI-Toolkit"
@@ -26,16 +27,22 @@ interface Tool {
   og_last_fetch?: string;
 }
 
-// Filter tools by tag
+// Filter tools by AI-Toolkit tag
 const aiToolKit = toolEntries
   .filter((entry) => {
     const frontmatter = entry.data;
-    return frontmatter.tags && frontmatter.tags.includes(tag);
-    console.log("Filtered toolkit:", aiToolKit.length);
+    const hasAiToolkitTag = frontmatter.tags && 
+      frontmatter.tags.some(tag => 
+        typeof tag === 'string' && 
+        tag === 'AI-Toolkit'
+      );
+    return hasAiToolkitTag;
   })
-  .map((entry) => ({
+  .filter(Boolean) // Remove any null/undefined entries
+  .map((entry: { data: any, id: string }) => ({
     site_name: entry.data.site_name,
     title: entry.data.title,
+    zinger: entry.data.zinger,
     url: entry.data.url,
     image: entry.data.image,
     favicon: entry.data.favicon,
@@ -61,7 +68,36 @@ const pageDescription = `A collection of tools and resources tagged with "${tag}
   title="AI Tools"
   description="A curated collection of AI-powered tools and resources"
   filterTag="AI-Toolkit"
-/>
+>
+  <div class="tools-header" slot="header">
+    <h2>
+      We're tracking
+      <ToolCount asBadge={true} />
+      AI tools.
+    </h2>
+  </div>
+</ToolkitLayout>
+
+<style>
+  .tools-header {
+    margin: 5rem auto 1rem;
+    max-width: 1200px;
+    padding: 0 2rem;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .tools-header h2 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 1.5rem 0;
+    width: 100%;
+  }
+</style>
 
 <style>
   body {
