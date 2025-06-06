@@ -234,7 +234,10 @@ interface Props {
   };
 
   return (
-    <Layout title={processedEntry.data.title || processedEntry.id.replace(/\.md$/, '')}>
+    <Layout
+      title={processedEntry.data.title || processedEntry.id.replace(/\.md$/, '')}
+      frontmatter={processedEntry.data}
+    >
       <OneArticle
         Component={OneArticleOnPage}
         title={processedEntry.data.title}

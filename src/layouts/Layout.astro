@@ -8,12 +8,43 @@ import "@styles/codeblocks.css";
 import "@styles/shiki-github-dark.css";
 
 interface Props {
+  // Direct props that .astro pages might pass (e.g., for title, description)
   title?: string;
   description?: string;
+
+  // Props from Markdown/MDX page frontmatter, which Astro nests under `frontmatter`
+  frontmatter?: {
+    title?: string;
+    description?: string;
+    lede?: string;
+    banner_image?: string;
+    portrait_image?: string;
+  };
 }
 
-const { title = "Go Lossless: Innovate and Collaborate", description } =
-  Astro.props;
+// Safely access frontmatter, defaulting to an empty object if not present
+const fm = Astro.props.frontmatter || {};
+
+// Determine page title: Prioritize frontmatter.title, then direct Astro.props.title, then a global default.
+const pageTitle = fm.title || Astro.props.title || "Go Lossless: Innovate and Collaborate";
+
+// Determine page description: Prioritize frontmatter.lede, then frontmatter.description, 
+// then direct Astro.props.description (if an .astro page passes it), then a global default.
+const pageDescription = fm.lede || fm.description || Astro.props.description || 'Explore insights on Digital Transformation, AI, and Software Development with The Lossless Group';
+
+// Determine image URL: Prioritize frontmatter.banner_image, then frontmatter.portrait_image, then a global default.
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://lossless.group';
+const defaultSiteImage = `${siteUrl}/images/default-social-banner.jpg`; // Ensure this image exists in /public/images/
+
+let imageUrl = defaultSiteImage;
+const fmBannerImage = fm.banner_image;
+const fmPortraitImage = fm.portrait_image;
+
+if (fmBannerImage) {
+  imageUrl = fmBannerImage.startsWith('http') ? fmBannerImage : `${siteUrl}${fmBannerImage.startsWith('/') ? '' : '/'}${fmBannerImage}`;
+} else if (fmPortraitImage) {
+  imageUrl = fmPortraitImage.startsWith('http') ? fmPortraitImage : `${siteUrl}${fmPortraitImage.startsWith('/') ? '' : '/'}${fmPortraitImage}`;
+}
 ---
 
 <!doctype html>
@@ -23,10 +54,26 @@ const { title = "Go Lossless: Innovate and Collaborate", description } =
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-    {description && <meta name="description" content={description} />}
+    <title>{pageTitle}</title>
+    {pageDescription && <meta name="description" content={pageDescription} />}
     <!-- Import global avatar and author handle styles -->
     <link rel="stylesheet" href="/src/styles/avatars.css" />
+
+    {/* Open Graph Tags */}
+    <meta property="og:title" content={pageTitle} />
+    {pageDescription && <meta property="og:description" content={pageDescription} />}
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Lossless.കം" />
+
+    {/* Twitter Card Tags */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    {pageDescription && <meta name="twitter:description" content={pageDescription} />}
+    <meta name="twitter:image" content={imageUrl} />
+    {/* Optional: <meta name="twitter:site" content="@yourTwitterHandle" /> */}
+    {/* Optional: <meta name="twitter:creator" content="@authorTwitterHandle" /> */}
   </head>
   <body>
     <Header />
