@@ -12,7 +12,7 @@ import { getCollection } from "astro:content";
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify } from '@utils/slugify';
-import shareIcon from '@assets/Icons/share.svg';
+// import shareIcon from '@assets/Icons/share.svg'; // Replaced with direct path string
 import IconSVGWrapper from '../basics/render-images/IconSVGWrapper.astro';
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
@@ -177,14 +177,44 @@ if (DEBUG_AST) {
 }
 ---
 
-{node.type === "root" && 
-  <>
-    {data?.renderingToC !== true && <h1>{data.title}</h1>}
-    {node.children.map((child) => (
-        <Astro.self node={child} data={data} />
-    ))}
-  </>
-}
+{node.type === "root" && (() => {
+  const pageTitle = data.title;
+  let titleElement = null;
+
+  if (pageTitle && data?.renderingToC !== true) {
+    const id = slugify(pageTitle.trim() || 'page-title'); // Fallback id for safety
+    const shareUrl = Astro.url.pathname + '#' + id;
+    const anchorProps = {
+      "aria-label": `Share page: ${pageTitle}`,
+      "data-share-url": shareUrl,
+      "data-share-title": pageTitle,
+      class: "heading-share-button page-title-share-button", // Added specific class for potential styling
+      href: shareUrl // Ensure it's a valid link for semantics, JS will handle actual sharing
+    };
+    const iconProps = {
+      src: "/src/assets/Icons/share.svg", // Pass the path string directly
+      alt: `Share ${pageTitle}`, // Renamed from altText
+      className: "share-icon",
+      width: "16", 
+      height: "16",
+    };
+    titleElement = (
+      <h1 id={id}>
+        {pageTitle}
+        <a {...anchorProps}><IconSVGWrapper {...iconProps} /></a>
+      </h1>
+    );
+  }
+
+  return (
+    <>
+      {titleElement}
+      {node.children.map((child) => (
+          <Astro.self node={child} data={data} />
+      ))}
+    </>
+  );
+})()}
 
 {node.type === "heading" && (() => {
   const articleTitle = data.title || 'Untitled Article';

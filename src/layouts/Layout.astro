@@ -6,6 +6,7 @@ import "@styles/starwind.css";
 import "@styles/callouts.css";
 import "@styles/codeblocks.css";
 import "@styles/shiki-github-dark.css";
+import PageMeta from "@components/basics/PageMeta.astro";
 
 interface Props {
   // Direct props that .astro pages might pass (e.g., for title, description)
@@ -51,29 +52,34 @@ if (fmBannerImage) {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    {/*
+      SEO Meta Tags Management:
+      The PageMeta component (src/components/basics/PageMeta.astro) 
+      is responsible for generating Open Graph and Twitter Card meta tags.
+      It takes props like title, description, imageUrl, etc., which are 
+      derived from page frontmatter or defaults in this layout's script.
+      For optional tags like twitter:site or twitter:creator, define 
+      corresponding variables in this layout's script and pass them to PageMeta.
+    */}
+
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
-    {pageDescription && <meta name="description" content={pageDescription} />}
-    <!-- Import global avatar and author handle styles -->
+    
+    <PageMeta
+      title={pageTitle}
+      description={pageDescription}
+      imageUrl={imageUrl}
+      pageUrl={Astro.url.href}
+      siteName="Lossless.കം"
+      ogType="article" 
+      twitterCardType="summary_large_image"
+    />
+
+    {/* Import global avatar and author handle styles */}
     <link rel="stylesheet" href="/src/styles/avatars.css" />
-
-    {/* Open Graph Tags */}
-    <meta property="og:title" content={pageTitle} />
-    {pageDescription && <meta property="og:description" content={pageDescription} />}
-    <meta property="og:image" content={imageUrl} />
-    <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:type" content="article" />
-    <meta property="og:site_name" content="Lossless.കം" />
-
-    {/* Twitter Card Tags */}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    {pageDescription && <meta name="twitter:description" content={pageDescription} />}
-    <meta name="twitter:image" content={imageUrl} />
-    {/* Optional: <meta name="twitter:site" content="@yourTwitterHandle" /> */}
-    {/* Optional: <meta name="twitter:creator" content="@authorTwitterHandle" /> */}
   </head>
   <body>
     <Header />

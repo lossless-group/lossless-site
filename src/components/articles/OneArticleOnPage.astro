@@ -1,7 +1,10 @@
 ---
 import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import type { Root } from 'mdast';
-import { DEBUG_ARTICLE } from '@utils/envUtils'
+import { DEBUG_ARTICLE } from '@utils/envUtils';
+import { slugify } from '@utils/slugify'; // Corrected import path
+import IconSVGWrapper from '@components/basics/render-images/IconSVGWrapper.astro';
+const shareIconPath = '/src/assets/Icons/share.svg';
 
 interface Props {
   articleHeading?: string; // Renamed from title to avoid conflict
@@ -9,16 +12,20 @@ interface Props {
   data?: {
     path: string;
     id?: string;  // File ID (e.g., 'Agile.md')
+    title?: string; // Common frontmatter field
+    author?: string;
+    date_created?: string;
+    [key: string]: any; // Allow other frontmatter fields
   };
-  compiledContent: string;
+  // compiledContent is removed as AstroMarkdown does not expect it
 }
 
 // =============================
 // Defensive destructuring of props
 // =============================
-// Accepts content (mdast Root), data (optional), and compiledContent (string)
+// Accepts content (mdast Root), data (optional)
 // Defensive: If content or children is missing, fallback to empty root node
-const { articleHeading, content, data = { path: Astro.url.pathname }, compiledContent } = Astro.props; // Renamed from title
+const { articleHeading, content, data = { path: Astro.url.pathname } } = Astro.props; // compiledContent removed
 
 // Define a type for data that may have hProperties
 interface DataWithHProperties {
@@ -43,6 +50,8 @@ const hProperties: Record<string, any> =
     ? safeData.hProperties as Record<string, any>
     : {};
 
+// Props for main title's share icon are now generated inline within the template
+
 // =============================
 // DEBUG: Output children node types to verify TOC injection
 // =============================
@@ -66,7 +75,15 @@ const tocNode = sanitizeTOCNode(
 );
 
 function createEmptyRoot(): Root {
-  return { type: 'root', children: [], data: {}, position: {} };
+  return { 
+    type: 'root', 
+    children: [], 
+    data: {}, 
+    position: { 
+      start: { line: 0, column: 0, offset: 0 }, 
+      end: { line: 0, column: 0, offset: 0 } 
+    } 
+  };
 }
 
 if (DEBUG_ARTICLE) {
@@ -107,9 +124,31 @@ if (DEBUG_ARTICLE) {
   <div class="content-inner">
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
-      {typeof articleHeading === 'string' && articleHeading.trim() !== '' && (
-        <div class="page-main-title-display">{articleHeading}</div>
-      )}
+      {/* Render the main page title with share icon if articleHeading is provided */}
+      {typeof articleHeading === 'string' && articleHeading.trim() !== '' && (() => {
+        const titleId = slugify(articleHeading);
+        const shareUrl = `${Astro.url.pathname}#${titleId}`;
+        const anchorProps = {
+          href: shareUrl,
+          class: 'title-share-icon-anchor header-anchor',
+          'aria-label': `Share link to section: ${articleHeading}`,
+        };
+        const iconProps = {
+          src: shareIconPath,
+          alt: `Share icon for ${articleHeading}`,
+          class: 'share-icon',
+          width: 16,
+          height: 16,
+        };
+        return (
+          <div class="page-main-title-display" id={titleId}>
+            {articleHeading}
+            <a {...anchorProps}>
+              <IconSVGWrapper {...iconProps} />
+            </a>
+          </div>
+        );
+      })()}
       <AstroMarkdown 
         node={{
           type: 'root',
@@ -117,7 +156,6 @@ if (DEBUG_ARTICLE) {
           data: { hProperties }
         }}         
         data={data} 
-        compiledContent={compiledContent}
         />
     </article>
   </div>
@@ -128,7 +166,6 @@ if (DEBUG_ARTICLE) {
       <AstroMarkdown 
         node={tocNode || createEmptyRoot()}
         data={{ ...data, renderingToC: true }}
-        compiledContent={compiledContent}
       />
     </div>
   </aside>

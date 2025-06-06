@@ -37,9 +37,11 @@ const { src, alt, width, height, class: className } = Astro.props as Props;
 //    - If src starts with '/', treat as absolute from project root
 //    - Otherwise, resolve relative to current working directory
 // ---
+console.log(`[IconSVGWrapper] Received src: ${src}, CWD: ${process.cwd()}`);
 const resolvedPath = src.startsWith("/")
   ? path.join(process.cwd(), src)
   : path.resolve(process.cwd(), src);
+console.log(`[IconSVGWrapper] Resolved path: ${resolvedPath}`);
 
 // ---
 // 2. Read the SVG file content as a string
@@ -47,8 +49,10 @@ const resolvedPath = src.startsWith("/")
 let svgContent = "";
 try {
   svgContent = fs.readFileSync(resolvedPath, "utf-8");
+console.log(`[IconSVGWrapper] Successfully read SVG content for ${resolvedPath}. Length: ${svgContent.length}`);
 } catch (err) {
-  throw new Error(`IconSVGWrapper: SVG not found or unreadable at path: ${resolvedPath}`);
+  console.error(`[IconSVGWrapper] Error reading SVG from ${resolvedPath}:`, err);
+throw new Error(`IconSVGWrapper: SVG not found or unreadable at path: ${resolvedPath}`);
 }
 
 // ---
