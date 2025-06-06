@@ -1,0 +1,34 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
+import path from 'node:path';
+
+interface EssayDataWithPublished extends Record<string, unknown> {
+  published?: boolean;
+}
+
+const rawEssays = await getCollection('essays');
+
+// Filter out unpublished essays, using type assertion for 'published'
+const publishedRawEssays = rawEssays.filter(entry => {
+  // Explicitly assert type before accessing published
+  return (entry.data as EssayDataWithPublished).published !== false;
+});
+
+const slugMap = new Map<string, string>();
+publishedRawEssays.forEach(entry => {
+  const filename = path.basename(entry.id, '.md');
+  const slug = filename.toLowerCase().replace(/\s+/g, '-');
+  slugMap.set(entry.id, slug);
+});
+
+let firstEssaySlug: string | undefined = undefined;
+if (publishedRawEssays.length > 0) {
+  firstEssaySlug = slugMap.get(publishedRawEssays[0].id);
+}
+
+---
+<Layout title="The Lossless Reader: Essays">
+   <CollectionReaderLayout essays={publishedRawEssays} pageSlug={firstEssaySlug} />
+</Layout>

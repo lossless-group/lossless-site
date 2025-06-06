@@ -7,18 +7,32 @@
  * - Handles missing image/lede gracefully
  * - All logic is handled in frontmatter, not template
  * - NO JSX syntax in template
+ *
+ * Now accepts a dynamic `tagRoute` prop for TagScroller,
+ * allowing parent pages to control the tag filtering route.
+ *
+ * If not provided, defaults to 'vibe-with' for backward compatibility.
  */
 
 import { Fragment } from 'astro/jsx-runtime'; // required for slot fallback, but not for image/lede
 import TagScroller from '@components/basics/tags/TagScroller.astro'
 // Canonical prop passthrough pattern (see PostCard.astro)
-const { data, ...rest } = Astro.props;
-const props = data ? data : Astro.props;
-const { title, lede, banner_image, image_prompt, url, summary, tags } = props;
-
-const resolvedTitle = title || '';
-const resolvedLede = lede || summary || '';
-const resolvedBannerImage = banner_image || '';
+const { data: maybeData, tagRoute = 'vibe-with', ...rest } = Astro.props;
+const props = maybeData ? maybeData : Astro.props;
+// Accept both flat and nested props for maximum compatibility
+const { title, lede, banner_image, image_prompt, url, summary, tags, slug } = props;
+// Utility: Convert filename/slug to human-readable title, preserving original case
+// - Replaces dashes/underscores with spaces
+// - DOES NOT capitalize or change casing (e.g., 'AI' stays 'AI')
+// - Use this for all auto-title rendering from slugs/filenames
+function slugToTitle(str) {
+  return str.replace(/[-_]/g, ' ').trim();
+}
+// For compatibility, also check maybeData for lede, title, etc if missing at top level
+const resolvedLede = lede || (maybeData && maybeData.lede) || summary || (maybeData && maybeData.summary) || '';
+// If no explicit title, generate from slug (preserving case)
+const resolvedTitle = title || (maybeData && maybeData.title) || (slug ? slugToTitle(slug) : '');
+const resolvedBannerImage = banner_image || (maybeData && maybeData.banner_image) || '';
 const resolvedImagePrompt = image_prompt || resolvedTitle || 'Article image';
 const resolvedUrl = url || '#';
 const showLede = !!resolvedLede;
@@ -42,13 +56,15 @@ const showImage = !!resolvedBannerImage;
   </div>
   <div class="news-preview-content">
     <h2 class="news-preview-title">
+      <!-- DEBUG: resolvedTitle value: {JSON.stringify(resolvedTitle)} -->
       <a href={resolvedUrl} class="news-preview-link">{resolvedTitle}</a>
     </h2>
+    <!-- DEBUG: resolvedLede value: {JSON.stringify(resolvedLede)} -->
     {showLede && <p class="news-preview-lede">{resolvedLede}</p>}
 
   <!-- TagScroller: horizontally scrollable tag row, max 88% width, overflow hidden, toggle buttons -->
   {tags && tags.length > 0 && (
-    <TagScroller tags={tags} tagRoute="vibe-with" maxWidth="88%" />
+    <TagScroller tags={tags} tagRoute={tagRoute} maxWidth="88%" />
   )}
     </div>
   <div class="news-preview-separator" role="presentation"></div>

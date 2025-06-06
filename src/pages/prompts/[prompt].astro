@@ -3,6 +3,7 @@
 // Dynamic route for individual prompt pages
 // Loads a specific prompt from the content collection and renders it
 // Follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
+export const prerender = false;
 
 import { getCollection, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';

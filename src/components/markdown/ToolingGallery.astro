@@ -1,0 +1,87 @@
+---
+import ToolCard from "../../components/tool-components/ToolCard.astro";
+
+interface Props {
+  tools: Array<Record<string, any>>;
+  expanded?: boolean;
+  galleryId?: string;
+}
+
+const {
+  tools,
+  expanded = true,
+  galleryId = `tooling-gallery-${Math.random().toString(36).slice(2)}`
+} = Astro.props;
+---
+
+<div class="tooling-gallery-container" id={galleryId}>
+  <button type="button" class="toggle-button" onclick={`toggleToolGallery('${galleryId}')`}>
+    {expanded ? "Click to close" : "Click to expand"}
+  </button>
+
+  <div class="tooling-gallery-scroll" style={`display: ${expanded ? 'flex' : 'none'}`}>
+    {tools.map(tool => (
+      <div class="tool-card-wrapper">
+        <ToolCard {...tool} filePath={tool.filePath} />
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+.tooling-gallery-container {
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.toggle-button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: left;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.tooling-gallery-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.tool-card-wrapper {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 320px;
+  height: 480px;
+  display: flex;
+}
+
+.tool-card-wrapper > * {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+</style>
+
+<script type="module">
+  function toggleToolGallery(id) {
+    const container = document.getElementById(id);
+    const scrollArea = container.querySelector('.tooling-gallery-scroll');
+    const button = container.querySelector('.toggle-button');
+
+    const isVisible = scrollArea.style.display !== 'none';
+    scrollArea.style.display = isVisible ? 'none' : 'flex';
+    button.textContent = isVisible ? 'Click to expand' : 'Click to close';
+  }
+
+  window.toggleToolGallery = toggleToolGallery;
+</script>

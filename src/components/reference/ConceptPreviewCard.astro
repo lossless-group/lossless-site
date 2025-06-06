@@ -18,31 +18,32 @@
 interface Props {
   entry: {
     id: string;
+    slug: string; // Add slug for canonical routing
     data: {
       title: string;
       description?: string;
       slug?: string;
     };
+    originalFilename: string; // For consistency and future use
   };
 }
 
 // Destructure the entry from props
 const { entry } = Astro.props;
-
-// Generate the URL for the concept
-// If a slug is provided in the frontmatter, use it; otherwise, generate from the filename
-const url = `/more-about/${entry.data.slug || entry.id.replace(/\.md$/, '').replace(/\s+/g, '-')}`;
+// ---
+// Always use entry.slug for the URL, as provided by ReferenceGrid and index.astro
+// This ensures correct casing and matches the routing logic in [...slug].astro
+// Do NOT reconstruct from id or data.slug here; single source of truth is entry.slug
+const url = `/more-about/${entry.slug}`;
+// ---
 ---
 
 <div class="concept-card">
   <h3 class="concept-card__title">
     <a href={url} class="concept-card__link">
-      {entry.data.title}
+      { entry.data.title }
     </a>
   </h3>
-  <p class="concept-card__description">
-    {entry.data.description || "Learn more about this concept..."}
-  </p>
 </div>
 
 <style>

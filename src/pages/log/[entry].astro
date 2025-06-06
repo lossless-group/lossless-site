@@ -1,9 +1,10 @@
 ---
 import { getCollection, render } from 'astro:content';
-import OneArticle from '@layouts/OneArticle.astro';
 import Layout from '@layouts/Layout.astro';
 import ChangelogEntryPage from '@components/changelog/ChangelogEntryPage.astro';
 import path from 'path';
+
+export const prerender = false
 
 // Flexible interface that allows any additional fields
 interface ChangelogData {

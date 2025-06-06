@@ -1,0 +1,16 @@
+---
+import BareToolCard from './BareToolCard.astro';
+
+interface Props {
+  tool: any;
+}
+
+const { tool } = Astro.props;
+---
+
+<BareToolCard 
+  {...tool} 
+  filePath={tool.filePath}
+  class="tool-card" 
+  data-tags={JSON.stringify(tool.tags || [])}
+/>

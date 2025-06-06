@@ -1,6 +1,5 @@
 /**
  * Route Manager for content paths
- * 
  * This module provides a centralized way to map content paths to web routes.
  * It allows for custom route mappings to be defined for different content types.
  */
@@ -26,13 +25,17 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'thread/prompts'
   },
   {
-    contentPath: 'content/visuals',
-    routePath: 'content/visuals'
-  },
-  {
-    contentPath: 'assets',
-    routePath: 'assets'
+    contentPath: 'tooling',
+    routePath: 'toolkit'
   }
+  // {
+  //   contentPath: 'content/visuals',
+  //   routePath: 'content/visuals'
+  // },
+  // {
+  //   contentPath: 'assets',
+  //   routePath: 'assets'
+  // }
   // Add more mappings as needed
 ];
 
@@ -45,43 +48,108 @@ let customRouteMappings: RouteMapping[] = [];
  * @param path - The content path to transform (e.g., "vocabulary/Software Development")
  * @returns The transformed web route (e.g., "/more-about/software-development")
  */
-export function transformContentPathToRoute(path: string): string {
-  // Normalize the path: lowercase and replace spaces with hyphens
-  const normalizedPath = path.toLowerCase().replace(/ /g, '-');
-  
-  // Check if the path has a directory structure
-  const segments = normalizedPath.split('/');
-  
-  // If there's no directory structure, just return the normalized path
-  if (segments.length === 1) {
-    return `/${normalizedPath}`;
+
+import { existsSync, readdirSync, statSync } from 'fs';
+import path from 'path';
+import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
+
+function isValidContentFile(contentPath: string): boolean {
+  const fullPath = path.resolve(contentBasePath, `${contentPath}.md`);
+  return existsSync(fullPath);
+}
+
+function resolveWithMappings(normalizedPath: string): string {
+  if (DEBUG_BACKLINKS) {
+    console.log("[routeManager] Found path", normalizedPath)
   }
-  
-  // Get the content type (first segment of the path)
+
+  const segments = normalizedPath.split('/');
   const contentType = segments[0];
-  
-  // Check if there's a mapping for this content type
+
   const allMappings = [...customRouteMappings, ...defaultRouteMappings];
-  const mapping = allMappings.find(m => {
-    // Handle both exact matches and prefix matches
-    return contentType === m.contentPath || 
-           normalizedPath.startsWith(`${m.contentPath}/`);
-  });
-  
+  const mapping = allMappings.find(m =>
+    contentType === m.contentPath ||
+    normalizedPath.startsWith(`${m.contentPath}/`)
+  );
+
   if (mapping) {
-    // If the content path is exactly the mapping path, use the route path directly
-    if (contentType === mapping.contentPath) {
-      // Return the route with the rest of the path
-      return `/${mapping.routePath}/${segments.slice(1).join('/')}`;
-    }
-    
-    // If the content path starts with the mapping path, replace the prefix
-    const relativePath = normalizedPath.substring(mapping.contentPath.length + 1); // +1 for the slash
+    const relativePath = normalizedPath.substring(mapping.contentPath.length + 1);
     return `/${mapping.routePath}/${relativePath}`;
   }
+
+  return `/not-found?path=${encodeURIComponent(normalizedPath)}`;
+}
+
+function collectAllMappingPaths(): RouteMapping[] {
+  const all: RouteMapping[] = [];
+
+  for (const mapping of [...customRouteMappings, ...defaultRouteMappings]) {
+    const root = path.resolve(contentBasePath, mapping.contentPath);
+
+    function walk(currentPath: string, relativePath = '') {
+      const entries = readdirSync(currentPath);
+
+      let foundMarkdown = false;
+
+      for (const entry of entries) {
+        const fullPath = path.join(currentPath, entry);
+        const relative = path.join(relativePath, entry);
+
+        if (statSync(fullPath).isDirectory()) {
+          walk(fullPath, relative); // go deeper
+        } else if (fullPath.endsWith('.md')) {
+          foundMarkdown = true;
+        }
+      }
+
+      if (foundMarkdown) {
+        const contentPath = path.join(mapping.contentPath, relativePath).replace(/\\/g, '/');
+        all.push({
+          contentPath,
+          routePath: mapping.routePath
+        });
+      }
+    }
+
+    walk(root);
+  }
+
+  return all;
+}
+
+export function transformContentPathToRoute(input: string): string {
+  const normalizedInput = input.toLowerCase().replace(/ /g, '-');
+  const segments = normalizedInput.split('/');
+
+  // Case 1: Full path (contains slash)
+  if (segments.length > 1) {
+    return resolveWithMappings(normalizedInput);
+  }
+
+  // Case 2: Try fallback resolution from known mappings
+  const allMappings = collectAllMappingPaths();
   
-  // Default fallback: use /content/ prefix if no mapping is found
-  return `/content/${normalizedPath}`;
+  if (DEBUG_BACKLINKS) {
+    console.log("[routeManager] No path provided! Searching...")
+  }
+
+  for (const mapping of allMappings) {
+    const candidate = `${mapping.contentPath}/${input}`;
+    
+    if (DEBUG_BACKLINKS) {
+      console.log("[routeManager] Trying", candidate)
+    }
+
+    if (isValidContentFile(candidate)) {
+      return transformContentPathToRoute(candidate); // Recurse as if it's a full path
+    }
+  }
+
+  if (DEBUG_BACKLINKS) {
+    console.log("No path found for path", input, "\n\n")
+  }
+  // Fallback
+  return `/not-found?path=${encodeURIComponent(input)}`;
 }
 
 /**

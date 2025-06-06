@@ -6,80 +6,53 @@ interface Props {
   gap?: string;
   minCardWidth?: string;
   tools: Array<Record<string, any>>;
+  filterTag?: string;
 }
 
-const { gap = "2rem", tools = [] } = Astro.props;
+const { gap = "2rem", tools = [], filterTag } = Astro.props;
 
-// Split tools into those with and without images
-const toolsWithImages = tools.filter(tool => tool.image);
-const toolsWithoutImages = tools.filter(tool => !tool.image);
+// Filter tools by tag if filterTag is provided
+const filteredTools = filterTag
+  ? tools.filter(tool => 
+      tool.tags?.some((tag: string) => tag === filterTag)
+    )
+  : tools;
+
+const toolsWithImages = filteredTools.filter(tool => tool.image);
+const toolsWithoutImages = filteredTools.filter(tool => !tool.image);
+
+toolsWithImages.forEach(tool => {
+  if (!tool.id) throw new Error("Missing tool.id in CardGrid");
+});
+
+
 ---
 
 <div class="cards-container">
-  {toolsWithImages.length > 0 && (
-    <section class="tools-section">
-      <div class="card-grid">
-        {toolsWithImages.map((tool) => (
-          <ToolCard
-            {...tool}
-            filePath={tool.filePath}
-          />
-        ))}
-      </div>
-    </section>
-  )}
+  <section class="tools-section">
+    <div class="card-grid">
+      {toolsWithImages.map(tool => (
+        <ToolCard 
+          {...tool} 
+          id={tool.id}
+          filePath={tool.filePath} 
+          class="tool-card" 
+          data-tags={JSON.stringify(tool.tags || [])} 
+        />
+      ))}
+      {toolsWithoutImages.map(tool => (
+        <BareToolCard 
+          {...tool} 
+          filePath={tool.filePath} 
+          class="tool-card" 
+          data-tags={JSON.stringify(tool.tags || [])} 
+        />
+      ))}
+    </div>
+  </section>
 
-  {toolsWithoutImages.length > 0 && (
-    <section class="tools-section bare-tools-section">
-      <div class="bare-tools-grid">
-        {toolsWithoutImages.map((tool) => (
-          <BareToolCard
-            {...tool}
-            filePath={tool.filePath}
-          />
-        ))}
-      </div>
-    </section>
-  )}
-  
-  {tools.length === 0 && (
-    <p class="no-tools">No tools found</p>
-  )}
+  {tools.length === 0 && <p class="no-tools">No tools found</p>}
 </div>
-
-<script is:inline>
-  // PERFORMANCE OPTIMIZATION: Remove mousemove event for all cards.
-  // Instead, only update hovered card using pointerenter/leave for GPU compositing.
-  // This avoids layout thrash and paint storms from updating all cards on every mousemove.
-
-  // Helper to set and unset mouse position CSS vars on a card
-  function setCardMouseVars(card, x, y) {
-    card.style.setProperty("--mouse-x", `${x}px`);
-    card.style.setProperty("--mouse-y", `${y}px`);
-  }
-  function clearCardMouseVars(card) {
-    card.style.removeProperty("--mouse-x");
-    card.style.removeProperty("--mouse-y");
-  }
-
-  // Attach listeners after DOMContentLoaded
-  document.addEventListener("DOMContentLoaded", () => {
-    const cards = document.getElementsByClassName("card");
-    for (const card of cards) {
-      card.addEventListener("pointerenter", (e) => {
-        const rect = card.getBoundingClientRect();
-        setCardMouseVars(card, e.clientX - rect.left, e.clientY - rect.top);
-      });
-      card.addEventListener("pointermove", (e) => {
-        const rect = card.getBoundingClientRect();
-        setCardMouseVars(card, e.clientX - rect.left, e.clientY - rect.top);
-      });
-      card.addEventListener("pointerleave", () => {
-        clearCardMouseVars(card);
-      });
-    }
-  });
-</script>
 
 <style define:vars={{ gap }}>
   .cards-container {
@@ -103,13 +76,6 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
     align-items: center;
   }
 
-  .tools-section h2 {
-    font-size: var(--fs-600);
-    color: var(--clr-heading);
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-
   .bare-tools-section {
     background-color: var(--clr-lossless-primary-dark);
     padding: 2rem;
@@ -129,48 +95,4 @@ const toolsWithoutImages = tools.filter(tool => !tool.image);
     font-style: italic;
     padding: 2rem;
   }
-
-  /* Card glow effects */
-  :global(.card) {
-    position: relative;
-    background: transparent !important;
-  }
-
-  :global(.card)::before,
-  :global(.card)::after {
-    border-radius: inherit;
-    content: "";
-    height: 100%;
-    left: 0;
-    opacity: 0;
-    position: absolute;
-    top: 0;
-    transition: opacity 500ms;
-    width: 100%;
-    pointer-events: none;
-  }
-
-  /* Radial gradient hover effect removed for performance. Previously, :global(.card)::before and ::after used radial-gradient backgrounds with mouse tracking, which caused page lag. This is now removed per user request. */
-
-  :global(.card:hover)::before {
-    opacity: 1;
-  }
-
-  :global(.cards-container:hover .card::after) {
-    opacity: 0.1;
-  }
-
-  @media (max-width: 768px) {
-/*     .cards-container {
-      padding: 0 1rem;
-    }
-
-    .bare-tools-section {
-      padding: 1rem;
-    }
-
-    .bare-tools-grid {
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    }
-  } */
 </style>

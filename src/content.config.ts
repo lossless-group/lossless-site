@@ -1,5 +1,24 @@
 import { defineCollection, z, getCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
+import { basename, dirname, extname, join, resolve } from 'node:path';
+import { pathToFileURL } from 'url';
+
+// Import environment utilities
+import { contentBasePath } from './utils/envUtils.js';
+
+
+// Function to resolve content paths based on environment
+function resolveContentPath(relativePath: string): string {
+  // If already within generated-content, return as-is
+  if (relativePath.startsWith('./src/generated-content')) {
+    return relativePath;
+  }
+
+  const absolutePath = join(contentBasePath, relativePath);
+
+  // Convert to file:// URL
+  return pathToFileURL(absolutePath).href;
+}
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
@@ -9,8 +28,29 @@ const cardCollection = defineCollection({
   }).passthrough()
 });
 
+const slidesCollection = defineCollection({
+    loader: glob({pattern: "**/*.md", base: resolveContentPath("slides")}),
+    schema: z.object({
+      title: z.string(),
+      lede: z.string().optional(),
+      slug: z.string().optional(),
+      date_created: z.date().optional(),
+      date_modified: z.date().optional(),
+      authors: z.array(z.string()).optional(),
+      for_client: z.string().optional(),
+      for_persons: z.array(z.string()).optional(),
+      password: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      theme: z.string().default('default').optional(),
+      layout: z.string().default('default').optional(),
+      status: z.string().default('draft').optional(),
+      published: z.boolean().default(true).optional(),
+      // Additional fields
+    }),
+});
+
 const visualsCollection = defineCollection({
-  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: "../content/visuals"}),  // Explicitly list image extensions
+  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
   schema: z.object({
     // Define base fields that all images should have
     id: z.string().optional(),
@@ -24,16 +64,19 @@ const visualsCollection = defineCollection({
     const filename = String(context.path).split('/').pop()?.replace(/\.[^.]+$/, '') || '';
     const extension = String(context.path).split('.').pop()?.toLowerCase() || '';
     
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Use the filename as the display title, preserving original case
+    // - Replace dashes/underscores with spaces
+    // - Collapse multiple spaces
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
+    const displayTitle = filename
+      .replace(/[-_]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     
     return {
       ...data,
       id: filename,  // Original filename as id
-      title: data.title || titleCase,  // Use provided title or computed one
+      title: data.title || displayTitle,  // Use provided title or computed one
       format: extension as 'png' | 'jpg' | 'jpeg' | 'gif' | 'webp' | 'svg',
       slug: filename.toLowerCase().replace(/\s+/g, '-')  // Add computed slug
     };
@@ -41,7 +84,7 @@ const visualsCollection = defineCollection({
 });
 
 const vocabularyCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/vocabulary"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("vocabulary")}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -52,29 +95,28 @@ const vocabularyCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  }).passthrough().transform((data, context) => {
-    // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    
-    // Merge our computed values into the data object
-    return {
-      ...data,  // Start with existing data
-      title: titleCase,  // Override with computed title
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
-      aliases: data.aliases || []  // Ensure aliases exists
-    };
   })
 });
 
 // Concepts collection - follows same pattern as vocabulary
 const conceptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/concepts"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("concepts")}),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]), // Single string -> array with one string
+      z.array(z.string()),                // Already an array
+      z.null(),                          // Handle null values
+      z.undefined()                      // Handle undefined values
+    ]).transform(val => {
+      if (!val) return [];              // Transform null/undefined to empty array
+      return val;                       // Keep arrays and transformed strings as-is
+    }).default([])                      // Default to empty array if missing
+  })
+});
+
+// Concepts collection - follows same pattern as vocabulary
+const essaysCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("essays")}),
   schema: z.object({
     aliases: z.union([
       z.string().transform(str => [str]), // Single string -> array with one string
@@ -89,24 +131,29 @@ const conceptsCollection = defineCollection({
     // Get the filename without extension
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
     
-    // Convert filename to title case for display
-    const titleCase = filename
-      .split(/[\s-]+/)  // Split on spaces or dashes
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Title fallback logic for essaysCollection:
+    // - If frontmatter provides a title, use it as-is (preserve all casing).
+    // - If missing, generate a title from the filename by replacing dashes/underscores with spaces.
+    // - DO NOT change the case of any letters (e.g., 'API' stays 'API', 'AI' stays 'AI').
+    // - This preserves the author's intended casing from the filename.
+    const displayTitle = data.title
+      ? data.title
+      : filename
+          .replace(/[-_]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
     
     // Merge our computed values into the data object
     return {
       ...data,  // Start with existing data
-      title: titleCase,  // Override with computed title
+      title: displayTitle,  // Override with computed title
       slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
-      aliases: data.aliases || []  // Ensure aliases exists
     };
   })
 });
 
 const promptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/prompts"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/prompts")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -117,7 +164,7 @@ const promptsCollection = defineCollection({
 });
 
 const remindersCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/lost-in-public/reminders"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/reminders")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -128,7 +175,7 @@ const remindersCollection = defineCollection({
 });
 
 const changelogContentCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/changelog--content"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--content")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -140,7 +187,7 @@ const changelogContentCollection = defineCollection({
 
 
 const changelogCodeCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/changelog--code"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--code")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -163,7 +210,7 @@ const pagesCollection = defineCollection({
 
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: "../content/tooling"}),
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("tooling")}),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -176,50 +223,91 @@ const toolCollection = defineCollection({
 // ***
 // Open: Specs Collection Definition
 // Type: Content Collection
+
+const specsCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("specs")}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags
+      : data.tags ? [data.tags]
+      : []
+  }))
+});
 // Includes:
 //   - specsCollection (defineCollection)
 //   - glob loader for ../content/specs
 //   - Flexible schema with normalization
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-const specsCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "../content/specs" }),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    tags: Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : []
-  }))
-});
-
 // ========================================
 // Affects: [specsCollection, collections export, paths export]
 // Close: Specs Collection Definition
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-// Define where to find the content - using relative paths from src/content
+// ***
+// Open: Issue Resolution Collection Definition (Ultra-Minimalist, following example)
+// Type: Content Collection
+// Purpose: For magazine-style articles detailing issue resolutions.
+// Schema: Permissive, passes through all frontmatter.
+// Transform: Passes data through. Astro will auto-generate id and slug.
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const issueResolutionCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/issue-resolution") }),
+  schema: z.object({
+    publish: z.boolean().optional(), // Allows individual entries to override collection default
+  }).passthrough().transform((data) => ({
+    ...data // Pass through all original frontmatter fields.
+            // Astro will automatically create 'id' and 'slug' properties for the entry.
+            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
+  }))
+});
+
+// ========================================
+// Close: Issue Resolution Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ---- NEW: Configuration for Publishing Defaults ----
+export const collectionPublishingDefaults = {
+  'issue-resolution': {
+    publishByDefault: true, // true = publish all EXCEPT items with publish: false
+                            // false = publish none EXCEPT items with publish: true
+  },
+  // Add other collections here as needed
+};
+// ---- END NEW ----
+
+// Define where to find the content - using environment-aware paths
 export const paths = {
   'cards': 'cards',
-  'changelog--content': '../content/changelog--content',
-  'changelog--code': '../content/changelog--code',
-  'concepts': '../content/concepts',
-  'reports': '../content/reports',
-  'tooling': '../content/tooling',
-  'vocabulary': '../content/vocabulary',
-  'prompts': '../content/lost-in-public/prompts',
-  'reminders': '../content/lost-in-public/reminders',
-  'specs': '../content/specs',
+  'changelog--content': resolveContentPath('changelog--content'),
+  'changelog--code': resolveContentPath('changelog--code'),
+  'essays': resolveContentPath('essays'),
+  'concepts': resolveContentPath('concepts'),
+  'reports': resolveContentPath('reports'),
+  'tooling': resolveContentPath('tooling'),
+  'vocabulary': resolveContentPath('vocabulary'),
+  'prompts': resolveContentPath('lost-in-public/prompts'),
+  'reminders': resolveContentPath('lost-in-public/reminders'),
+  'specs': resolveContentPath('specs'),
+  'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
 };
 
 // Export the collections
 export const collections = {
   'cards': cardCollection,
   'concepts': conceptsCollection,
+  'essays': essaysCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
   'reports': reportCollection,
   'pages': pagesCollection,
   'tooling': toolCollection,
+  'slides': slidesCollection,
   'prompts': promptsCollection,
   'reminders': remindersCollection,
   'specs': specsCollection,
+  'issue-resolution': issueResolutionCollection,
 };

@@ -2,16 +2,16 @@
   "page": "main",
   "questionsAndAnswers": [
     {
-      "question": "What do you mean by 'free updates'?",
-      "answer": "All future improvements and new features are included at no extra cost."
+      "question": "How can you help large organizations that may be difficult to mobilze?",
+      "answer": "We help management understand key, actionable practices learned from the highest growth companies of the last decade."
     },
     {
-      "question": "How do I contact support?",
-      "answer": "You can reach us via email or our support portal, 24/7."
+      "question": "How do you customize recommendations?",
+      "answer": "We have a series of key meetings, and then ask an internal team to survey the organization to understand their needs. We use various AI techniques, supervised and orchestrated, to customize our conent base to each client."
     },
     {
-      "question": "Can I use markdown in answers?",
-      "answer": "Yes! Answers can contain **markdown** for formatting, links, and more."
+      "question": "What does an engagement look like?",
+      "answer": "We operate on a collective retainer, and the more clients we have the more affordable it becomes."
     }
   ]
 }

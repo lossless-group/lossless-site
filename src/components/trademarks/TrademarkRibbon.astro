@@ -17,6 +17,10 @@ const { sourceDir, width, maxWidth } = Astro.props;
 const resolvedPath = path.join(process.cwd(), sourceDir);
 console.log("Looking for SVGs in:", resolvedPath);
 const svgFiles = await glob(`${resolvedPath}/*.svg`);
+console.log(JSON.stringify(svgFiles))
+if (svgFiles.length == 0) {
+  throw new Error("No SVG files found in ", resolvedPath)
+}
 console.log(`Found ${svgFiles.length} SVG files`);
 
 ---

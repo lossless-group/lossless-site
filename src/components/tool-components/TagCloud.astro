@@ -61,7 +61,6 @@ const maxHeight = visibleTagRowLimit * rowHeight;
     width: 100%;
     justify-content: space-between;
   }
-
   .tool-tags {
     display: flex;
     flex-flow: row wrap;
@@ -71,7 +70,6 @@ const maxHeight = visibleTagRowLimit * rowHeight;
     padding: 0.4em 0.6em;
     justify-content: space-between; /* Add space for potential scrollbar */
   }
-
   /* Show scrollbar on hover if content overflows */
   .tool-tags:hover {
     background: var(--clr-lossless-primary-dark-80);
@@ -80,21 +78,17 @@ const maxHeight = visibleTagRowLimit * rowHeight;
     overflow-y: auto; /* Change from hidden to auto on hover */
     z-index: 5; /* Lower z-index to ensure tag chips appear above */
   }
-
   /* Customize scrollbar */
   .tool-tags::-webkit-scrollbar {
     width: 6px;
   }
-
   .tool-tags::-webkit-scrollbar-track {
     background: transparent;
   }
-
   .tool-tags::-webkit-scrollbar-thumb {
     background: var(--clr-lossless-primary-dark);
     border-radius: 3px;
   }
-
   .tool-tags::-webkit-scrollbar-thumb:hover {
     background: var(--clr-lossless-primary-glass);
   }

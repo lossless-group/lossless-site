@@ -12,6 +12,9 @@ import Section__IconHeaderMessage from "@components/basics/messages/Section__Ico
 import Section__QuestionsAnswers from "./reference/Section__QuestionsAnswers.astro";
 import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json";
 import Section__VibeCodeWithUs from "@components/basics/messages/Section__VibeCodeWithUs.astro";
+import { readdirSync } from 'fs';
+import { join } from 'path';
+
 
 interface Tool {
   url: string;
@@ -25,13 +28,15 @@ interface Tool {
 }
 
 const TRADEMARK_CONFIG = {
-  sourceDir: "src/assets/Visuals/Tooling-Trademarks/usable--darkmode",
+  sourceDir: "./public/visuals/Tooling-Trademarks/usable--darkmode",
 };
+
+const TOOL_CARDGRID_LIMIT = 6;
 
 // ... existing type definitions ...
 
 const toolEntries = await getCollection("tooling");
-const tools = toolEntries.map((entry: any) => entry.data as Tool);
+const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id } as Tool));
 
 const tagFrequencies = tools.reduce(
   (tagCounts: Record<string, number>, tool: Tool) => {
@@ -150,11 +155,11 @@ const qaList = questionsAndAnswersData.page === "main"
 
 <section class="example-section" data-animate="fade-up" data-animate-delay="0.2">
   <Hero
-    title="Customize Your Experience"
-    subtitle="Flexible & Powerful"
-    description="The Hero component supports various layouts and content configurations to meet your specific needs."
-    ctaText="View Documentation"
-    ctaUrl="/docs/hero"
+    title="Harness the Power of AI with the right toolkit."
+    subtitle="Curated AI Tooling"
+    description="We've vetted over 300 AI tools to find the best options. We can customize recommendations based on your needs."
+    ctaText="Check it out!"
+    ctaUrl="/ai-toolkit"
     alignment="center"
     fullBleed={false}
     animate={true}
@@ -166,7 +171,7 @@ const qaList = questionsAndAnswersData.page === "main"
   <section>
     {
       tools && tools.length > 0 ? (
-        <CardGrid gap="2rem" tools={tools} />
+        <CardGrid gap="2rem" tools={tools.slice(0, TOOL_CARDGRID_LIMIT)} />
       ) : (
         <p>No tools found</p>
       )

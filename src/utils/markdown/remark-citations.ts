@@ -1,16 +1,17 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import type { Root, Paragraph, Text, Link } from 'mdast';
+import { DEBUG_CITATIONS } from '@utils/envUtils';
 
 const remarkCitations: Plugin<[], Root> = () => {
   return (tree: Root) => {
     const citations: { index: number; url: string }[] = [];
 
-    console.log('=== remarkCitations: Starting transformation ===');
+    if (DEBUG_CITATIONS) {
+      console.log('=== remarkCitations: Starting transformation ===');
+    }
 
     visit(tree, 'paragraph', (node: Paragraph) => {
-      // console.log('--- Inspecting paragraph node ---');
-      // console.dir(node, { depth: null });
 
       const newChildren = [];
       let i = 0;
@@ -32,7 +33,9 @@ const remarkCitations: Plugin<[], Root> = () => {
           const index = parseInt(indexStr);
           const before = a.value.slice(0, a.value.indexOf(`[${indexStr}]`));
 
-          console.log(`✅ Found citation: [${index}] (${b.url})`);
+          if (DEBUG_CITATIONS) {
+            console.log(`✅ Found citation: [${index}] (${b.url})`);
+          }
 
           if (before) {
             newChildren.push({ type: 'text', value: before });
@@ -64,7 +67,9 @@ const remarkCitations: Plugin<[], Root> = () => {
       node.children = newChildren;
     });
 
-    console.log('Collected citations:', citations);
+    if (DEBUG_CITATIONS) {
+      console.log('Collected citations:', citations);
+    }
 
     if (citations.length > 0) {
       const citationNodes = citations
@@ -98,9 +103,9 @@ const remarkCitations: Plugin<[], Root> = () => {
       } as any);
     }
 
-    // console.log('=== Final Transformed MDAST ===');
-    // console.dir(tree, { depth: null });
-    console.log('=== remarkCitations: Finished ===');
+    if (DEBUG_CITATIONS) {
+      console.log('=== remarkCitations: Finished ===');
+    }
   };
 };
 

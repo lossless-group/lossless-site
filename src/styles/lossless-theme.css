@@ -1,13 +1,127 @@
+/* Poor Story Font */
+@font-face {
+    font-family: 'Poor Story Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Poor Story Regular'), url('/src/assets/Fonts/PoorStory-Regular.woff') format('woff');
+}
 
 :root {
-   --bastille: #19141D;
    --cyan-aqua--brightest: rgb(4, 229, 229);
    --white-catskill: hsla(184, 35%, 92%, 1.00);
-   --purple-heart: hsla(272, 73%, 55%, 1.00);
 
-   --clr-lossless-primary-dark: var(--bastille);
-   --clr-lossless-accent--brightest: var(--cyan-aqua--brightest);
+   /* Lossless Brand Gradient Colors */
+   --eastern-blue: hsla(186, 68%, 42%, 1.00);
+   --blue-purple: hsla(272, 73%, 55%, 1.00);
+   --alazarin-crimson: hsla(352, 72%, 49%, 1.00);
+   --sundshade-yellow: hsla(29, 90%, 62%, 1.00);
+   --grd-eastern-crimson: linear-gradient(112deg, #22A6B5 6%, #9138E0 24%, #D9233B 48%, #F59C49 72%);
+
+   /* Lossless Brand Gradient Spectrum */
+   --mystic-turquoise: hsla(169, 60%, 49%, 1.00);
+   --pelorous-ocean: hsla(188, 42%, 51%, 1.00);
+   --purple-heart: hsla(272, 73%, 55%, 1.00);
+   --slate-blue: hsla(249, 53%, 58%, 1.00);
+   --purpureus: hsla(284, 51%, 47%, 1.00);
+   --dingy-dungeon: hsla(350, 55%, 49%, 1.00);
+   --jelly-bean: hsla(9, 62%, 56%, 1.00);
+   --porsche-orange: hsla(30, 76%, 63%, 1.00);
+
+   /* Lossless Brand Gradient Attention Grabbers */
+   --robins-egg-blue: hsla(180, 77%, 49%, 1.00);
+   --bright-lime: hsla(107, 73%, 55%, 1.00);
+   --algae-green: hsla(154, 62%, 72%, 1.00);
+   --pizzaz-pink: hsla(301, 93%, 62%, 1.00);
+
+   /* Lossless Brand Alternate Colors */
+   --bondi-blue: hsla(187, 100%, 35%, 1.00);
+   --tautara-grey: hsla(0, 0%, 21%, 1.00);
+   --butterfly-bush-purple: hsla(259, 34%, 45%, 1.00)
+   --ice-blue: hsla(173, 66%, 80%, 1.00);
+   --twighlight-dew: hsla(177, 100%, 96%, 1.00);
+   --iceberg-white: hsla(180, 46%, 91%, 1.00);
+   --iceberg-white-50p: hsla(180, 46%, 91%, .50);
+   --iceberg-white-20p: hsla(180, 46%, 91%, .20);
+   --iceberg-white-10p: hsla(180, 46%, 91%, .10);
+   --glitter-white: hsla(207, 47%, 93%, 1.00);
+   --glitter-white-50p: hsla(207, 47%, 93%, .50);
+   --glitter-white-20p: hsla(207, 47%, 93%, .20);
+   --glitter-white-10p: hsla(207, 47%, 93%, .10);
+
+   /* Lossless Design System Dark Mode  */
+   --jaguar-black: hsla(288, 100%, 2%, 1.00);
+   --bastille-black: hsla(273, 18%, 10%, 1.00);
+   --bunker-black: hsla(218, 22%, 7%, 1.00);
+
+   --grd-glass-cerulean-jagger: radial-gradient(77.98% 88.7% at 0% 37.7%, var(--cerulean-blue-10p) 0%, var(--mirage-purple-50p) 50.27%, var(--jagger-plum-80p) 100%);
+   
+   /* Lossless Alternates */
+   /* Base colors with HSL components for easy transparency manipulation */
+
+   --p: rgba(104, 75, 158, 1);
+   --cerulean-blue: hsla(198, 72%, 51%, 1.00);
+   --cerulean-blue-50p: hsla(198, 72%, 51%, .50);
+   --cerulean-blue-20p: hsla(198, 72%, 51%, .20);
+   --cerulean-blue-10p: hsla(198, 72%, 51%, .10);
+   --cerulean-blue-h: 198;
+   --cerulean-blue-s: 72%;
+   --cerulean-blue-l: 51%;
+   
+   --mirage-purple: hsla(270, 56%, 10%, 1.00);
+   --mirage-purple-50p: hsla(270, 56%, 10%, .50);
+   --mirage-purple-20p: hsla(270, 56%, 10%, .20);
+   --mirage-purple-10p: hsla(270, 56%, 10%, .10);
+   --mirage-purple-h: 270;
+   --mirage-purple-s: 56%;
+   --mirage-purple-l: 10%;
+   
+   --jagger-plum: hsla(270, 79%, 21%, 1.00);
+   --jagger-plum-80p: hsla(270, 79%, 21%, .80);
+   --jagger-plum-50p: hsla(270, 79%, 21%, .50);
+   --jagger-plum-20p: hsla(270, 79%, 21%, .20);
+   --jagger-plum-10p: hsla(270, 79%, 21%, .10);
+   --jagger-plum-h: 270;
+   --jagger-plum-s: 79%;
+   --jagger-plum-l: 21%;
+   
+   /* Gradient with full opacity */
+   --grd-cerulean-jagger-100: radial-gradient(
+     hsla(var(--cerulean-blue-h), var(--cerulean-blue-s), var(--cerulean-blue-l), 1.0) 10%, 
+     hsla(var(--mirage-purple-h), var(--mirage-purple-s), var(--mirage-purple-l), 1.0) 45%, 
+     hsla(var(--jagger-plum-h), var(--jagger-plum-s), var(--jagger-plum-l), 1.0) 80%
+   );
+   
+   /* Gradient with 70% opacity */
+   --grd-cerulean-jagger-70: radial-gradient(
+     hsla(var(--cerulean-blue-h), var(--cerulean-blue-s), var(--cerulean-blue-l), 0.7) 10%, 
+     hsla(var(--mirage-purple-h), var(--mirage-purple-s), var(--mirage-purple-l), 0.7) 45%, 
+     hsla(var(--jagger-plum-h), var(--jagger-plum-s), var(--jagger-plum-l), 0.7) 80%
+   );
+   
+   /* Gradient with 40% opacity */
+   --grd-cerulean-jagger-40: radial-gradient(
+     hsla(var(--cerulean-blue-h), var(--cerulean-blue-s), var(--cerulean-blue-l), 0.4) 10%, 
+     hsla(var(--mirage-purple-h), var(--mirage-purple-s), var(--mirage-purple-l), 0.4) 45%, 
+     hsla(var(--jagger-plum-h), var(--jagger-plum-s), var(--jagger-plum-l), 0.4) 80%
+   );
+
+   /* Elm Bean Gradient */
+   --allports-elm: hsla(190, 56%, 29%, 1.00);
+   --scooter-blue: hsla(191, 59%, 40%, 1.00);
+   --grd-elm-bean: linear-gradient(90deg, var(--allports-elm) 0%, var(--scooter-blue) 100%);
+
+   /* Lossless Assigned Design System Colors */
+
+   --grd-lossless-primary: var(--grd-eastern-crimson);
+
+   --clr-lossless-primary-dark: var(--bastille-black);
+   --clr-lossless-primary-darker: var(--bunker-black);
+   --clr-lossless-primary-darkest: var(--jaguar-black);
+
    --clr-lossless-primary-light: var(--white-catskill);
+   
+   --clr-lossless-accent--brightest: var(--cyan-aqua--brightest);
+
    --clr-lossless-primary-glass: hsla(184, 35%, 92%, .40);
    --clr-lossless-primary-glass--lighter: hsla(184, 35%, 92%, .60);
    --clr-lossless-primary-glass-gr--90-10p: var(--gr-white--90-10p);
@@ -15,20 +129,59 @@
    --clr-lossless-primary-glass-gr--80-40p: var(--gr-white--80-40p);
    --clr-lossless-primary-glass-gr--70-30p: var(--gr-white--70-30p);
    --clr-lossless-primary-glass-gr--60-40p: var(--gr-white--60-40p);
+
    --clr-lossless-attn-action: var(--purple-heart);
    --clr-lossless-ui-btn-border: var(--clr-lossless-primary-light);
-   --grd--lossless-eastern-crimson: linear-gradient(107deg, #22A6B5 5.36%, #9138E0 23.14%, #D9233B 47.56%, #F59C49 72.33%);
+
 
    /* ===================== */
 /* Tailwind Color Palette */
-/* ===================== */
 
 /* Lossless Colors in Tailwind Syntax */
 
    --clr-lossless-primary-600: var(--purple-heart);
    --clr-lossless-primary-400: var(--white-catskill);
-
-/* ===================== */
 }
 
+/* Color shade classes for direct use in HTML */
+
+.shade-mystic-turquoise {
+   color: var(--mystic-turquoise);
+ }
+
+.shade-pelorous-ocean {
+   color: var(--pelorous-ocean);
+ }
+ 
+.shade-purple-heart {
+   color: var(--purple-heart);
+ }
+ 
+.shade-slate-blue {
+   color: var(--slate-blue);
+ }
+ 
+.shade-purpureus {
+   color: var(--purpureus);
+ }
+.shade-dingy-dungeon {
+   color: var(--dingy-dungeon);
+ }
+ .shade-alazarin-crimson {
+   color: var(--alazarin-crimson);
+ }
+ .shade-eastern-blue {
+   color: var(--eastern-blue);
+ }
+.shade-jelly-bean {
+   color: var(--jelly-bean);
+ }
+.shade-porsche-orange {
+   color: var(--porsche-orange);
+}
+
+/* Font classes */
+.font-poor-story {
+   font-family: 'Poor Story Regular', 'Indie Flower', 'Gaegu', cursive;
+}
 

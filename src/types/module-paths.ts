@@ -1,0 +1,10 @@
+declare module '@layouts/*';
+declare module '@components/*';
+declare module '@basics/*';
+declare module '@styles/*';
+declare module '@utils/*';
+declare module '@assets/*';
+declare module '@content/*';
+declare module '@tool-components/*';
+declare module '@visuals/*';
+declare module '@scripts/*';

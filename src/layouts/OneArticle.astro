@@ -10,33 +10,10 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
-import remarkCallouts from '@utils/markdown/remark-callout-handler';
 import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
-import remarkRehype from 'remark-rehype';
-import rehypeMermaid from 'rehype-mermaid';
-import rehypeStringify from 'rehype-stringify';
-import remarkMermaidTag from '@utils/markdown/remark-mermaid-tag';
-import rehypeMermaidInline from '@utils/markdown/rehype-mermaid-inline';
-import { visit } from 'unist-util-visit';
-import { fromHtml } from 'hast-util-from-html';
-import { toHtml } from 'hast-util-to-html';
-
-/**
- * Helper rehype plugin to transfer mermaidId from MDAST node.data to HAST code/pre properties.
- * Ensures the ID is available for rehype-mermaid-inline to map SVGs correctly.
- */
-function rehypePreserveMermaidId() {
-  return (tree) => {
-    visit(tree, 'element', (node) => {
-      if (node.tagName === 'code' && node.data && node.data.hProperties && node.data.hProperties['data-mermaid-id']) {
-        node.properties = node.properties || {};
-        node.properties['data-mermaid-id'] = node.data.hProperties['data-mermaid-id'];
-      }
-    });
-  };
-}
 
 interface Props {
   Component: any;
@@ -47,103 +24,27 @@ interface Props {
 
 const { Component, data, content, markdownFile } = Astro.props;
 
-// === BEGIN: Mermaid Variable Interpolation ===
-// Helper function: interpolate variables in mermaid code blocks in Markdown
-function interpolateMermaidVariables(markdown, variables = {}) {
-  // Defensive: always coerce markdown to string
-  const safeMarkdown = typeof markdown === 'string' ? markdown : '';
-  // Replace variables in all mermaid code blocks
-  return safeMarkdown.replace(/```mermaid([\s\S]*?)```/g, (_unused, code) => {
-    // Defensive: ensure code is always a string fallback
-    let interpolated = typeof code === 'string' ? code : '';
-    // Replace ${variable} and [...variable] patterns
-    interpolated = interpolated
-      // Replace ${variable} patterns
-      .replace(/\$\{([a-zA-Z0-9_\-\.]+)\}/g, (_m, varName) => {
-        return Object.prototype.hasOwnProperty.call(variables, varName) ? String(variables[varName]) : '';
-      })
-      // Replace [...variable] patterns
-      .replace(/\[\.\.\.([a-zA-Z0-9_\-\.]+)\]/g, (_m, varName) => {
-        return Object.prototype.hasOwnProperty.call(variables, varName) ? String(variables[varName]) : '';
-      });
-    // Remove [variable] and [...variable] only when inside a path or label (i.e., after / or .)
-    interpolated = interpolated.replace(/([/.])\[(?:\.\.\.)?[a-zA-Z0-9_\-\.]+\]/g, '$1');
-    // Normalize all non-breaking and exotic spaces to standard space (U+0020)
-    interpolated = interpolated.replace(/[\u00A0\u202F]/g, ' ');
-    return `\`\`\`mermaid${interpolated}\`\`\``;
-  });
-}
-// === END: Mermaid Variable Interpolation ===
-
-// Get variables from data or context (expand as needed)
-const variables = { tag: data?.tag || '', collection: data?.collection || '' };
-const preprocessedContent = interpolateMermaidVariables(content, variables);
-
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
   .use(remarkGfm)
   .use(remarkImages)         
   .use(remarkBacklinks)          
-  // .use(remarkCallouts)      
   .use(remarkCitations)
-  .use(remarkMermaidTag) // Tag mermaid codeblocks in MDAST
-  .use(remarkRehype)
-  .use(rehypePreserveMermaidId) // Carry mermaidId to HAST
-  .use(rehypeMermaid, {
-    mermaidConfig: {
-      theme: 'dark',
-      themeVariables: {
-        fontFamily: 'var(--ff-body, Arial, sans-serif)',
-        background: 'transparent',
-      }
-    }
-  })
-  .use(rehypeMermaidInline) // Inline SVGs at codeblock position
-  .use(rehypeStringify);
+  .use(remarkTableOfContents)
 
 // First parse to MDAST
-const mdast = processor.parse(preprocessedContent || '');
+const mdast = processor.parse(content || '');
 // console.log("=== Raw MDAST ===", JSON.stringify(mdast, null, 2));
 
 const transformedMdast = await processor.run(mdast);
-
-// Helper: Extract mapping of mermaidId -> SVG string from HAST (after rehypeMermaidInline)
-function extractMermaidSvgs(hastTree) {
-  const svgMap = {};
-  visit(hastTree, 'element', (node) => {
-    // Mermaid SVGs are inserted as <svg data-mermaid-id="...">
-    if (node.tagName === 'svg' && node.properties && node.properties['data-mermaid-id']) {
-      const id = node.properties['data-mermaid-id'];
-      // Convert node back to HTML string (rehype-stringify already ran, so we can use innerHTML)
-      // Defensive: If node.children exists, reconstruct HTML string
-      // We'll use rehype-stringify for this node only
-      svgMap[id] = toHtml(node);
-    }
-  });
-  return svgMap;
-}
-
-// Generate HTML with only rehype and rehype-mermaid (no remark plugins)
-const astroCompiledHTML = await processor.process(preprocessedContent || '');
-const hastFromHtml = fromHtml(astroCompiledHTML.toString(), { fragment: true });
-const mermaidSvgs = extractMermaidSvgs(hastFromHtml);
 
 // Debug output to see AST structure
 markdownDebugger.log('OneArticle.astro Debug');
 markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
 markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
-// DEBUG: Output the compiled HTML to the server-side console for immediate inspection
-console.log('Compiled HTML:', astroCompiledHTML.toString());
-
-markdownDebugger.verbose('Compiled HTML:', astroCompiledHTML.toString());
-
 ---
-
-<head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.css">
-</head>
 
 <div class="one-article">
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}

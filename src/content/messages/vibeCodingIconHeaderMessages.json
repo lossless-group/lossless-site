@@ -13,7 +13,7 @@
      "badge": "As Needed",
      "verified": true,
      "icon": "/visuals/repVector__Prompt.svg",
-     "to_path": "thread/prompts"
+     "to_path": "/thread/prompts"
    },
    {
      "title": "Specifications",
@@ -21,6 +21,6 @@
      "badge": "Evolving",
      "verified": true,
      "icon": "/visuals/repVector__Specification.svg",
-     "to_path": "thread/specs"
+     "to_path": "/thread/specs"
    }
  ]
