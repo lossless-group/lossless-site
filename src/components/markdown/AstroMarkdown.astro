@@ -12,6 +12,8 @@ import { getCollection } from "astro:content";
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify } from '@utils/slugify';
+import shareIcon from '@assets/Icons/share.svg';
+import IconSVGWrapper from '../basics/render-images/IconSVGWrapper.astro';
     /*
       Compose a unique id for markdown headings using ONLY the main heading text.
       - This function takes a heading MDAST node and returns a slugified version of the primary text content.
@@ -200,7 +202,7 @@ if (DEBUG_AST) {
       <h1 id={id}>
         {node.children.map(child => <Astro.self node={child} data={data} />)}
         <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <span class="header-anchor-symbol">#</span>
+          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
         </a>
       </h1>
     );
@@ -209,7 +211,7 @@ if (DEBUG_AST) {
       <h2 id={id}>
         {node.children.map(child => <Astro.self node={child} data={data} />)}
         <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <span class="header-anchor-symbol">#</span>
+          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
         </a>
       </h2>
     );
@@ -218,7 +220,7 @@ if (DEBUG_AST) {
       <h3 id={id}>
         {node.children.map(child => <Astro.self node={child} data={data} />)}
         <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <span class="header-anchor-symbol">#</span>
+          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
         </a>
       </h3>
     );
@@ -227,7 +229,7 @@ if (DEBUG_AST) {
       <h4 id={id}>
         {node.children.map(child => <Astro.self node={child} data={data} />)}
         <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <span class="header-anchor-symbol">#</span>
+          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
         </a>
       </h4>
     );
@@ -236,7 +238,7 @@ if (DEBUG_AST) {
       <h5 id={id}>
         {node.children.map(child => <Astro.self node={child} data={data} />)}
         <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <span class="header-anchor-symbol">#</span>
+          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
         </a>
       </h5>
     );
@@ -245,7 +247,7 @@ if (DEBUG_AST) {
       <h6 id={id}>
         {node.children.map(child => <Astro.self node={child} data={data} />)}
         <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <span class="header-anchor-symbol">#</span>
+          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
         </a>
       </h6>
     );
