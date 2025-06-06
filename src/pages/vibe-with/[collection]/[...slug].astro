@@ -237,6 +237,7 @@ interface Props {
     <Layout title={processedEntry.data.title || processedEntry.id.replace(/\.md$/, '')}>
       <OneArticle
         Component={OneArticleOnPage}
+        title={processedEntry.data.title}
         content={processedEntry.body}
         markdownFile={processedEntry.id}
         data={contentData}

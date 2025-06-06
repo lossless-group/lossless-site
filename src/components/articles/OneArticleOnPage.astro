@@ -4,6 +4,7 @@ import type { Root } from 'mdast';
 import { DEBUG_ARTICLE } from '@utils/envUtils'
 
 interface Props {
+  articleHeading?: string; // Renamed from title to avoid conflict
   content: Root;
   data?: {
     path: string;
@@ -17,7 +18,7 @@ interface Props {
 // =============================
 // Accepts content (mdast Root), data (optional), and compiledContent (string)
 // Defensive: If content or children is missing, fallback to empty root node
-const { content, data = { path: Astro.url.pathname }, compiledContent } = Astro.props;
+const { articleHeading, content, data = { path: Astro.url.pathname }, compiledContent } = Astro.props; // Renamed from title
 
 // Define a type for data that may have hProperties
 interface DataWithHProperties {
@@ -105,6 +106,10 @@ if (DEBUG_ARTICLE) {
 
   <div class="content-inner">
     <article class="prose main-content">
+      {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
+      {typeof articleHeading === 'string' && articleHeading.trim() !== '' && (
+        <div class="page-main-title-display">{articleHeading}</div>
+      )}
       <AstroMarkdown 
         node={{
           type: 'root',
@@ -367,4 +372,13 @@ if (DEBUG_ARTICLE) {
     line-height: 1.4;
   }
 
+.page-main-title-display {
+    font-size: 2.25rem; /* Example: slightly smaller than a typical H1 but larger than H2 */
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest);
+    line-height: 1.2;
+    margin-bottom: 1.5rem; /* Space between this title and the start of Markdown content */
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--clr-lossless-accent--medium);
+  }
 </style>

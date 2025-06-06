@@ -17,12 +17,13 @@ import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
 interface Props {
   Component: any;
+  title: string; // Added title prop
   data: Record<string, any>;
   content: string;
   markdownFile?: string;
 }
 
-const { Component, data, content, markdownFile } = Astro.props;
+const { Component, title, data, content, markdownFile } = Astro.props; // Added title
 
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
@@ -47,10 +48,13 @@ markdownDebugger.verbose('MDAST structure:', transformedMdast);
 ---
 
 <div class="one-article">
+  {/* Render the title if it's provided */}
+  
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
   <Component 
     content={transformedMdast}
     data={data}
+    articleHeading={title} // Renamed prop to avoid conflict
   >
     <slot />
   </Component>
@@ -69,4 +73,5 @@ markdownDebugger.verbose('MDAST structure:', transformedMdast);
       padding: 4rem 2rem;
     }
   }
+
 </style>
