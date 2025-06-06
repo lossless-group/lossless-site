@@ -1,4 +1,36 @@
 
+/* Styling for rehype-autolink-headings */
+h1 .header-anchor,
+h2 .header-anchor,
+h3 .header-anchor,
+h4 .header-anchor,
+h5 .header-anchor,
+h6 .header-anchor {
+  visibility: hidden; /* Hide by default */
+  margin-left: 0.25em; /* Space between heading text and anchor */
+  text-decoration: none;
+  font-weight: normal;
+}
+
+h1:hover .header-anchor,
+h2:hover .header-anchor,
+h3:hover .header-anchor,
+h4:hover .header-anchor,
+h5:hover .header-anchor,
+h6:hover .header-anchor {
+  visibility: visible; /* Show on heading hover */
+}
+
+.header-anchor-symbol {
+  color: var(--clr-text-muted, #888); /* Muted color for the '#' or icon */
+  font-size: 0.8em; /* Slightly smaller than heading text */
+}
+
+.header-anchor:hover .header-anchor-symbol {
+  color: var(--clr-accent, var(--clr-lossless-accent--brightest)); /* Use your theme's accent color */
+  text-decoration: underline;
+}
+
 ul {
    list-style-type: disc;
    margin-left: 1em;

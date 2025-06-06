@@ -169,41 +169,86 @@ if (DEBUG_AST) {
 }
 
 {node.type === "heading" && (() => {
-  function generateHeadingId(node, data) {
-    let mainText = '';
-    if (Array.isArray(node.children)) {
-      for (const child of node.children) {
-        if (child.type === 'text') {
-          mainText = child.value;
-          break; // Only use the first text node for the id
+  function generateHeadingId(node) { 
+    // Helper to recursively extract all text content from a node and its children
+    function extractAllText(children) {
+      let text = '';
+      if (Array.isArray(children)) {
+        for (const child of children) {
+          if (child.type === 'text') {
+            text += child.value;
+          } else if (child.children && Array.isArray(child.children)) {
+            // Check if child.children is indeed an array before recursing
+            text += extractAllText(child.children);
+          }
         }
       }
+      return text;
     }
-    const base = mainText
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
-    return base;
+
+    const fullText = extractAllText(node.children);
+    return slugify(fullText.trim() || 'untitled-heading'); 
   }
 
   // === Heading Rendering Logic ===
   // The generateHeadingId function is called here for all heading depths (h1-h6).
   // The id will be based ONLY on the main heading text, not the filename or subtitle.
-  const id = generateHeadingId(node, data);
+  const id = generateHeadingId(node);
 
   if (node.depth === 1) {
-    return <h1 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h1>;
+    return (
+      <h1 id={id}>
+        {node.children.map(child => <Astro.self node={child} data={data} />)}
+        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
+          <span class="header-anchor-symbol">#</span>
+        </a>
+      </h1>
+    );
   } else if (node.depth === 2) {
-    return <h2 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h2>;
+    return (
+      <h2 id={id}>
+        {node.children.map(child => <Astro.self node={child} data={data} />)}
+        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
+          <span class="header-anchor-symbol">#</span>
+        </a>
+      </h2>
+    );
   } else if (node.depth === 3) {
-    return <h3 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h3>;
+    return (
+      <h3 id={id}>
+        {node.children.map(child => <Astro.self node={child} data={data} />)}
+        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
+          <span class="header-anchor-symbol">#</span>
+        </a>
+      </h3>
+    );
   } else if (node.depth === 4) {
-    return <h4 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h4>;
+    return (
+      <h4 id={id}>
+        {node.children.map(child => <Astro.self node={child} data={data} />)}
+        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
+          <span class="header-anchor-symbol">#</span>
+        </a>
+      </h4>
+    );
   } else if (node.depth === 5) {
-    return <h5 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h5>;
+    return (
+      <h5 id={id}>
+        {node.children.map(child => <Astro.self node={child} data={data} />)}
+        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
+          <span class="header-anchor-symbol">#</span>
+        </a>
+      </h5>
+    );
   } else if (node.depth === 6) {
-    return <h6 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}</h6>;
+    return (
+      <h6 id={id}>
+        {node.children.map(child => <Astro.self node={child} data={data} />)}
+        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
+          <span class="header-anchor-symbol">#</span>
+        </a>
+      </h6>
+    );
   } else {
     // Fallback for unexpected heading depths
     return <div>{node.children.map(child => <Astro.self node={child} data={data} />)}</div>;

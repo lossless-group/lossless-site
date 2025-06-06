@@ -10,6 +10,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
 import remarkTableOfContents from './src/utils/markdown/remark-toc';
 import vercel from '@astrojs/vercel';
@@ -70,6 +71,26 @@ export default defineConfig({
     rehypePlugins: [
       // rehypeRaw must come first to process raw HTML nodes in markdown
       rehypeRaw,
+      // Add IDs to headings (Astro might do this by default via rehype-slug)
+      // If not, uncomment: import rehypeSlug from 'rehype-slug'; and add rehypeSlug here.
+      // Add anchor links to headings
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'append', // append the link after the heading text
+          properties: {
+            className: ['header-anchor'], // for styling
+            'aria-hidden': 'true',
+            tabIndex: -1
+          },
+          content: { // Display a '#' as the link content
+            type: 'element',
+            tagName: 'span',
+            properties: { className: ['header-anchor-symbol'] },
+            children: [{ type: 'text', value: '#' }]
+          }
+        }
+      ],
       // rehype-mermaid for UML/Mermaid diagrams
       [
         rehypeMermaid,
