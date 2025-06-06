@@ -7,20 +7,41 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 ---
 <div id={chartId} class="mermaid-breakout" tabindex="0">
   <div class="mermaid-chart-shell">
-    <!-- Accessible, pure HTML/CSS expand/collapse toggle for Mermaid chart -->
-     <!-- TODO: Make fullscreen toggle work -->
-    <!-- <input type="checkbox" id={`toggle-${chartId}`} class="mermaid-toggle-checkbox" hidden>
-    <label for={`toggle-${chartId}`} class="mermaid-expand-toggle" tabindex="0" aria-label="Expand/collapse chart">
-      <span class="expand-icon">
-        <ExpandIcon class="icon-expand" />
-        <CollapseIcon class="icon-collapse" />
-      </span>
-    </label> -->
+    <button
+      type="button"
+      class="mermaid-expand-btn"
+      aria-label="Expand chart"
+      aria-expanded="false"
+      data-chart-id={chartId} data-mermaid-code={code}>
+      <ExpandIcon />
+    </button>
     <div class="mermaid">{code}</div>
   </div>
 </div>
 
-<!-- Fullscreen modal markup will be injected by JS when needed -->
+<!-- Fullscreen Modal -->
+<div
+  id={`modal-${chartId}`}
+  class="mermaid-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby={`modal-title-${chartId}`}
+  hidden
+>
+  <div class="mermaid-modal-content">
+    <h2 id={`modal-title-${chartId}`} class="visually-hidden">Expanded Chart</h2>
+    <button
+      type="button"
+      class="mermaid-modal-close-btn"
+      aria-label="Close expanded chart"
+    >
+      <CollapseIcon />
+    </button>
+    <div class="mermaid-modal-chart-container">
+      <div class="mermaid">{code}</div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -62,7 +83,7 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
   padding: 0 !important;
   margin: 0 !important;
 }
-.mermaid-chart-shell .mermaid-expand-toggle {
+.mermaid-expand-btn { /* Styles for the new expand button */
   position: absolute;
   top: 0.75rem;
   right: 1.5rem;
@@ -76,14 +97,98 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
   opacity: 0.7;
   transition: opacity 0.2s;
 }
-.mermaid-chart-shell .mermaid-expand-toggle:hover, .mermaid-chart-shell .mermaid-expand-toggle:focus {
+.mermaid-expand-btn:hover,
+.mermaid-expand-btn:focus {
   opacity: 1;
-  outline: 2px solid #88f;
+  outline: 2px solid var(--lossless-accent--brightest, #88f);
 }
-/* Only show ExpandIcon when NOT checked */
-.icon-collapse { display: none; }
-.mermaid-toggle-checkbox:checked + .mermaid-expand-toggle .icon-expand { display: none; }
-.mermaid-toggle-checkbox:checked + .mermaid-expand-toggle .icon-collapse { display: inline; }
+.mermaid-expand-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block; /* Helps with alignment */
+}
+
+/* Modal Styles */
+.mermaid-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s linear;
+  pointer-events: none;
+}
+
+.mermaid-modal[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+  pointer-events: auto;
+}
+
+.mermaid-modal-content {
+  position: relative;
+  background-color: var(--bastille);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90vw;
+  height: 90vh;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.mermaid-modal-chart-container {
+  flex-grow: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mermaid-modal-chart-container .mermaid {
+  width: 100%;
+  height: 100%;
+}
+
+.mermaid-modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  z-index: 10;
+}
+.mermaid-modal-close-btn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: block; /* Helps with alignment */
+}
+
+/* Visually hidden class for accessibility */
+.visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
+}
 </style>
 
 
@@ -106,7 +211,7 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
   const fontFmly = 'Open Sans, sans-serif';
 
   const mermaidConfig = {
-    startOnLoad: true,
+    startOnLoad: false,
     theme: 'base', // Use base for full customizability
     themeVariables: {
       darkMode: true,
@@ -136,4 +241,114 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
     window.mermaid?.initialize(mermaidConfig);
     window.mermaid?.run();
   }
+
+
+  // Modal Toggle Logic for all Mermaid Charts
+  document.addEventListener('DOMContentLoaded', () => {
+    const expandButtons = document.querySelectorAll('.mermaid-expand-btn');
+
+    expandButtons.forEach(expandBtn => {
+      const chartId = expandBtn.getAttribute('data-chart-id');
+      const modal = document.getElementById(`modal-${chartId}`);
+
+      if (modal) {
+        const closeBtn = modal.querySelector('.mermaid-modal-close-btn');
+        let previouslyFocusedElement;
+
+        const openModal = () => {
+          previouslyFocusedElement = document.activeElement;
+          const rawMermaidCode = expandBtn.getAttribute('data-mermaid-code');
+          const modalMermaidDiv = modal.querySelector('.mermaid');
+
+          if (modalMermaidDiv && rawMermaidCode && window.mermaid) {
+            // Restore raw code and prepare for re-render
+            modalMermaidDiv.innerHTML = ''; // Clear current content (likely error SVG)
+            modalMermaidDiv.removeAttribute('data-processed'); // Allow mermaid to reprocess
+            modalMermaidDiv.textContent = rawMermaidCode; // Set the raw mermaid code
+
+            // Ensure modal is visible BEFORE rendering, so dimensions are correct
+            modal.hidden = false;
+            // Use a minimal timeout to ensure DOM updates for visibility are processed
+            // and CSS transitions can start before mermaid tries to calculate layout.
+            setTimeout(() => {
+              modal.setAttribute('data-visible', 'true');
+
+              // Now that modal is visible and raw code is in place, render the chart
+              try {
+                window.mermaid.run({ nodes: [modalMermaidDiv] });
+              } catch (e) {
+                console.error('Error rendering Mermaid chart in modal:', e);
+                // Optionally, display a user-friendly error in modalMermaidDiv
+                modalMermaidDiv.textContent = 'Error rendering chart.';
+              }
+
+              document.body.style.overflow = 'hidden'; // Prevent background scroll
+              expandBtn.setAttribute('aria-expanded', 'true');
+              if (closeBtn) closeBtn.focus(); else modal.focus(); // Focus management
+            }, 10); // Small delay for visibility and DOM readiness
+          } else {
+            // Fallback or error if essential elements/data are missing
+            console.error('Cannot open modal: mermaid instance, modal div, or raw code missing.');
+            // Still show the modal structure if it exists, but chart won't render.
+            if (modal) {
+                modal.hidden = false;
+                setTimeout(() => {
+                    modal.setAttribute('data-visible', 'true');
+                    document.body.style.overflow = 'hidden';
+                    expandBtn.setAttribute('aria-expanded', 'true');
+                    if (closeBtn) closeBtn.focus(); else modal.focus();
+                }, 10);
+            }
+          }
+        };
+
+        const closeModal = () => {
+          modal.setAttribute('data-visible', 'false');
+          setTimeout(() => {
+            modal.hidden = true;
+          }, 300); // Match CSS transition duration
+          document.body.style.overflow = ''; // Restore background scroll
+          expandBtn.setAttribute('aria-expanded', 'false');
+          if (previouslyFocusedElement) {
+            previouslyFocusedElement.focus(); // Restore focus
+          }
+        };
+
+        expandBtn.addEventListener('click', openModal);
+        if (closeBtn) {
+          closeBtn.addEventListener('click', closeModal);
+        }
+
+        // Close modal with Escape key
+        modal.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            closeModal();
+          }
+        });
+        
+        // Basic focus trapping within the modal
+        const focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]';
+        modal.addEventListener('keydown', (event) => {
+          if (event.key === 'Tab') {
+            const focusableElements = Array.from(modal.querySelectorAll(focusableElementsString));
+            if (focusableElements.length === 0) return;
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey) { // Shift + Tab
+              if (document.activeElement === firstElement) {
+                lastElement.focus();
+                event.preventDefault();
+              }
+            } else { // Tab
+              if (document.activeElement === lastElement) {
+                firstElement.focus();
+                event.preventDefault();
+              }
+            }
+          }
+        });
+      }
+    });
+  });
 </script>
