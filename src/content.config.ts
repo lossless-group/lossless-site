@@ -28,6 +28,27 @@ const cardCollection = defineCollection({
   }).passthrough()
 });
 
+const slidesCollection = defineCollection({
+    loader: glob({pattern: "**/*.md", base: resolveContentPath("slides")}),
+    schema: z.object({
+      title: z.string(),
+      lede: z.string().optional(),
+      slug: z.string().optional(),
+      date_created: z.date().optional(),
+      date_modified: z.date().optional(),
+      authors: z.array(z.string()).optional(),
+      for_client: z.string().optional(),
+      for_persons: z.array(z.string()).optional(),
+      password: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      theme: z.string().default('default').optional(),
+      layout: z.string().default('default').optional(),
+      status: z.string().default('draft').optional(),
+      published: z.boolean().default(true).optional(),
+      // Additional fields
+    }),
+});
+
 const visualsCollection = defineCollection({
   loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
   schema: z.object({
@@ -284,6 +305,7 @@ export const collections = {
   'reports': reportCollection,
   'pages': pagesCollection,
   'tooling': toolCollection,
+  'slides': slidesCollection,
   'prompts': promptsCollection,
   'reminders': remindersCollection,
   'specs': specsCollection,
