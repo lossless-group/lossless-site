@@ -48,7 +48,7 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 <style>
 .mermaid-breakout {
   position: relative;
-  z-index: 9999;
+  z-index: 10; /* Reduced z-index */
   left: 50%;
   right: 50%;
   width: 100vw;
@@ -63,9 +63,9 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 }
 .mermaid-chart-shell {
   position: relative;
-  min-width: 600px;
-  width: 80vw;
-  max-width: 1000px;
+  min-width: 760px; /* Approx 6% wider than typical prose */
+  width: auto;
+  max-width: 900px; /* Slightly larger than min-width for wider diagrams */
   margin: 1.25rem 0;
   overflow-x: auto;
   background: var(--bastille);
