@@ -53,6 +53,22 @@ interface Props {
 
 const { node, data } = Astro.props;
 
+// Helper to recursively extract all text content from a node and its children
+function extractAllText(children) {
+  let text = '';
+  if (Array.isArray(children)) {
+    for (const child of children) {
+      if (child.type === 'text') {
+        text += child.value;
+      } else if (child.children && Array.isArray(child.children)) {
+        // Check if child.children is indeed an array before recursing
+        text += extractAllText(child.children);
+      }
+    }
+  }
+  return text;
+}
+
 // List of node types we handle with specific components
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
 const handled_types = [
@@ -171,89 +187,46 @@ if (DEBUG_AST) {
 }
 
 {node.type === "heading" && (() => {
-  function generateHeadingId(node) { 
-    // Helper to recursively extract all text content from a node and its children
-    function extractAllText(children) {
-      let text = '';
-      if (Array.isArray(children)) {
-        for (const child of children) {
-          if (child.type === 'text') {
-            text += child.value;
-          } else if (child.children && Array.isArray(child.children)) {
-            // Check if child.children is indeed an array before recursing
-            text += extractAllText(child.children);
-          }
-        }
-      }
-      return text;
-    }
+  const articleTitle = data.title || 'Untitled Article';
+  const currentHeaderText = extractAllText(node.children).trim() || 'Untitled Section';
 
-    const fullText = extractAllText(node.children);
-    return slugify(fullText.trim() || 'untitled-heading'); 
+  function generateHeadingId(nodeForId) {
+    const fullText = extractAllText(nodeForId.children); // Uses top-level extractAllText
+    return slugify(fullText.trim() || 'untitled-heading');
   }
-
-  // === Heading Rendering Logic ===
-  // The generateHeadingId function is called here for all heading depths (h1-h6).
-  // The id will be based ONLY on the main heading text, not the filename or subtitle.
   const id = generateHeadingId(node);
 
-  if (node.depth === 1) {
-    return (
-      <h1 id={id}>
-        {node.children.map(child => <Astro.self node={child} data={data} />)}
-        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
-        </a>
-      </h1>
-    );
-  } else if (node.depth === 2) {
-    return (
-      <h2 id={id}>
-        {node.children.map(child => <Astro.self node={child} data={data} />)}
-        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
-        </a>
-      </h2>
-    );
-  } else if (node.depth === 3) {
-    return (
-      <h3 id={id}>
-        {node.children.map(child => <Astro.self node={child} data={data} />)}
-        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
-        </a>
-      </h3>
-    );
-  } else if (node.depth === 4) {
-    return (
-      <h4 id={id}>
-        {node.children.map(child => <Astro.self node={child} data={data} />)}
-        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
-        </a>
-      </h4>
-    );
-  } else if (node.depth === 5) {
-    return (
-      <h5 id={id}>
-        {node.children.map(child => <Astro.self node={child} data={data} />)}
-        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
-        </a>
-      </h5>
-    );
-  } else if (node.depth === 6) {
-    return (
-      <h6 id={id}>
-        {node.children.map(child => <Astro.self node={child} data={data} />)}
-        <a href={`#${id}`} class="header-anchor" aria-hidden="true" tabindex={-1}>
-          <IconSVGWrapper src="/src/assets/Icons/share.svg" alt="Section link" class="header-anchor-symbol" width="16" height="16" />
-        </a>
-      </h6>
-    );
-  } else {
-    // Fallback for unexpected heading depths
-    return <div>{node.children.map(child => <Astro.self node={child} data={data} />)}</div>;
+  const anchorProps = {
+    role: "button",
+    tabIndex: 0,
+    className: "header-anchor",
+    title: `${articleTitle}... ${currentHeaderText}`,
+    "aria-label": `Copy link to section: ${currentHeaderText}`,
+    "data-heading-id": id,
+    "data-article-title": articleTitle,
+    "data-header-text": currentHeaderText,
+    onclick: "copyHeaderLink(this)" // Will call a global JS function
+  } as any;
+
+  const iconProps = {
+    src: "/src/assets/Icons/share.svg",
+    alt: "", // Decorative icon, as the <a> provides the label
+    "aria-hidden": "true",
+    class: "header-anchor-symbol",
+    width: "16",
+    height: "16"
+  };
+
+  switch (node.depth) {
+    case 1: return <h1 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h1>;
+    case 2: return <h2 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h2>;
+    case 3: return <h3 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h3>;
+    case 4: return <h4 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h4>;
+    case 5: return <h5 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h5>;
+    case 6: return <h6 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h6>;
+    default:
+      // Fallback for unexpected heading depths
+      return <div>{node.children.map(child => <Astro.self node={child} data={data} />)}</div>;
   }
 })()}
 
@@ -543,3 +516,50 @@ if (DEBUG_AST) {
         {JSON.stringify(node)}
     </div>
 }
+
+<script is:inline>
+  function copyHeaderLink(buttonElement) {
+    const headingId = buttonElement.dataset.headingId;
+    // const articleTitle = buttonElement.dataset.articleTitle; // Available if needed for feedback
+    // const headerText = buttonElement.dataset.headerText; // Available if needed for feedback
+
+    if (!navigator.clipboard) {
+      // Fallback for older browsers or insecure contexts (http)
+      console.warn('Clipboard API not available.');
+      // You could implement a textarea-based fallback here if needed
+      // For now, we'll just inform the user or do nothing.
+      alert('Copying to clipboard is not supported in your browser or on this page (HTTP).');
+      return;
+    }
+
+    const urlToCopy = window.location.origin + window.location.pathname + '#' + headingId;
+
+    navigator.clipboard.writeText(urlToCopy).then(() => {
+      // Success! Provide feedback.
+      const originalContent = buttonElement.innerHTML;
+      const originalTitle = buttonElement.title;
+      const originalAriaLabel = buttonElement.getAttribute('aria-label');
+
+      buttonElement.innerHTML = '<span class="header-anchor-symbol" style="font-style: italic; font-size: 0.9em;">Copied!</span>';
+      buttonElement.title = 'Link copied to clipboard!';
+      buttonElement.setAttribute('aria-label', 'Link copied to clipboard!');
+      
+      // Prevent multiple rapid clicks from messing up the timeout
+      if (buttonElement.dataset.timeoutId) {
+        clearTimeout(parseInt(buttonElement.dataset.timeoutId));
+      }
+
+      const timeoutId = setTimeout(() => {
+        buttonElement.innerHTML = originalContent;
+        buttonElement.title = originalTitle;
+        buttonElement.setAttribute('aria-label', originalAriaLabel);
+        delete buttonElement.dataset.timeoutId;
+      }, 2000); // Revert after 2 seconds
+      buttonElement.dataset.timeoutId = timeoutId.toString();
+
+    }).catch(err => {
+      console.error('Failed to copy link: ', err);
+      alert('Failed to copy link. See console for details.');
+    });
+  }
+</script>
