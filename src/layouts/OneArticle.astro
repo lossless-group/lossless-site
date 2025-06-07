@@ -14,6 +14,7 @@ import remarkCitations from '@utils/markdown/remark-citations';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import '@styles/markdown.css';
+import path from 'path'; // Needed for normalizeAuthorData if it uses path, though this version doesn't
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
 interface Props {
@@ -46,6 +47,30 @@ markdownDebugger.log('OneArticle.astro Debug');
 markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
 markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
+// Helper function to normalize author data, adapted from ChangelogLayout.astro
+const normalizeDataWithAuthors = (pageData) => {
+  if (!pageData) return { authors: [] }; // Return a default if pageData is null/undefined
+
+  let authorList = [];
+  if (pageData.authors) {
+    authorList = Array.isArray(pageData.authors)
+      ? pageData.authors
+      : [pageData.authors]; // Ensure it's an array
+  } else if (pageData.author) {
+    authorList = [pageData.author]; // Ensure it's an array
+  }
+
+  return {
+    ...pageData,
+    // id: pageData.id, // Assuming id is already part of pageData if needed elsewhere
+    // body: pageData.body, // body is handled separately as 'content' prop
+    // slug: pageData.slug || (pageData.id ? path.basename(pageData.id, ".md") : undefined),
+    authors: authorList, // Ensure 'authors' is always an array
+  };
+};
+
+const normalizedData = normalizeDataWithAuthors(data);
+
 ---
 
 <div class="one-article">
@@ -54,7 +79,7 @@ markdownDebugger.verbose('MDAST structure:', transformedMdast);
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
   <Component 
     content={transformedMdast}
-    data={data}
+    data={normalizedData}
     articleHeading={title} // Renamed prop to avoid conflict
   >
     <slot />

@@ -4,6 +4,7 @@ import type { Root } from 'mdast';
 import { DEBUG_ARTICLE } from '@utils/envUtils';
 import { slugify } from '@utils/slugify'; // Corrected import path
 import IconSVGWrapper from '@components/basics/render-images/IconSVGWrapper.astro';
+import AuthorHandle from '@components/basics/AuthorHandle.astro';
 const shareIconPath = '/src/assets/Icons/share.svg';
 
 interface Props {
@@ -13,7 +14,8 @@ interface Props {
     path: string;
     id?: string;  // File ID (e.g., 'Agile.md')
     title?: string; // Common frontmatter field
-    author?: string;
+    author?: string; // For single author string
+    authors?: string[]; // For an array of authors
     date_created?: string;
     [key: string]: any; // Allow other frontmatter fields
   };
@@ -26,6 +28,20 @@ interface Props {
 // Accepts content (mdast Root), data (optional)
 // Defensive: If content or children is missing, fallback to empty root node
 const { articleHeading, content, data = { path: Astro.url.pathname } } = Astro.props; // compiledContent removed
+
+// Determine the author prop to pass to AuthorHandle
+// Prefers data.authors (array) if available, otherwise falls back to data.author (string)
+let authorForHandle: string | string[] | undefined = undefined;
+if (data?.authors && Array.isArray(data.authors) && data.authors.length > 0) {
+  authorForHandle = data.authors;
+} else if (typeof data?.author === 'string' && data.author.length > 0) {
+  authorForHandle = data.author;
+}
+console.log('\n\n🚀🚀🚀 SERVER LOG FROM OneArticleOnPage.astro 🚀🚀🚀');
+console.log('Page Path:', Astro.url.pathname);
+console.log('Raw data prop:', data);
+console.log('Stringified data prop:', JSON.stringify(data, null, 2));
+console.log('🚀🚀🚀 END SERVER LOG 🚀🚀🚀\n\n');
 
 // Define a type for data that may have hProperties
 interface DataWithHProperties {
@@ -115,13 +131,22 @@ if (DEBUG_ARTICLE) {
         {data?.id && <li><strong>ID:</strong> {data.id}</li>}
         {data?.path && <li><strong>Path:</strong> {data.path}</li>}
         {data?.date_created && <li><strong>Created:</strong> {data.date_created}</li>}
-        {data?.author && <li><strong>Author:</strong> {data.author}</li>}
+        {authorForHandle &&
+          <li>
+            <strong>Author:</strong>
+            <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
+          </li>
+        }
         {/* Add more metadata fields as needed */}
       </ul>
     </div>
   </aside>
 
   <div class="content-inner">
+    <script>
+      console.log('CLIENT-SIDE TEST: OneArticleOnPage.astro script tag is running in the browser!');
+      // alert('CLIENT-SIDE TEST: OneArticleOnPage.astro script tag is running!'); // Alert removed for less annoyance
+    </script>
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
       {/* Render the main page title with share icon if articleHeading is provided */}

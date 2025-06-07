@@ -228,9 +228,10 @@ interface Props {
 
   // Add content type and path to the data object for downstream components
   const contentData = {
-    path: Astro.url.pathname,
-    id: processedEntry.id,
-    collection: finalCollection,
+    ...processedEntry.data, // Spread all frontmatter from the processed entry
+    path: Astro.url.pathname,    // Override/add path if necessary
+    id: processedEntry.id,       // Override/add id if necessary
+    collection: finalCollection, // Override/add collection if necessary
   };
 
   return (
