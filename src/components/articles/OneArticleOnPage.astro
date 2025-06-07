@@ -5,6 +5,7 @@ import { DEBUG_ARTICLE } from '@utils/envUtils';
 import { slugify } from '@utils/slugify'; // Corrected import path
 import IconSVGWrapper from '@components/basics/render-images/IconSVGWrapper.astro';
 import AuthorHandle from '@components/basics/AuthorHandle.astro';
+import TagChip from '@components/tool-components/TagChip.astro';
 import { formatDate } from '../../utils/formatDate.ts';
 const shareIconPath = '/src/assets/Icons/share.svg';
 
@@ -18,6 +19,8 @@ interface Props {
     author?: string; // For single author string
     authors?: string[]; // For an array of authors
     date_created?: string;
+    date_modified?: string;
+    tags?: Array<string>;
     [key: string]: any; // Allow other frontmatter fields
   };
   // compiledContent is removed as AstroMarkdown does not expect it
@@ -56,9 +59,15 @@ if (originalData?.augmented_with) {
   augmentedWith = originalData.augmented_with;
 }
 
+let tags: string[] = [];
+if (originalData?.tags && Array.isArray(originalData.tags)) {
+  tags = originalData.tags;
+}
+
 console.log('\n\n🚀🚀🚀 SERVER LOG FROM OneArticleOnPage.astro 🚀🚀🚀');
 console.log('Page Path:', Astro.url.pathname);
 console.log('Raw data prop:', originalData);
+console.log('Extracted tags:', tags);
 console.log('Stringified data prop:', JSON.stringify(originalData, null, 2));
 console.log('🚀🚀🚀 END SERVER LOG 🚀🚀🚀\n\n');
 
@@ -186,21 +195,27 @@ if (DEBUG_ARTICLE) {
           </div>
         )}
         {augmentedWith && (
-          <div>
+          <div class="text-xs">
            {augmentedWith}
           </div>
         )}
         {formattedDateModified && (
-          <div>
+          <div class="text-xs">
             <strong>Updated:</strong> {formattedDateModified}
           </div>
         )}
         {formattedDateCreated && (
-          <div>
+          <div class="text-xs">
             <strong>Created:</strong> {formattedDateCreated}
           </div>
         )}
-        {/* Add more metadata fields as needed */}
+        {tags && tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            {tags.map(tag => (
+              <TagChip tagString={tag} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   </aside>
