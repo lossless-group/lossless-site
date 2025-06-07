@@ -28,6 +28,7 @@ interface Props {
 
 // Destructure props passed from the page component
 const { collection, entry, essays } = Astro.props as Props;
+console.log('[CollectionReaderLayout.astro] Received essays prop:', essays);
 
 // Initialize MDAST node variable
 let mdastNode = null;
