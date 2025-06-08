@@ -4,15 +4,14 @@ import TableOfContents from '@components/markdown/TableOfContents.astro';
 import type { Root } from 'mdast';
 import { slugify } from '@utils/slugify'; // Corrected import path
 import IconSVGWrapper from '@components/basics/render-images/IconSVGWrapper.astro';
-import AuthorHandle from '@components/basics/AuthorHandle.astro';
-import TagChip from '@components/tool-components/TagChip.astro';
+import InfoSidebar from '@components/markdown/InfoSidebar.astro';
 import { formatDate } from '../../utils/formatDate.ts';
 import { DEBUG_ARTICLE } from '@utils/envUtils';
 
 const shareIconPath = '/src/assets/Icons/share.svg';
 
 interface Props {
-  articleHeading?: string; // Renamed from title to avoid conflict
+  effectiveHeading?: string; // Renamed from title to avoid conflict
   content: Root;
   data?: {
     path: string;
@@ -34,6 +33,7 @@ interface Props {
 // Accepts content (mdast Root), data (optional)
 // Defensive: If content or children is missing, fallback to empty root node
 const { articleHeading, content, data: originalData = { path: Astro.url.pathname } } = Astro.props; // compiledContent removed
+const effectiveHeading = articleHeading?.trim() || originalData.title?.trim() || '';
 
 // Determine the author prop to pass to AuthorHandle
 // Prefers data.authors (array) if available, otherwise falls back to data.author (string)
@@ -86,16 +86,16 @@ if (originalData?.date_created) {
   formattedDateCreated = formatDate(originalData.date_created);
 }
 
-// Prepare data for AstroMarkdown, conditionally removing title if articleHeading is used
+// Prepare data for AstroMarkdown, conditionally removing title if effectiveHeading is used
 let dataForMarkdown = { ...originalData };
-if (articleHeading && originalData?.title === articleHeading) {
-  // If OneArticleOnPage is rendering the title via articleHeading,
+if (effectiveHeading && originalData?.title === effectiveHeading) {
+  // If OneArticleOnPage is rendering the title via effectiveHeading,
   // and it's the same as the frontmatter title, remove 'title' from the data 
   // passed to AstroMarkdown to prevent it from also rendering it.
   const { title, ...restOfData } = dataForMarkdown;
   dataForMarkdown = restOfData;
-} else if (articleHeading && !originalData?.title) {
-  // If articleHeading is provided but there's no frontmatter title, still ensure AstroMarkdown doesn't try to render one
+} else if (effectiveHeading && !originalData?.title) {
+  // If effectiveHeading is provided but there's no frontmatter title, still ensure AstroMarkdown doesn't try to render one
   // (though AstroMarkdown relies on data.title, this is more of a conceptual safeguard)
 }
 
@@ -156,72 +156,39 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
 ---
 
 <div class="content-wrapper">
-    <aside class="info-sidebar">
-    <h2 class="info-title">Document Info</h2>
-    <div class="info-scroll-area">
-      <div class="info-list">
-        {categories && categories.length > 0 && (
-          <p class="inline-block text-xs font-medium text-white dark:text-white px-2 py-0.25 rounded-sm mb-1" style="background-color: var(--clr-lossless-attn-action, var(--purple-heart));">
-            {categories.join(', ')}
-          </p>
-        )}
-        {semanticVersion && (
-          <div>
-            <strong>Version:</strong> {semanticVersion}
-          </div>
-        )}
-        {authorForHandle && (
-          <div>
-            <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
-          </div>
-        )}
-        {augmentedWith && (
-          <div class="text-xs">
-           {augmentedWith}
-          </div>
-        )}
-        {formattedDateModified && (
-          <div class="text-xs">
-            <strong>Updated:</strong> {formattedDateModified}
-          </div>
-        )}
-        {formattedDateCreated && (
-          <div class="text-xs">
-            <strong>Created:</strong> {formattedDateCreated}
-          </div>
-        )}
-        {tags && tags.length > 0 && (
-          <div class="mt-4 flex flex-wrap justify-end gap-2">
-            {tags.map(tag => (
-              <TagChip tagString={tag} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  </aside>
-
+    <InfoSidebar 
+      categories={categories}
+      semanticVersion={semanticVersion}
+      authorForHandle={authorForHandle}
+      augmentedWith={augmentedWith}
+      formattedDateModified={formattedDateModified}
+      formattedDateCreated={formattedDateCreated}
+      tags={tags}
+      id={originalData.id}
+      path={originalData.path}
+      contentType={originalData.contentType}
+  />
   <div class="content-inner">
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
-      {/* Render the main page title with share icon if articleHeading is provided */}
-      {typeof articleHeading === 'string' && articleHeading.trim() !== '' && (() => {
-        const titleId = slugify(articleHeading);
+      {/* Render the main page title with share icon if effectiveHeading is provided */}
+      {typeof effectiveHeading === 'string' && effectiveHeading.trim() !== '' && (() => {
+        const titleId = slugify(effectiveHeading);
         const anchorProps = {
           onclick: "copyHeaderLink(this)", // Will call a global JS function
           class: 'title-share-icon-anchor header-anchor',
-          'aria-label': `Share link to section: ${articleHeading}`,
+          'aria-label': `Share link to section: ${effectiveHeading}`,
         };
         const iconProps = {
           src: shareIconPath,
-          alt: `Share icon for ${articleHeading}`,
+          alt: `Share icon for ${effectiveHeading}`,
           class: 'share-icon',
           width: 16,
           height: 16,
         };
         return (
           <div class="page-main-title-display" id={titleId}>
-            {articleHeading}
+            {effectiveHeading}
             <a {...anchorProps}>
               <IconSVGWrapper {...iconProps} />
             </a>
@@ -239,9 +206,7 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
     </article>
   </div>
 
-  {tocNode?.data?.map
-    ? <TableOfContents node={tocNode.data.map} />
-    : <p>No Table of Contents available.</p>}
+  <TableOfContents node={tocNode?.data.map} />
 
 </div>
 

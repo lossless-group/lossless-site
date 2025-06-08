@@ -1,0 +1,132 @@
+---
+import AuthorHandle from '@components/basics/AuthorHandle.astro';
+import TagChip from '@components/tool-components/TagChip.astro';
+
+interface Props {
+  categories?: string[];
+  semanticVersion?: string;
+  authorForHandle?: string | string[];
+  augmentedWith?: string;
+  formattedDateModified?: string | null;
+  formattedDateCreated?: string | null;
+  tags?: string[];
+  id?: string;
+  path?: string;
+  contentType?: string;
+}
+
+const {
+  categories = [],
+  semanticVersion,
+  authorForHandle,
+  augmentedWith,
+  formattedDateModified,
+  formattedDateCreated,
+  tags = [],
+  id,
+  path,
+  contentType
+} = Astro.props;
+---
+
+<aside class="info-sidebar">
+  <h2 class="info-title">Document Info</h2>
+  <div class="info-scroll-area">
+    <div class="info-list">
+      {categories.length > 0 && (
+        <p class="inline-block text-xs font-medium text-white dark:text-white px-2 py-0.25 rounded-sm mb-1" style="background-color: var(--clr-lossless-attn-action, var(--purple-heart));">
+          {categories.join(', ')}
+        </p>
+      )}
+
+      {semanticVersion && (
+        <div>
+          <strong>Version:</strong> {semanticVersion}
+        </div>
+      )}
+
+      {authorForHandle && (
+        <div>
+          <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
+        </div>
+      )}
+
+      {augmentedWith && (
+        <div class="text-xs">
+          {augmentedWith}
+        </div>
+      )}
+
+      {formattedDateModified && (
+        <div class="text-xs">
+          <strong>Updated:</strong> {formattedDateModified}
+        </div>
+      )}
+
+      {formattedDateCreated && (
+        <div class="text-xs">
+          <strong>Created:</strong> {formattedDateCreated}
+        </div>
+      )}
+
+      {id && (
+        <div class="text-xs">
+          <strong>Document ID:</strong> {id}
+        </div>
+      )}
+
+      {path && (
+        <div class="text-xs">
+          <strong>Path:</strong> {path}
+        </div>
+      )}
+
+      {contentType && (
+        <div class="text-xs">
+          <strong>Content Type:</strong> {contentType}
+        </div>
+      )}
+
+      {tags.length > 0 && (
+        <div class="mt-4 flex flex-wrap justify-end gap-2">
+          {tags.map(tag => (
+            <TagChip tagString={tag} />
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</aside>
+
+<style>
+.info-sidebar {
+  position: sticky;
+  margin-right: 1rem;
+  top: 2rem;
+  align-self: flex-start;
+  width: 220px;
+  flex-shrink: 0;
+  padding: 1rem;
+  border-right: 1px solid var(--clr-lossless-accent--brightest);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.info-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--clr-lossless-accent--brightest);
+}
+
+.info-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.9rem;
+  color: var(--clr-lossless-primary-light);
+}
+
+.info-list > div {
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+</style>
