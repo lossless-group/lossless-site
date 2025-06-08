@@ -1,97 +1,169 @@
 ---
-import AstroMarkdown from './AstroMarkdown.astro';
-/**
- * TableOfContents.astro
- * Renders the Table of Contents from a remark-toc MDAST node
- * - Expects a node of type 'tableOfContents' with data.map as a MDAST list node
- * - Props:
- *   - node: the 'tableOfContents' node from the MDAST
- *   - data: the parent article metadata (for context, e.g. file id)
- */
+import { DEBUG_TOC } from '@utils/envUtils';
+import { extractAllText, slugify } from '@utils/slugify';
+
+
 interface Props {
   node: {
     type: string;
-    data?: {
-      hProperties?: Record<string, any>;
-      map?: any;
-    };
-  };
-  data: {
-    id?: string;
-    path?: string;
-    [key: string]: any;
+    children?: any[];
   };
 }
-const { node, data } = Astro.props;
 
-// =============================
-// Defensive: Render TOC if map is a list node, fallback otherwise
-// =============================
-const isValidToc = node.data?.map?.type === 'list';
+const { node } = Astro.props;
 
+const isValidToc = node.type === 'list';
+
+function getLinkText(linkNode) {
+  if (Array.isArray(linkNode.children)) {
+    return "•   " + extractAllText(linkNode.children)
+      .replace(/:\s*$/, ''); // strip trailing colon
+  }
+  return '';
+}
 ---
-{isValidToc ? (
-  <aside class="toc-sidebar">
-    <AstroMarkdown node={node.data.map} data={{...data, renderingToC: true, path: data.path}} />
-    <style>
-      .toc-sidebar {
-        position: sticky;
-        top: 4rem;
-        max-height: calc(100vh - 4rem);
-        overflow-y: auto;
-        font-size: 0.9rem;
-        padding-right: 1rem;
-        margin-bottom: 2rem;
-      }
-      .toc-sidebar ul {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      .toc-sidebar li {
-        margin: 0.3rem 0;
-      }
-      .toc-depth-1 {
-        font-size: 1.05em;
-        font-weight: 400;
-        margin-left: 0;
-      }
-      .toc-depth-2 {
-        font-size: 1em;
-        font-weight: 400;
-        margin-left: .25em;
-      }
-      .toc-depth-3 {
-        font-size: 0.95em;
-        font-weight: 350;
-        margin-left: .5em;
-      }
-      .toc-depth-4 {
-        font-size: 0.92em;
-        font-weight: 300;
-        margin-left: .75em;
-      }
-      .toc-depth-5 {
-        font-size: 0.92em;
-        font-weight: 300;
-        margin-left: 1em;
-      }
-      .toc-depth-6 {
-        font-size: 0.92em;
-        font-weight: 300;
-        margin-left: 1.25em;
-      }
-      .toc-sidebar a {
-        text-decoration: none;
-        color: #ccc;
-      }
-      .toc-sidebar a:hover {
-        color: white;
-      }
-    </style>
-  </aside>
-) : (
-  <aside class="toc-sidebar">
-    <h1>{data?.id ? data.id.replace(/\.md$/, '') : 'Untitled'}</h1>
-    <p>No Table of Contents available.</p>
-  </aside>
-)}
+
+<aside class="toc-sidebar">
+  <h2 class="toc-title">Table of Contents</h2>
+  <div class="toc-scroll-area">
+    {isValidToc ? (
+      <ul>
+        {node.children.map(item => {
+          const firstLink = item.children?.[0]?.children?.[0];
+          const text = getLinkText(firstLink);
+          const slug = slugify(text.trim());
+          const href = `#${slug}`;
+          const depth = 1;
+          
+          if (DEBUG_TOC) {
+            console.log('[TableOfContents] Rendering item:', { text, href, depth });
+          }
+
+          return (
+            <li class={`toc-depth-${depth}`}>
+              {firstLink ? <a href={href}>{text}</a> : text}
+
+              {item.children?.find(child => child.type === 'list') && (
+                <ul>
+                  {item.children
+                    .filter(child => child.type === 'list')
+                    .flatMap(child => child.children)
+                    .map(subItem => {
+                      const subLink = subItem.children?.[0]?.children?.[0];
+                      const subText = getLinkText(subLink);
+                      const subSlug = slugify(subText.trim());
+                      const subHref = `#${subSlug}`;
+                      const subDepth = depth + 1;
+                      
+                      if (DEBUG_TOC) {
+                        console.log('[TableOfContents] Rendering subItem:', { subText, subHref, subDepth });
+                      }
+
+                      return (
+                        <li class={`toc-depth-${subDepth}`}>
+                          {subLink ? <a href={subHref}>{subText}</a> : subText}
+
+                          {subItem.children?.find(child => child.type === 'list') && (
+                            <ul>
+                              {subItem.children
+                                .filter(child => child.type === 'list')
+                                .flatMap(child => child.children)
+                                .map(subSubItem => {
+                                  const subSubLink = subSubItem.children?.[0]?.children?.[0];
+                                  const subSubText = getLinkText(subSubLink);
+                                  const subSubSlug = slugify(subSubText.trim());
+                                  const subSubHref = `#${subSubSlug}`;
+                                  const subSubDepth = subDepth + 1;
+
+                                  console.log('[TableOfContents] Rendering subSubItem:', { subSubText, subSubHref, subSubDepth });
+
+                                  return (
+                                    <li class={`toc-depth-${subSubDepth}`}>
+                                      {subSubLink ? <a href={subSubHref}>{subSubText}</a> : subSubText}
+                                    </li>
+                                  );
+                                })}
+                            </ul>
+                          )}
+                        </li>
+                      );
+                    })}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    ) : (
+      <p>No Table of Contents available.</p>
+    )}
+  </div>
+</aside>
+
+<style>
+.toc-sidebar {
+  margin-left: 1rem;
+  min-width: 35ch;
+  position: sticky;
+  top: 4rem;
+  align-self: flex-start;
+  height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--clr-lossless-accent--brightest);
+}
+.toc-scroll-area ul,
+.toc-scroll-area ul ul,
+.toc-scroll-area ul ul ul,
+.toc-scroll-area ul ul ul ul,
+.toc-scroll-area ul ul ul ul ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-scroll-area li::marker {
+  content: none;
+}
+
+.toc-scroll-area {
+  overflow-y: auto;
+  list-style-type: none;
+  flex-grow: 1;
+  padding-right: 0.5rem;
+  border-left: 1px solid var(--clr-lossless-accent--brightest);
+  padding-left: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.toc-scroll-area ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.toc-scroll-area li {
+  margin: 0.3rem 0;
+}
+
+.toc-depth-1 a { font-size: 1.25em; font-weight: 400; margin-left: 0; }
+.toc-depth-2 a { font-size: 1em; font-weight: 400; margin-left: 1em; }
+.toc-depth-3 a { font-size: 0.95em; font-weight: 350; margin-left: 2em; }
+.toc-depth-4 a { font-size: 0.92em; font-weight: 300; margin-left: 3em; }
+.toc-depth-5 a { font-size: 0.92em; font-weight: 300; margin-left: 4em; }
+.toc-depth-6 a { font-size: 0.92em; font-weight: 300; margin-left: 5em; }
+
+.toc-scroll-area a {
+  text-decoration: none;
+  color: #ccc;
+}
+
+.toc-scroll-area a:hover {
+  color: white;
+}
+</style>

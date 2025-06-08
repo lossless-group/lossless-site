@@ -5,13 +5,12 @@ import ArticleCitationsBlock from './citations/ArticleCitations.astro';
 import ArticleCitation from './citations/ArticleCitation.astro';
 import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
-import TableOfContents from './TableOfContents.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
 import { getCollection } from "astro:content";
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import { DEBUG_AST } from '@utils/envUtils';
-import { slugify } from '@utils/slugify';
+import { slugify, extractAllText } from '@utils/slugify';
 // import shareIcon from '@assets/Icons/share.svg'; // Replaced with direct path string
 import IconSVGWrapper from '../basics/render-images/IconSVGWrapper.astro';
     /*
@@ -53,21 +52,7 @@ interface Props {
 
 const { node, data } = Astro.props;
 
-// Helper to recursively extract all text content from a node and its children
-function extractAllText(children) {
-  let text = '';
-  if (Array.isArray(children)) {
-    for (const child of children) {
-      if (child.type === 'text') {
-        text += child.value;
-      } else if (child.children && Array.isArray(child.children)) {
-        // Check if child.children is indeed an array before recursing
-        text += extractAllText(child.children);
-      }
-    }
-  }
-  return text;
-}
+
 
 // List of node types we handle with specific components
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
@@ -178,37 +163,8 @@ if (DEBUG_AST) {
 ---
 
 {node.type === "root" && (() => {
-  const pageTitle = data.title;
-  let titleElement = null;
-
-  if (pageTitle && data?.renderingToC !== true) {
-    const id = slugify(pageTitle.trim() || 'page-title'); // Fallback id for safety
-    const shareUrl = Astro.url.pathname + '#' + id;
-    const anchorProps = {
-      "aria-label": `Share page: ${pageTitle}`,
-      "data-share-url": shareUrl,
-      "data-share-title": pageTitle,
-      class: "heading-share-button page-title-share-button", // Added specific class for potential styling
-      href: shareUrl // Ensure it's a valid link for semantics, JS will handle actual sharing
-    };
-    const iconProps = {
-      src: "/src/assets/Icons/share.svg", // Pass the path string directly
-      alt: `Share ${pageTitle}`, // Renamed from altText
-      className: "share-icon",
-      width: "16", 
-      height: "16",
-    };
-    titleElement = (
-      <h1 id={id}>
-        {pageTitle}
-        <a {...anchorProps}><IconSVGWrapper {...iconProps} /></a>
-      </h1>
-    );
-  }
-
   return (
     <>
-      {titleElement}
       {node.children.map((child) => (
           <Astro.self node={child} data={data} />
       ))}
@@ -298,25 +254,7 @@ if (DEBUG_AST) {
   </>
 }
 
-{(node.type === "listItem" && data?.renderingToC) && (() => {
-  // Determine ToC depth for styling classes
-  let depth = 1;
-  let parent = data?.parent;
-  while (parent) {
-    if (parent.type === 'list') depth++;
-    parent = parent.parent;
-  }
-  const depthClass = `toc-depth-${depth}`;
-  return (
-    <li class={depthClass}>
-      {node.children.map(child => (
-        <Astro.self node={child} data={{...data, parent: node}} />
-      ))}
-    </li>
-  );
-})()}
-
-{(node.type === "listItem" && !data?.renderingToC) &&
+{(node.type === "listItem") &&
   <li class="custom-li">
     <span class="li-content">
       {node.children.map(child => (
@@ -325,6 +263,7 @@ if (DEBUG_AST) {
     </span>
   </li>
 }
+
 
 {(node.type === "table") &&
   <div class="md-table-wrapper">
@@ -519,11 +458,6 @@ if (DEBUG_AST) {
   </div>
 )}
 
-<!-- Table of Contents Rendering Logic -->
-<!-- Now delegated to TableOfContents.astro for modularity and maintainability -->
-{node.type === "tableOfContents" && (
-  <TableOfContents node={node} data={data} />
-)}
 
 {(node.type === "paragraph") &&
     <div class="paragraph">
@@ -549,6 +483,7 @@ if (DEBUG_AST) {
 
 <script is:inline>
   function copyHeaderLink(buttonElement) {
+    console.log("Copying header link...")
     const headingId = buttonElement.dataset.headingId;
     // const articleTitle = buttonElement.dataset.articleTitle; // Available if needed for feedback
     // const headerText = buttonElement.dataset.headerText; // Available if needed for feedback
@@ -562,7 +497,7 @@ if (DEBUG_AST) {
       return;
     }
 
-    const urlToCopy = window.location.origin + window.location.pathname + '#' + headingId;
+    const urlToCopy = window.location.origin + window.location.pathname + (headingId ? '#' + headingId : "");
 
     navigator.clipboard.writeText(urlToCopy).then(() => {
       // Success! Provide feedback.
@@ -592,4 +527,46 @@ if (DEBUG_AST) {
       alert('Failed to copy link. See console for details.');
     });
   }
+
+
+  function copyPageLink(buttonElement) {
+    console.log("Copying PAGE link...");
+    
+    if (!navigator.clipboard) {
+      console.warn('Clipboard API not available.');
+      alert('Copying to clipboard is not supported in your browser or on this page (HTTP).');
+      return;
+    }
+
+    const urlToCopy = window.location.href;
+
+    navigator.clipboard.writeText(urlToCopy).then(() => {
+      // Success! Provide feedback.
+      const originalContent = buttonElement.innerHTML;
+      const originalTitle = buttonElement.title;
+      const originalAriaLabel = buttonElement.getAttribute('aria-label');
+
+      buttonElement.innerHTML = '<span class="header-anchor-symbol" style="font-style: italic; font-size: 0.9em;">Copied!</span>';
+      buttonElement.title = 'Page link copied to clipboard!';
+      buttonElement.setAttribute('aria-label', 'Page link copied to clipboard!');
+
+      if (buttonElement.dataset.timeoutId) {
+        clearTimeout(parseInt(buttonElement.dataset.timeoutId));
+      }
+
+      const timeoutId = setTimeout(() => {
+        buttonElement.innerHTML = originalContent;
+        buttonElement.title = originalTitle;
+        buttonElement.setAttribute('aria-label', originalAriaLabel);
+        delete buttonElement.dataset.timeoutId;
+      }, 2000);
+
+      buttonElement.dataset.timeoutId = timeoutId.toString();
+
+    }).catch(err => {
+      console.error('Failed to copy page link: ', err);
+      alert('Failed to copy page link. See console for details.');
+    });
+  }
+
 </script>

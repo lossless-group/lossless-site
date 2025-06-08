@@ -73,7 +73,8 @@ export const DEBUG_AST = toBool(envVars.DEBUG_AST);
 export const DEBUG_ARTICLE = toBool(envVars.DEBUG_ARTICLE);
 export const DEBUG_CITATIONS = toBool(envVars.DEBUG_CITATIONS)
 export const DEBUG_BACKLINKS = toBool(envVars.DEBUG_BACKLINKS)
-export const DEBUG_TOOLING =toBool(envVars.DEBUG_TOOLING)
+export const DEBUG_TOOLING = toBool(envVars.DEBUG_TOOLING)
+export const DEBUG_TOC = toBool(envVars.DEBUG_TOC)
 // Log environment info
 console.log('Environment Configuration:', {
   NODE_ENV,
@@ -87,6 +88,7 @@ console.log('Environment Configuration:', {
   DEBUG_CITATIONS,
   DEBUG_BACKLINKS,
   DEBUG_TOOLING,
+  DEBUG_TOC,
   resolvedContentPath: path.resolve(contentBasePath),
   envFile: envFileExists ? envPath : 'Not found',
   cwd: process.cwd()

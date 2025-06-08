@@ -21,6 +21,21 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
 }
 
+// Helper to recursively extract all text content from a node and its children
+export function extractAllText(children) {
+  let text = '';
+  if (Array.isArray(children)) {
+    for (const child of children) {
+      if (child.type === 'text') {
+        text += child.value;
+      } else if (child.children && Array.isArray(child.children)) {
+        // Check if child.children is indeed an array before recursing
+        text += extractAllText(child.children);
+      }
+    }
+  }
+  return text;
+}
 
 export function getReferenceSlug(filename: string): string {
   const parts = filename.split('/');
