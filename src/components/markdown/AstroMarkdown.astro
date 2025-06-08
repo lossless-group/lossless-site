@@ -248,25 +248,7 @@ if (DEBUG_AST) {
   </>
 }
 
-{(node.type === "listItem" && data?.renderingToC) && (() => {
-  // Determine ToC depth for styling classes
-  let depth = 1;
-  let parent = data?.parent;
-  while (parent) {
-    if (parent.type === 'list') depth++;
-    parent = parent.parent;
-  }
-  const depthClass = `toc-depth-${depth}`;
-  return (
-    <li class={depthClass}>
-      {node.children.map(child => (
-        <Astro.self node={child} data={{...data, parent: node}} />
-      ))}
-    </li>
-  );
-})()}
-
-{(node.type === "listItem" && !data?.renderingToC) &&
+{(node.type === "listItem") &&
   <li class="custom-li">
     <span class="li-content">
       {node.children.map(child => (
@@ -275,6 +257,7 @@ if (DEBUG_AST) {
     </span>
   </li>
 }
+
 
 {(node.type === "table") &&
   <div class="md-table-wrapper">
@@ -469,11 +452,6 @@ if (DEBUG_AST) {
   </div>
 )}
 
-<!-- Table of Contents Rendering Logic -->
-<!-- Now delegated to TableOfContents.astro for modularity and maintainability -->
-{node.type === "tableOfContents" && (
-  <TableOfContents node={node} data={data} />
-)}
 
 {(node.type === "paragraph") &&
     <div class="paragraph">

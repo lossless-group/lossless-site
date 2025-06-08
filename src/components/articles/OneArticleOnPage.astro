@@ -1,7 +1,7 @@
 ---
 import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
+import TableOfContents from '@components/markdown/TableOfContents.astro';
 import type { Root } from 'mdast';
-import { DEBUG_ARTICLE } from '@utils/envUtils'
 
 interface Props {
   articleHeading?: string; // Renamed from title to avoid conflict
@@ -43,50 +43,36 @@ const hProperties: Record<string, any> =
     ? safeData.hProperties as Record<string, any>
     : {};
 
-// =============================
-// DEBUG: Output children node types to verify TOC injection
-// =============================
-if (DEBUG_ARTICLE) {
-  console.log('[OneArticleOnPage.astro] children node types:', children.map(child => child.type));
-}
-// DEBUG: Output full tableOfContents node structure
-function sanitizeTOCNode(toc: any): any {
-  if (!toc?.data?.map?.children) return toc;
+const tocNode = children.find(child => child.type === 'tableOfContents');
 
-  toc.data.map.children = toc.data.map.children.filter(item => {
-    const link = item.children?.[0]?.children?.[0];
-    return link?.type === 'link' && link.children?.length > 0;
-  });
-
-  return toc;
-}
-
-const tocNode = sanitizeTOCNode(
-  children.find(child => child.type === 'tableOfContents')
-);
-
-function createEmptyRoot(): Root {
-  return { type: 'root', children: [], data: {}, position: {} };
-}
-
-if (DEBUG_ARTICLE) {
-  console.log('[OneArticleOnPage.astro] tableOfContents node:', JSON.stringify(tocNode, null, 2));
-}
 
 // =============================
-// Comprehensive comments for AstroMarkdown usage
+// Comprehensive comments for content rendering
 // =============================
-// AstroMarkdown is called twice:
-// 1. For main content (excluding ToC):
-//    - node: root node with children excluding 'tableOfContents'
-//    - data: passed through
-//    - compiledContent: passed through
-// 2. For Table of Contents:
-//    - node: first child of type 'tableOfContents', or empty root node
-//    - data: passed through with renderingToC flag
-//    - compiledContent: passed through
+// This layout renders articles with 3 parts:
 //
-// Defensive: If children array is empty or no ToC, will not fail
+// 1️⃣ Main Content:
+//    - Rendered using AstroMarkdown.
+//    - Passes the full Markdown AST (mdast Root) except for the 'tableOfContents' node.
+//    - Data and compiledContent are passed for custom renderers and code blocks.
+//
+// 2️⃣ Info Sidebar:
+//    - Displays metadata about the article (path, id, author, created date, etc.).
+//    - Fully static—content controlled by article frontmatter.
+//
+// 3️⃣ Table of Contents Sidebar:
+//    - The 'tableOfContents' node is passed directly to TableOfContents component.
+//    - TableOfContents handles all rendering, depth logic, and formatting internally.
+//    - OneArticleOnPage no longer modifies or sanitizes the TOC — separation of concerns.
+//
+// If no 'tableOfContents' node exists, fallback message is shown.
+//
+// Defensive notes:
+// - The children array is validated to avoid errors if MDAST is malformed.
+// - hProperties are passed through to AstroMarkdown for link and block styling.
+// - The TOC and content rendering paths are now fully independent.
+//
+
 
 ---
 
@@ -122,16 +108,8 @@ if (DEBUG_ARTICLE) {
     </article>
   </div>
 
-  <aside class="toc-sidebar">
-    <h2 class="toc-title">Table of Contents</h2>
-    <div class="toc-scroll-area">
-      <AstroMarkdown 
-        node={tocNode || createEmptyRoot()}
-        data={{ ...data, renderingToC: true }}
-        compiledContent={compiledContent}
-      />
-    </div>
-  </aside>
+  <TableOfContents node={tocNode?.data?.map} />
+
 </div>
 
 
@@ -139,7 +117,7 @@ if (DEBUG_ARTICLE) {
 <style>
   .prose {
     color: var(--clr-lossless-primary-light);
-    max-width: 75ch;
+    max-width: 85ch;
     padding: 1rem;
   }
 
@@ -229,29 +207,6 @@ if (DEBUG_ARTICLE) {
     line-height: 1;
   }
 
- 
-  .md-table-wrapper {
-    overflow-x: auto;
-    margin-bottom: 1.5rem;
-  }
-
-  .md-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-    background-color: transparent;
-  }
-
-  .md-tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.03);
-  }
-
-  .md-td {
-    border: 1px solid red; /* ✅ start with RED for visibility */
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    color: rgb(220, 4, 4);
-  }
 
   .content-wrapper {
     display: flex;
@@ -271,15 +226,6 @@ if (DEBUG_ARTICLE) {
     width: 100%;
   }
 
-  
-  .toc-sidebar {
-    overflow: visible;
-    position: sticky;
-    top: 2rem;
-    align-self: flex-start;
-    width: 220px;
-    flex-shrink: 0;
-  }
 
 
   .toc-title {
@@ -289,15 +235,15 @@ if (DEBUG_ARTICLE) {
     color: var(--clr-lossless-accent--brightest);
   }
 
-  .toc-scroll-area {
-    overflow: visible; /* ← changed from 'auto' to 'visible' */
-    max-height: none;  /* ← removes height restriction causing scroll */
-    padding-right: 0.5rem;
-    border-left: 1px solid var(--clr-lossless-accent--brightest);
-    padding-left: 1rem;
-    background: rgba(255, 255, 255, 0.02);
-  }
 
+.toc-scroll-area {
+  overflow-y: auto;
+  flex-grow: 1; /* take remaining space */
+  padding-right: 0.5rem;
+  border-left: 1px solid var(--clr-lossless-accent--brightest);
+  padding-left: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
 
   @media (max-width: 1024px) {
     .toc-sidebar,
@@ -320,28 +266,17 @@ if (DEBUG_ARTICLE) {
   }
 
 
-    
-
-  .toc-sidebar ul {
-    list-style-type: none;
-    padding-left: 0;
+  .prose :global(h1),
+  .prose :global(h2),
+  .prose :global(h3),
+  .prose :global(h4),
+  .prose :global(h5),
+  .prose :global(h6) {
+    scroll-margin-top: 10rem;
   }
 
-  .toc-sidebar li {
-    margin: 0.3rem 0;
-  }
 
-  .toc-sidebar a {
-    color: var(--clr-lossless-primary-light);
-    text-decoration: none;
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-
-  .toc-sidebar a:hover {
-    color: var(--clr-lossless-accent--brightest);
-  }
-
+  
   .info-sidebar {
     position: sticky;
     top: 2rem;
