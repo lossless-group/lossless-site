@@ -3,7 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { processEntries } from './index.astro';
+import { processEntries } from '@utils/slugify';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;

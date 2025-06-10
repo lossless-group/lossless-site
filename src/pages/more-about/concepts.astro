@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
-import { processEntries } from './index.astro';
+import { processEntries } from '@utils/slugify';
 
 const conceptsEntries = await getCollection('concepts' as any) as any[];
 const processedEntires = processEntries(conceptsEntries)

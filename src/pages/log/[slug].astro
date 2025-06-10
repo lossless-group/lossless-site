@@ -1,0 +1,71 @@
+---
+// ChangelogEntry.astro
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { processEntries } from '@utils/slugify';
+
+// Prerender changelog entries as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const contentEntries = await getCollection('changelog--content');
+  const codeEntries = await getCollection('changelog--code');
+
+  const processedContentEntries = processEntries(contentEntries)
+  const processedCodeEntries = processEntries(codeEntries)
+
+  const contentPaths = processedContentEntries.map(entry => {
+    return {
+      params: { slug: entry.slug },
+      props: {
+        entry,
+        contentType: 'changelog'
+      }
+    };
+  });
+
+  const codePaths = processedCodeEntries.map(entry => {
+    return {
+       params: { slug: entry.slug },
+        props: {
+          entry,
+          contentType: 'changelog'
+        }
+    }
+  })
+
+  return [...contentPaths, ...codePaths]
+}
+
+
+interface Props {
+  entry: CollectionEntry<'changelog--content'> | CollectionEntry<'changelog--code'>;
+  contentType: 'changelog';
+}
+
+const { entry, contentType } = Astro.props;
+
+// Render markdown content (same as Articles pattern)
+const { Content } = await render(entry);
+
+// Prepare contentData object (consistent with Articles page)
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data?.title,
+  contentType
+};
+---
+
+<Layout title={entry.data.title || "Changelog Entry"}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

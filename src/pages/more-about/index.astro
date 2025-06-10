@@ -3,30 +3,11 @@ import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
-import type { CollectionEntry } from 'astro:content';
-import { getReferenceSlug } from '@utils/slugify';
-
+import { processEntries } from '@utils/slugify';
 
 const vocabularyEntries = await getCollection('vocabulary');
 const conceptsEntries = await getCollection('concepts');
 
-
-// Process entries to add titles from filenames if missing and sort
-// Aggressively commented: If logic changes, update all call sites and this block.
-export function processEntries<T extends 'vocabulary' | 'concepts'>(entries: CollectionEntry<T>[]): CollectionEntry<T>[] {
-  entries.forEach(entry => {
-    // Always generate title from filename, preserving original case
-    const filename = entry.filePath.replace(/\.md$/, '');
-    const filenameParts = filename.split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-    entry.data.title = entry.rendered?.metadata?.frontmatter?.title || baseFilename;
-
-    entry.slug = getReferenceSlug(entry.id)
-  });
-
-  entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
-  return entries;
-}
 
 const processedVocabularyEntries = processEntries(vocabularyEntries);
 const processedConceptsEntries = processEntries(conceptsEntries);

@@ -18,6 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
+import remarkGfm from 'remark-gfm'
 
 // Debug log environment
 console.log('Environment in astro.config.mjs:', {

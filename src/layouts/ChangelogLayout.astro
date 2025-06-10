@@ -21,6 +21,7 @@ import Tabs from "@components/starwind/tabs/Tabs.astro";
 import TabsList from "@components/starwind/tabs/TabsList.astro";
 import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
 import TabsContent from "@components/starwind/tabs/TabsContent.astro";
+import { getReferenceSlug } from "@utils/slugify";
 
 
 interface Props extends HTMLAttributes<"div"> {
@@ -103,14 +104,14 @@ const normalizeAuthorData = (entry) => {
         {
           sortedContentChanges
             .map((entry) => normalizeAuthorData(entry))
-            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} />)
+            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} slug={getReferenceSlug(entry.id)} />)
         }
       </TabsContent>
       <TabsContent value="code" class="changelog-tab-content">
         {
           sortedCodeChanges
             .map((entry) => normalizeAuthorData(entry))
-            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} />)
+            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} slug={getReferenceSlug(entry.id)} />)
         }
       </TabsContent>
     </Tabs>

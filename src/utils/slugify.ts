@@ -11,6 +11,28 @@
  * @param input - The string to slugify
  * @returns The slugified string
  */
+// Process entries to add titles from filenames if missing and sort
+// Aggressively commented: If logic changes, update all call sites and this block.
+export function processEntries(entries) {
+  entries.forEach(entry => {
+    console.log("Processing", entry.filePath)
+    // Always generate title from filename, preserving original case
+    const filename = entry.filePath.replace(/\.md$/, '');
+    const filenameParts = filename.split('/');
+    const baseFilename = filenameParts[filenameParts.length - 1];
+    entry.data.title = entry.rendered?.metadata?.frontmatter?.title || baseFilename;
+
+    entry.slug = getReferenceSlug(entry.id)
+
+    console.log("Slug:", entry.slug)
+    console.log("\n\n")
+  });
+
+  entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
+  return entries;
+}
+
+
 export function slugify(input: string): string {
   return input
     .toLowerCase()                           // Convert to lowercase
