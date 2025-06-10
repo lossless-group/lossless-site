@@ -99,12 +99,26 @@ const tagCounts = tools.reduce((acc, tool) => {
         tagList.innerHTML = '';
         tags.forEach(tag => tagList.appendChild(tag));
     }
-
+    
     function filterCards() {
       allCards.forEach(card => {
         const tags = JSON.parse(card.dataset.tags || '[]');
         const match = selectedTags.every(tag => tags.includes(tag));
-        card.style.display = match || selectedTags.length === 0 ? '' : 'none';
+
+        if (match || selectedTags.length === 0) {
+          // Show card with fade-in only if it was hidden
+          if (card.style.display === 'none') {
+            card.style.display = '';
+            card.classList.remove('fade-out');
+            requestAnimationFrame(() => {
+              card.classList.add('fade-in');
+            });
+          }
+        } else {
+          // Instantly hide card — do not animate fade-out to avoid DOM load
+          card.classList.remove('fade-in');
+          card.style.display = 'none';
+        }
       });
 
       document.querySelectorAll('.tool-tag').forEach(chip => {
@@ -114,6 +128,7 @@ const tagCounts = tools.reduce((acc, tool) => {
 
       renderSelectedTags();
     }
+
 
 function renderSelectedTags() {
   const container = document.getElementById('selected-tags');

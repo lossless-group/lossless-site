@@ -290,9 +290,7 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
   }
 
   .prose :global(.custom-li) {
-    position: relative;
     padding-left: 1.25em;
-    list-style: none;
     line-height: 1.5;
   }
 
@@ -313,9 +311,9 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
 
   .main-content {
     width: 100%;
+    max-width: 85ch; /* already set in .prose but make explicit */
+    overflow-wrap: break-word;
   }
-
-
 
   .toc-title {
     font-size: 1rem;
@@ -339,9 +337,12 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
       padding: 1rem; /* Reduce side padding on smaller screens */
     }
 
+    @media (max-width: 768px) {
     .main-content {
       max-width: 100%;
+      padding: 0 1rem;
     }
+  }
 
     .content-wrapper {
       flex-direction: column;
@@ -401,4 +402,5 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--clr-lossless-accent--medium);
   }
+
 </style>

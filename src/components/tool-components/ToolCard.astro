@@ -240,6 +240,20 @@ const toolkitPath = generateToolkitPath();
     max-height: 100%;
     margin-bottom: 2px;
     box-sizing: border-box;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms ease, transform 300ms ease, box-shadow 300ms ease;
+    will-change: opacity, transform, box-shadow;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle base shadow */
+  }
+
+  .tool-card.fade-in {
+    animation: fadeInUp 400ms ease forwards;
+  }
+
+  .tool-card.fade-out {
+    animation: fadeOutDown 300ms ease forwards;
+    pointer-events: none;
   }
 
   .tool-card h2 {
@@ -383,4 +397,27 @@ const toolkitPath = generateToolkitPath();
   .tool-thoughts-cta {
     margin-top: 0.25em;
   }
+
+  @keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
 </style>
