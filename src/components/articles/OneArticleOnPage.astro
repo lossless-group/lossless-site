@@ -289,9 +289,84 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
     margin-bottom: 0.5rem;
   }
 
+  /* Base styles for all list items */
   .prose :global(.custom-li) {
     padding-left: 1.25em;
     line-height: 1.5;
+  }
+
+  /* Level 2 nesting */
+  .prose :global(ol ol > .custom-li),
+  .prose :global(ul ul > .custom-li),
+  .prose :global(ol ul > .custom-li),
+  .prose :global(ul ol > .custom-li) {
+    padding-left: 1.5em;
+    font-size: 0.95em;
+  }
+
+  /* Level 3 nesting */
+  .prose :global(ol ol ol > .custom-li),
+  .prose :global(ul ul ul > .custom-li),
+  .prose :global(ol ul ul > .custom-li),
+  .prose :global(ul ol ol > .custom-li),
+  .prose :global(ul ul ol > .custom-li),
+  .prose :global(ol ol ul > .custom-li) {
+    padding-left: 1.75em;
+    font-size: 0.9em;
+  }
+
+  /* Level 4+ nesting - clamp to max padding and font size */
+  .prose :global(ol ol ol ol > .custom-li),
+  .prose :global(ul ul ul ul > .custom-li),
+  .prose :global(ol ol ol ol ol > .custom-li),
+  .prose :global(ul ul ul ul ul > .custom-li),
+  .prose :global(ol ul ul ul > .custom-li),
+  .prose :global(ul ol ol ol > .custom-li),
+  .prose :global(ol ul ul ul ul > .custom-li),
+  .prose :global(ul ol ol ol ol > .custom-li) {
+    padding-left: 1.75em; /* SAME as level 3 */
+    font-size: 0.9em;     /* SAME as level 3 */
+  }
+
+  /* MOBILE ADJUSTMENTS */
+  @media (max-width: 600px) {
+    /* Base level */
+    .prose :global(.custom-li) {
+      padding-left: 0.75em;
+    }
+
+    /* Level 2 */
+    .prose :global(ol ol > .custom-li),
+    .prose :global(ul ul > .custom-li),
+    .prose :global(ol ul > .custom-li),
+    .prose :global(ul ol > .custom-li) {
+      padding-left: 1em;
+      font-size: 0.9em;
+    }
+
+    /* Level 3 */
+    .prose :global(ol ol ol > .custom-li),
+    .prose :global(ul ul ul > .custom-li),
+    .prose :global(ol ul ul > .custom-li),
+    .prose :global(ul ol ol > .custom-li),
+    .prose :global(ul ul ol > .custom-li),
+    .prose :global(ol ol ul > .custom-li) {
+      padding-left: 1.25em;
+      font-size: 0.85em;
+    }
+
+    /* Level 4+ - clamp */
+    .prose :global(ol ol ol ol > .custom-li),
+    .prose :global(ul ul ul ul > .custom-li),
+    .prose :global(ol ol ol ol ol > .custom-li),
+    .prose :global(ul ul ul ul ul > .custom-li),
+    .prose :global(ol ul ul ul > .custom-li),
+    .prose :global(ul ol ol ol > .custom-li),
+    .prose :global(ol ul ul ul ul > .custom-li),
+    .prose :global(ul ol ol ol ol > .custom-li) {
+      padding-left: 1.25em; /* Clamp */
+      font-size: 0.85em;    /* Clamp */
+    }
   }
 
 

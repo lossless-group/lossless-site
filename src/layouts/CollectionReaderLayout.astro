@@ -24,53 +24,57 @@ interface Props {
 const { collection, entry, essays } = Astro.props as Props;
 console.log('[CollectionReaderLayout.astro] Received essays prop:', essays);
 
-let mdastNode: Root | null = null;
+let mdastNode = null;
+let tocNode = null;
+let contentData = null;
+
+const effectiveEntry = entry ?? (essays.length > 0 ? essays[0] : null);
 
 // Process markdown content
-if (entry) {
+if (effectiveEntry) {
   const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkImages)
+    .use(remarkImages) 
     .use(remarkBacklinks)
     .use(remarkCitations)
     .use(remarkTableOfContents);
 
-  const mdast = processor.parse(entry.body || '');
+  const mdast = processor.parse(effectiveEntry.body || '');
   mdastNode = await processor.run(mdast);
 
-  // Debug output
   markdownDebugger.log('CollectionReaderLayout.astro Debug');
   markdownDebugger.writeDebugFile('collection-reader-mdast', mdastNode);
   markdownDebugger.verbose('MDAST structure:', mdastNode);
-}
 
-// Prepare content data for OneArticleOnPage
-const contentData = entry ? {
-  path: entry.id,
-  id: entry.id,
-  collection: collection,
-  ...entry.data
-} : null;
+  tocNode = mdastNode.children?.find(child => child.type === 'tableOfContents');
+
+  contentData = {
+    path: effectiveEntry.id,
+    id: effectiveEntry.id,
+    collection,
+    ...effectiveEntry.data
+  };
+}
 ---
 
 <div class="collection-reader-layout">
+  <aside class="collection-sidebar">
+    <div class="sidebar-inner">
+      <CollectionSidebar essays={essays} currentSlug={entry ? entry.id : null} />
+    </div>
+  </aside>
+
   <main class="collection-reader-pane">
-    {entry && mdastNode && contentData ? (
+    {effectiveEntry && mdastNode && contentData ? (
       <OneArticleOnPage 
         content={mdastNode} 
         data={contentData} 
       />
     ) : (
-      <h2>Collection: {collection}</h2>
+      <h2>No entries available in collection: {collection}</h2>
     )}
   </main>
-
-  <aside class="collection-sidebar mobile-bottom-sidebar">
-    <div class="sidebar-inner">
-      <CollectionSidebar essays={essays} currentSlug={entry ? entry.id : null} />
-    </div>
-  </aside>
 </div>
 
 
@@ -80,21 +84,22 @@ const contentData = entry ? {
   flex-direction: row;
   width: 100%;
   height: auto;
-  overflow: auto;
+  overflow: visible;
 }
 
 .collection-sidebar {
   width: 300px;
   min-width: 300px;
-  max-width: 800px;
+  max-width: 300px;
   flex-shrink: 0;
-  border-left: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
+  border-right: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
   overflow-y: auto;
   position: sticky;
   top: 4rem; /* Adjust for header height */
-  height: calc(100vh - 4rem);
+  height: 100%;
   padding: 1rem;
   background: var(--clr-sidebar-bg, #111);
+  transition: width 0.3s ease-in-out;
 }
 
 .sidebar-inner {
@@ -103,22 +108,16 @@ const contentData = entry ? {
 }
 
 .collection-reader-pane {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem 2rem;
-  overflow-y: auto;
+  flex: 1 1 auto;
+  display: block; /* simpler layout */
+  padding: 3rem 2rem;
   min-width: 0;
+  overflow: visible;
 }
 
 @media (max-width: 1024px) {
   .collection-reader-layout {
     flex-direction: column;
-  }
-
-  .collection-reader-pane {
-    padding: 1rem;
   }
 
   .collection-sidebar {
@@ -127,16 +126,30 @@ const contentData = entry ? {
     max-width: 100%;
     min-width: 100%;
     height: auto;
-    border-left: none;
-    border-top: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
+    border-right: none;
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
     padding: 1rem 0;
+    top: auto; /* ✅ Reset sticky top! */
+
+    box-sizing: border-box; /* ✅ VERY important */
+    flex-shrink: 0;          /* ✅ prevent flex from shrinking sidebar */
+    
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1; /* Optional — ensure sidebar sits above content if needed */
   }
 
-  /* Optional: make it scrollable if very long */
-  .mobile-bottom-sidebar {
-    max-height: 400px; /* Adjust as needed */
-    overflow-y: auto;
+
+  .collection-reader-pane {
+    padding: 1rem;
   }
 }
 
+@media (min-width: 1025px) {
+  .collection-sidebar:hover {
+    width: 500px;
+    max-width: 500px;
+  }
+}
 </style>
