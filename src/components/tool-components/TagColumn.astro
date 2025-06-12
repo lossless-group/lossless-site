@@ -76,134 +76,172 @@ const tagCounts = tools.reduce((acc, tool) => {
 </div>
 
 <script type="module">
-  document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('tag-search');
-    const clearBtn = document.getElementById('clear-tags');
-    const allCards = Array.from(document.querySelectorAll('.tool-card'));
-    let selectedTags = [];
-    let currentSort = 'alpha-asc';
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('tag-search');
+  const clearBtn = document.getElementById('clear-tags');
+  const allCards = Array.from(document.querySelectorAll('.tool-card'));
+  let selectedTags = [];
+  let currentSort = 'alpha-asc';
+  let isAnimating = true; // NEW FLAG
+  const revealedCards = new Set();
 
-    function renderTags(sortBy = currentSort) {
-      const tagList = document.getElementById('tag-list');
-      const tags = [...tagList.querySelectorAll('.tool-tag')];
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const card = entry.target;
 
-      const sortFuncs = {
-        'alpha-asc': (a, b) => a.dataset.tag.localeCompare(b.dataset.tag),
-        'alpha-desc': (a, b) => b.dataset.tag.localeCompare(a.dataset.tag),
-        'count-asc': (a, b) =>
-          parseInt(a.dataset.count || '0', 10) - parseInt(b.dataset.count || '0', 10),
-        'count-desc': (a, b) =>
-          parseInt(b.dataset.count || '0', 10) - parseInt(a.dataset.count || '0', 10),
-      };
-
-      tags.sort(sortFuncs[sortBy]);
-      tagList.innerHTML = '';
-      tags.forEach(tag => tagList.appendChild(tag));
-    }
-
-    function filterCards() {
-      allCards.forEach(card => {
-        const tags = JSON.parse(card.dataset.tags || '[]');
-        const match = selectedTags.every(tag => tags.includes(tag));
-
-        if (match || selectedTags.length === 0) {
-          card.style.display = '';
-          // OLD ANIMATION: add fade-in class every time card becomes visible
-          card.classList.remove('fade-in'); // reset
-          // Force reflow for smooth re-animation
-          void card.offsetWidth;
+      if (entry.isIntersecting && !revealedCards.has(card)) {
+        if (isAnimating) {
           card.classList.add('fade-in');
         } else {
-          card.classList.remove('fade-in');
-          card.style.display = 'none';
+          card.classList.remove('fade-in'); // Force remove if scrolling later
         }
-      });
+        revealedCards.add(card);
+        observer.unobserve(card); // Stop observing once revealed
+      }
+    });
+  }, {
+    threshold: 0.1,
+  });
 
-      document.querySelectorAll('.tool-tag').forEach(chip => {
-        const tag = chip.dataset.tag;
-        chip.classList.toggle('selected', selectedTags.includes(tag));
-      });
-
-      renderSelectedTags();
-    }
-
-
-    function renderSelectedTags() {
-      const container = document.getElementById('selected-tags');
-      if (!container) return;
-
-      container.innerHTML = '';
-
-      selectedTags.forEach(tag => {
-        const chip = document.createElement('span');
-        chip.className = 'tool-tag selected';
-        chip.setAttribute('data-tag', tag);
-        chip.setAttribute('role', 'button');
-        chip.setAttribute('tabindex', '0');
-
-        const p = document.createElement('p');
-        p.textContent = tag
-          .split('-')
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' ');
-
-        chip.appendChild(p);
-        container.appendChild(chip);
-      });
-    }
-
-    function toggleTag(tag) {
-      if (selectedTags.includes(tag)) {
-        selectedTags = selectedTags.filter(t => t !== tag);
+  function observeVisibleCards() {
+    allCards.forEach(card => {
+      if (card.style.display !== 'none' && !revealedCards.has(card)) {
+        observer.observe(card);
       } else {
-        selectedTags.push(tag);
+        observer.unobserve(card);
       }
-      filterCards();
+    });
+  }
+
+  function filterCards() {
+    // Enable animation mode
+    isAnimating = true;
+    clearTimeout(filterCards._animationTimeout); // Prevent overlapping timeouts
+
+    allCards.forEach(card => {
+      const tags = JSON.parse(card.dataset.tags || '[]');
+      const match = selectedTags.every(tag => tags.includes(tag));
+
+      if (match || selectedTags.length === 0) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    observeVisibleCards();
+
+    document.querySelectorAll('.tool-tag').forEach(chip => {
+      const tag = chip.dataset.tag;
+      chip.classList.toggle('selected', selectedTags.includes(tag));
+    });
+
+    renderSelectedTags();
+
+    // After 500ms, disable animation so scroll won't animate
+    filterCards._animationTimeout = setTimeout(() => {
+      isAnimating = false;
+    }, 500);
+  }
+
+  function renderSelectedTags() {
+    const container = document.getElementById('selected-tags');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    selectedTags.forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'tool-tag selected';
+      chip.setAttribute('data-tag', tag);
+      chip.setAttribute('role', 'button');
+      chip.setAttribute('tabindex', '0');
+
+      const p = document.createElement('p');
+      p.textContent = tag
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      chip.appendChild(p);
+      container.appendChild(chip);
+    });
+  }
+
+  function toggleTag(tag) {
+    if (selectedTags.includes(tag)) {
+      selectedTags = selectedTags.filter(t => t !== tag);
+    } else {
+      selectedTags.push(tag);
     }
+    filterCards();
+  }
 
-    document.addEventListener('click', e => {
-      const chip = e.target.closest('.tool-tag');
-      if (chip && chip.dataset.tag) {
-        e.preventDefault();
-        toggleTag(chip.dataset.tag);
-      }
-    });
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('.tool-tag');
+    if (chip && chip.dataset.tag) {
+      e.preventDefault();
+      toggleTag(chip.dataset.tag);
+    }
+  });
 
-    searchInput?.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase();
-      document.querySelectorAll('.tag-list .tool-tag').forEach(tag => {
-        const text = tag.textContent?.toLowerCase() || '';
-        tag.style.display = text.includes(query) ? '' : 'none';
-      });
-    });
-
-    clearBtn?.addEventListener('click', () => {
-      selectedTags = [];
-      searchInput.value = '';
-      filterCards();
-
-      document.querySelectorAll('.tool-tag').forEach(tag => {
-        tag.style.display = '';
-      });
-    });
-
-    document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
-      currentSort = 'alpha-asc';
-      renderTags();
-    });
-    document.getElementById('sort-alpha-desc')?.addEventListener('click', () => {
-      currentSort = 'alpha-desc';
-      renderTags();
-    });
-    document.getElementById('sort-count-asc')?.addEventListener('click', () => {
-      currentSort = 'count-asc';
-      renderTags();
-    });
-    document.getElementById('sort-count-desc')?.addEventListener('click', () => {
-      currentSort = 'count-desc';
-      renderTags();
+  searchInput?.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    document.querySelectorAll('.tag-list .tool-tag').forEach(tag => {
+      const text = tag.textContent?.toLowerCase() || '';
+      tag.style.display = text.includes(query) ? '' : 'none';
     });
   });
+
+  clearBtn?.addEventListener('click', () => {
+    selectedTags = [];
+    searchInput.value = '';
+    filterCards();
+
+    document.querySelectorAll('.tool-tag').forEach(tag => {
+      tag.style.display = '';
+    });
+  });
+
+  function renderTags(sortBy = currentSort) {
+    const tagList = document.getElementById('tag-list');
+    const tags = [...tagList.querySelectorAll('.tool-tag')];
+
+    const sortFuncs = {
+      'alpha-asc': (a, b) => a.dataset.tag.localeCompare(b.dataset.tag),
+      'alpha-desc': (a, b) => b.dataset.tag.localeCompare(a.dataset.tag),
+      'count-asc': (a, b) =>
+        parseInt(a.dataset.count || '0', 10) - parseInt(b.dataset.count || '0', 10),
+      'count-desc': (a, b) =>
+        parseInt(b.dataset.count || '0', 10) - parseInt(a.dataset.count || '0', 10),
+    };
+
+    tags.sort(sortFuncs[sortBy]);
+    tagList.innerHTML = '';
+    tags.forEach(tag => tagList.appendChild(tag));
+  }
+
+  document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
+    currentSort = 'alpha-asc';
+    renderTags();
+  });
+  document.getElementById('sort-alpha-desc')?.addEventListener('click', () => {
+    currentSort = 'alpha-desc';
+    renderTags();
+  });
+  document.getElementById('sort-count-asc')?.addEventListener('click', () => {
+    currentSort = 'count-asc';
+    renderTags();
+  });
+  document.getElementById('sort-count-desc')?.addEventListener('click', () => {
+    currentSort = 'count-desc';
+    renderTags();
+  });
+
+  // Initial observe of cards in viewport
+  observeVisibleCards();
+});
+
 </script>
 
 
@@ -305,22 +343,25 @@ const tagCounts = tools.reduce((acc, tool) => {
   padding-bottom: 0.5rem;
 }
 
-/* Basic fade-in animation */
 .tool-card {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  opacity: 1;
+  transform: none;
 }
 
 .tool-card.fade-in {
-  opacity: 1;
-  transform: translateY(0);
+  animation: fadeInUp 0.5s ease forwards;
 }
 
-  @media (max-width: 768px) {
-    .tag-panel {
-      max-height: 400px;
-      overflow-y: auto;
-    }
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 </style>
