@@ -1,86 +1,73 @@
 ---
 // PostCardContentLayout.astro
-// Receives an array of objects as the 'contentThreads' prop.
-// Renders the first as a feature card, the rest as standard cards.
-// Follows passthrough pattern: NO type safety, NO explicit interfaces.
 import { getCollection } from "astro:content";
-
 import PostCardFeature from '../components/articles/PostCardFeature.astro';
 import PostCard from '../components/articles/PostCard.astro';
 
 const { contentThreads = [] } = Astro.props;
 ---
 
-{contentThreads.length === 0 ? (
-  <div class="magazine-empty">No content available.</div>
-) : (
-  <div class="magazine-container">
-    {/* Feature card displayed separately, outside the grid */}
-    {contentThreads.length > 0 && (
-      <div class="feature-card-container">
-        <PostCardFeature {...contentThreads[0]} />
-      </div>
-    )}
-    
-    {/* Regular cards in a grid layout */}
-    {contentThreads.length > 1 && (
-      <div class="magazine-grid polished-magazine-grid responsive-magazine-grid">
-        {contentThreads.slice(1).map((item) => (
-          <PostCard 
-            {...item} 
-            imageContainerStyle="overflow: hidden; aspect-ratio: 12/9; max-width: 16vw; border-radius: 0.5rem;"
-          />
-        ))}
-      </div>
-    )}
-  </div>
-)}
+{/* Full-bleed Feature card */}
+<div class="feature-card-container">
+  <PostCardFeature {...contentThreads[0]} />
+</div>
 
-<!--
-  PostCardContentLayout.astro expects:
-    - contentThreads: array of objects (each with at least the fields needed by PostCard/PostCardFeature)
-  No type enforcement is used; this is required by .windsurfrules.
-  Handles empty arrays gracefully.
--->
+{/* Centered magazine container */}
+<div class="magazine-container">
+  {contentThreads.length > 1 && (
+    <div class="magazine-grid polished-magazine-grid responsive-magazine-grid">
+      {contentThreads.slice(1).map((item) => (
+        <PostCard 
+          {...item} 
+          imageAspectRatio="12/9" 
+        />
+      ))}
+    </div>
+  )}
+</div>
+
 
 <style>
-  /* Container for the entire magazine layout */
+  .feature-card-container {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding-left: 1rem;
+  }
+
   .magazine-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: var(--spacing-8, 2rem);
     margin: 2rem auto;
-    max-width: 92vw;
-  }
-
-  /* Feature card container */
-  .feature-card-container {
+    padding: 1rem;
+    box-sizing: border-box;
     width: 100%;
-    margin-bottom: var(--spacing-4, 1rem);
+    max-width: 1200px;
   }
 
-  /* Magazine grid layout: responsive, clean, visually balanced */
+
   .magazine-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--spacing-6, 1.5rem);
   }
 
-  /* Medium screens: 2 columns */
   @media (min-width: 768px) {
     .magazine-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  /* Large screens: 3 columns */
   @media (min-width: 1024px) {
     .magazine-grid {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
-  /* Empty state styling */
   .magazine-empty {
     color: #fff;
     background: #222c;
@@ -91,7 +78,6 @@ const { contentThreads = [] } = Astro.props;
     margin: 2rem 0;
   }
 
-  /* Polished magazine grid */
   .polished-magazine-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -101,20 +87,24 @@ const { contentThreads = [] } = Astro.props;
     margin: 0 auto;
     align-items: stretch;
   }
-  /* Responsive override for grid columns */
+
   .responsive-magazine-grid {
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   }
+
   @media (max-width: 1100px) {
     .responsive-magazine-grid {
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 1.5rem 1rem;
     }
   }
+
   @media (max-width: 800px) {
     .responsive-magazine-grid {
       grid-template-columns: 1fr;
       gap: 1.1rem 0.5rem;
     }
   }
+
+  
 </style>

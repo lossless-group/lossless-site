@@ -327,6 +327,31 @@ const rest = tags?.slice(6, tags?.length);
   .hidden {
     display: none;
   }
+
+  .changelog-entry__content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.changelog-entry__content pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.changelog-entry__content code {
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (min-width: 701px) {
+  .changelog-entry__content pre {
+    white-space: pre; /* normal behavior on desktop */
+  }
+}
+
 </style>
 
 <script type="module" is:inline define:vars={{ id }}>

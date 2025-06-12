@@ -83,23 +83,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     let selectedTags = [];
     let currentSort = 'alpha-asc';
 
-    // Setup IntersectionObserver
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const card = entry.target;
-        if (entry.isIntersecting) {
-          card.classList.add('fade-in');
-        } else {
-          card.classList.remove('fade-in');
-        }
-      });
-    }, {
-      threshold: 0.1, // Trigger when at least 10% of card is visible
-    });
-
-    // Observe all cards initially
-    allCards.forEach(card => observer.observe(card));
-
     function renderTags(sortBy = currentSort) {
       const tagList = document.getElementById('tag-list');
       const tags = [...tagList.querySelectorAll('.tool-tag')];
@@ -124,12 +107,13 @@ const tagCounts = tools.reduce((acc, tool) => {
         const match = selectedTags.every(tag => tags.includes(tag));
 
         if (match || selectedTags.length === 0) {
-          // Show card, re-observe it for fade-in
           card.style.display = '';
-          observer.observe(card);
+          // OLD ANIMATION: add fade-in class every time card becomes visible
+          card.classList.remove('fade-in'); // reset
+          // Force reflow for smooth re-animation
+          void card.offsetWidth;
+          card.classList.add('fade-in');
         } else {
-          // Hide card instantly and stop observing it
-          observer.unobserve(card);
           card.classList.remove('fade-in');
           card.style.display = 'none';
         }
@@ -142,6 +126,7 @@ const tagCounts = tools.reduce((acc, tool) => {
 
       renderSelectedTags();
     }
+
 
     function renderSelectedTags() {
       const container = document.getElementById('selected-tags');
@@ -320,6 +305,17 @@ const tagCounts = tools.reduce((acc, tool) => {
   padding-bottom: 0.5rem;
 }
 
+/* Basic fade-in animation */
+.tool-card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.tool-card.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
 
   @media (max-width: 768px) {
     .tag-panel {
