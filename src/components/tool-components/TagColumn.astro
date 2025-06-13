@@ -5,7 +5,7 @@ interface Props {
 
 const { tools } = Astro.props;
 
-const allTags = Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort().slice(1, 10);
+const allTags = Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort();
 
 function trainCaseToNormalCase(tag: string): string {
   return tag
@@ -17,7 +17,7 @@ function trainCaseToNormalCase(tag: string): string {
 const tagCounts = tools.reduce((acc, tool) => {
   (tool.tags || []).forEach(tag => {
     acc[tag] = (acc[tag] || 0) + 1;
-  }); 
+  });
   return acc;
 }, {});
 ---
@@ -27,11 +27,13 @@ const tagCounts = tools.reduce((acc, tool) => {
 
   <button id="clear-tags" class="clear-tags-btn">Clear All</button>
 
-  <!-- Choices select -->
+  <!-- Choices-enhanced select multiple -->
   <select
     id="tag-select"
     multiple
     class="js-choice"
+    data-all-tags={JSON.stringify(allTags)}
+    data-tag-counts={JSON.stringify(tagCounts)}
   >
     {allTags.map(tag => (
       <option value={tag}>{`${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`}</option>
@@ -44,43 +46,31 @@ const tagCounts = tools.reduce((acc, tool) => {
     const tagSelectEl = document.getElementById('tag-select');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
-
-    // Build map of card → tags once:
-    const cardTagsMap = new Map();
-    allCards.forEach(card => {
-      const tags = JSON.parse(card.dataset.tags || '[]');
-      cardTagsMap.set(card, tags);
-    });
+    const allTags = JSON.parse(tagSelectEl.dataset.allTags || '[]');
+    const tagCounts = JSON.parse(tagSelectEl.dataset.tagCounts || '{}');
 
     const choices = new Choices(tagSelectEl, {
-      removeItemButton: true,
+      removeItemButton: false, // KEY for mobile performance
       searchPlaceholderValue: 'Search tags...',
       shouldSort: false,
-      itemSelectText: '', // Removes "Press to select"
+      itemSelectText: '',
     });
 
     function getSelectedTags() {
-      return choices.getValue(true);
+      return choices.getValue(true); // array of selected values
     }
 
     function filterCards() {
       const selectedTags = getSelectedTags();
-
-      cardTagsMap.forEach((tags, card) => {
+      allCards.forEach(card => {
+        const tags = JSON.parse(card.dataset.tags || '[]');
         const match = selectedTags.every(tag => tags.includes(tag));
-
-        if (match || selectedTags.length === 0) {
-          card.style.removeProperty('display');
-        } else {
-          card.style.display = 'none';
-        }
+        card.style.display = match || selectedTags.length === 0 ? '' : 'none';
       });
     }
 
-
-    tagSelectEl.addEventListener('change', () => {
-      filterCards();
-    });
+    // Choices change listener
+    tagSelectEl.addEventListener('change', filterCards);
 
     // Clear all button
     clearBtn?.addEventListener('click', () => {
@@ -139,42 +129,42 @@ const tagCounts = tools.reduce((acc, tool) => {
 </style>
 
 <style is:global>
-.choices__inner {
-  background-color: var(--clr-lossless-primary-dark) !important;
-  border: 1px solid var(--clr-lossless-primary-glass) !important;
-  color: white !important;
-}
+  .choices__inner {
+    background-color: var(--clr-lossless-primary-dark) !important;
+    border: 1px solid var(--clr-lossless-primary-glass) !important;
+    color: white !important;
+  }
 
-.choices__list--multiple .choices__item {
-  background-color: var(--clr-lossless-primary-glass) !important;
-  color: white !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  word-break: break-word !important;
-  hyphens: auto !important;
-  display: inline-flex !important;
-  align-items: center;
-}
+  .choices__list--multiple .choices__item {
+    background-color: var(--clr-lossless-primary-glass) !important;
+    color: white !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    display: inline-flex !important;
+    align-items: center;
+  }
 
-.choices__list--dropdown {
-  background-color: var(--clr-lossless-primary-dark) !important;
-  color: white !important;
-}
+  .choices__list--dropdown {
+    background-color: var(--clr-lossless-primary-dark) !important;
+    color: white !important;
+  }
 
-.choices__item--choice {
-  color: white !important;
-}
+  .choices__item--choice {
+    color: white !important;
+  }
 
-.choices__item--choice.is-highlighted {
-  background-color: var(--clr-lossless-primary-glass) !important;
-  color: white !important;
-}
+  .choices__item--choice.is-highlighted {
+    background-color: var(--clr-lossless-primary-glass) !important;
+    color: white !important;
+  }
 
-.choices__input {
-  background-color: var(--clr-lossless-primary-dark) !important;
-  color: white !important;
-  border: none !important;
-  box-shadow: none !important;
-}
+  .choices__input {
+    background-color: var(--clr-lossless-primary-dark) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 </style>
