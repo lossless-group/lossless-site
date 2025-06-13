@@ -45,6 +45,13 @@ const tagCounts = tools.reduce((acc, tool) => {
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
 
+    // Build map of card → tags once:
+    const cardTagsMap = new Map();
+    allCards.forEach(card => {
+      const tags = JSON.parse(card.dataset.tags || '[]');
+      cardTagsMap.set(card, tags);
+    });
+
     const choices = new Choices(tagSelectEl, {
       removeItemButton: true,
       searchPlaceholderValue: 'Search tags...',
@@ -59,8 +66,7 @@ const tagCounts = tools.reduce((acc, tool) => {
     function filterCards() {
       const selectedTags = getSelectedTags();
 
-      allCards.forEach(card => {
-        const tags = JSON.parse(card.dataset.tags || '[]');
+      cardTagsMap.forEach((tags, card) => {
         const match = selectedTags.every(tag => tags.includes(tag));
 
         if (match || selectedTags.length === 0) {
@@ -71,7 +77,7 @@ const tagCounts = tools.reduce((acc, tool) => {
       });
     }
 
-    // Choices change listener
+
     tagSelectEl.addEventListener('change', () => {
       filterCards();
     });
