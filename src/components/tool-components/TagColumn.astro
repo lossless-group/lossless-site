@@ -5,7 +5,7 @@ interface Props {
 
 const { tools } = Astro.props;
 
-const allTags = Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort();
+const allTags = Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort().slice(1, 10);
 
 function trainCaseToNormalCase(tag: string): string {
   return tag
@@ -32,8 +32,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     id="tag-select"
     multiple
     class="js-choice"
-    data-all-tags={JSON.stringify(allTags)}
-    data-tag-counts={JSON.stringify(tagCounts)}
   >
     {allTags.map(tag => (
       <option value={tag}>{`${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`}</option>
