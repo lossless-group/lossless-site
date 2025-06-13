@@ -42,6 +42,7 @@ interface Props {
             map?: any[];
         };
         label?: string;
+        meta?: string;
     };
     data: {
         path: string;
@@ -113,12 +114,30 @@ async function resolveToolId(input: string, allTools: any[]): Promise<string | n
   return finalMatch?.id || null;
 }
 
-if (node.type === 'code' && node.lang === 'toolingGallery') {
-  const rawIds = node.value
+if (node.lang === 'yaml' && node.meta === 'toolingGallery') {
+   const rawLines = node.value
     .split('\n')
-    .map(line => line.replace(/^- /, '').trim())
+    .map(line => line.trim())
     .filter(Boolean);
 
+  const tagFilters = [];
+  const rawToolIds = [];
+
+  for (const line of rawLines) {
+    const tagMatch = line.match(/^- tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+    if (tagMatch) {
+      tagFilters.push((tagMatch[1] ?? tagMatch[2]).trim());
+      continue;
+    }
+
+    // Otherwise treat as tool reference
+    const toolMatch = line.replace(/^- /, '').trim();
+    if (toolMatch) {
+      rawToolIds.push(toolMatch);
+    }
+  }
+
+  // Load tooling collection
   const allTools = await getCollection('tooling');
   const toolMap = new Map(allTools.map(entry => [entry.id, {
     ...entry.data,
@@ -126,13 +145,15 @@ if (node.type === 'code' && node.lang === 'toolingGallery') {
     filePath: entry.id,
   }]));
 
-  const tools: any[] = [];
-  const toolGalleryErrors: string[] = [];
+  const tools = [];
+  const toolGalleryErrors = [];
 
-  for (const input of rawIds) {
+  console.log(toolMap.values().next().value);
+
+  // Resolve toolIds
+  for (const input of rawToolIds) {
     let id = input;
 
-    // Handle wiki-style links [[...]]
     const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
     if (backlinkMatch) {
       id = backlinkMatch[1].trim();
@@ -146,12 +167,35 @@ if (node.type === 'code' && node.lang === 'toolingGallery') {
     }
   }
 
+  // Add tools matching tagFilters
+  const normalizeTag = tag => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    const tagFilteredTools = allTools
+      .filter(tool => tool.data.tags?.some(tag =>
+        tagFilters.some(filterTag =>
+          normalizeTag(filterTag) === normalizeTag(tag)
+        )
+      ))
+      .map(entry => ({
+        ...entry.data,
+        id: entry.id,
+        filePath: entry.id,
+      }));
+    
+    // Add tag-matched tools if not already added
+    for (const tool of tagFilteredTools) {
+      if (!tools.some(t => t.id === tool.id)) {
+        tools.push(tool);
+      }
+    }
+  }
+
   if (toolGalleryErrors.length > 0) {
     console.warn('[toolingGallery] Missing tools for IDs:', toolGalleryErrors);
   }
 
   toolGalleryTools = tools;
-
 
 }
 // Debug output to see AST structure
@@ -327,26 +371,35 @@ if (DEBUG_AST) {
 }
 
 {node.type === "code" && (() => {
-  const { lang, value } = node;
+  const { lang, meta, value } = node;
 
-  if (lang === "toolingGallery") {
-    return
+  const isToolingGallery = (
+    lang === 'toolingGallery' || (lang === 'yaml' && meta === 'toolingGallery')
+  );
+
+  const isImageGallery = (
+    lang === 'imageGallery' || (lang === 'yaml' && meta === 'imageGallery')
+  );
+
+  if (isToolingGallery) {
+    return; // Do nothing here, the ToolingGallery is rendered separately below
   }
 
-  if (lang === "mermaid") {
-    return <MermaidChart code={value} />;
-  }
-
-  if (lang === "imageGallery") {
+  if (isImageGallery) {
     return <ImageGallery code={value} dirpath={data.dirpath} />;
+  }
+
+  if (lang === 'mermaid') {
+    return <MermaidChart code={value} />;
   }
 
   return <BaseCodeblock code={value} lang={lang ?? 'text'} />;
 })()}
 
+
 {toolGalleryTools && (
   <>
-    <ToolingGallery tools={toolGalleryTools} />
+    <ToolingGallery tools={toolGalleryTools}/>
     {toolGalleryErrors.length > 0 && (
       <div class="tool-gallery-error">
         ⚠️ Tool(s) not found:
