@@ -27,12 +27,19 @@ const tagCounts = tools.reduce((acc, tool) => {
   }); 
   return acc;
 }, {});
-
 ---
 
 <div class="tag-panel">
   <h3 class="tag-heading">Filter by Tag</h3>
 
+  <!-- Mobile dropdown -->
+  <select id="mobile-tag-select" multiple class="mobile-tag-select">
+    {allTags.map(tag => (
+      <option value={tag}>{trainCaseToNormalCase(tag)}</option>
+    ))}
+  </select>
+
+  <!-- Desktop tag search + actions -->
   <input
     id="tag-search"
     type="text"
@@ -46,7 +53,6 @@ const tagCounts = tools.reduce((acc, tool) => {
       <option value={trainCaseToNormalCase(tag)} />
     ))}
   </datalist>
-  
 
   <div class="tag-actions">
     <button id="sort-alpha-asc" class="sort-btn" title="Sort A → Z"><SortAscLetters /></button>
@@ -59,7 +65,6 @@ const tagCounts = tools.reduce((acc, tool) => {
   
   <div class="selected-tags" id="selected-tags"></div>
 
-
   <div class="tag-list" id="tag-list">
     {allTags.map(tag => (
       <TagChip 
@@ -71,20 +76,19 @@ const tagCounts = tools.reduce((acc, tool) => {
       />
     ))}
   </div>
-
-  
 </div>
 
 <script type="module">
+  let selectedTags = [];
+
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('tag-search');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
-    let selectedTags = [];
-    let currentSort = 'alpha-asc';
-    const revealedCards = new Set(); // Tracks cards already animated in
+    const mobileSelect = document.getElementById('mobile-tag-select');
+    const revealedCards = new Set();
 
-    function renderTags(sortBy = currentSort) {
+    function renderTags(sortBy = 'alpha-asc') {
       const tagList = document.getElementById('tag-list');
       const tags = [...tagList.querySelectorAll('.tool-tag')];
 
@@ -110,7 +114,6 @@ const tagCounts = tools.reduce((acc, tool) => {
         if (match || selectedTags.length === 0) {
           card.style.display = '';
 
-          // Only fade in the first time it's visible
           if (!revealedCards.has(card)) {
             card.classList.add('fade-in');
             revealedCards.add(card);
@@ -159,6 +162,14 @@ const tagCounts = tools.reduce((acc, tool) => {
         selectedTags.push(tag);
       }
       filterCards();
+      syncMobileSelect();
+    }
+
+    function syncMobileSelect() {
+      if (!mobileSelect) return;
+      Array.from(mobileSelect.options).forEach(opt => {
+        opt.selected = selectedTags.includes(opt.value);
+      });
     }
 
     document.addEventListener('click', e => {
@@ -181,6 +192,7 @@ const tagCounts = tools.reduce((acc, tool) => {
       selectedTags = [];
       searchInput.value = '';
       filterCards();
+      syncMobileSelect();
 
       document.querySelectorAll('.tool-tag').forEach(tag => {
         tag.style.display = '';
@@ -188,33 +200,33 @@ const tagCounts = tools.reduce((acc, tool) => {
     });
 
     document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
-      currentSort = 'alpha-asc';
-      renderTags();
+      renderTags('alpha-asc');
     });
     document.getElementById('sort-alpha-desc')?.addEventListener('click', () => {
-      currentSort = 'alpha-desc';
-      renderTags();
+      renderTags('alpha-desc');
     });
     document.getElementById('sort-count-asc')?.addEventListener('click', () => {
-      currentSort = 'count-asc';
-      renderTags();
+      renderTags('count-asc');
     });
     document.getElementById('sort-count-desc')?.addEventListener('click', () => {
-      currentSort = 'count-desc';
-      renderTags();
+      renderTags('count-desc');
     });
 
-    // Initial render — mark initial visible cards as revealed
+    // Mobile select change listener:
+    mobileSelect?.addEventListener('change', () => {
+      selectedTags = Array.from(mobileSelect.selectedOptions).map(opt => opt.value);
+      filterCards();
+    });
+
+    // Initial reveal:
     allCards.forEach(card => {
-      if (card.offsetParent !== null) { // Visible in DOM
+      if (card.offsetParent !== null) {
         card.classList.add('fade-in');
         revealedCards.add(card);
       }
     });
   });
 </script>
-
-
 
 <style>
   .tag-panel {
@@ -269,19 +281,12 @@ const tagCounts = tools.reduce((acc, tool) => {
     gap: 0.4rem;
     max-height: 60vh;
     overflow-y: auto;
-    overflow-x: hidden;       /* ✅ Prevent horizontal scroll */
-    width: 100%;              /* ✅ Ensure it doesn't overflow its container */
-    box-sizing: border-box;   /* ✅ Respect padding within width */
-    border-bottom: 5px solid var(--clr-lossless-ui-btn-border);
-
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border);
+    padding-bottom: 1rem;
   }
-
-    @media (max-width: 768px) {
-      .tag-list {
-        max-height: 30vh; /* Half of 60vh */
-      }
-    }
-
 
   .sort-btn {
     background: none;
@@ -296,48 +301,50 @@ const tagCounts = tools.reduce((acc, tool) => {
   .sort-btn svg {
     width: 20px;
     height: 20px;
-    fill: currentColor; /* ✅ forces color based on parent text color */
+    fill: currentColor;
     transition: transform 0.2s;
     display: inline-block;
     color: white;
   }
-
 
   .sort-btn:hover svg {
     transform: scale(1.1);
   }
 
   .selected-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-top: 1px solid var(--clr-lossless-ui-btn-border);
-  border-bottom: 1px solid var(--clr-lossless-ui-btn-border);
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.tool-card {
-  opacity: 1;
-  transform: none;
-}
-
-.tool-card.fade-in {
-  animation: fadeInUp 0.5s ease forwards;
-}
-
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-top: 1px solid var(--clr-lossless-ui-btn-border);
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+
+  /* Mobile-only dropdown */
+  .mobile-tag-select {
+    display: none;
   }
-}
 
+  @media (max-width: 768px) {
+    .tag-list,
+    .selected-tags,
+    .tag-actions,
+    .tag-search {
+      display: none;
+    }
 
+    .mobile-tag-select {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 0.25rem;
+      border: 1px solid var(--clr-lossless-primary-glass);
+      background-color: var(--clr-lossless-primary-dark);
+      color: white;
+    }
+  }
 </style>
