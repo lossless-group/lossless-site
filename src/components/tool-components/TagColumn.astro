@@ -32,8 +32,8 @@ const tagCounts = tools.reduce((acc, tool) => {
 <div class="tag-panel">
   <h3 class="tag-heading">Filter by Tag</h3>
 
-  <!-- Mobile dropdown -->
-  <select id="mobile-tag-select" multiple class="mobile-tag-select">
+  <!-- Mobile: Choices.js enhanced multi-select -->
+  <select id="mobile-tag-select" multiple>
     {allTags.map(tag => (
       <option value={tag}>{trainCaseToNormalCase(tag)}</option>
     ))}
@@ -79,14 +79,26 @@ const tagCounts = tools.reduce((acc, tool) => {
 </div>
 
 <script type="module">
+  import Choices from 'choices.js';
+  import 'choices.js/public/assets/styles/choices.min.css';
+
   let selectedTags = [];
 
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('tag-search');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
-    const mobileSelect = document.getElementById('mobile-tag-select');
     const revealedCards = new Set();
+
+    // Initialize Choices.js for mobile select
+    const mobileSelectEl = document.getElementById('mobile-tag-select');
+    const mobileChoices = new Choices(mobileSelectEl, {
+      removeItemButton: true,
+      searchPlaceholderValue: 'Search tags...',
+      placeholder: true,
+      placeholderValue: 'Select tags...',
+      shouldSort: false
+    });
 
     function renderTags(sortBy = 'alpha-asc') {
       const tagList = document.getElementById('tag-list');
@@ -162,16 +174,18 @@ const tagCounts = tools.reduce((acc, tool) => {
         selectedTags.push(tag);
       }
       filterCards();
-      syncMobileSelect();
+      syncChoices();
     }
 
-    function syncMobileSelect() {
-      if (!mobileSelect) return;
-      Array.from(mobileSelect.options).forEach(opt => {
-        opt.selected = selectedTags.includes(opt.value);
+    function syncChoices() {
+      const currentValues = mobileChoices.getValue(true);
+      mobileChoices.removeActiveItems();
+      selectedTags.forEach(tag => {
+        mobileChoices.setChoiceByValue(tag);
       });
     }
 
+    // Desktop tag click
     document.addEventListener('click', e => {
       const chip = e.target.closest('.tool-tag');
       if (chip && chip.dataset.tag) {
@@ -180,6 +194,7 @@ const tagCounts = tools.reduce((acc, tool) => {
       }
     });
 
+    // Desktop search
     searchInput?.addEventListener('input', () => {
       const query = searchInput.value.toLowerCase();
       document.querySelectorAll('.tag-list .tool-tag').forEach(tag => {
@@ -188,17 +203,19 @@ const tagCounts = tools.reduce((acc, tool) => {
       });
     });
 
+    // Desktop clear all
     clearBtn?.addEventListener('click', () => {
       selectedTags = [];
       searchInput.value = '';
       filterCards();
-      syncMobileSelect();
+      mobileChoices.removeActiveItems();
 
       document.querySelectorAll('.tool-tag').forEach(tag => {
         tag.style.display = '';
       });
     });
 
+    // Desktop sort
     document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
       renderTags('alpha-asc');
     });
@@ -212,9 +229,9 @@ const tagCounts = tools.reduce((acc, tool) => {
       renderTags('count-desc');
     });
 
-    // Mobile select change listener:
-    mobileSelect?.addEventListener('change', () => {
-      selectedTags = Array.from(mobileSelect.selectedOptions).map(opt => opt.value);
+    // Choices.js event listener
+    mobileSelectEl.addEventListener('change', () => {
+      selectedTags = Array.from(mobileSelectEl.selectedOptions).map(opt => opt.value);
       filterCards();
     });
 
@@ -323,11 +340,7 @@ const tagCounts = tools.reduce((acc, tool) => {
     padding-bottom: 0.5rem;
   }
 
-  /* Mobile-only dropdown */
-  .mobile-tag-select {
-    display: none;
-  }
-
+  /* Mobile adjustments */
   @media (max-width: 768px) {
     .tag-list,
     .selected-tags,
@@ -336,15 +349,9 @@ const tagCounts = tools.reduce((acc, tool) => {
       display: none;
     }
 
-    .mobile-tag-select {
+    #mobile-tag-select {
       display: block;
       width: 100%;
-      padding: 0.5rem;
-      font-size: 1rem;
-      border-radius: 0.25rem;
-      border: 1px solid var(--clr-lossless-primary-glass);
-      background-color: var(--clr-lossless-primary-dark);
-      color: white;
     }
   }
 </style>
