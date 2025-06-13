@@ -25,12 +25,14 @@ toolsWithImages.forEach(tool => {
   if (!tool.id) throw new Error("Missing tool.id in CardGrid");
 });
 
-
+// Pagination settings — TagColumn will use this value
+const itemsPerPage = 50;
 ---
 
-<div class="cards-container">
+<div class="cards-container" data-items-per-page={itemsPerPage}>
   <section class="tools-section">
-    <div class="card-grid">
+    <div class="card-grid" id="tool-card-grid">
+      <!-- Render ALL ToolCards in DOM -->
       {toolsWithImages.map(tool => (
         <ToolCard 
           {...tool} 
@@ -49,9 +51,13 @@ toolsWithImages.forEach(tool => {
         />
       ))}
     </div>
+
+    {filteredTools.length > itemsPerPage && (
+      <button id="load-more" class="load-more-btn">Load More</button>
+    )}
   </section>
 
-  {tools.length === 0 && <p class="no-tools">No tools found</p>}
+  {filteredTools.length === 0 && <p class="no-tools">No tools found</p>}
 </div>
 
 <style define:vars={{ gap }}>
@@ -76,23 +82,26 @@ toolsWithImages.forEach(tool => {
     align-items: center;
   }
 
-  .bare-tools-section {
-    background-color: var(--clr-lossless-primary-dark);
-    padding: 2rem;
-    border-radius: 1rem;
-  }
-
-  .bare-tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    width: 100%;
-  }
-
   .no-tools {
     text-align: center;
     color: var(--clr-body);
     font-style: italic;
     padding: 2rem;
+  }
+
+  .load-more-btn {
+    margin-top: 1rem;
+    background-color: var(--clr-lossless-primary-glass);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .load-more-btn:hover {
+    background-color: var(--clr-lossless-primary-dark);
   }
 </style>

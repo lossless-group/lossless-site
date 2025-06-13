@@ -1,9 +1,9 @@
 ---
 /**
- * Changelog Layout
+ * Laerdal Changelog Layout
  *
- * Displays a list of changelog entries in chronological order.
- * Shows both code and content changes in a two-column layout.
+ * Displays a list of changelog entries for Laerdal in a consistent UI.
+ * Keeps 1 tab for consistent styling.
  *
  * @component
  */
@@ -23,7 +23,6 @@ import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
 import TabsContent from "@components/starwind/tabs/TabsContent.astro";
 import { getReferenceSlug } from "@utils/slugify";
 
-
 interface Props extends HTMLAttributes<"div"> {
   title?: string;
   description?: string;
@@ -31,49 +30,38 @@ interface Props extends HTMLAttributes<"div"> {
   syncKey?: string;
 }
 
+// Get Laerdal changes
+const laerdalChanges = await getCollection("changelog--laerdal");
 
-// Get both content and code changes
-const contentChanges = await getCollection("changelog--content");
-const codeChanges = await getCollection("changelog--code");
-
-// Sort changes by date in descending order, and for same date, by index in descending order
+// Sort changes by date and index
 const sortByDateAndIndex = (a, b) => {
-  // Handle both date and date_created fields
   const dateA = new Date(a.data.date || a.data.date_created);
   const dateB = new Date(b.data.date || b.data.date_created);
 
-  // If dates are the same, sort by index (extracted from filename)
   if (dateA.getTime() === dateB.getTime()) {
-    // Extract index from the filename in the ID (e.g., "changelog--code/2025-04-06_03.md" -> "03")
     const filenameA = path.basename(a.id);
     const filenameB = path.basename(b.id);
 
     const indexA = filenameA.split("_").pop()?.split(".")[0] || "0";
     const indexB = filenameB.split("_").pop()?.split(".")[0] || "0";
 
-    // Convert to numbers and compare in descending order (higher index first)
     return parseInt(indexB, 10) - parseInt(indexA, 10);
   }
 
-  // Otherwise, sort by date in descending order
   return dateB.getTime() - dateA.getTime();
 };
 
-const sortedContentChanges = contentChanges.sort(sortByDateAndIndex);
-const sortedCodeChanges = codeChanges.sort(sortByDateAndIndex);
+const sortedLaerdalChanges = laerdalChanges.sort(sortByDateAndIndex);
 
 // Helper function to normalize author data
 const normalizeAuthorData = (entry) => {
-  // Handle both author (string) and authors (array) fields
   let authorData = [];
 
   if (entry.data.authors) {
-    // If authors is already an array, use it
     authorData = Array.isArray(entry.data.authors)
       ? entry.data.authors
       : [entry.data.authors];
   } else if (entry.data.author) {
-    // If only author is present (string), convert to array
     authorData = [entry.data.author];
   }
 
@@ -89,29 +77,25 @@ const normalizeAuthorData = (entry) => {
 
 <Layout title={title} description={description}>
   <div class="changelog-content">
-    <Tabs defaultValue="content" class="changelog-tabs">
+    <Tabs defaultValue="laerdal" class="changelog-tabs">
       <div class="changelog-tabs_container">
         <TabsList class="changelog-tabs-list">
-          <TabsTrigger value="content" class="changelog-tab"
-            >Content Changes</TabsTrigger
-          >
-          <TabsTrigger value="code" class="changelog-tab"
-            >Code Changes</TabsTrigger
-          >
+          <TabsTrigger value="laerdal" class="changelog-tab">
+            Laerdal Changes
+          </TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent value="content" class="changelog-tab-content">
+      <TabsContent value="laerdal" class="changelog-tab-content">
         {
-          sortedContentChanges
+          sortedLaerdalChanges
             .map((entry) => normalizeAuthorData(entry))
-            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} slug={'content-' + getReferenceSlug(entry.id)} />)
-        }
-      </TabsContent>
-      <TabsContent value="code" class="changelog-tab-content">
-        {
-          sortedCodeChanges
-            .map((entry) => normalizeAuthorData(entry))
-            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} slug={'code-' + getReferenceSlug(entry.id)} />)
+            ?.map((entry) => (
+              <ChangelogEntry
+                {...entry}
+                key={entry.id}
+                slug={'laerdal-' + getReferenceSlug(entry.id)}
+              />
+            ))
         }
       </TabsContent>
     </Tabs>
@@ -124,7 +108,6 @@ const normalizeAuthorData = (entry) => {
     padding-top: 2rem;
   }
 
-  /* Style the tabs with our brand colors */
   :global(.changelog-tabs-list) {
     background: var(--clr-lossless-primary-dark);
     border: 1px solid var(--clr-lossless-primary-light);
@@ -146,21 +129,13 @@ const normalizeAuthorData = (entry) => {
     margin-top: 1.5rem;
   }
 
-  /* Container styles */
   .changelog-tabs_container {
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto ;
+    margin: 0 auto;
     padding: 1rem;
   }
 
-  /*
-    Increase specificity to override Starwind's data-[state=active]:* classes.
-    - Uses double class selector for higher specificity.
-    - Applies !important for guaranteed override if needed.
-    - Uses brand accent color for selected tab background.
-    - Uses a softer text color for accessibility and visual comfort.
-  */
   :global(.changelog-tabs-list .changelog-tab[data-state="active"]) {
     background: var(--clr-lossless-attn-action) !important;
     color: var(--clr-lossless-primary-light) !important;

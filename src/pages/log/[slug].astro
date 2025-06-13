@@ -14,13 +14,15 @@ export const prerender = true;
 export async function getStaticPaths() {
   const contentEntries = await getCollection('changelog--content');
   const codeEntries = await getCollection('changelog--code');
+  const laerdalEntries = await getCollection('changelog--laerdal');
 
   const processedContentEntries = processEntries(contentEntries)
   const processedCodeEntries = processEntries(codeEntries)
+  const processedLaerdalEntries = processEntries(laerdalEntries)
 
   const contentPaths = processedContentEntries.map(entry => {
     return {
-      params: { slug: entry.slug },
+      params: { slug: 'content-' + entry.slug },
       props: {
         entry,
         contentType: 'changelog'
@@ -30,15 +32,24 @@ export async function getStaticPaths() {
 
   const codePaths = processedCodeEntries.map(entry => {
     return {
-       params: { slug: entry.slug },
+       params: { slug: 'code-' + entry.slug },
         props: {
           entry,
           contentType: 'changelog'
         }
     }
   })
-
-  return [...contentPaths, ...codePaths]
+  
+  const laerdalPaths = processedLaerdalEntries.map(entry => {
+    return {
+       params: { slug: 'laerdal-' + entry.slug },
+        props: {
+          entry,
+          contentType: 'changelog'
+        }
+    }
+  })
+  return [...contentPaths, ...codePaths, ...laerdalPaths]
 }
 
 
