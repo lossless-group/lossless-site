@@ -197,6 +197,17 @@ const changelogCodeCollection = defineCollection({
   }))
 });
 
+const changelogLaerdalCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--laerdal")}),
+  schema: z.object({}).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags
+      : data.tags ? [data.tags]
+      : []
+  }))
+});
+
 const reportCollection = defineCollection({
   type: 'content',
   schema: z.any() // Allow any frontmatter structure to avoid validation errors
@@ -283,6 +294,7 @@ export const paths = {
   'cards': 'cards',
   'changelog--content': resolveContentPath('changelog--content'),
   'changelog--code': resolveContentPath('changelog--code'),
+  'changelog--laerdal': resolveContentPath('changelog--laerdal'),
   'essays': resolveContentPath('essays'),
   'concepts': resolveContentPath('concepts'),
   'reports': resolveContentPath('reports'),
@@ -302,6 +314,7 @@ export const collections = {
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
+  'changelog--laerdal': changelogLaerdalCollection,
   'reports': reportCollection,
   'pages': pagesCollection,
   'tooling': toolCollection,
