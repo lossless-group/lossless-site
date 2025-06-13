@@ -32,8 +32,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     id="tag-select"
     multiple
     class="js-choice"
-    data-all-tags={JSON.stringify(allTags)}
-    data-tag-counts={JSON.stringify(tagCounts)}
   >
     {allTags.map(tag => (
       <option value={tag}>{`${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`}</option>
@@ -46,8 +44,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     const tagSelectEl = document.getElementById('tag-select');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
-    const allTags = JSON.parse(tagSelectEl.dataset.allTags || '[]');
-    const tagCounts = JSON.parse(tagSelectEl.dataset.tagCounts || '{}');
 
     const choices = new Choices(tagSelectEl, {
       removeItemButton: false, // KEY for mobile performance
