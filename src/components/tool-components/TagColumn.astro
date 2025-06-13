@@ -1,9 +1,4 @@
 ---
-import SortAscLetters from '@assets/Icons/sort-ascending-letters.svg';
-import SortDescLetters from '@assets/Icons/sort-descending-letters.svg';
-import SortAscNumbers from '@assets/Icons/sort-ascending-numbers.svg';
-import SortDescNumbers from '@assets/Icons/sort-descending-numbers.svg';
-
 interface Props {
   tools: any[];
 }
@@ -30,14 +25,7 @@ const tagCounts = tools.reduce((acc, tool) => {
 <div class="tag-panel">
   <h3 class="tag-heading">Filter by Tag</h3>
 
-  <div class="tag-actions">
-    <button id="sort-alpha-asc" class="sort-btn" title="Sort A → Z"><SortAscLetters /></button>
-    <button id="sort-alpha-desc" class="sort-btn" title="Sort Z → A"><SortDescLetters /></button>
-    <button id="sort-count-desc" class="sort-btn" title="Sort by Count ↓"><SortDescNumbers /></button>
-    <button id="sort-count-asc" class="sort-btn" title="Sort by Count ↑"><SortAscNumbers /></button>
-  
-    <button id="clear-tags" class="clear-tags-btn">Clear All</button>
-  </div>
+  <button id="clear-tags" class="clear-tags-btn">Clear All</button>
 
   <!-- Choices select -->
   <select
@@ -48,22 +36,9 @@ const tagCounts = tools.reduce((acc, tool) => {
     data-tag-counts={JSON.stringify(tagCounts)}
   >
     {allTags.map(tag => (
-      <option value={tag}>{`${trainCaseToNormalCase(tag)} (${(tagCounts[tag])})`}</option>
+      <option value={tag}>{`${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`}</option>
     ))}
   </select>
-
-  <!-- Optional visual tag list for sorting -->
-  <!-- <div class="tag-list" id="tag-list">
-    {allTags.map(tag => (
-      <div
-        class="tool-tag"
-        data-tag={tag}
-        data-count={tagCounts[tag]}
-      >
-        {trainCaseToNormalCase(tag)} ({tagCounts[tag]})
-      </div>
-    ))}
-  </div> -->
 </div>
 
 <script type="module">
@@ -71,11 +46,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     const tagSelectEl = document.getElementById('tag-select');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
-    const revealedCards = new Set();
-    let currentSort = 'alpha-asc';
-
-    const allTags = JSON.parse(tagSelectEl.dataset.allTags);
-    const tagCounts = JSON.parse(tagSelectEl.dataset.tagCounts);
 
     const choices = new Choices(tagSelectEl, {
       removeItemButton: true,
@@ -96,7 +66,7 @@ const tagCounts = tools.reduce((acc, tool) => {
         const match = selectedTags.every(tag => tags.includes(tag));
 
         if (match || selectedTags.length === 0) {
-          card.style.removeProperty('display'); // force full reset
+          card.style.removeProperty('display');
         } else {
           card.style.display = 'none';
         }
@@ -111,57 +81,13 @@ const tagCounts = tools.reduce((acc, tool) => {
     // Clear all button
     clearBtn?.addEventListener('click', () => {
       choices.removeActiveItems();
-      setTimeout(() => {
-        filterCards();
-      }, 0);
-    });
-
-    // Tag sorting — only sort .tag-list visually → no dropdown rebuild
-    function renderTags(sortBy = currentSort) {
-      const tagList = document.getElementById('tag-list');
-      if (!tagList) return;
-
-      const tags = [...tagList.querySelectorAll('.tool-tag')];
-
-      const sortFuncs = {
-        'alpha-asc': (a, b) => a.dataset.tag.localeCompare(b.dataset.tag),
-        'alpha-desc': (a, b) => b.dataset.tag.localeCompare(a.dataset.tag),
-        'count-asc': (a, b) =>
-          parseInt(a.dataset.count || '0', 10) - parseInt(b.dataset.count || '0', 10),
-        'count-desc': (a, b) =>
-          parseInt(b.dataset.count || '0', 10) - parseInt(a.dataset.count || '0', 10),
-      };
-
-      tags.sort(sortFuncs[sortBy]);
-      tagList.innerHTML = '';
-      tags.forEach(tag => tagList.appendChild(tag));
-
-      // 🚀 DO NOT call setChoices() → huge perf win!
-    }
-
-    // Sort button listeners
-    document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
-      currentSort = 'alpha-asc';
-      renderTags();
-    });
-    document.getElementById('sort-alpha-desc')?.addEventListener('click', () => {
-      currentSort = 'alpha-desc';
-      renderTags();
-    });
-    document.getElementById('sort-count-asc')?.addEventListener('click', () => {
-      currentSort = 'count-asc';
-      renderTags();
-    });
-    document.getElementById('sort-count-desc')?.addEventListener('click', () => {
-      currentSort = 'count-desc';
-      renderTags();
+      filterCards();
     });
 
     // Initial reveal
     allCards.forEach(card => {
       if (card.offsetParent !== null) {
         card.classList.add('fade-in');
-        revealedCards.add(card);
       }
     });
   });
@@ -183,13 +109,6 @@ const tagCounts = tools.reduce((acc, tool) => {
     color: white;
   }
 
-  .tag-actions {
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
   .clear-tags-btn {
     background: transparent;
     border: 1px solid white;
@@ -199,6 +118,7 @@ const tagCounts = tools.reduce((acc, tool) => {
     border-radius: 0.25rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    align-self: start;
   }
 
   .clear-tags-btn:hover {
@@ -206,66 +126,11 @@ const tagCounts = tools.reduce((acc, tool) => {
     color: black;
   }
 
-  .tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    max-height: 60vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+  #tag-select {
+    display: block;
     width: 100%;
-    box-sizing: border-box;
-    border-bottom: 5px solid var(--clr-lossless-primary-glass);
-    padding-bottom: 1rem;
-  }
-
-  .tool-tag {
-    background-color: var(--clr-lossless-primary-glass);
-    color: white;
-    padding: 0.3rem 0.6rem;
-    border-radius: 0.25rem;
-    cursor: default;
-    font-size: 0.85rem;
-  }
-
-  .sort-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .sort-btn svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-    transition: transform 0.2s;
-    display: inline-block;
-    color: white;
-  }
-
-  .sort-btn:hover svg {
-    transform: scale(1.1);
-  }
-
-  @media (max-width: 768px) {
-    .tag-actions {
-      display: none;
-    }
-
-    .tag-list {
-      display: none;
-    }
-
-    #tag-select {
-      display: block;
-      width: 100%;
-      padding: 0.4rem;
-      font-size: 1rem;
-    }
+    padding: 0.4rem;
+    font-size: 1rem;
   }
 </style>
 
