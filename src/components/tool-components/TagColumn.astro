@@ -22,16 +22,24 @@ const tagCounts = tools.reduce((acc, tool) => {
 }, {});
 ---
 
+<!-- Load Tom Select CSS + JS -->
+<link
+  href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css"
+  rel="stylesheet"
+/>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <div class="tag-panel">
   <h3 class="tag-heading">Filter by Tag</h3>
 
   <button id="clear-tags" class="clear-tags-btn">Clear All</button>
 
-  <!-- Choices-enhanced select multiple -->
+  <!-- Tom Select-enhanced <select multiple> -->
   <select
     id="tag-select"
     multiple
-    class="js-choice"
+    data-all-tags={JSON.stringify(allTags)}
+    data-tag-counts={JSON.stringify(tagCounts)}
   >
     {allTags.map(tag => (
       <option value={tag}>{`${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`}</option>
@@ -45,19 +53,22 @@ const tagCounts = tools.reduce((acc, tool) => {
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
 
-    const choices = new Choices(tagSelectEl, {
-      removeItemButton: false, // KEY for mobile performance
-      searchPlaceholderValue: 'Search tags...',
-      shouldSort: false,
-      itemSelectText: '',
+    // Initialize Tom Select
+    const tomSelect = new TomSelect(tagSelectEl, {
+      plugins: ['remove_button'],
+      maxItems: null, // unlimited selection
+      searchField: ['text'],
+      closeAfterSelect: false,
+      placeholder: 'Search tags...',
     });
 
     function getSelectedTags() {
-      return choices.getValue(true); // array of selected values
+      return tomSelect.getValue(); // returns array of selected values
     }
 
     function filterCards() {
       const selectedTags = getSelectedTags();
+
       allCards.forEach(card => {
         const tags = JSON.parse(card.dataset.tags || '[]');
         const match = selectedTags.every(tag => tags.includes(tag));
@@ -65,12 +76,10 @@ const tagCounts = tools.reduce((acc, tool) => {
       });
     }
 
-    // Choices change listener
     tagSelectEl.addEventListener('change', filterCards);
 
-    // Clear all button
     clearBtn?.addEventListener('click', () => {
-      choices.removeActiveItems();
+      tomSelect.clear();
       filterCards();
     });
 
@@ -121,46 +130,5 @@ const tagCounts = tools.reduce((acc, tool) => {
     width: 100%;
     padding: 0.4rem;
     font-size: 1rem;
-  }
-</style>
-
-<style is:global>
-  .choices__inner {
-    background-color: var(--clr-lossless-primary-dark) !important;
-    border: 1px solid var(--clr-lossless-primary-glass) !important;
-    color: white !important;
-  }
-
-  .choices__list--multiple .choices__item {
-    background-color: var(--clr-lossless-primary-glass) !important;
-    color: white !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    word-break: break-word !important;
-    hyphens: auto !important;
-    display: inline-flex !important;
-    align-items: center;
-  }
-
-  .choices__list--dropdown {
-    background-color: var(--clr-lossless-primary-dark) !important;
-    color: white !important;
-  }
-
-  .choices__item--choice {
-    color: white !important;
-  }
-
-  .choices__item--choice.is-highlighted {
-    background-color: var(--clr-lossless-primary-glass) !important;
-    color: white !important;
-  }
-
-  .choices__input {
-    background-color: var(--clr-lossless-primary-dark) !important;
-    color: white !important;
-    border: none !important;
-    box-shadow: none !important;
   }
 </style>
