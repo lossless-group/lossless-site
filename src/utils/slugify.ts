@@ -15,7 +15,6 @@
 // Aggressively commented: If logic changes, update all call sites and this block.
 export function processEntries(entries) {
   entries.forEach(entry => {
-    console.log("Processing", entry.filePath)
     // Always generate title from filename, preserving original case
     const filename = entry.filePath.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
@@ -24,8 +23,6 @@ export function processEntries(entries) {
 
     entry.slug = getReferenceSlug(entry.id)
 
-    console.log("Slug:", entry.slug)
-    console.log("\n\n")
   });
 
   entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
