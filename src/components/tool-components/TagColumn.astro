@@ -39,6 +39,7 @@ const tagCounts = tools.reduce((acc, tool) => {
     <button id="clear-tags" class="clear-tags-btn">Clear All</button>
   </div>
 
+  <!-- Choices select -->
   <select
     id="tag-select"
     multiple
@@ -51,27 +52,40 @@ const tagCounts = tools.reduce((acc, tool) => {
     ))}
   </select>
 
+  <!-- Optional visual tag list for sorting -->
+  <!-- <div class="tag-list" id="tag-list">
+    {allTags.map(tag => (
+      <div
+        class="tool-tag"
+        data-tag={tag}
+        data-count={tagCounts[tag]}
+      >
+        {trainCaseToNormalCase(tag)} ({tagCounts[tag]})
+      </div>
+    ))}
+  </div> -->
 </div>
 
 <script type="module">
   document.addEventListener('DOMContentLoaded', () => {
     const tagSelectEl = document.getElementById('tag-select');
-    const searchInput = document.getElementById('tag-search');
     const clearBtn = document.getElementById('clear-tags');
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
     const revealedCards = new Set();
     let currentSort = 'alpha-asc';
 
-    // Initialize Choices.js using your minimal example:
+    const allTags = JSON.parse(tagSelectEl.dataset.allTags);
+    const tagCounts = JSON.parse(tagSelectEl.dataset.tagCounts);
+
     const choices = new Choices(tagSelectEl, {
       removeItemButton: true,
       searchPlaceholderValue: 'Search tags...',
       shouldSort: false,
-      itemSelectText: '', // <== this disables the "Press to select" tooltip text
+      itemSelectText: '', // Removes "Press to select"
     });
 
     function getSelectedTags() {
-      return choices.getValue(true); // array of selected tag values
+      return choices.getValue(true);
     }
 
     function filterCards() {
@@ -81,12 +95,11 @@ const tagCounts = tools.reduce((acc, tool) => {
         const tags = JSON.parse(card.dataset.tags || '[]');
         const match = selectedTags.every(tag => tags.includes(tag));
 
-        card.style.display = match || selectedTags.length === 0 ? '' : 'none';
-      });
-
-      document.querySelectorAll('.tool-tag').forEach(chip => {
-        const tag = chip.dataset.tag;
-        chip.classList.toggle('selected', selectedTags.includes(tag));
+        if (match || selectedTags.length === 0) {
+          card.style.removeProperty('display'); // force full reset
+        } else {
+          card.style.display = 'none';
+        }
       });
     }
 
@@ -95,62 +108,38 @@ const tagCounts = tools.reduce((acc, tool) => {
       filterCards();
     });
 
-    // Desktop tag search (filters tag list)
-    searchInput?.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase();
-      document.querySelectorAll('.tag-list .tool-tag').forEach(tag => {
-        const text = tag.textContent?.toLowerCase() || '';
-        tag.style.display = text.includes(query) ? '' : 'none';
-      });
-    });
-
     // Clear all button
     clearBtn?.addEventListener('click', () => {
       choices.removeActiveItems();
-      filterCards();
-
-      document.querySelectorAll('.tool-tag').forEach(tag => {
-        tag.style.display = '';
-      });
+      setTimeout(() => {
+        filterCards();
+      }, 0);
     });
 
-    // Tag sorting
+    // Tag sorting — only sort .tag-list visually → no dropdown rebuild
     function renderTags(sortBy = currentSort) {
-      const tagSelectEl = document.getElementById('tag-select');
-      const allTags = JSON.parse(tagSelectEl.dataset.allTags);
-      const tagCounts = JSON.parse(tagSelectEl.dataset.tagCounts);
+      const tagList = document.getElementById('tag-list');
+      if (!tagList) return;
 
-      function trainCaseToNormalCase(tag) {
-        return tag
-          .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-      }
-      // Build a sorted array of tag strings (not DOM elements)
+      const tags = [...tagList.querySelectorAll('.tool-tag')];
+
       const sortFuncs = {
-        'alpha-asc': (a, b) => a.localeCompare(b),
-        'alpha-desc': (a, b) => b.localeCompare(a),
-        'count-asc': (a, b) => (tagCounts[a] || 0) - (tagCounts[b] || 0),
-        'count-desc': (a, b) => (tagCounts[b] || 0) - (tagCounts[a] || 0),
+        'alpha-asc': (a, b) => a.dataset.tag.localeCompare(b.dataset.tag),
+        'alpha-desc': (a, b) => b.dataset.tag.localeCompare(a.dataset.tag),
+        'count-asc': (a, b) =>
+          parseInt(a.dataset.count || '0', 10) - parseInt(b.dataset.count || '0', 10),
+        'count-desc': (a, b) =>
+          parseInt(b.dataset.count || '0', 10) - parseInt(a.dataset.count || '0', 10),
       };
 
-      const sortedTags = [...allTags].sort(sortFuncs[sortBy]);
+      tags.sort(sortFuncs[sortBy]);
+      tagList.innerHTML = '';
+      tags.forEach(tag => tagList.appendChild(tag));
 
-      // Update Choices.js dropdown
-      choices.setChoices(
-        sortedTags.map(tag => ({
-          value: tag,
-          label: `${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`,
-          selected: getSelectedTags().includes(tag),
-        })),
-        'value',
-        'label',
-        true // replaceChoices
-      );
+      // 🚀 DO NOT call setChoices() → huge perf win!
     }
 
-
-
+    // Sort button listeners
     document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
       currentSort = 'alpha-asc';
       renderTags();
@@ -194,19 +183,11 @@ const tagCounts = tools.reduce((acc, tool) => {
     color: white;
   }
 
-  .tag-search {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.9rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--clr-lossless-primary-glass);
-    background-color: var(--clr-lossless-primary-dark);
-    color: white;
-    width: 100%;
-  }
-
   .tag-actions {
     display: flex;
     justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 
   .clear-tags-btn {
@@ -234,7 +215,17 @@ const tagCounts = tools.reduce((acc, tool) => {
     overflow-x: hidden;
     width: 100%;
     box-sizing: border-box;
-    border-bottom: 5px solid var(--clr-lossless-ui-btn-border);
+    border-bottom: 5px solid var(--clr-lossless-primary-glass);
+    padding-bottom: 1rem;
+  }
+
+  .tool-tag {
+    background-color: var(--clr-lossless-primary-glass);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.25rem;
+    cursor: default;
+    font-size: 0.85rem;
   }
 
   .sort-btn {
@@ -261,6 +252,14 @@ const tagCounts = tools.reduce((acc, tool) => {
   }
 
   @media (max-width: 768px) {
+    .tag-actions {
+      display: none;
+    }
+
+    .tag-list {
+      display: none;
+    }
+
     #tag-select {
       display: block;
       width: 100%;
@@ -268,8 +267,6 @@ const tagCounts = tools.reduce((acc, tool) => {
       font-size: 1rem;
     }
   }
-
-
 </style>
 
 <style is:global>
@@ -279,13 +276,18 @@ const tagCounts = tools.reduce((acc, tool) => {
   color: white !important;
 }
 
-/* Selected pills */
 .choices__list--multiple .choices__item {
   background-color: var(--clr-lossless-primary-glass) !important;
   color: white !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+  display: inline-flex !important;
+  align-items: center;
 }
 
-/* Dropdown */
 .choices__list--dropdown {
   background-color: var(--clr-lossless-primary-dark) !important;
   color: white !important;
@@ -306,6 +308,4 @@ const tagCounts = tools.reduce((acc, tool) => {
   border: none !important;
   box-shadow: none !important;
 }
-
-
 </style>
