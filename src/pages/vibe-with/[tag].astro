@@ -1,136 +1,77 @@
 ---
 /**
- * /vibe-with/[tag].astro — Unified Tag Filter Page (Dynamic Route)
- *
- * Implements cross-collection tag filtering as specified in:
- *   /content/lost-in-public/prompts/render-logic/Convert-Static-Routing-to-Dynamic-Routing-in-Tags.md
- *
- * Follows comprehensive, parallel commenting rules as outlined in:
- *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
- *
- * - Loads all entries from BOTH 'prompts' and 'specs' collections (see content.config.ts for keys)
- * - Filters for items where tags include the selected tag (case-insensitive)
- * - Renders a unified list with links to /vibe-with/[collection]/[...slug]
- * - Handles empty state with a friendly message
- * - All logic is thoroughly commented and DRY
+ * /vibe-with/[tag].astro — Unified Tag Filter Page (Static Generation)
  */
-export const prerender = false
+export const prerender = true;
 
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import TagChip from '@components/tool-components/TagChip.astro';
 import ArticleListNewsPreview from '@components/articles/ArticleListNewsPreview.astro';
 import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
-import { slugify } from '@utils/slugify';
+import { getReferenceSlug } from '@utils/slugify';
 
-// ================================================================================
-// Inline Type Definitions for [tag].astro
-// -------------------------------------------------------------------------------
-// These interfaces are declared inline per .windsurfrules:
-//   - Types must be declared inline, not in a central file
-//   - Types must be mirrored and commented where used
-//   - Aggregate a list of the types information in the comment sections
-// -------------------------------------------------------------------------------
-/**
- * Interface: CollectionEntry
- * Represents a single entry from a content collection (prompts/specs)
- * - data: object containing frontmatter fields (title, tags, slug, etc.)
- * - id: unique string identifier (filename)
- */
-interface CollectionEntry {
-  data: {
-    title?: string;
-    tags?: string[];
-    slug?: string;
-    [key: string]: unknown;
-  };
-  id: string;
+export async function getStaticPaths() {
+  const collections = [
+    { name: 'prompts', collection: await getCollection('prompts') },
+    { name: 'specs', collection: await getCollection('specs') }
+  ];
+
+  const tagMap = new Map();
+
+  for (const { name, collection } of collections) {
+    for (const entry of collection) {
+      let tags = entry.data.tags;
+      if (typeof tags === 'string') {
+        tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+      }
+      if (!Array.isArray(tags)) tags = [];
+
+      for (const tag of tags) {
+        const key = tag.toLowerCase();
+        if (!tagMap.has(key)) tagMap.set(key, []);
+        tagMap.get(key).push({ collection: name, entry });
+      }
+    }
+  }
+
+  return Array.from(tagMap.entries()).map(([tag, entries]) => ({
+    params: { tag },
+    props: { tag, entries },
+  }));
 }
 
 /**
  * Interface: ResultItem
- * Represents an item for rendering in the results list
- * - collection: 'prompts' | 'specs'
- * - entry: CollectionEntry
  */
- type ResultItem = {
-  slug: string;
-  title: string;
-  lede: string;
-  banner_image: string;
-  tags: string[];
-  id: string;
-  collection: string;
-};
-// ================================================================================
-// End Inline Type Definitions for [tag].astro
-// -------------------------------------------------------------------------------
-// --- PARAMS ---
-// Get the tag from the dynamic route param
-const { tag } = Astro.params;
+const { tag, entries } = Astro.props;
 
-/**
- * Helper: Case-insensitive check if a tag is present in an array of tags
- * Ensures robust filtering regardless of tag case in frontmatter
- *
- * @param tags - string[] | undefined
- * @param target - string
- * @returns boolean
- */
-function tagMatches(tags: string[] | undefined, target: string): boolean {
-  return Array.isArray(tags) && tags.some(t => t.toLowerCase() === target.toLowerCase());
-}
+const results = entries.map(({ entry, collection }) => {
+  if (!entry.id) {
+    throw new Error("Entry is missing ID in vibe-with/[tag].astro. Entry:", JSON.stringify(entry))
+  }
+  const slug = getReferenceSlug(entry.id);
+  let tags = entry.data.tags;
+  if (typeof tags === 'string') {
+    tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+  }
+  if (!Array.isArray(tags)) tags = [];
 
-/**
- * getFilteredEntries — Loads and filters both collections by tag
- *
- * - Returns an array of { collection, entry } objects for rendering
- * - Uses inline types as per project rules
- */
-const prompts: CollectionEntry[] = await getCollection('prompts');
-const specs: CollectionEntry[] = await getCollection('specs');
-
-// Filter each collection for entries containing the tag
-const filteredPrompts: CollectionEntry[] = prompts.filter(entry => tagMatches(entry.data.tags, tag));
-const filteredSpecs: CollectionEntry[] = specs.filter(entry => tagMatches(entry.data.tags, tag));
-
-// Combine and map to ResultItem shape
-const results: ResultItem[] = [
-  ...filteredPrompts.map(entry => ({
-    slug: slugify(entry.id.split('/').pop()?.replace(/\.md$/, '') ?? ''),
+  return {
+    slug,
     title: entry.data.title ?? '',
     lede: String(entry.data.lede ?? ''),
     banner_image: String(entry.data.banner_image ?? ''),
-    tags: entry.data.tags ?? [],
+    tags,
     id: entry.id,
-    collection: 'prompts',
-  })),
-  ...filteredSpecs.map(entry => ({
-    slug: slugify(entry.id.split('/').pop()?.replace(/\.md$/, '') ?? ''),
-    title: entry.data.title ?? '',
-    lede: String(entry.data.lede ?? ''),
-    banner_image: String(entry.data.banner_image ?? ''),
-    tags: entry.data.tags ?? [],
-    id: entry.id,
-    collection: 'specs',
-  })),
-].sort((a, b) => {
-  // Use type guard and String() to safely access title property if it exists
-  const at = 'title' in a ? String(a.title) : '';
-  const bt = 'title' in b ? String(b.title) : '';
-  return at.localeCompare(bt);
-});
-// --- PAGE RENDERING ---
+    collection,
+  };
+}).sort((a, b) => String(a.title).localeCompare(String(b.title)));
 ---
 
 <Layout title={`Items tagged '${tag}'`}>
-  <!-- Display tag header as a semantic header, with all styling handled in CSS for maintainability and clarity. -->
   <header class="display-by-tag-row">
     <h1>Items tagged:</h1>
-    <!-- 
-      Pass results.length as count to TagChip for accurate tag count display.
-      This ensures the tag chip displays the correct number of results for the tag.
-    -->
     <TagChip tagString={tag} route="vibe-with" fontSize="var(--fs-400)" includeCount={true} count={results.length}/>
   </header>
   {results.length === 0 ? (
@@ -140,10 +81,6 @@ const results: ResultItem[] = [
     </div>
   ) : (
     <div class="news-preview-list-direct">
-      {/*
-        Render ArticleListColumn for all results, passing ArticleListNewsPreview as EntryComponent.
-        This matches the toolkit tag page convention and ensures columnar, DRY rendering.
-      */}
       <ArticleListColumn entries={results} EntryComponent={ArticleListNewsPreview} />
     </div>
   )}
@@ -178,7 +115,6 @@ const results: ResultItem[] = [
   }
   .news-preview-list-direct {
     max-width: 88vw;
-    /* Center the news preview list horizontally in the page */
     margin-left: auto;
     margin-right: auto;
     display: block;

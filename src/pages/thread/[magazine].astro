@@ -1,112 +1,68 @@
 ---
-// [magazine].astro
-// Dynamic page for rendering a magazine-style layout with prompt/content cards.
-// Loads prompt or specs data from Astro collections and passes it as a passthrough array to the layout.
-// Follows project rules: NO type safety, NO explicit interfaces, passthrough pattern only.
-
+// thread/[magazine].astro (converted to static generation)
 import Layout from '@layouts/Layout.astro';
 import PostCardContentLayout from '../../layouts/PostCardContentLayout.astro';
 import { getCollection } from 'astro:content';
-export const prerender = false;
-// ***
-// Open: Dynamic Collection Loader for Magazine-Style Layout
-// Type: Route Logic
-// Includes: [getCollection, param-driven collection selection, passthrough transformation]
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import { getReferenceSlug } from '@utils/slugify';
 
-// Get the [magazine] param from the route (e.g., 'prompts' or 'specs')
-const { magazine } = Astro.params;
+export const prerender = true;
 
-// Map route param to Astro collection name and URL prefix
-// ROUTING SPEC: All magazine cards use unified /vibe-with/[collection]/[slug] URLs
-const collectionMap = {
-  prompts: { collection: 'prompts', urlPrefix: '/vibe-with/prompts/' },
-  specs: { collection: 'specs', urlPrefix: '/vibe-with/specs/' },
-  reminders: { collection: 'reminders', urlPrefix: '/vibe-with/reminders/' }
-};
-
-// Default to prompts if unknown param
-const { collection, urlPrefix } = collectionMap[magazine] || collectionMap['prompts'];
-
-// Load all entries from the selected collection
-const entries = await getCollection(collection);
-
-// -----------------------------------------------------------------------------
-// FILTER: Only include entries that are published
-// This filter removes any entry where frontmatter contains 'publish: false'.
-// If 'publish' is missing or true, the entry is included by default.
-// -----------------------------------------------------------------------------
-const publishedEntries = entries.filter(entry => {
-  // Defensive: If 'publish' is explicitly false, filter out. Otherwise, include.
-  // This covers: publish: false (hidden), publish: true or missing (shown)
-  return entry.data.publish !== false;
-});
-
-// -----------------------------------------------------------------------------
-// SORT: Order by 'date_authored_current_draft' descending (most recent first)
-// Entries without this property/value are placed at the end of the list.
-// -----------------------------------------------------------------------------
-const sortedPublishedEntries = publishedEntries.slice().sort((a, b) => {
-  const aDate = a.data.date_authored_current_draft;
-  const bDate = b.data.date_authored_current_draft;
-  // If both have dates, compare them (descending)
-  if (aDate && bDate) {
-    // Compare as ISO8601 strings (safe for YYYY-MM-DD)
-    if (aDate > bDate) return -1;
-    if (aDate < bDate) return 1;
-    return 0;
-  }
-  // Only a has date: a comes before b
-  if (aDate && !bDate) return -1;
-  // Only b has date: b comes before a
-  if (!aDate && bDate) return 1;
-  // Neither has date: keep original order
-  return 0;
-});
-
-// Transform the sorted entries to include a URL property and flatten the structure for the card components
-// ROUTING LOGIC: All card URLs are now /vibe-with/[collection]/[slug] per unified routing spec
-const contentThreads = sortedPublishedEntries.map(entry => {
-  // Extract the filename without extension to create a slug
-  const pathParts = entry.id.split('/');
-  const filename = pathParts[pathParts.length - 1].replace(/\.md$/, '');
-  const slug = filename.toLowerCase().replace(/\s+/g, '-');
-
-  // Defensive: If entry.data.tags is a string, convert to array
-  let tags = entry.data.tags;
-  if (typeof tags === 'string') {
-    tags = tags.split(',').map(t => t.trim()).filter(Boolean);
-  }
-  if (!Array.isArray(tags)) {
-    tags = [];
-  }
-
-  return {
-    ...entry.data,
-    tags, // always an array
-    id: entry.id,
-    url: `${urlPrefix}${slug}` // Unified route: /vibe-with/[collection]/[slug]
-    // Include any other properties needed by the card components
+export async function getStaticPaths() {
+  const collectionMap = {
+    prompts: { collection: 'prompts', urlPrefix: '/vibe-with/prompts/' },
+    specs: { collection: 'specs', urlPrefix: '/vibe-with/specs/' },
+    reminders: { collection: 'reminders', urlPrefix: '/vibe-with/reminders/' },
   };
-});
 
-console.log("DEBUG: Transformed contentThreads:", contentThreads);
-// ========================================
-// Affects: [contentThreads, PostCardContentLayout]
-// Close: Dynamic Collection Loader for Magazine-Style Layout
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  const paths = [];
+
+  for (const [magazineKey, { collection, urlPrefix }] of Object.entries(collectionMap)) {
+    const entries = await getCollection(collection);
+
+    const publishedEntries = entries.filter(entry => entry.data.publish !== false);
+
+    const sortedEntries = publishedEntries.slice().sort((a, b) => {
+      const aDate = a.data.date_authored_current_draft;
+      const bDate = b.data.date_authored_current_draft;
+
+      if (aDate && bDate) {
+        const aStr = String(aDate);
+        const bStr = String(bDate);
+        return bStr.localeCompare(aStr);
+      }
+      if (aDate) return -1;
+      if (bDate) return 1;
+      return 0;
+    });
+
+    const contentThreads = sortedEntries.map(entry => {
+      const slug = getReferenceSlug(entry.id);
+
+      let tags = entry.data.tags;
+      if (typeof tags === 'string') {
+        tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+      }
+      if (!Array.isArray(tags)) tags = [];
+
+      return {
+        ...entry.data,
+        tags,
+        id: entry.id,
+        url: `${urlPrefix}${slug}`
+      };
+    });
+
+    paths.push({
+      params: { magazine: magazineKey },
+      props: { contentThreads },
+    });
+  }
+
+  return paths;
+}
+
+const { contentThreads } = Astro.props;
 ---
 <Layout title="Magazine Content">
   <PostCardContentLayout contentThreads={contentThreads} />
 </Layout>
-
-<!--
-  [magazine].astro loads prompt or specs data from the Astro content collection and transforms it
-  to match the expected structure for the card components.
-
-  The transformation adds a URL property and creates a slug from the filename.
-  All props are passed through and deconstructed as needed by child components.
-  No type enforcement is used; this is required by .windsurfrules.
-  Any transformation logic occurs here, not in the card/layout components.
-  The route param [magazine] determines which collection to load.
--->
