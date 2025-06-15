@@ -107,6 +107,18 @@ function filterCards() {
   let visibleCount = 0;
   matchingCards.forEach((card, index) => {
     if (index < currentPage * itemsPerPage) {
+
+    const tagChips = card.querySelectorAll('.tool-tag');
+    tagChips.forEach(chip => {
+        const tag = chip.dataset.tag;
+        if (selectedTags.includes(tag)) {
+          console.log("Added selected")
+          chip.classList.add('selected');
+        } else {
+          chip.classList.remove('selected');
+        }
+      });
+      
       card.classList.add('fade-in');
       card.addEventListener('animationend', () => {
         card.classList.remove('fade-in');
@@ -192,19 +204,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Handle .tool-tag clicks in ToolCards
-  document.addEventListener('click', (e) => {
-    const chip = e.target.closest('.tool-tag');
-    if (chip && chip.dataset && chip.dataset.tag) {
-      const clickedTag = chip.dataset.tag;
+    document.addEventListener('click', (e) => {
+      const chip = e.target.closest('.tool-tag');
+      if (chip && chip.dataset && chip.dataset.tag) {
+        const clickedTag = chip.dataset.tag;
+        const selectedTags = getSelectedTags();
 
-      const selectedTags = getSelectedTags();
-      if (!selectedTags.includes(clickedTag)) {
-        choices.setChoiceByValue(clickedTag);
-        currentPage = 1; // Reset page to 1 when adding new tag
+        if (selectedTags.includes(clickedTag)) {
+          // ❌ Remove tag
+          const item = choices.getValue().find(val => val.value === clickedTag);
+          if (item) choices.removeActiveItemsByValue(clickedTag);
+        } else {
+          // ✅ Add tag
+          choices.setChoiceByValue(clickedTag);
+        }
+
+        currentPage = 1;
         filterCards();
       }
-    }
-  });
+    });
+
 
   document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
     currentSort = 'alpha-asc';
@@ -350,4 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
     border: none !important;
     box-shadow: none !important;
   }
+
+  .tool-card.selected {
+  outline: 2px solid var(--clr-lossless-highlight);
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: outline 0.2s ease;
+}
 </style>
