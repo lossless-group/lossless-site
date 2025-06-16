@@ -1,0 +1,94 @@
+---
+interface Item {
+  href: string;
+  title: string;
+  description: string;
+}
+
+interface Props {
+  label: string;
+  items: Item[];
+}
+
+const { label, items } = Astro.props;
+---
+
+<div class="dropdown-wrapper">
+  <button class="dropdown-trigger">{label}</button>
+  <div class="jumbo-dropdown">
+    {items.map(item => (
+      <a href={item.href} class="jumbo-dropdown-item">
+        <div class="item-title">{item.title}</div>
+        <div class="item-description">{item.description}</div>
+      </a>
+    ))}
+  </div>
+</div>
+
+
+<style>
+  .dropdown-wrapper {
+    position: relative;
+    font-family: "Poppins", sans-serif;
+    display: flex;
+  }
+  
+   .dropdown-trigger {
+   all: unset;
+   display: inline-block; /* exactly like <a> */
+   color: var(--clr-lossless-primary-light);
+   font-family: "Poppins", sans-serif;
+   font-size: clamp(0.9em, 1.1vw, 1.25em);
+   line-height: 1.2; /* match <a> line-height */
+   white-space: nowrap;
+   transition: font-size 0.3s ease, color 0.2s ease;
+   text-decoration: none;
+   font-weight: normal; /* or 400 – ensure it matches the <a> */
+   }
+
+
+  .dropdown-wrapper:hover .jumbo-dropdown {
+    display: flex;
+  }
+
+  .jumbo-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--clr-primary-bg);
+    padding: 1rem;
+    gap: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    z-index: 1002;
+    min-width: 400px;
+    flex-direction: column;
+  }
+
+  .jumbo-dropdown-item {
+    text-decoration: none;
+    color: var(--clr-lossless-primary-light);
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .jumbo-dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .item-description {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light-alt, #ccc);
+  }
+
+  
+</style>

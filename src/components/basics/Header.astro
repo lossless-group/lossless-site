@@ -1,50 +1,62 @@
 ---
 import "@styles/global.css";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
-
-// Import social icons data
-import socialIconsData from "@content/basics/socialIcons.json";
-
-// Add Discord URL (not in the JSON) and ensure Twitter icon uses the Lightest version
-const socialIcons = [
-  { label: "Discord", icon: "/visuals/appIcon__Discord--Lighter.svg", url: "https://discord.gg/lossless" },
-  // Adjust Twitter icon to use the Lightest version that was previously used
-  { label: "X", icon: "/visuals/appIcon__X-Twitter--Lightest.svg", url: "https://twitter.com/lossless_group" },
-  { label: "GitHub", icon: "/visuals/appIcon__GitHub--Lighter.svg", url: "https://github.com/lossless-group" },
-  { label: "LinkedIn", icon: "/visuals/appIcon__LinkedIn.svg", url: "https://linkedin.com/company/lossless-group" }
-];
-
-// Define navigation links for reuse in both desktop and mobile menus
+import JumboDropdown from "./JumboDropdown.astro";
+// Define navigation links (nested items become dropdowns)
 const navLinks = [
   { href: "/about/", label: "About" },
   { href: "/read/through", label: "Reader" },
   { href: "/toolkit", label: "Toolkit" },
   { href: "/more-about", label: "Reference" },
-  { href: "/workflow/changelog", label: "Changelog" },
-  { href: "/workflow/laerdal", label: "Laerdal Changelog" }
+  {
+    label: "Changelog",
+    items: [
+      {
+        href: "/workflow/changelog",
+        title: "Internal Changelog",
+        description: "See what’s changed in the Lossless platform.",
+      },
+      {
+        href: "/workflow/laerdal",
+        title: "Laerdal Changelog",
+        description: "Track updates specific to the Laerdal integration.",
+      }
+    ]
+  }
+];
+
+// Social icon links
+const socialIcons = [
+  { label: "Discord", icon: "/visuals/appIcon__Discord--Lighter.svg", url: "https://discord.gg/lossless" },
+  { label: "X", icon: "/visuals/appIcon__X-Twitter--Lightest.svg", url: "https://twitter.com/lossless_group" },
+  { label: "GitHub", icon: "/visuals/appIcon__GitHub--Lighter.svg", url: "https://github.com/lossless-group" },
+  { label: "LinkedIn", icon: "/visuals/appIcon__LinkedIn.svg", url: "https://linkedin.com/company/lossless-group" }
 ];
 ---
 
 <header class="header">
   <div class="header-container-row">
-    <!-- Logo section -->
+    <!-- Logo -->
     <a href="/" class="logo-link" aria-label="Return to homepage">
       <img
         class="logo-box"
         src="/visuals/trademark__Lossless.svg"
-        alt="The Lossless Group logo indicates that what we do soon 
-        has dramatic impacts on potential performance later."
+        alt="The Lossless Group logo"
       />
     </a>
-    
-    <!-- Desktop navigation (hidden on mobile) -->
+
+    <!-- Desktop Nav -->
     <nav class="site-navigation desktop-only">
-      {navLinks.map(link => (
-        <a href={link.href}>{link.label}</a>
-      ))}
+      {navLinks.map(link =>
+        link.items ? (
+          <JumboDropdown label={link.label} items={link.items} />
+        ) : (
+          <a href={link.href}>{link.label}</a>
+        )
+      )}
     </nav>
-    
-    <!-- Social icons container (hidden on mobile) -->
+
+    <!-- Desktop Social -->
     <div class="social-icons desktop-only">
       {socialIcons.map(icon => (
         <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
@@ -52,21 +64,29 @@ const navLinks = [
         </a>
       ))}
     </div>
-    
-    <!-- Mobile hamburger menu button -->
+
+    <!-- Mobile Toggle -->
     <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
       <span class="hamburger-icon"></span>
     </button>
   </div>
-  
-  <!-- Mobile navigation menu (hidden by default) -->
+
+  <!-- Mobile Nav -->
   <div class="mobile-menu" id="mobile-menu">
     <nav class="mobile-navigation">
-      {navLinks.map(link => (
-        <a href={link.href}>{link.label}</a>
-      ))}
+      {navLinks.map(link =>
+        link.items ? (
+          <>
+            <div class="mobile-nav-header">{link.label}</div>
+            {link.items.map(sub => (
+              <a href={sub.href}>{sub.title}</a>
+            ))}
+          </>
+        ) : (
+          <a href={link.href}>{link.label}</a>
+        )
+      )}
     </nav>
-    
     <div class="mobile-social-icons">
       {socialIcons.map(icon => (
         <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
@@ -75,15 +95,15 @@ const navLinks = [
       ))}
     </div>
   </div>
-  
+
   <div class="header-separator">
-    <!-- Use enhanced separator with specific styling for the header -->
-    <ThinGradientBleedSeparator
-      height="2px"
-      color="var(--grd__primary-bg)"
-    />
+    <ThinGradientBleedSeparator height="2px" color="var(--grd__primary-bg)" />
   </div>
 </header>
+
+<!-- Inline styles omitted here for brevity, reuse from your original file -->
+<!-- Add the hamburger menu <style> and <script> block at the bottom as in your original -->
+
 
 <style>
   /* Base header styles */
@@ -259,14 +279,16 @@ const navLinks = [
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    
-    & a {
+    font-family: "Poppins", sans-serif;
+
+    & a,
+    & .mobile-nav-header {
       text-decoration: none;
       color: var(--clr-lossless-primary-light);
       font-size: 1.2rem;
       padding: 0.5rem 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      
+
       &:hover,
       &:focus-visible {
         color: var(--clr-link);
