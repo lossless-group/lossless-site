@@ -3,7 +3,7 @@ import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import TableOfContents from '@components/markdown/TableOfContents.astro';
 import type { Root } from 'mdast';
 import { slugify } from '@utils/slugify'; // Corrected import path
-import IconSVGWrapper from '@components/basics/render-images/IconSVGWrapper.astro';
+import CopyLinkButton from '@components/markdown/CopyLinkButton.astro';
 import InfoSidebar from '@components/markdown/InfoSidebar.astro';
 import { formatDate } from '../../utils/formatDate.ts';
 import { DEBUG_ARTICLE } from '@utils/envUtils';
@@ -174,27 +174,14 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
       {/* Render the main page title with share icon if effectiveHeading is provided */}
       {typeof effectiveHeading === 'string' && effectiveHeading.trim() !== '' && (() => {
         const titleId = slugify(effectiveHeading);
-        const anchorProps = {
-          onclick: "copyHeaderLink(this)", // Will call a global JS function
-          class: 'title-share-icon-anchor header-anchor',
-          'aria-label': `Share link to section: ${effectiveHeading}`,
-        };
-        const iconProps = {
-          src: shareIconPath,
-          alt: `Share icon for ${effectiveHeading}`,
-          class: 'share-icon',
-          width: 16,
-          height: 16,
-        };
         return (
-          <div class="page-main-title-display" id={titleId}>
-            {effectiveHeading}
-            <a {...anchorProps}>
-              <IconSVGWrapper {...iconProps} />
-            </a>
-          </div>
+          <h1 id={titleId} class="page-main-title-display">
+              <span class="title-text">{effectiveHeading}</span>
+              <CopyLinkButton id={titleId} label={effectiveHeading} />
+          </h1>
         );
       })()}
+
       <AstroMarkdown 
         node={{
           type: 'root',
@@ -470,18 +457,27 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
   }
 
 .page-main-title-display {
-    font-size: 2.25rem; /* Example: slightly smaller than a typical H1 but larger than H2 */
-    font-weight: 700;
-    color: var(--clr-lossless-accent--brightest);
-    line-height: 1.2;
-    margin-bottom: 1.5rem; /* Space between this title and the start of Markdown content */
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--clr-lossless-accent--medium);
-  }
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--clr-lossless-accent--brightest);
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--clr-lossless-accent--medium);
+}
+
+.title-text {
+  display: inline;
+}
 
 .header-anchor-symbol svg {
   display: inline-block;
   vertical-align: middle;
 }
+
+
 
 </style>

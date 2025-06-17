@@ -1,0 +1,79 @@
+---
+const { id, label } = Astro.props;
+---
+<button
+  class="copy-btn"
+  data-copy-id={id}
+  title={`Copy link to ${label}`}
+  aria-label={`Copy link to ${label}`}
+>
+  <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 2H8C7.45 2 7 2.45 7 3V4H6C4.9 4 4 4.9 4 6V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V6C20 4.9 19.1 4 18 4H17V3C17 2.45 16.55 2 16 2ZM16 4H8V3H16V4ZM18 20H6V6H7V7H17V6H18V20Z"/>
+  </svg>
+</button>
+
+<script is:inline>
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".copy-btn");
+    if (!btn) return;
+
+    const headingId = btn.dataset.copyId;
+    const url = window.location.origin + window.location.pathname + "#" + headingId;
+
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        btn.classList.add("copied");
+        setTimeout(() => btn.classList.remove("copied"), 800);
+      })
+      .catch((err) => {
+        console.error("Clipboard error:", err);
+        alert("Copy failed");
+      });
+  });
+</script>
+
+<style>
+  .copy-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 0.3rem;
+    cursor: pointer;
+    color: #999;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+  }
+
+  .copy-btn .icon {
+    width: 0.9em;
+    height: 0.9em;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .copy-btn:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .copy-btn:hover .icon {
+    transform: scale(1.05);
+  }
+
+  .copy-btn.copied {
+   color: rgb(0, 233, 233);
+  }
+
+  .copy-btn.copied .icon {
+    animation: copied-ping 0.3s ease;
+  }
+
+  @keyframes copied-ping {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  
+</style>

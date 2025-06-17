@@ -11,9 +11,8 @@ import { getCollection } from "astro:content";
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
-// import shareIcon from '@assets/Icons/share.svg'; // Replaced with direct path string
-import IconSVGWrapper from '../basics/render-images/IconSVGWrapper.astro';
-    /*
+import CopyLinkButton from './CopyLinkButton.astro';
+/*
       Compose a unique id for markdown headings using ONLY the main heading text.
       - This function takes a heading MDAST node and returns a slugified version of the primary text content.
       - It does NOT include the file name, any prefix, or subtitle/lead-in text.
@@ -217,48 +216,48 @@ if (DEBUG_AST) {
 })()}
 
 {node.type === "heading" && (() => {
-  const articleTitle = data.title || 'Untitled Article';
   const currentHeaderText = extractAllText(node.children).trim() || 'Untitled Section';
 
-  function generateHeadingId(nodeForId) {
-    const fullText = extractAllText(nodeForId.children); // Uses top-level extractAllText
-    return slugify(fullText.trim() || 'untitled-heading');
-  }
+  const generateHeadingId = nodeForId =>
+    slugify(extractAllText(nodeForId.children).trim() || 'untitled-heading');
   const id = generateHeadingId(node);
 
-  const anchorProps = {
-    role: "button",
-    tabIndex: 0,
-    className: "header-anchor",
-    title: `${articleTitle}... ${currentHeaderText}`,
-    "aria-label": `Copy link to section: ${currentHeaderText}`,
-    "data-heading-id": id,
-    "data-article-title": articleTitle,
-    "data-header-text": currentHeaderText,
-    onclick: "copyHeaderLink(this)" // Will call a global JS function
-  } as any;
+  const content = (
+    <>
+      <span class="heading-text">
+        {node.children.map(child => (
+          <Astro.self node={child} data={data} />
+        ))}
+      </span>
+      <CopyLinkButton id={id} label={currentHeaderText} />
+    </>
 
-  const iconProps = {
-    src: "/src/assets/Icons/link.svg",
-    alt: "", // Decorative icon, as the <a> provides the label
-    "aria-hidden": "true",
-    class: "header-anchor-symbol",
-    width: "24",
-    height: "24"
-  };
+    <style>
+      .heading-with-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      .heading-text {
+        display: inline;
+        line-height: inherit;
+      }
+    </style>
+  );
 
   switch (node.depth) {
-    case 1: return <h1 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h1>;
-    case 2: return <h2 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h2>;
-    case 3: return <h3 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h3>;
-    case 4: return <h4 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h4>;
-    case 5: return <h5 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h5>;
-    case 6: return <h6 id={id}>{node.children.map(child => <Astro.self node={child} data={data} />)}<a {...anchorProps}><IconSVGWrapper {...iconProps} /></a></h6>;
+    case 1: return <h1 id={id} class="heading-with-copy">{content}</h1>;
+    case 2: return <h2 id={id} class="heading-with-copy">{content}</h2>;
+    case 3: return <h3 id={id} class="heading-with-copy">{content}</h3>;
+    case 4: return <h4 id={id} class="heading-with-copy">{content}</h4>;
+    case 5: return <h5 id={id} class="heading-with-copy">{content}</h5>;
+    case 6: return <h6 id={id} class="heading-with-copy">{content}</h6>;
     default:
-      // Fallback for unexpected heading depths
-      return <div>{node.children.map(child => <Astro.self node={child} data={data} />)}</div>;
+      return <div>{content}</div>;
   }
 })()}
+
 
 {(node.type === "strong") &&
   <strong>
@@ -534,92 +533,3 @@ if (DEBUG_AST) {
     </div>
 }
 
-<script is:inline>
-  function copyHeaderLink(buttonElement) {
-    console.log("Copying header link...")
-    const headingId = buttonElement.dataset.headingId;
-    // const articleTitle = buttonElement.dataset.articleTitle; // Available if needed for feedback
-    // const headerText = buttonElement.dataset.headerText; // Available if needed for feedback
-
-    if (!navigator.clipboard) {
-      // Fallback for older browsers or insecure contexts (http)
-      console.warn('Clipboard API not available.');
-      // You could implement a textarea-based fallback here if needed
-      // For now, we'll just inform the user or do nothing.
-      alert('Copying to clipboard is not supported in your browser or on this page (HTTP).');
-      return;
-    }
-
-    const urlToCopy = window.location.origin + window.location.pathname + (headingId ? '#' + headingId : "");
-
-    navigator.clipboard.writeText(urlToCopy).then(() => {
-      // Success! Provide feedback.
-      const originalContent = buttonElement.innerHTML;
-      const originalTitle = buttonElement.title;
-      const originalAriaLabel = buttonElement.getAttribute('aria-label');
-
-      buttonElement.innerHTML = '<span class="header-anchor-symbol" style="font-style: italic; font-size: 0.9em;">Copied!</span>';
-      buttonElement.title = 'Link copied to clipboard!';
-      buttonElement.setAttribute('aria-label', 'Link copied to clipboard!');
-      
-      // Prevent multiple rapid clicks from messing up the timeout
-      if (buttonElement.dataset.timeoutId) {
-        clearTimeout(parseInt(buttonElement.dataset.timeoutId));
-      }
-
-      const timeoutId = setTimeout(() => {
-        buttonElement.innerHTML = originalContent;
-        buttonElement.title = originalTitle;
-        buttonElement.setAttribute('aria-label', originalAriaLabel);
-        delete buttonElement.dataset.timeoutId;
-      }, 2000); // Revert after 2 seconds
-      buttonElement.dataset.timeoutId = timeoutId.toString();
-
-    }).catch(err => {
-      console.error('Failed to copy link: ', err);
-      alert('Failed to copy link. See console for details.');
-    });
-  }
-
-
-  function copyPageLink(buttonElement) {
-    console.log("Copying PAGE link...");
-    
-    if (!navigator.clipboard) {
-      console.warn('Clipboard API not available.');
-      alert('Copying to clipboard is not supported in your browser or on this page (HTTP).');
-      return;
-    }
-
-    const urlToCopy = window.location.href;
-
-    navigator.clipboard.writeText(urlToCopy).then(() => {
-      // Success! Provide feedback.
-      const originalContent = buttonElement.innerHTML;
-      const originalTitle = buttonElement.title;
-      const originalAriaLabel = buttonElement.getAttribute('aria-label');
-
-      buttonElement.innerHTML = '<span class="header-anchor-symbol" style="font-style: italic; font-size: 0.9em;">Copied!</span>';
-      buttonElement.title = 'Page link copied to clipboard!';
-      buttonElement.setAttribute('aria-label', 'Page link copied to clipboard!');
-
-      if (buttonElement.dataset.timeoutId) {
-        clearTimeout(parseInt(buttonElement.dataset.timeoutId));
-      }
-
-      const timeoutId = setTimeout(() => {
-        buttonElement.innerHTML = originalContent;
-        buttonElement.title = originalTitle;
-        buttonElement.setAttribute('aria-label', originalAriaLabel);
-        delete buttonElement.dataset.timeoutId;
-      }, 2000);
-
-      buttonElement.dataset.timeoutId = timeoutId.toString();
-
-    }).catch(err => {
-      console.error('Failed to copy page link: ', err);
-      alert('Failed to copy page link. See console for details.');
-    });
-  }
-
-</script>
