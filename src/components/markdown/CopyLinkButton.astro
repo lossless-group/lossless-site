@@ -1,9 +1,10 @@
 ---
-const { id, label } = Astro.props;
+const { id, label, bannerImage } = Astro.props;
 ---
 <button
   class="copy-btn"
   data-copy-id={id}
+  data-banner-image={bannerImage}
   title={`Copy link to ${label}`}
   aria-label={`Copy link to ${label}`}
 >
@@ -21,12 +22,13 @@ const { id, label } = Astro.props;
     padding: 0.2rem 0.3rem;
     margin-left: 0.3rem;
     border-radius: 4px;
-    opacity: 0.7;
+    opacity: 0.8;
     transition: opacity 0.2s, color 0.2s;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
+    font-size: 0.9em;
   }
 
   .copy-btn:hover,
@@ -48,56 +50,55 @@ const { id, label } = Astro.props;
     if (!button) return;
 
     e.preventDefault();
+    e.stopPropagation();
     
     const headingId = button.getAttribute('data-copy-id');
     if (!headingId) return;
     
     const url = `${window.location.origin}${window.location.pathname}#${headingId}`;
+    const title = document.title;
+    const text = button.getAttribute('aria-label') || '';
+    
+    // Get banner image from data attribute, meta tag, or use fallback
+    const fallbackImage = 'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp';
+    const bannerImage = button.dataset.bannerImage || 
+                      document.querySelector('meta[property="og:image"]')?.content || 
+                      fallbackImage;
     
     try {
-      // Try Web Share API first
       if (navigator.share) {
         const shareData = {
-          title: document.title,
-          text: button.getAttribute('aria-label') || '',
+          title: title,
+          text: text,
           url: url
         };
         
-        // Add OpenGraph image if available
-        const ogImage = document.querySelector('meta[property="og:image"]');
-        if (ogImage) {
+        // Only include image if we have a valid URL
+        if (bannerImage && bannerImage.startsWith('http')) {
           try {
-            shareData.files = [
-              new File([ogImage.content], 'og-image.jpg', { type: 'image/jpeg' })
-            ];
+            // For Web Share API, we can just include the image URL
+            shareData.files = [bannerImage];
           } catch (e) {
-            console.warn('Could not add image to share data:', e);
+            console.warn('Could not prepare image for sharing:', e);
           }
         }
         
         await navigator.share(shareData);
       } else {
-        throw new Error('Web Share API not supported');
+        // Fallback to just copying the URL
+        await navigator.clipboard.writeText(url);
+        button.classList.add('copied');
+        setTimeout(() => button.classList.remove('copied'), 2000);
       }
     } catch (err) {
-      // Fall back to clipboard if sharing fails or is not supported
       if (err.name !== 'AbortError') {
+        // Final fallback to clipboard
         try {
           await navigator.clipboard.writeText(url);
           button.classList.add('copied');
           setTimeout(() => button.classList.remove('copied'), 2000);
         } catch (clipboardErr) {
           console.error('Failed to copy to clipboard:', clipboardErr);
-          // Fallback for older browsers
-          const input = document.createElement('input');
-          input.value = url;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand('copy');
-          document.body.removeChild(input);
-          
-          button.classList.add('copied');
-          setTimeout(() => button.classList.remove('copied'), 2000);
         }
       }
     }
@@ -111,7 +112,7 @@ const { id, label } = Astro.props;
     padding: 0.2rem 0.3rem;
     margin-left: 0.3rem;
     cursor: pointer;
-    color: var(--clr-text-muted);
+    color: #555
     line-height: 1;
     display: inline-flex;
     align-items: center;
