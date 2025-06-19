@@ -229,7 +229,11 @@ if (DEBUG_AST) {
           <Astro.self node={child} data={data} />
         ))}
       </span>
-      <CopyLinkButton id={id} label={currentHeaderText} />
+      <CopyLinkButton 
+        id={id} 
+        label={currentHeaderText} 
+        bannerImage={data?.banner_image} 
+      />
     </>
 
     <style>

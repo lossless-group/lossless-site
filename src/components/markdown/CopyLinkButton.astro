@@ -20,31 +20,100 @@ const { id, label } = Astro.props;
     const headingId = btn.dataset.copyId;
     const url = window.location.origin + window.location.pathname + "#" + headingId;
 
-    navigator.clipboard.writeText(url)
-      .then(() => {
+    // Try Web Share API first if available
+    if (navigator.share) {
+      // Prepare share data
+      const shareData = {
+        title: label || document.title,
+        text: label,
+        url: url
+      };
+      
+      // Add banner image to share data if available
+      // Note: Not all platforms support images in the Web Share API
+      const bannerImage = document.querySelector('meta[property="og:image"]')?.content || 
+                        'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp';
+      
+      try {
+        // Create a temporary link element to handle the image fetch
+        const link = document.createElement('a');
+        link.href = bannerImage;
+        
+        // Use the default image if the banner image fails to load
+        link.onerror = () => {
+          link.href = 'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp';
+        };
+        
+        // Add the image to share data
+        shareData.files = [
+          new File([bannerImage], 'banner.jpg', { type: 'image/webp' })
+        ];
+      } catch (e) {
+        console.warn('Could not add banner image to share data, using default:', e);
+        shareData.files = [
+          new File(['https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp'], 'banner.jpg', { type: 'image/webp' })
+        ];
+      }
+      
+      navigator.share(shareData).catch(err => {
+        // Fall back to clipboard if share is cancelled or fails
+        if (err.name !== 'AbortError') {
+          console.warn('Share failed, falling back to clipboard:', err);
+          copyToClipboard(url, btn);
+        }
+      });
+    } else {
+      copyToClipboard(url, btn);
+    }
+  });
+
+  function copyToClipboard(url, btn) {
+    // Create a temporary input to copy the URL
+    const input = document.createElement('input');
+    input.value = url;
+    document.body.appendChild(input);
+    input.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
         btn.classList.add("copied");
         setTimeout(() => btn.classList.remove("copied"), 800);
-      })
-      .catch((err) => {
-        console.error("Clipboard error:", err);
-        alert("Copy failed");
-      });
-  });
+      } else {
+        throw new Error('Copy command failed');
+      }
+    } catch (err) {
+      console.error('Clipboard error:', err);
+      alert('Copy failed: ' + err.message);
+    } finally {
+      document.body.removeChild(input);
+    }
+  }
+
+  // Initialize the event listener
+  document.addEventListener("click", handleCopyClick);
 </script>
 
 <style>
   .copy-btn {
     background: none;
     border: none;
-    padding: 0;
+    padding: 0.2rem 0.3rem;
     margin-left: 0.3rem;
     cursor: pointer;
-    color: #999;
+    color: var(--clr-text-muted);
     line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .copy-btn:hover {
+    background-color: var(--clr-bg-hover);
+    color: var(--clr-lossless-accent--brightest);
   }
 
   .copy-btn .icon {
