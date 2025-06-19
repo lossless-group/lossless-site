@@ -38,24 +38,29 @@ const { contentThreads = [] } = Astro.props;
     padding: 1rem 2rem;
     box-sizing: border-box;
   }
-
+  
   .magazine-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* 3 columns on large screens */
     gap: 2rem;
-    max-width: 80rem;
+    width: 100%;
+    max-width: 120rem; /* ≈ 3 × max card width (e.g. 24rem) */
     margin: 0 auto;
+    padding: 1rem;
+    box-sizing: border-box;
   }
 
   @media (max-width: 1024px) {
     .magazine-grid {
       grid-template-columns: repeat(2, 1fr);
+      max-width: 48rem;
     }
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: 768px) {
     .magazine-grid {
       grid-template-columns: 1fr;
+      max-width: 100%;
     }
   }
 </style>
