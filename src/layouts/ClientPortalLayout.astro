@@ -159,6 +159,9 @@ try {
       )}
     </div>
 
+  <button id="toggle-references" class="toggle-button">Hide References</button>
+
+  <div id="reference-section" class="collapsible-section expanded">
     {(clientVocab.length > 0 || clientConcepts.length > 0) && (
       <div class="mt-12">
         {clientVocab.length > 0 && (
@@ -179,6 +182,7 @@ try {
         )}
       </div>
     )}
+  </div>
 
     {toolGalleryTools.length > 0 && (
     <>
@@ -203,6 +207,16 @@ try {
         button.textContent = isCollapsed ? 'Show Reader' : 'Hide Reader';
       });
     });
+
+    const refButton = document.getElementById('toggle-references');
+    const refSection = document.getElementById('reference-section');
+
+    refButton.addEventListener('click', () => {
+      const isCollapsed = refSection.classList.toggle('collapsed');
+      refSection.classList.toggle('expanded', !isCollapsed);
+      refButton.textContent = isCollapsed ? 'Show References' : 'Hide References';
+    });
+
   </script>
 </Layout>
 
@@ -229,6 +243,7 @@ try {
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 600;
+  margin-top: 2rem;
   margin-bottom: 1rem;
   border: none;
   cursor: pointer;
