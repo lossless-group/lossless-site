@@ -7,9 +7,11 @@ import EntryListColumn from '@components/articles/EntryListColumn.astro';
 interface Props {
   essays: CollectionEntry<'essays'>[];
   currentSlug: string | null; // The slug of the essay currently displayed in the reader
+  mode?: 'client' | 'generic'; // prop to control link behavior
+  client?: string
 }
 
-const { essays, currentSlug } = Astro.props;
+const { essays, currentSlug, mode, client } = Astro.props;
 
 // This reactive variable will hold the slug of the currently active essay in the sidebar.
 // It's initialized with currentSlug and updated by client-side script.
@@ -17,7 +19,7 @@ let activeSlug = currentSlug;
 ---
 
 <div class="content-nav-sidebar w-full">
-  <EntryListColumn essays={essays} currentSlug={activeSlug} />
+  <EntryListColumn essays={essays} currentSlug={activeSlug} mode={mode} client={client}/>
 </div>
 
 {/* Removed conflicting client-side script */}

@@ -3,29 +3,44 @@
 import type { CollectionEntry } from 'astro:content';
 import EntryListItemPreviewBase from '@components/articles/EntryListItemPreview--Base.astro';
 import path from 'node:path';
+import { getReferenceSlug } from '@utils/slugify';
 
 // Define the properties that this component accepts
 interface Props {
   essays: CollectionEntry<'essays'>[];
   currentSlug: string | null; // The slug of the essay currently active in the reader
+  mode?: 'client' | 'generic'; // prop to control link behavior
+  client?: string
 }
 
-const { essays, currentSlug } = Astro.props;
+const { essays, currentSlug, mode, client } = Astro.props;
+
 ---
 
 <div class="entry-list-column w-full space-y-2 md:space-y-3">
   {essays.map((entry) => {
-    // Derive slug for this specific item
-    const itemSlug = path.basename(entry.id, '.md').toLowerCase().replace(/\s+/g, '-');
-    // Compare derived slug with currentSlug
-    const isActive = itemSlug === currentSlug; 
+    const filename = entry.id.split('/').pop(); // e.g. "foo.md"
+    const itemSlug = getReferenceSlug(filename.replace(/\.(md|mdx)$/, ''));
+    const lastSlugSegment = currentSlug?.split('/').pop();
+    const isActive = itemSlug === lastSlugSegment;    
+    const url = mode === 'client' 
+      ? `/client/${client.toLowerCase()}/essays/${itemSlug}` 
+      : `/read/through/${entry.collection}/${itemSlug}`;
+
     return (
-      // Use derived slug in data-slug and pass it down
-      <div class="preview-item-wrapper" data-slug={itemSlug}> 
-        <EntryListItemPreviewBase entry={entry} isActive={isActive} derivedSlug={itemSlug} /> 
+      <div class="preview-item-wrapper" data-slug={itemSlug}>
+        <a href={url} class="block">
+          <EntryListItemPreviewBase 
+            entry={entry} 
+            isActive={isActive} 
+            derivedSlug={itemSlug} 
+            linkHref={url} 
+          />        
+        </a>
       </div>
     );
   })}
+
   {essays.length === 0 && (
     <p class="text-neutral-500 dark:text-neutral-400 italic">
       No essays found in this collection.

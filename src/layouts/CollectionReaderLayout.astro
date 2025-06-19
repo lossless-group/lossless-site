@@ -19,10 +19,11 @@ interface Props {
   collection: string;
   entry: any;
   essays: any[];
+  mode?: 'client' | 'generic'; // prop to control link behavior
+  client?: string
 }
 
-const { collection, entry, essays } = Astro.props as Props;
-console.log('[CollectionReaderLayout.astro] Received essays prop:', essays);
+const { collection, entry, essays, mode, client } = Astro.props as Props;
 
 let mdastNode = null;
 let tocNode = null;
@@ -61,7 +62,7 @@ if (effectiveEntry) {
 <div class="collection-reader-layout">
   <aside class="collection-sidebar">
     <div class="sidebar-inner">
-      <CollectionSidebar essays={essays} currentSlug={entry ? entry.id : null} />
+      <CollectionSidebar essays={essays} currentSlug={effectiveEntry ? effectiveEntry.id : null} mode={mode} client={client} />
     </div>
   </aside>
 
@@ -147,9 +148,17 @@ if (effectiveEntry) {
 }
 
 @media (min-width: 1025px) {
+  .collection-sidebar {
+    width: 300px;
+    min-width: 300px;
+    /* Remove hard max-width so it can grow and shrink */
+    max-width: 500px;
+    transition: width 0.3s ease-in-out, max-width 0.3s ease-in-out;
+  }
+
   .collection-sidebar:hover {
     width: 500px;
-    max-width: 500px;
   }
 }
+
 </style>

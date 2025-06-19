@@ -8,10 +8,10 @@ import MermaidChart from '../codeblocks/MermaidChart.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
 import { getCollection } from "astro:content";
-import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
 import CopyLinkButton from './CopyLinkButton.astro';
+import { resolveToolId } from '@utils/toolUtils';
 /*
       Compose a unique id for markdown headings using ONLY the main heading text.
       - This function takes a heading MDAST node and returns a slugified version of the primary text content.
@@ -96,22 +96,6 @@ let toolGalleryTools = null;
 let toolGalleryErrors: string[] = [];
 
 
-async function resolveToolId(input: string, allTools: any[]): Promise<string | null> {
-  // 1. Try exact match
-  const directMatch = allTools.find(tool => tool.id === input);
-  if (directMatch) return directMatch.id;
-
-  // 2. Try normalized match
-  const normalized = slugify(input);
-  const normMatch = allTools.find(tool => slugify(tool.id) === normalized);
-  if (normMatch) return normMatch.id;
-
-  // 3. Try recursive routeManager resolution
-  const route = transformContentPathToRoute(input);
-  const finalSlug = route.split('/').pop();
-  const finalMatch = allTools.find(tool => slugify(tool.id).endsWith(finalSlug || ''));
-  return finalMatch?.id || null;
-}
 
 if (node.lang === 'yaml' && node.meta === 'toolingGallery') {
    const rawLines = node.value

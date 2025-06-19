@@ -57,6 +57,10 @@ export function extractAllText(children) {
 }
 
 export function getReferenceSlug(filename: string): string {
+  if (!filename) {
+    throw new Error("Blank or improper filename passed to the getReferenceSlug function. Work backwards from where this function is being called")
+  }
+  
   const parts = filename.split('/');
   const slugifiedParts = parts.map(p => slugify(p));
   return slugifiedParts.join('/');

@@ -40,6 +40,7 @@ export const getStaticPaths: GetStaticPaths = async ({}) => {
       const filename = path.basename(entry.id);
       const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
 
+      console.log(collectionName, derivedSlug)
       paths.push({
         params: { collection: collectionName, slug: derivedSlug },
         // Pass the SPECIFIC entry for this page AND the full list for the sidebar

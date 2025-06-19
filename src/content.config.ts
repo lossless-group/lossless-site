@@ -49,6 +49,35 @@ const slidesCollection = defineCollection({
     }),
 });
 
+const clientEssaysCollection = defineCollection({
+  loader: glob({
+    pattern: "**/essays/**/*.md", // lowercase "essays"
+    base: resolveContentPath("client-content")
+  }),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+  }).passthrough().transform((data, context) => {
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+
+    const displayTitle = data.title
+      ? data.title
+      : filename.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    return {
+      ...data,
+      title: displayTitle,
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+    };
+  })
+});
+
+
+
 const visualsCollection = defineCollection({
   loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
   schema: z.object({
@@ -304,6 +333,7 @@ export const paths = {
   'reminders': resolveContentPath('lost-in-public/reminders'),
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
+  'client-content': resolveContentPath('client-content'),
 };
 
 // Export the collections
@@ -323,4 +353,5 @@ export const collections = {
   'reminders': remindersCollection,
   'specs': specsCollection,
   'issue-resolution': issueResolutionCollection,
+  'client-content': clientEssaysCollection,
 };

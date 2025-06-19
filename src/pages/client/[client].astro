@@ -1,0 +1,60 @@
+---
+import ClientPortalLayout from '@layouts/ClientPortalLayout.astro'
+import { getCollection } from 'astro:content';
+import { processEntries, getReferenceSlug } from '@utils/slugify';
+import { contentBasePath } from '@utils/envUtils';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  const clientContentDir = path.resolve(`${contentBasePath}/client-content`);
+  const entries = await fs.readdir(clientContentDir, { withFileTypes: true });
+
+  return entries
+    .filter(entry => entry.isDirectory())
+    .map(entry => ({ params: { client: entry.name } }));
+}
+
+const { client } = Astro.params;
+
+// Load and process essays
+const allClientEssays = await getCollection('client-content');
+
+const rawEssays = allClientEssays.filter(entry =>
+  entry.id.startsWith(`${client.toLowerCase()}/essays/`)
+);
+const processedEssays = processEntries(rawEssays);
+const currentEssay = processedEssays[0];
+
+// Load vocab/concepts
+const allVocabulary = processEntries(await getCollection('vocabulary'));
+const allConcepts = processEntries(await getCollection('concepts'));
+
+const referenceTermsPath = path.resolve(
+  contentBasePath,
+  `client-content/${client}/reference-terms.json`
+);
+
+let referenceTerms = { vocabulary: [], concepts: [] };
+
+try {
+  const raw = await fs.readFile(referenceTermsPath, 'utf-8');
+  referenceTerms = JSON.parse(raw);
+} catch (err) {
+  console.warn(`No reference terms found for client: ${client}`);
+}
+
+const vocabSlugs = referenceTerms.vocabulary.map(getReferenceSlug);
+const conceptSlugs = referenceTerms.concepts.map(getReferenceSlug);
+
+const clientVocab = allVocabulary.filter(entry => vocabSlugs.includes(entry.slug));
+const clientConcepts = allConcepts.filter(entry => conceptSlugs.includes(entry.slug));
+---
+
+<ClientPortalLayout 
+  client={client}
+  currentEssay={currentEssay}
+  essays={processedEssays}
+  clientVocab={clientVocab}
+  clientConcepts={clientConcepts}
+/>

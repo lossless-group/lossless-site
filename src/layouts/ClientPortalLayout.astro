@@ -1,0 +1,201 @@
+---
+import Layout from '@layouts/Layout.astro';
+import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+import { contentBasePath } from '@utils/envUtils';
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import { toProperCase, slugify } from '@utils/slugify';
+import path from 'node:path'
+import { resolveToolId } from '@utils/toolUtils';
+import ToolingGallery from '@components/markdown/ToolingGallery.astro';
+
+
+interface Props {
+  client: string;
+  currentEssay: CollectionEntry<'client-content'>;
+  essays: CollectionEntry<'client-content'>[];
+  clientVocab: CollectionEntry<'vocabulary'>[];
+  clientConcepts: CollectionEntry<'concepts'>[];
+}
+
+const { client, currentEssay, essays, clientVocab, clientConcepts } = Astro.props;
+
+import yaml from 'js-yaml';
+import fs from 'node:fs/promises';
+
+let toolGalleryTools = [];
+
+try {
+  const yamlPath = path.resolve(contentBasePath, `client-content/${client}/tool-gallery.yaml`);
+  const rawYaml = await fs.readFile(yamlPath, 'utf-8');
+  const config = yaml.load(rawYaml);
+
+  const tagFilters = [];
+  const rawToolIds = [];
+
+  for (const item of config) {
+    if (item.tag) {
+      // Strip [[...]] if present
+      const raw = item.tag.trim();
+      const tag = raw.replace(/^\[\[(.*)\]\]$/, '$1').trim();
+      tagFilters.push(tag);
+    } else if (typeof item === 'string') {
+      const raw = item.trim();
+      const toolId = raw.replace(/^\[\[(.*)\]\]$/, '$1').trim();
+      rawToolIds.push(toolId);
+    }
+  }
+
+
+  const allTools = await getCollection('tooling');
+  const toolMap = new Map(allTools.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const tools = [];
+  const normalizeTag = tag => slugify(tag).toLowerCase();
+
+  for (const input of rawToolIds) {
+    let id = input;
+    const match = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (match) id = match[1].trim();
+
+    const resolvedId = await resolveToolId(id, allTools);
+    if (resolvedId && toolMap.has(resolvedId)) tools.push(toolMap.get(resolvedId));
+  }
+
+  if (tagFilters.length > 0) {
+    const tagFiltered = allTools
+      .filter(tool => tool.data.tags?.some(tag =>
+        tagFilters.some(filter => normalizeTag(filter) === normalizeTag(tag))
+      ))
+      .map(entry => ({
+        ...entry.data,
+        id: entry.id,
+        filePath: entry.id,
+      }));
+
+    for (const tool of tagFiltered) {
+      if (!tools.some(t => t.id === tool.id)) tools.push(tool);
+    }
+  }
+
+  toolGalleryTools = tools;
+} catch (err) {
+  console.warn(`No tool-gallery.yaml for ${client}`);
+}
+
+---
+
+<Layout title={`Client Portal: ${toProperCase(client)}`}>
+  <div class="client-reader-wrapper">
+    <h1 class="text-3xl font-bold mb-6">Client Portal: {toProperCase(client)}</h1>
+
+    <button id="toggle-reader" class="toggle-button">Hide Reader</button>
+
+    <div id="reader-section" class="collapsible-section expanded">
+      {currentEssay ? (
+        <CollectionReaderLayout 
+          collection={`client-content/${client}`} 
+          entry={currentEssay} 
+          essays={essays} 
+          mode="client"
+          client={client}
+        />
+      ) : (
+        <p>No published essays for this client.</p>
+      )}
+    </div>
+
+    {(clientVocab.length > 0 || clientConcepts.length > 0) && (
+      <div class="mt-12">
+        {clientVocab.length > 0 && (
+          <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
+            <ReferenceGrid items={clientVocab} />
+          </section>
+        )}
+
+        {clientConcepts.length > 0 && (
+          <>
+            <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+            <section>
+              <h2 class="text-2xl font-bold mb-4">Concepts</h2>
+              <ReferenceGrid items={clientConcepts} />
+            </section>
+          </>
+        )}
+      </div>
+    )}
+
+    {toolGalleryTools.length > 0 && (
+    <>
+      <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-4">Related Tools</h2>
+        <ToolingGallery tools={toolGalleryTools} />
+      </section>
+    </>
+  )}
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const button = document.getElementById('toggle-reader');
+      const section = document.getElementById('reader-section');
+
+      button.addEventListener('click', () => {
+        const isCollapsed = section.classList.toggle('collapsed');
+        section.classList.toggle('expanded', !isCollapsed);
+        button.textContent = isCollapsed ? 'Show Reader' : 'Hide Reader';
+      });
+    });
+  </script>
+</Layout>
+
+<style>
+.client-reader-wrapper {
+  padding: 2rem 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .client-reader-wrapper {
+    padding: 3rem 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .client-reader-wrapper {
+    padding: 4rem 3rem;
+  }
+}
+
+.toggle-button {
+  background: var(--clr-lossless-primary, #333);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.collapsible-section {
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  overflow: hidden;
+  max-height: 5000px;
+  opacity: 1;
+}
+
+.collapsible-section.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+</style>

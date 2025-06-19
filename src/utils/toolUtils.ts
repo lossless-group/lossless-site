@@ -182,3 +182,23 @@ export function defaultCategoryDir(filePath: string): string {
   
   return "";
 } 
+
+import { slugify } from '@utils/slugify';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+
+export async function resolveToolId(input: string, allTools: any[]): Promise<string | null> {
+  // 1. Try exact match
+  const directMatch = allTools.find(tool => tool.id === input);
+  if (directMatch) return directMatch.id;
+
+  // 2. Try normalized match
+  const normalized = slugify(input);
+  const normMatch = allTools.find(tool => slugify(tool.id) === normalized);
+  if (normMatch) return normMatch.id;
+
+  // 3. Try recursive routeManager resolution
+  const route = transformContentPathToRoute(input);
+  const finalSlug = route.split('/').pop();
+  const finalMatch = allTools.find(tool => slugify(tool.id).endsWith(finalSlug || ''));
+  return finalMatch?.id || null;
+}
