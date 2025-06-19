@@ -10,10 +10,16 @@ export const getStaticPaths = async () => {
   return allEntries
     .filter(entry => entry.id.includes('/essays/'))
     .map(entry => {
+      
       const [client] = entry.id.split('/');
       const filename = path.basename(entry.id).replace(/\.(md|mdx)$/, '');
       const slug = getReferenceSlug(filename);
 
+      if (slug.includes('>-')) {
+        console.warn(`[warn] Skipping malformed slug: ${slug}`);
+        return [];
+      }
+      
       return {
         params: {
           client,
@@ -30,49 +36,9 @@ export const getStaticPaths = async () => {
 };
 const { client, slug } = Astro.props;
 
-const allEntries = await getCollection('client-content');
-const rawEssays = allEntries.filter(entry =>
-  entry.id.startsWith(`${client.toLowerCase()}/essays/`)
-);
-const processedEssays = processEntries(rawEssays);
-const currentEssay = processedEssays.find(e => {
-  const parts = e.slug.split('/');
-  const lastPart = parts[parts.length - 1];
-  return lastPart === slug;
-});
-// Load vocab/concepts
-const allVocabulary = processEntries(await getCollection('vocabulary'));
-const allConcepts = processEntries(await getCollection('concepts'));
-
-import fs from 'node:fs/promises';
-import { contentBasePath } from '@utils/envUtils';
-
-const referenceTermsPath = path.resolve(
-  contentBasePath,
-  `client-content/${toProperCase(client)}/reference-terms.json`
-);
-
-let referenceTerms = { vocabulary: [], concepts: [] };
-
-try {
-  const raw = await fs.readFile(referenceTermsPath, 'utf-8');
-  referenceTerms = JSON.parse(raw);
-} catch (err) {
-  console.warn(`No reference terms found for client: ${client}`);
-}
-const vocabSlugs = referenceTerms.vocabulary.map(getReferenceSlug);
-const conceptSlugs = referenceTerms.concepts.map(getReferenceSlug);
-
-const clientVocab = allVocabulary.filter(entry => vocabSlugs.includes(entry.slug));
-const clientConcepts = allConcepts.filter(entry => conceptSlugs.includes(entry.slug));
-
-console.log("Passing", processedEssays[0].slug, slug, 'essays')
 ---
 
 <ClientPortalLayout 
   client={client}
-  currentEssay={currentEssay}
-  essays={processedEssays}
-  clientVocab={clientVocab}
-  clientConcepts={clientConcepts}
+  slug={slug}
 />

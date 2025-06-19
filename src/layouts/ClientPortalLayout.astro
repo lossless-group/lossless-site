@@ -18,17 +18,64 @@ interface Props {
   essays: CollectionEntry<'client-content'>[];
   clientVocab: CollectionEntry<'vocabulary'>[];
   clientConcepts: CollectionEntry<'concepts'>[];
+  slug?: string;
 }
 
-const { client, currentEssay, essays, clientVocab, clientConcepts } = Astro.props;
+const { client, slug } = Astro.props;
 
+import { processEntries } from '@utils/slugify';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+
+const allClientEssays = await getCollection('client-content');
+const allVocabulary = processEntries(await getCollection('vocabulary'));
+const allConcepts = processEntries(await getCollection('concepts'));
+
+// Load reference-terms.json
+// IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
+const referenceTermsPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/reference-terms.json`);
+let referenceTerms = { vocabulary: [], concepts: [] };
+
+try {
+  const raw = await fs.readFile(referenceTermsPath, 'utf-8');
+  referenceTerms = JSON.parse(raw);
+} catch (err) {
+  console.warn(`No reference terms found for client: ${client}`);
+}
+
+// Slugify helper
+function normalizeSlugFromPath(term: string): string {
+  const transformed = transformContentPathToRoute(term); // → "/more-about/explainers-for-ai/ai-avatars"
+  return transformed.split('/').slice(2).join('/');       // → "explainers-for-ai/ai-avatars"
+}
+
+// Extract data for client
+const rawEssays = allClientEssays.filter(e => e.id.startsWith(`${client.toLowerCase()}/essays/`));
+const essays = processEntries(rawEssays);
+
+let currentEssay = essays[0];
+if (slug) {
+  currentEssay = essays.find(e => {
+    const parts = e.slug.split('/');
+    const lastPart = parts[parts.length - 1];
+    return lastPart === slug;
+  });
+}
+
+const vocabPaths = referenceTerms.vocabulary.map(normalizeSlugFromPath);
+const conceptPaths = referenceTerms.concepts.map(normalizeSlugFromPath);
+
+const clientVocab = allVocabulary.filter(e => vocabPaths.includes(e.slug));
+const clientConcepts = allConcepts.filter(e => conceptPaths.includes(e.slug));
+
+// For the Tooling section
 import yaml from 'js-yaml';
 import fs from 'node:fs/promises';
 
 let toolGalleryTools = [];
 
 try {
-  const yamlPath = path.resolve(contentBasePath, `client-content/${client}/tool-gallery.yaml`);
+  // IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
+  const yamlPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/tool-gallery.yaml`);
   const rawYaml = await fs.readFile(yamlPath, 'utf-8');
   const config = yaml.load(rawYaml);
 
@@ -36,16 +83,17 @@ try {
   const rawToolIds = [];
 
   for (const item of config) {
-    if (item.tag) {
-      // Strip [[...]] if present
-      const raw = item.tag.trim();
-      const tag = raw.replace(/^\[\[(.*)\]\]$/, '$1').trim();
-      tagFilters.push(tag);
-    } else if (typeof item === 'string') {
-      const raw = item.trim();
-      const toolId = raw.replace(/^\[\[(.*)\]\]$/, '$1').trim();
-      rawToolIds.push(toolId);
-    }
+      if (item.tag) {
+        const raw = String(item.tag).trim();
+        const match = raw.match(/^\[\[(.*?)\]\]$/);
+        const tag = match ? match[1].trim() : raw;
+        tagFilters.push(tag);
+      } else if (typeof item === 'string') {
+        const raw = item.trim();
+        const match = raw.match(/^\[\[(.*?)\]\]$/);
+        const toolId = match ? match[1].trim() : raw;
+        rawToolIds.push(toolId);
+      }
   }
 
 
