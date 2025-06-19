@@ -7,91 +7,101 @@ const { id, label } = Astro.props;
   title={`Copy link to ${label}`}
   aria-label={`Copy link to ${label}`}
 >
-  <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 2H8C7.45 2 7 2.45 7 3V4H6C4.9 4 4 4.9 4 6V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V6C20 4.9 19.1 4 18 4H17V3C17 2.45 16.55 2 16 2ZM16 4H8V3H16V4ZM18 20H6V6H7V7H17V6H18V20Z"/>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 2H8C7.45 2 7 2.45 7 3V4H6C4.9 4 4 4.9 4 6V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V6C20 4.9 19.1 4 18 4H17V3C17 2.45 16.55 2 16 2ZM16 4H8V3H16V4ZM18 20H6V6H7V7H17V6H18V20Z" fill="currentColor"/>
   </svg>
 </button>
 
-<script is:inline>
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".copy-btn");
-    if (!btn) return;
-
-    const headingId = btn.dataset.copyId;
-    const url = window.location.origin + window.location.pathname + "#" + headingId;
-
-    // Try Web Share API first if available
-    if (navigator.share) {
-      // Prepare share data
-      const shareData = {
-        title: label || document.title,
-        text: label,
-        url: url
-      };
-      
-      // Add banner image to share data if available
-      // Note: Not all platforms support images in the Web Share API
-      const bannerImage = document.querySelector('meta[property="og:image"]')?.content || 
-                        'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp';
-      
-      try {
-        // Create a temporary link element to handle the image fetch
-        const link = document.createElement('a');
-        link.href = bannerImage;
-        
-        // Use the default image if the banner image fails to load
-        link.onerror = () => {
-          link.href = 'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp';
-        };
-        
-        // Add the image to share data
-        shareData.files = [
-          new File([bannerImage], 'banner.jpg', { type: 'image/webp' })
-        ];
-      } catch (e) {
-        console.warn('Could not add banner image to share data, using default:', e);
-        shareData.files = [
-          new File(['https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp'], 'banner.jpg', { type: 'image/webp' })
-        ];
-      }
-      
-      navigator.share(shareData).catch(err => {
-        // Fall back to clipboard if share is cancelled or fails
-        if (err.name !== 'AbortError') {
-          console.warn('Share failed, falling back to clipboard:', err);
-          copyToClipboard(url, btn);
-        }
-      });
-    } else {
-      copyToClipboard(url, btn);
-    }
-  });
-
-  function copyToClipboard(url, btn) {
-    // Create a temporary input to copy the URL
-    const input = document.createElement('input');
-    input.value = url;
-    document.body.appendChild(input);
-    input.select();
-    
-    try {
-      const successful = document.execCommand('copy');
-      if (successful) {
-        btn.classList.add("copied");
-        setTimeout(() => btn.classList.remove("copied"), 800);
-      } else {
-        throw new Error('Copy command failed');
-      }
-    } catch (err) {
-      console.error('Clipboard error:', err);
-      alert('Copy failed: ' + err.message);
-    } finally {
-      document.body.removeChild(input);
-    }
+<style>
+  .copy-btn {
+    background: none;
+    border: none;
+    color: var(--clr-text-muted);
+    cursor: pointer;
+    padding: 0.2rem 0.3rem;
+    margin-left: 0.3rem;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
   }
 
-  // Initialize the event listener
-  document.addEventListener("click", handleCopyClick);
+  .copy-btn:hover,
+  .copy-btn:focus-visible {
+    opacity: 1;
+    color: var(--clr-primary);
+    outline: none;
+  }
+
+  .copy-btn.copied {
+    color: var(--color-success);
+    opacity: 1;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('click', async (e) => {
+    const button = e.target.closest('.copy-btn');
+    if (!button) return;
+
+    e.preventDefault();
+    
+    const headingId = button.getAttribute('data-copy-id');
+    if (!headingId) return;
+    
+    const url = `${window.location.origin}${window.location.pathname}#${headingId}`;
+    
+    try {
+      // Try Web Share API first
+      if (navigator.share) {
+        const shareData = {
+          title: document.title,
+          text: button.getAttribute('aria-label') || '',
+          url: url
+        };
+        
+        // Add OpenGraph image if available
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) {
+          try {
+            shareData.files = [
+              new File([ogImage.content], 'og-image.jpg', { type: 'image/jpeg' })
+            ];
+          } catch (e) {
+            console.warn('Could not add image to share data:', e);
+          }
+        }
+        
+        await navigator.share(shareData);
+      } else {
+        throw new Error('Web Share API not supported');
+      }
+    } catch (err) {
+      // Fall back to clipboard if sharing fails or is not supported
+      if (err.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(url);
+          button.classList.add('copied');
+          setTimeout(() => button.classList.remove('copied'), 2000);
+        } catch (clipboardErr) {
+          console.error('Failed to copy to clipboard:', clipboardErr);
+          // Fallback for older browsers
+          const input = document.createElement('input');
+          input.value = url;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          document.body.removeChild(input);
+          
+          button.classList.add('copied');
+          setTimeout(() => button.classList.remove('copied'), 2000);
+        }
+      }
+    }
+  });
 </script>
 
 <style>
