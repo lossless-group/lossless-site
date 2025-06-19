@@ -131,7 +131,9 @@ safeTags = [...new Set(safeTags)];
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-width: 40rem;
+    width: 100%;
+    min-width: unset;
+    max-width: 100%;    
     transition: box-shadow 0.18s cubic-bezier(.4,0,.2,1), transform 0.16s cubic-bezier(.4,0,.2,1);
     will-change: box-shadow, transform;
   }
@@ -220,12 +222,13 @@ safeTags = [...new Set(safeTags)];
   /* =============================
    * Row grid for PostCard: image left, content right
    * ============================= */
-  .post-card__row {
-    display: grid;
-    grid-template-columns: minmax(120px, 16vw) 1fr;
-    gap: 1.5rem;
-    align-items: stretch;
-  }
+.post-card__row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
   .post-card__image-container {
     height: 100%;
     aspect-ratio: 16/9;
@@ -233,14 +236,12 @@ safeTags = [...new Set(safeTags)];
     margin-bottom: 0.75rem;
     display: block;
     position: relative;
-    max-width: 16vw;
-  }
+    width: 100%;
+    max-width: none;  
 
-  @media (max-width: 768px) {
-    .post-card__image-container {
-        max-width: 32vw;
-    }
-  }
+}
+
+
   
 
   .post-card__image {
