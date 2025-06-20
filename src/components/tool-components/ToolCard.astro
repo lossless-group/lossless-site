@@ -243,7 +243,6 @@ const toolkitPath = generateToolkitPath();
     display: flex;
     flex-direction: column;
     max-width: 100%;
-    min-width: 310px;
     max-height: 100%;
     margin-bottom: 2px;
     box-sizing: border-box;
@@ -252,6 +251,8 @@ const toolkitPath = generateToolkitPath();
     transition: opacity 300ms ease, transform 300ms ease, box-shadow 300ms ease;
     will-change: opacity, transform, box-shadow;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle base shadow */
+    min-width: 0;
+    flex-shrink: 1;
   }
 
   .tool-card.fade-in {
@@ -450,5 +451,94 @@ const toolkitPath = generateToolkitPath();
   height: 120px;
 }
 
+/* Responsive styles for better adaptation to smaller widths */
+@media (max-width: 1024px) {
+  .tool-card {
+    padding: 0.1em;
+  }
+  
+  .tool-card .content-wrapper {
+    padding: 0.4em;
+  }
+  
+  .tool-card-image img {
+    height: 160px;
+  }
+  
+  .tool-card h2 {
+    font-size: var(--fs-400);
+  }
+  
+  .tool-card h4 {
+    font-size: var(--fs-300);
+  }
+  
+  .tool-description {
+    font-size: var(--fs-250);
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-card-image img {
+    height: 140px;
+  }
+  
+  .tool-card h2 {
+    font-size: var(--fs-350);
+  }
+  
+  .tool-card h4 {
+    font-size: var(--fs-250);
+  }
+  
+  .tool-description {
+    font-size: var(--fs-200);
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-card-image img {
+    height: 120px;
+  }
+  
+  .tool-card h2 {
+    font-size: var(--fs-300);
+  }
+  
+  .tool-card h4 {
+    font-size: var(--fs-200);
+  }
+  
+  .tool-description {
+    font-size: var(--fs-150);
+  }
+}
+
+/* When sidebar is expanded (hover state on desktop) */
+@media (min-width: 1025px) {
+  .collection-reader-layout:has(.collection-sidebar:hover) .tool-card {
+    padding: 0.1em;
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .tool-card .content-wrapper {
+    padding: 0.4em;
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .tool-card-image img {
+    height: 160px;
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .tool-card h2 {
+    font-size: var(--fs-400);
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .tool-card h4 {
+    font-size: var(--fs-300);
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .tool-description {
+    font-size: var(--fs-250);
+  }
+}
 
 </style>

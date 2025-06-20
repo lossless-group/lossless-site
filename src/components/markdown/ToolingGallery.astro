@@ -2,7 +2,7 @@
 import ToolCard from "../../components/tool-components/ToolCard.astro";
 
 interface Props {
-  tools: Array<Record<string, any>>;
+  tools: any[];
   expanded?: boolean;
   galleryId?: string;
   small?: boolean;
@@ -12,7 +12,7 @@ const {
   tools,
   expanded = true,
   small,
-  galleryId = `tooling-gallery-${Math.random().toString(36).slice(2)}`
+  galleryId = `tooling-gallery-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 } = Astro.props;
 ---
 
@@ -36,6 +36,13 @@ const {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.5rem;
   background-color: rgba(255, 255, 255, 0.03);
+  width: 100%;
+  max-width: 25vw;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .toggle-button {
@@ -48,6 +55,7 @@ const {
   padding: 0.75rem 1rem;
   cursor: pointer;
   font-size: 0.9rem;
+  box-sizing: border-box;
 }
 
 .tooling-gallery-scroll {
@@ -56,14 +64,25 @@ const {
   scroll-snap-type: x mandatory;
   gap: 1rem;
   padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  box-sizing: border-box;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tool-card-wrapper {
   flex: 0 0 auto;
   scroll-snap-align: start;
   width: 320px;
+  max-width: 320px;
+  min-width: 200px;
   max-height: 480px;
   display: flex;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .tool-card-wrapper > * {
@@ -71,6 +90,35 @@ const {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+/* Ensure the gallery respects the prose container's max-width */
+.prose .tooling-gallery-container {
+  max-width: 85ch;
+  width: 100%;
+  overflow: hidden;
+}
+
+.prose .tooling-gallery-scroll {
+  max-width: 85ch;
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* On large screens (1500px+), allow the gallery to take up more width */
+@media (min-width: 1600px) {
+  .tooling-gallery-container {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .tooling-gallery-container {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 </style>
 

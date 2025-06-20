@@ -106,7 +106,7 @@ let isSmallToolGallery = false
 
 
 if (isToolingGallery) {  
-  isSmallToolGallery = node.meta.includes('small');
+  isSmallToolGallery = node.meta?.includes('small');
 
   const rawLines = node.value
     .split('\n')

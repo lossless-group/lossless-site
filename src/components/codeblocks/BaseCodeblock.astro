@@ -147,25 +147,5 @@ const { code, lang = 'text' } = Astro.props;
     max-height: 500px; /* adjust as desired */
     overflow-y: auto;
   }
-  
-  /*
-    Hide any language label injected inside the <pre> or <code> block by Markdown plugins or syntax highlighters.
-    We want the language label to appear ONLY in the header above the code block, not inside.
-    This targets any span, div, or element with a class containing 'language-'.
-  */
-  .codeblock-content [class*="language-"] {
-    display: none !important;
-  }
-  
-  /*
-    Hide any "before" or "after" labels or elements injected by Markdown plugins or syntax highlighters.
-    This includes pseudo-elements, classes, or even non-standard HTML tags.
-    Covers: ::before, ::after, [class*="before"], [class*="after"], and any literal <::before> or <::after> tags.
-  */
-  .codeblock-content ::before,
-  .codeblock-content ::after,
-  .codeblock-content [class*="before"],
-  .codeblock-content [class*="after"] {
-    display: none !important;
-  }
+
 </style>

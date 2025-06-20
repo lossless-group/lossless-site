@@ -163,9 +163,12 @@ try {
     </AnimationWrapper>
 
   <div class="client-reader-wrapper">
-    <h1 class="text-3xl font-bold mb-6">Client Portal: {toProperCase(client)}</h1>
+    <div class="client-reader-header">
+        <h1 class="text-3xl font-bold mb-6 mr-6">Client Portal: {toProperCase(client)}</h1>
 
-    <button id="toggle-reader" class="toggle-button">Hide Reader</button>
+        <button id="toggle-reader" class="toggle-button">Hide Reader</button>
+    </div>
+    
 
     <div id="reader-section" class="collapsible-section expanded">
       {currentEssay ? (
@@ -180,43 +183,46 @@ try {
         <p>No published essays for this client.</p>
       )}
     </div>
+  
+  <div class="client-portal-container">
+    <button id="toggle-references" class="toggle-button">Hide References</button>
 
-  <button id="toggle-references" class="toggle-button">Hide References</button>
+      <div id="reference-section" class="collapsible-section expanded">
+        {(clientVocab.length > 0 || clientConcepts.length > 0) && (
+          <div class="mt-12">
+            {clientVocab.length > 0 && (
+              <section class="mb-12">
+                <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
+                <ReferenceGrid items={clientVocab} />
+              </section>
+            )}
 
-  <div id="reference-section" class="collapsible-section expanded">
-    {(clientVocab.length > 0 || clientConcepts.length > 0) && (
-      <div class="mt-12">
-        {clientVocab.length > 0 && (
-          <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
-            <ReferenceGrid items={clientVocab} />
-          </section>
-        )}
-
-        {clientConcepts.length > 0 && (
-          <>
-            <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
-            <section>
-              <h2 class="text-2xl font-bold mb-4">Concepts</h2>
-              <ReferenceGrid items={clientConcepts} />
-            </section>
-          </>
+            {clientConcepts.length > 0 && (
+              <>
+                <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+                <section>
+                  <h2 class="text-2xl font-bold mb-4">Concepts</h2>
+                  <ReferenceGrid items={clientConcepts} />
+                </section>
+              </>
+            )}
+          </div>
         )}
       </div>
-    )}
-  </div>
 
-    {toolGalleryTools.length > 0 && (
-    <>
-      <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
-      <section class="mb-12">
-        <h2 class="text-2xl font-bold mb-4">Related Tools</h2>
-        <ToolingGallery tools={toolGalleryTools} />
-      </section>
-    </>
-  )}
+        {toolGalleryTools.length > 0 && (
+        <>
+          <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+          <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">Related Tools</h2>
+            <ToolingGallery tools={toolGalleryTools} />
+          </section>
+        </>
+      )}
 
+      </div>
   </div>
+  
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -244,7 +250,11 @@ try {
 
 <style>
 .client-reader-wrapper {
-  padding: 2rem 5rem;
+  padding: 2rem 0rem;
+}
+
+.client-reader-header, .client-portal-container {
+  padding: 0rem 2rem;
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,68 @@
+---
+// /client/thread/[magazine].astro (converted to static generation)
+import Layout from '@layouts/Layout.astro';
+import PostCardContentLayout from '../../layouts/PostCardContentLayout.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const collectionMap = {
+    prompts: { collection: 'prompts', urlPrefix: '/vibe-with/prompts/' },
+    specs: { collection: 'specs', urlPrefix: '/vibe-with/specs/' },
+    reminders: { collection: 'reminders', urlPrefix: '/vibe-with/reminders/' },
+  };
+
+  const paths = [];
+
+  for (const [magazineKey, { collection, urlPrefix }] of Object.entries(collectionMap)) {
+    const entries = await getCollection(collection);
+
+    const publishedEntries = entries.filter(entry => entry.data.publish !== false);
+
+    const sortedEntries = publishedEntries.slice().sort((a, b) => {
+      const aDate = a.data.date_authored_current_draft;
+      const bDate = b.data.date_authored_current_draft;
+
+      if (aDate && bDate) {
+        const aStr = String(aDate);
+        const bStr = String(bDate);
+        return bStr.localeCompare(aStr);
+      }
+      if (aDate) return -1;
+      if (bDate) return 1;
+      return 0;
+    });
+
+    const contentThreads = sortedEntries.map(entry => {
+      const slug = getReferenceSlug(entry.id);
+
+      let tags = entry.data.tags;
+      if (typeof tags === 'string') {
+        tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+      }
+      if (!Array.isArray(tags)) tags = [];
+
+      return {
+        ...entry.data,
+        tags,
+        id: entry.id,
+        url: `${urlPrefix}${slug}`
+      };
+    });
+
+    paths.push({
+      params: { magazine: magazineKey },
+      props: { contentThreads },
+    });
+  }
+
+  return paths;
+}
+
+const { contentThreads } = Astro.props;
+---
+<Layout title="Magazine Content">
+  <PostCardContentLayout contentThreads={contentThreads} />
+</Layout>
