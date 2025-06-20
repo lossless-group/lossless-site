@@ -154,7 +154,7 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
 //
 
 
-const bannerImage = originalData.banner_image;
+const bannerImage = originalData.banner_image || "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp";
 const lede = originalData.lede;
 const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
 ---
@@ -162,7 +162,7 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
   <title>{articleHeading}</title>
   <meta property="og:title" content={articleHeading} />
   {lede && <meta property="og:description" content={lede} />}
-  {bannerImage && <meta property="og:image" content={bannerImage} />}
+  <meta property="og:image" content={bannerImage} />
   <meta property="og:url" content={url} />
   <meta name="twitter:card" content="summary_large_image" />
 </head>
