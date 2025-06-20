@@ -94,11 +94,13 @@ data.dirpath = dirname(data.path)
 // Only apply if it's a toolGallery code block
 let toolGalleryTools = null;
 let toolGalleryErrors: string[] = [];
+let isSmallToolGallery = false
 
 
+if (node.lang === 'yaml' && node.meta?.startsWith('toolingGallery')) {  
+  isSmallToolGallery = node.meta.includes('small');
 
-if (node.lang === 'yaml' && node.meta === 'toolingGallery') {
-   const rawLines = node.value
+  const rawLines = node.value
     .split('\n')
     .map(line => line.trim())
     .filter(Boolean);
@@ -217,18 +219,18 @@ if (DEBUG_AST) {
     </>
 
     <style>
-  .heading-with-copy {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  flex-wrap: wrap;       /* ✅ fixes your issue */
-  max-width: 100%;
-}
+      .heading-with-copy {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        flex-wrap: wrap;     
+        max-width: 100%;
+      }
 
-.heading-text {
-  display: inline;
-  line-height: inherit;
-}
+      .heading-text {
+        display: inline;
+        line-height: inherit;
+      }
     </style>
   );
 
@@ -359,7 +361,7 @@ if (DEBUG_AST) {
   const { lang, meta, value } = node;
 
   const isToolingGallery = (
-    lang === 'toolingGallery' || (lang === 'yaml' && meta === 'toolingGallery')
+    lang === 'toolingGallery' || (node.lang === 'yaml' && node.meta?.startsWith('toolingGallery'))
   );
 
   const isImageGallery = (
@@ -384,7 +386,7 @@ if (DEBUG_AST) {
 
 {toolGalleryTools && (
   <>
-    <ToolingGallery tools={toolGalleryTools}/>
+    <ToolingGallery tools={toolGalleryTools} small={isSmallToolGallery}/>
     {toolGalleryErrors.length > 0 && (
       <div class="tool-gallery-error">
         ⚠️ Tool(s) not found:

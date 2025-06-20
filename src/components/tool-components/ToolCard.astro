@@ -40,7 +40,9 @@ interface Props {
   filename?: string;
   og_screenshot_url?: string;
   filePath?: string; // Allow filePath to be passed as a prop
+  small?: boolean;
 }
+
 
 const {
   id,
@@ -59,6 +61,7 @@ const {
   filename,
   og_screenshot_url,
   filePath,
+  small = false,
   // Allow all other HTML attributes like class, data-*, aria-*
   ...rest
 } = Astro.props;
@@ -121,7 +124,7 @@ const toolkitPath = generateToolkitPath();
 
 ---
 
-<div class="tool-card card card-hover-effect" data-tags={JSON.stringify(safeTags)}>
+<div class={`tool-card card card-hover-effect${small ? ' small' : ''}`} data-tags={JSON.stringify(safeTags)}>
   <div class="content-wrapper">
     {
       (image || og_image || og_image_url || og_screenshot_url) && (
@@ -146,25 +149,29 @@ const toolkitPath = generateToolkitPath();
       </div>
       <h4><span class="text-wrapper">{displayTitle}</span></h4>
     </div>
-    {
-      effectiveDescription && (
-        <p class="tool-description">
-          <!-- Wrap the description in a span to ensure proper text handling -->
-          <span class="description-text">{effectiveDescription}</span>
-        </p>
-      )
-    }
-    <div class="tool-card__footer">
-      <TagCloud tags={tags} />
-    </div>
-    <div class="tool-card__cta">
-      <TextCTA 
-        href={toolkitPath} 
-        text="Our Thoughts" 
-        showArrow={true}
-        class="tool-thoughts-cta"
-      />
-    </div>
+
+    {!small && effectiveDescription && (
+      <p class="tool-description">
+        <span class="description-text">{effectiveDescription}</span>
+      </p>
+    )}
+
+    {!small && (
+      <div class="tool-card__footer">
+        <TagCloud tags={tags} />
+      </div>
+    )}
+
+    {!small && (
+      <div class="tool-card__cta">
+        <TextCTA 
+          href={toolkitPath} 
+          text="Our Thoughts" 
+          showArrow={true}
+          class="tool-thoughts-cta"
+        />
+      </div>
+    )}
   </div>
 </div>
 
@@ -418,6 +425,29 @@ const toolkitPath = generateToolkitPath();
     opacity: 0;
     transform: translateY(20px);
   }
+}
+
+
+.tool-card.small {
+  height: auto !important;
+  max-height: 240px !important;
+  min-height: unset !important;
+  flex: unset !important;
+}
+
+.tool-card.small .content-wrapper {
+  height: auto !important;
+  flex-grow: 0 !important;
+}
+
+.tool-card.small .tool-card__footer,
+.tool-card.small .tool-card__cta,
+.tool-card.small .tool-description {
+  display: none !important;
+}
+
+.tool-card.small .tool-card-image img {
+  height: 120px;
 }
 
 

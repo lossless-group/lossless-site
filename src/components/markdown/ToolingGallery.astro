@@ -5,11 +5,13 @@ interface Props {
   tools: Array<Record<string, any>>;
   expanded?: boolean;
   galleryId?: string;
+  small?: boolean;
 }
 
 const {
   tools,
   expanded = true,
+  small,
   galleryId = `tooling-gallery-${Math.random().toString(36).slice(2)}`
 } = Astro.props;
 ---
@@ -22,7 +24,7 @@ const {
   <div class="tooling-gallery-scroll" style={`display: ${expanded ? 'flex' : 'none'}`}>
     {tools.map(tool => (
       <div class="tool-card-wrapper">
-        <ToolCard {...tool} filePath={tool.filePath} />
+        <ToolCard {...tool} filePath={tool.filePath} small={small} />
       </div>
     ))}
   </div>
@@ -60,7 +62,7 @@ const {
   flex: 0 0 auto;
   scroll-snap-align: start;
   width: 320px;
-  height: 480px;
+  max-height: 480px;
   display: flex;
 }
 
