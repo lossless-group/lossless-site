@@ -223,23 +223,25 @@ if (DEBUG_AST) {
           <Astro.self node={child} data={data} />
         ))}
       </span>
+      <style>
+  .heading-with-copy {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-wrap: nowrap;     
+    max-width: 100%;
+  }
+
+  .heading-text {
+    display: inline;
+    line-height: inherit;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+</style>
+
       <CopyLinkButton id={id} label={currentHeaderText} />
     </>
-
-    <style>
-      .heading-with-copy {
-        display: flex;
-        align-items: center;
-        gap: 0.2rem;
-        flex-wrap: wrap;     
-        max-width: 100%;
-      }
-
-      .heading-text {
-        display: inline;
-        line-height: inherit;
-      }
-    </style>
   );
 
   switch (node.depth) {
@@ -517,4 +519,5 @@ if (DEBUG_AST) {
         {JSON.stringify(node)}
     </div>
 }
+
 
