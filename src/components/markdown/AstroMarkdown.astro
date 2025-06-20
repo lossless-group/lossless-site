@@ -217,16 +217,18 @@ if (DEBUG_AST) {
     </>
 
     <style>
-      .heading-with-copy {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.2rem;
-      }
+  .heading-with-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-wrap: wrap;       /* ✅ fixes your issue */
+  max-width: 100%;
+}
 
-      .heading-text {
-        display: inline;
-        line-height: inherit;
-      }
+.heading-text {
+  display: inline;
+  line-height: inherit;
+}
     </style>
   );
 

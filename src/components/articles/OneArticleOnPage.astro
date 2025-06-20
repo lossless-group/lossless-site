@@ -13,6 +13,7 @@ const shareIconPath = '/src/assets/Icons/share.svg';
 interface Props {
   effectiveHeading?: string; // Renamed from title to avoid conflict
   content: Root;
+  articleHeading?: string;
   data?: {
     path: string;
     id?: string;  // File ID (e.g., 'Agile.md')
@@ -153,7 +154,18 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
 //
 
 
+const bannerImage = originalData.banner_image;
+const lede = originalData.lede;
+const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
 ---
+<head>
+  <title>{articleHeading}</title>
+  <meta property="og:title" content={articleHeading} />
+  {lede && <meta property="og:description" content={lede} />}
+  {bannerImage && <meta property="og:image" content={bannerImage} />}
+  <meta property="og:url" content={url} />
+  <meta name="twitter:card" content="summary_large_image" />
+</head>
 
 <div class="content-wrapper">
     <InfoSidebar 

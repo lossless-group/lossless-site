@@ -1,14 +1,20 @@
 ---
-const { id, label } = Astro.props;
+const { id, label, title, bannerImage } = Astro.props;
+
 ---
 <button
   class="copy-btn"
   data-copy-id={id}
+  data-title={title}
+  data-banner={bannerImage}
   title={`Copy link to ${label}`}
   aria-label={`Copy link to ${label}`}
 >
-  <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 2H8C7.45 2 7 2.45 7 3V4H6C4.9 4 4 4.9 4 6V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V6C20 4.9 19.1 4 18 4H17V3C17 2.45 16.55 2 16 2ZM16 4H8V3H16V4ZM18 20H6V6H7V7H17V6H18V20Z"/>
+  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+       xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1"/>
+    <path d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1"/>
   </svg>
 </button>
 
@@ -31,6 +37,7 @@ const { id, label } = Astro.props;
       });
   });
 </script>
+
 
 <style>
   .copy-btn {
@@ -62,7 +69,7 @@ const { id, label } = Astro.props;
   }
 
   .copy-btn.copied {
-   color: rgb(0, 233, 233);
+    color: rgb(0, 233, 233);
   }
 
   .copy-btn.copied .icon {
@@ -74,6 +81,4 @@ const { id, label } = Astro.props;
     50%  { transform: scale(1.2); }
     100% { transform: scale(1); }
   }
-
-  
 </style>

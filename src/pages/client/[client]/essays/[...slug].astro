@@ -15,11 +15,6 @@ export const getStaticPaths = async () => {
       const filename = path.basename(entry.id).replace(/\.(md|mdx)$/, '');
       const slug = getReferenceSlug(filename);
 
-      if (slug.includes('>-')) {
-        console.warn(`[warn] Skipping malformed slug: ${slug}`);
-        return [];
-      }
-      
       return {
         params: {
           client,
