@@ -1,4 +1,6 @@
 ---
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import Layout from '@layouts/Layout.astro';
 import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
@@ -140,6 +142,26 @@ try {
 ---
 
 <Layout title={`Client Portal: ${toProperCase(client)}`}>
+    <AnimationWrapper>
+      <Hero
+        title="Welcome, Laerdal"
+        subtitle="It's time to enter the era of AI"
+        description="With the right tools, mindset, processes, and culture, any organization can upskill everyone for the era of AI"
+        ctaText="Explore Tools"
+        ctaUrl="/toolkit"
+        image={{
+          src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
+          alt: "Laerdal Logo"
+        }}
+        alignment="left"
+        fullBleed={true}
+        animate={true}
+        class="mb-0"
+        style="margin-bottom: 0;"
+        innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+      />
+    </AnimationWrapper>
+
   <div class="client-reader-wrapper">
     <h1 class="text-3xl font-bold mb-6">Client Portal: {toProperCase(client)}</h1>
 
@@ -222,18 +244,12 @@ try {
 
 <style>
 .client-reader-wrapper {
-  padding: 2rem 1.5rem;
+  padding: 2rem 5rem;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 768px) {
   .client-reader-wrapper {
     padding: 3rem 2rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .client-reader-wrapper {
-    padding: 4rem 3rem;
   }
 }
 
