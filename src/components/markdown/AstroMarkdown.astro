@@ -92,12 +92,20 @@ data.dirpath = dirname(data.path)
 
 //This logic has to be done up here because it's async work
 // Only apply if it's a toolGallery code block
+  const isToolingGallery = (
+    node.lang === 'toolingGallery' || (node.lang === 'yaml' && node.meta?.startsWith('toolingGallery'))
+  );
+
+  const isImageGallery = (
+    node.lang === 'imageGallery' || (node.lang === 'yaml' && node.meta === 'imageGallery')
+  );
+
 let toolGalleryTools = null;
 let toolGalleryErrors: string[] = [];
 let isSmallToolGallery = false
 
 
-if (node.lang === 'yaml' && node.meta?.startsWith('toolingGallery')) {  
+if (isToolingGallery) {  
   isSmallToolGallery = node.meta.includes('small');
 
   const rawLines = node.value
@@ -360,17 +368,37 @@ if (DEBUG_AST) {
 {node.type === "code" && (() => {
   const { lang, meta, value } = node;
 
-  const isToolingGallery = (
-    lang === 'toolingGallery' || (node.lang === 'yaml' && node.meta?.startsWith('toolingGallery'))
-  );
+  if (toolGalleryTools?.length > 0) {
+      return (
+          <>
+            <ToolingGallery tools={toolGalleryTools} small={isSmallToolGallery}/>
+            {toolGalleryErrors.length > 0 && (
+              <div class="tool-gallery-error">
+                ⚠️ Tool(s) not found:
+                <ul>
+                  {toolGalleryErrors.map(id => <li><code>{id}</code></li>)}
+                </ul>
+              </div>
 
-  const isImageGallery = (
-    lang === 'imageGallery' || (lang === 'yaml' && meta === 'imageGallery')
-  );
+              <style>
+                .tool-gallery-error {
+                    color: #ff6b6b;
+                    background-color: rgba(255, 0, 0, 0.05);
+                    border: 1px solid rgba(255, 0, 0, 0.2);
+                    padding: 0.75rem;
+                    margin-top: 2rem;
+                    border-radius: 0.5rem;
+                    font-size: 0.9rem;
+                  }
 
-  if (isToolingGallery) {
-    return; // Do nothing here, the ToolingGallery is rendered separately below
-  }
+                  .tool-gallery-error ul {
+                    margin: 0.5rem 0 0;
+                    padding-left: 1.25rem;
+                  }
+              </style>
+            )}
+          </>
+      )}
 
   if (isImageGallery) {
     return <ImageGallery code={value} dirpath={data.dirpath} />;
@@ -383,37 +411,6 @@ if (DEBUG_AST) {
   return <BaseCodeblock code={value} lang={lang ?? 'text'} />;
 })()}
 
-
-{toolGalleryTools && (
-  <>
-    <ToolingGallery tools={toolGalleryTools} small={isSmallToolGallery}/>
-    {toolGalleryErrors.length > 0 && (
-      <div class="tool-gallery-error">
-        ⚠️ Tool(s) not found:
-        <ul>
-          {toolGalleryErrors.map(id => <li><code>{id}</code></li>)}
-        </ul>
-      </div>
-
-      <style>
-        .tool-gallery-error {
-            color: #ff6b6b;
-            background-color: rgba(255, 0, 0, 0.05);
-            border: 1px solid rgba(255, 0, 0, 0.2);
-            padding: 0.75rem;
-            margin-top: 2rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-          }
-
-          .tool-gallery-error ul {
-            margin: 0.5rem 0 0;
-            padding-left: 1.25rem;
-          }
-      </style>
-    )}
-  </>
-)}
 
 
 {(node.type === "html") &&
