@@ -24,6 +24,25 @@ interface Props {
 
 const { client } = Astro.props;
 
+let openGraphData = {
+  title: `Client Portal: ${toProperCase(client)}`,
+  description: `Explore tailored AI content for ${toProperCase(client)}.`,
+  image: undefined
+};
+
+try {
+  const ogPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/opengraph.json`);
+  const rawOg = await fs.readFile(ogPath, 'utf-8');
+  const parsedOg = JSON.parse(rawOg);
+
+  openGraphData = {
+    ...openGraphData,
+    ...parsedOg
+  };
+} catch (err) {
+  console.warn(`No Open Graph data found for client: ${client}`);
+}
+
 import { processEntries } from '@utils/slugify';
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 
@@ -128,7 +147,12 @@ try {
 
 ---
 
-<Layout title={`Client Portal: ${toProperCase(client)}`}>
+<Layout 
+  frontmatter={{
+    title: openGraphData.title,
+    description: openGraphData.description,
+    banner_image: openGraphData.image
+  }}>
     <AnimationWrapper>
       <Hero
         title="Welcome, Laerdal"
