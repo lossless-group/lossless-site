@@ -1,0 +1,100 @@
+---
+/**
+ * /client/[client]/recommendations/[...slug].astro — Dynamic Route for Client Recommendations
+ *
+ * Modeled after /vibe-with/[collection]/[...slug].astro
+ *
+ * - Fetches content from 'client-recommendations' collection
+ * - Filters by client name based on URL parameter
+ * - Generates static paths for all client recommendation entries
+ * - Renders content using Layout, OneArticle, and OneArticleOnPage components
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { processEntries } from '@utils/slugify';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+/**
+ * getStaticPaths — Generates all static paths for the /client/[client]/recommendations/[slug] dynamic route.
+ *
+ * - Fetches all entries from the 'client-recommendations' collection
+ * - Filters entries by client name (Laerdal, Param, etc.)
+ * - For each entry, generates a path with client and slug params
+ * - Ensures each entry has a slug and title (generates if missing)
+ * - Returns array of { params, props } objects for Astro static generation
+ */
+export async function getStaticPaths() {
+  const allRecommendations = await getCollection('client-recommendations');
+  const processedRecommendations = processEntries(allRecommendations);
+
+  // Define the clients we want to generate paths for
+  const clients = [...new Set(allRecommendations.map(entry => {
+    const entryPath = String(entry.id);
+    // Extract client name from path like "Laerdal/Recommendations/file.md" -> "laerdal"
+    const pathParts = entryPath.split('/');
+    return pathParts[0].toLowerCase();
+  }))];
+  
+  const allPaths = [];
+
+  for (const client of clients) {
+    // Filter recommendations for this specific client
+    const clientRecommendations = processedRecommendations.filter(entry => {
+      const entryPath = String(entry.id);
+      return entryPath.toLowerCase().includes(client.toLowerCase());
+    });
+
+    const clientPaths = clientRecommendations.map(entry => {
+
+      // Split the slug by '/' and take only the last part (the filename)
+      const slugParts = entry.slug.split('/');
+      const filenameSlug = slugParts[slugParts.length - 1];
+      
+      return {
+        params: { client, slug: filenameSlug },
+        props: {
+          entry,
+          client
+        }
+      };
+    });
+
+    allPaths.push(...clientPaths);
+  }
+
+  return allPaths;
+}
+
+/**
+ * Props interface for page rendering.
+ * Supports client recommendations with client name and entry data.
+ */
+interface Props {
+  entry: any;
+  client: string;
+}
+
+const { entry, client } = Astro.props;
+
+// Add content type to the data object for potential use in components
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data.title,
+  client: client
+};
+
+---
+
+<Layout title={entry.data.title}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout> 

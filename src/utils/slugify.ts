@@ -19,7 +19,9 @@ export function processEntries(entries) {
     const filename = entry.filePath.replace(/\.md$/, '');
     const filenameParts = filename.split('/');
     const baseFilename = filenameParts[filenameParts.length - 1];
-    entry.data.title = entry.rendered?.metadata?.frontmatter?.title || baseFilename;
+    
+    // Use entry.data.title if it exists, otherwise fall back to filename
+    entry.data.title = entry.data.title || baseFilename;
 
     entry.slug = getReferenceSlug(entry.id)
 
@@ -33,8 +35,8 @@ export function processEntries(entries) {
 export function slugify(input: string): string {
   return input
     .toLowerCase()                           // Convert to lowercase
-    .replace(/\.[^/.]+$/, '')               // Remove file extension like .md
-    .replace(/[^a-z0-9\s-_]/g, '')          // Remove all non-alphanumeric except space, dash, underscore
+    .replace(/\.[a-z0-9]+$/, '')            // Remove file extension like .md (only if it's just letters/numbers)
+    .replace(/[^a-z0-9\s\-_]/g, '')         // Remove all non-alphanumeric except space, dash, underscore (REMOVE dots)
     .replace(/[\s_]+/g, '-')                // Replace spaces and underscores with dashes
     .replace(/-+/g, '-')                    // Collapse multiple dashes
     .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes

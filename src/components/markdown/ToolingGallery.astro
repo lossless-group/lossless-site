@@ -6,17 +6,19 @@ interface Props {
   expanded?: boolean;
   galleryId?: string;
   small?: boolean;
+  takeUpWholeWidth?: boolean;
 }
 
 const {
   tools,
   expanded = true,
   small,
+  takeUpWholeWidth = false,
   galleryId = `tooling-gallery-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 } = Astro.props;
 ---
 
-<div class="tooling-gallery-container" id={galleryId}>
+<div class="tooling-gallery-container" id={galleryId} class:list={[{ 'full-width': takeUpWholeWidth }]}>
   <button type="button" class="toggle-button" onclick={`toggleToolGallery('${galleryId}')`}>
     {expanded ? "Click to close" : "Click to expand"}
   </button>
@@ -43,6 +45,11 @@ const {
   min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+.tooling-gallery-container.full-width {
+  max-width: 100%;
+  width: 100%;
 }
 
 .toggle-button {

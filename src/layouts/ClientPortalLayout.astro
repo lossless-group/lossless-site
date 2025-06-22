@@ -2,9 +2,9 @@
 import Hero from "@components/basics/Hero.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import Layout from '@layouts/Layout.astro';
-import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+import IconHeaderMessageCardGrid from '@components/basics/messages/IconHeaderMessageCardGrid.astro';
 import { contentBasePath } from '@utils/envUtils';
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from 'astro:content';
@@ -20,15 +20,13 @@ interface Props {
   essays: CollectionEntry<'client-content'>[];
   clientVocab: CollectionEntry<'vocabulary'>[];
   clientConcepts: CollectionEntry<'concepts'>[];
-  slug?: string;
 }
 
-const { client, slug } = Astro.props;
+const { client } = Astro.props;
 
 import { processEntries } from '@utils/slugify';
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 
-const allClientEssays = await getCollection('client-content');
 const allVocabulary = processEntries(await getCollection('vocabulary'));
 const allConcepts = processEntries(await getCollection('concepts'));
 
@@ -50,18 +48,6 @@ function normalizeSlugFromPath(term: string): string {
   return transformed.split('/').slice(2).join('/');       // → "explainers-for-ai/ai-avatars"
 }
 
-// Extract data for client
-const rawEssays = allClientEssays.filter(e => e.id.startsWith(`${client.toLowerCase()}/essays/`));
-const essays = processEntries(rawEssays);
-
-let currentEssay = essays[0];
-if (slug) {
-  currentEssay = essays.find(e => {
-    const parts = e.slug.split('/');
-    const lastPart = parts[parts.length - 1];
-    return lastPart === slug;
-  });
-}
 
 const vocabPaths = referenceTerms.vocabulary.map(normalizeSlugFromPath);
 const conceptPaths = referenceTerms.concepts.map(normalizeSlugFromPath);
@@ -139,6 +125,7 @@ try {
   console.warn(`No tool-gallery.yaml for ${client}`);
 }
 
+
 ---
 
 <Layout title={`Client Portal: ${toProperCase(client)}`}>
@@ -162,31 +149,34 @@ try {
       />
     </AnimationWrapper>
 
+    <!-- Separator between Hero and Client Portal Cards -->
+    <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="2rem" />
+
   <div class="client-reader-wrapper">
-    <div class="client-reader-header">
-        <h1 class="text-3xl font-bold mb-6 mr-6">Client Portal: {toProperCase(client)}</h1>
+    <!-- Client Portal Cards Section -->
+    <section class="client-portal-cards-section">
+      <div class="client-portal-cards-content">
+        <div class="client-portal-cards-text">
+          <p class="client-portal-cards-subtitle">Client Resources</p>
+          <h2 class="client-portal-cards-title">Explore {toProperCase(client)} Content</h2>
+          <p class="client-portal-cards-description">
+            Access strategic recommendations, active projects, and case studies tailored specifically for {toProperCase(client)}.
+          </p>
+        </div>
+      </div>
 
-        <button id="toggle-reader" class="toggle-button">Hide Reader</button>
-    </div>
-    
-
-    <div id="reader-section" class="collapsible-section expanded">
-      {currentEssay ? (
-        <CollectionReaderLayout 
-          collection={`client-content/${client}`} 
-          entry={currentEssay} 
-          essays={essays} 
-          mode="client"
-          client={client}
+      <section class="client-portal-cards-grid-section" style="--client-portal-section-top-margin: 0.5rem;">
+        <IconHeaderMessageCardGrid 
+          jsonPath="messages/clientPortalCards.json"
+          style="margin-top: 0; margin-bottom: 0;"
         />
-      ) : (
-        <p>No published essays for this client.</p>
-      )}
-    </div>
-  
-  <div class="client-portal-container">
-    <button id="toggle-references" class="toggle-button">Hide References</button>
+      </section>
+    </section>
 
+    <!-- Separator between Client Portal Cards and Reference Section -->
+    <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="2rem" />
+
+    <div class="client-portal-container">
       <div id="reference-section" class="collapsible-section expanded">
         {(clientVocab.length > 0 || clientConcepts.length > 0) && (
           <div class="mt-12">
@@ -210,41 +200,32 @@ try {
         )}
       </div>
 
-        {toolGalleryTools.length > 0 && (
+      {toolGalleryTools.length > 0 && (
         <>
           <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
-          <section class="mb-12">
+          <section class="mb-12 tooling-section">
             <h2 class="text-2xl font-bold mb-4">Related Tools</h2>
-            <ToolingGallery tools={toolGalleryTools} />
+            <ToolingGallery tools={toolGalleryTools} takeUpWholeWidth={true} />
           </section>
         </>
       )}
 
-      </div>
+    </div>
   </div>
   
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const button = document.getElementById('toggle-reader');
-      const section = document.getElementById('reader-section');
-
-      button.addEventListener('click', () => {
-        const isCollapsed = section.classList.toggle('collapsed');
-        section.classList.toggle('expanded', !isCollapsed);
-        button.textContent = isCollapsed ? 'Show Reader' : 'Hide Reader';
+      const readerButton = document.getElementById('toggle-reader');
+      const readerSection = document.getElementById('reader-section');
+      
+      // Reader toggle functionality
+      readerButton.addEventListener('click', () => {
+        const isCollapsed = readerSection.classList.toggle('collapsed');
+        readerSection.classList.toggle('expanded', !isCollapsed);
+        readerButton.textContent = isCollapsed ? 'Show Reader' : 'Hide Reader';
       });
     });
-
-    const refButton = document.getElementById('toggle-references');
-    const refSection = document.getElementById('reference-section');
-
-    refButton.addEventListener('click', () => {
-      const isCollapsed = refSection.classList.toggle('collapsed');
-      refSection.classList.toggle('expanded', !isCollapsed);
-      refButton.textContent = isCollapsed ? 'Show References' : 'Hide References';
-    });
-
   </script>
 </Layout>
 
@@ -257,10 +238,221 @@ try {
   padding: 0rem 2rem;
 }
 
+#reference-section {
+  padding: 0rem 2rem;
+}
+
+@media (max-width: 768px) {
+  #reference-section {
+    padding: 0rem;
+  }
+
+  .tooling-section {
+    padding: 0rem;
+  }
+}
+
+.tooling-section {
+  padding: 0rem 2rem;
+}
+
+.client-portal-cards-section {
+  margin-bottom: 0;
+  margin-top: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1rem;
+  /* Removed box-shadow to eliminate shadow boxes */
+  animation: fadeInSlideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.client-portal-cards-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto 3rem auto;
+  animation: fadeInContent 1s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+.client-portal-cards-text {
+  text-align: center;
+  animation: fadeInText 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.client-portal-cards-subtitle {
+  font-family: var(--ff-legible);
+  font-weight: var(--fw-semi-bold);
+  font-size: var(--fs-400);
+  color: var(--clr-lossless-accent--brightest);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  animation: fadeInSubtitle 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.client-portal-cards-title {
+  font-family: var(--ff-base);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-900);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, var(--clr-lossless-primary-light) 0%, var(--clr-lossless-accent--brightest) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  animation: fadeInTitle 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.client-portal-cards-description {
+  font-family: var(--ff-legible);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-450);
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 60ch;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  animation: fadeInDescription 0.8s cubic-bezier(0.4, 0, 0.2, 1) 1s forwards;
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.client-portal-cards-grid-section {
+  padding: 2rem 0 3rem 0;
+  display: flex;
+  flex-direction: column;
+  place-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: var(--client-portal-section-top-margin, 2.5rem);
+  animation: fadeInGrid 1s cubic-bezier(0.4, 0, 0.2, 1) 1.2s forwards;
+  opacity: 0;
+  transform: translateY(25px);
+}
+
+/* Animation Keyframes */
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInSubtitle {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInTitle {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDescription {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .client-reader-wrapper {
     padding: 3rem 2rem;
   }
+  
+  .client-portal-cards-section {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+}
+
+.collapsible-section {
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  max-height: 5000px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-bottom: 2rem;
+}
+
+.collapsible-section.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+.collapsible-section.expanded {
+  max-height: 5000px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-bottom: 2rem;
 }
 
 .toggle-button {
@@ -273,18 +465,35 @@ try {
   margin-bottom: 1rem;
   border: none;
   cursor: pointer;
-}
-
-.collapsible-section {
-  transition: max-height 0.4s ease, opacity 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
   overflow: hidden;
-  max-height: 5000px;
-  opacity: 1;
 }
 
-.collapsible-section.collapsed {
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
+.toggle-button:hover {
+  background: var(--clr-lossless-primary, #333);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.toggle-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.toggle-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.toggle-button:hover::before {
+  left: 100%;
 }
 </style>

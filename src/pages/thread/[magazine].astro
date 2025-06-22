@@ -3,7 +3,7 @@
 import Layout from '@layouts/Layout.astro';
 import PostCardContentLayout from '../../layouts/PostCardContentLayout.astro';
 import { getCollection } from 'astro:content';
-import { getReferenceSlug } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
 
 export const prerender = true;
 
@@ -18,8 +18,9 @@ export async function getStaticPaths() {
 
   for (const [magazineKey, { collection, urlPrefix }] of Object.entries(collectionMap)) {
     const entries = await getCollection(collection);
+    const processedEntries = processEntries(entries);
 
-    const publishedEntries = entries.filter(entry => entry.data.publish !== false);
+    const publishedEntries = processedEntries.filter(entry => entry.data.publish !== false);
 
     const sortedEntries = publishedEntries.slice().sort((a, b) => {
       const aDate = a.data.date_authored_current_draft;
@@ -36,8 +37,6 @@ export async function getStaticPaths() {
     });
 
     const contentThreads = sortedEntries.map(entry => {
-      const slug = getReferenceSlug(entry.id);
-
       let tags = entry.data.tags;
       if (typeof tags === 'string') {
         tags = tags.split(',').map(t => t.trim()).filter(Boolean);
@@ -48,7 +47,7 @@ export async function getStaticPaths() {
         ...entry.data,
         tags,
         id: entry.id,
-        url: `${urlPrefix}${slug}`
+        url: `${urlPrefix}${entry.slug}`
       };
     });
 

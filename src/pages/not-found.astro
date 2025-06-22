@@ -1,19 +1,25 @@
 ---
 import Layout from '@layouts/Layout.astro';
-
-const attemptedPath = Astro.url.searchParams.get('path') || '/unknown';
 ---
 
 <Layout>
   <div class="not-found-wrapper">
     <h1>404 – Not Found</h1>
     <p>
-      We couldn’t find <code>{attemptedPath}</code> in any known directory.
+      We couldn’t find <code id="attempted-path">this page</code> in any known directory.
     </p>
     <p>
       Double-check the spelling or <a href="/">return to the homepage</a>.
     </p>
   </div>
+
+  <script type="module" is:inline>
+    const params = new URLSearchParams(window.location.search);
+    const path = params.get('path');
+    if (path) {
+      document.getElementById('attempted-path').textContent = decodeURIComponent(path);
+    }
+  </script>
 
   <style>
     .not-found-wrapper {

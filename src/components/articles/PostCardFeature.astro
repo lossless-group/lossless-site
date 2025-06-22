@@ -31,18 +31,16 @@ const hasAuthors = Array.isArray(authors) && authors.length > 0;
 <article class="post-card-feature card-hover-effect">
   <div class="post-card-feature__grid">
     <div class="post-card-feature__image-container">
-      {banner_image && (
         <figure class="post-card-feature__figure">
           <img 
-            src={String(banner_image)} 
+            src={String(banner_image || 'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp')} 
             alt={title} 
             class="post-card-feature__image" 
           />
         </figure>
-      )}
     </div>
     <div class="post-card-feature__content">
-      <h1 class="post-card-feature__title"><a href={url}><span class="text-wrapper">{title}</span></a></h1>
+      <h1 class="post-card-feature__title"><a href={url}><span class="text-wrapper">{title || "No Title Found"}</span></a></h1>
       <p class="post-card-feature__lede"><span class="text-wrapper">{lede || summary}</span></p>
       <div class="post-card-feature__meta">
         <div class="post-card-feature__meta-row">

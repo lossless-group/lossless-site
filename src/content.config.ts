@@ -76,7 +76,59 @@ const clientEssaysCollection = defineCollection({
   })
 });
 
+const clientRecommendationsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/Recommendations/**/*.{md,mdx}", // Include both .md and .mdx files
+    base: resolveContentPath("client-content")
+  }),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+  }).passthrough().transform((data, context) => {
+    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
 
+    const displayTitle = data.title
+      ? data.title
+      : filename.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    return {
+      ...data,
+      title: displayTitle,
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+    };
+  })
+});
+
+const clientProjectsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/Projects/**/*.{md,mdx}", // Include both .md and .mdx files
+    base: resolveContentPath("client-content")
+  }),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+  }).passthrough().transform((data, context) => {
+    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
+
+    const displayTitle = data.title
+      ? data.title
+      : filename.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    return {
+      ...data,
+      title: displayTitle,
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+    };
+  })
+});
 
 const visualsCollection = defineCollection({
   loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
@@ -334,6 +386,8 @@ export const paths = {
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'client-content': resolveContentPath('client-content'),
+  'client-recommendations': resolveContentPath('client-content'),
+  'client-projects': resolveContentPath('client-content'),
 };
 
 // Export the collections
@@ -354,4 +408,6 @@ export const collections = {
   'specs': specsCollection,
   'issue-resolution': issueResolutionCollection,
   'client-content': clientEssaysCollection,
+  'client-recommendations': clientRecommendationsCollection,
+  'client-projects': clientProjectsCollection,
 };

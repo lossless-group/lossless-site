@@ -27,7 +27,11 @@ const defaultRouteMappings: RouteMapping[] = [
   {
     contentPath: 'tooling',
     routePath: 'toolkit'
-  }
+  },
+  {
+    contentPath: 'client-content',
+    routePath: 'client'
+  },
   // {
   //   contentPath: 'content/visuals',
   //   routePath: 'content/visuals'
@@ -52,6 +56,7 @@ let customRouteMappings: RouteMapping[] = [];
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
+import { getReferenceSlug, slugify } from '@utils/slugify';
 
 function isValidContentFile(contentPath: string): boolean {
   const fullPath = path.resolve(contentBasePath, `${contentPath}.md`);
@@ -118,8 +123,8 @@ function collectAllMappingPaths(): RouteMapping[] {
 }
 
 export function transformContentPathToRoute(input: string): string {
-  const normalizedInput = input.toLowerCase().replace(/ /g, '-');
-  const segments = normalizedInput.split('/');
+  const segments = input.split('/');
+  const normalizedInput = getReferenceSlug(input);
 
   // Case 1: Full path (contains slash)
   if (segments.length > 1) {

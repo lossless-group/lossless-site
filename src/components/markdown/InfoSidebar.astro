@@ -128,6 +128,8 @@ const {
 .info-list > div {
   margin: 0.5rem 0;
   line-height: 1.4;
+  word-break: break-word;        /* key fix */
+  overflow-wrap: anywhere;       /* optional fallback */
 }
 
 @media (max-width: 1250px) {

@@ -1,0 +1,168 @@
+---
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+import Layout from '@layouts/Layout.astro';
+import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import { toProperCase } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
+
+export async function getStaticPaths() {
+  const allClientEssays = await getCollection('client-content');
+  const paths = [];
+
+  // Group essays by client
+  const essaysByClient = new Map();
+  
+  for (const essay of allClientEssays) {
+    const parts = essay.id.split('/');
+    if (parts.length >= 3 && parts[1] === 'essays') {
+      const client = parts[0];
+      if (!essaysByClient.has(client)) {
+        essaysByClient.set(client, []);
+      }
+      essaysByClient.get(client).push(essay);
+    }
+  }
+
+  // Generate paths for each client
+  for (const [client, essays] of essaysByClient) {
+    // Add the main reader page for each client (no slug)
+    paths.push({
+      params: { 
+        client,
+        slug: undefined
+      },
+      props: { 
+        client, 
+        essaySlug: undefined,
+        essay: undefined
+      }
+    });
+
+    // Add individual essay pages for each client
+    for (const essay of essays) {
+      const processedEssay = processEntries([essay])[0];
+      const essaySlug = processedEssay.slug.split('/').slice(1).join('/');
+
+      paths.push({
+        params: { 
+          client,
+          slug: essaySlug
+        },
+        props: { 
+          client, 
+          essaySlug,
+          essay
+        }
+      });
+    }
+  }
+
+  return paths;
+}
+
+interface Props {
+  client: string;
+  essaySlug?: string;
+  essay?: CollectionEntry<'client-content'>;
+}
+
+const { client, essaySlug, essay } = Astro.props;
+
+const allClientEssays = await getCollection('client-content');
+const rawEssays = allClientEssays.filter(e => e.id.startsWith(`${client.toLowerCase()}/essays/`));
+const essays = processEntries(rawEssays);
+
+// Find the current essay
+let currentEssay = essays[0]; // Default to first essay
+if (essaySlug) {
+  currentEssay = essays.find(e => {
+    const parts = e.slug.split('/');
+    const slugWithoutClient = parts.slice(1).join('/'); // Remove first element (client name)
+    return slugWithoutClient === essaySlug;
+  }) || essays[0];
+}
+
+---
+
+<Layout title={`${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`}>
+  <AnimationWrapper>
+    <Hero
+      title={`${toProperCase(client)} Reader`}
+      subtitle="Strategic insights and recommendations"
+      description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
+      ctaText="Back to Portal"
+      ctaUrl={`/client/${toProperCase(client)}`}
+      image={{
+        src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
+        alt: `${toProperCase(client)} Logo`
+      }}
+      alignment="left"
+      fullBleed={true}
+      animate={true}
+      class="mb-0"
+      style="margin-bottom: 0;"
+      innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+    />
+  </AnimationWrapper>
+
+  <div class="reader-wrapper">
+    {currentEssay ? (
+      <CollectionReaderLayout 
+        collection={`client-content/${client}`} 
+        entry={currentEssay} 
+        essays={essays} 
+        mode="client"
+        client={client}
+      />
+    ) : (
+      <div class="no-content">
+        <h2>Essay not found.</h2>
+        <p>Check back later for updated content.</p>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<script>
+  // Scroll to reader-wrapper if viewing a specific essay (slug is provided)
+  const urlParams = new URLSearchParams(window.location.search);
+  const pathSegments = window.location.pathname.split('/');
+  const hasEssaySlug = pathSegments.includes('essays');
+  
+  if (hasEssaySlug) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const readerWrapper = document.querySelector('.reader-wrapper');
+      if (readerWrapper) {
+        readerWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Add a small offset to account for any fixed headers
+      }
+    });
+  }
+</script>
+
+<style>
+.reader-wrapper {
+  padding: 2rem 0rem;
+  margin: 0 auto;
+}
+
+.no-content {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--clr-lossless-primary);
+}
+
+.no-content h2 {
+  font-size: var(--fs-700);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .reader-wrapper {
+    padding: 1rem;
+  }
+}
+</style> 

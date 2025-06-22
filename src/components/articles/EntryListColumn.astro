@@ -22,9 +22,11 @@ const { essays, currentSlug, mode, client } = Astro.props;
     const filename = entry.id.split('/').pop(); // e.g. "foo.md"
     const itemSlug = getReferenceSlug(filename.replace(/\.(md|mdx)$/, ''));
     const lastSlugSegment = currentSlug?.split('/').pop();
+
     const isActive = itemSlug === lastSlugSegment;    
+
     const url = mode === 'client' 
-      ? `/client/${client.toLowerCase()}/essays/${itemSlug}` 
+      ? `/client/${client.toLowerCase()}/read/essays/${itemSlug}` 
       : `/read/through/${entry.collection}/${itemSlug}`;
 
     return (

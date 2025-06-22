@@ -57,14 +57,13 @@ safeTags = [...new Set(safeTags)];
     - .post-card__row uses CSS grid for two columns
   -->
   <div class="post-card__row">
-    {portrait_image && (
-      <div class="post-card__image-container" style={imageContainerStyle}>
-        <img src={portrait_image} alt={title} class="post-card__image" />
-      </div>
-    )}
+    <div class="post-card__image-container" style={imageContainerStyle}>
+      <img src={portrait_image || 'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp'} alt={title} class="post-card__image" />
+    </div>
+    
     <div class="content-wrapper">
       <div class="post-card__header">
-        <h2 class="post-card__title"><a href={url}><span class="text-wrapper">{title}</span></a></h2>
+        <h2 class="post-card__title"><a href={url}><span class="text-wrapper">{title || "No Title Found"}</span></a></h2>
         <p class="post-card__lede krub-regular"><span class="text-wrapper">{lede || summary}</span></p>
       </div>
       <div class="post-card__meta">

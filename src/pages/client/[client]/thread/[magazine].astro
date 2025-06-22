@@ -1,0 +1,91 @@
+---
+// thread/[magazine].astro (converted to static generation)
+import Layout from '@layouts/Layout.astro';
+import PostCardContentLayout from '@layouts/PostCardContentLayout.astro';
+import { getCollection } from 'astro:content';
+import { processEntries } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const collectionMap = {
+    'recommendations': { collection: 'client-recommendations', urlPrefix: '/client/' },
+    'projects': { collection: 'client-projects', urlPrefix: '/client/' },
+  };
+
+  const paths = [];
+
+  // Dynamically get all entries from both collections to discover clients
+  const allRecommendations = await getCollection('client-recommendations');
+  const allProjects = await getCollection('client-projects');
+  const allEntries = [...allRecommendations, ...allProjects];
+  
+  // Extract unique client names from the entry paths
+  const clients = [...new Set(allEntries.map(entry => {
+    const entryPath = String(entry.id);
+    // Extract client name from path like "Laerdal/Recommendations/file.md" -> "laerdal"
+    const pathParts = entryPath.split('/');
+    return pathParts[0].toLowerCase();
+  }))];
+
+  for (const [magazineKey, { collection, urlPrefix }] of Object.entries(collectionMap)) {
+    const entries = await getCollection(collection);
+    const processedEntries = processEntries(entries);
+
+    // For each dynamically discovered client, filter and generate paths
+    for (const client of clients) {
+      // Filter entries for this specific client
+      const clientEntries = processedEntries.filter(entry => {
+        // Check if the entry path contains the client name
+        const entryPath = String(entry.id);
+        return entryPath.toLowerCase().includes(client.toLowerCase());
+      });
+
+      const sortedEntries = clientEntries.slice().sort((a, b) => {
+        const aDate = a.data.date_authored_current_draft;
+        const bDate = b.data.date_authored_current_draft;
+
+        if (aDate && bDate) {
+          const aStr = String(aDate);
+          const bStr = String(bDate);
+          return bStr.localeCompare(aStr);
+        }
+        if (aDate) return -1;
+        if (bDate) return 1;
+        return 0;
+      });
+
+      const contentThreads = sortedEntries.map(entry => {
+        let tags = entry.data.tags;
+        if (typeof tags === 'string') {
+          tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+        if (!Array.isArray(tags)) tags = [];
+
+        return {
+          ...entry.data,
+          title: entry.data.title,
+          tags,
+          id: entry.id,
+          url: `${urlPrefix}${entry.slug}`
+        };
+      });
+      
+      paths.push({
+        params: { 
+          client: client.toLowerCase(),
+          magazine: magazineKey 
+        },
+        props: { contentThreads },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { contentThreads } = Astro.props;
+---
+<Layout title="Magazine Content">
+  <PostCardContentLayout contentThreads={contentThreads} />
+</Layout>
