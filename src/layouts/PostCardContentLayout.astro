@@ -50,10 +50,9 @@ const { contentThreads = [] } = Astro.props;
     box-sizing: border-box;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1200px) {
     .magazine-grid {
       grid-template-columns: repeat(2, 1fr);
-      max-width: 48rem;
     }
   }
 
@@ -61,6 +60,10 @@ const { contentThreads = [] } = Astro.props;
     .magazine-grid {
       grid-template-columns: 1fr;
       max-width: 100%;
+    }
+
+    .magazine-container {
+      padding: 1rem;
     }
   }
 </style>

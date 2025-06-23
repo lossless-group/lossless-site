@@ -219,13 +219,23 @@ safeTags = [...new Set(safeTags)];
     hyphens: auto;
   }
   /* =============================
-   * Row grid for PostCard: image left, content right
+   * Row grid for PostCard: responsive layout
+   * Mobile: image top, content bottom (like PostCardFeature)
+   * Desktop: image left, content right
    * ============================= */
 .post-card__row {
   display: grid;
-  grid-template-columns: 1fr 2fr;
   gap: 1.5rem;
   align-items: stretch;
+  /* Mobile first: stack vertically */
+  grid-template-columns: 1fr;
+}
+
+/* Desktop: side-by-side layout */
+@media (min-width: 768px) {
+  .post-card__row {
+    grid-template-columns: 1fr 2fr;
+  }
 }
 
   .post-card__image-container {
@@ -237,11 +247,7 @@ safeTags = [...new Set(safeTags)];
     position: relative;
     width: 100%;
     max-width: none;  
-
-}
-
-
-  
+  }
 
   .post-card__image {
     width: 100%;
