@@ -163,6 +163,36 @@ document.addEventListener('DOMContentLoaded', () => {
     searchPlaceholderValue: 'Search tags...',
     itemSelectText: '',
     shouldSort: true, // must be true for sorter to apply
+    searchEnabled: true,
+    searchFields: ['label'],
+    position: 'auto',
+    // Mobile-friendly settings
+    shouldSortItems: true,
+    searchResultLimit: 50,
+    // Ensure search input is properly accessible on mobile
+    classNames: {
+      containerOuter: 'choices',
+      containerInner: 'choices__inner',
+      input: 'choices__input',
+      inputCloned: 'choices__input--cloned',
+      list: 'choices__list',
+      listItems: 'choices__list--multiple',
+      listSingle: 'choices__list--single',
+      listDropdown: 'choices__list--dropdown',
+      item: 'choices__item',
+      placeholder: 'choices__placeholder',
+      group: 'choices__group',
+      groupHeading: 'choices__heading',
+      button: 'choices__button',
+      activeState: 'is-active',
+      focusState: 'is-focused',
+      openState: 'is-open',
+      disabledState: 'is-disabled',
+      flippedState: 'is-flipped',
+      loadingState: 'is-loading',
+      noResults: 'has-no-results',
+      noChoices: 'has-no-choices'
+    },
     sorter: (a, b) => {
       // Use currentSort to determine sort logic
       if (currentSort === 'alpha-asc') {
@@ -183,6 +213,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   },
   });
+
+  // Mobile-specific enhancements
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // Force focus on search input when dropdown opens
+    choices.passedElement.element.addEventListener('focus', () => {
+      setTimeout(() => {
+        const searchInput = choices.input.element;
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.click();
+        }
+      }, 100);
+    });
+
+    // Ensure search input is properly styled for mobile
+    const searchInput = choices.input.element;
+    if (searchInput) {
+      searchInput.setAttribute('inputmode', 'search');
+      searchInput.setAttribute('autocomplete', 'off');
+      searchInput.setAttribute('autocorrect', 'off');
+      searchInput.setAttribute('autocapitalize', 'off');
+      searchInput.setAttribute('spellcheck', 'false');
+    }
+
+    // Handle touch events to ensure search input gets focus
+    choices.passedElement.element.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      setTimeout(() => {
+        const searchInput = choices.input.element;
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.click();
+        }
+      }, 50);
+    }, { passive: false });
+
+    // Ensure search input is visible when dropdown is open
+    const observer = new MutationObserver(() => {
+      if (choices.isOpen) {
+        const searchInput = choices.input.element;
+        if (searchInput) {
+          searchInput.style.display = 'block';
+          searchInput.style.visibility = 'visible';
+          searchInput.style.opacity = '1';
+          searchInput.focus();
+        }
+      }
+    });
+
+    observer.observe(choices.passedElement.element, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    // Handle dropdown open event
+    choices.passedElement.element.addEventListener('showDropdown', () => {
+      setTimeout(() => {
+        const searchInput = choices.input.element;
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.click();
+        }
+      }, 100);
+    });
+  }
 
   tagSelectEl.addEventListener('change', () => {
     currentPage = 1; // Reset page when changing tags
@@ -335,6 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
     background-color: var(--clr-lossless-primary-dark) !important;
     border: 1px solid var(--clr-lossless-primary-glass) !important;
     color: white !important;
+    min-height: 44px !important; /* Mobile-friendly touch target */
   }
 
   .choices__list--multiple .choices__item {
@@ -347,15 +445,22 @@ document.addEventListener('DOMContentLoaded', () => {
     hyphens: auto !important;
     display: inline-flex !important;
     align-items: center;
+    min-height: 32px !important; /* Mobile-friendly touch target */
   }
 
   .choices__list--dropdown {
     background-color: var(--clr-lossless-primary-dark) !important;
     color: white !important;
+    max-height: 300px !important; /* Limit height on mobile */
+    overflow-y: auto !important;
   }
 
   .choices__item--choice {
     color: white !important;
+    padding: 8px 12px !important; /* Mobile-friendly padding */
+    min-height: 44px !important; /* Mobile-friendly touch target */
+    display: flex !important;
+    align-items: center !important;
   }
 
   .choices__item--choice.is-highlighted {
@@ -368,6 +473,52 @@ document.addEventListener('DOMContentLoaded', () => {
     color: white !important;
     border: none !important;
     box-shadow: none !important;
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    min-height: 44px !important; /* Mobile-friendly touch target */
+    padding: 8px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .choices__input:focus {
+    outline: 2px solid var(--clr-lossless-highlight) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 768px) {
+    .choices__inner {
+      font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+    
+    .choices__input {
+      font-size: 16px !important;
+      -webkit-appearance: none !important;
+      border-radius: 0 !important;
+    }
+    
+    .choices__list--dropdown {
+      max-height: 250px !important;
+      z-index: 9999 !important;
+    }
+    
+    .choices__item--choice {
+      font-size: 16px !important;
+      padding: 12px 16px !important;
+    }
+  }
+
+  /* Ensure search input is always visible and accessible */
+  .choices.is-focused .choices__input {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .choices.is-open .choices__input {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .tool-card.selected {
