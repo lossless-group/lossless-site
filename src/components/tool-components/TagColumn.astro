@@ -36,7 +36,16 @@ const tagCounts = tools.reduce((acc, tool) => {
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <div class="tag-panel">
-  <h3 class="tag-heading">Filter by Tag</h3>
+  <div class="tag-header">
+    <h3 class="tag-heading">Filter by Tag</h3>
+    <button id="share-tags-btn" class="share-btn" title="Share selected tags">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+        <polyline points="16,6 12,2 8,6"/>
+        <line x1="12" y1="2" x2="12" y2="15"/>
+      </svg>
+    </button>
+  </div>
 
   <div class="tag-actions">
     <button id="sort-alpha-asc" class="sort-btn" title="Sort A → Z"><SortAscLetters /></button>
@@ -223,6 +232,25 @@ document.addEventListener('DOMContentLoaded', () => {
   },
   });
 
+  // Handle URL parameters for pre-selected tags
+  function handleUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagsParam = urlParams.get('tags');
+    
+    if (tagsParam) {
+      // Split by comma and trim whitespace
+      const selectedTags = tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      
+      // Set the selected tags in Choices.js
+      selectedTags.forEach(tag => {
+        choices.setChoiceByValue(tag);
+      });
+      
+      // Trigger filtering to show only matching cards
+      filterCards();
+    }
+  }
+
   // Mobile-specific enhancements
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
@@ -351,6 +379,75 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshChoices();
   });
 
+  // Handle URL parameters after Choices.js is initialized
+  handleUrlParameters();
+
+  // Share button functionality
+  const shareBtn = document.getElementById('share-tags-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const selectedTags = getSelectedTags();
+      
+      // Create shareable URL
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('tags', selectedTags.join(','));
+      const shareableUrl = currentUrl.toString();
+      
+      try {
+        // Copy to clipboard
+        await navigator.clipboard.writeText(shareableUrl);
+        
+        // Visual feedback
+        const originalTitle = shareBtn.title;
+        shareBtn.title = 'URL copied!';
+        shareBtn.classList.add('copied');
+        
+        setTimeout(() => {
+          shareBtn.title = originalTitle;
+          shareBtn.classList.remove('copied');
+        }, 100);
+        
+      } catch (err) {
+        // Fallback for older browsers or if clipboard API fails
+        console.warn('Clipboard API not available, falling back to prompt');
+        
+        // Show URL in a prompt for manual copying
+        const userConfirmed = confirm(
+          `Shareable URL:\n\n${shareableUrl}\n\nClick OK to copy this URL.`
+        );
+        
+        if (userConfirmed) {
+          // Try to copy using a temporary textarea
+          const textarea = document.createElement('textarea');
+          textarea.value = shareableUrl;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          
+          try {
+            document.execCommand('copy');
+            shareBtn.title = 'URL copied!';
+            shareBtn.classList.add('copied');
+            
+            setTimeout(() => {
+              shareBtn.title = 'Share selected tags';
+              shareBtn.classList.remove('copied');
+            }, 2000);
+          } catch (fallbackErr) {
+            console.error('Failed to copy URL:', fallbackErr);
+            shareBtn.title = 'Failed to copy';
+            
+            setTimeout(() => {
+              shareBtn.title = 'Share selected tags';
+            }, 2000);
+          } finally {
+            document.body.removeChild(textarea);
+          }
+        }
+      }
+    });
+  }
 
   // Initial reveal: show first N matching cards
   filterCards();
@@ -372,6 +469,54 @@ document.addEventListener('DOMContentLoaded', () => {
     font-size: 1rem;
     font-weight: 600;
     color: white;
+    margin: 0;
+  }
+
+  .tag-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2rem;
+  }
+
+  .share-btn {
+    background: transparent;
+    border: 1px solid var(--clr-lossless-primary-glass);
+    color: white;
+    padding: 0.4rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .share-btn:hover {
+    background-color: var(--clr-lossless-primary-glass);
+    border-color: var(--clr-lossless-highlight);
+  }
+
+  .share-btn.copied {
+    background-color: var(--clr-lossless-highlight);
+    border-color: var(--clr-lossless-highlight);
+    color: black;
+  }
+
+  .share-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  .share-btn:hover svg {
+    transform: translateY(-1px);
+  }
+
+  .share-btn.copied svg {
+    transform: scale(1.1);
   }
 
   .clear-tags-btn {
