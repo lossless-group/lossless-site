@@ -35,7 +35,7 @@ const pageDescription = fm.lede || fm.description || Astro.props.description || 
 
 // Determine image URL: Prioritize frontmatter.banner_image, then frontmatter.portrait_image, then a global default.
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://lossless.group';
-const defaultSiteImage = `${siteUrl}/images/default-social-banner.jpg`; // Ensure this image exists in /public/images/
+const defaultSiteImage = "/visuals/imageRep__North-Sea-of-Data.webp" // Ensure this image exists in /public/images/
 
 let imageUrl = defaultSiteImage;
 const fmBannerImage = fm.banner_image;
