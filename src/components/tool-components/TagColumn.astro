@@ -76,6 +76,11 @@ let choices;
 
 
 function refreshChoices() {
+  // Clear any existing selected items to prevent duplicates
+
+  const selectedTags = getSelectedTags();
+  choices.removeActiveItems();
+
   choices.setChoices(
     choices._store.state.choices.map(choice => ({
       value: choice.value,
@@ -87,6 +92,10 @@ function refreshChoices() {
     'label',
     true
   );
+  
+  selectedTags.forEach(tag => {
+    choices.setChoiceByValue(tag);
+  });
 }
 
 function getSelectedTags() {
