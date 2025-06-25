@@ -9,10 +9,10 @@ import TagColumn from "@components/tool-components/TagColumn.astro";
 export interface Props {
   title?: string;
   description?: string;
-  filterTag?: string;
 }
 
-const { title = "Toolkit", description = "A curated collection of tools", filterTag } = Astro.props;
+const { title = "Toolkit", description = "A curated collection of tools", image } = Astro.props;
+
 
 const toolEntries = await getCollection("tooling");
 const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id }));
@@ -23,7 +23,14 @@ tools.forEach(tool => {
 
 ---
 
-<Layout title={title} description={description}>
+<Layout 
+  title={title} 
+  description={description}
+  frontmatter={{
+    title: title,
+    description: description,
+    banner_image: image || "/visuals/imageRep__North-Sea-of-Data.webp"
+  }}>
   <main>
     <slot name="header" />
     <div class="toolkit-layout">
@@ -31,7 +38,7 @@ tools.forEach(tool => {
         <TagColumn tools={tools} />
       </aside>
       <section class="main-content">
-        <CardGrid tools={tools} filterTag={filterTag} />
+        <CardGrid tools={tools} />
       </section>
     </div>
   </main>
