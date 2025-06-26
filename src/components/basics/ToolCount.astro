@@ -24,12 +24,28 @@ interface Props {
    * Whether to show the count as a badge (default: false)
    */
   asBadge?: boolean;
+
+  /**
+   * Optional tag to filter tools by
+   */
+  tag?: string;
 }
 
-const { class: className = "", asBadge = false } = Astro.props;
+const { class: className = "", asBadge = false, tag } = Astro.props;
 
 // Get the tooling collection
-const toolEntries = await getCollection("tooling");
+let toolEntries = await getCollection("tooling");
+
+// Filter by tag if provided
+if (tag) {
+  toolEntries = toolEntries.filter(entry => 
+    entry.data.tags && 
+    (Array.isArray(entry.data.tags) 
+      ? entry.data.tags.includes(tag)
+      : entry.data.tags === tag)
+  );
+}
+
 const toolCount = toolEntries.length;
 ---
 
