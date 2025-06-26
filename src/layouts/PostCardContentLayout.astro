@@ -41,16 +41,22 @@ const { contentThreads = [] } = Astro.props;
   
   .magazine-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columns on large screens */
+    grid-template-columns: repeat(4, 1fr); /* 4 columns for stacked cards */
     gap: 2rem;
     width: 100%;
-    max-width: 120rem; /* ≈ 3 × max card width (e.g. 24rem) */
+    max-width: 140rem; /* Increased for 4-column layout */
     margin: 0 auto;
     padding: 1rem;
     box-sizing: border-box;
   }
 
-  @media (max-width: 1200px) {
+  @media (max-width: 1400px) {
+    .magazine-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 1000px) {
     .magazine-grid {
       grid-template-columns: repeat(2, 1fr);
     }

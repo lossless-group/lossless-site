@@ -219,24 +219,23 @@ safeTags = [...new Set(safeTags)];
     hyphens: auto;
   }
   /* =============================
-   * Row grid for PostCard: responsive layout
-   * Mobile: image top, content bottom (like PostCardFeature)
-   * Desktop: image left, content right
+   * Row grid for PostCard: always stack vertically
+   * All displays: image top, content bottom
    * ============================= */
 .post-card__row {
   display: grid;
   gap: 1.5rem;
   align-items: stretch;
-  /* Mobile first: stack vertically */
+  /* Always stack vertically for all screen sizes */
   grid-template-columns: 1fr;
 }
 
-/* Desktop: side-by-side layout */
-@media (min-width: 768px) {
+/* Remove the desktop side-by-side layout */
+/* @media (min-width: 768px) {
   .post-card__row {
     grid-template-columns: 1fr 2fr;
   }
-}
+} */
 
   .post-card__image-container {
     height: 100%;
