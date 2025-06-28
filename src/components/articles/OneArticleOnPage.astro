@@ -216,6 +216,9 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
     color: var(--clr-lossless-primary-light);
     max-width: 85ch;
     padding: 1rem;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .prose > :global(h1:first-child) {  
@@ -286,6 +289,61 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
 
   .prose :global(li) {
     margin-bottom: 0.5rem;
+  }
+
+  /* Image responsive styles */
+  .prose :global(img) {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem auto;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  /* Ensure images don't overflow their containers */
+  .prose :global(p img),
+  .prose :global(div img) {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+  }
+
+  /* Force all images to respect container bounds */
+  .prose :global(img[src*="img.b2bpic.net"]),
+  .prose :global(img[src*="i.imgur.com"]),
+  .prose :global(img[src*="ik.imagekit.io"]) {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+  }
+
+  /* Handle any image that might have inline styles */
+  .prose :global(img[style*="width"]),
+  .prose :global(img[style*="height"]) {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* Comprehensive image constraint - catch all images */
+  .prose :global(img) {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+    box-sizing: border-box;
+  }
+
+  /* Ensure images in paragraphs and divs are also constrained */
+  .prose :global(p img),
+  .prose :global(div img),
+  .prose :global(article img),
+  .prose :global(section img) {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
   }
 
   /* Base styles for all list items */
@@ -366,8 +424,24 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
       padding-left: 1.25em; /* Clamp */
       font-size: 0.85em;    /* Clamp */
     }
+
+    /* Mobile image adjustments */
+    .prose :global(img) {
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+      margin: 0.75rem auto;
+    }
   }
 
+  /* Tablet adjustments */
+  @media (max-width: 1024px) {
+    .prose :global(img) {
+      max-width: 100%;
+      width: auto;
+      height: auto;
+    }
+  }
 
   .content-wrapper {
     display: flex;
@@ -382,12 +456,15 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
   .content-inner {
     width: 100%;
     padding: 0 1rem;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+    max-width: 100%;
   }
 
   .main-content {
     width: 100%;
     max-width: 85ch; /* already set in .prose but make explicit */
     overflow-wrap: break-word;
+    overflow-x: hidden; /* Prevent horizontal overflow */
   }
 
   .toc-title {

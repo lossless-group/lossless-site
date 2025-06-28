@@ -22,4 +22,96 @@ let activeSlug = currentSlug;
   <EntryListColumn essays={essays} currentSlug={activeSlug} mode={mode} client={client}/>
 </div>
 
-{/* Removed conflicting client-side script */}
+<script define:vars={{ currentSlug }}>
+  // Function to scroll to the active entry in the sidebar
+  function scrollToActiveEntry() {
+    if (!currentSlug) {
+      console.log('No currentSlug provided');
+      return;
+    }
+    
+    // Get the last segment of the current slug (e.g., "quantum-computing-is-confusing")
+    const lastSlugSegment = currentSlug.split('/').pop();
+    console.log('Looking for entry with slug:', lastSlugSegment);
+    
+    // Find the active entry element
+    const activeEntry = document.querySelector(`[data-slug="${lastSlugSegment}"]`);
+    
+    if (activeEntry) {
+      console.log('Found active entry, scrolling to it');
+      
+      // Scroll the sidebar to the active entry
+      activeEntry.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+      
+      // Add a subtle highlight effect
+      activeEntry.classList.add('active-entry-highlight');
+      
+      // Remove the highlight after a delay
+      setTimeout(() => {
+        activeEntry.classList.remove('active-entry-highlight');
+      }, 2000);
+    } else {
+      console.log('Active entry not found in sidebar');
+      // Log all available slugs for debugging
+      const allEntries = document.querySelectorAll('[data-slug]');
+      const availableSlugs = Array.from(allEntries).map(el => el.getAttribute('data-slug'));
+      console.log('Available slugs in sidebar:', availableSlugs);
+    }
+  }
+  
+  // Function to attempt scrolling with retries
+  function attemptScrollWithRetry(maxRetries = 5, delay = 100) {
+    let attempts = 0;
+    
+    function tryScroll() {
+      attempts++;
+      const lastSlugSegment = currentSlug?.split('/').pop();
+      const activeEntry = document.querySelector(`[data-slug="${lastSlugSegment}"]`);
+      
+      if (activeEntry) {
+        scrollToActiveEntry();
+        return; // Success, stop retrying
+      }
+      
+      if (attempts < maxRetries) {
+        console.log(`Attempt ${attempts}: Entry not found, retrying in ${delay}ms...`);
+        setTimeout(tryScroll, delay);
+      } else {
+        console.log('Max retries reached, entry not found');
+      }
+    }
+    
+    tryScroll();
+  }
+  
+  // Run the scroll function when the page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(attemptScrollWithRetry, 50); // Small delay to ensure DOM is ready
+    });
+  } else {
+    setTimeout(attemptScrollWithRetry, 50);
+  }
+  
+  // Also run when images and other resources finish loading
+  window.addEventListener('load', () => {
+    setTimeout(attemptScrollWithRetry, 100);
+  });
+</script>
+
+<style>
+  /* Highlight effect for the active entry */
+  .active-entry-highlight {
+    animation: highlightPulse 2s ease-in-out;
+  }
+  
+  @keyframes highlightPulse {
+    0% { background-color: rgba(255, 255, 255, 0.1); }
+    50% { background-color: rgba(255, 255, 255, 0.2); }
+    100% { background-color: transparent; }
+  }
+</style>

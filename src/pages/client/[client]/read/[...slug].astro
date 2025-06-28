@@ -89,24 +89,6 @@ if (essaySlug) {
 
 <Layout title={`${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`}>
   <AnimationWrapper>
-    <Hero
-      title={`${toProperCase(client)} Reader`}
-      subtitle="Strategic insights and recommendations"
-      description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
-      ctaText="Back to Portal"
-      ctaUrl={`/client/${toProperCase(client)}`}
-      image={{
-        src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
-        alt: `${toProperCase(client)} Logo`
-      }}
-      alignment="left"
-      fullBleed={true}
-      animate={true}
-      class="mb-0"
-      style="margin-bottom: 0;"
-      innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
-    />
-  </AnimationWrapper>
 
   <div class="reader-wrapper">
     {currentEssay ? (
@@ -124,6 +106,25 @@ if (essaySlug) {
       </div>
     )}
   </div>
+
+  <Hero
+      title={`${toProperCase(client)} Reader`}
+      subtitle="Strategic insights and recommendations"
+      description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
+      ctaText="Back to Portal"
+      ctaUrl={`/client/${toProperCase(client)}`}
+      image={{
+        src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
+        alt: `${toProperCase(client)} Logo`
+      }}
+      alignment="left"
+      fullBleed={true}
+      animate={true}
+      class="mb-0"
+      style="margin-bottom: 0;"
+      innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+  />
+  </AnimationWrapper>
 </Layout>
 
 <script>
