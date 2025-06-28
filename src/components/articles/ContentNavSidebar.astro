@@ -97,10 +97,6 @@ let activeSlug = currentSlug;
     setTimeout(attemptScrollWithRetry, 50);
   }
   
-  // Also run when images and other resources finish loading
-  window.addEventListener('load', () => {
-    setTimeout(attemptScrollWithRetry, 100);
-  });
 </script>
 
 <style>
