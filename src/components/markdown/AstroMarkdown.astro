@@ -96,9 +96,7 @@ data.dirpath = dirname(data.path)
     node.lang === 'toolingGallery' || (node.lang === 'yaml' && node.meta?.startsWith('toolingGallery'))
   );
 
-  const isImageGallery = (
-    node.lang === 'imageGallery' || (node.lang === 'yaml' && node.meta === 'imageGallery')
-  );
+ 
 
 let toolGalleryTools = null;
 let toolGalleryErrors: string[] = [];
@@ -370,6 +368,10 @@ if (DEBUG_AST) {
 {node.type === "code" && (() => {
   const { lang, meta, value } = node;
 
+  const isImageGallery = (
+    lang === 'imageGallery' || (lang === 'yaml' && meta === 'imageGallery')
+  );
+
   if (toolGalleryTools?.length > 0) {
       return (
           <>
@@ -410,7 +412,410 @@ if (DEBUG_AST) {
     return <MermaidChart code={value} />;
   }
 
-  return <BaseCodeblock code={value} lang={lang ?? 'text'} />;
+  // Enhanced block types support using switch statement
+  const blockType = lang?.toLowerCase();
+  
+  switch (blockType) {
+    case 'emphasis':
+    case 'em':
+      return (
+        <>
+          <div class="block-emphasis">
+            <div class="emphasis-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-emphasis {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.08) 0%, 
+                rgba(59, 130, 246, 0.04) 100%);
+              border-left: 4px solid #3b82f6;
+              border-radius: 0 8px 8px 0;
+              position: relative;
+            }
+            
+            .emphasis-content {
+              font-size: 1.1em;
+              line-height: 1.6;
+              color: #e2e8f0;
+              font-weight: 500;
+            }
+            
+            .block-emphasis::before {
+              content: "💡";
+              position: absolute;
+              left: -0.5rem;
+              top: 1rem;
+              background: #1e293b;
+              padding: 0.25rem;
+              border-radius: 50%;
+              font-size: 0.875rem;
+            }
+          </style>
+        </>
+      );
+
+    case 'alert':
+    case 'warning':
+      return (
+        <>
+          <div class="block-alert">
+            <div class="alert-header">
+              <span class="alert-icon">⚠️</span>
+              <span class="alert-title">Warning</span>
+            </div>
+            <div class="alert-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-alert {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(245, 158, 11, 0.1) 0%, 
+                rgba(245, 158, 11, 0.05) 100%);
+              border: 1px solid rgba(245, 158, 11, 0.3);
+              border-radius: 8px;
+              position: relative;
+            }
+            
+            .alert-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              font-weight: 600;
+              color: #fbbf24;
+            }
+            
+            .alert-icon {
+              font-size: 1.25rem;
+            }
+            
+            .alert-title {
+              font-size: 1rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .alert-content {
+              color: #f1f5f9;
+              line-height: 1.6;
+            }
+          </style>
+        </>
+      );
+
+    case 'quote':
+    case 'blockquote':
+      return (
+        <>
+          <div class="block-quote">
+            <div class="quote-content">
+              {value}
+            </div>
+            <div class="quote-decoration"></div>
+          </div>
+          <style>
+            .block-quote {
+              margin: 1.5rem 0;
+              padding: 1.5rem 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                rgba(255, 255, 255, 0.02) 100%);
+              border-left: 4px solid #64748b;
+              border-radius: 0 8px 8px 0;
+              position: relative;
+              font-style: italic;
+            }
+            
+            .quote-content {
+              font-size: 1.1em;
+              line-height: 1.7;
+              color: #cbd5e1;
+              position: relative;
+              z-index: 1;
+            }
+            
+            .quote-decoration {
+              position: absolute;
+              top: 1rem;
+              right: 1rem;
+              font-size: 3rem;
+              color: rgba(100, 116, 139, 0.2);
+              font-family: serif;
+              line-height: 1;
+            }
+            
+            .quote-decoration::before {
+              content: """;
+            }
+          </style>
+        </>
+      );
+
+    case 'info':
+    case 'information':
+      return (
+        <>
+          <div class="block-info">
+            <div class="info-header">
+              <span class="info-icon">ℹ️</span>
+              <span class="info-title">Information</span>
+            </div>
+            <div class="info-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-info {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.08) 0%, 
+                rgba(59, 130, 246, 0.04) 100%);
+              border: 1px solid rgba(59, 130, 246, 0.3);
+              border-radius: 8px;
+            }
+            
+            .info-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              font-weight: 600;
+              color: #60a5fa;
+            }
+            
+            .info-icon {
+              font-size: 1.25rem;
+            }
+            
+            .info-title {
+              font-size: 1rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .info-content {
+              color: #e2e8f0;
+              line-height: 1.6;
+            }
+          </style>
+        </>
+      );
+
+    case 'success':
+    case 'check':
+      return (
+        <>
+          <div class="block-success">
+            <div class="success-header">
+              <span class="success-icon">✅</span>
+              <span class="success-title">Success</span>
+            </div>
+            <div class="success-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-success {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(34, 197, 94, 0.08) 0%, 
+                rgba(34, 197, 94, 0.04) 100%);
+              border: 1px solid rgba(34, 197, 94, 0.3);
+              border-radius: 8px;
+            }
+            
+            .success-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              font-weight: 600;
+              color: #4ade80;
+            }
+            
+            .success-icon {
+              font-size: 1.25rem;
+            }
+            
+            .success-title {
+              font-size: 1rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .success-content {
+              color: #e2e8f0;
+              line-height: 1.6;
+            }
+          </style>
+        </>
+      );
+
+    case 'error':
+    case 'danger':
+      return (
+        <>
+          <div class="block-error">
+            <div class="error-header">
+              <span class="error-icon">❌</span>
+              <span class="error-title">Error</span>
+            </div>
+            <div class="error-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-error {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(239, 68, 68, 0.1) 0%, 
+                rgba(239, 68, 68, 0.05) 100%);
+              border: 1px solid rgba(239, 68, 68, 0.3);
+              border-radius: 8px;
+            }
+            
+            .error-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              font-weight: 600;
+              color: #f87171;
+            }
+            
+            .error-icon {
+              font-size: 1.25rem;
+            }
+            
+            .error-title {
+              font-size: 1rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .error-content {
+              color: #e2e8f0;
+              line-height: 1.6;
+            }
+          </style>
+        </>
+      );
+
+    case 'tip':
+    case 'hint':
+      return (
+        <>
+          <div class="block-tip">
+            <div class="tip-header">
+              <span class="tip-icon">💡</span>
+              <span class="tip-title">Tip</span>
+            </div>
+            <div class="tip-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-tip {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(168, 85, 247, 0.08) 0%, 
+                rgba(168, 85, 247, 0.04) 100%);
+              border: 1px solid rgba(168, 85, 247, 0.3);
+              border-radius: 8px;
+            }
+            
+            .tip-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              font-weight: 600;
+              color: #c084fc;
+            }
+            
+            .tip-icon {
+              font-size: 1.25rem;
+            }
+            
+            .tip-title {
+              font-size: 1rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .tip-content {
+              color: #e2e8f0;
+              line-height: 1.6;
+            }
+          </style>
+        </>
+      );
+
+    case 'note':
+      return (
+        <>
+          <div class="block-note">
+            <div class="note-header">
+              <span class="note-icon">📝</span>
+              <span class="note-title">Note</span>
+            </div>
+            <div class="note-content">
+              {value}
+            </div>
+          </div>
+          <style>
+            .block-note {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(107, 114, 128, 0.08) 0%, 
+                rgba(107, 114, 128, 0.04) 100%);
+              border: 1px solid rgba(107, 114, 128, 0.3);
+              border-radius: 8px;
+            }
+            
+            .note-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              font-weight: 600;
+              color: #9ca3af;
+            }
+            
+            .note-icon {
+              font-size: 1.25rem;
+            }
+            
+            .note-title {
+              font-size: 1rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .note-content {
+              color: #e2e8f0;
+              line-height: 1.6;
+            }
+          </style>
+        </>
+      );
+
+    default:
+      // Default code block handling
+      return <BaseCodeblock code={value} lang={lang ?? 'text'} />;
+  }
 })()}
 
 

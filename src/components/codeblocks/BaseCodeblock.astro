@@ -46,12 +46,7 @@ const { code, lang = 'text' } = Astro.props;
     <!-- Use Astro's built-in <Code /> component for robust Shiki highlighting -->
     <Code code={code} lang={lang as any} />
   </div>
-  <!--
-    DO NOT render the language header (codeblock-language) inside the <pre> or <code> block.
-    The language label should ONLY appear in the header above the code block, not inside.
-    This is the single source of truth for the language label.
-    If you see a language header inside the code area, check your Markdown plugins or input for extra markup.
-  -->
+
   <slot />
 </div>
 
@@ -146,6 +141,29 @@ const { code, lang = 'text' } = Astro.props;
     background-color: var(--clr-code-bg, #1e1e1e);
     max-height: 500px; /* adjust as desired */
     overflow-y: auto;
+  }
+
+  /* Hide language display inside the Shiki code block */
+  .codeblock-content pre::before,
+  .codeblock-content code::before,
+  .codeblock-content pre::after,
+  .codeblock-content code::after {
+    content: none !important;
+  }
+
+  /* Hide any language indicators that might appear inside the code block */
+  .codeblock-content .language-identifier,
+  .codeblock-content .lang-label,
+  .codeblock-content .shiki .language-id,
+  .codeblock-content .shiki::before,
+  .codeblock-content .shiki::after {
+    display: none !important;
+  }
+
+  /* Hide pseudo-elements that might show language */
+  .codeblock-content pre[class*="language-"]::before,
+  .codeblock-content code[class*="language-"]::before {
+    display: none !important;
   }
 
 </style>
