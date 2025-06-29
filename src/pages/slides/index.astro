@@ -9,9 +9,16 @@ import OneSlideDeck from '@layouts/OneSlideDeck.astro';
 // Title and description for the presentation
 const title = "Introduction to RevealJS with Astro";
 const description = "A demonstration of RevealJS integration with the Lossless site";
+
+// Define frontmatter data for the slides page
+const frontmatter = {
+  title: title,
+  description: description,
+  lede: description
+};
 ---
 
-<Layout title={title} description={description}>
+<Layout frontmatter={frontmatter}>
   <OneSlideDeck>
       <!-- Title Slide -->
       <section class="title-slide">

@@ -47,9 +47,16 @@ const TRADEMARK_CONFIG = {
   sourceDir: "src/assets/Visuals/Tooling-Trademarks",
   destinationDir: "src/assets/Visuals/Tooling-Trademarks/usable--darkmode",
 };
+
+// Define frontmatter data for the tools page
+const frontmatter = {
+  title: "Tools",
+  description: "A collection of tools and resources for software development and AI",
+  lede: "A collection of tools and resources for software development and AI"
+};
 ---
 
-<Layout title="Tools">
+<Layout frontmatter={frontmatter}>
   <main class="container">
     <section>
       <h2>Simplest Ribbon</h2>

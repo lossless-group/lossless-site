@@ -11,9 +11,16 @@ import HeroGlassmorphic from "@components/basics/HeroGlassmorphic.astro";
 import HeroLoader from "@components/basics/HeroLoader.astro";
 import ThinGradientBleedSeparator from "@components/basics/separators/ThinGradientBleedSeparator.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+
+// Define frontmatter data for the hero examples page
+const frontmatter = {
+  title: "Hero Component Examples",
+  description: "Demonstrations of different ways to use the Hero component",
+  lede: "Demonstrations of different ways to use the Hero component"
+};
 ---
 
-<Layout title="Hero Component Examples">
+<Layout frontmatter={frontmatter}>
   <AnimationWrapper>
     <main>
       <div class="container" data-animate="fade-in">

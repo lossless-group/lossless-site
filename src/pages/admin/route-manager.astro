@@ -8,9 +8,16 @@
 
 import Layout from '@layouts/Layout.astro';
 import RouteManagerComponent from '@components/admin/RouteManager.astro';
+
+// Define frontmatter data for the route manager page
+const frontmatter = {
+  title: "Route Manager",
+  description: "Configure how content paths are mapped to web routes",
+  lede: "Configure how content paths are mapped to web routes"
+};
 ---
 
-<Layout title="Route Manager">
+<Layout frontmatter={frontmatter}>
   <div class="container mx-auto py-8">
     <h1 class="text-3xl font-bold mb-6">Content Route Manager</h1>
     

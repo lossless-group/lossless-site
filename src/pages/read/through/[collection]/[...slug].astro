@@ -31,8 +31,6 @@ export const getStaticPaths: GetStaticPaths = async ({}) => {
       entry => (entry.data as any).publish !== false 
     );
 
-    console.log(`[STATIC PATHS] ${collectionName}:`, publishedEntries.map(e => ({ id: e.id, slug: e.data?.slug })));
-
     if (publishedEntries.length === 0) continue; 
 
     // Generate paths for each published entry
@@ -40,7 +38,6 @@ export const getStaticPaths: GetStaticPaths = async ({}) => {
       const filename = path.basename(entry.id);
       const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
 
-      console.log(collectionName, derivedSlug)
       paths.push({
         params: { collection: collectionName, slug: derivedSlug },
         // Pass the SPECIFIC entry for this page AND the full list for the sidebar

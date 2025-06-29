@@ -8,6 +8,24 @@ import "@styles/codeblocks.css";
 import "@styles/shiki-github-dark.css";
 import PageMeta from "@components/basics/PageMeta.astro";
 
+/**
+ * Open Graph Meta Tags Pipeline:
+ * 
+ * 1. PAGES pass frontmatter data to Layout.astro
+ *    - Direct pages: frontmatter = { title, description, lede, banner_image, portrait_image }
+ *    - Markdown pages: frontmatter = entry.data (from content collections)
+ * 
+ * 2. LAYOUT.ASTRO processes frontmatter and extracts values
+ *    - Prioritizes: frontmatter.title → Astro.props.title → (PageMeta default)
+ *    - Prioritizes: frontmatter.lede → frontmatter.description → Astro.props.description → (PageMeta default)
+ *    - Prioritizes: frontmatter.banner_image → frontmatter.portrait_image → (PageMeta default)
+ * 
+ * 3. PAGE META generates all meta tags with fallbacks
+ *    - Single source of truth for all defaults
+ *    - Generates Open Graph, Twitter Card, and standard SEO tags
+ *    - Ensures consistent meta tags across all pages
+ */
+
 interface Props {
   // Direct props that .astro pages might pass (e.g., for title, description)
   title?: string;
@@ -23,64 +41,41 @@ interface Props {
   };
 }
 
-// Safely access frontmatter, defaulting to an empty object if not present
+// Process frontmatter data with clear priority order
 const fm = Astro.props.frontmatter || {};
 
-// Determine page title: Prioritize frontmatter.title, then direct Astro.props.title, then a global default.
-const pageTitle = fm.title || Astro.props.title || "Go Lossless: Innovate and Collaborate";
+// Extract values with clear priority (frontmatter takes precedence over direct props)
+const pageTitle = fm.title || Astro.props.title;
+const pageDescription = fm.lede || fm.description || Astro.props.description;
+const pageImageUrl = fm.banner_image || fm.portrait_image;
 
-// Determine page description: Prioritize frontmatter.lede, then frontmatter.description, 
-// then direct Astro.props.description (if an .astro page passes it), then a global default.
-const pageDescription = fm.lede || fm.description || Astro.props.description || 'Explore insights on Digital Transformation, AI, and Software Development with The Lossless Group';
-
-// Determine image URL: Prioritize frontmatter.banner_image, then frontmatter.portrait_image, then a global default.
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://lossless.group';
-const defaultSiteImage = "/visuals/imageRep__North-Sea-of-Data.webp" // Ensure this image exists in /public/images/
-
-let imageUrl = defaultSiteImage;
-const fmBannerImage = fm.banner_image;
-const fmPortraitImage = fm.portrait_image;
-
-if (fmBannerImage) {
-  imageUrl = fmBannerImage.startsWith('http') ? fmBannerImage : `${siteUrl}${fmBannerImage.startsWith('/') ? '' : '/'}${fmBannerImage}`;
-} else if (fmPortraitImage) {
-  imageUrl = fmPortraitImage.startsWith('http') ? fmPortraitImage : `${siteUrl}${fmPortraitImage.startsWith('/') ? '' : '/'}${fmPortraitImage}`;
-}
+// PageMeta.astro will handle all defaults if these are undefined
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
-    {/*
-      SEO Meta Tags Management:
-      The PageMeta component (src/components/basics/PageMeta.astro) 
-      is responsible for generating Open Graph and Twitter Card meta tags.
-      It takes props like title, description, imageUrl, etc., which are 
-      derived from page frontmatter or defaults in this layout's script.
-      For optional tags like twitter:site or twitter:creator, define 
-      corresponding variables in this layout's script and pass them to PageMeta.
-    */}
-
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{pageTitle}</title>
-      
+    <meta name="google-site-verification" content="DxG05i6VcG3uGrOped0ZQGyw5Oorv30KqRY9EPadxCc" />
+    
+    {/* Page title for browser tab */}
+    <title>{pageTitle || "Go Lossless: Innovate and Collaborate"}</title>
+    
+    {/* Open Graph and SEO meta tags - PageMeta handles all defaults */}
     <PageMeta
       title={pageTitle}
       description={pageDescription}
-      imageUrl={imageUrl}
+      imageUrl={pageImageUrl}
       pageUrl={Astro.url.href}
-      siteName="Lossless Group"
       ogType="article" 
       twitterCardType="summary_large_image"
     />
 
     {/* Import global avatar and author handle styles */}
     <link rel="stylesheet" href="/src/styles/avatars.css" />
-
   </head>
   <body>
     <Header />

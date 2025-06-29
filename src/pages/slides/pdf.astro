@@ -4,9 +4,16 @@ import { getCollection } from 'astro:content';
 
 // You can customize the title
 const title = "Presentation PDF Export";
+
+// Define frontmatter data for the PDF export page
+const frontmatter = {
+  title: title,
+  description: "Instructions for exporting presentations as PDF files",
+  lede: "Instructions for exporting presentations as PDF files"
+};
 ---
 
-<Layout title={title}>
+<Layout frontmatter={frontmatter}>
   <div class="pdf-export-container">
     <h1>PDF Export Instructions</h1>
     

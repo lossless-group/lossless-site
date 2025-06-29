@@ -13,6 +13,13 @@ import FeatureSideImageComponent from "@components/basics/FeatureSideImage.astro
 import { Image } from "astro:assets";
 import { getImage } from "astro:assets";
 
+// Define frontmatter data for the feature side image examples page
+const frontmatter = {
+  title: "Feature Side Image Examples",
+  description: "Examples of the FeatureSideImage component",
+  lede: "Examples of the FeatureSideImage component"
+};
+
 // Create a placeholder image for the example
 const placeholderImageSrc = "https://via.placeholder.com/1200x800/3a506b/ffffff?text=Feature+Image";
 const placeholderImage = {
@@ -25,7 +32,7 @@ const placeholderImage = {
 // Use the placeholder image for both examples
 ---
 
-<Layout title="Feature Side Image Examples" description="Examples of the FeatureSideImage component">
+<Layout frontmatter={frontmatter}>
   <main class="container">
     <h1 class="page-title">Feature Side Image Examples</h1>
     

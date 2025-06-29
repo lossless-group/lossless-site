@@ -8,9 +8,16 @@ import Layout from "@layouts/Layout.astro";
 import Hero from "@components/basics/Hero.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import ThinGradientBleedSeparator from "@components/basics/separators/ThinGradientBleedSeparator.astro";
+
+// Define frontmatter data for the subtle hero examples page
+const frontmatter = {
+  title: "Subtle Hero Component Examples",
+  description: "Examples of the subtle Hero component with clean, minimalist design",
+  lede: "Examples of the subtle Hero component with clean, minimalist design"
+};
 ---
 
-<Layout title="Subtle Hero Component Examples">
+<Layout frontmatter={frontmatter}>
   <AnimationWrapper>
     <main>
       <div class="container" data-animate="fade-in">

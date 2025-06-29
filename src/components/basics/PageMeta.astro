@@ -1,5 +1,16 @@
 ---
-// File: /Users/mpstaton/code/lossless-monorepo/site/src/components/basics/PageMeta.astro
+/**
+ * PageMeta.astro - Single Source of Truth for Open Graph and SEO Meta Tags
+ * 
+ * This component generates all Open Graph, Twitter Card, and standard SEO meta tags.
+ * It serves as the centralized location for all default values and meta tag generation.
+ * 
+ * USAGE:
+ * - Called from Layout.astro with processed frontmatter data
+ * - Handles all fallbacks and defaults internally
+ * - Generates consistent meta tags across all pages
+ */
+
 interface Props {
   title?: string;
   description?: string;
@@ -12,36 +23,47 @@ interface Props {
   twitterCreator?: string; // e.g., '@AuthorTwitterHandle'
 }
 
+// Single source of truth for all defaults
 const {
-  title = "Your Default Page Title", // Fallback title
-  description = "Your default page description.", // Fallback description
-  imageUrl, // No default here, let Layout.astro provide a fallback
-  pageUrl = Astro.url.toString(), // Defaults to the current page's URL
-  siteName = "Your Site Name", // Fallback site name
+  title,
+  description,
+  imageUrl,
+  pageUrl = "https://www.lossless.group",
+  siteName = "Lossless Group",
   ogType = "website",
   twitterCardType = "summary_large_image",
   twitterSite,
   twitterCreator,
 } = Astro.props;
+
+// Default values for required fields
+const defaultTitle = "Go Lossless: Innovate and Collaborate";
+const defaultDescription = "Explore insights on Digital Transformation, AI, and Software Development with The Lossless Group";
+const defaultImageUrl = "/visuals/imageRep__North-Sea-of-Data.webp";
+
+// Use provided values or fall back to defaults
+const finalTitle = title || defaultTitle;
+const finalDescription = description || defaultDescription;
+const finalImageUrl = imageUrl || defaultImageUrl;
 ---
 
 {/* Standard Meta Tags */}
-{title && <meta name="title" content={title} />}
-{description && <meta name="description" content={description} />}
+<meta name="title" content={finalTitle} />
+<meta name="description" content={finalDescription} />
 
 {/* Open Graph / Facebook */}
-{ogType && <meta property="og:type" content={ogType} />}
-{pageUrl && <meta property="og:url" content={pageUrl} />}
-{title && <meta property="og:title" content={title} />}
-{description && <meta property="og:description" content={description} />}
-{imageUrl && <meta property="og:image" content={imageUrl} />}
-{siteName && <meta property="og:site_name" content={siteName} />}
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={pageUrl} />
+<meta property="og:title" content={finalTitle} />
+<meta property="og:description" content={finalDescription} />
+<meta property="og:image" content={finalImageUrl} />
+<meta property="og:site_name" content={siteName} />
 
 {/* Twitter */}
-{twitterCardType && <meta name="twitter:card" content={twitterCardType} />}
-{pageUrl && <meta name="twitter:url" content={pageUrl} />}
-{title && <meta name="twitter:title" content={title} />}
-{description && <meta name="twitter:description" content={description} />}
-{imageUrl && <meta name="twitter:image" content={imageUrl} />}
+<meta name="twitter:card" content={twitterCardType} />
+<meta name="twitter:url" content={pageUrl} />
+<meta name="twitter:title" content={finalTitle} />
+<meta name="twitter:description" content={finalDescription} />
+<meta name="twitter:image" content={finalImageUrl} />
 {twitterSite && <meta name="twitter:site" content={twitterSite} />}
 {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}

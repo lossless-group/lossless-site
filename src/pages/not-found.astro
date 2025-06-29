@@ -1,12 +1,19 @@
 ---
 import Layout from '@layouts/Layout.astro';
+
+// Define frontmatter data for the 404 page
+const frontmatter = {
+  title: "404 – Not Found",
+  description: "We couldn't find this page in any known directory.",
+  lede: "We couldn't find this page in any known directory."
+};
 ---
 
-<Layout>
+<Layout frontmatter={frontmatter}>
   <div class="not-found-wrapper">
     <h1>404 – Not Found</h1>
     <p>
-      We couldn’t find <code id="attempted-path">this page</code> in any known directory.
+      We couldn't find <code id="attempted-path">this page</code> in any known directory.
     </p>
     <p>
       Double-check the spelling or <a href="/">return to the homepage</a>.

@@ -74,9 +74,16 @@ const promptData = {
   fileName: prompt
 };
 
+// Define frontmatter data for the prompt page
+const frontmatter = {
+  title: promptData.title || 'Prompt',
+  description: promptData.lede || 'A detailed prompt for AI assistance',
+  lede: promptData.lede || 'A detailed prompt for AI assistance'
+};
+
 ---
 
-<Layout title={promptData.title || 'Prompt'}>
+<Layout frontmatter={frontmatter}>
   <article class="prose mx-auto">
     <header>
       {promptData.title && <h1>{promptData.title}</h1>}

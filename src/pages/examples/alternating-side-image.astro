@@ -9,10 +9,17 @@
 import Layout from "@layouts/Layout.astro";
 import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
 
+// Define frontmatter data for the alternating side image examples page
+const frontmatter = {
+  title: "Alternating Side Image Examples",
+  description: "Examples of the AlternatingSideImage component",
+  lede: "Examples of the AlternatingSideImage component"
+};
+
 // The AlternatingSideImage component will load data from the specified JSON file
 ---
 
-<Layout title="Alternating Side Image Examples" description="Examples of the AlternatingSideImage component">
+<Layout frontmatter={frontmatter}>
   <main class="container">
     <h1 class="page-title">Alternating Side Image Examples</h1>
     

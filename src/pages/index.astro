@@ -3,9 +3,17 @@ import Layout from "@layouts/Layout.astro";
 import SingleColumnSectionScroll from "@layouts/SingleColumnSectionScroll.astro";
 import Hero from "@components/basics/Hero.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+
+// Define frontmatter data for the homepage
+const frontmatter = {
+  title: "Go Lossless: Innovate and Collaborate",
+  description: "With the right tools, mindset, processes, and culture, any organization can upskill everyone for the era of AI",
+  lede: "With the right tools, mindset, processes, and culture, any organization can upskill everyone for the era of AI",
+  banner_image: "/visuals/Convey__Picto__Assembly-Line.svg"
+};
 ---
 
-<Layout>
+<Layout frontmatter={frontmatter}>
   <AnimationWrapper>
     <Hero
       title="Level Up the Whole Organization"
