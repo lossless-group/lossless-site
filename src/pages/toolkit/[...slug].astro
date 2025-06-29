@@ -75,7 +75,10 @@ const contentData = {
 };
 ---
 
-<Layout title={entry.data.title || entry.id.replace(/\.md$/, '')}>
+<Layout 
+  title={entry.data.title || entry.id.replace(/\.md$/, '')}
+  frontmatter={entry.data}
+>
   <OneArticle
     Component={OneArticleOnPage}
     content={entry.body}

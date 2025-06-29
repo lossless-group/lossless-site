@@ -83,7 +83,11 @@ const contentDataForOneArticle = {
 ---
 {(async () => {
   return (
-    <Layout title={pageTitle} description={pageDescription}>
+    <Layout 
+      title={pageTitle} 
+      description={pageDescription}
+      frontmatter={entry.data}
+    >
       <OneArticle
         Component={OneArticleOnPage}
         content={entry.body} {/* Pass raw Markdown body */}

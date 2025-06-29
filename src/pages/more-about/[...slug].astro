@@ -59,7 +59,10 @@ const contentData = {
 };
 ---
 
-<Layout title={entry.data.title}>
+<Layout 
+  title={entry.data.title}
+  frontmatter={entry.data}
+>
   <OneArticle
     Component={OneArticleOnPage}
     content={entry.body}
