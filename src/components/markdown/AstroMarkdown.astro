@@ -425,7 +425,109 @@ if (DEBUG_AST) {
 }
 
 {(node.type === "inlineCode") &&
-  <code class="inline-code">{node.value}</code>
+  <>
+    <code class="inline-code">{node.value}</code>
+    <style>
+      .inline-code {
+        /* Typography */
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Ubuntu Mono', monospace;
+        font-size: 0.875em;
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: -0.01em;
+        
+        /* Background & Border */
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.08) 0%, 
+          rgba(255, 255, 255, 0.04) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 6px;
+        
+        /* Spacing & Layout */
+        padding: 0.2em 0.4em;
+        margin: 0 0.1em;
+        display: inline-block;
+        vertical-align: baseline;
+        
+        /* Colors */
+        color: #e2e8f0;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        
+        /* Effects */
+        box-shadow: 
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          0 1px 2px rgba(0, 0, 0, 0.06),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        
+        /* Transitions */
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Prevent line breaks */
+        white-space: nowrap;
+        
+        /* Ensure proper rendering */
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Hover effects for interactive feel */
+      .inline-code:hover {
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.12) 0%, 
+          rgba(255, 255, 255, 0.08) 100%);
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: 
+          0 2px 8px rgba(0, 0, 0, 0.15),
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+      }
+      
+      /* Focus state for accessibility */
+      .inline-code:focus {
+        outline: 2px solid rgba(59, 130, 246, 0.5);
+        outline-offset: 2px;
+      }
+      
+      /* Dark theme adjustments */
+      @media (prefers-color-scheme: dark) {
+        .inline-code {
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.06) 0%, 
+            rgba(255, 255, 255, 0.03) 100%);
+          border-color: rgba(255, 255, 255, 0.08);
+          color: #f1f5f9;
+        }
+        
+        .inline-code:hover {
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.06) 100%);
+          border-color: rgba(255, 255, 255, 0.15);
+        }
+      }
+      
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        .inline-code {
+          background: rgba(255, 255, 255, 0.15);
+          border: 2px solid currentColor;
+          color: inherit;
+        }
+      }
+      
+      /* Print styles */
+      @media print {
+        .inline-code {
+          background: transparent;
+          border: 1px solid #000;
+          color: #000;
+          box-shadow: none;
+        }
+      }
+    </style>
+  </>
 }
 
 <!-- Anything citation-* is custom made -->
