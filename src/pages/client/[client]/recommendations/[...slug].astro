@@ -88,17 +88,9 @@ const contentData = {
   client: client
 };
 
-// Define frontmatter data for the client recommendations page
-const frontmatter = {
-  title: entry.data.title,
-  description: entry.data.lede || entry.data.description || `Recommendations for ${client}`,
-  lede: entry.data.lede || entry.data.description || `Recommendations for ${client}`,
-  banner_image: entry.data.banner_image || entry.data.portrait_image
-};
-
 ---
 
-<Layout frontmatter={frontmatter}>
+<Layout title={entry.data.title}>
   <OneArticle
     Component={OneArticleOnPage}
     content={entry.body}
