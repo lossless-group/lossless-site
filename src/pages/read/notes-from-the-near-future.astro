@@ -2,9 +2,16 @@
 import Layout from "@layouts/Layout.astro";
 import ArticlesLayout from "@layouts/Articles.astro";
 import ArticleGrid from "@components/articles/ArticleGrid.astro";
+
+// Define frontmatter data for the notes from the near future page
+const frontmatter = {
+  title: "Notes from the near future",
+  description: "A collection of articles and resources about the future of software development.",
+  lede: "A collection of articles and resources about the future of software development."
+};
 ---
 
-<Layout>
+<Layout frontmatter={frontmatter}>
 <ArticlesLayout
   title="Notes from the near future"
   description="A collection of articles and resources about the future of software development."

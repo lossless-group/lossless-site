@@ -93,10 +93,17 @@ const essayItems: EssayItem[] = publishedEssays.map(entry => {
 
 // console.log(essayItems);
 
+// Define frontmatter data for the reader index page
+const frontmatter = {
+  title: "The Losslesss Reader",
+  description: "Browse essays and longform writing from our library",
+  lede: "Browse essays and longform writing from our library"
+};
+
 // Render the page with the filtered and sorted essays
 ---
 
-<Layout title="The Losslesss Reader">
+<Layout frontmatter={frontmatter}>
   <div class="container mx-auto py-8 px-4">
     <h1 class="text-3xl font-bold mb-6">Reader: Essays</h1>
     <p class="text-lg mb-8">Browse essays and longform writing from our library.</p>

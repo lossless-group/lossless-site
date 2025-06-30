@@ -11,6 +11,13 @@ import { Image } from "astro:assets";
 import Layout from "@layouts/Layout.astro";
 import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
 import Einstein from "@assets/visuals/imageOf/imageOf__Albert-Einstein.png";
+
+// Define frontmatter data for the vibe with us page
+const frontmatter = {
+  title: "Vibe Code with Us",
+  description: "We've been down the rabbit holes, shaved our yaks, and present our tender, love, care, and the results of untold frustration for you here.",
+  lede: "We've been down the rabbit holes, shaved our yaks, and present our tender, love, care, and the results of untold frustration for you here."
+};
 ---
 
 <!--
@@ -18,7 +25,7 @@ import Einstein from "@assets/visuals/imageOf/imageOf__Albert-Einstein.png";
   Page for showcasing featured coding tools or messages in a grid layout.
   Wrapped in Layout.astro for site-wide navigation, SEO, and styling.
 -->
-<Layout>
+<Layout frontmatter={frontmatter}>
 
   <section class="think-harder">
     <div class="think-harder-container">

@@ -50,13 +50,22 @@ export const getStaticPaths: GetStaticPaths = async ({}) => {
   }
 
   return paths;
+  
 };
 
 // Get the specific entry and the full list from props
 const { entry, essays } = Astro.props as Props; 
 
+// Define frontmatter data for the reader page
+const frontmatter = {
+  title: `Reader: ${entry.data.title || entry.id}`,
+  description: entry.data.lede || entry.data.description || `Read ${entry.data.title || entry.id}`,
+  lede: entry.data.lede || entry.data.description || `Read ${entry.data.title || entry.id}`,
+  banner_image: entry.data.banner_image || entry.data.portrait_image
+};
+
 ---
-<Layout title={`Reader: ${entry.data.title || entry.id}`}>
+<Layout frontmatter={frontmatter}>
   {/* Pass the required props to the layout */}
   <CollectionReaderLayout 
     collection={entry.collection} 

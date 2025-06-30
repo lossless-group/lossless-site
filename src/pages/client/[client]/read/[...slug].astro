@@ -85,9 +85,17 @@ if (essaySlug) {
   }) || essays[0];
 }
 
+// Define frontmatter data for the client reader page
+const frontmatter = {
+  title: `${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`,
+  description: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  lede: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  banner_image: currentEssay?.data?.banner_image || currentEssay?.data?.portrait_image
+};
+
 ---
 
-<Layout title={`${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`}>
+<Layout frontmatter={frontmatter}>
   <AnimationWrapper>
 
   <div class="reader-wrapper">

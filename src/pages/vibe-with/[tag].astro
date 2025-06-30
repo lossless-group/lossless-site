@@ -67,9 +67,16 @@ const results = entries.map(({ entry, collection }) => {
     collection,
   };
 }).sort((a, b) => String(a.title).localeCompare(String(b.title)));
+
+// Define frontmatter data for the tag page
+const frontmatter = {
+  title: `Items tagged '${tag}'`,
+  description: `Prompts and specs tagged with '${tag}'`,
+  lede: `Prompts and specs tagged with '${tag}'`
+};
 ---
 
-<Layout title={`Items tagged '${tag}'`}>
+<Layout frontmatter={frontmatter}>
   <header class="display-by-tag-row">
     <h1>Items tagged:</h1>
     <TagChip tagString={tag} route="vibe-with" fontSize="var(--fs-400)" includeCount={true} count={results.length}/>

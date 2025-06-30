@@ -85,7 +85,14 @@ export async function getStaticPaths() {
 }
 
 const { contentThreads } = Astro.props;
+
+// Define frontmatter data for the client magazine page
+const frontmatter = {
+  title: "Magazine Content",
+  description: "A collection of curated content from our magazine",
+  lede: "A collection of curated content from our magazine"
+};
 ---
-<Layout title="Magazine Content">
+<Layout frontmatter={frontmatter}>
   <PostCardContentLayout contentThreads={contentThreads} />
 </Layout>

@@ -106,8 +106,15 @@ const essayItems: EssayItem[] = publishedEssays.map(entry => {
 });
 // Debug output for inspection
 console.log(essayItems);
+
+// Define frontmatter data for the tag page
+const frontmatter = {
+  title: `Essays tagged '${tag}'`,
+  description: `Essays and articles tagged with '${tag}'`,
+  lede: `Essays and articles tagged with '${tag}'`
+};
 ---
-<Layout title={`Essays tagged '${tag}'`}>
+<Layout frontmatter={frontmatter}>
   <header class="display-by-tag-row">
     <h1>Essays tagged:</h1>
     <TagChip tagString={tag} route="read/more-on" fontSize="var(--fs-400)" includeCount={true} count={essayItems.length}/>
