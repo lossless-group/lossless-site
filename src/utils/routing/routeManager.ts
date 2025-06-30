@@ -21,8 +21,12 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'more-about'
   },
   {
-    contentPath: 'lost-in-public/prompts',
-    routePath: 'thread/prompts'
+    contentPath: 'lost-in-public',
+    routePath: 'vibe-with'
+  },
+  {
+    contentPath: 'specs',
+    routePath: 'vibe-with/specs'
   },
   {
     contentPath: 'tooling',
