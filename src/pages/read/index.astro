@@ -12,6 +12,9 @@ import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradie
 import CollectionEntryRow from '@components/basics/CollectionEntryRow.astro';
 import ArticleListColumn from '@components/articles/ArticleListColumn.astro';
 import ArticleListNewsPreview from '@components/articles/ArticleListNewsPreview.astro';
+import HeroGlassmorphic from '@components/basics/HeroGlassmorphic.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import TagColumn from '@components/tool-components/TagColumn.astro';
 /**
  * Interface for an essay item, matching the data structure output by essaysCollection
  * (see src/content.config.ts for schema and transforms)
@@ -101,32 +104,247 @@ const frontmatter = {
 };
 
 // Render the page with the filtered and sorted essays
+
 ---
 
 <Layout frontmatter={frontmatter}>
-  <div class="container mx-auto py-8 px-4">
-    <h1 class="text-3xl font-bold mb-6">Reader: Essays</h1>
-    <p class="text-lg mb-8">Browse essays and longform writing from our library.</p>
+  <AnimationWrapper>
+    <main>
+      <!-- Hero Section -->
+      <HeroGlassmorphic
+        title="The Lossless Reader"
+        subtitle="Deep Insights & Longform Writing"
+        description="Explore our curated collection of essays, research, and commentary that delves into the intersection of technology, innovation, and human potential."
+        ctaText="Browse All Essays"
+        ctaUrl="/read/through"
+        image={{
+          src: "/visuals/Convey__Picto__Assembly-Line.svg",
+          alt: "Assembly line illustration representing systematic thinking"
+        }}
+        backgroundStyle="glassmorphic-vivid"
+        alignment="left"
+        fullBleed={true}
+        animate={true}
+      />
 
-    <div class="flex gap-4 mb-8">
-      <a href="/read/through" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Essays</a>
-      <!-- Add more navigation as needed -->
-    </div>
+      <!-- Content Section -->
+      <div class="content-wrapper">
+        <div class="essays-layout">
+          <!-- Tag Filter Sidebar -->
+          <aside class="tag-sidebar">
+            <TagColumn tools={essayItems} />
+          </aside>
 
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold mb-4">Essays</h2>
-      <p class="mb-6">Longform writing, research, and commentary.</p>
-      {/*
-        Render ArticleListColumn for all essays, passing ArticleListNewsPreview as EntryComponent.
-        This mirrors the columnar, DRY rendering pattern from the [tag].astro page for consistency.
-        - entries: essayItems (array of essay data)
-        - EntryComponent: ArticleListNewsPreview (renders each essay row)
-      */}
-      <ArticleListColumn entries={essayItems} EntryComponent={ArticleListNewsPreview} />
-    </section>
+          <!-- Essays List -->
+          <main class="essays-main">
+            <section class="essays-section">
+              <div class="section-header">
+                <h2 class="section-title">Featured Essays</h2>
+                <p class="section-description">Longform writing, research, and commentary that challenges conventional thinking.</p>
+              </div>
+              
+              {/*
+                Render ArticleListColumn for all essays, passing ArticleListNewsPreview as EntryComponent.
+                This mirrors the columnar, DRY rendering pattern from the [tag].astro page for consistency.
+                - entries: essayItems (array of essay data)
+                - EntryComponent: ArticleListNewsPreview (renders each essay row)
+              */}
+              <ArticleListColumn entries={essayItems} EntryComponent={ArticleListNewsPreview} />
+            </section>
+          </main>
+        </div>
 
-    <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+        <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="3rem" />
 
-    <!-- You can add additional sections or features here if desired -->
-  </div>
+        <!-- Additional navigation section -->
+        <section class="navigation-section" data-animate="fade-up" data-animate-delay="0.3">
+          <div class="navigation-content">
+            <h3 class="navigation-title">Explore More</h3>
+            <div class="navigation-links">
+              <a href="/read/through" class="nav-link primary">Browse All Essays</a>
+              <a href="/more-about" class="nav-link secondary">Reference Library</a>
+              <a href="/ai-toolkit" class="nav-link secondary">AI Toolkit</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </AnimationWrapper>
 </Layout>
+
+<style>
+  /* Content wrapper with consistent styling */
+  .content-wrapper {
+    width: 92%;
+    max-width: 1400px; /* Increased to accommodate sidebar */
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+
+  /* Essays layout with sidebar */
+  .essays-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  /* Tag sidebar styling */
+  .tag-sidebar {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+    flex: 0 0 300px; /* Fixed width, no shrinking */
+  }
+
+  /* Main essays content */
+  .essays-main {
+    flex: 1;
+    display: flex;
+    justify-content: center; /* Center the essays column */
+  }
+
+  /* Center the essays section within the main area */
+  .essays-section {
+    width: 100%;
+    max-width: 800px; /* Match the max-width of individual essay entries */
+  }
+
+  /* Essays section styling */
+  .essays-section {
+    margin: 3rem 0;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: var(--fs-700);
+    font-weight: var(--fw-bold);
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, var(--clr-lossless-primary-light) 0%, var(--clr-lossless-accent--brightest) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-description {
+    font-size: var(--fs-450);
+    color: var(--clr-lossless-primary-light);
+    max-width: 60ch;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Navigation section styling */
+  .navigation-section {
+    margin: 2rem 0;
+  }
+
+  .navigation-content {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+  }
+
+  .navigation-title {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-semi-bold);
+    margin-bottom: 1.5rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .navigation-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: var(--fw-semi-bold);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .nav-link.primary {
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-dark);
+  }
+
+  .nav-link.primary:hover {
+    background: transparent;
+    color: var(--clr-lossless-accent--brightest);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-1px);
+  }
+
+  .nav-link.secondary {
+    background: transparent;
+    color: var(--clr-lossless-primary-light);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-link.secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--clr-lossless-accent--brightest);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-1px);
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .content-wrapper {
+      width: 95%;
+      padding: 1rem 0;
+    }
+
+    .essays-layout {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .tag-sidebar {
+      position: static;
+      flex: none;
+      width: 100%;
+      order: 2; /* Move sidebar below content on mobile */
+    }
+
+    .essays-main {
+      order: 1; /* Move content above sidebar on mobile */
+      justify-content: center;
+    }
+
+    .essays-section {
+      max-width: 100%; /* Full width on mobile */
+    }
+
+    .navigation-links {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .nav-link {
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: var(--fs-600);
+    }
+
+    .section-description {
+      font-size: var(--fs-400);
+    }
+  }
+</style>

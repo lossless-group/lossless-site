@@ -14,8 +14,7 @@
  * If not provided, defaults to 'vibe-with' for backward compatibility.
  */
 
-import { Fragment } from 'astro/jsx-runtime'; // required for slot fallback, but not for image/lede
-import TagScroller from '@components/basics/tags/TagScroller.astro'
+import TagCloud from '@components/tool-components/TagCloud.astro'
 // Canonical prop passthrough pattern (see PostCard.astro)
 const { data: maybeData, tagRoute = 'vibe-with', ...rest } = Astro.props;
 const props = maybeData ? maybeData : Astro.props;
@@ -47,7 +46,7 @@ const showImage = !!resolvedBannerImage;
   - No JSX in template
 -->
 
-<div class="news-preview-entry">
+<div class="news-preview-entry tool-card" data-tags={JSON.stringify(tags || [])}>
   <div class="news-preview-img-wrap">
     {showImage
       ? <img src={resolvedBannerImage} alt={resolvedImagePrompt} class="news-preview-img" loading="lazy" />
@@ -62,9 +61,9 @@ const showImage = !!resolvedBannerImage;
     <!-- DEBUG: resolvedLede value: {JSON.stringify(resolvedLede)} -->
     {showLede && <p class="news-preview-lede">{resolvedLede}</p>}
 
-  <!-- TagScroller: horizontally scrollable tag row, max 88% width, overflow hidden, toggle buttons -->
+  <!-- TagCloud: compact tag cloud layout with hover expansion -->
   {tags && tags.length > 0 && (
-    <TagScroller tags={tags} tagRoute={tagRoute} maxWidth="88%" />
+    <TagCloud tags={tags} tagRoute={tagRoute} maxWidth="88%" />
   )}
     </div>
   <div class="news-preview-separator" role="presentation"></div>
@@ -75,16 +74,41 @@ const showImage = !!resolvedBannerImage;
   display: flex;
   flex-direction: row;
   margin-left: 2rem;
-  transition: box-shadow 0.2s, background 0.2s;
+  max-width: 800px; /* Limit the width of each entry */
+  padding: 1.5rem; /* Add padding for the background */
+  border-radius: 16px; /* Rounded corners for the entire entry */
+  background: rgba(255, 255, 255, 0.02); /* Subtle light background */
+  backdrop-filter: blur(10px); /* Glass effect */
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle border */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04); /* Gentle shadow */
+  transition: box-shadow 0.2s, background 0.2s, transform 0.2s ease;
 }
 .news-preview-entry:hover {
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.13), 0 1.5px 8px 0 rgba(0,0,0,0.08);
-  background: var(--clr-lossless-primary-darkest, #23222a);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1); /* Enhanced shadow on hover */
+  background: rgba(255, 255, 255, 0.04); /* Slightly more visible background on hover */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* More visible border on hover */
+  transform: translateY(-2px); /* Enhanced lift effect on hover */
+}
+
+/* Fade-in animation for filtering */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.news-preview-entry.fade-in {
+  animation: fadeIn 0.3s ease-out;
 }
 .news-preview-content{
   display: flex;
   flex-direction: column;
-  margin-left: .4rem;
+  margin-left: 1rem; /* Increased spacing to account for new padding */
 }
 .news-preview-link {
   display: flex;
@@ -93,14 +117,16 @@ const showImage = !!resolvedBannerImage;
   color: inherit;
 }
 .news-preview-img-wrap {
-  flex: 0 0 96px;
-  max-width: 96px;
-  min-width: 72px;
+  flex: 0 0 140px; /* Increased from 96px */
+  max-width: 140px; /* Increased from 96px */
+  min-width: 100px; /* Increased from 72px */
   overflow: hidden;
   background: #e3edf5;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 12px; /* Rounded corners for the image container */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 .news-preview-img {
   width: 100%;
@@ -108,6 +134,12 @@ const showImage = !!resolvedBannerImage;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   display: block;
+  border-radius: 12px; /* Rounded corners for the image */
+  transition: transform 0.2s ease; /* Smooth transition for hover effects */
+}
+
+.news-preview-entry:hover .news-preview-img {
+  transform: scale(1.02); /* Subtle zoom effect on hover */
 }
 .news-preview-img--fallback {
   width: 100%;
@@ -117,7 +149,9 @@ const showImage = !!resolvedBannerImage;
   justify-content: center;
   color: #888;
   font-size: 0.9em;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); /* Subtle gradient background */
+  border-radius: 12px; /* Rounded corners for fallback */
+  border: 1px solid #e0e0e0; /* Subtle border */
 }
 .news-preview-content {
   flex: 1;
@@ -150,16 +184,18 @@ const showImage = !!resolvedBannerImage;
 .news-preview-separator {
   height: 1px;
   background: linear-gradient(90deg, #e3edf5 0%, #f5f5f5 100%);
-  margin: 2rem 0 0 0;
+  margin: 1.5rem 0 0 0; /* Reduced margin to account for entry padding */
   border: none;
+  border-radius: 0.5px; /* Subtle rounded corners for separator */
+  opacity: 0.6; /* Slightly more subtle */
 }
 @media (max-width: 600px) {
   .news-preview-link {
     flex-direction: row;
   }
   .news-preview-img-wrap {
-    max-width: 72px;
-    min-width: 56px;
+    max-width: 100px; /* Increased from 72px */
+    min-width: 80px; /* Increased from 56px */
   }
   .news-preview-content {
     padding-left: 0.75rem;
