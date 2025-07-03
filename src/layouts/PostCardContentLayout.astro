@@ -2,8 +2,30 @@
 import { getCollection } from "astro:content";
 import PostCardFeature from '../components/articles/PostCardFeature.astro';
 import PostCard from '../components/articles/PostCard.astro';
+import TagRow from '../components/tool-components/TagRow.astro';
 
 const { contentThreads = [] } = Astro.props;
+
+// Prepare data for TagRow
+const toolsForTagRow = contentThreads.map(item => {
+  const props = item.data ? item.data : item;
+  return {
+    ...props,
+    tags: props.tags || [],
+    title: props.title || '',
+    url: props.url || '#'
+  };
+});
+
+// Prepare PostCard data with tags as JSON string
+const postCardsData = contentThreads.slice(1).map(item => {
+  const props = item.data ? item.data : item;
+  const tags = props.tags || [];
+  return {
+    ...item,
+    tagsJson: `["${tags.join('","')}"]`
+  };
+});
 ---
 
 {/* Full-bleed Feature card */}
@@ -11,18 +33,32 @@ const { contentThreads = [] } = Astro.props;
   <PostCardFeature {...contentThreads[0]} />
 </div>
 
-{/* Centered magazine container */}
-<div class="magazine-container">
-  {contentThreads.length > 1 && (
-    <div class="magazine-grid">
-      {contentThreads.slice(1).map((item) => (
-        <PostCard 
-          {...item} 
-          imageAspectRatio="12/9" 
-        />
-      ))}
+{/* Content Section with Tag Filtering */}
+<div class="content-wrapper">
+  {/* Tag Filter Bar */}
+  <div class="tag-bar-container">
+    <TagRow tools={toolsForTagRow} />
+  </div>
+
+  {/* Post Cards Main Content */}
+  <main class="post-cards-main">
+    <div class="magazine-container">
+      {contentThreads.length > 1 && (
+        <div class="magazine-grid">
+          {postCardsData.map((item) => {
+            return (
+              <div class="tool-card" data-tags={item.tagsJson}>
+                <PostCard 
+                  {...item} 
+                  imageAspectRatio="12/9"
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
-  )}
+  </main>
 </div>
 
 <style>
@@ -33,43 +69,91 @@ const { contentThreads = [] } = Astro.props;
     padding: 4rem 1.5rem;
   }
 
+  /* Content wrapper with consistent styling */
+  .content-wrapper {
+    width: 92%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* Tag row styling */
+  .tag-bar-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    top: 2rem;
+    z-index: 10;
+  }
+
+  /* Main post cards content */
+  .post-cards-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    min-height: 500px;
+  }
+
+  /* Center the magazine container within the main area */
   .magazine-container {
     width: 100%;
+    max-width: 1200px;
     padding: 1rem 2rem;
     box-sizing: border-box;
   }
-  
+
   .magazine-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns for stacked cards */
+    grid-template-columns: repeat(3, 1fr); /* 3 columns by default */
     gap: 2rem;
     width: 100%;
-    max-width: 140rem; /* Increased for 4-column layout */
+    max-width: 140rem;
     margin: 0 auto;
     padding: 1rem;
     box-sizing: border-box;
-  }
+}
 
-  @media (max-width: 1400px) {
-    .magazine-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
+@media (max-width: 1000px) {
+  .magazine-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-
-  @media (max-width: 1000px) {
-    .magazine-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
+}
 
   @media (max-width: 768px) {
-    .magazine-grid {
-      grid-template-columns: 1fr;
-      max-width: 100%;
+    .content-wrapper {
+      width: 95%;
+      padding: 1rem 0;
     }
-
     .magazine-container {
+      max-width: 100%;
       padding: 1rem;
     }
+    .magazine-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Fade-in animation for filtering */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .tool-card.fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .tool-card > .post-card {
+    width: 100%;
+    height: 100%;
   }
 </style>

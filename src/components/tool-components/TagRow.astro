@@ -1,106 +1,393 @@
 ---
-// TagRow.astro
 import TagChip from './TagChip.astro';
+import SortAscLetters from '@assets/Icons/sort-ascending-letters.svg';
+import SortDescLetters from '@assets/Icons/sort-descending-letters.svg';
+import SortAscNumbers from '@assets/Icons/sort-ascending-numbers.svg';
+import SortDescNumbers from '@assets/Icons/sort-descending-numbers.svg';
 
 interface Props {
-  tags: string[];
-  tagCounts?: Record<string, number>;
-  includeCount?: boolean;
+  tools: any[];
 }
 
-const { tags, tagCounts = {}, includeCount = false } = Astro.props;
+const { tools } = Astro.props;
+
+const allTags = Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort();
+
+function trainCaseToNormalCase(tag: string): string {
+  return tag
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+const tagCounts = tools.reduce((acc, tool) => {
+  (tool.tags || []).forEach(tag => {
+    acc[tag] = (acc[tag] || 0) + 1;
+  });
+  return acc;
+}, {});
 ---
 
-<div class="tag-row-container">
-  <button class="scroll-btn left" aria-label="Scroll left">←</button>
-  
-  <div class="tag-row">
-    <div class="tags-wrapper">
-      {tags.map((tag) => (
-        <TagChip 
-          tagString={tag}
-          tag={tag} 
-          count={tagCounts[tag]} 
-          includeCount={includeCount}
-          route="vibe-with"
-        />
-      ))}
-    </div>
+<!-- Choices.js CDN -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<div class="tag-row-bar">
+  <div class="tag-header">
+    <h3 class="tag-heading">Filter by Tag</h3>
   </div>
-  
-  <button class="scroll-btn right" aria-label="Scroll right">→</button>
+  <div class="tag-select-container">
+    <select id="tag-select" multiple class="js-choice">
+      {allTags.map(tag => (
+        <option value={tag}>{`${trainCaseToNormalCase(tag)} (${tagCounts[tag]})`}</option>
+      ))}
+    </select>
+  </div>
+  <div class="sort-buttons">
+    <button id="sort-alpha-asc" class="sort-btn" title="Sort A → Z"><SortAscLetters /></button>
+    <button id="sort-alpha-desc" class="sort-btn" title="Sort Z → A"><SortDescLetters /></button>
+    <button id="sort-count-desc" class="sort-btn" title="Sort by Count ↓"><SortDescNumbers /></button>
+    <button id="sort-count-asc" class="sort-btn" title="Sort by Count ↑"><SortAscNumbers /></button>
+    <button id="clear-tags" class="clear-tags-btn">Clear</button>
+  </div>
 </div>
 
+
+
+<script type="module">
+let currentPage = 1;
+const itemsPerPage = 50;
+let choices;
+let currentSort = 'alpha-asc';
+
+function getSelectedTags() {
+  return choices ? choices.getValue(true) : [];
+}
+
+function refreshChoices() {
+  const selectedTags = getSelectedTags();
+  choices.removeActiveItems();
+  choices.setChoices(
+    choices._store.state.choices.map(choice => ({
+      value: choice.value,
+      label: choice.label,
+      selected: choice.selected,
+      disabled: choice.disabled,
+    })),
+    'value',
+    'label',
+    true
+  );
+  selectedTags.forEach(tag => {
+    choices.setChoiceByValue(tag);
+  });
+}
+
+function filterCards() {
+  const selectedTags = getSelectedTags();
+  const allCards = Array.from(document.querySelectorAll('.tool-card'));
+  const matchingCards = allCards.filter(card => {
+    const tags = JSON.parse(card.dataset.tags || '[]');
+    return selectedTags.every(tag => tags.includes(tag)) || selectedTags.length === 0;
+  });
+  let visibleCount = 0;
+  matchingCards.forEach((card, index) => {
+    if (index < currentPage * itemsPerPage) {
+      const tagChips = card.querySelectorAll('.tool-tag');
+      tagChips.forEach(chip => {
+        const tag = chip.dataset.tag;
+        if (selectedTags.includes(tag)) {
+          chip.classList.add('selected');
+        } else {
+          chip.classList.remove('selected');
+        }
+      });
+      card.classList.add('fade-in');
+      card.addEventListener('animationend', () => {
+        card.classList.remove('fade-in');
+      }, { once: true });
+      card.style.display = '';
+      visibleCount += 1;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+  allCards.forEach(card => {
+    if (!matchingCards.includes(card)) {
+      card.style.display = 'none';
+    }
+  });
+  const loadMoreBtn = document.getElementById('load-more');
+  if (loadMoreBtn) {
+    if (visibleCount >= matchingCards.length) {
+      loadMoreBtn.style.display = 'none';
+    } else {
+      loadMoreBtn.style.display = '';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tagSelectEl = document.getElementById('tag-select');
+  const clearBtn = document.getElementById('clear-tags');
+  choices = new Choices(tagSelectEl, {
+    removeItemButton: true,
+    searchPlaceholderValue: 'Search tags...',
+    itemSelectText: '',
+    shouldSort: true,
+    searchEnabled: true,
+    searchFields: ['label'],
+    position: 'auto',
+    shouldSortItems: true,
+    searchResultLimit: 50,
+    classNames: {
+      containerOuter: 'choices',
+      containerInner: 'choices__inner',
+      input: 'choices__input',
+      inputCloned: 'choices__input--cloned',
+      list: 'choices__list',
+      listItems: 'choices__list--multiple',
+      listSingle: 'choices__list--single',
+      listDropdown: 'choices__list--dropdown',
+      item: 'choices__item',
+      placeholder: 'choices__placeholder',
+      group: 'choices__group',
+      groupHeading: 'choices__heading',
+      button: 'choices__button',
+      activeState: 'is-active',
+      focusState: 'is-focused',
+      openState: 'is-open',
+      disabledState: 'is-disabled',
+      flippedState: 'is-flipped',
+      loadingState: 'is-loading',
+      noResults: 'has-no-results',
+      noChoices: 'has-no-choices'
+    },
+    sorter: (a, b) => {
+      if (currentSort === 'alpha-asc') {
+        return a.label.localeCompare(b.label);
+      } else if (currentSort === 'alpha-desc') {
+        return b.label.localeCompare(a.label);
+      } else if (currentSort === 'count-asc') {
+        const countA = parseInt(a.label.match(/\((\d+)\)/)?.[1] || '0', 10);
+        const countB = parseInt(b.label.match(/\((\d+)\)/)?.[1] || '0', 10);
+        return countA - countB;
+      } else if (currentSort === 'count-desc') {
+        const countA = parseInt(a.label.match(/\((\d+)\)/)?.[1] || '0', 10);
+        const countB = parseInt(b.label.match(/\((\d+)\)/)?.[1] || '0', 10);
+        return countB - countA;
+      } else {
+        return 0;
+      }
+    },
+  });
+
+  tagSelectEl.addEventListener('change', () => {
+    currentPage = 1;
+    filterCards();
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    choices.removeActiveItems();
+    currentPage = 1;
+    filterCards();
+  });
+
+  document.getElementById('sort-alpha-asc')?.addEventListener('click', () => {
+    currentSort = 'alpha-asc';
+    refreshChoices();
+  });
+  document.getElementById('sort-alpha-desc')?.addEventListener('click', () => {
+    currentSort = 'alpha-desc';
+    refreshChoices();
+  });
+  document.getElementById('sort-count-asc')?.addEventListener('click', () => {
+    currentSort = 'count-asc';
+    refreshChoices();
+  });
+  document.getElementById('sort-count-desc')?.addEventListener('click', () => {
+    currentSort = 'count-desc';
+    refreshChoices();
+  });
+
+  filterCards();
+});
+
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('.tool-tag');
+  if (chip && chip.dataset && chip.dataset.tag) {
+    const clickedTag = chip.dataset.tag;
+    const selectedTags = getSelectedTags();
+
+    if (selectedTags.includes(clickedTag)) {
+      // remove
+      choices.removeActiveItemsByValue(clickedTag);
+    } else {
+      // add
+      choices.setChoiceByValue(clickedTag);
+    }
+    currentPage = 1;
+    filterCards();
+  }
+});
+
+</script>
+
 <style>
-  .tag-row-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 1rem 0;
-  }
+.tag-row-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  background: var(--clr-sidebar-bg);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 1.5rem;
+}
 
-  .tag-row {
-    position: relative;
-    overflow-x: hidden;
-    width: 100%;
-  }
+.tag-select-container {
+  width: 100%;
+}
 
-  .tags-wrapper {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
-    padding: 0.5rem 0;
-  }
+.tag-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
 
-  .tags-wrapper::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
-  }
+.tag-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 
-  .scroll-btn {
-    background: var(--clr-lossless-primary-dark);
-    color: var(--clr-lossless-primary-glass);
-    border: none;
-    border-radius: 50%;
-    width: 2rem;
-    height: 2rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease-in-out;
-    z-index: 1;
-  }
+.sort-buttons {
+  display: flex;
+  justify-content: flex-end; /* push to the right */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-  .scroll-btn:hover {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 20%
-    );
-  }
+.choices {
+  width: 100% !important;
+  max-width: 900px;
+}
+.sort-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sort-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: transform 0.2s;
+  display: inline-block;
+  color: white;
+}
+.sort-btn:hover svg {
+  transform: scale(1.1);
+}
+.clear-tags-btn {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.clear-tags-btn:hover {
+  background-color: white;
+  color: black;
+}
 </style>
 
-<script>
-  // Client-side JavaScript for scroll functionality
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.tags-wrapper');
-    const leftBtn = document.querySelector('.scroll-btn.left');
-    const rightBtn = document.querySelector('.scroll-btn.right');
+<style is:global>
+.choices__inner {
+  background-color: var(--clr-lossless-primary-dark) !important;
+  border: 1px solid var(--clr-lossless-primary-glass) !important;
+  color: white !important;
+  min-height: 44px !important;
+  border-radius: 0.5rem !important;
+}
+.choices__list--multiple .choices__item {
+  background-color: var(--clr-lossless-primary-glass) !important;
+  color: white !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 32px !important;
+}
+.choices__list--dropdown {
+  background-color: var(--clr-lossless-primary-dark) !important;
+  color: white !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  border-
+  radius: 0.5rem !important;
+}
+.choices__list--dropdown .choices__list {
+  overflow-y: visible !important;
+  max-height: none !important;
+}
 
-    if (!container || !leftBtn || !rightBtn) return;
-
-    const scrollAmount = 200;
-
-    leftBtn.addEventListener('click', () => {
-      container.scrollLeft -= scrollAmount;
-    });
-
-    rightBtn.addEventListener('click', () => {
-      container.scrollLeft += scrollAmount;
-    });
-  });
-</script>
+.choices__item--choice {
+  color: white !important;
+  padding: 8px 12px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.choices__item--choice.is-highlighted {
+  background-color: var(--clr-lossless-primary-glass) !important;
+  color: white !important;
+}
+.choices__input {
+  background-color: var(--clr-lossless-primary-dark) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  min-height: 44px !important;
+  padding: 8px 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.choices__input:focus {
+  outline: 2px solid var(--clr-lossless-highlight) !important;
+  outline-offset: 2px !important;
+}
+@media (max-width: 768px) {
+  .choices__inner {
+    font-size: 16px !important;
+  }
+  .choices__input {
+    font-size: 16px !important;
+    -webkit-appearance: none !important;
+    border-radius: 0 !important;
+  }
+  .choices__list--dropdown {
+    max-height: 250px !important;
+    z-index: 9999 !important;
+  }
+  .choices__item--choice {
+    font-size: 16px !important;
+    padding: 12px 16px !important;
+  }
+}
+</style>
