@@ -136,7 +136,7 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 .mermaid-modal-content {
   position: relative;
   background-color: var(--bastille);
-  padding: 2rem;
+  padding: 4rem 2rem 2rem 2rem; /* extra top padding for the button */
   border-radius: 8px;
   width: 90vw;
   height: 90vh;
@@ -144,7 +144,9 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
   display: flex;
   flex-direction: column;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  box-sizing: border-box;
 }
+
 
 .mermaid-modal-chart-container {
   flex-grow: 1;
