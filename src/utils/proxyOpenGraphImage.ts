@@ -5,6 +5,10 @@
  * by serving external images through our own domain.
  */
 
+// Define proxy configuration constants directly in this file for now
+const PROXY_IMAGE_FIELDS = ['image', 'og_image', 'banner_image', 'portrait_image', 'favicon', 'logo'];
+const PROXY_IMAGE_ARRAY_FIELDS = ['images', 'og_images'];
+
 /**
  * Determines if a URL should be proxied
  * @param url The URL to check
@@ -34,18 +38,61 @@ export function shouldProxyUrl(url: string | undefined | null): boolean {
 }
 
 /**
- * Proxies an image URL through our own domain
+ * Proxies an image URL through our own API endpoint
+ * @param url The URL to proxy
+ * @returns The proxied URL or original URL if no proxying needed
  */
 export function proxyImageUrl(url: string | undefined | null): string {
-  if (!url) return '';
-  if (typeof url !== 'string') return '';
-  if (!url.startsWith('http')) return url;
+  // Debug the input URL
+  console.log(`[proxyImageUrl] Input URL: ${url}`);
   
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4321';
-  return `${baseUrl}/api/image-proxy?url=${encodeURIComponent(url)}`;
+  if (!url) {
+    console.log('[proxyImageUrl] Empty URL, returning empty string');
+    return '';
+  }
+  
+  if (typeof url !== 'string') {
+    console.log(`[proxyImageUrl] URL is not a string: ${typeof url}, returning empty string`);
+    return '';
+  }
+  
+  if (!url.startsWith('http')) {
+    console.log(`[proxyImageUrl] Not an HTTP URL: ${url}, returning as-is`);
+    return url;
+  }
+  
+  // Don't proxy data URLs
+  if (url.startsWith('data:')) {
+    console.log('[proxyImageUrl] Data URL, returning as-is');
+    return url;
+  }
+  
+  // Get the base URL for our site
+  const baseUrl = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : import.meta.env.SITE || 'http://localhost:4323';
+  
+  // Make sure the URL is properly encoded once (and only once)
+  // First decode it in case it's already encoded to prevent double-encoding
+  try {
+    // Try to decode the URL in case it's already encoded
+    const decodedUrl = decodeURIComponent(url);
+    // Then encode it properly
+    const encodedUrl = encodeURIComponent(decodedUrl);
+    
+    // Use our own proxy endpoint which internally uses Oxylabs
+    const proxiedUrl = `${baseUrl}/api/image-proxy?url=${encodedUrl}`;
+    console.log(`[proxyImageUrl] Proxied URL: ${proxiedUrl}`);
+    return proxiedUrl;
+  } catch (error) {
+    // If decoding fails, just encode the original URL
+    const encodedUrl = encodeURIComponent(url);
+    const proxiedUrl = `${baseUrl}/api/image-proxy?url=${encodedUrl}`;
+    console.log(`[proxyImageUrl] Input URL (couldn't decode): ${url}`);
+    console.log(`[proxyImageUrl] Proxied URL: ${proxiedUrl}`);
+    return proxiedUrl;
+  }
 }
-
-import { PROXY_IMAGE_FIELDS, PROXY_IMAGE_ARRAY_FIELDS } from './proxyConfig';
 
 /**
  * Processes OpenGraph data to proxy all image URLs

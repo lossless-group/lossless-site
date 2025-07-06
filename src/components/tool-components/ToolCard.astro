@@ -124,32 +124,49 @@ function generateToolkitPath(): string {
 // Get the toolkit path for this tool
 const toolkitPath = generateToolkitPath();
 
+// Debug OpenGraph data
+console.log(`[ToolCard:${id}] OpenGraph data:`, {
+  image,
+  og_image,
+  og_image_url,
+  og_screenshot_url,
+  favicon
+});
+
 ---
 
 <div class={`tool-card card card-hover-effect${small ? ' small' : ''}`} data-tags={JSON.stringify(safeTags)}>
   <div class="content-wrapper">
     {(image || og_image || og_image_url || og_screenshot_url) && 
       <div class="tool-card-image">
+        {/* Simplify image rendering to just use the first available image URL */}
         <img
           src={proxyImageUrl(image || og_image || og_image_url || og_screenshot_url)}
           alt={displayTitle}
-          data-primary-image={image ? proxyImageUrl(image) : ''}
-          data-screenshot-url={og_screenshot_url ? proxyImageUrl(og_screenshot_url) : ''}
           loading="lazy"
           decoding="async"
+          onerror="this.onerror=null; this.style.display='none';"
         />
       </div>
     }
     <div class="tool-card__header">
       <div class="tool-card__site-name">
-        {favicon && <img class="tool-favicon" src={proxyImageUrl(favicon)} alt="" />}
+        {favicon && 
+          <img 
+            class="tool-favicon" 
+            src={proxyImageUrl(favicon)} 
+            alt="" 
+            loading="lazy" 
+            decoding="async" 
+            onerror="this.onerror=null; this.style.display='none';"
+          />
+        }
         <a href={url} target="_blank" rel="noopener noreferrer">
           <h2><span class="text-wrapper">{effectiveSiteName}</span></h2>
         </a>
       </div>
       <h4><span class="text-wrapper">{displayTitle}</span></h4>
     </div>
-
     {!small && effectiveDescription && (
       <p class="tool-description">
         <span class="description-text">{effectiveDescription}</span>

@@ -22,51 +22,21 @@ const PROXY_CONFIG = {
  * which helps bypass CORS issues and improves image loading reliability.
  * Uses Oxylabs datacenter proxies for better reliability and to avoid IP blocks.
  */
-export const GET: APIRoute = async ({ request, url }) => {
+export const GET: APIRoute = async ({ request }) => {
   const requestId = Math.random().toString(36).substring(2, 10);
   
-  // Extract URL parameter using multiple methods for maximum reliability
-  let imageUrl = null;
-  
-  // Method 1: Try using Astro's url object (most reliable)
-  try {
-    imageUrl = url.searchParams.get('url');
-    console.log(`[ImageProxy:${requestId}] URL from Astro url object: ${imageUrl}`);
-  } catch (error) {
-    console.error(`[ImageProxy:${requestId}] Error getting URL from Astro url: ${error.message}`);
-  }
-  
-  // Method 2: Try parsing request.url if Method 1 failed
-  if (!imageUrl) {
-    try {
-      const urlObj = new URL(request.url);
-      imageUrl = urlObj.searchParams.get('url');
-      console.log(`[ImageProxy:${requestId}] URL from parsed request.url: ${imageUrl}`);
-    } catch (error) {
-      console.error(`[ImageProxy:${requestId}] Error parsing request.url: ${error.message}`);
-    }
-  }
-  
-  // Method 3: Last resort regex extraction
-  if (!imageUrl) {
-    const urlMatch = request.url.match(/[?&]url=([^&]+)/);
-    imageUrl = urlMatch ? decodeURIComponent(urlMatch[1]) : null;
-    console.log(`[ImageProxy:${requestId}] URL from regex: ${imageUrl}`);
-  }
+  // Extract URL parameter using regex for maximum reliability
+  const urlString = request.url;
+  const urlMatch = urlString.match(/[?&]url=([^&]+)/);
+  let imageUrl = urlMatch ? decodeURIComponent(urlMatch[1]) : null;
   
   console.log(`[ImageProxy:${requestId}] Raw request URL: ${request.url}`);
-  console.log(`[ImageProxy:${requestId}] Final extracted URL parameter: ${imageUrl}`);
+  console.log(`[ImageProxy:${requestId}] Extracted URL parameter: ${imageUrl}`);
   
-  // Return error if no URL parameter
+  // Return transparent pixel if no URL parameter
   if (!imageUrl) {
-    console.log(`[ImageProxy:${requestId}] Missing URL parameter, returning 400 error`);
-    return new Response('Missing URL parameter', {
-      status: 400,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    console.log(`[ImageProxy:${requestId}] Missing URL parameter, returning transparent pixel`);
+    return getTransparentPixelResponse();
   }
   
   // Sanitize URL - remove quotes, angle brackets, whitespace
@@ -81,14 +51,8 @@ export const GET: APIRoute = async ({ request, url }) => {
   
   // Skip non-HTTP URLs
   if (!imageUrl.startsWith('http')) {
-    console.log(`[ImageProxy:${requestId}] Not an HTTP URL: ${imageUrl}, returning 400 error`);
-    return new Response('Invalid URL: must start with http or https', {
-      status: 400,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    console.log(`[ImageProxy:${requestId}] Not an HTTP URL: ${imageUrl}, returning transparent pixel`);
+    return getTransparentPixelResponse();
   }
   
   console.log(`[ImageProxy:${requestId}] Fetching image: ${imageUrl}`);
@@ -125,27 +89,29 @@ export const GET: APIRoute = async ({ request, url }) => {
     }
     
     console.log(`[ImageProxy:${requestId}] Proxy fetch failed: ${proxyResponse.status}`);
-    return new Response(`Failed to fetch image: ${proxyResponse.status} ${proxyResponse.statusText}`, {
-      status: proxyResponse.status,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    return getTransparentPixelResponse();
     
   } catch (error: any) {
     console.error(`[ImageProxy:${requestId}] Error fetching image: ${error.message}`);
-    return new Response(`Error fetching image: ${error.message}`, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    return getTransparentPixelResponse();
   }
 };
 
-// getTransparentPixelResponse function removed - now returning proper error responses instead
+/**
+ * Get transparent pixel response as fallback
+ */
+function getTransparentPixelResponse() {
+  const transparentPixel = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  return new Response(Buffer.from(transparentPixel, 'base64'), {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/gif',
+      'Cache-Control': `public, max-age=${PROXY_CONFIG.cacheDurationSeconds}`,
+      'X-Content-Type-Options': 'nosniff',
+      'Access-Control-Allow-Origin': '*'
+    }
+  });
+}
 
 /**
  * Get image response with proper headers
@@ -190,9 +156,8 @@ async function fetchWithProxy(url: string, requestId: string) {
         throw error;
       }
       
-      // Wait before retrying with exponential backoff
-      const backoffTime = Math.min(1000 * Math.pow(2, attempts), 10000);
-      await new Promise(resolve => setTimeout(resolve, backoffTime));
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay => resolve(delay), 1000));
     }
   }
   
