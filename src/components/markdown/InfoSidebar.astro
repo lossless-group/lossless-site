@@ -1,12 +1,70 @@
 ---
 import AuthorHandle from '@components/basics/AuthorHandle.astro';
 import TagChip from '@components/tool-components/TagChip.astro';
+import { formatDate } from '@utils/formatDate';
+
+// Type definitions for trademarks data
+type TrademarkEntry = Record<string, string>;
+interface AugmenterTrademarks {
+  [key: string]: TrademarkEntry[];
+}
+
+// Import the trademarks data from JSON file
+import trademarksData from '@content/metadata/ai-augmenter-trademarks.json';
+
+// Type assertion for the imported data
+const trademarks: AugmenterTrademarks = trademarksData;
+
+// Helper function to find trademark image URL with flexible matching
+function findTrademarkImage(augmenterName: string | undefined): string | null {
+  if (!augmenterName) return null;
+  
+  // Try exact match first
+  let augmenterData = trademarks[augmenterName];
+  
+  // If no exact match, try to find a partial match
+  if (!augmenterData) {
+    const matchingKey = Object.keys(trademarks).find(key => 
+      augmenterName?.toLowerCase().includes(key.toLowerCase()) || 
+      key.toLowerCase().includes(augmenterName.toLowerCase())
+    );
+    
+    if (matchingKey) {
+      augmenterData = trademarks[matchingKey];
+    } else {
+      return null;
+    }
+  }
+  
+  if (!Array.isArray(augmenterData) || augmenterData.length === 0) {
+    return null;
+  }
+  
+  // First try to find a trademark entry
+  let trademarkEntry = augmenterData.find(item => {
+    const value = Object.values(item)[0];
+    return value && typeof value === 'string' && value.toLowerCase().includes('trademark');
+  });
+  
+  // If no trademark entry found, just take the first available image
+  if (!trademarkEntry && augmenterData.length > 0) {
+    trademarkEntry = augmenterData[0];
+  }
+  
+  if (!trademarkEntry) return null;
+  
+  const value = Object.values(trademarkEntry)[0];
+  return typeof value === 'string' ? value : null;
+}
 
 interface Props {
   categories?: string[];
   semanticVersion?: string;
   authorForHandle?: string | string[];
   augmentedWith?: string;
+  augmentedBy?: string;
+  augmented_with?: string;
+  augmented_by?: string;
   formattedDateModified?: string | null;
   formattedDateCreated?: string | null;
   tags?: string[];
@@ -15,77 +73,106 @@ interface Props {
   contentType?: string;
 }
 
+// Process component props
 const {
   categories = [],
   semanticVersion,
   authorForHandle,
-  augmentedWith,
   formattedDateModified,
   formattedDateCreated,
   tags = [],
   id,
   path,
-  contentType
-} = Astro.props;
+  contentType,
+  ...restProps
+} = Astro.props as Props;
+
+// Handle all possible variations of the augmented with/by property
+const augmentedWith = 
+  restProps.augmented_with || 
+  restProps.augmentedWith || 
+  restProps.augmented_by || 
+  restProps.augmentedBy;
+
+// Process the augmented with data
+const augmentedWithData = augmentedWith ? {
+  name: augmentedWith,
+  imageUrl: findTrademarkImage(augmentedWith)
+} : null;
 ---
 
 <aside class="info-sidebar">
-  <h2 class="info-title">Document Info</h2>
   <div class="info-scroll-area">
     <div class="info-list">
       {categories.length > 0 && (
-        <p class="inline-block text-xs font-medium text-white dark:text-white px-2 py-0.25 rounded-sm mb-1" style="background-color: var(--clr-lossless-attn-action, var(--purple-heart));">
-          {categories.join(', ')}
-        </p>
-      )}
-
-      {semanticVersion && (
-        <div>
-          <strong>Version:</strong> {semanticVersion}
+        <div class="categories-container">
+          <div class="categories-wrapper">
+            {categories.map(category => (
+              <span class="category-pill">
+                {category}
+              </span>
+            ))}
+          </div>
+          <div class="title-separator"></div>
         </div>
       )}
 
+<div class="publish-info">
+      {semanticVersion && (
+        <div class="version-number">
+          v.{semanticVersion}
+        </div>
+      )}
+
+
+
+    {(formattedDateModified || formattedDateCreated) && (
+      <div class="text-xs">
+        <div class="flex justify-between">
+          {formattedDateCreated && (
+            <div>
+              <span class="date-label">Created</span>
+              <div class="date-value">{formatDate(formattedDateCreated)}</div>
+            </div>
+          )}
+          {formattedDateModified && (
+            <div class="text-right">
+              <span class="date-label">Updated</span>
+              <div class="date-value">{formatDate(formattedDateModified)}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+</div>
+
+<div class="author-info">
+      <div class="author-separator"></div>
       {authorForHandle && (
         <div>
+          <span class="date-label">Author</span>
           <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
+          {augmentedWithData && (
+            <div class="mt-2 w-[80%] ml-auto">
+              <span class="augmented-with">Augmented with</span>
+              <div class="augmented-with-content">
+                {augmentedWithData.imageUrl ? (
+                  <img 
+                    src={augmentedWithData.imageUrl}
+                    alt={augmentedWithData.name}
+                    class="w-full h-auto max-h-8 object-contain"
+                    loading="lazy"
+                    title={augmentedWithData.name}
+                  />
+                ) : (
+                  <span class="date-value">{augmentedWithData.name}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
-
-      {augmentedWith && (
-        <div class="text-xs">
-          {augmentedWith}
-        </div>
-      )}
-
-      {formattedDateModified && (
-        <div class="text-xs">
-          <strong>Updated:</strong> {formattedDateModified}
-        </div>
-      )}
-
-      {formattedDateCreated && (
-        <div class="text-xs">
-          <strong>Created:</strong> {formattedDateCreated}
-        </div>
-      )}
-
-      {id && (
-        <div class="text-xs">
-          <strong>Document ID:</strong> {id}
-        </div>
-      )}
-
-      {path && (
-        <div class="text-xs">
-          <strong>Path:</strong> {path}
-        </div>
-      )}
-
-      {contentType && (
-        <div class="text-xs">
-          <strong>Content Type:</strong> {contentType}
-        </div>
-      )}
+</div>
 
       {tags.length > 0 && (
         <div class="mt-4 flex flex-wrap justify-end gap-2">
@@ -101,34 +188,170 @@ const {
 <style>
 .info-sidebar {
   position: sticky;
+  top: 1rem;
   margin-right: 1rem;
   align-self: flex-start;
   width: 220px;
   flex-shrink: 0;
-  padding: 1rem;
+  padding: 0.5rem 0.75rem 0.75rem;
   border-right: 1px solid var(--clr-lossless-accent--brightest);
   background: rgba(255, 255, 255, 0.02);
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
-.info-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--clr-lossless-accent--brightest);
+/* Categories and separator */
+.categories-container {
+  margin-bottom: 0.75rem;
+}
+
+.categories-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.category-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  background-color: var(--clr-lossless-attn-action, var(--purple-heart));
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.125rem;
+  line-height: 1;
+}
+
+.title-separator {
+  height: 1px;
+  background-color: var(--clr-lossless-accent--brightest);
+  width: 100%;
 }
 
 .info-list {
   list-style: none;
-  padding-left: 0;
-  font-size: 0.9rem;
+  padding: 0;
+  margin: 0;
   color: var(--clr-lossless-primary-light);
 }
 
 .info-list > div {
+  margin: 0.4rem 0;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+/* Style for version number */
+.version-number {
+  text-align: center;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Remove default margin from first element after categories */
+.categories-container + div:not(.version-number) {
+  margin-top: 0;
+}
+
+/* Make the Perplexity logo much smaller */
+.info-list img[src*="perplexity"] {
+  max-width: 80px;
+  height: auto;
+  margin: 0.25rem 0 0.5rem 0;
+  opacity: 0.9;
+}
+
+/* Adjust author section */
+.author-handle-container {
   margin: 0.5rem 0;
-  line-height: 1.4;
-  word-break: break-word;        /* key fix */
-  overflow-wrap: anywhere;       /* optional fallback */
+}
+
+/* Date styling */
+.info-list .text-xs {
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.date-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+
+.date-value {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+/* Augmented with section */
+.augmented-with {
+  display: block;
+  text-align: right;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-bottom: 0.1rem;
+}
+
+.augmented-with-content {
+  text-align: right;
+  margin-top: 0.1rem;
+}
+
+/* Author info section */
+.author-info {
+  margin: 1.25rem 0;
+  padding: 0.75rem 0 0;
+  position: relative;
+}
+
+.author-separator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--clr-lossless-accent--brightest);
+  opacity: 0.2;
+}
+
+/* Tag cloud container */
+.mt-4.flex.flex-wrap.justify-end.gap-2 {
+  margin: 1.25rem 0 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.25rem;
+  line-height: 1;
+}
+
+/* Make individual tag chips more compact */
+.mt-4.flex.flex-wrap.justify-end.gap-2 .tag-chip {
+  margin: 0.1rem 0;
+  padding: 0.1rem 0.4rem;
+}
+
+/* Adjust version number */
+.info-list > div:has(> v) {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin: 0.3rem 0;
+}
+
+/* Ensure the image container takes full width and maintains aspect ratio */
+.info-list > div > img {
+  width: 100%;
+  height: auto;
+  max-height: 2.5rem;
+  object-fit: contain;
+  display: block;
 }
 
 @media (max-width: 1250px) {
