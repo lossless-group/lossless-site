@@ -266,36 +266,45 @@ const flatTocItems = flattenTocItems(tocItems);
   overflow: hidden;
 }
 
-.toc-link::before {
+.toc-link::before,
+.toc-link::after {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
+  height: 1px;
   width: 0;
   background: linear-gradient(90deg, 
     var(--clr-lossless-accent--brightest), 
     rgba(255, 255, 255, 0.1)
   );
   transition: width 0.3s ease;
-  z-index: 0;
+}
+
+.toc-link::before {
+  top: 0;
+  left: 0;
+}
+
+.toc-link::after {
+  bottom: 0;
+  left: 0;
 }
 
 .toc-link:hover::before,
-.toc-link.active::before {
+.toc-link:hover::after,
+.toc-link.active::before,
+.toc-link.active::after {
   width: 100%;
 }
 
 .toc-link:hover {
   color: white;
   border-left-color: var(--clr-lossless-accent--brightest);
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .toc-link.active {
   color: white;
   border-left-color: var(--clr-lossless-accent--brightest);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .toc-bullet {
