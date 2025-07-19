@@ -8,7 +8,7 @@ import type { Plugin } from 'unified';
  * This node can later be rendered however you want in Astro or React.
  */
 const remarkTableOfContents: Plugin<[], Root> = () => (tree: Root) => {
-  const result = toc(tree, { maxDepth: 3, heading: null });
+  const result = toc(tree, { maxDepth: 6, heading: null });
 
   if (result.map) {
     const tocNode: RootContent = {

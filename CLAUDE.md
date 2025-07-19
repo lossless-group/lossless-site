@@ -8,6 +8,7 @@ This is an Astro-based static site in a monorepo structure. The site features ad
 
 **Key Context:**
 - This is part of the Lossless Group monorepo
+- Much of the code is in the Astro framework.  We do not support JSX. Do not use React conventions.
 - The project is "vibe coded" (AI-assisted development) - expect non-standard patterns
 - Heavy use of Markdown extensions and custom components
 - Content is managed separately as a git submodule
