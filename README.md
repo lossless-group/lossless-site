@@ -32,7 +32,9 @@ pnpm build
 pnpm dev
 ```
 
-# BEFORE PROCEEDING
+# Getting Started
+
+## Prerequisites
 
 ```bash
 brew install git-lfs
@@ -46,6 +48,22 @@ APP_ENV=development
 
 DEPLOY_ENV=LocalSiteOnly
 ```
+
+## Running the Development Server
+
+The development server can be started with:
+```bash
+pnpm dev
+```
+
+**Note:** If the server doesn't start or isn't accessible, you may need to run it in the background:
+```bash
+pnpm dev > /tmp/astro-dev.log 2>&1 &
+```
+This runs the server in the background and redirects output to a log file. The server will be available at `http://localhost:4321/` after a few seconds.
+
+## Deployment Context
+
 Lossless has one deployment on Vercel, which uses only the astro project as the root directory, and the content is in the 'generated_content' directory in `src` as a git submodule.
 
 The team that also manages the content uses the lossless-monorepo, which has the astro project as the 'site' submodule. The content is then in the 'content' submodule.
@@ -124,6 +142,7 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm install`            | Installs dependencies                            |
 | `pnpm approve-builds`     | Approves a few packages that need additional approval. This is a one-time operation. |
 | `pnpm run dev`            | Starts local dev server at `localhost:4321`      |
+| `pnpm run dev > /tmp/astro-dev.log 2>&1 &` | Starts dev server in background (if having issues) |
 | `pnpm run build`          | Build your production site to `./dist/`          |
 | `pnpm run preview`        | Preview your build locally, before deploying     |
 | `pnpm run astro ...`      | Run CLI commands like `astro add`, `astro check` |
