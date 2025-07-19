@@ -18,7 +18,7 @@
     "@astrojs/prism": "3.3.0",
     "@astrojs/sitemap": "^3.4.0",
     "@astrojs/svelte": "7.1.0",
-    "@astrojs/vercel": "^8.1.4",
+    "@astrojs/vercel": "^8.2.2",
     "@iconify-json/tabler": "^1.2.18",
     "@tabler/icons": "^3.33.0",
     "@tailwindcss/forms": "^0.5.10",
@@ -80,5 +80,10 @@
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "uuid": "^11.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "path-to-regexp": ">=6.3.0"
+    }
   }
 }
