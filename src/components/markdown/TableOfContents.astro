@@ -485,10 +485,13 @@ class TableOfContentsManager {
   }
 
   init() {
+    console.log('[TOC] Initializing TableOfContentsManager');
     this.collectHeadings();
     this.setupEventListeners();
     this.updateActiveLink();
     this.updateScrollProgress();
+    console.log('[TOC] Found', this.tocLinks?.length || 0, 'TOC links');
+    console.log('[TOC] Found', this.headings.length, 'headings on page');
   }
 
   collectHeadings() {
@@ -519,7 +522,21 @@ class TableOfContentsManager {
     this.tocLinks?.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        this.scrollToHeading(link.getAttribute('href'));
+        const href = link.getAttribute('href');
+        console.log('[TOC] Click event fired for:', href);
+        
+        // Direct, simple approach
+        if (href && href.startsWith('#')) {
+          const id = href.substring(1);
+          const element = document.getElementById(id);
+          console.log('[TOC] Looking for element with id:', id, 'Found:', !!element);
+          
+          if (element) {
+            // Just use the native behavior
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.history.replaceState(null, null, href);
+          }
+        }
       });
     });
 
@@ -562,13 +579,33 @@ class TableOfContentsManager {
     const targetElement = targetId ? document.getElementById(targetId) : null;
     
     if (targetElement) {
-      const offset = 100; // Account for sticky headers
-      const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - offset;
+      // Get the fixed header height dynamically
+      const header = document.querySelector('.header');
+      const headerHeight = header ? header.offsetHeight : 0;
       
+      // Add extra padding for better visibility
+      const extraPadding = 20;
+      const totalOffset = headerHeight + extraPadding;
+      
+      // Calculate scroll position
+      const elementPosition = targetElement.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - totalOffset;
+      
+      console.log('[TOC] Scrolling to:', href, 'Header height:', headerHeight, 'Total offset:', totalOffset);
+      
+      // Scroll to the calculated position
       window.scrollTo({
-        top: targetPosition,
+        top: offsetPosition,
         behavior: 'smooth'
       });
+      
+      // Update URL hash
+      if (window.history?.replaceState) {
+        window.history.replaceState(null, null, href);
+      }
+      
+      // Update active link after scroll completes
+      setTimeout(() => this.updateActiveLink(), 600);
     }
   }
 

@@ -495,13 +495,14 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
   }
 
 
+  /* Removed scroll-margin-top as it conflicts with dynamic header calculation */
   .prose :global(h1),
   .prose :global(h2),
   .prose :global(h3),
   .prose :global(h4),
   .prose :global(h5),
   .prose :global(h6) {
-    scroll-margin-top: 10rem;
+    /* Headings styled by TOC JavaScript for proper scroll positioning */
   }
 
 
