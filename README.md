@@ -1,4 +1,4 @@
-<a href="https://lossless.group"><img src="https://i.imgur.com/jjBNAla.png" alt="The Lossless Group"></a>
+<a href="https://lossless.group"><img src="https://i.imgur.com/jrZBIAb.png" alt="The Lossless Group"></a>
 
 # Basics
 
@@ -13,6 +13,8 @@ A preference for `pnpm` over `npm` or `yarn`.
 - [Mermaid](https://mermaid-js.github.io/mermaid) for diagrams.
 - [Starwind](https://starwind.dev/) for basic component starters.
 - [Tailwind CSS](https://tailwindcss.com) for inline styling, usually in the development phase.
+- [Svelte](https://svelte.dev) for client-side interactivity.
+- [MDX](https://mdxjs.com) for Markdown+JSX for component heavy content.
 
 ```bash
 pnpm install --save-dev
@@ -146,5 +148,7 @@ Given we've just been trying to make things work, we've been in "YOLO Mode" and 
 
 # Reach Out, we'd love to hear from you.
 https://x.com/losslessgroup
+
+<a href="https://lossless.group"><img src="https://i.imgur.com/jjBNAla.png" alt="The Lossless Group"></a>
 
 
