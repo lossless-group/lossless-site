@@ -68,13 +68,39 @@ function buildTocTree(listNode, depth = 1): TocItem[] {
   }).filter(item => item && item.text); // Only include valid items with text
 }
 
-const tocItems = isValidToc ? buildTocTree(node) : [];
+const rawTocItems = isValidToc ? buildTocTree(node) : [];
+const tocItems = removeDuplicates(rawTocItems);
 
 if (DEBUG_TOC) {
   console.log('[TableOfContents] isValidToc:', isValidToc);
-  console.log('[TableOfContents] node:', node);
-  console.log('[TableOfContents] tocItems length:', tocItems.length);
+  console.log('[TableOfContents] Raw tocItems length:', rawTocItems.length);
+  console.log('[TableOfContents] Cleaned tocItems length:', tocItems.length);
   console.log('[TableOfContents] tocItems:', tocItems);
+}
+
+// Remove duplicate items where a parent has the same text as its first child
+function removeDuplicates(items: TocItem[]): TocItem[] {
+  return items.map(item => {
+    if (item.children && item.children.length > 0) {
+      // Check if the first child has the same text as the parent
+      const firstChild = item.children[0];
+      if (firstChild && firstChild.text === item.text) {
+        // Remove the duplicate first child, keep the rest
+        const remainingChildren = item.children.slice(1);
+        return {
+          ...item,
+          children: removeDuplicates(remainingChildren)
+        };
+      } else {
+        // Recursively clean children
+        return {
+          ...item,
+          children: removeDuplicates(item.children)
+        };
+      }
+    }
+    return item;
+  });
 }
 
 // Flatten the TOC tree into a simple array for easier rendering
