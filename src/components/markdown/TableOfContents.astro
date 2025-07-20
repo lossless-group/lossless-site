@@ -122,7 +122,7 @@ const flatTocItems = flattenTocItems(tocItems);
             {flatTocItems.map((item, index) => {
               const depthClass = `toc-item toc-depth-${item.depth || 1}`;
               return (
-                <li class={depthClass} data-depth={item.depth || 1}>
+                <li class={depthClass} data-depth={item.depth || 1} data-slug={item.slug}>
                   <a 
                     href={`#${item.slug}`} 
                     class="toc-link"
@@ -130,9 +130,16 @@ const flatTocItems = flattenTocItems(tocItems);
                     title={item.text}
                   >
                     {item.hasChildren ? (
-                      <svg class="toc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9,18 15,12 9,6"></polyline>
-                      </svg>
+                      <button 
+                        class="toc-toggle" 
+                        data-parent-slug={item.slug}
+                        data-expanded="true"
+                        aria-label={`Toggle ${item.text} section`}
+                      >
+                        <svg class="toc-chevron expanded" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6,9 12,15 18,9"></polyline>
+                        </svg>
+                      </button>
                     ) : (
                       <span class="toc-bullet"></span>
                     )}
@@ -266,6 +273,14 @@ const flatTocItems = flattenTocItems(tocItems);
 .toc-item {
   margin: 0;
   position: relative;
+  transition: opacity 0.2s ease, max-height 0.2s ease;
+}
+
+.toc-item.hidden {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .toc-link {
@@ -322,16 +337,36 @@ const flatTocItems = flattenTocItems(tocItems);
   background: rgba(255, 255, 255, 0.03);
 }
 
+.toc-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
 .toc-chevron {
   width: 12px;
   height: 12px;
-  margin-right: 0.75rem;
-  flex-shrink: 0;
   color: var(--clr-lossless-primary-light);
   transition: all 0.2s ease;
 }
 
-.toc-link:hover .toc-chevron {
+.toc-chevron.expanded {
+  transform: rotate(0deg);
+}
+
+.toc-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.toc-link:hover .toc-toggle .toc-chevron,
+.toc-toggle:hover .toc-chevron {
   color: var(--clr-lossless-accent--brightest);
 }
 
@@ -601,17 +636,45 @@ class TableOfContentsManager {
 
   toggleSection(button) {
     const isExpanded = button.getAttribute('data-expanded') === 'true';
-    const tocItem = button.closest('.toc-item');
-    const sublist = tocItem?.querySelector(':scope > .toc-sublist');
+    const parentSlug = button.getAttribute('data-parent-slug');
+    const chevron = button.querySelector('.toc-chevron');
     
-    if (sublist) {
-      if (isExpanded) {
-        sublist.classList.add('collapsed');
-        button.setAttribute('data-expanded', 'false');
-      } else {
-        sublist.classList.remove('collapsed');
-        button.setAttribute('data-expanded', 'true');
+    console.log('[TOC] Toggling section:', parentSlug, 'Currently expanded:', isExpanded);
+    
+    // Find the parent item
+    const parentItem = this.tocSidebar?.querySelector(`[data-slug="${parentSlug}"]`);
+    if (!parentItem) return;
+    
+    const parentDepth = parseInt(parentItem.getAttribute('data-depth')) || 1;
+    
+    // Find all child items (items that come after this one with greater depth)
+    const allItems = Array.from(this.tocSidebar?.querySelectorAll('.toc-item') || []);
+    const parentIndex = allItems.indexOf(parentItem);
+    
+    let childItems = [];
+    for (let i = parentIndex + 1; i < allItems.length; i++) {
+      const itemDepth = parseInt(allItems[i].getAttribute('data-depth')) || 1;
+      if (itemDepth <= parentDepth) {
+        // Reached a sibling or parent level, stop
+        break;
       }
+      childItems.push(allItems[i]);
+    }
+    
+    console.log('[TOC] Found', childItems.length, 'child items for', parentSlug);
+    
+    if (isExpanded) {
+      // Collapse: hide children
+      childItems.forEach(item => item.classList.add('hidden'));
+      button.setAttribute('data-expanded', 'false');
+      chevron?.classList.remove('expanded');
+      chevron?.classList.add('collapsed');
+    } else {
+      // Expand: show children
+      childItems.forEach(item => item.classList.remove('hidden'));
+      button.setAttribute('data-expanded', 'true');
+      chevron?.classList.remove('collapsed');
+      chevron?.classList.add('expanded');
     }
   }
 
