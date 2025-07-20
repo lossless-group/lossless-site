@@ -1,6 +1,6 @@
 {
   "name": "site",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -13,18 +13,18 @@
     "postinstall": "[ \"$CI\" != \"true\" ] && pnpx playwright-core install --with-deps chromium || echo 'Skipping Playwright install in CI'"
   },
   "dependencies": {
-    "@astrojs/mdx": "4.3.0",
-    "@astrojs/node": "9.2.2",
+    "@astrojs/mdx": "4.3.1",
+    "@astrojs/node": "9.3.0",
     "@astrojs/prism": "3.3.0",
-    "@astrojs/sitemap": "^3.4.0",
+    "@astrojs/sitemap": "3.4.1",
     "@astrojs/svelte": "7.1.0",
-    "@astrojs/vercel": "^8.1.4",
+    "@astrojs/vercel": "^8.2.2",
     "@iconify-json/tabler": "^1.2.18",
     "@tabler/icons": "^3.33.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/vite": "^4.1.7",
     "@types/unist": "^3.0.3",
-    "astro": "5.8.0",
+    "astro": "5.12.0",
     "astro-icon": "^1.1.5",
     "choices.js": "^11.1.0",
     "decktape": "^3.15.0",
@@ -80,5 +80,10 @@
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "uuid": "^11.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "path-to-regexp": ">=6.3.0"
+    }
   }
 }

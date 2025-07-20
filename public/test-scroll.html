@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scroll Test</title>
+    <style>
+        body { margin: 0; padding: 0; }
+        .header { position: fixed; top: 0; width: 100%; height: 60px; background: #333; color: white; z-index: 1000; }
+        .content { padding-top: 80px; }
+        .section { height: 800px; border: 1px solid #ccc; padding: 20px; }
+        h2 { margin-top: 0; }
+        .toc { position: fixed; right: 20px; top: 100px; background: #f0f0f0; padding: 20px; }
+        .toc a { display: block; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">Fixed Header (60px height)</div>
+    <div class="content">
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <a href="#section1">Section 1</a>
+            <a href="#section2">Section 2</a>
+            <a href="#section3">Section 3</a>
+        </div>
+        
+        <div class="section">
+            <h2 id="section1">Section 1</h2>
+            <p>Content for section 1...</p>
+        </div>
+        
+        <div class="section">
+            <h2 id="section2">Section 2</h2>
+            <p>Content for section 2...</p>
+        </div>
+        
+        <div class="section">
+            <h2 id="section3">Section 3</h2>
+            <p>Content for section 3...</p>
+        </div>
+    </div>
+    
+    <script>
+        document.querySelectorAll('.toc a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = link.getAttribute('href').substring(1);
+                const element = document.getElementById(id);
+                console.log('Clicking:', id, 'Element found:', !!element);
+                if (element) {
+                    const headerHeight = 60;
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

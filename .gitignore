@@ -18,10 +18,6 @@ pnpm-debug.log*
 .vercel/*
 .vercel/output/*
 
-# generated content
-src/generated-content/
-
-
 # environment variables
 .env
 .env.production

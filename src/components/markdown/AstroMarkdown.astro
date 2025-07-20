@@ -422,6 +422,7 @@ if (DEBUG_AST) {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
             referrerpolicy="strict-origin-when-cross-origin" 
             allowfullscreen
+            loading="lazy"
           />
           {linkText && (
             <div class="youtube-caption">
@@ -1016,8 +1017,7 @@ if (DEBUG_AST) {
         /* Spacing & Layout */
         padding: 0.2em 0.4em;
         margin: 0 0.1em;
-        display: inline-block;
-        vertical-align: baseline;
+        display: inline;
         
         /* Colors */
         color: #e2e8f0;
@@ -1032,8 +1032,10 @@ if (DEBUG_AST) {
         /* Transitions */
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         
-        /* Prevent line breaks */
-        white-space: nowrap;
+        /* Text wrapping - allow breaking on mobile */
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
         
         /* Ensure proper rendering */
         text-rendering: optimizeLegibility;
@@ -1084,6 +1086,23 @@ if (DEBUG_AST) {
           background: rgba(255, 255, 255, 0.15);
           border: 2px solid currentColor;
           color: inherit;
+        }
+      }
+      
+      /* Mobile responsive adjustments */
+      @media (max-width: 768px) {
+        .inline-code {
+          font-size: 0.8em;
+          padding: 0.15em 0.3em;
+          word-break: break-all;
+          overflow-wrap: anywhere;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .inline-code {
+          font-size: 0.75em;
+          padding: 0.1em 0.25em;
         }
       }
       
