@@ -128,6 +128,16 @@ function flattenTocItems(items: TocItem[]): (TocItem & { hasChildren: boolean })
 }
 
 const flatTocItems = flattenTocItems(tocItems);
+
+if (DEBUG_TOC) {
+  console.log('[TableOfContents] flatTocItems count:', flatTocItems.length);
+  console.log('[TableOfContents] flatTocItems:', flatTocItems.map(item => ({
+    text: item.text,
+    slug: item.slug,
+    depth: item.depth,
+    hasChildren: item.hasChildren
+  })));
+}
 ---
 
 <aside class="toc-sidebar" id="toc-sidebar">
