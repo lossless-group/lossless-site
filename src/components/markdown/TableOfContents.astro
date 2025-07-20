@@ -78,13 +78,18 @@ if (DEBUG_TOC) {
 }
 
 // Flatten the TOC tree into a simple array for easier rendering
-function flattenTocItems(items: TocItem[]): TocItem[] {
-  const flattened: TocItem[] = [];
+function flattenTocItems(items: TocItem[]): (TocItem & { hasChildren: boolean })[] {
+  const flattened: (TocItem & { hasChildren: boolean })[] = [];
   
   function flatten(itemList: TocItem[]) {
     itemList.forEach(item => {
       if (item && typeof item === 'object' && item.text) {
-        flattened.push(item);
+        // Add hasChildren property to the flattened item
+        const flatItem = {
+          ...item,
+          hasChildren: item.children && item.children.length > 0
+        };
+        flattened.push(flatItem);
         if (item.children && item.children.length > 0) {
           flatten(item.children);
         }
@@ -116,7 +121,6 @@ const flatTocItems = flattenTocItems(tocItems);
           <ul class="toc-list">
             {flatTocItems.map((item, index) => {
               const depthClass = `toc-item toc-depth-${item.depth || 1}`;
-              const hasChildren = item.children && item.children.length > 0;
               return (
                 <li class={depthClass} data-depth={item.depth || 1}>
                   <a 
@@ -125,7 +129,7 @@ const flatTocItems = flattenTocItems(tocItems);
                     data-slug={item.slug}
                     title={item.text}
                   >
-                    {hasChildren ? (
+                    {item.hasChildren ? (
                       <svg class="toc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9,18 15,12 9,6"></polyline>
                       </svg>
@@ -357,15 +361,18 @@ const flatTocItems = flattenTocItems(tocItems);
 /* Depth-based styling */
 .toc-depth-1 .toc-link {
   font-weight: 500;
+  padding-left: 1rem;
 }
 
 .toc-depth-2 .toc-link {
   font-size: 0.85rem;
+  padding-left: 2rem;
 }
 
 .toc-depth-3 .toc-link {
   font-size: 0.8rem;
   opacity: 0.9;
+  padding-left: 3rem;
 }
 
 .toc-depth-4 .toc-link,
@@ -373,6 +380,7 @@ const flatTocItems = flattenTocItems(tocItems);
 .toc-depth-6 .toc-link {
   font-size: 0.75rem;
   opacity: 0.8;
+  padding-left: 4rem;
 }
 
 .toc-progress-bar {
