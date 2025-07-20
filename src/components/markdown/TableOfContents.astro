@@ -116,6 +116,7 @@ const flatTocItems = flattenTocItems(tocItems);
           <ul class="toc-list">
             {flatTocItems.map((item, index) => {
               const depthClass = `toc-item toc-depth-${item.depth || 1}`;
+              const hasChildren = item.children && item.children.length > 0;
               return (
                 <li class={depthClass} data-depth={item.depth || 1}>
                   <a 
@@ -124,7 +125,13 @@ const flatTocItems = flattenTocItems(tocItems);
                     data-slug={item.slug}
                     title={item.text}
                   >
-                    <span class="toc-bullet"></span>
+                    {hasChildren ? (
+                      <svg class="toc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9,18 15,12 9,6"></polyline>
+                      </svg>
+                    ) : (
+                      <span class="toc-bullet"></span>
+                    )}
                     <span class="toc-text">{item.text}</span>
                   </a>
                 </li>
@@ -257,13 +264,14 @@ const flatTocItems = flattenTocItems(tocItems);
 .toc-link {
   display: flex;
   align-items: center;
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1rem;
   text-decoration: none;
   color: var(--clr-lossless-primary-light);
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
   position: relative;
   overflow: hidden;
+  flex-grow: 1;
 }
 
 .toc-link::before,
@@ -307,6 +315,19 @@ const flatTocItems = flattenTocItems(tocItems);
   background: rgba(255, 255, 255, 0.03);
 }
 
+.toc-chevron {
+  width: 12px;
+  height: 12px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  color: var(--clr-lossless-primary-light);
+  transition: all 0.2s ease;
+}
+
+.toc-link:hover .toc-chevron {
+  color: var(--clr-lossless-accent--brightest);
+}
+
 .toc-bullet {
   width: 6px;
   height: 6px;
@@ -338,46 +359,20 @@ const flatTocItems = flattenTocItems(tocItems);
   font-weight: 500;
 }
 
-.toc-depth-1 .toc-bullet {
-  width: 8px;
-  height: 8px;
-  background: var(--clr-lossless-accent--brightest);
-}
-
 .toc-depth-2 .toc-link {
-  padding-left: 2rem;
   font-size: 0.85rem;
 }
 
-.toc-depth-2 .toc-bullet {
-  width: 5px;
-  height: 5px;
-}
-
 .toc-depth-3 .toc-link {
-  padding-left: 2.75rem;
   font-size: 0.8rem;
   opacity: 0.9;
-}
-
-.toc-depth-3 .toc-bullet {
-  width: 4px;
-  height: 4px;
 }
 
 .toc-depth-4 .toc-link,
 .toc-depth-5 .toc-link,
 .toc-depth-6 .toc-link {
-  padding-left: 3.5rem;
   font-size: 0.75rem;
   opacity: 0.8;
-}
-
-.toc-depth-4 .toc-bullet,
-.toc-depth-5 .toc-bullet,
-.toc-depth-6 .toc-bullet {
-  width: 3px;
-  height: 3px;
 }
 
 .toc-progress-bar {
@@ -527,6 +522,16 @@ class TableOfContentsManager {
       this.toggleCollapse();
     });
 
+    // Toggle functionality for nested items
+    const toggleButtons = this.tocSidebar?.querySelectorAll('.toc-toggle');
+    toggleButtons?.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleSection(button);
+      });
+    });
+
     // Smooth scrolling for TOC links
     this.tocLinks?.forEach(link => {
       link.addEventListener('click', (e) => {
@@ -580,6 +585,22 @@ class TableOfContentsManager {
       this.collapseBtn.setAttribute('aria-label', 
         isCollapsed ? 'Expand Table of Contents' : 'Collapse Table of Contents'
       );
+    }
+  }
+
+  toggleSection(button) {
+    const isExpanded = button.getAttribute('data-expanded') === 'true';
+    const tocItem = button.closest('.toc-item');
+    const sublist = tocItem?.querySelector(':scope > .toc-sublist');
+    
+    if (sublist) {
+      if (isExpanded) {
+        sublist.classList.add('collapsed');
+        button.setAttribute('data-expanded', 'false');
+      } else {
+        sublist.classList.remove('collapsed');
+        button.setAttribute('data-expanded', 'true');
+      }
     }
   }
 
