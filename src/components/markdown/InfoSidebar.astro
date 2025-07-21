@@ -68,6 +68,7 @@ interface Props {
   augmented_by?: string;
   formattedDateModified?: string | null;
   formattedDateCreated?: string | null;
+  formattedDateOfEvent?: string | null;
   tags?: string[];
   id?: string;
   path?: string;
@@ -82,6 +83,7 @@ const {
   participants,
   formattedDateModified,
   formattedDateCreated,
+  formattedDateOfEvent,
   tags = [],
   id,
   path,
@@ -89,10 +91,7 @@ const {
   ...restProps
 } = Astro.props as Props;
 
-// Debug logging
-console.log('InfoSidebar Debug:');
-console.log('authorForHandle:', authorForHandle);
-console.log('participants:', participants);
+
 
 // Handle all possible variations of the augmented with/by property
 const augmentedWith = 
@@ -142,22 +141,31 @@ const augmentedWithData = augmentedWith ? {
 
 
 
-    {(formattedDateModified || formattedDateCreated) && (
+    {(formattedDateOfEvent || formattedDateModified || formattedDateCreated) && (
       <div class="text-xs">
-        <div class="flex justify-between">
-          {formattedDateCreated && (
-            <div>
-              <span class="date-label">Created</span>
-              <div class="date-value">{formatDate(formattedDateCreated)}</div>
-            </div>
-          )}
-          {formattedDateModified && (
-            <div class="text-right">
-              <span class="date-label">Updated</span>
-              <div class="date-value">{formatDate(formattedDateModified)}</div>
-            </div>
-          )}
-        </div>
+        {formattedDateOfEvent ? (
+          <!-- Event date takes priority and is centered -->
+          <div class="text-center">
+            <span class="date-label">Event Date</span>
+            <div class="date-value">{formatDate(formattedDateOfEvent)}</div>
+          </div>
+        ) : (
+          <!-- Standard two-column layout for Created/Updated -->
+          <div class="flex justify-between">
+            {formattedDateCreated && (
+              <div>
+                <span class="date-label">Created</span>
+                <div class="date-value">{formatDate(formattedDateCreated)}</div>
+              </div>
+            )}
+            {formattedDateModified && (
+              <div class="text-right">
+                <span class="date-label">Updated</span>
+                <div class="date-value">{formatDate(formattedDateModified)}</div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     )}
 </div>
