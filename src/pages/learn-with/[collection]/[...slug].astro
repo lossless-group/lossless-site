@@ -25,6 +25,9 @@ export async function getStaticPaths() {
     for (const entry of entries) {
       // Access entry.data.title directly; entry.data is 'any' from CollectionEntry<any>
       const titleSlug = slugify(entry.data.title || 'Untitled Issue');
+      
+
+      
       paths.push({
         params: { collection: urlPath, slug: titleSlug }, // Use URL path instead of collection name
         props: { entry, collection: collectionName }, // Pass actual collection name in props
@@ -91,8 +94,9 @@ const articleData = {
 const pageTitle = articleData.title;
 const pageDescription = articleData.lede || 'Detailed article view.';
 
-// Data for the OneArticle component, similar to vibe-with pattern
+// Data for the OneArticle component - pass the complete entry data
 const contentDataForOneArticle = {
+  ...entry.data, // Include ALL the original entry data (participants, authors, etc.)
   path: Astro.url.pathname,
   id: entry.id,
   collection: collection, // collection name from Astro.props

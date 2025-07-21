@@ -1,0 +1,211 @@
+---
+/**
+ * ParticipantHandle.astro
+ * 
+ * This component renders participant information for events and talks.
+ * It matches the participant name with the people/participants.json data and renders the appropriate
+ * information including headshot and name.
+ * 
+ * Usage:
+ * <ParticipantHandle participants={entry.data.participants} />
+ * 
+ * Props:
+ * - participants: string | string[] - The participant(s) of the content
+ * - size: "sm" | "md" | "lg" - Optional size of the avatar (default: "md")
+ * - variant: "default" | "primary" | "secondary" | etc. - Optional variant of the avatar (default: "default")
+ * - showName: boolean - Optional. Show participant name (default: true)
+ * - nameClass: string - Optional. Extra CSS classes for the participant name span (default: "participant-name")
+ * - avatarClass: string - Optional. Custom class for avatar container (default: "avatar-bg-attn avatar-base")
+ * - sizeClass: string - Optional. Extra size class for the participant name span. Example: "text-lg"
+ * - color: string - Optional. Color class for the participant name span. Example: "text-green-600"
+ */
+
+// Import the Starwind Avatar components
+import Avatar from "../starwind/avatar/Avatar.astro";
+import AvatarImage from "../starwind/avatar/AvatarImage.astro";
+import AvatarFallback from "../starwind/avatar/AvatarFallback.astro";
+
+// Import the participants data
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
+// Define the interface for participant data
+interface Participant {
+  id: string;
+  name: string;
+  headshotOf: string;
+  socialLinks: {
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+    [key: string]: string | undefined;
+  };
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+interface Props {
+  participants: string | string[];
+  size?: "sm" | "md" | "lg";
+  variant?: "default" | "primary" | "secondary" | "info" | "success" | "warning" | "error";
+  showName?: boolean;
+  nameClass?: string;
+  avatarClass?: string;
+  sizeClass?: string;
+  color?: string;
+}
+
+// Get the participants data
+const participantsFilePath = path.join(process.cwd(), 'src/content/people/participants.json');
+const participantsFileContent = await fs.readFile(participantsFilePath, 'utf-8');
+const participantsData = JSON.parse(participantsFileContent);
+
+// Normalize the participants prop to always be an array
+const { 
+  participants: participantsProp, 
+  size = "md", 
+  variant = "default",
+  showName = true,
+  nameClass = "participant-name",
+  avatarClass = "avatar-bg-attn avatar-base",
+  sizeClass = "",
+  color = ""
+} = Astro.props;
+
+// Flatten and normalize participants to ensure we have an array of strings
+function flattenParticipants(participants: any): string[] {
+  if (!participants) return [];
+  
+  // If it's already a string, return it as an array
+  if (typeof participants === 'string') {
+    return [participants];
+  }
+  
+  // If it's an array, flatten it recursively and filter to strings only
+  if (Array.isArray(participants)) {
+    return participants
+      .flatMap(participant => flattenParticipants(participant)) // Recursively flatten nested arrays
+      .filter(participant => typeof participant === 'string' && participant.trim() !== ''); // Only keep non-empty strings
+  }
+  
+  // For any other type, try to convert to string
+  if (typeof participants === 'object' && participants !== null) {
+    // If it's an object, try to get name or id property
+    return flattenParticipants(participants.name || participants.id || '');
+  }
+  
+  // Last resort: convert to string
+  const participantStr = String(participants).trim();
+  return participantStr ? [participantStr] : [];
+}
+
+const participantsList = flattenParticipants(participantsProp);
+
+/**
+ * Find the best matching participant from the participants.json file
+ * Uses a flexible matching approach to handle slight variations in names
+ */
+function findBestMatchingParticipant(participantName: string, participantsData: any): Participant | undefined {
+  // Safety check: ensure participantName is actually a string
+  if (!participantName || typeof participantName !== 'string') {
+    console.warn('findBestMatchingParticipant received non-string participantName:', typeof participantName, participantName);
+    return undefined;
+  }
+  
+  // If empty after trimming, return undefined
+  if (participantName.trim() === '') {
+    return undefined;
+  }
+  
+  // Safety check: ensure participantsData exists and has network-people array
+  if (!participantsData || !participantsData['network-people'] || !Array.isArray(participantsData['network-people'])) {
+    console.warn('findBestMatchingParticipant: participantsData is invalid or missing network-people array');
+    return undefined;
+  }
+  
+  // Normalize the name for comparison (lowercase, trim whitespace)
+  const normalizedName = participantName.toLowerCase().trim();
+  
+  // First try exact matches on id or name
+  const exactMatch = participantsData['network-people'].find((participant: Participant) => 
+    participant.id.toLowerCase() === normalizedName || 
+    participant.name.toLowerCase() === normalizedName
+  );
+  
+  if (exactMatch) {
+    return exactMatch;
+  }
+  
+  // Try partial matches (e.g., "Oz" should match "Oz Silahtar")
+  const partialMatches = participantsData['network-people'].filter((participant: Participant) => {
+    const participantFullName = participant.name.toLowerCase();
+    const participantId = participant.id.toLowerCase();
+    
+    // Check if the name is contained within the full name
+    return participantFullName.includes(normalizedName) || 
+           normalizedName.includes(participantFullName) ||
+           participantId.includes(normalizedName) ||
+           normalizedName.includes(participantId);
+  });
+  
+  // Return the first partial match if any found
+  return partialMatches.length > 0 ? partialMatches[0] : undefined;
+}
+
+// Find matching participants from the JSON data using the flexible matching
+const matchedParticipants = participantsList
+  .map(participantName => findBestMatchingParticipant(participantName, participantsData))
+  .filter(Boolean) as Participant[]; // Remove any undefined entries
+---
+
+<div class="participant-handle-container">
+  {matchedParticipants.map((participant: Participant) => (
+    <div class="participant-handle">
+      <div class="participant-avatar-container">
+        <Avatar size={size} variant={variant} class={avatarClass}>
+          {participant.headshotOf ? (
+            <AvatarImage src={participant.headshotOf} alt={`${participant.name}'s headshot`} />
+          ) : null}
+          <AvatarFallback>
+            {participant.name
+              .split(' ')
+              .map(part => part[0])
+              .join('')}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+      
+      {showName && (
+        <div class="participant-info" style="color: var(--clr-lossless-primary-light);">
+          <div class={`${nameClass} ${sizeClass} ${color}`.trim()}>{participant.name}</div>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  .participant-handle-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .participant-handle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .participant-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .participant-name {
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-300);
+  }
+</style>

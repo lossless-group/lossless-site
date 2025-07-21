@@ -45,6 +45,21 @@ if (originalData?.authors && Array.isArray(originalData.authors) && originalData
   authorForHandle = originalData.author;
 }
 
+// Determine participants for talks/events
+let participants: string | string[] | undefined = undefined;
+if (originalData?.participants && Array.isArray(originalData.participants) && originalData.participants.length > 0) {
+  participants = originalData.participants;
+} else if (originalData?.participant && typeof originalData.participant === 'string') {
+  participants = originalData.participant;
+}
+
+// Debug logging
+console.log('OneArticleOnPage Debug:');
+console.log('originalData.participants:', originalData?.participants);
+console.log('originalData.authors:', originalData?.authors);
+console.log('authorForHandle:', authorForHandle);
+console.log('participants:', participants);
+
 let semanticVersion: string | undefined = undefined;
 if (originalData?.at_semantic_version) {
   semanticVersion = originalData.at_semantic_version;
@@ -164,6 +179,7 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
       categories={categories}
       semanticVersion={semanticVersion}
       authorForHandle={authorForHandle}
+      participants={participants}
       augmentedWith={augmentedWith}
       formattedDateModified={formattedDateModified}
       formattedDateCreated={formattedDateCreated}

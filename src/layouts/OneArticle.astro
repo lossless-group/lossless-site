@@ -60,7 +60,7 @@ const normalizeDataWithAuthors = (pageData) => {
   }
 
   return {
-    ...pageData,
+    ...pageData, // Preserve ALL original fields including participants
     // id: pageData.id, // Assuming id is already part of pageData if needed elsewhere
     // body: pageData.body, // body is handled separately as 'content' prop
     // slug: pageData.slug || (pageData.id ? path.basename(pageData.id, ".md") : undefined),
@@ -69,7 +69,6 @@ const normalizeDataWithAuthors = (pageData) => {
 };
 
 const normalizedData = normalizeDataWithAuthors(data);
-
 
 ---
 

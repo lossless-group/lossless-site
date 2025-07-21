@@ -61,6 +61,7 @@ interface Props {
   categories?: string[];
   semanticVersion?: string;
   authorForHandle?: string | string[];
+  participants?: string | string[];
   augmentedWith?: string;
   augmentedBy?: string;
   augmented_with?: string;
@@ -78,6 +79,7 @@ const {
   categories = [],
   semanticVersion,
   authorForHandle,
+  participants,
   formattedDateModified,
   formattedDateCreated,
   tags = [],
@@ -86,6 +88,11 @@ const {
   contentType,
   ...restProps
 } = Astro.props as Props;
+
+// Debug logging
+console.log('InfoSidebar Debug:');
+console.log('authorForHandle:', authorForHandle);
+console.log('participants:', participants);
 
 // Handle all possible variations of the augmented with/by property
 const augmentedWith = 
@@ -157,31 +164,36 @@ const augmentedWithData = augmentedWith ? {
 
 <div class="author-info">
       <div class="author-separator"></div>
-      {authorForHandle && (
+      {authorForHandle ? (
         <div>
           <span class="date-label">Author</span>
           <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
-          {augmentedWithData && (
-            <div class="mt-2 w-[80%] ml-auto">
-              <span class="augmented-with">Augmented with</span>
-              <div class="augmented-with-content">
-                {augmentedWithData.imageUrl ? (
-                  <img 
-                    src={augmentedWithData.imageUrl}
-                    alt={augmentedWithData.name}
-                    class="w-full h-auto max-h-8 object-contain"
-                    loading="lazy"
-                    title={augmentedWithData.name}
-                  />
-                ) : (
-                  <span class="date-value">{augmentedWithData.name}</span>
-                )}
-              </div>
-            </div>
-          )}
+        </div>
+      ) : participants ? (
+        <div>
+          <span class="date-label">Participants</span>
+          <AuthorHandle authors={participants} showName={true} showRole={false} />
+        </div>
+      ) : null}
+      {augmentedWithData && (
+        <div class="mt-2 w-[80%] ml-auto">
+          <span class="augmented-with">Augmented with</span>
+          <div class="augmented-with-content">
+            {augmentedWithData.imageUrl ? (
+              <img 
+                src={augmentedWithData.imageUrl}
+                alt={augmentedWithData.name}
+                class="w-full h-auto max-h-8 object-contain"
+                loading="lazy"
+                title={augmentedWithData.name}
+              />
+            ) : (
+              <span class="date-value">{augmentedWithData.name}</span>
+            )}
+          </div>
         </div>
       )}
-</div>
+    </div>
 
       {tags.length > 0 && (
         <div class="mt-4 flex flex-wrap justify-end gap-2">
