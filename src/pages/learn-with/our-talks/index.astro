@@ -58,12 +58,22 @@ const articles = allEntries.map((entry) => {
     banner_image: data?.banner_image, 
     portrait_image: data?.portrait_image, 
     imageAlt: `Image for ${data?.title || 'Untitled'}`, 
-    date_of_event: dateValue, 
+    date: dateValue, // Map date_of_event to date for ArticleGrid compatibility
+    date_of_event: dateValue, // Keep original field for UpcomingSection
     lede: data?.lede || '', 
     tags: normalizeToArray('tag', 'tags'),
     participants: normalizeToArray('participant', 'participants'),
     categories: normalizeToArray('category', 'categories'),
   };
+}).sort((a, b) => {
+  // Sort by date descending (most recent first)
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+  
+  const dateA = new Date(a.date);
+  const dateB = new Date(b.date);
+  return dateB.getTime() - dateA.getTime();
 });
 
 

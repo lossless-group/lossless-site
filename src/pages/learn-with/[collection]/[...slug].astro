@@ -12,18 +12,22 @@ import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 
 export async function getStaticPaths() {
   // Define which collections this dynamic route should handle.
-  // For now, hardcoding 'issue-resolution'. This can be expanded.
-  const collectionsToProcess = ['issue-resolution'];
+  // Map collection names to their URL paths
+  const collectionsConfig = {
+    'issue-resolution': 'issue-resolution',
+    'talks': 'our-talks'
+  };
+  
   const paths = [];
 
-  for (const collectionName of collectionsToProcess) {
+  for (const [collectionName, urlPath] of Object.entries(collectionsConfig)) {
     const entries: CollectionEntry<any>[] = await getCollection(collectionName as any); // 'as any' for flexibility during dev
     for (const entry of entries) {
       // Access entry.data.title directly; entry.data is 'any' from CollectionEntry<any>
       const titleSlug = slugify(entry.data.title || 'Untitled Issue');
       paths.push({
-        params: { collection: collectionName, slug: titleSlug },
-        props: { entry, collection: collectionName }, // Pass collection name in props
+        params: { collection: urlPath, slug: titleSlug }, // Use URL path instead of collection name
+        props: { entry, collection: collectionName }, // Pass actual collection name in props
       });
     }
   }
@@ -59,11 +63,25 @@ const normalizeToArray = (sourceData: any, singularKey: string, pluralKey: strin
 };
 
 // Prepare data for the layout and components
+// Handle collection-specific date and author fields
+let dateValue;
+let authorsValue;
+
+if (collection === 'talks') {
+  // For talks, use date_of_event and participants
+  dateValue = data.date_of_event || data.date_created || data.date_modified || new Date();
+  authorsValue = normalizeToArray(data, 'participant', 'participants') || normalizeToArray(data, 'author', 'authors');
+} else {
+  // For issue-resolution and other collections, use standard fields
+  dateValue = data.date_reported || data.date_created || data.date_modified || new Date();
+  authorsValue = normalizeToArray(data, 'author', 'authors');
+}
+
 const articleData = {
   title: data.title || 'Untitled Article',
   // The main content of the article will be passed via <Content />
-  date: data.date_reported || data.date_created || data.date_modified || new Date(),
-  authors: normalizeToArray(data, 'author', 'authors'),
+  date: dateValue,
+  authors: authorsValue,
   tags: normalizeToArray(data, 'tag', 'tags'),
   categories: normalizeToArray(data, 'category', 'categories'),
   banner_image: data.banner_image || data.portrait_image || '/images/placeholders/default-banner.jpg',
