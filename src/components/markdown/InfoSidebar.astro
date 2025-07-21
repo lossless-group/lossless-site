@@ -175,12 +175,12 @@ const augmentedWithData = augmentedWith ? {
       {authorForHandle ? (
         <div>
           <span class="date-label">Author</span>
-          <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
+          <AuthorHandle authors={authorForHandle} showName={true} showRole={false} alternateLayout={true} />
         </div>
       ) : participants ? (
         <div>
           <span class="date-label">Participants</span>
-          <AuthorHandle authors={participants} showName={true} showRole={false} />
+          <AuthorHandle authors={participants} showName={true} showRole={false} alternateLayout={true} />
         </div>
       ) : null}
       {augmentedWithData && (
