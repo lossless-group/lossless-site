@@ -83,17 +83,54 @@ const {
   color = ""
 } = Astro.props;
 
-const authorsList = Array.isArray(authorsProp) 
-  ? authorsProp 
-  : (typeof authorsProp === 'string' ? [authorsProp] : []);
+// Flatten and normalize authors to ensure we have an array of strings
+function flattenAuthors(authors: any): string[] {
+  if (!authors) return [];
+  
+  // If it's already a string, return it as an array
+  if (typeof authors === 'string') {
+    return [authors];
+  }
+  
+  // If it's an array, flatten it recursively and filter to strings only
+  if (Array.isArray(authors)) {
+    return authors
+      .flatMap(author => flattenAuthors(author)) // Recursively flatten nested arrays
+      .filter(author => typeof author === 'string' && author.trim() !== ''); // Only keep non-empty strings
+  }
+  
+  // For any other type, try to convert to string
+  if (typeof authors === 'object' && authors !== null) {
+    // If it's an object, try to get name or id property
+    return flattenAuthors(authors.name || authors.id || '');
+  }
+  
+  // Last resort: convert to string
+  const authorStr = String(authors).trim();
+  return authorStr ? [authorStr] : [];
+}
+
+const authorsList = flattenAuthors(authorsProp);
 
 /**
  * Find the best matching author from the authors.json file
  * Uses a flexible matching approach to handle slight variations in names
  */
 function findBestMatchingAuthor(authorName: string, authorsData: any): Author | undefined {
-  // If empty, return undefined
-  if (!authorName || authorName.trim() === '') {
+  // Safety check: ensure authorName is actually a string
+  if (!authorName || typeof authorName !== 'string') {
+    console.warn('findBestMatchingAuthor received non-string authorName:', typeof authorName, authorName);
+    return undefined;
+  }
+  
+  // If empty after trimming, return undefined
+  if (authorName.trim() === '') {
+    return undefined;
+  }
+  
+  // Safety check: ensure authorsData exists and has authors array
+  if (!authorsData || !authorsData.authors || !Array.isArray(authorsData.authors)) {
+    console.warn('findBestMatchingAuthor: authorsData is invalid or missing authors array');
     return undefined;
   }
   

@@ -164,6 +164,21 @@ const visualsCollection = defineCollection({
   })
 });
 
+const talksCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/talks")}),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]), // Single string -> array with one string
+      z.array(z.string()),                // Already an array
+      z.null(),                          // Handle null values
+      z.undefined()                      // Handle undefined values
+    ]).transform(val => {
+      if (!val) return [];              // Transform null/undefined to empty array
+      return val;                       // Keep arrays and transformed strings as-is
+    }).default([])                      // Default to empty array if missing
+  })
+});
+
 const vocabularyCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("vocabulary")}),
   schema: z.object({
@@ -379,6 +394,7 @@ export const paths = {
   'essays': resolveContentPath('essays'),
   'concepts': resolveContentPath('concepts'),
   'reports': resolveContentPath('reports'),
+  'talks': resolveContentPath('lost-in-public/talks'),
   'tooling': resolveContentPath('tooling'),
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
@@ -406,6 +422,7 @@ export const collections = {
   'prompts': promptsCollection,
   'reminders': remindersCollection,
   'specs': specsCollection,
+  'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
