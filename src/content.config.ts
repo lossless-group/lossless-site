@@ -164,6 +164,15 @@ const visualsCollection = defineCollection({
   })
 });
 
+const talksCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/talks")}),
+  schema: z.object({
+    publish: z.boolean().optional(), // Allows individual entries to override collection default
+  }).passthrough().transform((data) => ({
+    ...data // Pass through all original frontmatter fields.
+  }))
+});
+
 const vocabularyCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("vocabulary")}),
   schema: z.object({
@@ -366,6 +375,10 @@ export const collectionPublishingDefaults = {
     publishByDefault: true, // true = publish all EXCEPT items with publish: false
                             // false = publish none EXCEPT items with publish: true
   },
+  'talks': {
+    publishByDefault: true, // true = publish all EXCEPT items with publish: false
+                            // false = publish none EXCEPT items with publish: true
+  },
   // Add other collections here as needed
 };
 // ---- END NEW ----
@@ -379,6 +392,7 @@ export const paths = {
   'essays': resolveContentPath('essays'),
   'concepts': resolveContentPath('concepts'),
   'reports': resolveContentPath('reports'),
+  'talks': resolveContentPath('lost-in-public/talks'),
   'tooling': resolveContentPath('tooling'),
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
@@ -406,6 +420,7 @@ export const collections = {
   'prompts': promptsCollection,
   'reminders': remindersCollection,
   'specs': specsCollection,
+  'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,

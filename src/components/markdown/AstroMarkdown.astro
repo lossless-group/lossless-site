@@ -139,8 +139,6 @@ if (isToolingGallery) {
   const tools = [];
   const toolGalleryErrors = [];
 
-  console.log(toolMap.values().next().value);
-
   // Resolve toolIds
   for (const input of rawToolIds) {
     let id = input;
@@ -238,7 +236,7 @@ if (DEBUG_AST) {
   }
 </style>
 
-      <CopyLinkButton id={id} label={currentHeaderText} />
+      <CopyLinkButton id={id} label={currentHeaderText} articleTitle={data.title} />
     </>
   );
 

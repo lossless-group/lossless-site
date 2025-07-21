@@ -45,6 +45,16 @@ if (originalData?.authors && Array.isArray(originalData.authors) && originalData
   authorForHandle = originalData.author;
 }
 
+// Determine participants for talks/events
+let participants: string | string[] | undefined = undefined;
+if (originalData?.participants && Array.isArray(originalData.participants) && originalData.participants.length > 0) {
+  participants = originalData.participants;
+} else if (originalData?.participant && typeof originalData.participant === 'string') {
+  participants = originalData.participant;
+}
+
+
+
 let semanticVersion: string | undefined = undefined;
 if (originalData?.at_semantic_version) {
   semanticVersion = originalData.at_semantic_version;
@@ -85,6 +95,11 @@ if (originalData?.date_modified) {
 let formattedDateCreated: string | null = null;
 if (originalData?.date_created) {
   formattedDateCreated = formatDate(originalData.date_created);
+}
+
+let formattedDateOfEvent: string | null = null;
+if (originalData?.date_of_event) {
+  formattedDateOfEvent = formatDate(originalData.date_of_event);
 }
 
 // Prepare data for AstroMarkdown, conditionally removing title if effectiveHeading is used
@@ -164,9 +179,11 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
       categories={categories}
       semanticVersion={semanticVersion}
       authorForHandle={authorForHandle}
+      participants={participants}
       augmentedWith={augmentedWith}
       formattedDateModified={formattedDateModified}
       formattedDateCreated={formattedDateCreated}
+      formattedDateOfEvent={formattedDateOfEvent}
       tags={tags}
       id={originalData.id}
       path={originalData.path}

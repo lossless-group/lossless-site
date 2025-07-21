@@ -58,17 +58,44 @@ interface Props {
    * nameClass: Optional. Extra CSS classes for the author name span. Example: "text-primary font-bold"
    * sizeClass: Optional. Extra size class for the author name span. Example: "text-lg"
    * color: Optional. Color class for the author name span. Example: "text-green-600"
+   * alternateLayout: Optional. If true, alternates avatar position (left/right) for each person
    */
   nameClass?: string;
   avatarClass?: string;
   sizeClass?: string;
   color?: string;
+  alternateLayout?: boolean;
 }
 
-// Get the authors data
-const authorsFilePath = path.join(process.cwd(), 'src/content/people/authors.json');
-const authorsFileContent = await fs.readFile(authorsFilePath, 'utf-8');
-const authorsData = JSON.parse(authorsFileContent);
+// Load and collate all JSON files from the people directory
+const peopleDir = path.join(process.cwd(), 'src/content/people');
+const allPeopleData: Author[] = [];
+
+try {
+  const files = await fs.readdir(peopleDir);
+  const jsonFiles = files.filter(file => file.endsWith('.json'));
+  
+  for (const file of jsonFiles) {
+    try {
+      const filePath = path.join(peopleDir, file);
+      const fileContent = await fs.readFile(filePath, 'utf-8');
+      const data = JSON.parse(fileContent);
+      
+      // Handle different data structures
+      if (data.authors && Array.isArray(data.authors)) {
+        allPeopleData.push(...data.authors);
+      } else if (data['network-people'] && Array.isArray(data['network-people'])) {
+        allPeopleData.push(...data['network-people']);
+      } else if (Array.isArray(data)) {
+        allPeopleData.push(...data);
+      }
+    } catch (error) {
+      console.warn(`Could not load ${file}:`, error.message);
+    }
+  }
+} catch (error) {
+  console.warn('Could not read people directory:', error.message);
+}
 
 // Normalize the authors prop to always be an array
 const { 
@@ -80,20 +107,52 @@ const {
   nameClass = "author-name",
   avatarClass = "avatar-bg-attn avatar-base",
   sizeClass = "",
-  color = ""
+  color = "",
+  alternateLayout = false
 } = Astro.props;
 
-const authorsList = Array.isArray(authorsProp) 
-  ? authorsProp 
-  : (typeof authorsProp === 'string' ? [authorsProp] : []);
+// Flatten and normalize authors to ensure we have an array of strings
+function flattenAuthors(authors: any): string[] {
+  if (!authors) return [];
+  
+  // If it's already a string, return it as an array
+  if (typeof authors === 'string') {
+    return [authors];
+  }
+  
+  // If it's an array, flatten it recursively and filter to strings only
+  if (Array.isArray(authors)) {
+    return authors
+      .flatMap(author => flattenAuthors(author)) // Recursively flatten nested arrays
+      .filter(author => typeof author === 'string' && author.trim() !== ''); // Only keep non-empty strings
+  }
+  
+  // For any other type, try to convert to string
+  if (typeof authors === 'object' && authors !== null) {
+    // If it's an object, try to get name or id property
+    return flattenAuthors(authors.name || authors.id || '');
+  }
+  
+  // Last resort: convert to string
+  const authorStr = String(authors).trim();
+  return authorStr ? [authorStr] : [];
+}
+
+const authorsList = flattenAuthors(authorsProp);
 
 /**
- * Find the best matching author from the authors.json file
+ * Find the best matching person from all people data
  * Uses a flexible matching approach to handle slight variations in names
  */
-function findBestMatchingAuthor(authorName: string, authorsData: any): Author | undefined {
-  // If empty, return undefined
-  if (!authorName || authorName.trim() === '') {
+function findBestMatchingPerson(authorName: string, peopleData: Author[]): Author | undefined {
+  // Safety check: ensure authorName is actually a string
+  if (!authorName || typeof authorName !== 'string') {
+    console.warn('findBestMatchingPerson received non-string authorName:', typeof authorName, authorName);
+    return undefined;
+  }
+  
+  // If empty after trimming, return undefined
+  if (authorName.trim() === '') {
     return undefined;
   }
   
@@ -101,9 +160,9 @@ function findBestMatchingAuthor(authorName: string, authorsData: any): Author | 
   const normalizedName = authorName.toLowerCase().trim();
   
   // First try exact matches on id or name
-  const exactMatch = authorsData.authors.find((author: Author) => 
-    author.id.toLowerCase() === normalizedName || 
-    author.name.toLowerCase() === normalizedName
+  const exactMatch = peopleData.find((person: Author) => 
+    person.id.toLowerCase() === normalizedName || 
+    person.name.toLowerCase() === normalizedName
   );
   
   if (exactMatch) {
@@ -111,63 +170,66 @@ function findBestMatchingAuthor(authorName: string, authorsData: any): Author | 
   }
   
   // Try partial matches (e.g., "Michael" should match "Michael Staton")
-  const partialMatches = authorsData.authors.filter((author: Author) => {
-    const authorFullName = author.name.toLowerCase();
-    const authorId = author.id.toLowerCase();
+  const partialMatches = peopleData.filter((person: Author) => {
+    const personFullName = person.name.toLowerCase();
+    const personId = person.id.toLowerCase();
     
     // Check if the name is contained within the full name
-    return authorFullName.includes(normalizedName) || 
-           normalizedName.includes(authorFullName) ||
-           authorId.includes(normalizedName) ||
-           normalizedName.includes(authorId);
+    return personFullName.includes(normalizedName) || 
+           normalizedName.includes(personFullName) ||
+           personId.includes(normalizedName) ||
+           normalizedName.includes(personId);
   });
   
   // Return the first partial match if any found
   return partialMatches.length > 0 ? partialMatches[0] : undefined;
 }
 
-// Find matching authors from the JSON data using the flexible matching
+// Find matching people from the unified people data using flexible matching
 const matchedAuthors = authorsList
-  .map(authorName => findBestMatchingAuthor(authorName, authorsData))
+  .map(authorName => findBestMatchingPerson(authorName, allPeopleData))
   .filter(Boolean) as Author[]; // Remove any undefined entries
 ---
 
 <div class="author-handle-container">
-  {matchedAuthors.map((author: Author) => (
-    <div class="author-handle">
-      <div class="author-avatar-container">
-        {/**
-         * Avatar container for author image or fallback.
-         * Passes avatarClass directly to Avatar for border/size control.
-         * Default: avatar-bg-attn avatar-base (see avatars.css)
-         */}
-        <Avatar size={size} variant={variant} class={avatarClass}>
-          {author.headshotOf ? (
-            <AvatarImage src={author.headshotOf} alt={`${author.name}'s headshot`} />
-          ) : null}
-          <AvatarFallback>
-            {author.name
-              .split(' ')
-              .map(part => part[0])
-              .join('')}
-          </AvatarFallback>
-        </Avatar>
-      </div>
-      
-      {(showName || showRole) && (
-        <div class="author-info" style="color: var(--clr-lossless-primary-light);">
-          {showName && <div class={`${nameClass} ${sizeClass} ${color}`.trim()}>{author.name}</div>}
-          {showRole && <div class="author-role">{author.role}</div>}
+  {matchedAuthors.map((author: Author, index: number) => {
+    const isReversed = alternateLayout && index % 2 === 1;
+    return (
+      <div class={`author-handle ${isReversed ? 'author-handle-reversed' : ''}`}>
+        <div class="author-avatar-container">
+          {/**
+           * Avatar container for author image or fallback.
+           * Passes avatarClass directly to Avatar for border/size control.
+           * Default: avatar-bg-attn avatar-base (see avatars.css)
+           */}
+          <Avatar size={size} variant={variant} class={avatarClass}>
+            {author.headshotOf ? (
+              <AvatarImage src={author.headshotOf} alt={`${author.name}'s headshot`} />
+            ) : null}
+            <AvatarFallback>
+              {author.name
+                .split(' ')
+                .map(part => part[0])
+                .join('')}
+            </AvatarFallback>
+          </Avatar>
         </div>
-      )}
-    </div>
-  ))}
+        
+        {(showName || showRole) && (
+          <div class="author-info" style="color: var(--clr-lossless-primary-light);">
+            {showName && <div class={`${nameClass} ${sizeClass} ${color}`.trim()}>{author.name}</div>}
+            {showRole && <div class="author-role">{author.role}</div>}
+          </div>
+        )}
+      </div>
+    );
+  })}
 </div>
 
 <style>
   .author-handle-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 1rem;
   }
 
@@ -175,6 +237,17 @@ const matchedAuthors = authorsList
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    justify-self: flex-start;
+  }
+
+  .author-handle-reversed {
+    flex-direction: row-reverse;
+    justify-self: flex-end;
+    align-self: flex-end;
+  }
+
+  .author-handle-reversed .author-info {
+    text-align: right;
   }
 
   .author-info {

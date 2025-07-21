@@ -69,7 +69,9 @@ function buildTocTree(listNode, depth = 1): TocItem[] {
 }
 
 const rawTocItems = isValidToc ? buildTocTree(node) : [];
-const tocItems = removeDuplicates(rawTocItems);
+const dedupedTocItems = removeDuplicates(rawTocItems);
+const fixedTocItems = fixNumberedSiblings(dedupedTocItems);
+const tocItems = applyFlattening(fixedTocItems);
 
 if (DEBUG_TOC) {
   console.log('[TableOfContents] isValidToc:', isValidToc);
@@ -101,6 +103,77 @@ function removeDuplicates(items: TocItem[]): TocItem[] {
     }
     return item;
   });
+}
+
+// Fix incorrectly nested numbered siblings
+function fixNumberedSiblings(items: TocItem[]): TocItem[] {
+  const result: TocItem[] = [];
+  
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    
+    if (!item.children || item.children.length === 0) {
+      result.push(item);
+      continue;
+    }
+    
+    // Check if this item and its children are all numbered at the same depth
+    const isNumbered = /^\d+\./.test(item.text);
+    
+    if (isNumbered) {
+      // Check if any children are also numbered at the same depth
+      const numberedChildren = item.children.filter(child => 
+        /^\d+\./.test(child.text) && child.depth === item.depth
+      );
+      
+      if (numberedChildren.length > 0) {
+        // This is the problematic pattern: numbered items incorrectly nested
+        // All numbered items at the same depth should be siblings
+        
+        // Add the current item without numbered children
+        const nonNumberedChildren = item.children.filter(child => 
+          !(/^\d+\./.test(child.text) && child.depth === item.depth)
+        );
+        
+        result.push({
+          ...item,
+          children: fixNumberedSiblings(nonNumberedChildren)
+        });
+        
+        // Add the numbered children as siblings
+        numberedChildren.forEach(child => {
+          result.push({
+            ...child,
+            children: fixNumberedSiblings(child.children || [])
+          });
+        });
+      } else {
+        // Normal case: recurse on children
+        result.push({
+          ...item,
+          children: fixNumberedSiblings(item.children)
+        });
+      }
+    } else {
+      // Non-numbered item: recurse on children
+      result.push({
+        ...item,
+        children: fixNumberedSiblings(item.children)
+      });
+    }
+  }
+  
+  return result;
+}
+
+// Apply the flattening for items marked as needing it
+function applyFlattening(items: TocItem[]): TocItem[] {
+  // Since fixNumberedSiblings now handles the flattening directly,
+  // this function just recursively processes children
+  return items.map(item => ({
+    ...item,
+    children: item.children ? applyFlattening(item.children) : []
+  }));
 }
 
 // Flatten the TOC tree into a simple array for easier rendering
@@ -142,12 +215,12 @@ if (DEBUG_TOC) {
 
 <aside class="toc-sidebar" id="toc-sidebar">
   <div class="toc-header">
-    <h2 class="toc-title">Table of Contents</h2>
     <button class="toc-collapse-btn" aria-label="Collapse Table of Contents">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="18,15 12,9 6,15"></polyline>
+        <polyline points="9,18 15,12 9,6"></polyline>
       </svg>
     </button>
+    <h2 class="toc-title">Table of Contents</h2>
   </div>
   
   <div class="toc-scroll-area" id="toc-scroll-area">
@@ -177,7 +250,12 @@ if (DEBUG_TOC) {
                         </svg>
                       </button>
                     ) : (
-                      <span class="toc-bullet"></span>
+                      // Only show bullet if header is not numbered
+                      /^\d+\./.test(item.text) ? (
+                        <span class="toc-spacer"></span>
+                      ) : (
+                        <span class="toc-bullet"></span>
+                      )
                     )}
                     <span class="toc-text">{item.text}</span>
                   </a>
@@ -230,7 +308,7 @@ if (DEBUG_TOC) {
   transition: all 0.3s ease;
 }
 
-.toc-sidebar:hover {
+.toc-sidebar:hover:not(.collapsed) {
   border-color: var(--clr-lossless-accent--brightest);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   width: 800px;
@@ -418,6 +496,13 @@ if (DEBUG_TOC) {
   z-index: 1;
 }
 
+.toc-spacer {
+  width: 6px;
+  height: 6px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
 .toc-link:hover .toc-bullet,
 .toc-link.active .toc-bullet {
   background: white;
@@ -531,10 +616,18 @@ if (DEBUG_TOC) {
 }
 
 /* Animation for collapse/expand */
+.toc-sidebar.collapsed {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+}
+
 .toc-sidebar.collapsed .toc-scroll-area {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-10px);
+  display: none;
+}
+
+.toc-sidebar.collapsed .toc-title {
+  display: none;
 }
 
 .toc-sidebar.collapsed .toc-collapse-btn svg {
@@ -661,7 +754,7 @@ class TableOfContentsManager {
   toggleCollapse() {
     this.tocSidebar?.classList.toggle('collapsed');
     
-    // Update aria-label
+    // Update aria-label for horizontal collapse
     const isCollapsed = this.tocSidebar?.classList.contains('collapsed');
     if (this.collapseBtn) {
       this.collapseBtn.setAttribute('aria-label', 

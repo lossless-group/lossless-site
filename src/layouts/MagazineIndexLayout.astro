@@ -26,6 +26,10 @@ const {
   <main class="magazine-index-container">
     <!-- Slot for hero content to be injected from the page using this layout -->
     <slot name="hero-content" />
+    
+    <!-- Slot for additional content between hero and articles -->
+    <slot name="additional-content" />
+    
     <!-- Collection name and description 
     {(collectionDisplayName || description) && (
       <header class="magazine-index-header">

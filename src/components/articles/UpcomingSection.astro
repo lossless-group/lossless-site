@@ -1,0 +1,325 @@
+---
+// UpcomingSection.astro
+// Displays upcoming events in a featured card layout, filtering by date_of_event
+// Based on PostCardFeature.astro but adapted for events/talks with future dates
+// Example usage: <UpcomingSection articles={articles} />
+
+import TagCloud from "../tool-components/TagCloud.astro";
+import AuthorHandle from "../basics/AuthorHandle.astro";
+import { formatDate } from "@utils/formatDate";
+
+// Accept articles array and filter for upcoming events
+const { articles = [] } = Astro.props;
+
+// Get current date for comparison
+const now = new Date();
+now.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+
+// Filter for upcoming events based on date_of_event
+const upcomingEvents = articles.filter(article => {
+  if (!article.date_of_event) return false;
+  
+  const eventDate = new Date(article.date_of_event);
+  eventDate.setHours(0, 0, 0, 0);
+  
+  return eventDate >= now;
+}).sort((a, b) => {
+  // Sort by date_of_event ascending (soonest first)
+  const dateA = new Date(a.date_of_event);
+  const dateB = new Date(b.date_of_event);
+  return dateA.getTime() - dateB.getTime();
+});
+
+// Get the next upcoming event (first in sorted array)
+const nextEvent = upcomingEvents[0];
+
+if (!nextEvent) {
+  // No upcoming events, don't render anything
+  return;
+}
+
+// Extract event data
+const { 
+  title, 
+  lede, 
+  authors, 
+  participants, // talks might use participants instead of authors
+  tags, 
+  date_of_event, 
+  slug,
+  banner_image,
+  summary 
+} = nextEvent;
+
+// Use participants if authors not available (common in talks)
+const eventAuthors = authors || participants || [];
+const hasAuthors = Array.isArray(eventAuthors) && eventAuthors.length > 0;
+
+// Format the event date
+let formattedDate = '';
+if (date_of_event) {
+  try {
+    formattedDate = formatDate(date_of_event);
+  } catch (e) {
+    console.error('Error formatting date_of_event:', e);
+    formattedDate = date_of_event?.toString() || '';
+  }
+}
+
+// Generate URL for the event
+const eventUrl = `/learn-with/our-talks/${slug}`;
+
+---
+
+{nextEvent && (
+  <section class="upcoming-section">
+    <div class="upcoming-section__header">
+      <h2 class="upcoming-section__title">Upcoming Event</h2>
+      <p class="upcoming-section__subtitle">Next scheduled presentation</p>
+    </div>
+    
+    <article class="upcoming-event card-hover-effect">
+      <div class="upcoming-event__grid">
+        <div class="upcoming-event__image-container">
+          <figure class="upcoming-event__figure">
+            <img 
+              src={String(banner_image || 'https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp')} 
+              alt={title} 
+              class="upcoming-event__image" 
+            />
+          </figure>
+        </div>
+        <div class="upcoming-event__content">
+          <h3 class="upcoming-event__event-title">
+            <a href={eventUrl}>
+              <span class="text-wrapper">{title || "No Title Found"}</span>
+            </a>
+          </h3>
+          <p class="upcoming-event__lede">
+            <span class="text-wrapper">{lede || summary}</span>
+          </p>
+          <div class="upcoming-event__meta">
+            <div class="upcoming-event__meta-row">
+              {hasAuthors && (
+                <span class="upcoming-event__author">
+                  <AuthorHandle 
+                    authors={eventAuthors} 
+                    showName={true} 
+                    showRole={false} 
+                    nameClass="author-name--article-card" 
+                    avatarClass="avatar-bg-attn avatar-lg" 
+                  />
+                </span>
+              )}
+              <span class="upcoming-event__date upcoming-event__date--highlight">
+                {formattedDate && <time datetime={formattedDate}>{formattedDate}</time>}
+              </span>
+            </div>
+            {tags && tags.length > 0 && (
+              <div class="upcoming-event__meta-tags">
+                <TagCloud tags={tags} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+)}
+
+<style>
+  /* Upcoming Section Header */
+  .upcoming-section {
+    margin-bottom: 3rem;
+  }
+  
+  .upcoming-section__header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .upcoming-section__title {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .upcoming-section__subtitle {
+    font-size: var(--fs-300);
+    color: var(--clr-body);
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  /* Upcoming Event Card - Based on PostCardFeature */
+  .upcoming-event {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 2px solid var(--clr-lossless-accent--brightest); /* Highlighted border for upcoming */
+    color: var(--clr-lossless-primary-light);
+    border-radius: 1em;
+    padding: 1.5rem;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+    position: relative;
+  }
+  
+  /* Add a subtle glow effect for upcoming events */
+  .upcoming-event::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--clr-lossless-accent--brightest), var(--clr-lossless-accent));
+    border-radius: 1em;
+    z-index: -1;
+    opacity: 0.3;
+  }
+
+  .upcoming-event__grid {
+    display: grid;
+    gap: 1.5rem;
+    /* Stack vertically on mobile */
+    grid-template-columns: 1fr;
+  }
+
+  /* Switch to 2:3 grid on medium screens and up */
+  @media (min-width: 768px) {
+    .upcoming-event__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .upcoming-event__image-container {
+      grid-column: 1 / span 2;
+    }
+
+    .upcoming-event__content {
+      grid-column: 3 / span 1;
+    }
+  }
+
+  .upcoming-event__image-container {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+  }
+
+  .upcoming-event__figure {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .upcoming-event__image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .upcoming-event:hover .upcoming-event__image {
+    transform: scale(1.02);
+  }
+
+  .upcoming-event__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+  }
+
+  .upcoming-event__event-title {
+    font-size: var(--fs-600);
+    font-weight: var(--fw-semi-bold);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  @media (min-width: 768px) {
+    .upcoming-event__event-title {
+      font-size: var(--fs-600);
+    }
+  }
+
+  .upcoming-event__event-title a {
+    color: var(--clr-heading);
+    text-decoration: none;
+  }
+
+  .upcoming-event__event-title a:hover {
+    text-decoration: underline;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .upcoming-event__lede {
+    font-size: var(--fs-350);
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    margin: 0;
+  }
+
+  .upcoming-event__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: var(--fs-250);
+    color: var(--clr-body);
+    margin-top: auto;
+  }
+  
+  .upcoming-event__meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+  
+  .upcoming-event__author,
+  .upcoming-event__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  /* Highlight the upcoming date */
+  .upcoming-event__date--highlight {
+    background: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-dark);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-250);
+  }
+  
+  .upcoming-event__meta-tags {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  /* Common text wrapping styles */
+  .text-wrapper {
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+</style>
