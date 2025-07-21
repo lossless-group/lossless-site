@@ -1,0 +1,87 @@
+---
+/**
+ * Universal Fallback Route - [...path].astro
+ * 
+ * This route handles any path that doesn't match curated routes.
+ * It automatically serves content from the content directory based on the URL path.
+ * 
+ * Flow:
+ * 1. Curated routes (like /learn-with/*) are handled first by specific route files
+ * 2. If no curated route matches, this fallback route attempts to find content
+ * 3. Maps URL path directly to content directory structure
+ * 4. Serves content with appropriate layout if found
+ * 5. Shows 404 if no content exists at that path
+ */
+
+import { getCollection } from 'astro:content';
+import OneArticle from '../layouts/OneArticle.astro';
+
+export async function getStaticPaths() {
+  // Get all content collections that contain markdown files
+  // Excluding 'tooling' collection as it causes infinite loops
+  const allCollections = await Promise.all([
+    getCollection('concepts'),
+    getCollection('essays'), 
+    getCollection('vocabulary'),
+    getCollection('changelog--content'),
+    getCollection('changelog--code'),
+    getCollection('changelog--laerdal'),
+    getCollection('reports'),
+    getCollection('slides'),
+    getCollection('prompts'),
+    getCollection('reminders'),
+    getCollection('specs'),
+    getCollection('talks'),
+    getCollection('issue-resolution'),
+    getCollection('client-content'),
+    getCollection('client-recommendations'),
+    getCollection('client-projects'),
+  ]);
+  
+  // Flatten all entries and create paths based on their file structure
+  const allEntries = allCollections.flat();
+  
+  const paths = allEntries.map(entry => {
+    // Get the native file path (e.g., "essays/ai-is-first-a-trojan-horse")
+    const nativePath = entry.id.replace(/\.md$/, '');
+    
+    return {
+      params: { 
+        path: nativePath 
+      },
+      props: {
+        entry,
+        collection: entry.collection,
+        nativePath
+      }
+    };
+  });
+
+  return paths;
+}
+
+const { entry, collection, nativePath } = Astro.props;
+const { path } = Astro.params;
+
+// If we got here, we found content at this path
+// Prepare data for OneArticle layout
+const contentDataForOneArticle = {
+  path: `/${path}`,
+  id: entry.id,
+  collection: collection,
+  ...entry.data,
+  // Preserve all original frontmatter data
+};
+
+// Import OneArticleOnPage component for rendering
+import OneArticleOnPage from '../components/articles/OneArticleOnPage.astro';
+---
+
+<OneArticle 
+  Component={OneArticleOnPage}
+  title={entry.data.title || 'Untitled'}
+  data={contentDataForOneArticle}
+  content={entry.body}
+  markdownFile={entry.id}
+/>
+
