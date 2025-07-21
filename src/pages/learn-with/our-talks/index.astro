@@ -8,6 +8,7 @@ import { slugify } from '../../../utils/slugify';
 import { collectionPublishingDefaults } from '../../../content.config'; 
 import Hero from '../../../components/basics/Hero.astro';
 import AnimationWrapper from '../../../components/basics/AnimationWrapper.astro';
+import UpcomingSection from '../../../components/articles/UpcomingSection.astro';
 
 // Get all talks entries
 const allEntriesUnfiltered = await getCollection('talks');
@@ -111,6 +112,11 @@ const articles = allEntries.map((entry) => {
         </svg>
       </a>
     </div>
+  </div>
+  
+  <!-- Upcoming Events Section -->
+  <div slot="additional-content">
+    <UpcomingSection articles={articles} />
   </div>
 </MagazineIndexLayout>
 
