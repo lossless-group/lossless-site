@@ -39,12 +39,15 @@ const {
   border-radius: 0.5rem;
   background-color: rgba(255, 255, 255, 0.03);
   width: 100%;
-  max-width: 25vw;
+  /* Smooth responsive width using clamp() - scales from 100% on mobile to 25vw on large screens */
+  max-width: clamp(100%, calc(100vw - 2rem), 25vw);
   overflow: hidden;
   box-sizing: border-box;
   min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  /* Add smooth transition for width changes */
+  transition: max-width 0.3s ease-in-out;
 }
 
 .tooling-gallery-container.full-width {
@@ -113,22 +116,32 @@ const {
   overflow-x: auto;
 }
 
-/* On large screens (1500px+), allow the gallery to take up more width */
+/* Smooth responsive breakpoints using container queries and CSS custom properties */
+@media (min-width: 1024px) {
+  .tooling-gallery-container {
+    /* Smoothly scale from 25vw to 35vw as screen gets larger */
+    max-width: clamp(25vw, calc(20vw + 5vw * (100vw - 1024px) / (1600px - 1024px)), 35vw);
+  }
+}
+
 @media (min-width: 1600px) {
   .tooling-gallery-container {
+    /* Maintain 35vw for very large screens */
     max-width: 35vw;
   }
 }
 
-@media (max-width: 1250px) {
+/* For smaller screens, use a more gradual approach */
+@media (max-width: 1023px) {
   .tooling-gallery-container {
-    max-width: 35vw;
+    /* Smoothly scale from 100% on mobile to 35vw on tablet */
+    max-width: clamp(100%, calc(100% - (100vw - 768px) * 0.65), 35vw);
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 767px) {
   .tooling-gallery-container {
-    width: 100%;
+    /* Full width on mobile */
     max-width: 100%;
   }
 }
