@@ -150,10 +150,13 @@ const rest = tags?.slice(6, tags?.length);
     min-height: 200px; /* Ensure minimum height for entries */
     max-width: 1200px;
     margin: 0 auto 3rem;
+    overflow-x: hidden; /* Prevent horizontal overflow */
   }
 
   .changelog-entry__container {
     flex: 1;
+    min-width: 0; /* Allow flex item to shrink below content size */
+    overflow-x: hidden; /* Prevent horizontal overflow */
   }
 
   /* Header Section */
@@ -329,28 +332,49 @@ const rest = tags?.slice(6, tags?.length);
   }
 
   .changelog-entry__content {
-  max-width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.changelog-entry__content pre {
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-.changelog-entry__content code {
-  max-width: 100%;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-@media (min-width: 701px) {
-  .changelog-entry__content pre {
-    white-space: pre; /* normal behavior on desktop */
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-x: hidden; /* Prevent horizontal overflow */
   }
-}
+
+  .changelog-entry__content pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre;
+    word-wrap: break-word;
+    word-break: break-word;
+    background: var(--clr-lossless-primary-dark);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin: 1rem 0;
+    border: 1px solid var(--clr-lossless-primary-light);
+  }
+
+  .changelog-entry__content code {
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    background: var(--clr-lossless-primary-dark);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+  }
+
+  /* Ensure inline code doesn't break layout */
+  .changelog-entry__content :global(code:not(pre code)) {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Handle long URLs and text in any element */
+  .changelog-entry__content :global(*) {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
 
 </style>
 

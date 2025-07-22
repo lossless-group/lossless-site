@@ -122,6 +122,8 @@ const normalizeAuthorData = (entry) => {
   .changelog-content {
     margin-bottom: 2rem;
     padding-top: 2rem;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+    max-width: 100%;
   }
 
   /* Style the tabs with our brand colors */
@@ -144,6 +146,8 @@ const normalizeAuthorData = (entry) => {
 
   :global(.changelog-tab-content) {
     margin-top: 1.5rem;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+    max-width: 100%;
   }
 
   /* Container styles */
