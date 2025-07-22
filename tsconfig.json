@@ -11,8 +11,8 @@
     "baseUrl": ".",
     "strictNullChecks": false,
     "allowJs": true,
-    "moduleResolution": "node",
-    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "plugins": [

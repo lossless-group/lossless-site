@@ -17,9 +17,8 @@ import { getCollection } from 'astro:content';
 import OneArticle from '../layouts/OneArticle.astro';
 
 export async function getStaticPaths() {
-  // Get all content collections that contain markdown files
-  // Excluding 'tooling' collection as it causes infinite loops
-  const allCollections = await Promise.all([
+  // First, get all explicit collections (excluding 'pages' and 'tooling')
+  const explicitCollections = await Promise.all([
     getCollection('concepts'),
     getCollection('essays'), 
     getCollection('vocabulary'),
@@ -37,13 +36,21 @@ export async function getStaticPaths() {
     getCollection('client-recommendations'),
     getCollection('client-projects'),
   ]);
-  
-  // Flatten all entries and create paths based on their file structure
-  const allEntries = allCollections.flat();
+
+  // Get the pages collection separately
+  let pagesEntries = [];
+  try {
+    pagesEntries = await getCollection('pages');
+  } catch (error) {
+    console.warn('Could not load pages collection:', error.message);
+  }
+
+  // Combine all entries
+  const allEntries = [...explicitCollections.flat(), ...pagesEntries];
   
   const paths = allEntries.map(entry => {
     // Get the native file path (e.g., "essays/ai-is-first-a-trojan-horse")
-    const nativePath = entry.id.replace(/\.md$/, '');
+    const nativePath = entry.id.replace(/\.(md|mdx)$/, '');
     
     return {
       params: { 

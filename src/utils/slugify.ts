@@ -11,9 +11,23 @@
  * @param input - The string to slugify
  * @returns The slugified string
  */
-// Process entries to add titles from filenames if missing and sort
-// Aggressively commented: If logic changes, update all call sites and this block.
-export function processEntries(entries) {
+interface ProcessedEntry {
+  filePath: string;
+  data: {
+    title?: string;
+    [key: string]: any;
+  };
+  id: string;
+  slug?: string;
+  [key: string]: any;
+}
+
+/**
+ * Processes an array of content entries to ensure they have proper titles and slugs
+ * @param entries - Array of content entries to process
+ * @returns The processed entries with titles and slugs
+ */
+export function processEntries<T extends ProcessedEntry>(entries: T[]): T[] {
   entries.forEach(entry => {
     // Always generate title from filename, preserving original case
     const filename = entry.filePath.replace(/\.md$/, '');
@@ -42,8 +56,19 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
 }
 
-// Helper to recursively extract all text content from a node and its children
-export function extractAllText(children) {
+interface TextNode {
+  type: string;
+  value?: string;
+  children?: TextNode[];
+  [key: string]: any;
+}
+
+/**
+ * Recursively extracts all text content from a node and its children
+ * @param children - The node or array of nodes to extract text from
+ * @returns The concatenated text content
+ */
+export function extractAllText(children: TextNode | TextNode[]): string {
   let text = '';
   if (Array.isArray(children)) {
     for (const child of children) {

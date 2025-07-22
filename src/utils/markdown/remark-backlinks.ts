@@ -1,8 +1,8 @@
-import { visit } from 'unist-util-visit';
-import type { Root, Text, Link } from 'mdast';
-import markdownDebugger from './markdownDebugger';
-import { transformContentPathToRoute } from '../routing/routeManager';
-import { DEBUG_BACKLINKS } from '@utils/envUtils';
+import { visit } from 'unist-util-visit.js';
+import type { Root, Text, Link } from 'mdast.js';
+import markdownDebugger from './markdownDebugger.js';
+import { transformContentPathToRoute } from '../routing/routeManager.js';
+import { DEBUG_BACKLINKS } from '../envUtils.js';
 // Match [[...]] but skip if it's a visual path
 const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
 

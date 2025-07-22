@@ -1,5 +1,5 @@
 import { defineCollection, z, getCollection } from 'astro:content';
-import { file, glob } from 'astro/loaders';
+import { glob } from 'astro/loaders';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'url';
 
@@ -14,15 +14,23 @@ function resolveContentPath(relativePath: string): string {
     return relativePath;
   }
 
-  const absolutePath = join(contentBasePath, relativePath);
+  // For LocalMonorepo mode, use the path directly without file:// URL
+  if (process.env.DEPLOY_ENV === 'LocalMonorepo') {
+    return join(contentBasePath, relativePath);
+  }
 
-  // Convert to file:// URL
+  const absolutePath = join(contentBasePath, relativePath);
+  
+  // For other environments, convert to file:// URL
   return pathToFileURL(absolutePath).href;
 }
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
-  type: 'data',
+  loader: glob({
+    pattern: '**/*.json',
+    base: resolveContentPath('cards')
+  }),
   schema: z.object({
     cards: z.array(z.any())
   }).passthrough()
@@ -51,7 +59,7 @@ const slidesCollection = defineCollection({
 
 const clientEssaysCollection = defineCollection({
   loader: glob({
-    pattern: "**/essays/**/*.md", // lowercase "essays"
+    pattern: "*/essays/*.{md,mdx}", // Match MDX files in client/essays/
     base: resolveContentPath("client-content")
   }),
   schema: z.object({
@@ -62,7 +70,7 @@ const clientEssaysCollection = defineCollection({
       z.undefined()
     ]).transform(val => val ?? []).default([]),
   }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
 
     const displayTitle = data.title
       ? data.title
@@ -78,7 +86,7 @@ const clientEssaysCollection = defineCollection({
 
 const clientRecommendationsCollection = defineCollection({
   loader: glob({
-    pattern: "**/Recommendations/**/*.{md,mdx}", // Include both .md and .mdx files
+    pattern: "*/Recommendations/*.{md,mdx}", // Match MDX files in client/Recommendations/
     base: resolveContentPath("client-content")
   }),
   schema: z.object({
@@ -105,7 +113,7 @@ const clientRecommendationsCollection = defineCollection({
 
 const clientProjectsCollection = defineCollection({
   loader: glob({
-    pattern: "**/Projects/**/*.{md,mdx}", // Include both .md and .mdx files
+    pattern: "*/Projects/*.{md,mdx}", // Match MDX files in client/Projects/
     base: resolveContentPath("client-content")
   }),
   schema: z.object({
@@ -165,7 +173,10 @@ const visualsCollection = defineCollection({
 });
 
 const talksCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/talks")}),
+  loader: glob({
+    pattern: "**/*.{md,mdx}", // Include both .md and .mdx files
+    base: resolveContentPath("lost-in-public/talks")
+  }),
   schema: z.object({
     publish: z.boolean().optional(), // Allows individual entries to override collection default
   }).passthrough().transform((data) => ({
@@ -219,7 +230,7 @@ const essaysCollection = defineCollection({
     }).default([])                      // Default to empty array if missing
   }).passthrough().transform((data, context) => {
     // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
     
     // Title fallback logic for essaysCollection:
     // - If frontmatter provides a title, use it as-is (preserve all casing).
@@ -265,7 +276,10 @@ const remindersCollection = defineCollection({
 });
 
 const changelogContentCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--content")}),
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: resolveContentPath('changelog--content')
+  }),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -277,7 +291,10 @@ const changelogContentCollection = defineCollection({
 
 
 const changelogCodeCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--code")}),
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: resolveContentPath('changelog--code')
+  }),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -288,7 +305,10 @@ const changelogCodeCollection = defineCollection({
 });
 
 const changelogLaerdalCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--laerdal")}),
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: resolveContentPath('changelog--laerdal')
+  }),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -298,20 +318,54 @@ const changelogLaerdalCollection = defineCollection({
   }))
 });
 
-const reportCollection = defineCollection({
-  type: 'content',
-  schema: z.any() // Allow any frontmatter structure to avoid validation errors
-});
-
-// Pages collection for individual MDX files
+// Catch-all collection for content not handled by other collections
+// This ensures backlinks work for all content, even without explicit routes
 const pagesCollection = defineCollection({
-  type: 'content',
-  schema: z.any() // Allow any frontmatter structure to avoid validation errors
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: resolveContentPath('')
+  }),
+  schema: z.any().transform((data, context) => {
+    // Skip files in directories handled by other collections
+    const excludePatterns = [
+      /\/cards\//,
+      /\/changelog--/,
+      /\/client-content\//,
+      /\/client-essays\//,
+      /\/client-projects\//,
+      /\/client-recommendations\//,
+      /\/concepts\//,
+      /\/essays\//,
+      /\/issue-resolution\//,
+      /\/lost-in-public\//,
+      /\/prompts\//,
+      /\/reminders\//,
+      /\/reports\//,
+      /\/slides\//,
+      /\/specs\//,
+      /\/talks\//,
+      /\/tooling\//,
+      /\/vocabulary\//
+    ];
+
+    const filePath = String(context.path || '');
+    const shouldExclude = excludePatterns.some(pattern => pattern.test(filePath));
+    
+    // Return null for excluded files, which will be filtered out
+    if (shouldExclude) {
+      return null;
+    }
+    
+    return data;
+  })
 });
 
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("tooling")}),
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: resolveContentPath('tooling')
+  }),
   schema: z.object({}).passthrough().transform((data) => ({
     ...data,
     // Ensure tags is always an array, even if null/undefined in frontmatter
@@ -391,7 +445,6 @@ export const paths = {
   'changelog--laerdal': resolveContentPath('changelog--laerdal'),
   'essays': resolveContentPath('essays'),
   'concepts': resolveContentPath('concepts'),
-  'reports': resolveContentPath('reports'),
   'talks': resolveContentPath('lost-in-public/talks'),
   'tooling': resolveContentPath('tooling'),
   'vocabulary': resolveContentPath('vocabulary'),
@@ -400,6 +453,8 @@ export const paths = {
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'client-content': resolveContentPath('client-content'),
+  // Client-specific collections
+  'client-essays': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-projects': resolveContentPath('client-content'),
 };
@@ -413,7 +468,6 @@ export const collections = {
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
   'changelog--laerdal': changelogLaerdalCollection,
-  'reports': reportCollection,
   'pages': pagesCollection,
   'tooling': toolCollection,
   'slides': slidesCollection,
@@ -422,7 +476,9 @@ export const collections = {
   'specs': specsCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
-  'client-content': clientEssaysCollection,
+  'client-essays': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-projects': clientProjectsCollection,
+  // Legacy client content collection for backward compatibility
+  'client-content': clientEssaysCollection,
 };

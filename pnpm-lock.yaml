@@ -189,6 +189,9 @@ importers:
       remark-images:
         specifier: ^4.1.0
         version: 4.1.0
+      remark-smartypants:
+        specifier: ^3.0.2
+        version: 3.0.2
       remark-stringify:
         specifier: ^11.0.0
         version: 11.0.0

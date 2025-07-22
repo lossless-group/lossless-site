@@ -63,105 +63,239 @@ let customRouteMappings: RouteMapping[] = [];
 
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
-import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
-import { getReferenceSlug, slugify } from '@utils/slugify';
+import { contentBasePath, DEBUG_BACKLINKS } from '../envUtils.ts';
+import { getReferenceSlug, slugify } from '../slugify.ts';
 
 function isValidContentFile(contentPath: string): boolean {
-  const fullPath = path.resolve(contentBasePath, `${contentPath}.md`);
-  return existsSync(fullPath);
+  // Check for both .md and .mdx extensions
+  const mdPath = path.resolve(contentBasePath, `${contentPath}.md`);
+  const mdxPath = path.resolve(contentBasePath, `${contentPath}.mdx`);
+  
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] Checking content file:', { contentPath, mdPath, mdxPath });
+  }
+  
+  return existsSync(mdPath) || existsSync(mdxPath);
 }
 
 function resolveWithMappings(normalizedPath: string): string {
-  if (DEBUG_BACKLINKS) {
-    console.log("[routeManager] Found path", normalizedPath)
+  if (!normalizedPath || typeof normalizedPath !== 'string') {
+    if (DEBUG_BACKLINKS) {
+      console.warn('[routeManager] Invalid path in resolveWithMappings:', normalizedPath);
+    }
+    return '/not-found';
   }
 
-  const segments = normalizedPath.split('/');
-  const contentType = segments[0];
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] Resolving path:', normalizedPath);
+  }
 
+  // Split path into segments and filter out empty segments
+  const segments = normalizedPath.split('/').filter(Boolean);
+  if (segments.length === 0) {
+    if (DEBUG_BACKLINKS) {
+      console.warn('[routeManager] Empty path segments after normalization');
+    }
+    return '/not-found';
+  }
+
+  const contentType = segments[0];
   const allMappings = [...customRouteMappings, ...defaultRouteMappings];
-  const mapping = allMappings.find(m =>
-    contentType === m.contentPath ||
-    normalizedPath.startsWith(`${m.contentPath}/`)
-  );
+  
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] All available mappings:', allMappings);
+  }
+
+  // Try to find a matching mapping
+  const mapping = allMappings.find(m => {
+    const isExactMatch = contentType === m.contentPath;
+    const isPrefixMatch = normalizedPath.startsWith(`${m.contentPath}/`);
+    
+    if (DEBUG_BACKLINKS && (isExactMatch || isPrefixMatch)) {
+      console.log('[routeManager] Found matching mapping:', { 
+        contentPath: m.contentPath, 
+        routePath: m.routePath,
+        isExactMatch,
+        isPrefixMatch
+      });
+    }
+    
+    return isExactMatch || isPrefixMatch;
+  });
 
   if (mapping) {
-    const relativePath = normalizedPath.substring(mapping.contentPath.length + 1);
-    return `/${mapping.routePath}/${relativePath}`;
+    let relativePath = normalizedPath;
+    
+    // Only strip the content path if it's not the entire path
+    if (normalizedPath !== mapping.contentPath) {
+      relativePath = normalizedPath.substring(mapping.contentPath.length).replace(/^\/+/, '');
+    } else {
+      relativePath = '';
+    }
+    
+    const resultPath = `/${mapping.routePath}${relativePath ? `/${relativePath}` : ''}`;
+    
+    if (DEBUG_BACKLINKS) {
+      console.log('[routeManager] Mapped path:', {
+        original: normalizedPath,
+        routePath: mapping.routePath,
+        relativePath,
+        resultPath
+      });
+    }
+    
+    return resultPath;
   }
 
+  if (DEBUG_BACKLINKS) {
+    console.warn('[routeManager] No mapping found for path:', normalizedPath);
+  }
+  
   return `/not-found?path=${encodeURIComponent(normalizedPath)}`;
 }
 
 function collectAllMappingPaths(): RouteMapping[] {
   const all: RouteMapping[] = [];
+  const processedDirs = new Set<string>();
 
   for (const mapping of [...customRouteMappings, ...defaultRouteMappings]) {
     const root = path.resolve(contentBasePath, mapping.contentPath);
+    
+    // Skip if we've already processed this directory
+    const dirKey = path.normalize(root);
+    if (processedDirs.has(dirKey)) continue;
+    processedDirs.add(dirKey);
+
+    if (!existsSync(root)) {
+      if (DEBUG_BACKLINKS) {
+        console.warn(`[routeManager] Directory does not exist: ${root}`);
+      }
+      continue;
+    }
 
     function walk(currentPath: string, relativePath = '') {
-      const entries = readdirSync(currentPath);
+      try {
+        const entries = readdirSync(currentPath);
+        let hasContentFiles = false;
 
-      let foundMarkdown = false;
+        // Check for content files in this directory
+        const hasMarkdown = entries.some(entry => 
+          entry.endsWith('.md') || entry.endsWith('.mdx')
+        );
 
-      for (const entry of entries) {
-        const fullPath = path.join(currentPath, entry);
-        const relative = path.join(relativePath, entry);
-
-        if (statSync(fullPath).isDirectory()) {
-          walk(fullPath, relative); // go deeper
-        } else if (fullPath.endsWith('.md')) {
-          foundMarkdown = true;
+        // If this directory has markdown files, add it to the mappings
+        if (hasMarkdown && relativePath) {
+          const contentPath = path.join(mapping.contentPath, relativePath).replace(/\\/g, '/');
+          if (!all.some(m => m.contentPath === contentPath)) {
+            all.push({
+              contentPath,
+              routePath: mapping.routePath
+            });
+          }
+          hasContentFiles = true;
         }
-      }
 
-      if (foundMarkdown) {
-        const contentPath = path.join(mapping.contentPath, relativePath).replace(/\\/g, '/');
-        all.push({
-          contentPath,
-          routePath: mapping.routePath
-        });
+        // Process subdirectories
+        for (const entry of entries) {
+          const fullPath = path.join(currentPath, entry);
+          const relative = path.join(relativePath, entry);
+
+          if (statSync(fullPath).isDirectory()) {
+            const subDirHasContent = walk(fullPath, relative);
+            hasContentFiles = hasContentFiles || subDirHasContent;
+          }
+        }
+
+        return hasContentFiles;
+      } catch (error) {
+        if (DEBUG_BACKLINKS) {
+          console.error(`[routeManager] Error walking directory ${currentPath}:`, error);
+        }
+        return false;
       }
     }
 
-    walk(root);
+    try {
+      walk(root);
+    } catch (error) {
+      if (DEBUG_BACKLINKS) {
+        console.error(`[routeManager] Error processing root directory ${root}:`, error);
+      }
+    }
+  }
+
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] Collected mappings:', all);
   }
 
   return all;
 }
 
 export function transformContentPathToRoute(input: string): string {
-  const segments = input.split('/');
-  const normalizedInput = getReferenceSlug(input);
-
-  // Case 1: Full path (contains slash)
-  if (segments.length > 1) {
-    return resolveWithMappings(normalizedInput);
+  if (!input || typeof input !== 'string') {
+    if (DEBUG_BACKLINKS) {
+      console.warn('[routeManager] Invalid input:', input);
+    }
+    return '/not-found';
   }
 
-  // Case 2: Try fallback resolution from known mappings
+  // Normalize input - trim and replace backslashes with forward slashes
+  const normalizedInput = input.trim().replace(/\\/g, '/');
+  
+  // Use getReferenceSlug to properly handle the entire path
+  // This will ensure consistent slug generation with the rest of the application
+  const processedPath = getReferenceSlug(normalizedInput);
+  
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] Processing input with getReferenceSlug:', { 
+      raw: input,
+      normalized: normalizedInput,
+      processed: processedPath
+    });
+  }
+
+  // Split path into segments, removing any empty segments
+  const pathSegments = processedPath.split('/').filter(Boolean);
+
+  // Case 1: Full path (contains multiple segments)
+  if (pathSegments.length > 1) {
+    return resolveWithMappings(processedPath);
+  }
+
+  // Case 2: Single segment - try to find matching content
   const allMappings = collectAllMappingPaths();
   
   if (DEBUG_BACKLINKS) {
-    console.log("[routeManager] No path provided! Searching...")
+    console.log('[routeManager] Single segment path, searching in mappings...');
   }
 
   for (const mapping of allMappings) {
-    const candidate = `${mapping.contentPath}/${input}`;
+    const candidate = `${mapping.contentPath}/${processedPath}`;
     
     if (DEBUG_BACKLINKS) {
-      console.log("[routeManager] Trying", candidate)
+      console.log('[routeManager] Trying candidate:', candidate);
     }
 
     if (isValidContentFile(candidate)) {
-      return transformContentPathToRoute(candidate); // Recurse as if it's a full path
+      if (DEBUG_BACKLINKS) {
+        console.log('[routeManager] Found valid file:', candidate);
+      }
+      return transformContentPathToRoute(candidate); // Recurse with full path
+    }
+  }
+
+  // If no exact match found, try with the original input
+  if (normalizedInput !== processedPath) {
+    const fallbackResult = transformContentPathToRoute(normalizedInput);
+    if (fallbackResult !== '/not-found') {
+      return fallbackResult;
     }
   }
 
   if (DEBUG_BACKLINKS) {
-    console.log("No path found for path", input, "\n\n")
+    console.warn('[routeManager] No valid path found for input:', input);
   }
-  // Fallback
+  
   return `/not-found?path=${encodeURIComponent(input)}`;
 }
 

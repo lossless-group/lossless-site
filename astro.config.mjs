@@ -1,13 +1,12 @@
 // Load environment variables
 import { NODE_ENV, isProduction, isDevelopment, contentBasePath } from './src/utils/envUtils.js';
-
+import { fileURLToPath } from 'url';
 
 // Now import other dependencies
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
-import { fileURLToPath } from 'url';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -41,7 +40,9 @@ const langs = [
   'html',
   'css',
   'shellscript',
-  'python'
+  'python',
+  // Aliases for shellscript
+  { id: 'shellscript', aliases: ['bash', 'zsh', 'sh'] }
 ];
 
 
@@ -52,6 +53,14 @@ if (!fs.existsSync(contentBasePath)) {
 
 export default defineConfig({
   markdown: {
+    // Be more lenient with markdown parsing
+    gfm: true,
+    smartypants: true,
+    // Allow empty markdown content (just YAML frontmatter)
+    allowDangerousHtml: true,
+    // Don't fail on invalid markdown
+    strict: false,
+    
     syntaxHighlight: 'shiki',
     // Syntax Highlighting with Shiki in codeblocks
     shikiConfig: {
@@ -106,7 +115,58 @@ export default defineConfig({
   output: "static",
   adapter: vercel(),
   integrations: [
-    mdx(),
+    mdx({
+      // Add MDX-specific configuration
+      markdown: {
+        // Match the main markdown config
+        gfm: true,
+        smartypants: true,
+        allowDangerousHtml: true,
+        strict: false,
+        
+        syntaxHighlight: 'shiki',
+        shikiConfig: {
+          theme: 'github-dark',
+          wrap: true,
+        },
+        // Exclude reports directory from processing
+        exclude: ['**/reports/**/*.md', '**/reports/**/*.mdx'],
+      },
+      // Don't fail on empty MDX content
+      allowDangerousHtml: true,
+      // Add custom remark plugins
+      remarkPlugins: [
+        // Use the existing backlinks plugin
+        (await import('./src/utils/markdown/remark-backlinks.js')).default
+      ],
+      // Better error handling for MDX files
+      onError: (error, file) => {
+        console.warn(`[MDX] Error in ${file || 'unknown file'}:`, error.message);
+        // Don't fail the build for MDX errors
+        return false;
+      },
+      // Ensure rehype plugins are properly configured for MDX
+      rehypePlugins: [
+        rehypeRaw,
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: 'append',
+            properties: {
+              className: ['header-anchor'],
+              'aria-hidden': 'true',
+              tabIndex: -1
+            },
+            content: {
+              type: 'element',
+              tagName: 'span',
+              properties: { className: ['header-anchor-symbol'] },
+              children: [{ type: 'text', value: '#' }]
+            }
+          }
+        ]
+      ]
+    }),
     icon({
       iconDir: "src/assets/Icons"
     }),
@@ -115,23 +175,22 @@ export default defineConfig({
   ], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      alias: [
+        { find: '@utils', replacement: fileURLToPath(new URL('./src/utils', import.meta.url)) },
+        { find: '@components', replacement: fileURLToPath(new URL('./src/components', import.meta.url)) },
+        { find: '@assets', replacement: fileURLToPath(new URL('./src/assets', import.meta.url)) },
+        { find: '@styles', replacement: fileURLToPath(new URL('./src/styles', import.meta.url)) },
+        { find: '@basics', replacement: fileURLToPath(new URL('./src/components/basics', import.meta.url)) },
+        { find: '@layouts', replacement: fileURLToPath(new URL('./src/layouts', import.meta.url)) },
+        { find: '@visuals', replacement: fileURLToPath(new URL('./src/content/visuals', import.meta.url)) },
+        { find: '@tool-components', replacement: fileURLToPath(new URL('./src/components/tool-components', import.meta.url)) },
+        { find: '@content', replacement: fileURLToPath(new URL('./src/content', import.meta.url)) },
+        { find: '@content-root', replacement: contentBasePath }
+      ]
+    },
     rollupOptions: {
       external: ['astro:content/loaders']
-    },
-    resolve: {
-      alias: {
-        '@basics': fileURLToPath(new URL('./src/components/basics', import.meta.url)),
-        '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
-        '@layouts': fileURLToPath(new URL('./src/layouts', import.meta.url)),
-        '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
-        '@visuals': fileURLToPath(new URL('./src/content/visuals', import.meta.url)),
-        '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
-        '@tool-components': fileURLToPath(new URL('./src/components/tool-components', import.meta.url)),
-        '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        '@content': fileURLToPath(new URL('./src/content', import.meta.url)),
-        // Add content root alias that points to the correct location in both environments
-        '@content-root': contentBasePath
-      }
     },
     // server.fs.allow: Vite will serve files from the project root and node_modules, preventing
     // 'outside of Vite serving allow list' errors when dependencies are resolved with absolute paths.
