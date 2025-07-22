@@ -66,14 +66,18 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2)}`; // unique id
   flex: 0 0 auto;
   scroll-snap-align: start;
   height: 6rem;
+  width: 20rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .image-gallery-scroll img {
-  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
   width: auto;
+  height: auto;
   object-fit: contain;
   display: block;
 }
