@@ -23,14 +23,12 @@ export async function getStaticPaths() {
   for (const [collectionName, urlPath] of Object.entries(collectionsConfig)) {
     const entries: CollectionEntry<any>[] = await getCollection(collectionName as any); // 'as any' for flexibility during dev
     for (const entry of entries) {
-      // Access entry.data.title directly; entry.data is 'any' from CollectionEntry<any>
-      const titleSlug = slugify(entry.data.title || 'Untitled Issue');
-      
-
+      // Use existing slug from frontmatter if available, otherwise generate from title
+      const slug = entry.data.slug || slugify(entry.data.title || 'Untitled Issue');
       
       paths.push({
-        params: { collection: urlPath, slug: titleSlug }, // Use URL path instead of collection name
-        props: { entry, collection: collectionName }, // Pass actual collection name in props
+        params: { collection: urlPath, slug: slug },
+        props: { entry, collection: collectionName },
       });
     }
   }

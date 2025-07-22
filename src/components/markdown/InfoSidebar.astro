@@ -73,6 +73,8 @@ interface Props {
   id?: string;
   path?: string;
   contentType?: string;
+  google_maps_url?: string;
+  googleMapsUrl?: string;
 }
 
 // Process component props
@@ -88,6 +90,8 @@ const {
   id,
   path,
   contentType,
+  google_maps_url,
+  googleMapsUrl,
   ...restProps
 } = Astro.props as Props;
 
@@ -105,6 +109,10 @@ const augmentedWithData = augmentedWith ? {
   name: augmentedWith,
   imageUrl: findTrademarkImage(augmentedWith)
 } : null;
+
+// Process Google Maps URL
+const mapsUrl = google_maps_url || googleMapsUrl;
+const hasLocationInfo = Boolean(mapsUrl);
 ---
 
 <aside class="info-sidebar" id="info-sidebar">
@@ -169,6 +177,32 @@ const augmentedWithData = augmentedWith ? {
       </div>
     )}
 </div>
+
+    {hasLocationInfo && (
+      <div class="location-info">
+        <div class="location-separator"></div>
+        <div>
+          <span class="date-label">Location</span>
+          <div class="location-content" data-maps-url={mapsUrl}>
+            <div class="location-loading">Loading location...</div>
+            <div class="location-display" style="display: none;">
+              <div class="location-name"></div>
+              <div class="location-address"></div>
+              <a class="location-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                View on Maps
+              </a>
+            </div>
+            <div class="location-error" style="display: none;">
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer">View on Google Maps</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
 
 <div class="author-info">
       <div class="author-separator"></div>
@@ -408,6 +442,81 @@ const augmentedWithData = augmentedWith ? {
   margin-top: 0.1rem;
 }
 
+/* Location info section */
+.location-info {
+  margin: 1.25rem 0;
+  padding: 0.75rem 0 0;
+  position: relative;
+}
+
+.location-separator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--clr-lossless-accent--brightest);
+  opacity: 0.2;
+}
+
+.location-content {
+  margin-top: 0.1rem;
+}
+
+.location-loading {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.location-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+  opacity: 0.9;
+}
+
+.location-address {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-bottom: 0.4rem;
+  line-height: 1.2;
+}
+
+.location-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--clr-lossless-accent--brightest);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.location-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.location-link svg {
+  flex-shrink: 0;
+}
+
+.location-error {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.location-error a {
+  color: var(--clr-lossless-accent--brightest);
+  text-decoration: none;
+}
+
+.location-error a:hover {
+  text-decoration: underline;
+}
+
 /* Author info section */
 .author-info {
   margin: 1.25rem 0;
@@ -498,6 +607,9 @@ const augmentedWithData = augmentedWith ? {
 
 <script>
 class InfoSidebarManager {
+  infoSidebar;
+  collapseBtn;
+
   constructor() {
     this.infoSidebar = document.getElementById('info-sidebar');
     this.collapseBtn = this.infoSidebar?.querySelector('.info-collapse-btn');
@@ -510,6 +622,7 @@ class InfoSidebarManager {
   init() {
     console.log('[InfoSidebar] Initializing InfoSidebarManager');
     this.setupEventListeners();
+    this.initializeLocationInfo();
   }
 
   setupEventListeners() {
@@ -528,6 +641,92 @@ class InfoSidebarManager {
       this.collapseBtn.setAttribute('aria-label', 
         isCollapsed ? 'Expand Info Sidebar' : 'Collapse Info Sidebar'
       );
+    }
+  }
+
+  async initializeLocationInfo() {
+    const locationContent = document.querySelector('.location-content');
+    if (!locationContent) return;
+
+    const mapsUrl = locationContent.getAttribute('data-maps-url');
+    if (!mapsUrl) return;
+
+    const loadingElement = locationContent.querySelector('.location-loading');
+    const displayElement = locationContent.querySelector('.location-display');
+    const errorElement = locationContent.querySelector('.location-error');
+    const nameElement = locationContent.querySelector('.location-name');
+    const addressElement = locationContent.querySelector('.location-address');
+
+    try {
+      // Show loading state
+      if (loadingElement && loadingElement instanceof HTMLElement) {
+        loadingElement.style.display = 'block';
+      }
+      if (displayElement && displayElement instanceof HTMLElement) {
+        displayElement.style.display = 'none';
+      }
+      if (errorElement && errorElement instanceof HTMLElement) {
+        errorElement.style.display = 'none';
+      }
+
+      // Fetch location information from our API endpoint
+      const response = await fetch(`/api/google-maps?url=${encodeURIComponent(mapsUrl)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const locationData = result.data;
+        
+        // Update the display elements
+        if (nameElement && locationData.name) {
+          nameElement.textContent = locationData.name;
+          if (nameElement instanceof HTMLElement) {
+            nameElement.style.display = 'block';
+          }
+        } else if (nameElement && nameElement instanceof HTMLElement) {
+          nameElement.style.display = 'none';
+        }
+
+        if (addressElement) {
+          const address = locationData.formattedAddress || 
+                         (locationData.city && locationData.country ? 
+                          `${locationData.city}, ${locationData.country}` : 
+                          'Location information available');
+          addressElement.textContent = address;
+        }
+
+        // Show the display element and hide loading
+        if (loadingElement && loadingElement instanceof HTMLElement) {
+          loadingElement.style.display = 'none';
+        }
+        if (displayElement && displayElement instanceof HTMLElement) {
+          displayElement.style.display = 'block';
+        }
+        if (errorElement && errorElement instanceof HTMLElement) {
+          errorElement.style.display = 'none';
+        }
+
+        console.log('[InfoSidebar] Location information loaded successfully:', locationData);
+      } else {
+        throw new Error(result.error || 'Failed to fetch location data');
+      }
+    } catch (error) {
+      console.error('[InfoSidebar] Error fetching location information:', error);
+      
+      // Show error state
+      if (loadingElement && loadingElement instanceof HTMLElement) {
+        loadingElement.style.display = 'none';
+      }
+      if (displayElement && displayElement instanceof HTMLElement) {
+        displayElement.style.display = 'none';
+      }
+      if (errorElement && errorElement instanceof HTMLElement) {
+        errorElement.style.display = 'block';
+      }
     }
   }
 }
