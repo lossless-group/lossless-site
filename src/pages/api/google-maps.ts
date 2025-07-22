@@ -13,12 +13,18 @@ import {
   isGoogleMapsUrl,
   type LocationInfo 
 } from '@utils/googleMapsUtils';
+import { GOOGLE_MAPS_API_KEY } from '@utils/envUtils';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const mapsUrl = url.searchParams.get('url');
 
+  console.log('[Google Maps API] Request URL:', request.url);
+  console.log('[Google Maps API] Parsed URL params:', Object.fromEntries(url.searchParams));
+  console.log('[Google Maps API] Maps URL:', mapsUrl);
+
   if (!mapsUrl) {
+    console.log('[Google Maps API] Missing URL parameter');
     return new Response(JSON.stringify({ 
       error: 'Missing url parameter' 
     }), {
@@ -29,7 +35,12 @@ export const GET: APIRoute = async ({ request }) => {
     });
   }
 
-  if (!isGoogleMapsUrl(mapsUrl)) {
+  console.log('[Google Maps API] Validating URL:', mapsUrl);
+  const isValidUrl = isGoogleMapsUrl(mapsUrl);
+  console.log('[Google Maps API] URL validation result:', isValidUrl);
+  
+  if (!isValidUrl) {
+    console.log('[Google Maps API] Invalid Google Maps URL');
     return new Response(JSON.stringify({ 
       error: 'Invalid Google Maps URL' 
     }), {
@@ -40,11 +51,30 @@ export const GET: APIRoute = async ({ request }) => {
     });
   }
 
-  const apiKey = import.meta.env.GOOGLE_MAPS_API_KEY;
+  // Debug: Log all environment variables (filtered for security)
+  console.log('[Google Maps API] Environment variables:', Object.keys(process.env)
+    .filter(key => key.includes('GOOGLE') || key.includes('MAPS') || key === 'NODE_ENV')
+    .reduce((obj, key) => ({
+      ...obj,
+      [key]: key.includes('KEY') ? '***' + (process.env[key] || '').slice(-4) : process.env[key]
+    }), {}));
+
+  // Get API key from envUtils
+  const apiKey = GOOGLE_MAPS_API_KEY;
+  
   if (!apiKey) {
-    console.error('Google Maps API key not configured');
+    const errorMsg = 'Google Maps API key not found in environment variables. Please ensure GOOGLE_MAPS_API_KEY is set in your .env file and the server has been restarted.';
+    console.error(errorMsg);
+    console.error('[Google Maps API] Current working directory:', process.cwd());
     return new Response(JSON.stringify({ 
-      error: 'Google Maps API not configured' 
+      error: errorMsg,
+      help: 'Make sure your .env file is in the site/ directory and contains GOOGLE_MAPS_API_KEY=your_key_here',
+      env: {
+        nodeEnv: process.env.NODE_ENV,
+        cwd: process.cwd(),
+        hasGoogleMapsKey: !!process.env.GOOGLE_MAPS_API_KEY,
+        hasImportMetaKey: !!(import.meta.env.GOOGLE_MAPS_API_KEY)
+      }
     }), {
       status: 500,
       headers: {
@@ -52,6 +82,8 @@ export const GET: APIRoute = async ({ request }) => {
       }
     });
   }
+  
+  console.log('[Google Maps API] Successfully loaded API key (last 4):', '***' + apiKey.slice(-4));
 
   try {
     // First, try to resolve shortened URLs
@@ -119,6 +151,7 @@ async function fetchPlaceDetails(placeId: string, apiKey: string): Promise<Locat
   const fields = [
     'name',
     'formatted_address',
+    'address_components',
     'geometry',
     'place_id',
     'types',
@@ -126,28 +159,63 @@ async function fetchPlaceDetails(placeId: string, apiKey: string): Promise<Locat
     'rating',
     'user_ratings_total',
     'website',
-    'formatted_phone_number'
+    'formatted_phone_number',
+    'photos',
+    'opening_hours',
+    'price_level'
   ].join(',');
 
-  const response = await fetch(
-    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=${fields}&key=${apiKey}`
-  );
+  // Construct the API URL with all required parameters
+  const apiUrl = new URL('https://maps.googleapis.com/maps/api/place/details/json');
+  apiUrl.searchParams.append('place_id', placeId);
+  apiUrl.searchParams.append('fields', fields);
+  apiUrl.searchParams.append('key', apiKey);
 
-  if (!response.ok) {
-    throw new Error(`Google Places API error: ${response.status}`);
-  }
+  console.log('[Google Maps API] Fetching place details from:', apiUrl.toString().replace(apiKey, '***'));
 
+  const response = await fetch(apiUrl.toString());
   const data = await response.json();
 
+  if (!response.ok) {
+    console.error('[Google Maps API] Error response:', data);
+    throw new Error(`Google Places API error: ${response.status} - ${response.statusText}`);
+  }
+
   if (data.status !== 'OK') {
-    throw new Error(`Google Places API status: ${data.status}`);
+    console.error('[Google Maps API] API error status:', data.status, data.error_message || '');
+    throw new Error(`Google Places API status: ${data.status} - ${data.error_message || 'Unknown error'}`);
   }
 
   const place = data.result;
   
+  // Extract address components for better address display
+  const addressComponents = place.address_components?.map((component: any) => ({
+    longName: component.long_name,
+    shortName: component.short_name,
+    types: component.types
+  }));
+
+  // Extract city and country from address components
+  const city = addressComponents?.find(comp => 
+    comp.types.includes('locality') || comp.types.includes('administrative_area_level_1')
+  )?.longName;
+  const country = addressComponents?.find(comp => 
+    comp.types.includes('country')
+  )?.longName;
+
+  // Process photos to include photo references
+  const photos = place.photos?.slice(0, 5).map((photo: any) => ({
+    photoReference: photo.photo_reference,
+    width: photo.width,
+    height: photo.height,
+    htmlAttributions: photo.html_attributions || []
+  }));
+
   return {
     name: place.name,
     formattedAddress: place.formatted_address,
+    city,
+    country,
     coordinates: place.geometry?.location ? {
       lat: place.geometry.location.lat,
       lng: place.geometry.location.lng
@@ -158,7 +226,15 @@ async function fetchPlaceDetails(placeId: string, apiKey: string): Promise<Locat
     rating: place.rating,
     userRatingsTotal: place.user_ratings_total,
     website: place.website,
-    phoneNumber: place.formatted_phone_number
+    phoneNumber: place.formatted_phone_number,
+    photos,
+    addressComponents,
+    openingHours: place.opening_hours ? {
+      openNow: place.opening_hours.open_now,
+      periods: place.opening_hours.periods,
+      weekdayText: place.opening_hours.weekday_text
+    } : undefined,
+    priceLevel: place.price_level
   };
 }
 

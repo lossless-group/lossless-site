@@ -22,6 +22,34 @@ export interface LocationInfo {
   userRatingsTotal?: number;
   website?: string;
   phoneNumber?: string;
+  photos?: {
+    photoReference: string;
+    width: number;
+    height: number;
+    htmlAttributions: string[];
+  }[];
+  addressComponents?: {
+    longName: string;
+    shortName: string;
+    types: string[];
+  }[];
+  openingHours?: {
+    openNow?: boolean;
+    periods?: any[];
+    weekdayText?: string[];
+  };
+  priceLevel?: number;
+}
+
+/**
+ * Generate a Google Places Photo URL from a photo reference
+ * @param photoReference - The photo reference from Google Places API
+ * @param maxWidth - Maximum width of the photo (default: 400)
+ * @param apiKey - Google Maps API key
+ * @returns Photo URL
+ */
+export function getPhotoUrl(photoReference: string, maxWidth: number = 400, apiKey: string): string {
+  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${apiKey}`;
 }
 
 /**

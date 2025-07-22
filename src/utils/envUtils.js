@@ -66,6 +66,7 @@ const toBool = (val) => typeof val === 'string' && val.toLowerCase() === 'true';
 export const NODE_ENV = envVars.NODE_ENV;
 export const APP_ENV = envVars.APP_ENV;
 export const DEPLOY_ENV = envVars.DEPLOY_ENV;
+export const GOOGLE_MAPS_API_KEY = envVars.GOOGLE_MAPS_API_KEY;
 export const isProduction = NODE_ENV === 'production';
 export const isDevelopment = !isProduction;
 export const contentBasePath = getContentBasePath();
