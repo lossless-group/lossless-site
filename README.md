@@ -1,6 +1,22 @@
 <a href="https://lossless.group"><img src="https://i.imgur.com/jrZBIAb.png" alt="The Lossless Group"></a>
 
+
+
 # Basics
+
+## Features
+- Responsive Layout
+- Extensible Collections
+- Extended Markdown Render Pipeline
+- Logo Scroller
+- Hero Banner
+- Open Graph image handling per file content frontmatter.
+- Filtered Lists
+- Environment-based Content Delivery
+- Header
+- Footer
+- Cards
+- Feature Image with Side Text
 
 ## Stack:
 This is an Astro project, with robust support for Markdown, Extended Markdown, MDX, and Markdown+YAML frontmatter.
