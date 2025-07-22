@@ -18,6 +18,14 @@ interface TocItem {
 
 const { node } = Astro.props;
 
+// Debug: Log the entire node AST tree structure
+if (DEBUG_TOC) {
+  console.log('[TableOfContents] Raw node AST tree:', JSON.stringify(node, null, 2));
+  console.log('[TableOfContents] Node type:', node?.type);
+  console.log('[TableOfContents] Node children count:', node?.children?.length);
+  console.log('[TableOfContents] Node children types:', node?.children?.map(child => child?.type));
+}
+
 const isValidToc = node?.type === 'list' && Array.isArray(node.children);
 
 function getLinkText(linkNode): string {
@@ -37,178 +45,116 @@ function buildTocTree(listNode, depth = 0): TocItem[] {
     return [];
   }
 
-  return listNode.children.map((item, index) => {
-    if (!item) {
-      if (DEBUG_TOC) {
-        console.warn(`[TableOfContents] Skipping undefined item at index ${index}, depth ${depth}`);
-      }
-      return null;
+  const result: TocItem[] = [];
+
+  for (const item of listNode.children) {
+    if (!item || item.type !== 'listItem') {
+      continue;
     }
 
-    const firstLink = item.children?.[0]?.children?.[0];
-    const text = getLinkText(firstLink);
-    const slug = slugify(text.trim());
+    // Find the first paragraph with a link (the main heading)
+    const paragraph = item.children?.find(child => child.type === 'paragraph');
+    const link = paragraph?.children?.find(child => child.type === 'link');
     
-    // Find nested lists
-    const nestedList = item.children?.find(child => child.type === 'list');
-    const children = nestedList ? buildTocTree(nestedList, depth + 1) : [];
+    let text = '';
+    let slug = '';
+    
+    if (link) {
+      text = getLinkText(link);
+      if (text.trim()) {
+        slug = slugify(text.trim());
+      }
+    }
+    
+    // If no direct link found, check if this listItem contains nested lists with links
+    if (!text.trim()) {
+      const nestedLists = item.children?.filter(child => child.type === 'list') || [];
+      if (nestedLists.length > 0) {
+        // This listItem contains nested lists, process them recursively
+        const nestedChildren = buildTocTree(nestedLists[0], depth);
+        result.push(...nestedChildren);
+        continue;
+      }
+    }
+    
+    if (!text.trim()) {
+      continue;
+    }
+
+    // Find only the direct nested lists (immediate children of this listItem)
+    const directNestedLists = item.children?.filter(child => child.type === 'list') || [];
+    const allChildren: TocItem[] = [];
+    
+    if (DEBUG_TOC && directNestedLists.length > 0) {
+      console.log(`[TableOfContents] Processing ${directNestedLists.length} nested lists for "${text}"`);
+    }
+    
+    // Process each direct nested list
+    for (const nestedList of directNestedLists) {
+      const nestedChildren = buildTocTree(nestedList, depth + 1);
+      if (DEBUG_TOC) {
+        console.log(`[TableOfContents] Found ${nestedChildren.length} children in nested list for "${text}"`);
+      }
+      allChildren.push(...nestedChildren);
+    }
 
     if (DEBUG_TOC) {
-      console.log(`[TableOfContents] Building item:`, { text, slug, depth, hasChildren: children.length > 0 });
+      console.log(`[TableOfContents] Building item:`, { 
+        text, 
+        slug, 
+        depth, 
+        hasChildren: allChildren.length > 0,
+        nestedListsCount: directNestedLists.length
+      });
     }
 
     const tocItem = {
       text: text.trim(),
       slug,
       depth,
-      children
+      children: allChildren
     };
 
-    return tocItem;
-  }).filter(item => item && item.text); // Only include valid items with text
-}
-
-const rawTocItems = isValidToc ? buildTocTree(node) : [];
-const dedupedTocItems = removeDuplicates(rawTocItems);
-const fixedTocItems = fixNumberedSiblings(dedupedTocItems);
-const tocItems = applyFlattening(fixedTocItems);
-
-if (DEBUG_TOC) {
-  console.log('[TableOfContents] isValidToc:', isValidToc);
-  console.log('[TableOfContents] Raw tocItems length:', rawTocItems.length);
-  console.log('[TableOfContents] Cleaned tocItems length:', tocItems.length);
-  console.log('[TableOfContents] tocItems:', tocItems);
-}
-
-// Remove duplicate items where a parent has the same text as its first child
-function removeDuplicates(items: TocItem[]): TocItem[] {
-  return items.map(item => {
-    if (item.children && item.children.length > 0) {
-      // Check if the first child has the same text as the parent
-      const firstChild = item.children[0];
-      if (firstChild && firstChild.text === item.text) {
-        // Remove the duplicate first child, keep the rest
-        const remainingChildren = item.children.slice(1);
-        return {
-          ...item,
-          children: removeDuplicates(remainingChildren)
-        };
-      } else {
-        // Recursively clean children
-        return {
-          ...item,
-          children: removeDuplicates(item.children)
-        };
-      }
-    }
-    return item;
-  });
-}
-
-// Fix incorrectly nested numbered siblings
-function fixNumberedSiblings(items: TocItem[]): TocItem[] {
-  const result: TocItem[] = [];
-  
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    
-    if (!item.children || item.children.length === 0) {
-      result.push(item);
-      continue;
-    }
-    
-    // Check if this item and its children are all numbered at the same depth
-    const isNumbered = /^\d+\./.test(item.text);
-    
-    if (isNumbered) {
-      // Check if any children are also numbered at the same depth
-      const numberedChildren = item.children.filter(child => 
-        /^\d+\./.test(child.text) && child.depth === item.depth
-      );
-      
-      if (numberedChildren.length > 0) {
-        // This is the problematic pattern: numbered items incorrectly nested
-        // All numbered items at the same depth should be siblings
-        
-        // Add the current item without numbered children
-        const nonNumberedChildren = item.children.filter(child => 
-          !(/^\d+\./.test(child.text) && child.depth === item.depth)
-        );
-        
-        result.push({
-          ...item,
-          children: fixNumberedSiblings(nonNumberedChildren)
-        });
-        
-        // Add the numbered children as siblings
-        numberedChildren.forEach(child => {
-          result.push({
-            ...child,
-            children: fixNumberedSiblings(child.children || [])
-          });
-        });
-      } else {
-        // Normal case: recurse on children
-        result.push({
-          ...item,
-          children: fixNumberedSiblings(item.children)
-        });
-      }
-    } else {
-      // Non-numbered item: recurse on children
-      result.push({
-        ...item,
-        children: fixNumberedSiblings(item.children)
-      });
-    }
+    result.push(tocItem);
   }
-  
+
   return result;
 }
 
-// Apply the flattening for items marked as needing it
-function applyFlattening(items: TocItem[]): TocItem[] {
-  // Since fixNumberedSiblings now handles the flattening directly,
-  // this function just recursively processes children
-  return items.map(item => ({
-    ...item,
-    children: item.children ? applyFlattening(item.children) : []
-  }));
-}
+const tocItems = isValidToc ? buildTocTree(node) : [];
 
-// Flatten the TOC tree into a simple array for easier rendering
-function flattenTocItems(items: TocItem[]): (TocItem & { hasChildren: boolean })[] {
-  const flattened: (TocItem & { hasChildren: boolean })[] = [];
+if (DEBUG_TOC) {
+  console.log('[TableOfContents] isValidToc:', isValidToc);
+  console.log('[TableOfContents] tocItems length:', tocItems.length);
+  console.log('[TableOfContents] tocItems:', tocItems);
   
-  function flatten(itemList: TocItem[]) {
-    itemList.forEach(item => {
-      if (item && typeof item === 'object' && item.text) {
-        // Add hasChildren property to the flattened item
-        const flatItem = {
-          ...item,
-          hasChildren: item.children && item.children.length > 0
-        };
-        flattened.push(flatItem);
-        if (item.children && item.children.length > 0) {
-          flatten(item.children);
-        }
+  // Debug: Show the tree structure more clearly
+  function logTree(items: TocItem[], indent = '') {
+    items.forEach(item => {
+      console.log(`${indent}${item.text} (depth: ${item.depth}, children: ${item.children?.length || 0})`);
+      if (item.children && item.children.length > 0) {
+        logTree(item.children, indent + '  ');
       }
     });
   }
-  
-  flatten(items);
-  return flattened;
+  console.log('[TableOfContents] Tree structure:');
+  logTree(tocItems);
 }
 
-const flatTocItems = flattenTocItems(tocItems).slice(1);
+// Keep the tree structure for proper toggle functionality
+const tocItemsWithHasChildren = tocItems.map(item => ({
+  ...item,
+  hasChildren: item.children && item.children.length > 0
+}));
 
 if (DEBUG_TOC) {
-  console.log('[TableOfContents] flatTocItems count:', flatTocItems.length);
-  console.log('[TableOfContents] flatTocItems:', flatTocItems.map(item => ({
+  console.log('[TableOfContents] tocItemsWithHasChildren count:', tocItemsWithHasChildren.length);
+  console.log('[TableOfContents] tocItemsWithHasChildren:', tocItemsWithHasChildren.map(item => ({
     text: item.text,
     slug: item.slug,
     depth: item.depth,
-    hasChildren: item.hasChildren
+    hasChildren: item.hasChildren,
+    childrenCount: item.children?.length || 0
   })));
 }
 ---
@@ -224,43 +170,54 @@ if (DEBUG_TOC) {
   </div>
   
   <div class="toc-scroll-area" id="toc-scroll-area">
-    {flatTocItems.length > 0 ? (
+    {tocItemsWithHasChildren.length > 0 ? (
       <Fragment>
         <nav aria-label="Table of Contents">
           <ul class="toc-list">
-            {flatTocItems.map((item, index) => {
-              const depthClass = `toc-item toc-depth-${item.depth || 1}`;
-              return (
-                <li class={depthClass} data-depth={item.depth || 1} data-slug={item.slug}>
-                  <a 
-                    href={`#${item.slug}`} 
-                    class="toc-link"
-                    data-slug={item.slug}
-                    title={item.text}
-                  >
-                    {item.hasChildren ? (
-                      <button 
-                        class="toc-toggle" 
-                        data-parent-slug={item.slug}
-                        data-expanded="true"
-                        aria-label={`Toggle ${item.text} section`}
-                      >
-                        <svg class="toc-chevron expanded" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="6,9 12,15 18,9"></polyline>
-                        </svg>
-                      </button>
-                    ) : (
-                      // Only show bullet if header is not numbered
-                      /^\d+\./.test(item.text) ? (
-                        <span class="toc-spacer"></span>
+            {tocItemsWithHasChildren.map((item, index) => {
+              function renderTocItem(tocItem: any) {
+                const depthClass = `toc-item toc-depth-${tocItem.depth}`;
+                const hasChildren = tocItem.children && tocItem.children.length > 0;
+                
+                return (
+                  <li class={depthClass} data-depth={tocItem.depth} data-slug={tocItem.slug}>
+                    <a 
+                      href={`#${tocItem.slug}`} 
+                      class="toc-link"
+                      data-slug={tocItem.slug}
+                      title={tocItem.text}
+                    >
+                      {hasChildren ? (
+                        <button 
+                          class="toc-toggle" 
+                          data-parent-slug={tocItem.slug}
+                          data-expanded="true"
+                          aria-label={`Toggle ${tocItem.text} section`}
+                        >
+                          <svg class="toc-chevron expanded" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6,9 12,15 18,9"></polyline>
+                          </svg>
+                        </button>
                       ) : (
-                        <span class="toc-bullet"></span>
-                      )
+                        // Only show bullet if header is not numbered
+                        /^\d+\./.test(tocItem.text) ? (
+                          <span class="toc-spacer"></span>
+                        ) : (
+                          <span class="toc-bullet"></span>
+                        )
+                      )}
+                      <span class="toc-text">{tocItem.text}</span>
+                    </a>
+                    {hasChildren && (
+                      <ul class="toc-sublist">
+                        {tocItem.children?.map((child: any, childIndex: number) => renderTocItem(child))}
+                      </ul>
                     )}
-                    <span class="toc-text">{item.text}</span>
-                  </a>
-                </li>
-              );
+                  </li>
+                );
+              }
+              
+              return renderTocItem(item);
             })}
           </ul>
         </nav>
@@ -522,20 +479,26 @@ if (DEBUG_TOC) {
 }
 
 /* Depth-based styling */
-.toc-depth-1 .toc-link {
+.toc-depth-0 .toc-link {
   font-weight: 500;
   padding-left: 1rem;
 }
 
-.toc-depth-2 .toc-link {
+.toc-depth-1 .toc-link {
   font-size: 0.85rem;
   padding-left: 2rem;
 }
 
-.toc-depth-3 .toc-link {
+.toc-depth-2 .toc-link {
   font-size: 0.8rem;
   opacity: 0.9;
   padding-left: 3rem;
+}
+
+.toc-depth-3 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 4rem;
 }
 
 .toc-depth-4 .toc-link,
@@ -543,7 +506,7 @@ if (DEBUG_TOC) {
 .toc-depth-6 .toc-link {
   font-size: 0.75rem;
   opacity: 0.8;
-  padding-left: 4rem;
+  padding-left: 5rem;
 }
 
 .toc-progress-bar {
@@ -654,12 +617,21 @@ if (DEBUG_TOC) {
 
 <script>
 class TableOfContentsManager {
+  private tocSidebar: HTMLElement | null;
+  private tocScrollArea: HTMLElement | null;
+  private tocProgressFill: HTMLElement | null;
+  private collapseBtn: HTMLElement | null;
+  private tocLinks: NodeListOf<Element> | null;
+  private headings: Array<{element: Element, id: string, top: number}>;
+  private currentActiveLink: HTMLElement | null;
+  private scrollTimeout: ReturnType<typeof setTimeout> | null;
+
   constructor() {
     this.tocSidebar = document.getElementById('toc-sidebar');
     this.tocScrollArea = document.getElementById('toc-scroll-area');
     this.tocProgressFill = document.getElementById('toc-progress-fill');
-    this.collapseBtn = this.tocSidebar?.querySelector('.toc-collapse-btn');
-    this.tocLinks = this.tocSidebar?.querySelectorAll('.toc-link');
+    this.collapseBtn = this.tocSidebar?.querySelector('.toc-collapse-btn') as HTMLElement | null;
+    this.tocLinks = this.tocSidebar?.querySelectorAll('.toc-link') || null;
     this.headings = [];
     this.currentActiveLink = null;
     this.scrollTimeout = null;
@@ -721,7 +693,7 @@ class TableOfContentsManager {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.toggleSection(button);
+        this.toggleSection(button as HTMLElement);
       });
     });
 
@@ -800,7 +772,7 @@ class TableOfContentsManager {
     }
   }
 
-  toggleSection(button) {
+    toggleSection(button: HTMLElement) {
     const isExpanded = button.getAttribute('data-expanded') === 'true';
     const parentSlug = button.getAttribute('data-parent-slug');
     const chevron = button.querySelector('.toc-chevron');
@@ -811,33 +783,21 @@ class TableOfContentsManager {
     const parentItem = this.tocSidebar?.querySelector(`[data-slug="${parentSlug}"]`);
     if (!parentItem) return;
     
-    const parentDepth = parseInt(parentItem.getAttribute('data-depth')) || 1;
+    // Find the nested sublist within this parent item
+    const sublist = parentItem.querySelector('.toc-sublist');
+    if (!sublist) return;
     
-    // Find all child items (items that come after this one with greater depth)
-    const allItems = Array.from(this.tocSidebar?.querySelectorAll('.toc-item') || []);
-    const parentIndex = allItems.indexOf(parentItem);
-    
-    let childItems = [];
-    for (let i = parentIndex + 1; i < allItems.length; i++) {
-      const itemDepth = parseInt(allItems[i].getAttribute('data-depth')) || 1;
-      if (itemDepth <= parentDepth) {
-        // Reached a sibling or parent level, stop
-        break;
-      }
-      childItems.push(allItems[i]);
-    }
-    
-    console.log('[TOC] Found', childItems.length, 'child items for', parentSlug);
+    console.log('[TOC] Found sublist for', parentSlug);
     
     if (isExpanded) {
-      // Collapse: hide children
-      childItems.forEach(item => item.classList.add('hidden'));
+      // Collapse: hide sublist
+      sublist.classList.add('hidden');
       button.setAttribute('data-expanded', 'false');
       chevron?.classList.remove('expanded');
       chevron?.classList.add('collapsed');
     } else {
-      // Expand: show children
-      childItems.forEach(item => item.classList.remove('hidden'));
+      // Expand: show sublist
+      sublist.classList.remove('hidden');
       button.setAttribute('data-expanded', 'true');
       chevron?.classList.remove('collapsed');
       chevron?.classList.add('expanded');
@@ -875,7 +835,7 @@ class TableOfContentsManager {
 
     // Update active link
     if (activeHeading) {
-      const activeLink = this.tocSidebar?.querySelector(`[data-slug="${activeHeading.id}"]`);
+      const activeLink = this.tocSidebar?.querySelector(`[data-slug="${activeHeading.id}"]`) as HTMLElement | null;
       
       console.log('[TOC] Active heading:', activeHeading.id, 'Found link:', !!activeLink);
       
@@ -908,7 +868,7 @@ class TableOfContentsManager {
     }
   }
 
-  scrollTocToActiveItem(activeLink) {
+  scrollTocToActiveItem(activeLink: HTMLElement) {
     if (!activeLink || !this.tocScrollArea) return;
 
     const containerRect = this.tocScrollArea.getBoundingClientRect();
