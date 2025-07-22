@@ -29,7 +29,7 @@ function getLinkText(linkNode): string {
   return '';
 }
 
-function buildTocTree(listNode, depth = 1): TocItem[] {
+function buildTocTree(listNode, depth = 0): TocItem[] {
   if (!listNode?.children || !Array.isArray(listNode.children)) {
     if (DEBUG_TOC) {
       console.log(`[TableOfContents] buildTocTree: Invalid listNode or children at depth ${depth}:`, listNode);
@@ -200,7 +200,7 @@ function flattenTocItems(items: TocItem[]): (TocItem & { hasChildren: boolean })
   return flattened;
 }
 
-const flatTocItems = flattenTocItems(tocItems);
+const flatTocItems = flattenTocItems(tocItems).slice(1);
 
 if (DEBUG_TOC) {
   console.log('[TableOfContents] flatTocItems count:', flatTocItems.length);
@@ -617,9 +617,9 @@ if (DEBUG_TOC) {
 
 /* Animation for collapse/expand */
 .toc-sidebar.collapsed {
-  width: 48px;
-  min-width: 48px;
-  max-width: 48px;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
 }
 
 .toc-sidebar.collapsed .toc-scroll-area {
@@ -644,6 +644,8 @@ if (DEBUG_TOC) {
   outline: 2px solid var(--clr-lossless-accent--brightest);
   outline-offset: 2px;
 }
+
+
 </style>
 
 <script>
@@ -657,6 +659,8 @@ class TableOfContentsManager {
     this.headings = [];
     this.currentActiveLink = null;
     this.scrollTimeout = null;
+    
+    console.log('[TOC] Progress fill element found:', !!this.tocProgressFill);
     
     if (this.tocSidebar) {
       this.init();
@@ -719,8 +723,11 @@ class TableOfContentsManager {
           const id = href.substring(1);
           const element = document.getElementById(id);
           console.log('[TOC] Looking for element with id:', id, 'Found:', !!element);
-          
+          console.log('[TOC] Element:', element);
           if (element) {
+            // Add scroll margin
+            element.style.scrollMarginTop = '150px';
+            
             // Just use the native behavior
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             window.history.replaceState(null, null, href);
@@ -731,15 +738,31 @@ class TableOfContentsManager {
 
     // Scroll tracking with throttling
     let scrollTimeout;
-    window.addEventListener('scroll', () => {
-      if (scrollTimeout) {
-        cancelAnimationFrame(scrollTimeout);
-      }
-      scrollTimeout = requestAnimationFrame(() => {
-        this.updateActiveLink();
-        this.updateScrollProgress();
-      });
-    }, { passive: true });
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    if (collectionReaderPane) {
+      collectionReaderPane.addEventListener('scroll', () => {
+        console.log('[TOC] Collection reader pane scroll event fired');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          this.updateActiveLink();
+          this.updateScrollProgress();
+        });
+      }, { passive: true });
+    } else {
+      // Fallback to window scroll if collection-reader-pane not found
+      window.addEventListener('scroll', () => {
+        console.log('[TOC] Window scroll event fired (fallback)');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          this.updateActiveLink();
+          this.updateScrollProgress();
+        });
+      }, { passive: true });
+    }
 
     // Update positions on resize
     window.addEventListener('resize', () => {
@@ -807,40 +830,7 @@ class TableOfContentsManager {
     }
   }
 
-  scrollToHeading(href) {
-    const targetId = href?.replace('#', '');
-    const targetElement = targetId ? document.getElementById(targetId) : null;
-    
-    if (targetElement) {
-      // Get the fixed header height dynamically
-      const header = document.querySelector('.header');
-      const headerHeight = header ? header.offsetHeight : 0;
-      
-      // Add extra padding for better visibility
-      const extraPadding = 20;
-      const totalOffset = headerHeight + extraPadding;
-      
-      // Calculate scroll position
-      const elementPosition = targetElement.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - totalOffset;
-      
-      console.log('[TOC] Scrolling to:', href, 'Header height:', headerHeight, 'Total offset:', totalOffset);
-      
-      // Scroll to the calculated position
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-      
-      // Update URL hash
-      if (window.history?.replaceState) {
-        window.history.replaceState(null, null, href);
-      }
-      
-      // Update active link after scroll completes
-      setTimeout(() => this.updateActiveLink(), 600);
-    }
-  }
+
 
   updateActiveLink() {
     if (!this.headings.length || !this.tocLinks) return;
@@ -901,13 +891,31 @@ class TableOfContentsManager {
   }
 
   updateScrollProgress() {
-    if (!this.tocProgressFill) return;
+    if (!this.tocProgressFill) {
+      console.log('[TOC] Progress fill element not found');
+      return;
+    }
 
-    const scrollTop = window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercentage = Math.min(100, Math.max(0, (scrollTop / documentHeight) * 100));
-    
-    this.tocProgressFill.style.width = `${scrollPercentage}%`;
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    if (collectionReaderPane) {
+      const scrollTop = collectionReaderPane.scrollTop;
+      const scrollHeight = collectionReaderPane.scrollHeight;
+      const clientHeight = collectionReaderPane.clientHeight;
+      const scrollPercentage = Math.min(100, Math.max(0, (scrollTop / (scrollHeight - clientHeight)) * 100));
+      
+      console.log('[TOC] Collection reader pane scroll progress:', scrollTop);
+      console.log('[TOC] Updating progress from collection reader pane:', scrollPercentage + '%');
+      this.tocProgressFill.style.width = `${scrollPercentage}%`;
+    } else {
+      // Fallback to window scroll calculation
+      const scrollTop = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = Math.min(100, Math.max(0, (scrollTop / documentHeight) * 100));
+      
+      console.log('[TOC] Window scroll progress (fallback):', scrollTop);
+      console.log('[TOC] Updating progress from window scroll (fallback):', scrollPercentage + '%');
+      this.tocProgressFill.style.width = `${scrollPercentage}%`;
+    }
   }
 }
 
