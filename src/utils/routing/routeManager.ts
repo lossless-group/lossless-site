@@ -33,6 +33,10 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'toolkit'
   },
   {
+    contentPath: 'essays',
+    routePath: 'read/essays'
+  },
+  {
     contentPath: 'client-content',
     routePath: 'client'
   },
