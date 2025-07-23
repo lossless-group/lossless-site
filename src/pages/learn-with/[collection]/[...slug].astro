@@ -11,23 +11,24 @@ import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 
 export async function getStaticPaths() {
-  // Define which collections this dynamic route should handle.
-  // Map collection names to their URL paths
+  // Define which collections this dynamic route should handle
   const collectionsConfig = {
     'issue-resolution': 'issue-resolution',
     'talks': 'our-talks'
-  };
+  } as const;
   
   const paths = [];
 
   for (const [collectionName, urlPath] of Object.entries(collectionsConfig)) {
-    const entries: CollectionEntry<any>[] = await getCollection(collectionName as any); // 'as any' for flexibility during dev
+    // Use CollectionEntry with the correct collection name
+    const entries = await getCollection(collectionName as keyof typeof collectionsConfig);
+    
     for (const entry of entries) {
-      // Use existing slug from frontmatter if available, otherwise generate from title
+      // Now TypeScript knows entry has a data property
       const slug = entry.data.slug || slugify(entry.data.title || 'Untitled Issue');
       
       paths.push({
-        params: { collection: urlPath, slug: slug },
+        params: { collection: urlPath, slug },
         props: { entry, collection: collectionName },
       });
     }
@@ -37,14 +38,13 @@ export async function getStaticPaths() {
 
 // Define an interface for the props passed by getStaticPaths
 interface Props {
-  entry: CollectionEntry<any>; // Using <any> as collectionName can vary.
-                               // Astro should correctly infer CollectionEntry<'issue-resolution'> etc. at build time.
-  collection: string; // Added collection to Props
+  entry: CollectionEntry<'issue-resolution' | 'talks'>;
+  collection: string;
 }
 
 // Explicitly cast Astro.props, then assign to typed variables
 const astroProps = Astro.props as Props;
-const entry: CollectionEntry<any> = astroProps.entry;
+const entry: CollectionEntry<'issue-resolution' | 'talks'> = astroProps.entry;
 const collection: string = astroProps.collection;
 const data = entry.data; // 'data' is 'any' due to CollectionEntry<any>
 
@@ -85,7 +85,7 @@ const articleData = {
   authors: authorsValue,
   tags: normalizeToArray(data, 'tag', 'tags'),
   categories: normalizeToArray(data, 'category', 'categories'),
-  banner_image: data.banner_image || data.portrait_image || '/images/placeholders/default-banner.jpg',
+  banner_image: data.banner_image || data.portrait_image || '/visuals/bannerImage__The-Lossless-Group.png',
   lede: data.lede || data.excerpt || '', // For description
 };
 

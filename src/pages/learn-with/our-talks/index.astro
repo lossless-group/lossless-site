@@ -55,6 +55,7 @@ const articles = allEntries.map((entry) => {
     id: entry.id, 
     title: data?.title || 'Untitled',
     slug: customSlug, 
+    collection: 'our-talks',
     banner_image: data?.banner_image, 
     portrait_image: data?.portrait_image, 
     imageAlt: `Image for ${data?.title || 'Untitled'}`, 
