@@ -66,7 +66,7 @@ const clientEssaysCollection = defineCollection({
 
     const displayTitle = data.title
       ? data.title
-      : filename.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 
     return {
       ...data,
@@ -93,7 +93,7 @@ const clientRecommendationsCollection = defineCollection({
 
     const displayTitle = data.title
       ? data.title
-      : filename.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 
     return {
       ...data,
@@ -120,7 +120,7 @@ const clientProjectsCollection = defineCollection({
 
     const displayTitle = data.title
       ? data.title
-      : filename.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 
     return {
       ...data,
@@ -150,7 +150,7 @@ const visualsCollection = defineCollection({
     // - Collapse multiple spaces
     // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
     const displayTitle = filename
-      .replace(/[-_]/g, ' ')
+      .replace(/_/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
     
@@ -229,7 +229,7 @@ const essaysCollection = defineCollection({
     const displayTitle = data.title
       ? data.title
       : filename
-          .replace(/[-_]/g, ' ')
+          .replace(/_/g, ' ')
           .replace(/\s+/g, ' ')
           .trim();
     
