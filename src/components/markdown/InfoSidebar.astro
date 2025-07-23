@@ -111,10 +111,7 @@ const augmentedWithData = augmentedWith ? {
 } : null;
 
 // Process Google Maps URL
-console.log('[InfoSidebar] Received props - google_maps_url:', google_maps_url);
-console.log('[InfoSidebar] Received props - googleMapsUrl:', googleMapsUrl);
 const mapsUrl = google_maps_url || googleMapsUrl;
-console.log('[InfoSidebar] Final mapsUrl:', mapsUrl);
 const hasLocationInfo = Boolean(mapsUrl);
 ---
 
@@ -186,17 +183,10 @@ const hasLocationInfo = Boolean(mapsUrl);
         <div class="location-separator"></div>
         <div>
           <span class="date-label">Location</span>
-          <div class="location-content" data-maps-url={mapsUrl}>
-            <div class="location-loading">Loading location...</div>
-            <div class="location-display" style="display: none;">
-              <div class="location-address"></div>
-              <a class="location-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
-                View on Google Maps
-              </a>
-            </div>
-            <div class="location-error" style="display: none;">
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer">View on Google Maps</a>
-            </div>
+          <div class="location-content">
+            <a class="location-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+              View on Google Maps
+            </a>
           </div>
         </div>
       </div>
@@ -461,26 +451,6 @@ const hasLocationInfo = Boolean(mapsUrl);
   margin-top: 0.1rem;
 }
 
-.location-loading {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  font-style: italic;
-}
-
-.location-name {
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin-bottom: 0.2rem;
-  opacity: 0.9;
-}
-
-.location-address {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin-bottom: 0.4rem;
-  line-height: 1.2;
-}
-
 .location-link {
   display: inline-flex;
   align-items: center;
@@ -497,80 +467,7 @@ const hasLocationInfo = Boolean(mapsUrl);
   text-decoration: underline;
 }
 
-.location-link svg {
-  flex-shrink: 0;
-}
 
-.location-error {
-  font-size: 0.75rem;
-  opacity: 0.7;
-}
-
-.location-photo {
-  margin-bottom: 0.5rem;
-}
-
-.location-photo-img {
-  width: 100%;
-  max-width: 200px;
-  height: auto;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
-.location-details {
-  margin: 0.4rem 0;
-  font-size: 0.7rem;
-}
-
-.location-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-bottom: 0.2rem;
-}
-
-.rating-stars {
-  color: #fbbf24;
-  font-size: 0.8rem;
-}
-
-.rating-text {
-  opacity: 0.7;
-}
-
-.location-hours {
-  opacity: 0.7;
-  font-size: 0.65rem;
-}
-
-.location-error a {
-  color: var(--clr-lossless-accent--brightest);
-  text-decoration: none;
-}
-
-.location-error a:hover {
-  text-decoration: underline;
-}
-
-.location-link {
-  display: inline-block;
-  color: var(--clr-lossless-accent--bright);
-  text-decoration: none;
-  margin-top: 4px;
-  font-size: 0.9em;
-  transition: color 0.2s ease;
-}
-
-.location-link:hover {
-  color: var(--clr-lossless-accent--brighter);
-  text-decoration: underline;
-}
-
-.location-address {
-  font-weight: 500;
-  margin-bottom: 4px;
-}
 
 /* Author info section */
 .author-info {
@@ -677,7 +574,6 @@ class InfoSidebarManager {
   init() {
     console.log('[InfoSidebar] Initializing InfoSidebarManager');
     this.setupEventListeners();
-    this.initializeLocationInfo();
   }
 
   setupEventListeners() {
@@ -699,72 +595,7 @@ class InfoSidebarManager {
     }
   }
 
-  async initializeLocationInfo() {
-    // Wait a bit for DOM to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const locationContent = document.querySelector('.location-content[data-maps-url]') as HTMLElement | null;
-    if (!locationContent) return;
-    
-    const mapsUrl = locationContent.getAttribute('data-maps-url');
-    if (!mapsUrl) return;
-
-    const linkElement = locationContent.querySelector('.location-link') as HTMLAnchorElement | null;
-    const addressElement = locationContent.querySelector('.location-address');
-    const displayElement = locationContent.querySelector('.location-display') as HTMLElement | null;
-    const loadingElement = locationContent.querySelector('.location-loading') as HTMLElement | null;
-
-    if (!linkElement || !addressElement || !displayElement || !loadingElement) return;
-
-    try {
-      // Set up the link
-      linkElement.href = mapsUrl;
-      linkElement.textContent = 'View on Google Maps';
-
-      // Make API call to get the formatted address
-      try {
-        // Make sure to encode the URL parameter
-        const apiUrl = new URL('/api/google-maps', window.location.origin);
-        apiUrl.search = new URLSearchParams({ url: mapsUrl }).toString();
-        
-        console.log('[InfoSidebar] Fetching location data from:', apiUrl.toString());
-        const response = await fetch(apiUrl.toString(), {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          
-          if (result.success && result.data && result.data.formatted_address) {
-            // Use the formatted address from the API response
-            addressElement.textContent = result.data.formatted_address;
-          } else {
-            // Fallback to showing just the link if no formatted address is available
-            (addressElement as HTMLElement).style.display = 'none';
-          }
-        } else {
-          // If API call fails, hide the address element
-          (addressElement as HTMLElement).style.display = 'none';
-        }
-      } catch (error) {
-        console.error('[InfoSidebar] Error fetching location data:', error);
-        // Hide the address element on error
-        (addressElement as HTMLElement).style.display = 'none';
-      } finally {
-        // Always show the display and hide loading, regardless of API success/failure
-        (displayElement as HTMLElement).style.display = 'block';
-        (loadingElement as HTMLElement).style.display = 'none';
-      }
-    } catch (error) {
-      console.error('[InfoSidebar] Error processing maps URL:', error);
-      // Fallback to just showing the link
-      linkElement.textContent = 'View Location on Google Maps';
-      (displayElement as HTMLElement).style.display = 'block';
-      (loadingElement as HTMLElement).style.display = 'none';
-    }
-  }
+  // Location info is now handled with simple links, no API calls needed
 }
 
 // Initialize when DOM is ready
