@@ -365,9 +365,28 @@ const issueResolutionCollection = defineCollection({
   }))
 });
 
-// ========================================
-// Close: Issue Resolution Collection Definition
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+const toHeroCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/to-hero") }),
+  schema: z.object({
+    publish: z.boolean().optional(), // Allows individual entries to override collection default
+  }).passthrough().transform((data) => ({
+    ...data // Pass through all original frontmatter fields.
+            // Astro will automatically create 'id' and 'slug' properties for the entry.
+            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
+  }))
+});
+
+const upAndRunningCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/up-and-running") }),
+  schema: z.object({
+    publish: z.boolean().optional(), // Allows individual entries to override collection default
+  }).passthrough().transform((data) => ({
+    ...data // Pass through all original frontmatter fields.
+            // Astro will automatically create 'id' and 'slug' properties for the entry.
+            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
+  }))
+});
+
 
 // ---- NEW: Configuration for Publishing Defaults ----
 export const collectionPublishingDefaults = {
@@ -399,6 +418,8 @@ export const paths = {
   'reminders': resolveContentPath('lost-in-public/reminders'),
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
+  'to-hero': resolveContentPath('lost-in-public/to-hero'),
+  'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-projects': resolveContentPath('client-content'),
@@ -422,6 +443,8 @@ export const collections = {
   'specs': specsCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
+  'up-and-running': upAndRunningCollection,
+  'to-hero': toHeroCollection,
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-projects': clientProjectsCollection,
