@@ -181,11 +181,27 @@ const articles = allEntries.map((entry) => {
     transform: translateY(-50%) scale(0.95);
   }
   
-  /* Responsive adjustments */
+  /* Mobile-only adjustments - move to bottom */
   @media (max-width: 768px) {
+    .chevron-navigation {
+      top: auto;
+      bottom: 1.5rem;
+    }
+    
     .chevron-nav {
+      top: auto;
+      bottom: 0;
+      transform: none;
       width: 50px;
       height: 50px;
+    }
+    
+    .chevron-nav:hover {
+      transform: scale(1.05);
+    }
+    
+    .chevron-nav:active {
+      transform: scale(0.95);
     }
     
     .chevron-left {
@@ -194,6 +210,25 @@ const articles = allEntries.map((entry) => {
     
     .chevron-right {
       right: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .chevron-navigation {
+      bottom: 1rem;
+    }
+    
+    .chevron-nav {
+      width: 44px;
+      height: 44px;
+    }
+    
+    .chevron-left {
+      left: 0.5rem;
+    }
+    
+    .chevron-right {
+      right: 0.5rem;
     }
   }
 </style>
