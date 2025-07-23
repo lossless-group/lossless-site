@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro preview",
-    "prebuild": "git remote get-url origin || git remote add origin https://github.com/lossless-group/lossless-site.git && git lfs install && git lfs pull",
+    "prebuild": "git remote get-url origin 2>/dev/null || git remote add origin https://github.com/lossless-group/lossless-site.git; git lfs install && git lfs pull",
     "build": "node -e \"require('dotenv').config({ path: '.env' }); require('child_process').execSync('astro build --remote', { stdio: 'inherit' });\"",
     "preview": "astro preview",
     "astro": "astro",
