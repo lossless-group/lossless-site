@@ -1,30 +1,28 @@
 ---
+// Core imports
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Component imports
 import Hero from "@components/basics/Hero.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import Layout from '@layouts/Layout.astro';
-import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import IconHeaderMessageCardGrid from '@components/basics/messages/IconHeaderMessageCardGrid.astro';
-import { contentBasePath } from '@utils/envUtils';
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from 'astro:content';
-import { toProperCase, slugify } from '@utils/slugify';
-import path from 'node:path'
-import { resolveToolId } from '@utils/toolUtils';
 import ToolingGallery from '@components/markdown/ToolingGallery.astro';
+import ClientReferenceSection from '@components/client-portals/ClientReferenceSection.astro';
 
+// Utility imports
+import { getCollection } from "astro:content";
+import { toProperCase } from '@utils/slugify';
+import { resolveToolId } from '@utils/toolUtils';
 
-interface Props {
-  client: string;
-  currentEssay: CollectionEntry<'client-content'>;
-  essays: CollectionEntry<'client-content'>[];
-  clientVocab: CollectionEntry<'vocabulary'>[];
-  clientConcepts: CollectionEntry<'concepts'>[];
-}
+// Type imports
+import type { ClientPortalProps, OpenGraphData } from '../types/client-data.d';
 
-const { client } = Astro.props;
+const { client } = Astro.props as ClientPortalProps;
 
-let openGraphData = {
+let openGraphData: OpenGraphData = {
   title: `Client Portal: ${toProperCase(client)}`,
   description: `Explore tailored AI content for ${toProperCase(client)}.`,
   image: undefined
@@ -43,41 +41,10 @@ try {
   console.warn(`No Open Graph data found for client: ${client}`);
 }
 
-import { processEntries } from '@utils/slugify';
-import { transformContentPathToRoute } from '@utils/routing/routeManager';
+// Define content base path
+const contentBasePath = path.resolve(process.cwd(), 'content');
 
-const allVocabulary = processEntries(await getCollection('vocabulary'));
-const allConcepts = processEntries(await getCollection('concepts'));
-
-// Load reference-terms.json
-// IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
-const referenceTermsPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/reference-terms.json`);
-let referenceTerms = { vocabulary: [], concepts: [] };
-
-try {
-  const raw = await fs.readFile(referenceTermsPath, 'utf-8');
-  referenceTerms = JSON.parse(raw);
-} catch (err) {
-  console.warn(`No reference terms found for client: ${client}`);
-}
-
-// Slugify helper
-function normalizeSlugFromPath(term: string): string {
-  const transformed = transformContentPathToRoute(term); // → "/more-about/explainers-for-ai/ai-avatars"
-  return transformed.split('/').slice(2).join('/');       // → "explainers-for-ai/ai-avatars"
-}
-
-
-const vocabPaths = referenceTerms.vocabulary.map(normalizeSlugFromPath);
-const conceptPaths = referenceTerms.concepts.map(normalizeSlugFromPath);
-
-const clientVocab = allVocabulary.filter(e => vocabPaths.includes(e.slug));
-const clientConcepts = allConcepts.filter(e => conceptPaths.includes(e.slug));
-
-// For the Tooling section
-import yaml from 'js-yaml';
-import fs from 'node:fs/promises';
-
+// Process tool gallery
 let toolGalleryTools = [];
 
 try {
@@ -202,26 +169,7 @@ try {
 
     <div class="client-portal-container">
       <div id="reference-section" class="collapsible-section expanded">
-        {(clientVocab.length > 0 || clientConcepts.length > 0) && (
-          <div class="mt-12">
-            {clientVocab.length > 0 && (
-              <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
-                <ReferenceGrid items={clientVocab} />
-              </section>
-            )}
-
-            {clientConcepts.length > 0 && (
-              <>
-                <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
-                <section>
-                  <h2 class="text-2xl font-bold mb-4">Concepts</h2>
-                  <ReferenceGrid items={clientConcepts} />
-                </section>
-              </>
-            )}
-          </div>
-        )}
+        <ClientReferenceSection client={client} contentBasePath={contentBasePath} />
       </div>
 
       {toolGalleryTools.length > 0 && (
