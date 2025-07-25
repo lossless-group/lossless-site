@@ -1,9 +1,18 @@
 import type { CollectionEntry } from 'astro:content';
 
 export interface OpenGraphData {
+  // Basic OpenGraph fields
   title: string;
   description: string;
   image?: string;
+  
+  // Hero section fields
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroDescription?: string;
+  heroImage?: string;
+  ctaText?: string;
+  ctaUrl?: string;
 }
 
 export interface ReferenceItem {

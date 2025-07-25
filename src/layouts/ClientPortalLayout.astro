@@ -23,9 +23,11 @@ import type { ClientPortalProps, OpenGraphData } from '../types/client-data.d';
 
 const { client } = Astro.props as ClientPortalProps;
 
-// Define content base path
-const contentBasePath = path.resolve(process.cwd(), 'content');
+// Import contentBasePath from envUtils which handles the correct path based on DEPLOY_ENV
+import { contentBasePath } from '@utils/envUtils';
 
+// Debug log the content path
+console.log('Content base path from envUtils:', contentBasePath);
 
 let openGraphData: OpenGraphData = {
   title: `Client Portal: ${toProperCase(client)}`,
@@ -131,14 +133,14 @@ try {
   }}>
     <AnimationWrapper>
       <Hero
-        title="Welcome, Laerdal"
-        subtitle="It's time to enter the era of AI"
-        description="With the right tools, mindset, processes, and culture, any organization can upskill everyone for the era of AI"
-        ctaText="Explore Tools"
-        ctaUrl="/toolkit"
+        title={openGraphData.heroTitle || `Welcome, ${toProperCase(client)}`}
+        subtitle={openGraphData.heroSubtitle || `It's time to enter the era of AI`}
+        description={openGraphData.heroDescription || `Explore AI tools and resources tailored for ${toProperCase(client)}`}
+        ctaText={openGraphData.ctaText || "Explore Tools"}
+        ctaUrl={openGraphData.ctaUrl || "/toolkit"}
         image={{
-          src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
-          alt: "Laerdal Logo"
+          src: openGraphData.heroImage || openGraphData.image || "/images/placeholder-hero.jpg",
+          alt: `${toProperCase(client)} Logo`
         }}
         alignment="left"
         fullBleed={true}

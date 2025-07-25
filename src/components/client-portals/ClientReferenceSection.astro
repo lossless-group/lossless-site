@@ -15,14 +15,58 @@ interface Props {
 const { client, contentBasePath } = Astro.props;
 
 // Load reference-terms.json
-const referenceTermsPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/reference-terms.json`);
 let referenceTerms = { vocabulary: [], concepts: [] };
 
+// Import contentBasePath from envUtils which handles the correct path based on DEPLOY_ENV
+import { resolvedContentPath } from '@utils/envUtils';
+
+// Debug: Log the contentBasePath and current working directory
+console.log('contentBasePath from envUtils:', resolvedContentPath);
+console.log('process.cwd():', process.cwd());
+console.log('client:', client);
+
+// First try with the exact client name, then with proper case
 try {
-  const raw = await fs.readFile(referenceTermsPath, 'utf-8');
-  referenceTerms = JSON.parse(raw);
-} catch (err) {
-  console.warn(`No reference terms found for client: ${client}`);
+  // Try exact client name - use contentBasePath from envUtils
+  const exactPath = path.join(resolvedContentPath, 'client-content', client, 'reference-terms.json');
+  console.log('Trying to load reference terms from:', exactPath);
+  
+  try {
+    // Check if file exists first
+    await fs.access(exactPath, fs.constants.F_OK);
+    console.log('File exists, attempting to read...');
+    
+    const raw = await fs.readFile(exactPath, 'utf-8');
+    referenceTerms = JSON.parse(raw);
+    console.log('Successfully loaded reference terms from exact path');
+  } catch (fileErr) {
+    console.error('Error reading exact path:', fileErr);
+    throw fileErr; // Re-throw to trigger the outer catch
+  }
+} catch (firstErr) {
+  console.log('First attempt failed, trying with proper case...');
+  try {
+    // If that fails, try with proper case
+    const properClient = toProperCase(client);
+    const properCasePath = path.join(contentBasePath, 'client-content', properClient, 'reference-terms.json');
+    console.log('Trying to load reference terms from:', properCasePath);
+    
+    try {
+      // Check if file exists first
+      await fs.access(properCasePath, fs.constants.F_OK);
+      console.log('File exists, attempting to read...');
+      
+      const raw = await fs.readFile(properCasePath, 'utf-8');
+      referenceTerms = JSON.parse(raw);
+      console.log('Successfully loaded reference terms from proper case path');
+    } catch (fileErr) {
+      console.error('Error reading proper case path:', fileErr);
+      throw fileErr; // Re-throw to trigger the outer catch
+    }
+  } catch (secondErr) {
+    console.warn(`No reference terms found for client: ${client} (tried both exact and proper case)`);
+    console.warn('Error details:', secondErr);
+  }
 }
 
 // Helper functions
@@ -31,18 +75,36 @@ function normalizeTerm(term: string): string {
 }
 
 function toReferenceItems(entries: any[], collection: 'vocabulary' | 'concepts'): ReferenceItem[] {
-  return entries.map(entry => ({
-    id: entry.id,
-    slug: entry.slug,
-    collection,
-    data: {
-      title: entry.data?.title || toProperCase(entry.slug.replace(/[-_]/g, ' ')),
-      aliases: Array.isArray(entry.data?.aliases) ? entry.data.aliases : [],
-      description: entry.data?.lede || entry.data?.description || '',
-      tags: Array.isArray(entry.data?.tags) ? entry.data.tags : []
-    },
-    originalFilename: entry.id
-  }));
+  if (!Array.isArray(entries)) {
+    console.warn('Expected entries to be an array, got:', entries);
+    return [];
+  }
+
+  return entries
+    .map(entry => {
+      if (!entry) {
+        console.warn('Encountered undefined entry in entries array');
+        return null;
+      }
+
+      const slug = String(entry.slug || entry.id || '').trim();
+      const title = entry.data?.title || 
+                   (slug ? toProperCase(slug.replace(/[-_]/g, ' ')) : 'Untitled');
+
+      return {
+        id: entry.id || slug || `missing-id-${Math.random().toString(36).substr(2, 9)}`,
+        slug,
+        collection,
+        data: {
+          title,
+          aliases: Array.isArray(entry.data?.aliases) ? entry.data.aliases : [],
+          description: entry.data?.lede || entry.data?.description || '',
+          tags: Array.isArray(entry.data?.tags) ? entry.data.tags : []
+        },
+        originalFilename: entry.id || slug || ''
+      };
+    })
+    .filter((item): item is ReferenceItem => item !== null);
 }
 
 function createLookupMap(items: ReferenceItem[]): Map<string, ReferenceItem> {
