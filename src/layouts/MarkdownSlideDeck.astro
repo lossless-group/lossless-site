@@ -1,16 +1,40 @@
 ---
 /**
- * OneSlideDeck.astro
- * A component for RevealJS presentations that can be used within the base Layout
+ * MarkdownSlideDeck.astro
+ * A component for RevealJS presentations that renders markdown content
+ * Uses the same styles as OneSlideDeck but processes markdown input
  */
 
-// No need to import global styles as they'll come from the Layout component
-
 interface Props {
-  // No title/description needed as they'll be handled by the Layout
+  // The markdown content to render as slides
+  markdownContent: string;
+  // Optional title for the presentation
+  title?: string;
 }
 
-// RevealJS configuration options
+const { markdownContent, title } = Astro.props;
+
+// Process markdown content to split into slides
+// Split by --- for horizontal slides and -- for vertical slides
+const processMarkdownToSlides = (content: string) => {
+  const horizontalSlides = content.split(/\n---\n/);
+  
+  return horizontalSlides.map(slide => {
+    const verticalSlides = slide.split(/\n--\n/);
+    if (verticalSlides.length > 1) {
+      // Has vertical slides
+      return {
+        type: 'vertical',
+        slides: verticalSlides.map(s => ({ type: 'single', content: s.trim() }))
+      };
+    }
+    return { type: 'single', content: slide.trim() };
+  });
+};
+
+const slides = processMarkdownToSlides(markdownContent);
+
+// RevealJS configuration options (same as OneSlideDeck)
 const revealOptions = {
   controls: true,
   progress: true,
@@ -75,7 +99,24 @@ const revealOptions = {
   <!-- The actual reveal.js presentation -->
   <div class="reveal">
     <div class="slides">
-      <slot />
+      {slides.map(slide => {
+        if (slide.type === 'vertical') {
+          return (
+            <section>
+              {slide.slides.map(vSlide => (
+                <section data-markdown>
+                  <textarea data-template>{vSlide.content}</textarea>
+                </section>
+              ))}
+            </section>
+          );
+        }
+        return (
+          <section data-markdown>
+            <textarea data-template>{slide.content}</textarea>
+          </section>
+        );
+      })}
     </div>
   </div>
 </div>

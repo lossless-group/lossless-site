@@ -1,107 +1,133 @@
 ---
 /**
- * Example RevealJS presentation using the OneSlideDeck component within the base Layout
- * This demonstrates how to create slides while keeping the site's header and footer
+ * Slides Index Page
+ * Lists all available presentations
  */
 import Layout from '@layouts/Layout.astro';
-import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+import TextCTA from '@components/basics/cta/TextCTA.astro';
 
-// Title and description for the presentation
-const title = "Introduction to RevealJS with Astro";
-const description = "A demonstration of RevealJS integration with the Lossless site";
+const title = "Presentations";
+const description = "Browse available slide presentations";
 
-// Define frontmatter data for the slides page
 const frontmatter = {
   title: title,
   description: description,
   lede: description
 };
+
+// Define available presentations
+const presentations = [
+  {
+    title: "Introduction to RevealJS",
+    description: "Learn how RevealJS works with Astro",
+    url: "/slides/reveal-intro",
+    icon: "🎯"
+  },
+  {
+    title: "Astro Basics",
+    description: "Learn the fundamentals of the Astro web framework",
+    url: "/slides/astro-basics",
+    icon: "🚀"
+  },
+  {
+    title: "Web Performance Optimization",
+    description: "Essential techniques for building lightning-fast websites",
+    url: "/slides/web-performance",
+    icon: "⚡"
+  },
+  {
+    title: "Modern CSS Features",
+    description: "Exploring the latest and most powerful CSS capabilities",
+    url: "/slides/modern-css",
+    icon: "🎨"
+  }
+];
 ---
 
 <Layout frontmatter={frontmatter}>
-  <OneSlideDeck>
-      <!-- Title Slide -->
-      <section class="title-slide">
-        <h1>{title}</h1>
-        <p>A simple example to get started</p>
-        <p><small>Edit this file directly to customize your presentation</small></p>
-      </section>
-
-      <!-- Introduction Slide -->
-      <section>
-        <h2>What is RevealJS?</h2>
-        <ul>
-          <li>A framework for creating beautiful presentations using HTML</li>
-          <li>Supports Markdown content</li>
-          <li>Features animations, transitions, and speaker notes</li>
-          <li>Works well with Astro's component model</li>
-        </ul>
-      </section>
-
-      <!-- Features Slide -->
-      <section>
-        <h2>Key Features</h2>
-        <ul>
-          <li class="fragment">Nested slides</li>
-          <li class="fragment">Markdown support</li>
-          <li class="fragment">PDF export</li>
-          <li class="fragment">Speaker notes</li>
-          <li class="fragment">Syntax highlighted code</li>
-        </ul>
-        <aside class="notes">
-          Speaker notes go here. Press 's' to view them during the presentation.
-        </aside>
-      </section>
-
-      <!-- Code Example Slide -->
-      <section>
-        <h2>Code Example</h2>
-        {`
-        <pre><code class="javascript" data-trim data-line-numbers>
-function createSlide(title, content) {
-  const slide = document.createElement('section');
-  const heading = document.createElement('h2');
-  heading.textContent = title;
-  
-  slide.appendChild(heading);
-  slide.innerHTML += content;
-  
-  return slide;
-}
-        </code></pre>
-        `}
-      </section>
-
-      <!-- Vertical Slides Example -->
-      <section>
-        <section>
-          <h2>Vertical Slides</h2>
-          <p>Use the down arrow to navigate</p>
-          <p>↓</p>
-        </section>
-        <section>
-          <h3>Vertical Slide 1</h3>
-          <p>This is a nested slide</p>
-        </section>
-        <section>
-          <h3>Vertical Slide 2</h3>
-          <p>You can have as many nested slides as you want</p>
-        </section>
-      </section>
-
-      <!-- Image Example -->
-      <section>
-        <h2>Add Images</h2>
-        <img src="https://placekitten.com/450/300" alt="Example image">
-        <p>Use images to enhance your presentations</p>
-      </section>
-
-      <!-- Final Slide -->
-      <section>
-        <h2>Get Started</h2>
-        <p>Edit this file to create your own presentation</p>
-        <p>Add or remove slides as needed</p>
-        <p>Customize styles and options</p>
-      </section>
-  </OneSlideDeck>
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8 text-center">{title}</h1>
+    
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+      {presentations.map(presentation => (
+        <div class="presentation-card block p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 transform">
+          <div class="text-4xl mb-4">{presentation.icon}</div>
+          <h2 class="text-xl font-semibold mb-2">{presentation.title}</h2>
+          <p class="opacity-80">{presentation.description}</p>
+          <div class="mt-4">
+            <TextCTA href={presentation.url} text="View Presentation" />
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <div class="mt-12 text-center">
+      <p class="help-text">
+        All presentations support keyboard navigation, speaker notes, and PDF export.
+      </p>
+      <p class="help-text mt-2">
+        Press <kbd class="keyboard-hint">F</kbd> for fullscreen, 
+        <kbd class="keyboard-hint">S</kbd> for speaker notes, 
+        or <kbd class="keyboard-hint">ESC</kbd> for overview.
+      </p>
+    </div>
+  </div>
 </Layout>
+
+<style>
+  .presentation-card {
+    background-color: var(--clr-secondary-bg, #1a1a1a);
+    border: 1px solid var(--clr-border, #333);
+    color: var(--clr-text, #e0e0e0);
+  }
+  
+  .presentation-card:hover {
+    background-color: var(--clr-hover-bg, #252525);
+    border-color: var(--clr-primary, #0078ff);
+  }
+  
+  /* Fallback for light mode if CSS variables aren't available */
+  @media (prefers-color-scheme: light) {
+    .presentation-card {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+      color: #212529;
+    }
+    
+    .presentation-card:hover {
+      background-color: #e9ecef;
+    }
+  }
+  
+  /* Help text styling */
+  .help-text {
+    color: var(--clr-text-muted, #999);
+    opacity: 0.9;
+  }
+  
+  /* Keyboard hint styling */
+  .keyboard-hint {
+    padding: 0.25rem 0.5rem;
+    background-color: var(--clr-secondary-bg, #2a2a2a);
+    border: 1px solid var(--clr-border, #444);
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.875em;
+    color: var(--clr-text, #e0e0e0);
+    display: inline-block;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Light mode fallback for keyboard hints */
+  @media (prefers-color-scheme: light) {
+    .help-text {
+      color: #6c757d;
+    }
+    
+    .keyboard-hint {
+      background-color: #e9ecef;
+      border-color: #ced4da;
+      color: #495057;
+    }
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+/**
+ * Markdown Slideshow Demo
+ * Demonstrates how to use the MarkdownSlideDeck component
+ */
+import Layout from '@layouts/Layout.astro';
+import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
+
+const title = "Markdown Slideshow Demo";
+const description = "A demonstration of markdown-based RevealJS presentations";
+
+const frontmatter = {
+  title: title,
+  description: description,
+  lede: description
+};
+
+// Example markdown content for the presentation
+// Use --- for horizontal slides and -- for vertical slides
+const markdownContent = `
+# Markdown Slides
+
+## With RevealJS
+
+This is a demo of markdown-powered presentations
+
+---
+
+## Easy Slide Creation
+
+Just write in **Markdown**!
+
+- Bullet points
+- *Italic text*
+- **Bold text**
+- \`inline code\`
+
+---
+
+## Code Blocks
+
+\`\`\`javascript
+function greet(name) {
+  console.log(\`Hello, \${name}!\`);
+}
+
+greet('World');
+\`\`\`
+
+---
+
+## Vertical Slides
+
+Press down arrow to navigate vertically
+
+--
+
+### Sub-slide 1
+
+This is a vertical slide
+
+--
+
+### Sub-slide 2
+
+Another vertical slide in the same stack
+
+---
+
+## Images
+
+![Placeholder](https://via.placeholder.com/400x300)
+
+You can embed images easily
+
+---
+
+## Tables
+
+| Feature | Support |
+|---------|---------|
+| Markdown | ✅ |
+| Code Highlighting | ✅ |
+| Vertical Slides | ✅ |
+| PDF Export | ✅ |
+
+---
+
+## Fragments
+
+<!-- .element: class="fragment" -->
+This appears first
+
+<!-- .element: class="fragment" -->
+Then this
+
+<!-- .element: class="fragment" -->
+Finally this
+
+---
+
+# Thank You!
+
+[Back to Presentations](/slides/)
+`;
+
+// You can also load markdown from a file:
+// const markdownContent = await Astro.glob('/path/to/slides.md')[0].rawContent();
+---
+
+<Layout frontmatter={frontmatter}>
+  <MarkdownSlideDeck markdownContent={markdownContent} title={title} />
+</Layout>
