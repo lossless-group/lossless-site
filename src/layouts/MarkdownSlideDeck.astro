@@ -1,0 +1,277 @@
+---
+/**
+ * MarkdownSlideDeck.astro
+ * A component for RevealJS presentations that renders markdown content
+ * Uses the same styles as OneSlideDeck but processes markdown input
+ */
+
+interface Props {
+  // The markdown content to render as slides
+  markdownContent: string;
+  // Optional title for the presentation
+  title?: string;
+}
+
+const { markdownContent, title } = Astro.props;
+
+// Process markdown content to split into slides
+// Split by --- for horizontal slides and -- for vertical slides
+const processMarkdownToSlides = (content: string) => {
+  const horizontalSlides = content.split(/\n---\n/);
+  
+  return horizontalSlides.map(slide => {
+    const verticalSlides = slide.split(/\n--\n/);
+    if (verticalSlides.length > 1) {
+      // Has vertical slides
+      return {
+        type: 'vertical',
+        slides: verticalSlides.map(s => ({ type: 'single', content: s.trim() }))
+      };
+    }
+    return { type: 'single', content: slide.trim() };
+  });
+};
+
+const slides = processMarkdownToSlides(markdownContent);
+
+// RevealJS configuration options (same as OneSlideDeck)
+const revealOptions = {
+  controls: true,
+  progress: true,
+  slideNumber: true,
+  history: true,
+  center: true,
+  touch: true,
+  hideInactiveCursor: true,
+  transition: 'slide',
+  backgroundTransition: 'fade',
+};
+---
+
+<!-- RevealJS styles -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.min.css" id="theme">
+
+<!-- Syntax highlighting for code blocks -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.min.css">
+
+<!-- Print PDF styles - load both to ensure they're available -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/css/print/paper.css" media="print">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/css/print/pdf.css" media="print">
+
+<!-- Additional script to ensure PDF mode is detected -->
+<script is:inline>
+  // This script will run on the client side
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.search.match(/print-pdf/gi)) {
+      // Force PDF mode
+      document.documentElement.classList.add('print-pdf');
+      
+      // Log to console for debugging
+      console.log('PDF export mode activated');
+    }
+  });
+</script>
+
+<!-- RevealJS container -->
+<div class="reveal-container">
+  <!-- Control buttons positioned in the container -->
+  <div class="control-buttons">
+    <!-- Exit button -->
+    <a href="/slides/" class="control-button exit-button" title="Back to Presentations">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      Exit
+    </a>
+    
+    <!-- PDF button -->
+    <a href="?print-pdf" target="_blank" class="control-button pdf-button" title="Export to PDF">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9L6 2H18L18 9"></path>
+        <path d="M6 18H4C3.46957 18 2.96086 17.7893 2.58579 17.4142C2.21071 17.0391 2 16.5304 2 16V11C2 10.4696 2.21071 9.96086 2.58579 9.58579C2.96086 9.21071 3.46957 9 4 9H20C20.5304 9 21.0391 9.21071 21.4142 9.58579C21.7893 9.96086 22 10.4696 22 11V16C22 16.5304 21.7893 17.0391 21.4142 17.4142C21.0391 17.7893 20.5304 18 20 18H18"></path>
+        <path d="M6 14H18V22H6V14Z"></path>
+      </svg>
+      PDF
+    </a>
+  </div>
+  
+  <!-- The actual reveal.js presentation -->
+  <div class="reveal">
+    <div class="slides">
+      {slides.map(slide => {
+        if (slide.type === 'vertical') {
+          return (
+            <section>
+              {slide.slides.map(vSlide => (
+                <section data-markdown>
+                  <textarea data-template>{vSlide.content}</textarea>
+                </section>
+              ))}
+            </section>
+          );
+        }
+        return (
+          <section data-markdown>
+            <textarea data-template>{slide.content}</textarea>
+          </section>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<!-- RevealJS scripts -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.js"></script>
+
+<!-- RevealJS plugins -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.min.js"></script>
+
+<script is:inline>
+  // Initialize RevealJS with configuration options
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize RevealJS
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      slideNumber: true,
+      history: true,
+      center: true,
+      touch: true,
+      hideInactiveCursor: true,
+      transition: 'slide',
+      backgroundTransition: 'fade',
+      
+      // Set 16:9 aspect ratio
+      width: 1600,
+      height: 900,
+      
+      // Make it responsive
+      disableLayout: false,
+      margin: 0.04,
+      
+      // Enable four-direction navigation for nested slides
+      navigationMode: 'grid',
+      
+      // PDF export settings
+      pdfMaxPagesPerSlide: 1,
+      pdfSeparateFragments: false,
+      
+      // Initialize plugins
+      plugins: [
+        RevealMarkdown,
+        RevealHighlight,
+        RevealNotes,
+        RevealZoom
+      ]
+    });
+  });
+</script>
+
+<style>
+  /* Container to ensure proper positioning within the Layout */
+  .reveal-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -4.5rem; /* Offset the header margin */
+    padding-top: 4.5rem;
+    position: relative;
+  }
+  
+  /* Set default size for RevealJS */
+  .reveal {
+    /* These CSS variables are used by RevealJS */
+    --r-width: 1600;
+    --r-height: 900;
+  }
+
+  /* Control buttons container - positioned to align with slide content */
+  .control-buttons {
+    position: absolute;
+    top: max(5rem, 50% - 450px - 40px); /* Position above the 900px tall slides */
+    right: max(20px, 50% - 800px); /* Align with the 1600px wide slides */
+    z-index: 30;
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 1640px) {
+    .control-buttons {
+      right: 20px;
+    }
+  }
+  
+  @media (max-height: 1000px) {
+    .control-buttons {
+      top: 5rem;
+    }
+  }
+  
+  /* Shared button styles */
+  .control-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background-color: var(--clr-primary, #0078ff);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+  
+  .control-button:hover {
+    background-color: var(--clr-primary-dark, #0056b3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Exit button specific styling */
+  .exit-button {
+    background-color: #6c757d;
+  }
+  
+  .exit-button:hover {
+    background-color: #5a6268;
+  }
+  
+  /* Hide control buttons when in print mode */
+  @media print {
+    .control-buttons {
+      display: none;
+    }
+  }
+
+  /* Custom styles for presentations that integrate with site theme */
+  .reveal .slides {
+    font-family: "Poppins", sans-serif;
+    background-color: var(--clr-primary-bg);
+  }
+  
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--clr-lossless-primary-light, #ffffff);
+  }
+  
+  /* Code blocks styling */
+  .reveal pre {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  /* Custom slide background for title slides */
+  .title-slide {
+    background-color: var(--clr-primary-bg, #2c3e50) !important;
+  }
+</style>

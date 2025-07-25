@@ -1,0 +1,97 @@
+---
+/**
+ * Dynamic markdown slideshow renderer
+ * Reads .md files directly from the filesystem
+ */
+export const prerender = false;
+
+import Layout from '@layouts/Layout.astro';
+import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
+import { readFile } from 'fs/promises';
+import path from 'path';
+
+// Get the slug from URL parameters
+const { slug } = Astro.params;
+
+// Title and content
+let title = 'Markdown Presentation';
+let markdownContent = '';
+let frontmatter = {};
+
+// Validate parameters
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+// Convert slug array to path
+const slidePath = Array.isArray(slug) ? slug.join('/') : slug;
+
+try {
+  // Read markdown file directly from filesystem
+  const filePath = path.join(process.cwd(), 'src/content/slides', `${slidePath}.md`);
+  const fileContent = await readFile(filePath, 'utf-8');
+  
+  // Parse frontmatter if it exists
+  const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  
+  if (frontmatterMatch) {
+    // Has frontmatter
+    const frontmatterText = frontmatterMatch[1];
+    markdownContent = frontmatterMatch[2];
+    
+    // Simple frontmatter parsing
+    const frontmatterLines = frontmatterText.split('\n');
+    const parsedFrontmatter: any = {};
+    
+    for (const line of frontmatterLines) {
+      const match = line.match(/^(\w+):\s*(.+)$/);
+      if (match) {
+        parsedFrontmatter[match[1]] = match[2].replace(/^['"]|['"]$/g, '');
+      }
+    }
+    
+    title = parsedFrontmatter.title || `Slides: ${slidePath}`;
+    frontmatter = {
+      title: title,
+      description: parsedFrontmatter.description || 'Markdown slideshow presentation',
+      lede: parsedFrontmatter.description
+    };
+  } else {
+    // No frontmatter, use entire content
+    markdownContent = fileContent;
+    title = `Slides: ${slidePath}`;
+    frontmatter = {
+      title: title,
+      description: 'Markdown slideshow presentation'
+    };
+  }
+} catch (error) {
+  console.error('Error loading markdown file:', error);
+  markdownContent = `
+# Presentation Not Found
+
+Could not find markdown file: ${slidePath}.md
+
+---
+
+## Available Files
+
+Check that your file exists at:
+\`src/content/slides/${slidePath}.md\`
+
+---
+
+## Error Details
+
+${error.message}
+`;
+  frontmatter = {
+    title: 'Not Found',
+    description: 'Presentation not found'
+  };
+}
+---
+
+<Layout frontmatter={frontmatter}>
+  <MarkdownSlideDeck markdownContent={markdownContent} title={title} />
+</Layout>
