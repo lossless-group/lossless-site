@@ -1,4 +1,3 @@
-import { TFile } from 'obsidian';
 
 /**
  * Extracts frontmatter from markdown content using regex only - no YAML libraries

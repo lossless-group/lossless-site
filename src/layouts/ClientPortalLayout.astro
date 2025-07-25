@@ -14,13 +14,18 @@ import ClientReferenceSection from '@components/client-portals/ClientReferenceSe
 
 // Utility imports
 import { getCollection } from "astro:content";
-import { toProperCase } from '@utils/slugify';
+import { toProperCase, slugify } from '@utils/slugify';
 import { resolveToolId } from '@utils/toolUtils';
+import { extractFrontmatter } from '@utils/yamlFrontmatter';
 
 // Type imports
 import type { ClientPortalProps, OpenGraphData } from '../types/client-data.d';
 
 const { client } = Astro.props as ClientPortalProps;
+
+// Define content base path
+const contentBasePath = path.resolve(process.cwd(), 'content');
+
 
 let openGraphData: OpenGraphData = {
   title: `Client Portal: ${toProperCase(client)}`,
@@ -41,8 +46,6 @@ try {
   console.warn(`No Open Graph data found for client: ${client}`);
 }
 
-// Define content base path
-const contentBasePath = path.resolve(process.cwd(), 'content');
 
 // Process tool gallery
 let toolGalleryTools = [];
@@ -51,12 +54,18 @@ try {
   // IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
   const yamlPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/tool-gallery.yaml`);
   const rawYaml = await fs.readFile(yamlPath, 'utf-8');
-  const config = yaml.load(rawYaml);
+  const config = extractFrontmatter(`---\n${rawYaml}\n---`);
+
+  if (!config) {
+    console.warn(`No valid tool gallery config found for ${client}`);
+    return;
+  }
 
   const tagFilters = [];
   const rawToolIds = [];
+  const items = Array.isArray(config) ? config : [config];
 
-  for (const item of config) {
+  for (const item of items) {
       if (item.tag) {
         const raw = String(item.tag).trim();
         const match = raw.match(/^\[\[(.*?)\]\]$/);
@@ -78,8 +87,8 @@ try {
     filePath: entry.id,
   }]));
 
-  const tools = [];
-  const normalizeTag = tag => slugify(tag).toLowerCase();
+  const tools: Array<{ id: string; filePath: string; [key: string]: any }> = [];
+  const normalizeTag = (tag: string): string => slugify(tag).toLowerCase();
 
   for (const input of rawToolIds) {
     let id = input;
@@ -134,9 +143,8 @@ try {
         alignment="left"
         fullBleed={true}
         animate={true}
-        class="mb-0"
-        style="margin-bottom: 0;"
-        innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+        classes="mb-0"
+        style="margin-bottom: 0; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
       />
     </AnimationWrapper>
 
