@@ -1,30 +1,35 @@
 ---
+// Core imports
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Component imports
 import Hero from "@components/basics/Hero.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import Layout from '@layouts/Layout.astro';
-import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import IconHeaderMessageCardGrid from '@components/basics/messages/IconHeaderMessageCardGrid.astro';
-import { contentBasePath } from '@utils/envUtils';
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from 'astro:content';
-import { toProperCase, slugify } from '@utils/slugify';
-import path from 'node:path'
-import { resolveToolId } from '@utils/toolUtils';
 import ToolingGallery from '@components/markdown/ToolingGallery.astro';
+import ClientReferenceSection from '@components/client-portals/ClientReferenceSection.astro';
 
+// Utility imports
+import { getCollection } from "astro:content";
+import { toProperCase, slugify } from '@utils/slugify';
+import { resolveToolId } from '@utils/toolUtils';
+import { extractFrontmatter } from '@utils/yamlFrontmatter';
 
-interface Props {
-  client: string;
-  currentEssay: CollectionEntry<'client-content'>;
-  essays: CollectionEntry<'client-content'>[];
-  clientVocab: CollectionEntry<'vocabulary'>[];
-  clientConcepts: CollectionEntry<'concepts'>[];
-}
+// Type imports
+import type { ClientPortalProps, OpenGraphData } from '../types/client-data.d';
 
-const { client } = Astro.props;
+const { client } = Astro.props as ClientPortalProps;
 
-let openGraphData = {
+// Import contentBasePath from envUtils which handles the correct path based on DEPLOY_ENV
+import { contentBasePath } from '@utils/envUtils';
+
+// Debug log the content path
+console.log('Content base path from envUtils:', contentBasePath);
+
+let openGraphData: OpenGraphData = {
   title: `Client Portal: ${toProperCase(client)}`,
   description: `Explore tailored AI content for ${toProperCase(client)}.`,
   image: undefined
@@ -43,53 +48,26 @@ try {
   console.warn(`No Open Graph data found for client: ${client}`);
 }
 
-import { processEntries } from '@utils/slugify';
-import { transformContentPathToRoute } from '@utils/routing/routeManager';
 
-const allVocabulary = processEntries(await getCollection('vocabulary'));
-const allConcepts = processEntries(await getCollection('concepts'));
-
-// Load reference-terms.json
-// IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
-const referenceTermsPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/reference-terms.json`);
-let referenceTerms = { vocabulary: [], concepts: [] };
-
-try {
-  const raw = await fs.readFile(referenceTermsPath, 'utf-8');
-  referenceTerms = JSON.parse(raw);
-} catch (err) {
-  console.warn(`No reference terms found for client: ${client}`);
-}
-
-// Slugify helper
-function normalizeSlugFromPath(term: string): string {
-  const transformed = transformContentPathToRoute(term); // → "/more-about/explainers-for-ai/ai-avatars"
-  return transformed.split('/').slice(2).join('/');       // → "explainers-for-ai/ai-avatars"
-}
-
-
-const vocabPaths = referenceTerms.vocabulary.map(normalizeSlugFromPath);
-const conceptPaths = referenceTerms.concepts.map(normalizeSlugFromPath);
-
-const clientVocab = allVocabulary.filter(e => vocabPaths.includes(e.slug));
-const clientConcepts = allConcepts.filter(e => conceptPaths.includes(e.slug));
-
-// For the Tooling section
-import yaml from 'js-yaml';
-import fs from 'node:fs/promises';
-
+// Process tool gallery
 let toolGalleryTools = [];
 
 try {
   // IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
   const yamlPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/tool-gallery.yaml`);
   const rawYaml = await fs.readFile(yamlPath, 'utf-8');
-  const config = yaml.load(rawYaml);
+  const config = extractFrontmatter(`---\n${rawYaml}\n---`);
+
+  if (!config) {
+    console.warn(`No valid tool gallery config found for ${client}`);
+    return;
+  }
 
   const tagFilters = [];
   const rawToolIds = [];
+  const items = Array.isArray(config) ? config : [config];
 
-  for (const item of config) {
+  for (const item of items) {
       if (item.tag) {
         const raw = String(item.tag).trim();
         const match = raw.match(/^\[\[(.*?)\]\]$/);
@@ -111,8 +89,8 @@ try {
     filePath: entry.id,
   }]));
 
-  const tools = [];
-  const normalizeTag = tag => slugify(tag).toLowerCase();
+  const tools: Array<{ id: string; filePath: string; [key: string]: any }> = [];
+  const normalizeTag = (tag: string): string => slugify(tag).toLowerCase();
 
   for (const input of rawToolIds) {
     let id = input;
@@ -155,21 +133,19 @@ try {
   }}>
     <AnimationWrapper>
       <Hero
-        title="Welcome, Laerdal"
-        subtitle="It's time to enter the era of AI"
-        description="With the right tools, mindset, processes, and culture, any organization can upskill everyone for the era of AI"
-        ctaText="Explore Tools"
-        ctaUrl="/toolkit"
+        title={openGraphData.heroTitle || `Welcome, ${toProperCase(client)}`}
+        subtitle={openGraphData.heroSubtitle || `It's time to enter the era of AI`}
+        description={openGraphData.heroDescription || `Explore AI tools and resources tailored for ${toProperCase(client)}`}
+        ctaText={openGraphData.ctaText || "Explore Tools"}
+        ctaUrl={openGraphData.ctaUrl || "/toolkit"}
         image={{
-          src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
-          alt: "Laerdal Logo"
+          src: openGraphData.heroImage || openGraphData.image || "/images/placeholder-hero.jpg",
+          alt: `${toProperCase(client)} Logo`
         }}
         alignment="left"
         fullBleed={true}
         animate={true}
-        class="mb-0"
-        style="margin-bottom: 0;"
-        innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+        classes="client-portal-hero"
       />
     </AnimationWrapper>
 
@@ -201,27 +177,8 @@ try {
     <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="2rem" />
 
     <div class="client-portal-container">
-      <div id="reference-section" class="collapsible-section expanded">
-        {(clientVocab.length > 0 || clientConcepts.length > 0) && (
-          <div class="mt-12">
-            {clientVocab.length > 0 && (
-              <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
-                <ReferenceGrid items={clientVocab} />
-              </section>
-            )}
-
-            {clientConcepts.length > 0 && (
-              <>
-                <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
-                <section>
-                  <h2 class="text-2xl font-bold mb-4">Concepts</h2>
-                  <ReferenceGrid items={clientConcepts} />
-                </section>
-              </>
-            )}
-          </div>
-        )}
+      <div id="reference-section">
+        <ClientReferenceSection client={client} contentBasePath={contentBasePath} />
       </div>
 
       {toolGalleryTools.length > 0 && (
@@ -254,6 +211,65 @@ try {
 </Layout>
 
 <style>
+/* Hero Section Styles */
+:global(.client-portal-hero) {
+  --hero-max-width: 1200px;
+  --hero-padding: 1.5rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+:global(.client-portal-hero .hero-container) {
+  max-width: var(--hero-max-width);
+  width: 100%;
+  margin: 10rem auto 0;
+  padding: 0 var(--hero-padding);
+}
+
+:global(.client-portal-hero .hero-title) {
+  font-size: var(--fs-900);
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+:global(.client-portal-hero .hero-subtitle) {
+  font-size: var(--fs-600);
+  font-weight: var(--fw-semi-bold);
+  margin-bottom: 1rem;
+  color: var(--clr-lossless-accent--brightest);
+}
+
+:global(.client-portal-hero .hero-description) {
+  font-size: var(--fs-500);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 65ch;
+}
+
+:global(.client-portal-hero .hero-cta) {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  :global(.client-portal-hero) {
+    margin-top: 6rem;
+    padding: 0 1rem;
+  }
+  
+  :global(.client-portal-hero .hero-title) {
+    font-size: var(--fs-800);
+  }
+  
+  :global(.client-portal-hero .hero-subtitle) {
+    font-size: var(--fs-500);
+  }
+  
+  :global(.client-portal-hero .hero-description) {
+    font-size: var(--fs-400);
+  }
+}
+
 .client-reader-wrapper {
   padding: 2rem 0rem;
 }
@@ -263,12 +279,17 @@ try {
 }
 
 #reference-section {
-  padding: 0rem 2rem;
+  padding: 0 2rem;
+  margin: 0 auto;
+  max-width: var(--max-content-width, 1200px);
+  width: 100%;
+  box-sizing: border-box;
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
   #reference-section {
-    padding: 0rem;
+    padding: 0 1.5rem;
   }
 
   .tooling-section {
@@ -452,32 +473,7 @@ try {
   }
 }
 
-.collapsible-section {
-  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  max-height: 5000px;
-  opacity: 1;
-  transform: translateY(0);
-  margin-bottom: 2rem;
-}
-
-.collapsible-section.collapsed {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-10px);
-  margin-bottom: 0;
-  pointer-events: none;
-}
-
-.collapsible-section.expanded {
-  max-height: 5000px;
-  opacity: 1;
-  transform: translateY(0);
-  margin-bottom: 2rem;
-}
+/* Collapsible section styles moved to where they're needed */
 
 .toggle-button {
   background: var(--clr-lossless-primary, #333);
