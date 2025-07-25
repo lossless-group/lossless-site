@@ -1,0 +1,147 @@
+---
+/**
+ * Astro Basics Presentation
+ * Introduction to Astro framework fundamentals
+ */
+import Layout from '@layouts/Layout.astro';
+import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+
+const title = "Astro Basics";
+const description = "Learn the fundamentals of the Astro web framework";
+
+const frontmatter = {
+  title: title,
+  description: description,
+  lede: description
+};
+---
+
+<Layout frontmatter={frontmatter}>
+  <OneSlideDeck>
+      <!-- Title Slide -->
+      <section class="title-slide">
+        <h1>{title}</h1>
+        <p>The modern static site builder</p>
+        <p><small>Build faster websites with less client-side JavaScript</small></p>
+      </section>
+
+      <!-- What is Astro -->
+      <section>
+        <h2>What is Astro?</h2>
+        <ul>
+          <li>Static site generator with a focus on performance</li>
+          <li>Ships zero JavaScript by default</li>
+          <li>Component-based architecture</li>
+          <li>Built-in support for multiple UI frameworks</li>
+        </ul>
+      </section>
+
+      <!-- Key Features -->
+      <section>
+        <h2>Key Features</h2>
+        <ul>
+          <li class="fragment">Island Architecture</li>
+          <li class="fragment">Partial Hydration</li>
+          <li class="fragment">File-based Routing</li>
+          <li class="fragment">Built-in Optimizations</li>
+          <li class="fragment">Framework Agnostic</li>
+        </ul>
+      </section>
+
+      <!-- Island Architecture -->
+      <section>
+        <section>
+          <h2>Island Architecture</h2>
+          <p>Interactive components in a sea of static HTML</p>
+          <p>↓</p>
+        </section>
+        <section>
+          <h3>How Islands Work</h3>
+          <ul>
+            <li>Most of your site is static HTML</li>
+            <li>JavaScript loads only for interactive components</li>
+            <li>Each island hydrates independently</li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- Component Example -->
+      <section>
+        <h2>Astro Components</h2>
+        {`
+        <pre><code class="astro" data-trim data-line-numbers>
+---
+// Component Script (runs at build time)
+const name = "Astro";
+const items = ["Fast", "Flexible", "Fun"];
+---
+
+<!-- Component Template (becomes HTML) -->
+<div>
+  <h1>Hello {name}!</h1>
+  <ul>
+    {items.map(item => <li>{item}</li>)}
+  </ul>
+</div>
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Integrations -->
+      <section>
+        <h2>Framework Integrations</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <ul>
+            <li>React</li>
+            <li>Vue</li>
+            <li>Svelte</li>
+          </ul>
+          <ul>
+            <li>SolidJS</li>
+            <li>Alpine.js</li>
+            <li>Lit</li>
+          </ul>
+        </div>
+        <p><small>Use your favorite framework or mix multiple!</small></p>
+      </section>
+
+      <!-- Performance -->
+      <section>
+        <h2>Performance First</h2>
+        <ul>
+          <li>Zero JavaScript by default</li>
+          <li>Automatic asset optimization</li>
+          <li>Lazy loading built-in</li>
+          <li>Fast build times</li>
+        </ul>
+      </section>
+
+      <!-- Getting Started -->
+      <section>
+        <h2>Getting Started</h2>
+        {`
+        <pre><code class="bash" data-trim>
+# Create a new project
+npm create astro@latest
+
+# Start the dev server
+npm run dev
+
+# Build for production
+npm run build
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Resources -->
+      <section>
+        <h2>Learn More</h2>
+        <ul>
+          <li>Official Docs: docs.astro.build</li>
+          <li>Discord Community</li>
+          <li>GitHub: withastro/astro</li>
+          <li>Astro Blog</li>
+        </ul>
+      </section>
+  </OneSlideDeck>
+</Layout>
