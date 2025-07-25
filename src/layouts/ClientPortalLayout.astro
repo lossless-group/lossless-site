@@ -145,8 +145,7 @@ try {
         alignment="left"
         fullBleed={true}
         animate={true}
-        classes="mb-0"
-        style="margin-bottom: 0; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+        classes="client-portal-hero"
       />
     </AnimationWrapper>
 
@@ -212,6 +211,65 @@ try {
 </Layout>
 
 <style>
+/* Hero Section Styles */
+:global(.client-portal-hero) {
+  --hero-max-width: 1200px;
+  --hero-padding: 1.5rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+:global(.client-portal-hero .hero-container) {
+  max-width: var(--hero-max-width);
+  width: 100%;
+  margin: 10rem auto 0;
+  padding: 0 var(--hero-padding);
+}
+
+:global(.client-portal-hero .hero-title) {
+  font-size: var(--fs-900);
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+:global(.client-portal-hero .hero-subtitle) {
+  font-size: var(--fs-600);
+  font-weight: var(--fw-semi-bold);
+  margin-bottom: 1rem;
+  color: var(--clr-lossless-accent--brightest);
+}
+
+:global(.client-portal-hero .hero-description) {
+  font-size: var(--fs-500);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 65ch;
+}
+
+:global(.client-portal-hero .hero-cta) {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  :global(.client-portal-hero) {
+    margin-top: 6rem;
+    padding: 0 1rem;
+  }
+  
+  :global(.client-portal-hero .hero-title) {
+    font-size: var(--fs-800);
+  }
+  
+  :global(.client-portal-hero .hero-subtitle) {
+    font-size: var(--fs-500);
+  }
+  
+  :global(.client-portal-hero .hero-description) {
+    font-size: var(--fs-400);
+  }
+}
+
 .client-reader-wrapper {
   padding: 2rem 0rem;
 }
