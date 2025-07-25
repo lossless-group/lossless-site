@@ -177,7 +177,7 @@ try {
     <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="2rem" />
 
     <div class="client-portal-container">
-      <div id="reference-section" class="collapsible-section expanded">
+      <div id="reference-section">
         <ClientReferenceSection client={client} contentBasePath={contentBasePath} />
       </div>
 
@@ -279,12 +279,17 @@ try {
 }
 
 #reference-section {
-  padding: 0rem 2rem;
+  padding: 0 2rem;
+  margin: 0 auto;
+  max-width: var(--max-content-width, 1200px);
+  width: 100%;
+  box-sizing: border-box;
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
   #reference-section {
-    padding: 0rem;
+    padding: 0 1.5rem;
   }
 
   .tooling-section {
@@ -468,32 +473,7 @@ try {
   }
 }
 
-.collapsible-section {
-  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  max-height: 5000px;
-  opacity: 1;
-  transform: translateY(0);
-  margin-bottom: 2rem;
-}
-
-.collapsible-section.collapsed {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-10px);
-  margin-bottom: 0;
-  pointer-events: none;
-}
-
-.collapsible-section.expanded {
-  max-height: 5000px;
-  opacity: 1;
-  transform: translateY(0);
-  margin-bottom: 2rem;
-}
+/* Collapsible section styles moved to where they're needed */
 
 .toggle-button {
   background: var(--clr-lossless-primary, #333);

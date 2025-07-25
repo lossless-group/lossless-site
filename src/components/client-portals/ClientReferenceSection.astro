@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import { toProperCase } from '@utils/slugify';
 import type { ReferenceItem } from '../../types/client-data.d';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import "../../styles/global.css";
 
 interface Props {
   client: string;
@@ -157,15 +158,55 @@ const clientConcepts = findMatchingItems(referenceTerms.concepts, conceptMap);
 <style>
   .reference-section {
     padding: 2rem 0;
+    opacity: 1;
+    transform: none;
   }
 
   .reference-category {
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
   }
 
   .reference-category h2 {
-    font-size: 1.5rem;
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: 1.75rem;
+    line-height: 1.2;
     margin-bottom: 1.5rem;
-    color: var(--color-text);
+    color: var(--clr-heading--secondary); /* --hippie-blue from theme */
+    position: relative;
+    padding-bottom: 0.75rem;
+  }
+
+  .reference-category h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 3rem;
+    height: 3px;
+    background: linear-gradient(90deg, var(--clr-lossless-primary-light), var(--clr-lossless-accent--brightest));
+    border-radius: 3px;
+  }
+
+  @keyframes fadeInSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .reference-section {
+      padding: 1.5rem 0;
+    }
+    
+    .reference-category h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
   }
 </style>
