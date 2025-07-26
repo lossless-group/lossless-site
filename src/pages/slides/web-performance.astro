@@ -40,9 +40,9 @@ const frontmatter = {
       <section>
         <h2>Core Web Vitals</h2>
         <ul>
-          <li class="fragment"><strong>LCP</strong> - Largest Contentful Paint (< 2.5s)</li>
-          <li class="fragment"><strong>FID</strong> - First Input Delay (< 100ms)</li>
-          <li class="fragment"><strong>CLS</strong> - Cumulative Layout Shift (< 0.1)</li>
+          <li class="fragment"><strong>LCP</strong> - Largest Contentful Paint (&lt; 2.5s)</li>
+          <li class="fragment"><strong>FID</strong> - First Input Delay (&lt; 100ms)</li>
+          <li class="fragment"><strong>CLS</strong> - Cumulative Layout Shift (&lt; 0.1)</li>
         </ul>
       </section>
 
@@ -64,7 +64,6 @@ const frontmatter = {
         </section>
         <section>
           <h3>Resource Hints</h3>
-          {`
           <pre><code class="html" data-trim data-line-numbers>
 <!-- DNS Prefetch -->
 <link rel="dns-prefetch" href="//example.com">
@@ -78,7 +77,6 @@ const frontmatter = {
 <!-- Prefetch -->
 <link rel="prefetch" href="next-page.html">
           </code></pre>
-          `}
         </section>
       </section>
 
@@ -96,9 +94,8 @@ const frontmatter = {
       <!-- JavaScript Performance -->
       <section>
         <h2>JavaScript Optimization</h2>
-        {`
-        <pre><code class="javascript" data-trim data-line-numbers>
-// Code splitting
+        <pre>
+          <code class="javascript" data-trim data-line-numbers>{`// Code splitting
 import('./heavy-module.js').then(module => {
   // Use module when needed
 });
@@ -113,9 +110,8 @@ const debounce = (fn, delay) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };
-};
-        </code></pre>
-        `}
+};`}
+</code></pre>
       </section>
 
       <!-- Caching Strategies -->
