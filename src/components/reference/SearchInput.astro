@@ -1,0 +1,47 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<div class="relative mb-6">
+  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <Icon name="search" class="h-5 w-5 text-gray-400 dark:text-gray-500" />
+  </div>
+  <input
+    type="text"
+    id="search-input"
+    class="block w-full pl-10 pr-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md leading-5 border-none placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-600 sm:text-sm transition-colors duration-200"
+    placeholder="Search terms..."
+  />
+</div>
+
+<script>
+  // Function to filter items based on search input
+  function filterItems(searchTerm: string) {
+    // Select both elements with data-searchable attribute and data-searchable="true"
+    const items = document.querySelectorAll('[data-searchable]:not([data-searchable="false"])');
+    const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+
+    items.forEach(item => {
+      // Get text content from title and description elements if they exist
+      const titleEl = item.querySelector('[data-title]');
+      const descEl = item.querySelector('[data-description]');
+      const title = titleEl?.textContent?.toLowerCase() || '';
+      const description = descEl?.textContent?.toLowerCase() || '';
+      
+      // If no specific elements found, fall back to all text content
+      const allText = title + ' ' + description + ' ' + item.textContent?.toLowerCase();
+      
+      const isVisible = allText.includes(normalizedSearchTerm);
+      (item as HTMLElement).style.display = isVisible ? '' : 'none';
+    });
+  }
+
+  // Add event listener to search input
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      filterItems(target.value);
+    });
+  }
+</script> 

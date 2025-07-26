@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
+import SearchInput from '@components/reference/SearchInput.astro';
 import { processEntries } from '@utils/slugify';
 
 const conceptsEntries = await getCollection('concepts' as any) as any[];
@@ -19,10 +20,14 @@ const processedEntires = processEntries(conceptsEntries)
       <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
       <a href="/more-about/concepts" class="px-4 py-2 bg-blue-600 text-white rounded-md">Concepts</a>
     </div>
+
+    <SearchInput />
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {processedEntires.map(entry => (
-        <ConceptPreviewCard entry={entry} />
+        <div data-searchable="true">
+          <ConceptPreviewCard entry={entry} />
+        </div>
       ))}
     </div>
   </div>

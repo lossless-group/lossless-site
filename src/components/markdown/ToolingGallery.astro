@@ -19,9 +19,11 @@ const {
 ---
 
 <div class="tooling-gallery-container" id={galleryId} class:list={[{ 'full-width': takeUpWholeWidth }]}>
-  <button type="button" class="toggle-button" onclick={`toggleToolGallery('${galleryId}')`}>
-    {expanded ? "Click to close" : "Click to expand"}
-  </button>
+  <div class="gallery-header">
+    <button type="button" class="toggle-button" onclick={`toggleToolGallery('${galleryId}')`}>
+      {expanded ? "Click to close" : "Click to expand"}
+    </button>
+  </div>
 
   <div class="tooling-gallery-scroll" style={`display: ${expanded ? 'flex' : 'none'}`}>
     {tools.map(tool => (
@@ -50,6 +52,12 @@ const {
   transition: max-width 0.3s ease-in-out;
 }
 
+.gallery-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
 .tooling-gallery-container.full-width {
   max-width: 100%;
   width: 100%;
@@ -62,10 +70,10 @@ const {
   color: white;
   text-align: left;
   font-weight: 600;
-  padding: 0.75rem 1rem;
   cursor: pointer;
   font-size: 0.9rem;
   box-sizing: border-box;
+  padding: 0;
 }
 
 .tooling-gallery-scroll {

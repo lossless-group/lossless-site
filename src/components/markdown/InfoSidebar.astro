@@ -95,8 +95,6 @@ const {
   ...restProps
 } = Astro.props as Props;
 
-
-
 // Handle all possible variations of the augmented with/by property
 const augmentedWith = 
   restProps.augmented_with || 
@@ -113,6 +111,19 @@ const augmentedWithData = augmentedWith ? {
 // Process Google Maps URL
 const mapsUrl = google_maps_url || googleMapsUrl;
 const hasLocationInfo = Boolean(mapsUrl);
+
+// Check if we have any article info to display
+const hasArticleInfo = 
+  categories.length > 0 || 
+  semanticVersion || 
+  authorForHandle || 
+  participants || 
+  formattedDateModified || 
+  formattedDateCreated || 
+  formattedDateOfEvent || 
+  tags.length > 0 || 
+  augmentedWithData || 
+  hasLocationInfo;
 ---
 
 <aside class="info-sidebar" id="info-sidebar">
@@ -126,113 +137,122 @@ const hasLocationInfo = Boolean(mapsUrl);
   </div>
   
   <div class="info-scroll-area" id="info-scroll-area">
-    <div class="info-list">
-      {categories.length > 0 && (
-        <div class="categories-container">
-          <div class="categories-wrapper">
-            {categories.map(category => (
-              <span class="category-pill">
-                {category}
-              </span>
+    {hasArticleInfo ? (
+      <div class="info-list">
+        {categories.length > 0 && (
+          <div class="categories-container">
+            <div class="categories-wrapper">
+              {categories.map(category => (
+                <span class="category-pill">
+                  {category}
+                </span>
+              ))}
+            </div>
+            <div class="title-separator"></div>
+          </div>
+        )}
+
+        <div class="publish-info">
+          {semanticVersion && (
+            <div class="version-number">
+              v.{semanticVersion}
+            </div>
+          )}
+
+          {(formattedDateOfEvent || formattedDateModified || formattedDateCreated) && (
+            <div class="text-xs">
+              {formattedDateOfEvent ? (
+                <div class="text-center">
+                  <span class="date-label">Event Date</span>
+                  <div class="date-value">{formatDate(formattedDateOfEvent)}</div>
+                </div>
+              ) : (
+                <div class="flex justify-between">
+                  {formattedDateCreated && (
+                    <div>
+                      <span class="date-label">Created</span>
+                      <div class="date-value">{formatDate(formattedDateCreated)}</div>
+                    </div>
+                  )}
+                  {formattedDateModified && (
+                    <div class="text-right">
+                      <span class="date-label">Updated</span>
+                      <div class="date-value">{formatDate(formattedDateModified)}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {hasLocationInfo && (
+          <div class="location-info">
+            <div class="location-separator"></div>
+            <div>
+              <span class="date-label">Location</span>
+              <div class="location-content">
+                <a class="location-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                  View on Google Maps
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div class="author-info">
+          <div class="author-separator"></div>
+          {authorForHandle ? (
+            <div>
+              <span class="date-label">Author</span>
+              <AuthorHandle authors={authorForHandle} showName={true} showRole={false} alternateLayout={true} />
+            </div>
+          ) : participants ? (
+            <div>
+              <span class="date-label">Participants</span>
+              <AuthorHandle authors={participants} showName={true} showRole={false} alternateLayout={true} />
+            </div>
+          ) : null}
+          {augmentedWithData && (
+            <div class="mt-2 w-[80%] ml-auto">
+              <span class="augmented-with">Augmented with</span>
+              <div class="augmented-with-content">
+                {augmentedWithData.imageUrl ? (
+                  <img 
+                    src={augmentedWithData.imageUrl}
+                    alt={augmentedWithData.name}
+                    class="w-full h-auto max-h-8 object-contain"
+                    loading="lazy"
+                    title={augmentedWithData.name}
+                  />
+                ) : (
+                  <span class="date-value">{augmentedWithData.name}</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            {tags.map(tag => (
+              <TagChip tagString={tag} />
             ))}
-          </div>
-          <div class="title-separator"></div>
-        </div>
-      )}
-
-<div class="publish-info">
-      {semanticVersion && (
-        <div class="version-number">
-          v.{semanticVersion}
-        </div>
-      )}
-
-
-
-    {(formattedDateOfEvent || formattedDateModified || formattedDateCreated) && (
-      <div class="text-xs">
-        {formattedDateOfEvent ? (
-          <!-- Event date takes priority and is centered -->
-          <div class="text-center">
-            <span class="date-label">Event Date</span>
-            <div class="date-value">{formatDate(formattedDateOfEvent)}</div>
-          </div>
-        ) : (
-          <!-- Standard two-column layout for Created/Updated -->
-          <div class="flex justify-between">
-            {formattedDateCreated && (
-              <div>
-                <span class="date-label">Created</span>
-                <div class="date-value">{formatDate(formattedDateCreated)}</div>
-              </div>
-            )}
-            {formattedDateModified && (
-              <div class="text-right">
-                <span class="date-label">Updated</span>
-                <div class="date-value">{formatDate(formattedDateModified)}</div>
-              </div>
-            )}
           </div>
         )}
       </div>
-    )}
-</div>
-
-    {hasLocationInfo && (
-      <div class="location-info">
-        <div class="location-separator"></div>
-        <div>
-          <span class="date-label">Location</span>
-          <div class="location-content">
-            <a class="location-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
-              View on Google Maps
-            </a>
-          </div>
-        </div>
+    ) : (
+      <div class="info-empty-message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14,2 14,8 20,8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10,9 9,9 8,9"></polyline>
+        </svg>
+        <span>No article info available</span>
       </div>
     )}
-
-<div class="author-info">
-      <div class="author-separator"></div>
-      {authorForHandle ? (
-        <div>
-          <span class="date-label">Author</span>
-          <AuthorHandle authors={authorForHandle} showName={true} showRole={false} alternateLayout={true} />
-        </div>
-      ) : participants ? (
-        <div>
-          <span class="date-label">Participants</span>
-          <AuthorHandle authors={participants} showName={true} showRole={false} alternateLayout={true} />
-        </div>
-      ) : null}
-      {augmentedWithData && (
-        <div class="mt-2 w-[80%] ml-auto">
-          <span class="augmented-with">Augmented with</span>
-          <div class="augmented-with-content">
-            {augmentedWithData.imageUrl ? (
-              <img 
-                src={augmentedWithData.imageUrl}
-                alt={augmentedWithData.name}
-                class="w-full h-auto max-h-8 object-contain"
-                loading="lazy"
-                title={augmentedWithData.name}
-              />
-            ) : (
-              <span class="date-value">{augmentedWithData.name}</span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-
-      {tags.length > 0 && (
-        <div class="mt-4 flex flex-wrap justify-end gap-2">
-          {tags.map(tag => (
-            <TagChip tagString={tag} />
-          ))}
-        </div>
-      )}
-    </div>
   </div>
 </aside>
 
@@ -554,6 +574,27 @@ const hasLocationInfo = Boolean(mapsUrl);
 .info-collapse-btn:focus {
   outline: 2px solid var(--clr-lossless-accent--brightest);
   outline-offset: 2px;
+}
+
+/* Empty state message styling - matching TableOfContents empty state */
+.info-empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--clr-lossless-primary-light);
+  opacity: 0.7;
+}
+
+.info-empty-message svg {
+  opacity: 0.5;
+}
+
+.info-empty-message span {
+  font-size: 0.875rem;
+  font-style: italic;
 }
 </style>
 
