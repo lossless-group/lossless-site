@@ -1,0 +1,10 @@
+---
+// This is a fallback 404 page that redirects to /not-found
+// Some systems specifically look for 404.astro, so we provide both options
+
+export const prerender = true;
+
+if (Astro.url.pathname !== '/not-found') {
+  return Astro.redirect('/not-found');
+}
+--- 

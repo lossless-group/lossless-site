@@ -23,14 +23,10 @@ const { id, label, title, bannerImage, articleTitle } = Astro.props;
     if (!btn) return;
 
     const headingId = btn.dataset.copyId;
-    const headerTitle = btn.dataset.headerTitle;
     
-    // Create URL with both hash fragment and share_heading parameter for OpenGraph
+    // Create URL with just the hash fragment for direct heading navigation
     const baseUrl = window.location.origin + window.location.pathname;
-    const params = new URLSearchParams({
-      share_heading: headerTitle
-    });
-    const url = `${baseUrl}?${params.toString()}#${headingId}`;
+    const url = `${baseUrl}#${headingId}`;
 
     navigator.clipboard.writeText(url)
       .then(() => {
