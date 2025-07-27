@@ -7,6 +7,7 @@ import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
+import SlidesEmbed from '@components/SlidesEmbed.astro';
 import { getCollection } from "astro:content";
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
@@ -974,6 +975,56 @@ if (DEBUG_AST) {
             }
           </style>
         </>
+      );
+
+    case 'slides':
+      // Parse slides configuration and links
+      const lines = value.trim().split('\n');
+      const config = {};
+      const slides = [];
+      let configSection = true;
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        // Skip empty lines
+        if (!trimmedLine) continue;
+        
+        // Check if this is a slide link
+        if (trimmedLine.startsWith('- [[')) {
+          configSection = false;
+          const linkMatch = trimmedLine.match(/\[\[(.*?)\|(.*?)\]\]/);
+          if (linkMatch) {
+            slides.push({
+              path: linkMatch[1],
+              title: linkMatch[2]
+            });
+          }
+        } else if (configSection) {
+          // Parse configuration options
+          // Support both "key: value" and "key=value" syntax
+          const colonMatch = trimmedLine.match(/^(\w+):\s*(.+)$/);
+          const equalsMatch = trimmedLine.match(/^(\w+)=(.+)$/);
+          
+          if (colonMatch) {
+            config[colonMatch[1]] = colonMatch[2].trim();
+          } else if (equalsMatch) {
+            config[equalsMatch[1]] = equalsMatch[2].trim();
+          } else if (trimmedLine.includes('=')) {
+            // Handle inline config like "theme=dark transition=slide"
+            const pairs = trimmedLine.split(/\s+/);
+            for (const pair of pairs) {
+              const [key, value] = pair.split('=');
+              if (key && value) {
+                config[key] = value;
+              }
+            }
+          }
+        }
+      }
+      
+      return (
+        <SlidesEmbed slides={slides} config={config} />
       );
 
     default:

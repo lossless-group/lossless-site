@@ -31,7 +31,7 @@ const cardCollection = defineCollection({
 const slidesCollection = defineCollection({
     loader: glob({pattern: "**/*.md", base: resolveContentPath("slides")}),
     schema: z.object({
-      title: z.string(),
+      title: z.string().optional(),
       lede: z.string().optional(),
       slug: z.string().optional(),
       date_created: z.date().optional(),
@@ -46,6 +46,19 @@ const slidesCollection = defineCollection({
       status: z.string().default('draft').optional(),
       published: z.boolean().default(true).optional(),
       // Additional fields
+    }).passthrough().transform((data, context) => {
+      // Get the filename without extension
+      const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+      
+      // Use provided title or generate from filename
+      const displayTitle = data.title
+        ? data.title
+        : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+      
+      return {
+        ...data,
+        title: displayTitle,
+      };
     }),
 });
 

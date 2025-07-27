@@ -1,0 +1,183 @@
+---
+/**
+ * Embedded slide deck renderer
+ * Creates an embedded presentation view from multiple markdown content files
+ * Reuses the MarkdownSlideDeck component for consistency
+ */
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
+
+// Get query parameters
+const { url } = Astro;
+const searchParams = new URLSearchParams(url.search);
+
+// Parse slides parameter
+const slidesParam = searchParams.get('slides');
+if (!slidesParam) {
+  return Astro.redirect('/404');
+}
+
+const slidePaths = slidesParam.split(',').filter(Boolean);
+
+// Get configuration from query params
+const config = {
+  theme: searchParams.get('theme') || 'black',
+  transition: searchParams.get('transition') || 'slide',
+  controls: searchParams.get('controls') !== 'false',
+  progress: searchParams.get('progress') !== 'false',
+  autoSlide: parseInt(searchParams.get('autoSlide') || '0', 10),
+  loop: searchParams.get('loop') === 'true',
+};
+
+// Sanitize and validate paths
+const sanitizePath = (path: string) => {
+  return path.replace(/\.\./g, '').replace(/^\//, '');
+};
+
+// Load slide content
+let combinedMarkdown = '';
+const slideContents = [];
+
+for (const path of slidePaths) {
+  const sanitizedPath = sanitizePath(path);
+  
+  try {
+    // Parse the path to extract collection and slug
+    const pathParts = sanitizedPath.split('/');
+    const collection = pathParts[0];
+    const slug = pathParts.slice(1).join('/').replace(/\.md$/, '');
+    
+    // Get the content from the collection
+    const allEntries = await getCollection(collection as any);
+    const entry = allEntries.find(e => e.slug === slug);
+    
+    if (entry) {
+      // Add the content with horizontal slide separator
+      if (combinedMarkdown) {
+        combinedMarkdown += '\n\n---\n\n';
+      }
+      
+      // Add title slide for each section
+      combinedMarkdown += `# ${entry.data.title || 'Untitled'}\n\n`;
+      
+      // Add the actual content
+      combinedMarkdown += entry.body;
+      
+      slideContents.push({
+        title: entry.data.title || 'Untitled',
+        path: sanitizedPath
+      });
+      
+      console.log(`Added slide: ${entry.data.title || 'Untitled'}`);
+    } else {
+      console.log(`Available slugs in collection '${collection}':`, allEntries.map(e => e.slug));
+    }
+  } catch (error) {
+    console.error(`Failed to load slide: ${sanitizedPath}`, error);
+  }
+}
+
+// If no slides were loaded, show error
+if (!combinedMarkdown) {
+  combinedMarkdown = `# No Content Available\n\nThe requested slides could not be loaded.`;
+}
+
+// Create a title from the loaded slides
+const title = slideContents.length > 0 
+  ? slideContents.map(s => s.title).join(' | ')
+  : 'Embedded Presentation';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  
+  <style>
+    /* Reset for embedded context */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+    }
+    
+    /* Hide control buttons in embedded view */
+    .control-buttons {
+      display: none !important;
+    }
+    
+    /* Adjust container for full viewport */
+    .reveal-container {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      height: 100vh !important;
+    }
+    
+    /* Ensure reveal takes full space */
+    .reveal {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    /* Theme override will be handled via JavaScript */
+  </style>
+</head>
+<body>
+  <!-- Use the MarkdownSlideDeck component -->
+  <MarkdownSlideDeck markdownContent={combinedMarkdown} title={title} />
+  
+  <!-- Override configuration based on query params -->
+  <script define:vars={{ config }}>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait a bit for Reveal to initialize
+      setTimeout(() => {
+        if (window.Reveal) {
+          // Update configuration
+          Reveal.configure({
+            controls: config.controls,
+            progress: config.progress,
+            transition: config.transition,
+            autoSlide: config.autoSlide,
+            loop: config.loop,
+            
+            // Embedded specific settings
+            embedded: true,
+            keyboard: true,
+            touch: true,
+            hideInactiveCursor: false
+          });
+          
+          // Update theme if different from default
+          if (config.theme !== 'black') {
+            const themeLink = document.getElementById('theme');
+            if (themeLink) {
+              themeLink.href = `https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/${config.theme}.min.css`;
+            }
+          }
+          
+          // Post message to parent window when slide changes
+          Reveal.on('slidechanged', event => {
+            window.parent.postMessage({
+              type: 'reveal-slide-changed',
+              currentSlide: event.indexh,
+              indexv: event.indexv
+            }, '*');
+          });
+          
+          // Listen for messages from parent window
+          window.addEventListener('message', event => {
+            if (event.data.type === 'reveal-goto-slide') {
+              Reveal.slide(event.data.slide);
+            }
+          });
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>
