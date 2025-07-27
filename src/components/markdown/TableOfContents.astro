@@ -501,12 +501,33 @@ if (DEBUG_TOC) {
   padding-left: 4rem;
 }
 
-.toc-depth-4 .toc-link,
-.toc-depth-5 .toc-link,
-.toc-depth-6 .toc-link {
+.toc-depth-4 .toc-link {
   font-size: 0.75rem;
   opacity: 0.8;
   padding-left: 5rem;
+}
+
+.toc-depth-5 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 6rem;
+}
+
+.toc-depth-6 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 7rem;
+}
+
+/* Mobile adjustments for all depths */
+@media (max-width: 768px) {
+  .toc-depth-0 .toc-link { padding-left: 0.75rem; }
+  .toc-depth-1 .toc-link { padding-left: 1.5rem; }
+  .toc-depth-2 .toc-link { padding-left: 2.25rem; }
+  .toc-depth-3 .toc-link { padding-left: 3rem; }
+  .toc-depth-4 .toc-link { padding-left: 3.75rem; }
+  .toc-depth-5 .toc-link { padding-left: 4.5rem; }
+  .toc-depth-6 .toc-link { padding-left: 5.25rem; }
 }
 
 .toc-progress-bar {

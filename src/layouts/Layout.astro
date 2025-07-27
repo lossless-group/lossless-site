@@ -45,12 +45,11 @@ interface Props {
 const fm = Astro.props.frontmatter || {};
 
 // Check for share parameters in URL for social media sharing
-const shareTitle = Astro.url.searchParams.get('share_title');
-const shareDescription = Astro.url.searchParams.get('share_description');
+const shareHeading = Astro.url.searchParams.get('share_heading');
 
 // Extract values with clear priority (share params take precedence for social sharing)
-const pageTitle = shareTitle || fm.title || Astro.props.title;
-const pageDescription = shareDescription || fm.lede || fm.description || Astro.props.description;
+const pageTitle = shareHeading || fm.title || Astro.props.title;
+const pageDescription = fm.lede || fm.description || Astro.props.description;
 const pageImageUrl = fm.banner_image || fm.portrait_image;
 
 // PageMeta.astro will handle all defaults if these are undefined

@@ -233,27 +233,60 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
   }
 
   .prose > :global(h1:first-child) {  
-    font-size: 2rem;
+    font-size: 2.75rem;
     margin-bottom: 2rem;
+    color: var(--clr-lossless-accent--brightest);
   }
 
   .prose :global(h1) {
-    font-size: 2rem;
+    font-size: 2.75rem;
+    margin-bottom: 1.5rem;
     color: var(--clr-lossless-accent--brightest);
   }
 
   .prose :global(h2) {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
     margin-top: 2rem;
     margin-bottom: 1rem;
     color: var(--clr-lossless-accent--brightest);
   }
 
   .prose :global(h3) {
-    font-size: 1.25rem;
+    font-size: 1.875rem;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
     color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h4) {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h5) {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h6) {
+    font-size: 1.125rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  /* Add responsive styles for headings */
+  @media (max-width: 768px) {
+    .prose :global(h1), .prose > :global(h1:first-child) { font-size: 2.25rem; }
+    .prose :global(h2) { font-size: 1.875rem; }
+    .prose :global(h3) { font-size: 1.5rem; }
+    .prose :global(h4) { font-size: 1.25rem; }
+    .prose :global(h5) { font-size: 1.125rem; }
+    .prose :global(h6) { font-size: 1rem; }
   }
 
   .prose :global(p), .prose :global(.paragraph) {
