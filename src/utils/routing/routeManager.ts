@@ -90,7 +90,8 @@ function resolveWithMappings(normalizedPath: string): string {
     return `/${mapping.routePath}/${relativePath}`;
   }
 
-  return `/not-found?path=${encodeURIComponent(normalizedPath)}`;
+  // Return 404 page with the attempted path
+  return `/404`;
 }
 
 function collectAllMappingPaths(): RouteMapping[] {
@@ -161,8 +162,8 @@ export function transformContentPathToRoute(input: string): string {
   if (DEBUG_BACKLINKS) {
     console.log("No path found for path", input, "\n\n")
   }
-  // Fallback
-  return `/not-found?path=${encodeURIComponent(input)}`;
+  // Return 404 page
+  return `/404`;
 }
 
 /**

@@ -1,10 +1,154 @@
 ---
-// This is a fallback 404 page that redirects to /not-found
-// Some systems specifically look for 404.astro, so we provide both options
+import Layout from '@layouts/Layout.astro';
 
-export const prerender = true;
+// Define frontmatter data for the 404 page
+const frontmatter = {
+  title: "404 – Page Lost in Innovation",
+  description: "Oops! This page seems to have innovated itself out of existence.",
+  lede: "Oops! This page seems to have innovated itself out of existence."
+};
 
-if (Astro.url.pathname !== '/not-found') {
-  return Astro.redirect('/not-found');
-}
---- 
+const funnyMessages = [
+  "Looks like this page took 'lossless innovation' too literally and disappeared!",
+  "Our AI assistant is still learning directories... and comedy apparently.",
+  "This page is practicing social distancing from our server.",
+  "Even with all our tools, we couldn't find this one!",
+  "Error 404: Page went to get coffee, might be back later.",
+];
+
+const randomMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+
+// Get the actual path that was attempted
+const attemptedPath = Astro.url.pathname;
+---
+
+<Layout frontmatter={frontmatter}>
+  <div class="not-found-wrapper">
+    <div class="error-code">404</div>
+    <h1>Page Not Found</h1>
+    <p class="funny-message">{randomMessage}</p>
+    <p class="path-message">
+      We couldn't find <code>{attemptedPath}</code> in our innovation hub.
+    </p>
+    <div class="action-buttons">
+      <a href="/" class="home-button">Return to Homepage</a>
+      <button onclick="window.history.back()" class="back-button">Go Back</button>
+    </div>
+    <div class="ascii-art">
+      <pre>
+         /\___/\
+        (  o o  )
+        (  =^=  ) 
+         (______)
+      </pre>
+    </div>
+  </div>
+
+  <style>
+    .not-found-wrapper {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .error-code {
+      font-size: 8rem;
+      font-weight: bold;
+      color: var(--clr-lossless-accent--brightest);
+      text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+      font-family: monospace;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--clr-lossless-accent--brightest);
+      margin-bottom: 1rem;
+    }
+
+    .funny-message {
+      font-size: 1.4rem;
+      color: var(--clr-lossless-primary-light);
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+
+    .path-message {
+      font-size: 1.1rem;
+      color: var(--clr-lossless-primary-light);
+      margin-bottom: 2rem;
+    }
+
+    code {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .home-button, .back-button {
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: none;
+    }
+
+    .home-button {
+      background-color: var(--clr-lossless-accent--brightest);
+      color: var(--clr-lossless-primary-dark);
+    }
+
+    .back-button {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--clr-lossless-primary-light);
+    }
+
+    .home-button:hover, .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .ascii-art {
+      margin-top: 3rem;
+      font-family: monospace;
+      color: var(--clr-lossless-accent--brightest);
+      opacity: 0.8;
+    }
+
+    .ascii-art pre {
+      font-size: 1.2rem;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 600px) {
+      .error-code {
+        font-size: 6rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .ascii-art pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</Layout> 
