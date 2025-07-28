@@ -1,21 +1,7 @@
 ---
-// Import the layout
+// Use the Information layout which will load the content
+// from the pages collection where slug === 'about'
 import Information from '../layouts/Information.astro';
-
-// Import the MDX content directly from the pages directory
-import AboutContent from './mdx/about.mdx';
 ---
 
-<Information pageName="about">
-  <div class="content-wrapper">
-    <AboutContent />
-  </div>
-</Information>
-
-<style>
-  .content-wrapper {
-    max-width: 65ch;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-</style>
+<Information pageName="about" />
