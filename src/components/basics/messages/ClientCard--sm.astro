@@ -14,6 +14,8 @@
  * - website (string, optional): Client website URL
  */
 
+import TextCTA from '../cta/TextCTA.astro';
+
 interface Props {
   name: string;
   logo?: string;
@@ -45,9 +47,7 @@ const { name, logo, description, industry, engagement, website } = Astro.props;
   <p class="client-description">{description}</p>
   
   {website && (
-    <a href={website} target="_blank" rel="noopener noreferrer" class="client-link">
-      Visit Website →
-    </a>
+    <TextCTA href={website} text="Visit Website" />
   )}
 </div>
 
@@ -71,9 +71,10 @@ const { name, logo, description, industry, engagement, website } = Astro.props;
   }
   
   .client-card--sm:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    border-image: var(--grd--lossless-eastern-crimson, linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)) 1;
+    border-width: 2.5px;
+    border-style: solid;
   }
   
   .client-header {
@@ -134,19 +135,4 @@ const { name, logo, description, industry, engagement, website } = Astro.props;
     margin: 0;
   }
   
-  .client-link {
-    color: #60a5fa;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    transition: color 0.2s;
-    margin-top: auto;
-  }
-  
-  .client-link:hover {
-    color: #93c5fd;
-  }
 </style>

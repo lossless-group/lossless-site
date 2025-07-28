@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import TeamBios from '../components/TeamBios.svelte';
 import ClientListHorizontalScroller from '../components/basics/messages/ClientListHorizontalScroller.astro';
+import ProjectGrid from '../components/content/ProjectGrid.astro';
 import BaseCodeblock from '../components/codeblocks/BaseCodeblock.astro';
 import fs from 'fs';
 import yaml from 'js-yaml';
@@ -11,6 +12,25 @@ import path from 'path';
 const clientsPath = path.join(process.cwd(), 'src/content/people/clients.yaml');
 const clientsData = yaml.load(fs.readFileSync(clientsPath, 'utf8'));
 const clients = clientsData.clients;
+
+// Define projects data
+const projects = [
+  {
+    icon: "🌐",
+    title: "Markdown-First Websites",
+    description: "Making pure Markdown a first-class citizen for beautiful, content-rich websites using Astro."
+  },
+  {
+    icon: "🌾",
+    title: "Content Farm",
+    description: "A universe of Obsidian plugins that give deep thinkers superpowers to put out content."
+  },
+  {
+    icon: "🏠",
+    title: "Home Lab Playbook",
+    description: "A toolkit to help make sure everyone can win in the Age of AI."
+  }
+];
 ---
 
 <Layout title="About The Lossless Group">
@@ -39,23 +59,7 @@ const clients = clientsData.clients;
     </section>
 
     <!-- Current Projects Section -->
-    <section class="content-section">
-      <h2>Current Projects</h2>
-      <div class="projects-grid">
-        <div class="project-card">
-          <h3>🌐 Markdown-First Websites</h3>
-          <p>Making pure Markdown a first-class citizen for beautiful, content-rich websites using Astro.</p>
-        </div>
-        <div class="project-card">
-          <h3>🌾 Content Farm</h3>
-          <p>A universe of Obsidian plugins that give deep thinkers superpowers to put out content.</p>
-        </div>
-        <div class="project-card">
-          <h3>🏠 Home Lab Playbook</h3>
-          <p>A toolkit to help make sure everyone can win in the Age of AI.</p>
-        </div>
-      </div>
-    </section>
+    <ProjectGrid projects={projects} />
 
     <!-- Our Team Section -->
     <section class="content-section">
@@ -162,43 +166,6 @@ We are not looking for employees, we are looking for collaborators.`} lang="mark
     margin-bottom: 1rem;
   }
   
-  /* Projects Grid */
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-  }
-  
-  .project-card {
-    background: rgba(0, 0, 0, 0.05);
-    border: 1.5px solid rgba(255, 255, 255, 0.06);
-    border-radius: 1rem;
-    padding: 2rem;
-    transition: all 0.3s ease;
-  }
-  
-  :global(.dark) .project-card {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-  
-  .project-card h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin-bottom: 0.75rem;
-  }
-  
-  .project-card p {
-    color: #cbd5e1;
-    line-height: 1.6;
-  }
   
   
   /* Open Source CTA */
