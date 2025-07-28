@@ -1,0 +1,34 @@
+---
+import MdxLayout from '../../layouts/sections/MdxSectionLayout.astro';
+import ToolCard from '../../components/mdx/ToolCard.svelte';
+
+const title = 'About Page';
+const description = 'This is an example page using MDX with Svelte components';
+---
+
+<MdxLayout title={title} description={description}>
+
+# MDX with Svelte Components
+
+Here's an example of using a Svelte component in MDX:
+
+<ToolCard 
+  title="Svelte in MDX" 
+  description="This is a Svelte component rendered in MDX"
+  icon="🚀"
+/>
+
+## Another Example
+
+<ToolCard title="Another Example" icon="💡">
+  You can also use children in your components! This text is passed as children to the ToolCard component.
+</ToolCard>
+
+## Features
+
+- **Svelte Components**: Use any Svelte component in your MDX
+- **Markdown**: All standard markdown features work
+- **Frontmatter**: Define metadata at the top of the file
+- **Layouts**: Use Astro layouts for consistent page structure
+
+</MdxLayout>

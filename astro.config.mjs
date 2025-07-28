@@ -106,7 +106,10 @@ export default defineConfig({
   output: "static",
   adapter: vercel(),
   integrations: [
-    mdx(),
+    mdx({
+      // Use the MDX configuration file
+      ...(await import('./src/mdx.config.js')).default
+    }),
     icon({
       iconDir: "src/assets/Icons"
     }),
@@ -136,6 +139,9 @@ export default defineConfig({
     // server.fs.allow: Vite will serve files from the project root and node_modules, preventing
     // 'outside of Vite serving allow list' errors when dependencies are resolved with absolute paths.
     // If you are in a monorepo, add the monorepo root (e.g., '../') as needed.
+    ssr: {
+      noExternal: ['@astrojs/svelte']
+    },
     server: {
       fs: {
         allow: [

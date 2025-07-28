@@ -1,5 +1,21 @@
 ---
+// Import the layout
 import Information from '../layouts/Information.astro';
+
+// Import the MDX content directly from the pages directory
+import AboutContent from './mdx/about.mdx';
 ---
 
-<Information pageName="test" />
+<Information pageName="about">
+  <div class="content-wrapper">
+    <AboutContent />
+  </div>
+</Information>
+
+<style>
+  .content-wrapper {
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+</style>

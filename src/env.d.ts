@@ -1,5 +1,6 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
+/// <reference types="astro-svelte" />
 
 interface ImportMetaEnv {
   // Core environment
