@@ -1,6 +1,7 @@
 ---
 title: Introduction to Docker
 description: Containerization fundamentals and Docker basics
+slug: docker-intro
 ---
 
 # Introduction to Docker

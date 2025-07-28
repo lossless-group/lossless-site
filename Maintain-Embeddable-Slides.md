@@ -52,7 +52,7 @@ Add parsing logic in `/src/components/markdown/AstroMarkdown.astro` around line 
 - Maintain slide order as specified in the markdown
 
 #### 3. Component Structure
-Create a new component `PresentationEmbed.astro` that:
+Create a new component `SlidesEmbed.astro` that:
 - Accepts parsed slides array with paths and titles
 - Accepts configuration object
 - Renders an iframe pointing to the reveal.js presentation route
@@ -61,7 +61,7 @@ Create a new component `PresentationEmbed.astro` that:
 #### 4. URL Construction
 The embed component should construct URLs like:
 ```
-/presentations/embed?slides=essays/intro.md,essays/chapter1.md&theme=dark&transition=slide
+/slides/embed?slides=essays/intro.md,essays/chapter1.md&theme=dark&transition=slide
 ```
 
 Or use a POST request / session storage for complex configurations.
@@ -84,7 +84,7 @@ The parsed content should render as:
 ```html
 <div class="presentation-embed">
   <iframe 
-    src="/presentations/embed?slides=..." 
+    src="/slides/embed?slides=..." 
     width="100%" 
     height="600px"
     frameborder="0"

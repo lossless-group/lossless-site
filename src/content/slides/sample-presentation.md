@@ -1,6 +1,7 @@
 ---
 title: Sample Markdown Presentation
 description: A demo of markdown-based slides
+slug: sample-presentation
 ---
 
 # Sample Markdown Presentation

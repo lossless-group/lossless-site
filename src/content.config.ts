@@ -55,9 +55,13 @@ const slidesCollection = defineCollection({
         ? data.title
         : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
       
+      // Generate slug from filename if not provided in frontmatter
+      const slug = data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+      
       return {
         ...data,
         title: displayTitle,
+        slug: slug,
       };
     }),
 });

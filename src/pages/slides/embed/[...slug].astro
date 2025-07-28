@@ -6,20 +6,19 @@
  */
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
 import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
-// Get query parameters
-const { url } = Astro;
-const searchParams = new URLSearchParams(url.search);
-
-// Parse slides parameter
-const slidesParam = searchParams.get('slides');
-if (!slidesParam) {
+// Get slug from path parameters
+const { slug } = Astro.params;
+if (!slug) {
   return Astro.redirect('/404');
 }
 
-const slidePaths = slidesParam.split(',').filter(Boolean);
+// Get query parameters for configuration
+const { url } = Astro;
+const searchParams = new URLSearchParams(url.search);
 
 // Get configuration from query params
 const config = {
@@ -31,63 +30,48 @@ const config = {
   loop: searchParams.get('loop') === 'true',
 };
 
-// Sanitize and validate paths
-const sanitizePath = (path: string) => {
-  return path.replace(/\.\./g, '').replace(/^\//, '');
-};
+// Convert slug array to path
+const slidePath = Array.isArray(slug) ? slug.join('/') : slug;
 
-// Load slide content
+// Load slide content directly from filesystem like the working markdown route
 let combinedMarkdown = '';
-const slideContents = [];
+let title = 'Embedded Presentation';
 
-for (const path of slidePaths) {
-  const sanitizedPath = sanitizePath(path);
+try {
+  // Read markdown file directly from filesystem
+  const slidesDir = path.join(process.cwd(), 'src', 'generated-content', 'slides');
+  const fullPath = path.join(slidesDir, `${slidePath}.md`);
   
-  try {
-    // Parse the path to extract collection and slug
-    const pathParts = sanitizedPath.split('/');
-    const collection = pathParts[0];
-    const slug = pathParts.slice(1).join('/').replace(/\.md$/, '');
+  console.log(`Reading slide from: ${fullPath}`);
+  
+  const fileContent = await readFile(fullPath, 'utf-8');
+  
+  // Parse frontmatter and content (simple approach)
+  const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  
+  if (frontmatterMatch) {
+    const frontmatterText = frontmatterMatch[1];
+    combinedMarkdown = frontmatterMatch[2];
     
-    // Get the content from the collection
-    const allEntries = await getCollection(collection as any);
-    const entry = allEntries.find(e => e.slug === slug);
-    
-    if (entry) {
-      // Add the content with horizontal slide separator
-      if (combinedMarkdown) {
-        combinedMarkdown += '\n\n---\n\n';
-      }
-      
-      // Add title slide for each section
-      combinedMarkdown += `# ${entry.data.title || 'Untitled'}\n\n`;
-      
-      // Add the actual content
-      combinedMarkdown += entry.body;
-      
-      slideContents.push({
-        title: entry.data.title || 'Untitled',
-        path: sanitizedPath
-      });
-      
-      console.log(`Added slide: ${entry.data.title || 'Untitled'}`);
-    } else {
-      console.log(`Available slugs in collection '${collection}':`, allEntries.map(e => e.slug));
+    // Extract title from frontmatter
+    const titleMatch = frontmatterText.match(/title:\s*(.+)/);
+    if (titleMatch) {
+      title = titleMatch[1].trim().replace(/['"]/g, '');
     }
-  } catch (error) {
-    console.error(`Failed to load slide: ${sanitizedPath}`, error);
+    
+    console.log(`Loaded slide: ${title}`);
+  } else {
+    combinedMarkdown = fileContent;
   }
+} catch (error) {
+  console.error(`Failed to load slide: ${slidePath}`, error);
+  combinedMarkdown = `# Slide Not Found\n\nThe requested slide "${slidePath}" could not be loaded.`;
 }
 
 // If no slides were loaded, show error
 if (!combinedMarkdown) {
   combinedMarkdown = `# No Content Available\n\nThe requested slides could not be loaded.`;
 }
-
-// Create a title from the loaded slides
-const title = slideContents.length > 0 
-  ? slideContents.map(s => s.title).join(' | ')
-  : 'Embedded Presentation';
 ---
 
 <!DOCTYPE html>

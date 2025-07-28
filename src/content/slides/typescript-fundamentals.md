@@ -1,6 +1,7 @@
 ---
 title: TypeScript Fundamentals
 description: Type-safe JavaScript development with TypeScript
+slug: typescript-fundamentals
 ---
 
 # TypeScript Fundamentals

@@ -1,6 +1,7 @@
 ---
 title: Git Basics
 description: Introduction to version control with Git
+slug: git-basics
 ---
 
 # Git Basics

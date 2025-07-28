@@ -56,12 +56,17 @@ const sanitizePath = (path: string) => {
   return path.replace(/\.\./g, '').replace(/^\//, '');
 };
 
-// Build URL for the embed
-const slidePaths = slides.map(s => sanitizePath(s.path)).join(',');
-const embedUrl = new URL('/slides/embed', Astro.url.origin);
-embedUrl.searchParams.set('slides', slidePaths);
+// Build URL for the embed - use first slide as the main slug
+const firstSlide = slides[0];
+if (!firstSlide) {
+  throw new Error('No slides provided');
+}
 
-// Add config parameters
+// Extract slug from path (remove slides/ prefix and .md extension)
+const slug = sanitizePath(firstSlide.path).replace(/^slides\//, '').replace(/\.md$/, '');
+const embedUrl = new URL(`/slides/embed/${slug}`, Astro.url.origin);
+
+// Add config parameters as query params
 Object.entries(finalConfig).forEach(([key, value]) => {
   if (key !== 'width' && key !== 'height') {
     embedUrl.searchParams.set(key, String(value));
