@@ -1,0 +1,127 @@
+---
+/**
+ * ClientListHorizontalScroller.astro
+ * 
+ * Horizontal scrolling container for client cards
+ * Features smooth scrolling, snap points, and custom scrollbar styling
+ * 
+ * PROPS:
+ * - clients (array, required): Array of client objects with properties:
+ *   - name: string
+ *   - logo?: string  
+ *   - description: string
+ *   - industry: string
+ *   - engagement: string
+ *   - website?: string
+ * - title (string, optional): Section title (defaults to "Who We've Worked With")
+ */
+
+import ClientCardSm from './ClientCard--sm.astro';
+
+interface Client {
+  name: string;
+  logo?: string;
+  description: string;
+  industry: string;
+  engagement: string;
+  website?: string;
+}
+
+interface Props {
+  clients: Client[];
+  title?: string;
+}
+
+const { clients, title = "Who We've Worked With" } = Astro.props;
+---
+
+<section class="client-list-section">
+  <h2 class="section-title">{title}</h2>
+  <div class="clients-container">
+    <div class="clients-scroll">
+      {clients.map((client) => (
+        <ClientCardSm 
+          name={client.name}
+          logo={client.logo}
+          description={client.description}
+          industry={client.industry}
+          engagement={client.engagement}
+          website={client.website}
+        />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .client-list-section {
+    margin-bottom: 5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 2rem;
+  }
+  
+  /* Clients Container */
+  .clients-container {
+    position: relative;
+    margin: 2rem -1rem;
+    padding: 0 1rem;
+  }
+  
+  .clients-scroll {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem 0 2rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .clients-scroll > :global(*) {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  
+  /* Custom Scrollbar Styling */
+  .clients-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Firefox Scrollbar */
+  @supports (scrollbar-width: thin) {
+    .clients-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  /* Mobile Adjustments */
+  @media (max-width: 768px) {
+    .clients-container {
+      margin: 1rem -1rem;
+    }
+    
+    .clients-scroll {
+      gap: 1rem;
+      padding: 0.5rem 0 1.5rem;
+    }
+  }
+</style>

@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import TeamBios from '../components/TeamBios.svelte';
-import ClientCard from '../components/ClientCard.astro';
+import ClientListHorizontalScroller from '../components/basics/messages/ClientListHorizontalScroller.astro';
 import BaseCodeblock from '../components/codeblocks/BaseCodeblock.astro';
 import fs from 'fs';
 import yaml from 'js-yaml';
@@ -64,23 +64,7 @@ const clients = clientsData.clients;
     </section>
 
     <!-- Clients Section -->
-    <section class="content-section">
-      <h2>Who We've Worked With</h2>
-      <div class="clients-container">
-        <div class="clients-scroll">
-          {clients.map((client) => (
-            <ClientCard 
-              name={client.name}
-              logo={client.logo}
-              description={client.description}
-              industry={client.industry}
-              engagement={client.engagement}
-              website={client.website}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
+    <ClientListHorizontalScroller clients={clients} />
 
     <!-- Open Source Section -->
     <section class="content-section">
@@ -216,44 +200,6 @@ We are not looking for employees, we are looking for collaborators.`} lang="mark
     line-height: 1.6;
   }
   
-  /* Clients Section */
-  .clients-container {
-    position: relative;
-    margin: 2rem -1rem;
-    padding: 0 1rem;
-  }
-  
-  .clients-scroll {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    padding: 1rem 0 2rem;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .clients-scroll > :global(*) {
-    scroll-snap-align: start;
-    flex-shrink: 0;
-  }
-  
-  .clients-scroll::-webkit-scrollbar {
-    height: 8px;
-  }
-  
-  .clients-scroll::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-  }
-  
-  .clients-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-  }
-  
-  .clients-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
   
   /* Open Source CTA */
   .open-source-cta {
