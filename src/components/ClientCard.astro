@@ -1,0 +1,137 @@
+---
+interface Props {
+  name: string;
+  logo?: string;
+  description: string;
+  industry: string;
+  engagement: string;
+  website?: string;
+}
+
+const { name, logo, description, industry, engagement, website } = Astro.props;
+---
+
+<div class="client-card">
+  <div class="client-header">
+    {logo && (
+      <div class="client-logo">
+        <img src={logo} alt={`${name} logo`} />
+      </div>
+    )}
+    <div class="client-info">
+      <h3 class="client-name">{name}</h3>
+      <div class="client-meta">
+        <span class="client-industry">{industry}</span>
+        <span class="client-engagement">{engagement}</span>
+      </div>
+    </div>
+  </div>
+  
+  <p class="client-description">{description}</p>
+  
+  {website && (
+    <a href={website} target="_blank" rel="noopener noreferrer" class="client-link">
+      Visit Website →
+    </a>
+  )}
+</div>
+
+<style>
+  .client-card {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    min-width: 320px;
+    max-width: 400px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s ease;
+  }
+  
+  :global(.dark) .client-card {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .client-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  .client-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .client-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .client-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .client-info {
+    flex: 1;
+  }
+  
+  .client-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+  }
+  
+  .client-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .client-industry {
+    color: #60a5fa;
+    font-weight: 500;
+  }
+  
+  .client-engagement {
+    color: #94a3b8;
+  }
+  
+  .client-description {
+    color: #cbd5e1;
+    line-height: 1.6;
+    flex: 1;
+    margin: 0;
+  }
+  
+  .client-link {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s;
+    margin-top: auto;
+  }
+  
+  .client-link:hover {
+    color: #93c5fd;
+  }
+</style>

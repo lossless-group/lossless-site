@@ -1,5 +1,358 @@
 ---
-import Information from '../layouts/Information.astro';
+import Layout from '../layouts/Layout.astro';
+import TeamBios from '../components/TeamBios.svelte';
+import ClientCard from '../components/ClientCard.astro';
+import BaseCodeblock from '../components/codeblocks/BaseCodeblock.astro';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import path from 'path';
+
+// Load clients data
+const clientsPath = path.join(process.cwd(), 'src/content/people/clients.yaml');
+const clientsData = yaml.load(fs.readFileSync(clientsPath, 'utf8'));
+const clients = clientsData.clients;
 ---
 
-<Information pageName="test" />
+<Layout title="About The Lossless Group">
+  <div class="about-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1 class="hero-title">The Lossless Group</h1>
+      <p class="hero-subtitle">
+        A loose collection of innovators finding winning formulae for the Age of AI
+      </p>
+    </section>
+
+    <!-- Purpose Section -->
+    <section class="content-section">
+      <h2>Less of a Company, More of a Social Club</h2>
+      <div class="prose-content">
+        <p>
+          The Lossless Group is not an actual company. It is a social club for innovators.
+        </p>
+        <p>
+          When we are not investing through VC funds, advising tiny startup companies, or eating tacos, 
+          we sometimes get asked to consult for large companies. This is the pseudo-brand under which 
+          we do that work.
+        </p>
+      </div>
+    </section>
+
+    <!-- Current Projects Section -->
+    <section class="content-section">
+      <h2>Current Projects</h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <h3>🌐 Markdown-First Websites</h3>
+          <p>Making pure Markdown a first-class citizen for beautiful, content-rich websites using Astro.</p>
+        </div>
+        <div class="project-card">
+          <h3>🌾 Content Farm</h3>
+          <p>A universe of Obsidian plugins that give deep thinkers superpowers to put out content.</p>
+        </div>
+        <div class="project-card">
+          <h3>🏠 Home Lab Playbook</h3>
+          <p>A toolkit to help make sure everyone can win in the Age of AI.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Team Section -->
+    <section class="content-section">
+      <h2>Our Team</h2>
+      <TeamBios client:load />
+    </section>
+
+    <!-- Clients Section -->
+    <section class="content-section">
+      <h2>Who We've Worked With</h2>
+      <div class="clients-container">
+        <div class="clients-scroll">
+          {clients.map((client) => (
+            <ClientCard 
+              name={client.name}
+              logo={client.logo}
+              description={client.description}
+              industry={client.industry}
+              engagement={client.engagement}
+              website={client.website}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Open Source Section -->
+    <section class="content-section">
+      <h2>Join Our Open Source Community</h2>
+      <div class="open-source-cta">
+        <p>
+          We're always looking for contributors to help us build out our content and open source projects. 
+          If you're interested in contributing, please reach out!
+        </p>
+        
+        <div class="cta-buttons">
+          <a href="https://github.com/lossless-group" target="_blank" rel="noopener noreferrer" class="cta-button primary">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            View on GitHub
+          </a>
+          <a href="mailto:mpstaton@gmail.com" class="cta-button secondary">
+            Contact Michael Staton
+          </a>
+        </div>
+        
+        <div class="contribution-note">
+          <BaseCodeblock code={`# The only constraint
+We need to become friends. 
+We are not looking for employees, we are looking for collaborators.`} lang="markdown" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Collaborators Section -->
+    <section class="content-section">
+      <h2>Collaborators</h2>
+      <div class="collaborators-list">
+        <div class="collaborator">Nicholas Cooper</div>
+        <div class="collaborator">Tugce Ergul</div>
+        <div class="collaborator">Katelyn Donnelly</div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .about-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  /* Hero Section */
+  .hero-section {
+    text-align: center;
+    padding: 4rem 0;
+    margin-bottom: 4rem;
+    position: relative;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: var(--grd--lossless-eastern-crimson);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  
+  /* Content Sections */
+  .content-section {
+    margin-bottom: 5rem;
+  }
+  
+  .content-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 2rem;
+  }
+  
+  .prose-content {
+    max-width: 65ch;
+    color: #cbd5e1;
+    line-height: 1.8;
+  }
+  
+  .prose-content p {
+    margin-bottom: 1rem;
+  }
+  
+  /* Projects Grid */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .project-card {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  :global(.dark) .project-card {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  .project-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.75rem;
+  }
+  
+  .project-card p {
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+  
+  /* Clients Section */
+  .clients-container {
+    position: relative;
+    margin: 2rem -1rem;
+    padding: 0 1rem;
+  }
+  
+  .clients-scroll {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem 0 2rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .clients-scroll > :global(*) {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  
+  .clients-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Open Source CTA */
+  .open-source-cta {
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.08) 0%, 
+      rgba(168, 85, 247, 0.04) 100%);
+    border: 1.5px solid rgba(59, 130, 246, 0.2);
+    border-radius: 1rem;
+    padding: 3rem;
+    text-align: center;
+  }
+  
+  .open-source-cta p {
+    font-size: 1.125rem;
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  
+  .cta-button.primary {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .cta-button.primary:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  
+  .cta-button.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+  }
+  
+  .cta-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(96, 165, 250, 0.5);
+  }
+  
+  .cta-button .icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .contribution-note {
+    margin-top: 2rem;
+  }
+  
+  /* Collaborators */
+  .collaborators-list {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .collaborator {
+    font-size: 1.125rem;
+    color: #94a3b8;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.25rem;
+    }
+    
+    .open-source-cta {
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>
