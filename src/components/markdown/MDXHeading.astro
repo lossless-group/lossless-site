@@ -1,0 +1,55 @@
+---
+// MDXHeading.astro
+// Reuses the exact heading rendering from AstroMarkdown including copy buttons
+
+import CopyLinkButton from './CopyLinkButton.astro';
+import { slugify } from '@utils/slugify';
+
+interface Props {
+  level: number;
+  children: any;
+  [key: string]: any;
+}
+
+const { level, children, ...rest } = Astro.props;
+
+// Extract text content from children
+function extractText(children: any): string {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) {
+    return children.map(child => extractText(child)).join('');
+  }
+  if (children?.props?.children) {
+    return extractText(children.props.children);
+  }
+  return '';
+}
+
+const text = extractText(children);
+const id = slugify(text);
+const Tag = `h${level}` as any;
+---
+
+<Tag id={id} class="heading-with-copy" {...rest}>
+  <span class="heading-text">
+    {children}
+  </span>
+  <CopyLinkButton id={id} label={text} articleTitle="" />
+</Tag>
+
+<style>
+  .heading-with-copy {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-wrap: nowrap;     
+    max-width: 100%;
+  }
+
+  .heading-text {
+    display: inline;
+    line-height: inherit;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+</style>

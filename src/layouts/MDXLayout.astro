@@ -3,18 +3,22 @@
 // Layout wrapper for MDX content that applies consistent markdown styles
 
 import Layout from './Layout.astro';
+import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 
 const { frontmatter } = Astro.props;
+
+// This approach won't work because we can't intercept MDX rendering
+// We need to use the mdx integration's components option instead
 ---
 
 <Layout>
-  <article class="mdx-article prose">
+  <article class="mdx-article markdown-content">
     <slot />
   </article>
 </Layout>
 
 <style is:global>
-  /* MDX content styling to match AstroMarkdown */
+  /* MDX content styling - copied directly from AstroMarkdown.astro */
   .mdx-article {
     max-width: 65ch;
     margin: 0 auto;
@@ -23,7 +27,7 @@ const { frontmatter } = Astro.props;
     line-height: 1.6;
   }
   
-  /* Headings */
+  /* Headings - Note: These won't have copy buttons without custom components */
   .mdx-article h1,
   .mdx-article h2,
   .mdx-article h3,
@@ -34,6 +38,7 @@ const { frontmatter } = Astro.props;
     margin-bottom: 1rem;
     font-weight: 600;
     line-height: 1.25;
+    color: #f1f5f9; /* Same as AstroMarkdown headings */
   }
   
   .mdx-article h1 { font-size: 2.25rem; }
