@@ -4,6 +4,7 @@ title: 'Testing MDX Integration'
 import BaseCodeblock from '../../components/codeblocks/BaseCodeblock.astro';
 import LitegalCodeblock from '../../components/codeblocks/LitegalCodeblockDisplay.astro';
 import DataviewCodeblock from '../../components/codeblocks/DataviewCodeblockDisplay.astro';
+import TeamBios from '../../components/TeamBios.svelte';
 
 # About The Lossless Group
 
@@ -32,10 +33,7 @@ The only constraint is we need to become friends. We are not looking for employe
 
 ## Our Team
 
-Michael Staton - Music Editor
-Tanuj Siripurapu - Developer
-Ida Soboleva - Developer
-Sergey Sobolev - Developer
+<TeamBios client:load />
 
 ## Collaborators
 
