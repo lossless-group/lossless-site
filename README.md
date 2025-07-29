@@ -120,11 +120,64 @@ Once you have the content submodule cloned, use symbolic links to point from the
 ## Image Handling:
 While Astro is supposed to handle images extremely well, I find that sometimes there are just "dud rendering" issues that are not immediately apparent. As a result, I have a preference for using image APIs, I'm using [ImageKit](https://imagekit.io) for this.
 
-## Markdown Handling:
+## Markdown Render Pipeline:
 
-There are any number of libraries and plugins that allow Astro to "extend" Markdown and support various kinds of Markdown syntax, rendered as either HMTL or custom components.  Honestly, we're still figuring all this out, and it's been quite the rabbit hole of yak shaving.
+The site uses a sophisticated multi-stage Markdown processing pipeline that transforms raw Markdown content into rich, interactive web components. This pipeline handles everything from basic formatting to complex custom components and syntax highlighting.
 
-At the moment, we're using [remark-gfm](https://github.com/remarkjs/remark-gfm) for GitHub Flavored Markdown, and [remark-mermaid](https://github.com/mermaid-js/mermaid) for Mermaid diagrams. 
+### Pipeline Architecture
+
+The processing flow follows this sequence:
+1. **Raw Markdown** → **Remark Plugins** → **Rehype Plugins** → **Custom Components** → **Final HTML**
+
+### Core Dependencies
+- **[remark-gfm](https://github.com/remarkjs/remark-gfm)** - GitHub Flavored Markdown support
+- **[Shiki](https://shiki.style/)** - Advanced syntax highlighting with custom themes
+- **[KaTeX](https://katex.org/)** - Mathematical notation rendering
+- **[Mermaid](https://mermaid-js.github.io/mermaid)** - Diagram and flowchart generation
+
+### Remark Plugins (Markdown AST Processing)
+Located in `/src/utils/remark/`:
+- **remark-mermaid** - Converts Mermaid code blocks to diagram components
+- **remark-math** - Processes mathematical expressions for KaTeX
+- **remark-container** - Custom container blocks (callouts, info boxes)
+- **remark-backlinks** - Generates bidirectional content linking
+- **remark-toc** - Auto-generates table of contents from headers
+
+### Rehype Plugins (HTML AST Processing)  
+Located in `/src/utils/rehype/`:
+- **rehype-katex** - Renders mathematical expressions
+- **rehype-autolink-headings** - Adds shareable anchor links to headers
+- **rehype-slug** - Generates URL-friendly header IDs
+- **rehype-external-links** - Processes external link handling
+
+### Custom Processing Features
+- **YouTube Auto-embeds** - Converts YouTube URLs to embedded players
+- **Code Block Enhancement** - Custom syntax highlighting with copy buttons
+- **Image Processing** - External image optimization via ImageKit API
+- **Frontmatter Integration** - YAML metadata processing for pages and collections
+
+### Syntax Highlighting
+Uses Shiki with custom themes supporting:
+- 100+ programming languages
+- Custom code block types (`imageGallery`, `toolingGallery`, `litegal`)
+- Dark mode optimized color schemes
+- Line highlighting and annotations
+
+### Debug Configuration
+Enable debugging in `.env`:
+```bash
+SHOW_DEBUG_MARKDOWN_AST=true  # Outputs processing AST to /debug/
+DEBUG_CITATIONS=true          # Debug citation processing  
+DEBUG_BACKLINKS=true          # Debug backlink generation
+DEBUG_TOC=true               # Debug table of contents
+```
+
+### Custom Markdown Extensions
+The pipeline supports several non-standard Markdown syntaxes:
+- **Obsidian-style backlinks** - `[[Internal Links]]`
+- **Custom callouts** - `> [!info]`, `> [!warning]`, etc.
+- **Image galleries** - Special code block syntax for multi-image displays
+- **Embedded components** - MDX-style component integration 
 
 We have working:
 - Codeblocks

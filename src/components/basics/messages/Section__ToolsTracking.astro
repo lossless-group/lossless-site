@@ -58,11 +58,13 @@ const allTags = [
   </div>
 </section>
 
+<!-- Header for tech section - centered to viewport -->
+<div class="tech-header">
+  <h2>Tech we're watching.</h2>
+</div>
+
 <!-- Full-bleed ribbon container -->
 <div id="ribbon-container">
-  <div id="ribbon-context">
-    <h2>Tech we're watching.</h2>
-  </div>
   <div class="trademark-ribbon-wrapper">
     <TrademarkRibbon
       sourceDir={TRADEMARK_CONFIG.sourceDir}
@@ -97,10 +99,16 @@ const allTags = [
     }
   }
 
-  #ribbon-context {
+  .tech-header {
     width: 100%;
     text-align: center;
-    margin: 0 auto 0 auto;
+    margin: 2rem auto 1rem auto;
+  }
+  
+  .tech-header h2 {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-semi-bold);
+    margin: 0;
   }
 
   /* Full-bleed container for the ribbon */
