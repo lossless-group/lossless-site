@@ -122,8 +122,12 @@ const { name, logo, description, industry, engagement } = Astro.props;
   }
   
   .client-industry {
-    color: #f87171;
+    background: linear-gradient(90deg, #F59C49 0%, #FDE047 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-weight: 500;
+    letter-spacing: 0.5px;
   }
   
   .client-engagement {
