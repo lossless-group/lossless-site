@@ -1,0 +1,69 @@
+{
+  "clients": [
+    {
+      "id": "acme-corp",
+      "name": "Acme Corporation",
+      "logo": "/images/clients/acme-logo.png",
+      "description": "Enterprise AI transformation and strategic consulting",
+      "industry": "Technology",
+      "engagement": "2023-Present",
+      "website": "https://acme.example.com",
+      "stealth-name": "Project Alpha",
+      "stealth-logo": "/images/clients/stealth/alpha-logo.png",
+      "stealth-description": "Confidential enterprise transformation initiative",
+      "stealth-passcode": "crimson-dawn-42"
+    },
+    {
+      "id": "innovate-labs",
+      "name": "Innovate Labs",
+      "logo": "/images/clients/innovate-logo.png",
+      "description": "AI-powered research tools and knowledge management systems",
+      "industry": "Research & Development",
+      "engagement": "2024-Present",
+      "website": "https://innovatelabs.example.com",
+      "stealth-name": "Deep Dive",
+      "stealth-logo": "/images/clients/stealth/deepdive-logo.png",
+      "stealth-description": "Advanced knowledge synthesis platform development",
+      "stealth-passcode": "neural-bridge-7"
+    },
+    {
+      "id": "future-finance",
+      "name": "Future Finance",
+      "logo": "/images/clients/future-finance-logo.png",
+      "description": "Algorithmic trading systems and financial AI models",
+      "industry": "Financial Services",
+      "engagement": "2023-2024",
+      "website": "https://futurefinance.example.com",
+      "stealth-name": "Quantum Edge",
+      "stealth-logo": "/images/clients/stealth/quantum-logo.png",
+      "stealth-description": "Next-generation predictive trading algorithms",
+      "stealth-passcode": "golden-ratio-89"
+    },
+    {
+      "id": "health-ai",
+      "name": "HealthAI Solutions",
+      "logo": "/images/clients/health-ai-logo.png",
+      "description": "Medical diagnosis assistance and healthcare optimization",
+      "industry": "Healthcare",
+      "engagement": "2024-Present",
+      "website": "https://healthai.example.com",
+      "stealth-name": "Vital Signs",
+      "stealth-logo": "/images/clients/stealth/vital-logo.png",
+      "stealth-description": "Revolutionary diagnostic AI system",
+      "stealth-passcode": "pulse-wave-23"
+    },
+    {
+      "id": "creative-studio",
+      "name": "Creative Studio X",
+      "logo": "/images/clients/creative-studio-logo.png",
+      "description": "AI-assisted content creation and digital marketing automation",
+      "industry": "Media & Entertainment",
+      "engagement": "2023-Present",
+      "website": "https://creativestudiox.example.com",
+      "stealth-name": "Canvas Dream",
+      "stealth-logo": "/images/clients/stealth/canvas-logo.png",
+      "stealth-description": "Experimental AI-driven creative workflows",
+      "stealth-passcode": "pixel-storm-56"
+    }
+  ]
+}

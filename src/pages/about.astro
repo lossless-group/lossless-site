@@ -4,21 +4,17 @@ import TeamBios from '../components/TeamBios.svelte';
 import ClientListHorizontalScroller from '../components/basics/messages/ClientListHorizontalScroller.astro';
 import ProjectGrid from '../components/content/ProjectGrid.astro';
 import BaseCodeblock from '../components/codeblocks/BaseCodeblock.astro';
-import fs from 'fs';
-import yaml from 'js-yaml';
-import path from 'path';
+import clientsData from '../content/people/clients.json';
 
 // Load clients data
-const clientsPath = path.join(process.cwd(), 'src/content/people/clients.yaml');
-const clientsData = yaml.load(fs.readFileSync(clientsPath, 'utf8'));
 const clients = clientsData.clients;
 
 // Define projects data
 const projects = [
   {
     icon: "🌐",
-    title: "Markdown-First Websites",
-    description: "Making pure Markdown a first-class citizen for beautiful, content-rich websites using Astro."
+    title: "Extended Markdown Website",
+    description: "Making Extended Markdown a first-class citizen for beautiful, content-rich websites using Astro."
   },
   {
     icon: "🌾",
@@ -27,9 +23,16 @@ const projects = [
   },
   {
     icon: "🏠",
-    title: "Home Lab Playbook",
-    description: "A toolkit to help make sure everyone can win in the Age of AI."
-  }
+    title: "Augment-It",
+    description: "An AI-powered workflow to augment basic data sets with AI data capture, analysis, and inputs."
+  },
+  {
+    icon: "🧠",
+    title: "Context Engineering, Shared",
+    description: "A set of reminders, blueprints, specifications, and prompts used with tempestuous code generating AI models.",
+    link: "/vibe-with/us"
+  },
+
 ];
 ---
 

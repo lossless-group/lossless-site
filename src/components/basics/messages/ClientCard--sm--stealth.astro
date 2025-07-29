@@ -1,0 +1,147 @@
+---
+/**
+ * ClientCard--sm--stealth.astro
+ * 
+ * Small stealth client card component for confidential project display
+ * Shows stealth information instead of public client details
+ * Uses TextCTA for access portal functionality
+ * 
+ * PROPS:
+ * - name (string, required): Stealth project name
+ * - logo (string, optional): Path to stealth logo image
+ * - description (string, required): Stealth description of engagement
+ * - industry (string, required): Client's industry sector
+ * - engagement (string, required): Engagement period (e.g., "2023-Present")
+ */
+
+import TextCTA from '../cta/TextCTA.astro';
+
+interface Props {
+  name: string;
+  logo?: string;
+  description: string;
+  industry: string;
+  engagement: string;
+}
+
+const { name, logo, description, industry, engagement } = Astro.props;
+---
+
+<div class="stealth-client-card--sm">
+  <div class="client-header">
+    {logo && (
+      <div class="client-logo">
+        <img src={logo} alt={`${name} logo`} />
+      </div>
+    )}
+    <div class="client-info">
+      <h3 class="client-name">{name}</h3>
+      <div class="client-meta">
+        <span class="client-industry">{industry}</span>
+        <span class="client-engagement">{engagement}</span>
+      </div>
+    </div>
+  </div>
+  
+  <p class="client-description">{description}</p>
+  
+  <div class="stealth-indicator">
+    <TextCTA text="Access Portal" />
+  </div>
+</div>
+
+<style>
+  .stealth-client-card--sm {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    min-width: 320px;
+    max-width: 400px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  :global(.dark) .stealth-client-card--sm {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .stealth-client-card--sm:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    border-image: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) 1;
+    border-width: 2.5px;
+    border-style: solid;
+  }
+  
+  .client-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .client-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+  }
+  
+  .client-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: contrast(0.8) brightness(0.9);
+  }
+  
+  .client-info {
+    flex: 1;
+  }
+  
+  .client-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+  }
+  
+  .client-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .client-industry {
+    color: #f87171;
+    font-weight: 500;
+  }
+  
+  .client-engagement {
+    color: #94a3b8;
+  }
+  
+  .client-description {
+    color: #cbd5e1;
+    line-height: 1.6;
+    flex: 1;
+    margin: 0;
+    font-style: italic;
+  }
+  
+  .stealth-indicator {
+    display: flex;
+    justify-content: center;
+    margin-top: auto;
+  }
+  
+</style>

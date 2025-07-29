@@ -12,6 +12,8 @@
  * - link (string, optional): URL to link to when clicked
  */
 
+import TextCTA from '../basics/cta/TextCTA.astro';
+
 interface Props {
   icon: string;
   title: string;
@@ -20,18 +22,19 @@ interface Props {
 }
 
 const { icon, title, description, link } = Astro.props;
-
-const Tag = link ? 'a' : 'div';
-const linkProps = link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {};
 ---
 
-<Tag class="project-card" {...linkProps}>
+<div class="project-card">
   <h3 class="project-title">
     <span class="project-icon">{icon}</span>
     {title}
   </h3>
   <p class="project-description">{description}</p>
-</Tag>
+  
+  {link && (
+    <TextCTA href={link} text="Learn More" />
+  )}
+</div>
 
 <style>
   .project-card {
@@ -40,9 +43,10 @@ const linkProps = link ? { href: link, target: '_blank', rel: 'noopener noreferr
     border-radius: 1rem;
     padding: 2rem;
     transition: all 0.3s ease;
-    display: block;
-    text-decoration: none;
-    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
   }
   
   :global(.dark) .project-card {
@@ -54,10 +58,6 @@ const linkProps = link ? { href: link, target: '_blank', rel: 'noopener noreferr
     border-image: var(--grd--lossless-eastern-crimson, linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)) 1;
     border-width: 2.5px;
     border-style: solid;
-  }
-  
-  a.project-card {
-    cursor: pointer;
   }
   
   .project-title {
@@ -79,6 +79,7 @@ const linkProps = link ? { href: link, target: '_blank', rel: 'noopener noreferr
     color: #cbd5e1;
     line-height: 1.6;
     margin: 0;
+    flex: 1;
   }
   
 </style>

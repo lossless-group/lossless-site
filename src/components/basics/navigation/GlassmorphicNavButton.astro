@@ -1,0 +1,92 @@
+---
+/**
+ * GlassmorphicNavButton.astro
+ * 
+ * Glassmorphic navigation button with blur effect and hover animations
+ * Can be used for left/right navigation, carousels, or any directional navigation
+ * 
+ * PROPS:
+ * - direction ('left' | 'right', required): Arrow direction
+ * - href (string, optional): URL to navigate to (creates <a> tag)
+ * - label (string, required): Accessibility label
+ * - onClick (string, optional): JavaScript click handler (creates <button> tag)
+ * - class (string, optional): Additional CSS classes
+ */
+
+interface Props {
+  direction: 'left' | 'right';
+  href?: string;
+  label: string;
+  onClick?: string;
+  class?: string;
+}
+
+const { direction, href, label, onClick, class: className = '' } = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+const tagProps = href 
+  ? { href } 
+  : onClick 
+    ? { onclick: onClick, type: 'button' } 
+    : { type: 'button' };
+---
+
+<Tag 
+  class:list={['glassmorphic-nav-button', className]}
+  aria-label={label}
+  {...tagProps}
+>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {direction === 'left' ? (
+      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ) : (
+      <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    )}
+  </svg>
+</Tag>
+
+<style>
+  .glassmorphic-nav-button {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  
+  .glassmorphic-nav-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .glassmorphic-nav-button:active {
+    transform: scale(0.95);
+  }
+  
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .glassmorphic-nav-button {
+      width: 50px;
+      height: 50px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .glassmorphic-nav-button {
+      width: 44px;
+      height: 44px;
+    }
+  }
+</style>

@@ -39,7 +39,7 @@ const { clients, title = "Who We've Worked With" } = Astro.props;
   <h2 class="section-title">{title}</h2>
   <div class="clients-container">
     <div class="clients-scroll">
-      {clients.map((client) => (
+      {clients.map((client, index) => (
         <ClientCardSm 
           name={client.name}
           logo={client.logo}
@@ -47,6 +47,7 @@ const { clients, title = "Who We've Worked With" } = Astro.props;
           industry={client.industry}
           engagement={client.engagement}
           website={client.website}
+          data-index={index}
         />
       ))}
     </div>
@@ -76,13 +77,13 @@ const { clients, title = "Who We've Worked With" } = Astro.props;
     display: flex;
     gap: 1.5rem;
     overflow-x: auto;
-    padding: 1rem 0 2rem;
+    padding: 1rem calc(50% - 160px) 2rem calc(50% - 160px);
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }
   
   .clients-scroll > :global(*) {
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     flex-shrink: 0;
   }
   
