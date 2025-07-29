@@ -58,6 +58,21 @@
         "createdAt": "2025-03-12T20:32:45-07:00",
         "updatedAt": "2025-04-20T20:32:45-07:00"
       }
+    },
+    {
+      "id": "sarahmaikenis",
+      "name": "Sarah Mikenis",
+      "role": "Art Director",
+      "bio": "Art Director @ Lossless Group",
+      "headshotOf": "/images/headshotOf__Sarah-Mikenis.png",
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/sarahmakenis",
+        "personal_site": "https://sarahmikenis.com/home.html"
+      },
+      "metadata": {
+        "createdAt": "2025-03-12T20:32:45-07:00",
+        "updatedAt": "2025-04-20T20:32:45-07:00"
+      }
     }
   ]
 }
