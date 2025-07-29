@@ -5,6 +5,10 @@ import ClientListHorizontalScroller from '../components/basics/messages/ClientLi
 import ProjectGrid from '../components/content/ProjectGrid.astro';
 import BaseCodeblock from '../components/codeblocks/BaseCodeblock.astro';
 import clientsData from '../content/people/clients.json';
+import Hero from '@components/basics/Hero.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import FeatureSideImage from '@components/basics/FeatureSideImage.astro';
+import AlternatingSideImage from '@components/basics/messages/AlternatingSideImage.astro';
 
 // Load clients data
 const clients = clientsData.clients;
@@ -37,16 +41,55 @@ const projects = [
   },
 
 ];
+
+const featureSideImageEntries = [
+  {
+    "label": "Less of a Company, More of a Learning Community.",
+    "title": "Collaboration is a Journey, Not a Destination.",
+    "details": "We are not looking for employees, we are looking for collaborators.",
+    "imageSide": "right",
+    "ctaText": "Learn More",
+    "ctaUrl": "#",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Friends First, Humanity Always",
+    "details": `When we are not investing through VC funds, advising tiny startup companies, or eating tacos, we sometimes get asked to consult for large companies. This is the pseudo-brand under which we do that work.`,
+    "imageSide": "left",
+    "ctaText": "Explore Library",
+    "ctaUrl": "/vibe-with/us",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+]
+
 ---
 
 <Layout title="About The Lossless Group">
   <div class="about-page">
     <!-- Hero Section -->
-    <section class="hero-section">
-      <img src="/visuals/wordmark__The-Lossless-Group.svg" alt="The Lossless Group" />
-      <p class="hero-subtitle">
-        A loose collection of innovators finding winning formulae for the Age of AI
-      </p>
+    <div slot="hero-content" style="position: relative;">
+      <AnimationWrapper>
+        <Hero
+          alignment="center"
+          fullBleed={false}
+          title=""
+          subtitle="A loose collection of innovators finding winning formulae for the Age of AI"
+          subtitleVariant="minimal"
+          imagePosition="top"
+          image={{
+            src: "/visuals/wordmark__The-Lossless-Group.svg",
+            alt: "The Lossless Group wordmark with brand Eastern Crimson gradient"
+          }}
+          animate={true}
+        />
+      </AnimationWrapper>
+    </div>
     </section>
 
     <!-- Purpose Section -->
@@ -63,6 +106,22 @@ const projects = [
         </p>
       </div>
     </section>
+
+    <section class="content-section">
+      <FeatureSideImage
+        image={{
+          src: "/visuals/aigen_aisomething-diagram.jpeg",
+          alt: "The Lossless Group wordmark with brand Eastern Crimson gradient"
+        }}
+        title=""
+        label="Less of a Company, More of a Learning Community"
+        details="We are not looking for employees, we are looking for collaborators."
+      />
+    </section>
+
+    
+
+    
 
     <!-- Current Projects Section -->
     <ProjectGrid projects={projects} />

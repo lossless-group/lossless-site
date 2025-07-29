@@ -55,13 +55,13 @@
     {
       "id": "avalanche",
       "name": "Avalanche",
-      "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Avalanche.svg",
+      "logo": "/visuals/appIcon__Avalanche.svg",
       "description": "AI-assisted content creation and digital marketing automation",
       "industry": "Venture Capital",
       "engagement": "2024-Present",
       "website": "https://avalanche.vc",
       "stealth-name": "Market Tectonics",
-      "stealth-logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Avalanche.svg",
+      "stealth-logo": "/visuals/appIcon__Avalanche.svg",
       "stealth-description": "Backing founders pursuing their life's work in the middle of a market avalanche.",
       "stealth-passcode": "avalanche-2025"
     }

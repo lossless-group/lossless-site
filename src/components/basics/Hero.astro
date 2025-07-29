@@ -37,7 +37,7 @@ interface Props {
   /**
    * Main title of the hero section
    */
-  title: string;
+  title?: string;
   
   /**
    * Optional subtitle displayed above the title
@@ -97,37 +97,59 @@ interface Props {
    * If true, removes all bottom margin from child elements for a tight layout
    */
   noBottomMargin?: boolean;
+
+  /**
+   * Custom CSS class(es) to apply to the subtitle
+   */
+  subtitleClass?: string;
+
+  /**
+   * Position of the image relative to the content
+   * @default "bottom"
+   */
+  imagePosition?: 'top' | 'bottom';
+
+  /**
+   * Style variant for the subtitle
+   * - 'default': Standard hero subtitle style
+   * - 'minimal': Simple, understated style with gray color and larger size
+   * @default "default"
+   */
+  subtitleVariant?: 'default' | 'minimal';
 }
 
 // Destructure props with defaults
-const { 
-  title, 
-  subtitle, 
-  description, 
-  ctaText, 
-  ctaUrl, 
-  image, 
-  alignment = 'left', 
+const {
+  title = '',
+  subtitle = '',
+  description = '',
+  ctaText = '',
+  ctaUrl = '',
+  image,
+  alignment = 'left',
   fullBleed = false,
-  classes = "",
-  style = "",
+  classes = '',
+  style = '',
   animate = true,
-  noBottomMargin = false
+  noBottomMargin = false,
+  subtitleClass = '',
+  imagePosition = 'bottom',
+  subtitleVariant = 'default',
 } = Astro.props;
+
+// Determine if we have an image
+const hasImage = Boolean(image?.src);
 
 // Determine container classes based on props
 const containerClasses = [
-  "hero-container",
+  'hero-container',
   `hero-align--${alignment}`,
-  fullBleed ? "hero-full-bleed" : "",
-  classes
-];
+  fullBleed ? 'hero-full-bleed' : '',
+  noBottomMargin ? 'no-bottom-margin' : ''
+].filter(Boolean);
 
 // Determine if we have a CTA button
 const hasCta = ctaText && ctaUrl;
-
-// Determine if we have an image
-const hasImage = image && image.src;
 
 // Animation attributes based on animate prop
 const animationAttributes = animate ? {
@@ -168,8 +190,29 @@ const imageAnimationAttributes = animate ? {
   {...animationAttributes}
 >
   <div class="hero-content">
+    {hasImage && imagePosition === 'top' && (
+      <div class="hero-image-container">
+        <div class="hero-image-wrapper">
+          <img 
+            class="hero-image"
+            src={image.src}
+            alt={image.alt || title}
+            loading="eager"
+            {...imageAnimationAttributes}
+          />
+        </div>
+      </div>
+    )}
+    
     <div class="hero-text">
-      {subtitle && <p class="hero-subtitle" {...subtitleAnimationAttributes}>{subtitle}</p>}
+      {subtitle && (
+        <p 
+          class={`hero-subtitle ${subtitleVariant === 'minimal' ? 'minimal' : ''} ${subtitleClass}`}
+          {...subtitleAnimationAttributes}
+        >
+          {subtitle}
+        </p>
+      )}
       <h1 class="hero-title" {...titleAnimationAttributes}>{title}</h1>
       {description && <p class="hero-description" {...descriptionAnimationAttributes}>{description}</p>}
       {hasCta && (
@@ -179,7 +222,7 @@ const imageAnimationAttributes = animate ? {
       )}
     </div>
     
-    {hasImage && (
+    {hasImage && imagePosition === 'bottom' && (
       <div class="hero-image-container">
         <div class="hero-image-wrapper">
           <img 
@@ -252,6 +295,43 @@ const imageAnimationAttributes = animate ? {
     letter-spacing: 0.5px;
   }
   
+  /* Custom subtitle styling */
+  .hero-subtitle {
+    /* Base styles */
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-400);
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    
+    /* Minimal variant */
+    &.minimal {
+      font-size: 1.5rem;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+    
+    /* When custom class is applied */
+    &:not(.minimal).custom-subtitle {
+      /* Reset any default styles that might interfere */
+      all: unset;
+      display: block;
+      /* Add your custom styles here */
+      color: var(--clr-lossless-accent--brightest);
+      font-size: 1.25rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  
   .hero-title {
     font-family: var(--ff-base);
     font-weight: var(--fw-bold);
@@ -307,6 +387,12 @@ const imageAnimationAttributes = animate ? {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .hero-image-container:last-child {
+    margin-bottom: 0;
+    margin-top: 2rem;
   }
   
   .hero-image-wrapper {

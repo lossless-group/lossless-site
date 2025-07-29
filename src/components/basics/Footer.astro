@@ -20,6 +20,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import ThinGradientBleedSeparator from './separators/ThinGradientBleedSeparator.astro';
+import { getImageForPath } from '../../utils/imageMapping';
 
 // Helper to resolve JSON file paths
 const siteRoot = import.meta.env.SITE ? new URL(import.meta.env.SITE).pathname : '';
@@ -71,11 +72,14 @@ try {
 <footer class="footer-container">
   <div class="footer-left">
     <div class="footer-social-row">
-      {socialIcons.map(icon => (
-        <a href={icon.url} aria-label={icon.label} target="_blank" rel="noopener noreferrer" class="footer-social-icon">
-          <img src={icon.icon} alt={icon.label} />
-        </a>
-      ))}
+      {socialIcons.map(icon => {
+        const img = getImageForPath(icon.icon, icon.label);
+        return (
+          <a href={icon.url} aria-label={icon.label} target="_blank" rel="noopener noreferrer" class="footer-social-icon">
+            <img src={img.src} alt={img.alt} />
+          </a>
+        );
+      })}
     </div>
     <div class="footer-bottom-row">
       <div class="org-info">
@@ -135,11 +139,17 @@ try {
   flex-direction: row;
   gap: 1rem;
 }
+.footer-social-icon {
+  color: currentColor; /* Ensure color is set for currentColor to work */
+}
+
 .footer-social-icon img {
   width: 28px;
   height: 28px;
   filter: grayscale(0.2) contrast(1.1);
   transition: filter 0.2s;
+  color: inherit; /* Inherit color from parent */
+  fill: currentColor; /* Ensure SVG fills use currentColor */
 }
 .footer-social-icon:hover img {
   filter: grayscale(0) contrast(1.4);
