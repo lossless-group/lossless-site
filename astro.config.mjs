@@ -19,6 +19,8 @@ import path from 'path';
 import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
 import remarkGfm from 'remark-gfm'
+import remarkDirective from 'remark-directive';
+import { directiveComponentMap } from './src/utils/markdown/remark-directives.js';
 
 // Debug log environment
 console.log('Environment in astro.config.mjs:', {
@@ -62,6 +64,7 @@ export default defineConfig({
     remarkPlugins: [
       /** @type {any} */ (normalizeShellLangs),
       /** @type {any} */ (remarkTableOfContents),
+      /** @type {any} */ (remarkDirective), // Add remark-directive support
     ],
     remarkRehype: {
       allowDangerousHtml: true,
