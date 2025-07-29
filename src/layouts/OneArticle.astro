@@ -8,10 +8,12 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCitations from '@utils/markdown/remark-citations';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import '@styles/markdown.css';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
@@ -30,6 +32,8 @@ const { Component, title, data, content, markdownFile } = Astro.props; // Added 
 const processor = unified()
   .use(remarkParse)           // 1. Parse markdown to MDAST
   .use(remarkGfm)
+  .use(remarkDirective)       // 2. Parse directive syntax
+  .use(remarkDirectiveToComponent) // 3. Preserve directives for AstroMarkdown
   .use(remarkImages)         
   .use(remarkBacklinks)          
   .use(remarkCitations)

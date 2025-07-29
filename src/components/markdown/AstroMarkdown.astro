@@ -43,6 +43,9 @@ interface Props {
         };
         label?: string;
         meta?: string;
+        // Directive-specific properties
+        name?: string; // directive name (e.g., 'figma-embed')
+        attributes?: Record<string, any>; // directive attributes
     };
     data: {
         path: string;
@@ -84,7 +87,9 @@ const handled_types = [
     "tableOfContents",
     "imageGallery",
     "toolingGallery",
-    "thematicBreak" // Add support for horizontal rules
+    "thematicBreak", 
+    "leafDirective", 
+    "containerDirective" 
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -1254,6 +1259,99 @@ if (DEBUG_AST) {
 {(node.type === "text") && 
     <span>{node.value}</span>
 }
+
+{/* Handle directive nodes from remark-directive */}
+{(node.type === "leafDirective" || node.type === "containerDirective") && (() => {
+  const directiveName = node.name;
+  const props = node.attributes || {};
+  
+  if (directiveName === 'figma-embed') {
+    const figmaUrl = props.src || props.url || '';
+    const width = props.width || '100%';
+    const height = props.height || '500px';
+    const authUser = props['auth-user'] || '';
+    
+    return (
+      <>
+        <div class="figma-embed-container" data-directive="figma-embed">
+          <div class="figma-embed-wrapper">
+            <iframe
+              src={`https://www.figma.com/embed?embed_host=lossless.group&url=${encodeURIComponent(figmaUrl)}&initial_view=design&scaling=contain&hide_ui=true`}
+              allowfullscreen
+              loading="lazy"
+              title="Figma embed"
+              style={`border: none; width: ${width}; height: ${height}; border-radius: 8px; max-width: 100%;`}
+            ></iframe>
+          </div>
+          <div class="figma-embed-footer">
+            <a href={figmaUrl} target="_blank" rel="noopener">Open in Figma →</a>
+          </div>
+        </div>
+        <style>
+          .figma-embed-container {
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          
+          .figma-embed-wrapper {
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .figma-embed-wrapper iframe {
+            display: block;
+            border: none;
+          }
+          
+          .figma-embed-footer {
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: right;
+          }
+          
+          .figma-embed-footer a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+          }
+          
+          .figma-embed-footer a:hover {
+            color: #8b5cf6;
+          }
+          
+          @media (max-width: 768px) {
+            .figma-embed-container {
+              margin: 1rem 0;
+            }
+            
+            .figma-embed-wrapper iframe {
+              height: 400px !important;
+            }
+          }
+        </style>
+      </>
+    );
+  }
+  
+  // Handle other directive types or show debug info
+  return (
+    <div class="unknown-directive" data-directive={directiveName}>
+      <p>Unknown directive: <code>{directiveName}</code></p>
+      <details>
+        <summary>Debug Info</summary>
+        <pre>{JSON.stringify({ name: directiveName, attributes: props }, null, 2)}</pre>
+      </details>
+    </div>
+  );
+})()}
 
 {other_type && 
     <div class={`unhandled-${node.type}`}>

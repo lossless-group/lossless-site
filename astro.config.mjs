@@ -20,7 +20,7 @@ import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
 import remarkGfm from 'remark-gfm'
 import remarkDirective from 'remark-directive';
-import { directiveComponentMap, remarkDirectiveToComponent } from './src/utils/markdown/remark-directives.js';
+import { directiveComponentMap, remarkDirectiveToComponent } from './src/utils/markdown/remark-directives.ts';
 
 // Debug log environment
 console.log('Environment in astro.config.mjs:', {

@@ -139,71 +139,30 @@ export function remarkDirectiveTransform() {
 }
 
 /**
- * Simple approach - transform directives to raw HTML component calls
- * Since we're using rehype-raw, we can inject actual component HTML
- * The Figma API integration will happen in the Astro component itself
+ * Preserve directive nodes for AstroMarkdown.astro to handle
+ * This plugin does NOT generate HTML - it just ensures directive nodes are preserved in the AST
+ * so that AstroMarkdown.astro can handle them properly
  */
 export function remarkDirectiveToComponent() {
   return (tree: any) => {
     visit(tree, (node: any) => {
       if (node.type === 'leafDirective' || node.type === 'containerDirective') {
         const directiveName = node.name;
-        const componentPath = getComponentForDirective(directiveName);
         
-        if (componentPath && directiveName === 'figma-embed') {
-          // Extract props from directive attributes
-          const props = node.attributes || {};
-          
-          // Convert props to component attributes, properly escaping values
-          const propsString = Object.entries(props)
-            .map(([key, value]) => {
-              const escapedValue = String(value)
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-              return `${key}="${escapedValue}"`;
-            })
-            .join(' ');
-          
-          // Create enhanced HTML with better styling and metadata support
-          node.type = 'html';
-          node.value = `
-<!-- Figma Embed Directive -->
-<div class="directive-component figma-embed" data-directive="${directiveName}">
-  <iframe
-    src="https://www.figma.com/embed?embed_host=lossless.group&url=${encodeURIComponent(props.src || '')}&initial_view=design&scaling=contain&hide_ui=true"
-    allowfullscreen
-    loading="lazy"
-    title="Figma embed"
-    style="border: none; width: ${props.width || '100%'}; height: ${props.height || '500px'}; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); max-width: 100%;"
-  ></iframe>
-  <div class="figma-embed-footer" style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem; text-align: right;">
-    <a href="${props.src || ''}" target="_blank" rel="noopener" style="color: #6366f1; text-decoration: none;">Open in Figma →</a>
-  </div>
-</div>
-`;
-        } else if (componentPath) {
-          // Handle other directive types with simple processing
-          const propsString = Object.entries(props || {})
-            .map(([key, value]) => {
-              const escapedValue = String(value)
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-              return `${key}="${escapedValue}"`;
-            })
-            .join(' ');
-          
-          node.type = 'html';
-          node.value = `<!-- Unknown directive component: ${directiveName} -->`;
+        // Validate that this is a supported directive
+        if (isSupportedDirective(directiveName)) {
+          // Leave the node as-is for AstroMarkdown.astro to handle
+          // Just add some debug info if needed
+          if (process.env.DEBUG_AST === 'true') {
+            console.log(`[remarkDirectiveToComponent] Preserving directive: ${directiveName}`);
+          }
         } else {
-          // Unknown directive - leave as comment for debugging
-          node.type = 'html';
-          node.value = `<!-- Unknown directive: ${directiveName} -->`;
-          console.warn(`Unknown directive: ${directiveName}`);
+          // For unsupported directives, log a warning but preserve the node
+          console.warn(`[remarkDirectiveToComponent] Unknown directive: ${directiveName}`);
         }
+        
+        // Always preserve the original directive node - don't transform to HTML
+        // AstroMarkdown.astro will handle the actual rendering
       }
     });
   };
