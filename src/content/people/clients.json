@@ -64,6 +64,19 @@
       "stealth-logo": "/visuals/appIcon__Avalanche.svg",
       "stealth-description": "Backing founders pursuing their life's work in the middle of a market avalanche.",
       "stealth-passcode": "avalanche-2025"
+    }, 
+    {
+      "id": "flourish",
+      "name": "Flourish Schools",
+      "logo": "/visuals/appIcon__Flourish.png",
+      "description": "Reimagined Schools for the Age of AI",
+      "industry": "Reimagined Schools",
+      "engagement": "2022-Present",
+      "website": "https://flourishschools.com",
+      "stealth-name": "ESA Eligible Full Stack Schools",
+      "stealth-logo": "/visuals/appIcon__Flourish.png",
+      "stealth-description": "ESA programs are creating an open space for innovators to Reimagine School outside of the confines of the Charter ",
+      "stealth-passcode": "flourish-2025"
     }
   ]
 }
