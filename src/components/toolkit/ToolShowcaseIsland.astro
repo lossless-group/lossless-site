@@ -1,131 +1,86 @@
 ---
 /**
  * ToolShowcaseIsland.astro
- * Server island component that fetches tool data and renders Svelte carousel
+ * Server island component for rendering tool carousels from backlink lists
  * Used by the ::tool-showcase directive in markdown
  */
 
 import { getCollection } from 'astro:content';
-import ToolShowcaseCarousel from './ToolShowcaseCarousel.svelte';
+import ToolShowcaseCarousel from './ToolShowcaseCarousel.astro';
 
 interface Props {
   toolPaths: string[];
 }
 
+// Define the shape of tool data from the collection
+type ToolData = {
+  id: string;
+  data: {
+    title?: string;
+    og_image?: string;
+    image?: string;
+    og_screenshot?: string;
+    og_screenshot_url?: string;
+    og_favicon?: string;
+    favicon?: string;
+    og_title?: string;
+    url?: string;
+    og_description?: string;
+    description_site_cp?: string;
+    tags?: string[] | string;
+    [key: string]: unknown; // Allow for any additional properties
+  };
+};
+
 const { toolPaths } = Astro.props;
 
-// Fetch from all available collections that might contain tools
-const [verticalToolkits, tooling] = await Promise.all([
-  getCollection('vertical-toolkits').catch(() => []),
-  getCollection('tooling').catch(() => [])
-]);
+// Get all tools from the content collections
+const allTools = (await getCollection('tooling')) as unknown as ToolData[];
 
-// Combine all tools from different collections
-const allTools = [...verticalToolkits, ...tooling];
-
-// Match the toolPaths to actual collection entries
-const matchedTools = toolPaths.map(toolPath => {
-  // Find the tool by matching the path/ID across all collections
-  const tool = allTools.find(entry => {
-    // Remove directory separators and convert to lowercase for matching
-    const entryId = entry.id.toLowerCase().replace(/\\/g, '/');
-    const searchPath = toolPath.toLowerCase().replace(/\\/g, '/');
+// Find tools that match the provided paths
+const matchedTools = toolPaths
+  .map(path => {
+    // Try to find exact matches first
+    const exactMatch = allTools.find(tool => tool.id.endsWith(path));
+    if (exactMatch) return exactMatch;
     
-    // Try exact match first, then partial matches
-    return entryId === searchPath || 
-           entryId.endsWith('/' + searchPath) ||
-           entryId.includes(searchPath) ||
-           searchPath.includes(entryId) ||
-           entry.data.title?.toLowerCase().includes(searchPath.split('/').pop() || '') ||
-           // Also try matching the last part of the path (filename)
-           entryId.split('/').pop() === searchPath.split('/').pop();
-  });
-  
-  return { path: toolPath, tool };
-}).filter(item => item.tool); // Only include matched tools
+    // Fallback to partial matches in title or ID
+    return allTools.find(tool => {
+      const title = tool.data?.title || '';
+      return tool.id.includes(path) || 
+        (typeof title === 'string' && title.toLowerCase().includes(path.toLowerCase()));
+    });
+  })
+  .filter((tool): tool is ToolData => Boolean(tool));
 
-// Transform the data for the Svelte component
-const toolsData = matchedTools.map(({ tool }) => ({
-  title: tool.data.title,
-  og_image: tool.data.og_image,
-  image: tool.data.image,
-  og_screenshot: tool.data.og_screenshot,
-  og_screenshot_url: tool.data.og_screenshot_url,
-  og_favicon: tool.data.og_favicon,
-  favicon: tool.data.favicon,
-  og_title: tool.data.og_title,
-  url: tool.data.url,
-  og_description: tool.data.og_description,
-  description_site_cp: tool.data.description_site_cp,
-}));
+// Transform the data to match the expected format
+const tools = matchedTools.map(tool => {
+  const data = tool.data || {};
+  
+  // Handle tags - ensure it's always an array
+  let tags: string[] = [];
+  if (Array.isArray(data.tags)) {
+    tags = data.tags;
+  } else if (data.tags) {
+    tags = [String(data.tags)];
+  }
+  
+  return {
+    title: typeof data.title === 'string' ? data.title : '',
+    og_image: typeof data.og_image === 'string' ? data.og_image : undefined,
+    image: typeof data.image === 'string' ? data.image : undefined,
+    og_screenshot: typeof data.og_screenshot === 'string' ? data.og_screenshot : undefined,
+    og_screenshot_url: typeof data.og_screenshot_url === 'string' ? data.og_screenshot_url : undefined,
+    og_favicon: typeof data.og_favicon === 'string' ? data.og_favicon : undefined,
+    favicon: typeof data.favicon === 'string' ? data.favicon : undefined,
+    og_title: typeof data.og_title === 'string' ? data.og_title : undefined,
+    url: typeof data.url === 'string' ? data.url : undefined,
+    og_description: typeof data.og_description === 'string' ? data.og_description : undefined,
+    description_site_cp: typeof data.description_site_cp === 'string' ? data.description_site_cp : undefined,
+    tags: tags,
+    inCarousel: true
+  };
+});
 ---
 
-{toolsData.length > 0 ? (
-  <ToolShowcaseCarousel tools={toolsData} client:load />
-) : (
-  <div class="tool-showcase-error">
-    <h4>Tool Showcase Error</h4>
-    <p>No matching tools found for the specified paths:</p>
-    <ul>
-      {toolPaths.map(path => <li key={path}>{path}</li>)}
-    </ul>
-    <details>
-      <summary>Debug Information</summary>
-      <div class="debug-info">
-        <p><strong>Searched paths:</strong> {toolPaths.length}</p>
-        <p><strong>Available tools:</strong> {allTools.length} (vertical-toolkits: {verticalToolkits.length}, tooling: {tooling.length})</p>
-        <p><strong>Sample tool IDs:</strong></p>
-        <ul>
-          {allTools.slice(0, 10).map(tool => (
-            <li key={tool.id}>{tool.id} ({tool.data.title})</li>
-          ))}
-        </ul>
-      </div>
-    </details>
-  </div>
-)}
-
-<style>
-  .tool-showcase-error {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: rgba(255, 165, 0, 0.1);
-    border: 1px solid rgba(255, 165, 0, 0.3);
-    border-radius: 12px;
-    color: var(--clr-lossless-primary-light);
-  }
-
-  .tool-showcase-error h4 {
-    color: #ffa500;
-    margin: 0 0 1rem 0;
-    font-size: 1.25rem;
-  }
-
-  .tool-showcase-error ul {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-  }
-
-  .tool-showcase-error li {
-    margin: 0.25rem 0;
-    font-family: monospace;
-    font-size: 0.9rem;
-  }
-
-  .debug-info {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    font-size: 0.85rem;
-  }
-
-  .debug-info p {
-    margin: 0.5rem 0;
-  }
-
-  .debug-info ul {
-    max-height: 150px;
-    overflow-y: auto;
-  }
-</style>
+<ToolShowcaseCarousel tools={tools} />

@@ -113,7 +113,11 @@ const companyDescription = og_description || description_site_cp;
   /* ===== Tool Showcase Wide Responsive Styles ===== */
   
   .tool-showcase-wide {
+    --item-padding: 1rem;
     position: relative;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     width: 100%;
     margin: clamp(1rem, 2vw, 2rem) 0;
     border-radius: clamp(8px, 1vw, 12px);
@@ -216,28 +220,32 @@ const companyDescription = og_description || description_site_cp;
     flex: 1;
     min-width: 0;
     display: flex;
-    gap: clamp(1.5rem, 3vw, 3rem);
+    gap: clamp(1rem, 2vw, 2rem);
     align-items: flex-start;
+    width: 100%;
   }
 
   .company-left {
-    flex: 0 0 auto;
+    flex: 0 0 40%;
     min-width: 0;
+    max-width: 45%;
   }
 
   .company-right {
     flex: 1;
     min-width: 0;
-    max-width: clamp(40%, 45vw, 45%);
+    max-width: 55%;
+    align-self: center;
   }
 
   .company-name {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    font-weight: 600;
-    color: white;
-    margin: 0 0 clamp(0.125rem, 0.5vw, 0.25rem) 0;
-    line-height: 1.2;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem) !important;
+    font-weight: 600 !important;
+    color: white !important;
+    margin: 0 0 0.25rem 0 !important;
+    line-height: 1.3 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    word-break: break-word;
   }
 
   .company-url {
@@ -256,12 +264,15 @@ const companyDescription = og_description || description_site_cp;
   }
 
   .company-description {
-    font-size: clamp(0.8rem, 1.25vw, 0.9rem);
-    color: var(--clr-lossless-primary-light);
-    opacity: 0.9;
-    line-height: 1.4;
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
+    color: rgba(255, 255, 255, 0.9);
     margin: 0;
-    max-width: none;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Carousel chevrons */

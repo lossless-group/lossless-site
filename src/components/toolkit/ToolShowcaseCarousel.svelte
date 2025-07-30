@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   
-  export let tools: Array<{
+  interface ToolData {
     title: string;
     og_image?: string;
     image?: string;
@@ -13,7 +13,11 @@
     url?: string;
     og_description?: string;
     description_site_cp?: string;
-  }> = [];
+    tags?: string[];
+    inCarousel?: boolean;
+  }
+  
+  export let tools: ToolData[] = [];
 
   let currentSlide = 0;
   let carouselTrack: HTMLElement;
@@ -113,6 +117,7 @@
                     alt="{getDisplayTitle(tool)} banner"
                     class="banner-image"
                     loading="lazy"
+                    style="width: 100%; height: 100%; object-fit: cover;"
                   />
                   <div class="banner-overlay"></div>
                 </div>
@@ -130,33 +135,20 @@
                   </svg>
                 </button>
                 
-                <div class="company-info">
-                  {#if getCompanyIcon(tool)}
-                    <div class="company-icon">
-                      <img 
-                        src={getCompanyIcon(tool)} 
-                        alt="{getDisplayTitle(tool)} logo"
-                        class="icon-image"
-                        loading="lazy"
-                      />
-                    </div>
-                  {/if}
-                  
-                  <div class="company-details">
-                    <div class="company-left">
-                      <h3 class="company-name">{getDisplayTitle(tool)}</h3>
-                      {#if tool.url}
-                        <a href={tool.url} target="_blank" rel="noopener noreferrer" class="company-url">
-                          {cleanUrl(tool.url)}
-                        </a>
-                      {/if}
-                    </div>
-                    {#if getDescription(tool)}
-                      <div class="company-right">
-                        <p class="company-description">{getDescription(tool)}</p>
-                      </div>
+                <div class="company-details">
+                  <div class="company-left">
+                    <h3 class="company-name">{getDisplayTitle(tool)}</h3>
+                    {#if tool.url}
+                      <a href={tool.url} target="_blank" rel="noopener noreferrer" class="company-url">
+                        {cleanUrl(tool.url)}
+                      </a>
                     {/if}
                   </div>
+                  {#if tool.og_description}
+                    <div class="company-right">
+                      <p class="company-description">{tool.og_description}</p>
+                    </div>
+                  {/if}
                 </div>
                 
                 <button 
@@ -197,26 +189,36 @@
 
 <style>
   .tool-showcase-carousel {
+    --carousel-padding: 1rem;
     position: relative;
     margin: 2rem 0;
     width: 100%;
+    max-width: 100%;
+    contain: content;
   }
 
   .carousel-container {
     position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 8px;
   }
 
   .carousel-track {
     display: flex;
     transition: transform 0.3s ease;
+    height: 100%;
     width: 100%;
   }
 
   .carousel-slide {
     flex: 0 0 100%;
     width: 100%;
+    height: 100%;
+    padding: 0 var(--carousel-padding);
+    box-sizing: border-box;
   }
 
   /* Tool showcase styling (copied from ToolShowcaseItem--Wide-Responsive) */
@@ -280,41 +282,6 @@
     backdrop-filter: blur(15px);
     border-top: none;
     border-radius: 0 0 12px 12px;
-  }
-
-  .company-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 1;
-  }
-
-  .company-icon {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-  }
-
-  .company-icon:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--clr-lossless-accent--brightest);
-    transform: translateY(-2px);
-  }
-
-  .icon-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
   }
 
   .company-details {
@@ -434,10 +401,7 @@
       padding: 0.75rem;
     }
 
-    .company-icon {
-      width: 32px;
-      height: 32px;
-    }
+
 
     .company-name {
       font-size: 1.1rem;
@@ -451,9 +415,7 @@
       font-size: 0.85rem;
     }
 
-    .company-info {
-      gap: 0.5rem;
-    }
+
 
     .company-details {
       flex-direction: column;
