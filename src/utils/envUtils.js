@@ -69,7 +69,7 @@ export const DEPLOY_ENV = envVars.DEPLOY_ENV;
 export const isProduction = NODE_ENV === 'production';
 export const isDevelopment = !isProduction;
 export const contentBasePath = getContentBasePath();
-export const DEBUG_AST = true; // toBool(envVars.DEBUG_AST); // Temporarily enabled for debugging
+export const DEBUG_AST = toBool(envVars.DEBUG_AST);
 export const DEBUG_ARTICLE = toBool(envVars.DEBUG_ARTICLE);
 export const DEBUG_CITATIONS = toBool(envVars.DEBUG_CITATIONS)
 export const DEBUG_BACKLINKS = toBool(envVars.DEBUG_BACKLINKS)

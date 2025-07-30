@@ -1,52 +1,44 @@
 ---
 /**
- * /toolkit/[...slug].astro — Dynamic Route for Tooling Collection Content
+ * /toolkit/vertical/[...slug].astro — Dynamic Route for Vertical Toolkits Collection Content
  *
- * Modeled after /more-about/[...slug].astro and /vibe-with/[collection]/[...slug].astro
+ * Modeled after /toolkit/[...slug].astro
  * 
- * - Fetches content from the 'tooling' collection (from the 'tooling' directory)
- * - Uses the relative path from the tooling directory as the slug
+ * - Fetches content from the 'vertical-toolkits' collection
+ * - Uses the relative path from the vertical-toolkits directory as the slug
  * - Generates static paths for all entries
  * - Renders content using Layout, OneArticle, and OneArticleOnPage components
- * - All logic is thoroughly commented and follows project conventions
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { getReferenceSlug } from '@utils/slugify';
-import { DEBUG_TOOLING } from '@utils/envUtils';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
 
-
 export async function getStaticPaths() {
-
-  // Get all entries from the tooling collection
-  const toolingEntries = await getCollection('tooling');
+  // Get all entries from the vertical-toolkits collection
+  const verticalToolkitsEntries = await getCollection('vertical-toolkits');
   
   // Debug: Log the number of entries found
-  console.log(`Found ${toolingEntries.length} entries in the tooling collection`);
+  console.log(`Found ${verticalToolkitsEntries.length} entries in the vertical-toolkits collection`);
   
-  // Process tooling entries to create static paths
-  return toolingEntries.map(entry => {
-    const generatedSlug = getReferenceSlug(entry.id)
-    if (DEBUG_TOOLING) {
-      console.log(`Generated path: /toolkit/${generatedSlug}`);
-    }
+  // Process vertical-toolkits entries to create static paths
+  return verticalToolkitsEntries.map(entry => {
+    // Log the entry ID to debug
+    console.log(`Entry ID: ${entry.id}`);
+    const generatedSlug = getReferenceSlug(entry.id);
+    console.log(`Generated vertical-toolkits path: /toolkit/vertical/${generatedSlug}`);
 
     return {
       params: { slug: generatedSlug },
       props: {
         entry,
-        contentType: 'tooling'
+        contentType: 'vertical-toolkits'
       }
     };
-  }).filter(path => {
-    // Exclude any paths that would conflict with /toolkit/vertical/*
-    // This ensures /toolkit/vertical/* routes go to the vertical-specific page
-    return !path.params.slug.startsWith('vertical/');
   });
 }
 
@@ -62,7 +54,7 @@ interface Props {
       [key: string]: any;
     }
   };
-  contentType: 'tooling';
+  contentType: 'vertical-toolkits';
 }
 
 // Destructure only what is sent in props

@@ -338,6 +338,36 @@ const toolCollection = defineCollection({
   }))
 });
 
+const verticalToolkitsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md", 
+    base: resolveContentPath("vertical-toolkits"),
+    // Custom ID generation to preserve the full directory path
+    generateId: ({ entry }) => {
+      // entry is the relative path from base, e.g., "FinTech/Alviere.md"
+      // We want to preserve the directory structure but lowercase it for consistency
+      // Remove the .md extension and convert to lowercase
+      return entry.replace(/\.md$/, '').toLowerCase();
+    }
+  }),
+  schema: z.object({}).passthrough().transform((data, context) => {
+    // Get the filename for title generation
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Generate title from filename if not provided
+    const displayTitle = data.title || filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    return {
+      ...data,
+      title: displayTitle,
+      // Ensure tags is always an array, even if null/undefined in frontmatter
+      tags: Array.isArray(data.tags) ? data.tags
+        : data.tags ? [data.tags]
+        : []
+    };
+  })
+});
+
 // ***
 // Open: Specs Collection Definition
 // Type: Content Collection
@@ -453,6 +483,7 @@ export const paths = {
   'reports': resolveContentPath('reports'),
   'talks': resolveContentPath('lost-in-public/talks'),
   'tooling': resolveContentPath('tooling'),
+  'vertical-toolkits': resolveContentPath('vertical-toolkits'),
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
   'reminders': resolveContentPath('lost-in-public/reminders'),
@@ -479,6 +510,7 @@ export const collections = {
   'reports': reportCollection,
   'pages': pagesCollection,
   'tooling': toolCollection,
+  'vertical-toolkits': verticalToolkitsCollection,
   'slides': slidesCollection,
   'prompts': promptsCollection,
   'reminders': remindersCollection,

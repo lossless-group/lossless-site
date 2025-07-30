@@ -58,6 +58,10 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'toolkit'
   },
   {
+    contentPath: 'vertical-toolkits',
+    routePath: 'toolkit/vertical'
+  },
+  {
     contentPath: 'essays',
     routePath: 'read/essays'
   },
@@ -165,6 +169,11 @@ function collectAllMappingPaths(): RouteMapping[] {
     const root = mapping.baseDir 
       ? path.resolve(contentBasePath, mapping.baseDir, mapping.contentPath)
       : path.resolve(contentBasePath, mapping.contentPath);
+
+    // Skip if the directory doesn't exist
+    if (!existsSync(root)) {
+      continue;
+    }
 
     function walk(currentPath: string, relativePath = '') {
       const entries = readdirSync(currentPath);
