@@ -342,6 +342,29 @@ const toolCollection = defineCollection({
 // Open: Specs Collection Definition
 // Type: Content Collection
 
+const marketMapsCollection = defineCollection({
+  // Use the full path to the market maps content
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/market-maps")}),
+  schema: z.object({
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    banner_image: z.string().optional(),
+    portrait_image: z.string().optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    lede: z.string().optional(),
+    publish: z.boolean().default(true).optional(),
+    tags: z.union([z.string(), z.array(z.string())]).optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+  }).passthrough().transform((data) => ({
+    ...data,
+    // Ensure tags is always an array, even if null/undefined in frontmatter
+    tags: Array.isArray(data.tags) ? data.tags
+      : data.tags ? [data.tags]
+      : []
+  }))
+});
+
 const specsCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("specs")}),
   schema: z.object({}).passthrough().transform((data) => ({
@@ -433,6 +456,7 @@ export const paths = {
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
   'reminders': resolveContentPath('lost-in-public/reminders'),
+  'market-maps': resolveContentPath('market-maps'),
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),
@@ -446,6 +470,7 @@ export const paths = {
 export const collections = {
   'cards': cardCollection,
   'concepts': conceptsCollection,
+  'market-maps': marketMapsCollection,
   'essays': essaysCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,

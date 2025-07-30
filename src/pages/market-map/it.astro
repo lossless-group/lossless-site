@@ -1,0 +1,101 @@
+---
+// Market Maps collection page
+// Defines how market map entries should be transformed and rendered
+
+import { getCollection } from 'astro:content';
+import MagazineIndexLayout from '@layouts/MagazineIndexLayout.astro'; 
+import { slugify } from '../../utils/slugify'; 
+import { collectionPublishingDefaults } from '../../content.config'; 
+import { ROUTE_PATHS } from '../../utils/routing/routeManager';
+import Hero from '../../components/basics/Hero.astro';
+import AnimationWrapper from '../../components/basics/AnimationWrapper.astro';
+
+// Collection-specific configuration
+const collectionName = 'market-maps';
+const collectionConfig = {
+  title: 'Market Maps',
+  subtitle: 'Industry Landscapes & Analyses',
+  description: 'Comprehensive market maps and analyses of various industries and sectors.'
+};
+
+// Fetch and process market map entries
+const allEntriesUnfiltered = await getCollection(collectionName);
+
+// Apply publishing filter logic
+const defaultPublishBehavior = collectionPublishingDefaults[collectionName]?.publishByDefault ?? true;
+
+const allEntries = allEntriesUnfiltered.filter((entry) => {
+  const itemPublishFlag = (entry.data as any).publish; 
+  
+  if (defaultPublishBehavior === true) {
+    return itemPublishFlag !== false;
+  }
+  return itemPublishFlag === true;
+});
+
+// Transform entries with market map specific logic
+const articles = allEntries.map((entry) => {
+  const data = entry.data as any;
+  
+  function normalizeToArray(singularKey: string, pluralKey: string): string[] {
+    const singularValue = data?.[singularKey];
+    const pluralValue = data?.[pluralKey];
+    
+    const combined = [singularValue, pluralValue].filter(Boolean).flat();
+    return combined.length > 0 ? combined : [];
+  }
+  
+  const customSlug = data?.slug || slugify(data?.title || entry.id);
+  
+  let dateValue = data?.date_modified;
+  if (dateValue instanceof Date) {
+    dateValue = dateValue.toISOString().split('T')[0];
+  }
+  
+  // For market maps, the slug should be the full path including the base
+  const fullSlug = `${ROUTE_PATHS.MARKET_MAP.FOR}/${customSlug}`.replace(/\/+/g, '/');
+  
+  return {
+    id: entry.id, 
+    title: data?.title || 'Untitled',
+    slug: fullSlug, // Use the full path as the slug
+    banner_image: data?.banner_image, 
+    portrait_image: data?.portrait_image, 
+    imageAlt: `Image for ${data?.title || 'Untitled'}`,
+    date: dateValue,
+    lede: data?.lede || '', 
+    tags: normalizeToArray('tag', 'tags'),
+    authors: normalizeToArray('author', 'authors'),
+    categories: normalizeToArray('category', 'categories'),
+  };
+}).sort((a, b) => {
+  // Sort by date descending (most recent first)
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+  
+  const dateA = new Date(a.date);
+  const dateB = new Date(b.date);
+  return dateB.getTime() - dateA.getTime();
+});
+---
+
+<MagazineIndexLayout
+  title={collectionConfig.title} 
+  description={collectionConfig.description}
+  articles={articles}
+  collectionDisplayName={collectionConfig.title} 
+>
+  <div slot="hero-content" style="position: relative;">
+    <AnimationWrapper>
+      <Hero
+        title={collectionConfig.title}
+        subtitle={collectionConfig.subtitle}
+        description={collectionConfig.description}
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+      />
+    </AnimationWrapper>
+  </div>
+</MagazineIndexLayout>

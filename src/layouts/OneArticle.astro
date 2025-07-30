@@ -46,9 +46,9 @@ const mdast = processor.parse(content || '');
 const transformedMdast = await processor.run(mdast);
 
 // Debug output to see AST structure
-markdownDebugger.log('OneArticle.astro Debug');
-markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
-markdownDebugger.verbose('MDAST structure:', transformedMdast);
+// markdownDebugger.log('OneArticle.astro Debug');
+// markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
+// markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
 // Helper function to normalize author data, adapted from ChangelogLayout.astro
 const normalizeDataWithAuthors = (pageData) => {

@@ -45,16 +45,15 @@ const {
   description,
   imgWidth,
   imgHeight,
-  class: customClasses = '', // Ensure default empty string
-  collection = 'issue-resolution', // Default to 'issue-resolution' if not provided
+  class: customClasses = '', 
+  collection = 'issue-resolution', 
   ...attrs 
 } = Astro.props as Props;
 
-// Handle both full paths and just the slug
-const slug = slugProp.startsWith('/') ? slugProp : `/${slugProp}`;
-const href = slug.startsWith('/learn-with/') 
-  ? slug 
-  : `/learn-with/${collection}${slug}`;
+import { ROUTE_PATHS } from '@utils/routing/routeManager';
+
+// Use the slug as-is since it should already contain the full path
+const href = slugProp.startsWith('/') ? slugProp : `/${slugProp}`;
 
 // Format the date consistently if it exists
 // Ensure date is treated as Date object for formatting

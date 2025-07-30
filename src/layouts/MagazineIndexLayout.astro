@@ -13,13 +13,15 @@ export interface Props {
   title: string; // Page title, passed to main Layout
   description?: string; // Optional page description
   collectionDisplayName?: string; // Optional H1 heading for the collection
+  basePath?: string; // Optional base path for article links
 }
 
 const { 
   articles = [], 
   title, 
   description,
-  collectionDisplayName
+  collectionDisplayName,
+  basePath
 } = Astro.props as Props; // Cast Astro.props to our defined Props interface
 ---
 <Layout title={title} description={description}>
@@ -39,7 +41,7 @@ const {
     )} -->
 
     {articles.length > 0 ? (
-      <ArticleGrid articles={articles} />
+      <ArticleGrid articles={articles} basePath={basePath} />
     ) : (
       <div class="magazine-empty">No articles found in this collection.</div>
     )}
