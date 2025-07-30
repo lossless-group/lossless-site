@@ -456,7 +456,7 @@ export const paths = {
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
   'reminders': resolveContentPath('lost-in-public/reminders'),
-  'market-maps': resolveContentPath('market-maps'),
+  'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),

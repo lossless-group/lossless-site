@@ -161,7 +161,10 @@ function collectAllMappingPaths(): RouteMapping[] {
   const all: RouteMapping[] = [];
 
   for (const mapping of [...customRouteMappings, ...defaultRouteMappings]) {
-    const root = path.resolve(contentBasePath, mapping.contentPath);
+    // Consider baseDir when resolving the root path
+    const root = mapping.baseDir 
+      ? path.resolve(contentBasePath, mapping.baseDir, mapping.contentPath)
+      : path.resolve(contentBasePath, mapping.contentPath);
 
     function walk(currentPath: string, relativePath = '') {
       const entries = readdirSync(currentPath);

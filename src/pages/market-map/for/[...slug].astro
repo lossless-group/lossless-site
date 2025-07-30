@@ -7,8 +7,8 @@ export const prerender = true;
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { slugify } from '@utils/slugify';
 import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import type { Root } from 'mdast';
 
 export async function getStaticPaths() {
   const collectionName = 'market-maps';
@@ -108,12 +108,22 @@ const articleData = {
 
 // Set the page title and description
 const pageTitle = `${articleData.title} | The Lossless Group`;
+
+// Data for the OneArticle component - include all entry data
+const contentDataForOneArticle = {
+  ...entry.data, // Include ALL the original entry data
+  path: Astro.url.pathname,
+  id: entry.id,
+  collection: collection,
+};
 ---
 
-<Layout title={pageTitle} description={articleData.lede}>
-  <OneArticleOnPage 
-    data={articleData}
-    effectiveHeading={articleData.title}
-    content={entry.body}
+<Layout title={pageTitle} description={articleData.lede} frontmatter={entry.data}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body} {/* Pass raw Markdown body */}
+    markdownFile={entry.id}
+    data={contentDataForOneArticle}
+    title={articleData.title}
   />
 </Layout>
