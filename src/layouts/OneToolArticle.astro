@@ -87,14 +87,7 @@ const normalizedData = normalizeDataWithAuthors(data);
   {/* Company Showcase - prominently display the company */}
   <CompanyShowcase 
     title={title}
-    og_image={data.og_image}
-    image={data.image}
-    og_screenshot={data.og_screenshot}
-    og_screenshot_url={data.og_screenshot_url}
-    og_favicon={data.og_favicon}
-    favicon={data.favicon}
-    og_title={data.og_title}
-    url={data.url}
+    {...data}
   />
   
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}

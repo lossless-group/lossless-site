@@ -79,7 +79,7 @@ const contentData = {
     Component={OneArticleOnPage}
     content={entry.body}
     markdownFile={entry.id}
-    data={contentData}
+    data={{...contentData, ...entry.data}}
     title={entry.data.title}
   />
 </Layout>
