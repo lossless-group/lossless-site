@@ -107,6 +107,9 @@ importers:
       remark-definition-list:
         specifier: ^2.0.0
         version: 2.0.0
+      remark-directive:
+        specifier: github:lossless-group/remark-directive
+        version: https://codeload.github.com/lossless-group/remark-directive/tar.gz/23b8f416da165b6ddaa4c5e7e82addaf6dcb96a9
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
@@ -2908,6 +2911,9 @@ packages:
   mdast-util-definitions@6.0.0:
     resolution: {integrity: sha512-scTllyX6pnYNZH/AIp/0ePz6s4cZtARxImwoPJ7kS42n+MnVsI4XbnG6d4ibehRIldYMWM2LD7ImQblVhUejVQ==}
 
+  mdast-util-directive@3.1.0:
+    resolution: {integrity: sha512-I3fNFt+DHmpWCYAT7quoM6lHf9wuqtI+oCOfvILnoicNIqjh5E3dEJWiXuYME2gNe8vl1iMQwyUHa7bgFmak6Q==}
+
   mdast-util-find-and-replace@3.0.2:
     resolution: {integrity: sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg==}
 
@@ -3005,6 +3011,9 @@ packages:
 
   micromark-extension-definition-list@2.0.1:
     resolution: {integrity: sha512-lQSkVTWNR0f9qzUbM4p0chJSecIRYvZBjnI+cWqN0k2zDSvzpduGJifWJj4SpCWF4TlpNV9amCF8Y1VEXdJubQ==}
+
+  micromark-extension-directive@4.0.0:
+    resolution: {integrity: sha512-/C2nqVmXXmiseSSuCdItCMho7ybwwop6RrrRPk0KbOHW21JKoCldC+8rFOaundDoRBUWBnJJcxeA/Kvi34WQXg==}
 
   micromark-extension-gfm-autolink-literal@2.1.0:
     resolution: {integrity: sha512-oOg7knzhicgQ3t4QCjCWgTmfNhvQbDDnJeVu9v81r7NltNCVmhPy1fJRX27pISafdjL+SVc4d3l48Gb6pbRypw==}
@@ -3580,6 +3589,10 @@ packages:
 
   remark-definition-list@2.0.0:
     resolution: {integrity: sha512-OOJ0zUrfUGITUNxOBnsipyFUjqq1m4AgYOqQk10jDXyz+RoODJL3qYvRn8qzYQDzRnz1wlCP3dbDEOpl05LlQw==}
+
+  remark-directive@https://codeload.github.com/lossless-group/remark-directive/tar.gz/23b8f416da165b6ddaa4c5e7e82addaf6dcb96a9:
+    resolution: {tarball: https://codeload.github.com/lossless-group/remark-directive/tar.gz/23b8f416da165b6ddaa4c5e7e82addaf6dcb96a9}
+    version: 4.0.0
 
   remark-gfm@4.0.1:
     resolution: {integrity: sha512-1quofZ2RQ9EWdeN34S79+KExV1764+wCUGop5CPL1WGdD0ocPpu91lzPGbwWMECpEpd42kJGQwzRfyov9j4yNg==}
@@ -7233,6 +7246,20 @@ snapshots:
       '@types/unist': 3.0.3
       unist-util-visit: 5.0.0
 
+  mdast-util-directive@3.1.0:
+    dependencies:
+      '@types/mdast': 4.0.4
+      '@types/unist': 3.0.3
+      ccount: 2.0.1
+      devlop: 1.1.0
+      mdast-util-from-markdown: 2.0.2
+      mdast-util-to-markdown: 2.1.2
+      parse-entities: 4.0.2
+      stringify-entities: 4.0.4
+      unist-util-visit-parents: 6.0.1
+    transitivePeerDependencies:
+      - supports-color
+
   mdast-util-find-and-replace@3.0.2:
     dependencies:
       '@types/mdast': 4.0.4
@@ -7512,6 +7539,16 @@ snapshots:
       micromark-util-symbol: 2.0.1
       micromark-util-types: 2.0.2
       ts-dedent: 2.2.0
+
+  micromark-extension-directive@4.0.0:
+    dependencies:
+      devlop: 1.1.0
+      micromark-factory-space: 2.0.1
+      micromark-factory-whitespace: 2.0.1
+      micromark-util-character: 2.1.1
+      micromark-util-symbol: 2.0.1
+      micromark-util-types: 2.0.2
+      parse-entities: 4.0.2
 
   micromark-extension-gfm-autolink-literal@2.1.0:
     dependencies:
@@ -8328,6 +8365,15 @@ snapshots:
       hast-util-definition-list: 2.1.0
       mdast-util-definition-list: 2.0.0
       micromark-extension-definition-list: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  remark-directive@https://codeload.github.com/lossless-group/remark-directive/tar.gz/23b8f416da165b6ddaa4c5e7e82addaf6dcb96a9:
+    dependencies:
+      '@types/mdast': 4.0.4
+      mdast-util-directive: 3.1.0
+      micromark-extension-directive: 4.0.0
+      unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
