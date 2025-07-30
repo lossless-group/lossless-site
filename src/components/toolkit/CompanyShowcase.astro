@@ -78,27 +78,36 @@ const displayTitle = og_title || title;
 </div>
 
 <style>
+  /* ===== Company Showcase Styles (matching InfoSidebar/TableOfContents) ===== */
+  
   .company-showcase {
     position: relative;
     width: 100%;
     margin-bottom: 2rem;
-    border-radius: 12px;
+    border-radius: 0 0 12px 12px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .company-showcase:hover {
+    border-color: var(--clr-lossless-accent--brightest);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   }
 
   .banner-container {
     position: relative;
     width: 100%;
-    height: 200px;
     overflow: hidden;
   }
 
   .banner-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+    height: auto;
+    display: block;
   }
 
   .banner-overlay {
@@ -117,36 +126,47 @@ const displayTitle = og_title || title;
 
   .company-header {
     position: relative;
-    background: white;
-    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
     z-index: 2;
   }
 
   /* If there's a banner, position the header to overlap slightly */
   .banner-container + .company-header {
     margin-top: -30px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 12px 12px 0 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
   }
 
   .company-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .company-icon {
     flex-shrink: 0;
-    width: 64px;
-    height: 64px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     overflow: hidden;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .company-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-2px);
   }
 
   .icon-image {
@@ -161,54 +181,64 @@ const displayTitle = og_title || title;
   }
 
   .company-name {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1a1a1a;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
     margin: 0 0 0.25rem 0;
     line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   .company-url {
-    color: #666;
+    color: var(--clr-lossless-primary-light);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
-    transition: color 0.2s ease;
+    opacity: 0.8;
+    transition: all 0.2s ease;
   }
 
   .company-url:hover {
-    color: #2563eb;
+    color: var(--clr-lossless-accent--brightest);
+    opacity: 1;
     text-decoration: underline;
   }
 
   /* Responsive adjustments */
   @media (max-width: 640px) {
-    .banner-container {
-      height: 150px;
-    }
-
     .company-header {
-      padding: 1rem;
+      padding: 0.75rem;
     }
 
     .company-icon {
-      width: 48px;
-      height: 48px;
+      width: 32px;
+      height: 32px;
     }
 
     .company-name {
-      font-size: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    .company-url {
+      font-size: 0.9rem;
     }
 
     .company-info {
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
   }
 
   /* Handle cases where there's no banner */
   .company-showcase:not(:has(.banner-container)) .company-header {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
     margin-top: 0;
+    border-radius: 0 0 12px 12px;
+  }
+
+  /* Focus styles for accessibility */
+  .company-url:focus {
+    outline: 2px solid var(--clr-lossless-accent--brightest);
+    outline-offset: 2px;
   }
 </style>
