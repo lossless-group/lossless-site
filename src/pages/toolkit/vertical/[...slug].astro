@@ -7,11 +7,11 @@
  * - Fetches content from the 'vertical-toolkits' collection
  * - Uses the relative path from the vertical-toolkits directory as the slug
  * - Generates static paths for all entries
- * - Renders content using Layout, OneArticle, and OneArticleOnPage components
+ * - Renders content using Layout, OneToolArticle, and OneArticleOnPage components
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import OneArticle from '@layouts/OneArticle.astro';
+import OneToolArticle from '@layouts/OneToolArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { getReferenceSlug } from '@utils/slugify';
 
@@ -75,10 +75,11 @@ const contentData = {
   title={entry.data.title || entry.id.replace(/\.md$/, '')}
   frontmatter={entry.data}
 >
-  <OneArticle
+  <OneToolArticle
     Component={OneArticleOnPage}
     content={entry.body}
     markdownFile={entry.id}
     data={contentData}
+    title={entry.data.title}
   />
 </Layout>
