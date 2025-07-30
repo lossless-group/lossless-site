@@ -15,6 +15,8 @@ interface Props {
   favicon?: string;
   og_title?: string;
   url?: string;
+  og_description?: string;
+  description_site_cp?: string;
 }
 
 const { 
@@ -26,7 +28,9 @@ const {
   og_favicon, 
   favicon,
   og_title,
-  url 
+  url,
+  og_description,
+  description_site_cp
 } = Astro.props;
 
 // Determine the best banner image to use (priority order)
@@ -37,6 +41,9 @@ const companyIcon = og_favicon || favicon;
 
 // Use og_title if available, otherwise use the title
 const displayTitle = og_title || title;
+
+// Determine the best description to use (priority order)
+const companyDescription = og_description || description_site_cp;
 ---
 
 <div class="company-showcase">
@@ -66,11 +73,18 @@ const displayTitle = og_title || title;
       )}
       
       <div class="company-details">
-        <h1 class="company-name">{displayTitle}</h1>
-        {url && (
-          <a href={url} target="_blank" rel="noopener noreferrer" class="company-url">
-            {url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-          </a>
+        <div class="company-left">
+          <h1 class="company-name">{displayTitle}</h1>
+          {url && (
+            <a href={url} target="_blank" rel="noopener noreferrer" class="company-url">
+              {url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+            </a>
+          )}
+        </div>
+        {companyDescription && (
+          <div class="company-right">
+            <p class="company-description">{companyDescription}</p>
+          </div>
         )}
       </div>
     </div>
@@ -102,6 +116,7 @@ const displayTitle = og_title || title;
     position: relative;
     width: 100%;
     overflow: hidden;
+    border-radius: 12px 12px 0 0;
   }
 
   .banner-image {
@@ -177,7 +192,21 @@ const displayTitle = og_title || title;
 
   .company-details {
     flex: 1;
-    min-width: 0; /* Allows text to truncate if needed */
+    min-width: 0;
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+  }
+
+  .company-left {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .company-right {
+    flex: 1;
+    min-width: 0;
+    max-width: 45%;
   }
 
   .company-name {
@@ -204,6 +233,15 @@ const displayTitle = og_title || title;
     text-decoration: underline;
   }
 
+  .company-description {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light);
+    opacity: 0.9;
+    line-height: 1.4;
+    margin: 0;
+    max-width: none;
+  }
+
   /* Responsive adjustments */
   @media (max-width: 640px) {
     .company-header {
@@ -223,8 +261,21 @@ const displayTitle = og_title || title;
       font-size: 0.9rem;
     }
 
+    .company-description {
+      font-size: 0.85rem;
+    }
+
     .company-info {
       gap: 0.5rem;
+    }
+
+    .company-details {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .company-right {
+      max-width: none;
     }
   }
 

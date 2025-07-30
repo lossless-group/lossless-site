@@ -79,11 +79,6 @@ const normalizedData = normalizeDataWithAuthors(data);
 ---
 
 <div class="one-tool-article">
-  {/* Visual indicator that OneToolArticle layout is being used */}
-  <div class="layout-indicator">
-    <span>OneToolArticle Layout</span>
-  </div>
-  
   {/* Company Showcase - prominently display the company */}
   <CompanyShowcase 
     title={title}
@@ -108,16 +103,6 @@ const normalizedData = normalizeDataWithAuthors(data);
     padding: 2rem 1rem;
   }
 
-  .layout-indicator {
-    background: #e3f2fd;
-    border: 1px solid #2196f3;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-bottom: 1rem;
-    font-family: monospace;
-    font-size: 0.85rem;
-    color: #1976d2;
-  }
 
   /* @media (min-width: 768px) {
     .one-tool-article {
