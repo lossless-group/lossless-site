@@ -8,6 +8,7 @@ import MermaidChart from '../codeblocks/MermaidChart.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
 import SlidesEmbed from '@components/SlidesEmbed.astro';
+import ToolShowcaseIsland from '@components/toolkit/ToolShowcaseIsland.astro';
 import { getCollection } from "astro:content";
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
@@ -1629,6 +1630,62 @@ if (DEBUG_AST) {
           });
         </script>
       </>
+    );
+  }
+
+  if (directiveName === 'tool-showcase') {
+    // Parse the container content for markdown list items with backlinks
+    let toolPaths = [];
+    
+    if (node.type === "containerDirective" && node.children) {
+      // Find list nodes in the container
+      const listNodes = node.children.filter(child => child.type === 'list');
+      
+      for (const listNode of listNodes) {
+        if (listNode.children) {
+          for (const listItem of listNode.children) {
+            if (listItem.type === 'listItem' && listItem.children) {
+              // Look for paragraph containing a link
+              const paragraph = listItem.children.find(child => child.type === 'paragraph');
+              if (paragraph && paragraph.children) {
+                const link = paragraph.children.find(child => child.type === 'link');
+                if (link && link.url) {
+                  // Extract the tool path from the backlink URL
+                  const url = link.url;
+                  // Remove leading slash and .md extension if present
+                  const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                  toolPaths.push(toolPath);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    if (toolPaths.length > 0) {
+      return <ToolShowcaseIsland toolPaths={toolPaths} />;
+    }
+    
+    return (
+      <div class="tool-showcase-empty">
+        <p>No tools found in showcase directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, toolPaths, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .tool-showcase-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
     );
   }
   

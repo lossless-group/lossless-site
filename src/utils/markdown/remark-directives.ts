@@ -17,6 +17,7 @@ import { visit } from 'unist-util-visit';
  */
 export const directiveComponentMap: Record<string, string> = {
   'figma-embed': 'Figma-Object--Display.astro',
+  'tool-showcase': 'toolkit/ToolShowcaseIsland.astro',
   // Future components following the same pattern:
   // 'miro-board': 'Miro-Board--Embed.astro',
   // 'notion-page': 'Notion-Page--Preview.astro',
@@ -82,31 +83,85 @@ export function remarkDirectiveTransform() {
         const componentPath = getComponentForDirective(directiveName);
         
         if (componentPath) {
-          // Extract props from directive attributes
-          const props = node.attributes || {};
-          
-          // Convert directive to Astro component import and usage
-          const componentName = componentPath.replace('.astro', '').replace(/[^a-zA-Z0-9]/g, '');
-          const importPath = `@components/${componentPath}`;
-          
-          // Create the component JSX
-          const propsString = Object.entries(props)
-            .map(([key, value]) => `${key}="${value}"`)
-            .join(' ');
-          
-          // Replace the directive node with an HTML node that will render the component
-          node.type = 'html';
-          node.value = `<${componentName} ${propsString} />`;
-          
-          // Store import information for later processing
-          if (!tree.imports) {
-            tree.imports = new Set();
+          // Special handling for tool-showcase directive
+          if (directiveName === 'tool-showcase') {
+            // Extract tool paths from the container content
+            const toolPaths: string[] = [];
+            
+            if (node.type === 'containerDirective' && node.children) {
+              // Find list nodes in the container
+              const listNodes = node.children.filter((child: any) => child.type === 'list');
+              
+              for (const listNode of listNodes) {
+                if (listNode.children) {
+                  for (const listItem of listNode.children) {
+                    if (listItem.type === 'listItem' && listItem.children) {
+                      // Look for paragraph containing a link
+                      const paragraph = listItem.children.find((child: any) => child.type === 'paragraph');
+                      if (paragraph && paragraph.children) {
+                        const link = paragraph.children.find((child: any) => child.type === 'link');
+                        if (link && link.url) {
+                          // Extract the tool path from the backlink URL
+                          const url = link.url;
+                          // Remove leading slash and .md extension if present
+                          const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                          toolPaths.push(toolPath);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            
+            // Convert directive to Astro component import and usage
+            const componentName = 'ToolShowcaseIsland';
+            const importPath = `@components/toolkit/ToolShowcaseIsland.astro`;
+            
+            // Create the component JSX with tool paths
+            const toolPathsJson = JSON.stringify(toolPaths).replace(/"/g, '&quot;');
+            
+            // Replace the directive node with an HTML node that will render the component
+            node.type = 'html';
+            node.value = `<${componentName} toolPaths={${JSON.stringify(toolPaths)}} />`;
+            
+            // Store import information for later processing
+            if (!tree.imports) {
+              tree.imports = new Set();
+            }
+            tree.imports.add({
+              componentName,
+              importPath,
+              componentPath
+            });
+          } else {
+            // Handle other directives normally
+            // Extract props from directive attributes
+            const props = node.attributes || {};
+            
+            // Convert directive to Astro component import and usage
+            const componentName = componentPath.replace('.astro', '').replace(/[^a-zA-Z0-9]/g, '');
+            const importPath = `@components/${componentPath}`;
+            
+            // Create the component JSX
+            const propsString = Object.entries(props)
+              .map(([key, value]) => `${key}="${value}"`)
+              .join(' ');
+            
+            // Replace the directive node with an HTML node that will render the component
+            node.type = 'html';
+            node.value = `<${componentName} ${propsString} />`;
+            
+            // Store import information for later processing
+            if (!tree.imports) {
+              tree.imports = new Set();
+            }
+            tree.imports.add({
+              componentName,
+              importPath,
+              componentPath
+            });
           }
-          tree.imports.add({
-            componentName,
-            importPath,
-            componentPath
-          });
         } else {
           console.warn(`Unknown directive: ${directiveName}`);
         }

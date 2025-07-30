@@ -1,0 +1,315 @@
+---
+/**
+ * ToolShowcaseCarousel.astro
+ * Carousel wrapper for multiple ToolShowcaseItem--Wide-Responsive components
+ * Used by the ::tool-showcase directive
+ */
+
+import { getCollection } from 'astro:content';
+import ToolShowcaseItem from './ToolShowcaseItem--Wide-Responsive.astro';
+
+interface Props {
+  toolPaths: string[]; // Array of tool paths from the directive
+}
+
+const { toolPaths } = Astro.props;
+
+// Fetch all vertical-toolkits entries
+const allTools = await getCollection('vertical-toolkits');
+
+// Match the toolPaths to actual collection entries
+const matchedTools = toolPaths.map(toolPath => {
+  // Find the tool by matching the path/ID
+  const tool = allTools.find(entry => {
+    // Remove directory separators and convert to lowercase for matching
+    const entryId = entry.id.toLowerCase().replace(/\//g, '/');
+    const searchPath = toolPath.toLowerCase().replace(/\//g, '/');
+    
+    // Try exact match first, then partial matches
+    return entryId === searchPath || 
+           entryId.endsWith('/' + searchPath) ||
+           entryId.includes(searchPath) ||
+           entry.data.title?.toLowerCase().includes(searchPath.split('/').pop() || '');
+  });
+  
+  return { path: toolPath, tool };
+}).filter(item => item.tool); // Only include matched tools
+
+const carouselId = `tool-carousel-${Math.random().toString(36).slice(2, 10)}`;
+---
+
+{matchedTools.length > 0 ? (
+  <div class="tool-showcase-carousel" id={carouselId}>
+    <div class="carousel-container">
+      <div class="carousel-track">
+        {matchedTools.map(({ tool }, index) => (
+          <div class="carousel-slide" data-slide={index}>
+            <ToolShowcaseItem 
+              title={tool.data.title}
+              og_image={tool.data.og_image}
+              image={tool.data.image}
+              og_screenshot={tool.data.og_screenshot}
+              og_screenshot_url={tool.data.og_screenshot_url}
+              og_favicon={tool.data.og_favicon}
+              favicon={tool.data.favicon}
+              og_title={tool.data.og_title}
+              url={tool.data.url}
+              og_description={tool.data.og_description}
+              description_site_cp={tool.data.description_site_cp}
+              inCarousel={true}
+            />
+          </div>
+        ))}
+      </div>
+      
+      {matchedTools.length > 1 && (
+        <>
+          <button class="carousel-nav carousel-prev" aria-label="Previous tool" data-carousel={carouselId}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+          </button>
+          <button class="carousel-nav carousel-next" aria-label="Next tool" data-carousel={carouselId}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+          </button>
+          <div class="carousel-indicators">
+            {matchedTools.map((_, index) => (
+              <button 
+                class={`carousel-dot ${index === 0 ? 'active' : ''}`}
+                data-slide={index}
+                data-carousel={carouselId}
+                aria-label={`Go to tool ${index + 1}`}
+              ></button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+) : (
+  <div class="tool-showcase-empty">
+    <p>No matching tools found for: {toolPaths.join(', ')}</p>
+    <details>
+      <summary>Debug Info</summary>
+      <pre>Searched paths: {JSON.stringify(toolPaths, null, 2)}</pre>
+      <pre>Available tools: {allTools.length}</pre>
+    </details>
+  </div>
+)}
+
+<style>
+  .tool-showcase-carousel {
+    position: relative;
+    margin: clamp(1.5rem, 3vw, 2rem) 0;
+    width: 100%;
+  }
+
+  .carousel-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: clamp(8px, 1vw, 12px);
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.3s ease;
+    width: 100%;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: clamp(40px, 4vw, 48px);
+    height: clamp(40px, 4vw, 48px);
+    display: flex;      
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .carousel-nav:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .carousel-prev {
+    left: clamp(8px, 1vw, 16px);
+  }
+
+  .carousel-next {
+    right: clamp(8px, 1vw, 16px);
+  }
+
+  .carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .carousel-dot.active,
+  .carousel-dot:hover {
+    background: var(--clr-lossless-accent--brightest);
+    border-color: var(--clr-lossless-accent--brightest);
+  }
+
+  .tool-showcase-empty {
+    padding: clamp(1rem, 2vw, 2rem);
+    text-align: center;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: clamp(8px, 1vw, 12px);
+    color: var(--clr-lossless-primary-light);
+  }
+
+  .tool-showcase-empty details {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .tool-showcase-empty pre {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+  }
+
+  /* Hide navigation on very small screens */
+  @media (max-width: 480px) {
+    .carousel-nav {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  class ToolShowcaseCarousel {
+    private carousel: HTMLElement;
+    private track: HTMLElement;
+    private slides: NodeListOf<HTMLElement>;
+    private dots: NodeListOf<HTMLElement>;
+    private prevBtn: HTMLElement | null;
+    private nextBtn: HTMLElement | null;
+    private currentSlide: number = 0;
+
+    constructor(carouselElement: HTMLElement) {
+      this.carousel = carouselElement;
+      this.track = this.carousel.querySelector('.carousel-track') as HTMLElement;
+      this.slides = this.carousel.querySelectorAll('.carousel-slide');
+      this.dots = this.carousel.querySelectorAll('.carousel-dot');
+      this.prevBtn = this.carousel.querySelector('.carousel-prev');
+      this.nextBtn = this.carousel.querySelector('.carousel-next');
+
+      this.init();
+    }
+
+    init() {
+      if (this.slides.length <= 1) return;
+
+      // Add event listeners
+      this.prevBtn?.addEventListener('click', () => this.prevSlide());
+      this.nextBtn?.addEventListener('click', () => this.nextSlide());
+
+      this.dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => this.goToSlide(index));
+      });
+
+      // Touch/swipe support
+      let startX = 0;
+      let isDragging = false;
+
+      this.track.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+      });
+
+      this.track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+      });
+
+      this.track.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const endX = e.changedTouches[0].clientX;
+        const diffX = startX - endX;
+
+        if (Math.abs(diffX) > 50) { // Minimum swipe distance
+          if (diffX > 0) {
+            this.nextSlide();
+          } else {
+            this.prevSlide();
+          }
+        }
+      });
+
+      // Auto-advance (optional)
+      // setInterval(() => this.nextSlide(), 5000);
+    }
+
+    goToSlide(index: number) {
+      this.currentSlide = index;
+      this.updateSlidePosition();
+      this.updateDots();
+    }
+
+    nextSlide() {
+      this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+      this.updateSlidePosition();
+      this.updateDots();
+    }
+
+    prevSlide() {
+      this.currentSlide = this.currentSlide === 0 ? this.slides.length - 1 : this.currentSlide - 1;
+      this.updateSlidePosition();
+      this.updateDots();
+    }
+
+    updateSlidePosition() {
+      const offset = -this.currentSlide * 100;
+      this.track.style.transform = `translateX(${offset}%)`;
+    }
+
+    updateDots() {
+      this.dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === this.currentSlide);
+      });
+    }
+  }
+
+  // Initialize all carousels on the page
+  document.addEventListener('DOMContentLoaded', () => {
+    const carousels = document.querySelectorAll('.tool-showcase-carousel');
+    carousels.forEach(carousel => {
+      new ToolShowcaseCarousel(carousel as HTMLElement);
+    });
+  });
+</script>
