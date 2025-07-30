@@ -16,6 +16,7 @@ import remarkCitations from '@utils/markdown/remark-citations';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
 import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
+import CompanyShowcase from '@components/toolkit/CompanyShowcase.astro';
 import '@styles/markdown.css';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
@@ -82,6 +83,19 @@ const normalizedData = normalizeDataWithAuthors(data);
   <div class="layout-indicator">
     <span>OneToolArticle Layout</span>
   </div>
+  
+  {/* Company Showcase - prominently display the company */}
+  <CompanyShowcase 
+    title={title}
+    og_image={data.og_image}
+    image={data.image}
+    og_screenshot={data.og_screenshot}
+    og_screenshot_url={data.og_screenshot_url}
+    og_favicon={data.og_favicon}
+    favicon={data.favicon}
+    og_title={data.og_title}
+    url={data.url}
+  />
   
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
   <Component 

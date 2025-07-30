@@ -1,0 +1,214 @@
+---
+/**
+ * CompanyShowcase.astro
+ * Displays company branding with banner image and favicon/logo
+ * Shows company name prominently with visual hierarchy
+ */
+
+interface Props {
+  title: string;
+  og_image?: string;
+  image?: string;
+  og_screenshot?: string;
+  og_screenshot_url?: string;
+  og_favicon?: string;
+  favicon?: string;
+  og_title?: string;
+  url?: string;
+}
+
+const { 
+  title, 
+  og_image, 
+  image, 
+  og_screenshot, 
+  og_screenshot_url,
+  og_favicon, 
+  favicon,
+  og_title,
+  url 
+} = Astro.props;
+
+// Determine the best banner image to use (priority order)
+const bannerImage = og_image || image || og_screenshot || og_screenshot_url;
+
+// Determine the best icon to use
+const companyIcon = og_favicon || favicon;
+
+// Use og_title if available, otherwise use the title
+const displayTitle = og_title || title;
+---
+
+<div class="company-showcase">
+  {bannerImage && (
+    <div class="banner-container">
+      <img 
+        src={bannerImage} 
+        alt={`${displayTitle} banner`}
+        class="banner-image"
+        loading="eager"
+      />
+      <div class="banner-overlay"></div>
+    </div>
+  )}
+  
+  <div class="company-header">
+    <div class="company-info">
+      {companyIcon && (
+        <div class="company-icon">
+          <img 
+            src={companyIcon} 
+            alt={`${displayTitle} logo`}
+            class="icon-image"
+            loading="eager"
+          />
+        </div>
+      )}
+      
+      <div class="company-details">
+        <h1 class="company-name">{displayTitle}</h1>
+        {url && (
+          <a href={url} target="_blank" rel="noopener noreferrer" class="company-url">
+            {url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .company-showcase {
+    position: relative;
+    width: 100%;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .banner-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 70%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  }
+
+  .company-header {
+    position: relative;
+    background: white;
+    padding: 1.5rem;
+    z-index: 2;
+  }
+
+  /* If there's a banner, position the header to overlap slightly */
+  .banner-container + .company-header {
+    margin-top: -30px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px 12px 0 0;
+  }
+
+  .company-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .company-icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .company-details {
+    flex: 1;
+    min-width: 0; /* Allows text to truncate if needed */
+  }
+
+  .company-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+  }
+
+  .company-url {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .company-url:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .banner-container {
+      height: 150px;
+    }
+
+    .company-header {
+      padding: 1rem;
+    }
+
+    .company-icon {
+      width: 48px;
+      height: 48px;
+    }
+
+    .company-name {
+      font-size: 1.5rem;
+    }
+
+    .company-info {
+      gap: 0.75rem;
+    }
+  }
+
+  /* Handle cases where there's no banner */
+  .company-showcase:not(:has(.banner-container)) .company-header {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-top: 0;
+  }
+</style>
