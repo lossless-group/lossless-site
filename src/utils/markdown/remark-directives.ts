@@ -18,6 +18,7 @@ import { visit } from 'unist-util-visit';
 export const directiveComponentMap: Record<string, string> = {
   'figma-embed': 'Figma-Object--Display.astro',
   'tool-showcase': 'toolkit/ToolShowcaseIsland.astro',
+  'slides': 'direct', // Handled directly in AstroMarkdown.astro
   // Future components following the same pattern:
   // 'miro-board': 'Miro-Board--Embed.astro',
   // 'notion-page': 'Notion-Page--Preview.astro',

@@ -1688,6 +1688,63 @@ if (DEBUG_AST) {
       </div>
     );
   }
+
+  if (directiveName === 'slides') {
+    // Parse the container content for markdown list items with slide backlinks
+    const slides = [];
+    const config = node.attributes || {};
+    
+    if (node.type === "containerDirective" && node.children) {
+      // Find list nodes in the container
+      const listNodes = node.children.filter(child => child.type === 'list');
+      
+      for (const listNode of listNodes) {
+        if (listNode.children) {
+          for (const listItem of listNode.children) {
+            if (listItem.type === 'listItem' && listItem.children) {
+              // Look for paragraph containing a link
+              const paragraph = listItem.children.find(child => child.type === 'paragraph');
+              if (paragraph && paragraph.children) {
+                const link = paragraph.children.find(child => child.type === 'link');
+                if (link && link.url) {
+                  // Extract slide path and title from backlink
+                  const path = link.url.replace(/^\//, '').replace(/\.md$/, '');
+                  const title = link.children?.[0]?.value || path.split('/').pop() || path;
+                  
+                  slides.push({ path, title });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    if (slides.length > 0) {
+      return <SlidesEmbed slides={slides} config={config} />;
+    }
+    
+    return (
+      <div class="slides-directive-empty">
+        <p>No slides found in slides directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, slides, config, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .slides-directive-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
   
   // Handle other directive types or show debug info
   return (
