@@ -4,10 +4,12 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
 import remarkImages from '@utils/markdown/remark-images'; 
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkCitations from '@utils/markdown/remark-citations';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 import type { Root } from 'mdast';
 
 import CollectionSidebar from '@components/articles/ContentNavSidebar.astro';
@@ -36,6 +38,8 @@ if (effectiveEntry) {
   const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
+    .use(remarkDirective)       // Parse directive syntax
+    .use(remarkDirectiveToComponent) // Preserve directives for AstroMarkdown
     .use(remarkImages) 
     .use(remarkBacklinks)
     .use(remarkCitations)

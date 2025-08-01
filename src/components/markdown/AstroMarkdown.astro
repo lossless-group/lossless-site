@@ -1266,6 +1266,11 @@ if (DEBUG_AST) {
   const directiveName = node.name;
   let props = node.attributes || {};
   
+  // Debug: Log all directives being processed
+  if (DEBUG_AST || directiveName === 'slides') {
+    console.log(`[AstroMarkdown] Processing directive: ${directiveName}, type: ${node.type}`);
+  }
+  
   // For container directives, parse content as key-value pairs
   if (node.type === "containerDirective" && node.children) {
     const content = node.children
@@ -1689,10 +1694,14 @@ if (DEBUG_AST) {
     );
   }
 
-  if (directiveName === 'slides') {
+  if (directiveName === 'slides' || directiveName === 'slideshow') {
     // Parse the container content for markdown list items with slide backlinks
     const slides = [];
     const config = node.attributes || {};
+    
+    console.log('=== SLIDES/SLIDESHOW DIRECTIVE FOUND ===');
+    console.log('Directive name:', directiveName);
+    console.log('Node structure:', JSON.stringify(node, null, 2));
     
     if (node.type === "containerDirective" && node.children) {
       // Find list nodes in the container

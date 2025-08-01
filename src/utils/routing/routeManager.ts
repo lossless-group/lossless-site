@@ -69,6 +69,10 @@ const defaultRouteMappings: RouteMapping[] = [
     contentPath: 'client-content',
     routePath: 'client'
   },
+  {
+    contentPath: 'slides',
+    routePath: 'slides'
+  },
   // {
   //   contentPath: 'content/visuals',
   //   routePath: 'content/visuals'

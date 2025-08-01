@@ -19,6 +19,7 @@ export const directiveComponentMap: Record<string, string> = {
   'figma-embed': 'Figma-Object--Display.astro',
   'tool-showcase': 'toolkit/ToolShowcaseIsland.astro',
   'slides': 'direct', // Handled directly in AstroMarkdown.astro
+  'slideshow': 'direct', // Alternative name to avoid conflict with slides codeblock
   // Future components following the same pattern:
   // 'miro-board': 'Miro-Board--Embed.astro',
   // 'notion-page': 'Notion-Page--Preview.astro',
@@ -201,9 +202,11 @@ export function remarkDirectiveTransform() {
  */
 export function remarkDirectiveToComponent() {
   return (tree: any) => {
+    console.log('[remarkDirectiveToComponent] Plugin called, processing tree...');
     visit(tree, (node: any) => {
       if (node.type === 'leafDirective' || node.type === 'containerDirective') {
         const directiveName = node.name;
+        console.log(`[remarkDirectiveToComponent] Found directive: ${directiveName}, type: ${node.type}`);
         
         // Validate that this is a supported directive
         if (isSupportedDirective(directiveName)) {
