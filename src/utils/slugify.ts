@@ -13,22 +13,39 @@
  */
 // Process entries to add titles from filenames if missing and sort
 // Aggressively commented: If logic changes, update all call sites and this block.
-export function processEntries(entries) {
-  entries.forEach(entry => {
-    // Always generate title from filename, preserving original case
-    const filename = entry.filePath.replace(/\.md$/, '');
-    const filenameParts = filename.split('/');
-    const baseFilename = filenameParts[filenameParts.length - 1];
-    
-    // Use entry.data.title if it exists, otherwise fall back to filename
-    entry.data.title = entry.data.title || baseFilename;
+// Generic type that represents a collection entry with basic properties
+type BaseCollectionEntry = {
+  id: string;
+  filePath: string;
+  data: {
+    title?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+};
 
-    entry.slug = getReferenceSlug(entry.id)
+// Process entries to ensure they have required fields and proper formatting
+export function processEntries<T extends BaseCollectionEntry>(entries: T[]): (T & { slug: string; data: { title: string } })[] {
+  return entries
+    .map(entry => {
+      // Always generate title from filename, preserving original case
+      const filename = entry.filePath.replace(/\.md$/, '');
+      const filenameParts = filename.split('/');
+      const baseFilename = filenameParts[filenameParts.length - 1];
+      
+      // Create a new object to avoid mutating the original
+      const processedEntry = {
+        ...entry,
+        slug: getReferenceSlug(entry.id),
+        data: {
+          ...entry.data,
+          title: entry.data.title || baseFilename,
+        },
+      };
 
-  });
-
-  entries.sort((a, b) => (a.data.title! as string).localeCompare(b.data.title! as string));
-  return entries;
+      return processedEntry as T & { slug: string; data: { title: string } };
+    })
+    .sort((a, b) => a.data.title.localeCompare(b.data.title));
 }
 
 

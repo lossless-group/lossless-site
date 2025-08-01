@@ -20,6 +20,28 @@ function resolveContentPath(relativePath: string): string {
   return pathToFileURL(absolutePath).href;
 }
 
+// Function to create a collection that loads from multiple paths
+function createMultiPathCollection({
+  paths,
+  ...config
+}: {
+  paths: string[];
+  schema: any;
+  loader?: any;
+}) {
+  // Create a glob pattern that combines all paths
+  const patterns = paths.map(path => `${path}/**/*.md`);
+  const base = process.cwd(); // Use current working directory as base
+
+  return defineCollection({
+    ...config,
+    loader: config.loader || glob({
+      pattern: patterns,
+      base
+    })
+  });
+}
+
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
   type: 'data',
@@ -457,6 +479,20 @@ const upAndRunningCollection = defineCollection({
   }))
 });
 
+const portfolioCollection = createMultiPathCollection({
+  paths: [
+    'content/client-content/Hypernova/Portfolio',
+    'content/client-content/Avalanche/Portfolio',
+  ],
+  schema: z.object({
+    publish: z.boolean().optional(), // Allows individual entries to override collection default
+  }).passthrough().transform((data) => ({
+    ...data // Pass through all original frontmatter fields.
+            // Astro will automatically create 'id' and 'slug' properties for the entry.
+            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
+  }))
+});
+
 
 // ---- NEW: Configuration for Publishing Defaults ----
 export const collectionPublishingDefaults = {
@@ -522,4 +558,5 @@ export const collections = {
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-projects': clientProjectsCollection,
+  'portfolio': portfolioCollection,
 };

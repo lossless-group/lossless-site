@@ -1,0 +1,78 @@
+---
+/**
+ * /client/[client]/portfolio/[...slug].astro — Dynamic Route for Client Portfolio
+ * Renders a single portfolio item
+ */
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const portfolioEntries = await getCollection('portfolio');
+  const paths = [];
+
+  for (const entry of portfolioEntries) {
+    const entryPath = entry.id.replace(/\\/g, '/');
+    const pathParts = entryPath.split('/');
+    
+    const client = pathParts[1]?.toLowerCase() || 'unknown';
+    const slug = pathParts.pop()?.replace(/\.md$/, '');
+    
+    paths.push({
+      params: { 
+        client,
+        slug: slug ? [slug] : undefined
+      },
+      props: {
+        entry: {
+          ...entry,
+          data: {
+            ...entry.data,
+            title: entry.data.title || entry.id.split('/').pop()?.replace(/\.md$/, '') || 'Untitled'
+          }
+        }
+      }
+    });
+  }
+
+  return paths;
+}
+
+interface Props {
+  entry: {
+    id: string;
+    body: string;
+    data: {
+      title: string;
+      [key: string]: any;
+    }
+  };
+}
+
+const { entry } = Astro.props as Props;
+
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, ''),
+  title: entry.data.title,
+  ...entry.data,
+  date_created: entry.data.date_created || new Date().toISOString(),
+  date_modified: entry.data.date_modified || new Date().toISOString()
+};
+---
+<Layout 
+  title={entry.data.title || 'Portfolio Item'}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+    title={entry.data.title}
+  />
+</Layout>

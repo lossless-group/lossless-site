@@ -17,6 +17,13 @@ export const ROUTE_PATHS = {
     FOR: '/market-map/for',
   },
   
+  CLIENT: {
+    BASE: '/client',
+    PORTFOLIO: '/client/[client]/portfolio',
+    PROJECTS: '/client/[client]/projects',
+    RECOMMENDATIONS: '/client/[client]/recommendations',
+  },
+  
   VIBE_WITH: {
     BASE: '/vibe-with',
   },
