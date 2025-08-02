@@ -16,10 +16,13 @@ export async function getStaticPaths() {
   const paths = [];
 
   for (const entry of portfolioEntries) {
+    // Only include client-specific portfolio items
+    if (!entry.data.client) continue;
+    
     const entryPath = entry.id.replace(/\\/g, '/');
     const pathParts = entryPath.split('/');
     
-    const client = pathParts[1]?.toLowerCase() || 'unknown';
+    const client = entry.data.client.toLowerCase();
     const slug = pathParts.pop()?.replace(/\.md$/, '');
     
     paths.push({

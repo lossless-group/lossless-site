@@ -479,18 +479,56 @@ const upAndRunningCollection = defineCollection({
   }))
 });
 
-const portfolioCollection = createMultiPathCollection({
-  paths: [
-    'content/client-content/Hypernova/Portfolio',
-    'content/client-content/Avalanche/Portfolio',
-  ],
+const portfolioCollection = defineCollection({
+  loader: glob({ 
+    pattern: [
+      'tooling/Portfolio/*.md',
+      'client-content/*/Portfolio/*.md'
+    ], 
+    base: resolveContentPath('') 
+  }),
   schema: z.object({
-    publish: z.boolean().optional(), // Allows individual entries to override collection default
-  }).passthrough().transform((data) => ({
-    ...data // Pass through all original frontmatter fields.
-            // Astro will automatically create 'id' and 'slug' properties for the entry.
-            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
-  }))
+    // Make title optional and derive from og_title or filename
+    title: z.string().optional(),
+    og_title: z.string().optional(),
+    og_description: z.string().optional(),
+    og_image: z.string().optional(),
+    og_favicon: z.string().optional(),
+    og_last_fetch: z.union([z.string(), z.date()]).optional(),
+    url: z.string().optional(),
+    zinger: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    tags: z.array(z.string()).optional(),
+    portfolios: z.array(z.string()).optional(),
+    client: z.string().optional(),
+    status: z.string().optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+    description_site_cp: z.string().optional(),
+    site_uuid: z.string().optional(),
+    slug: z.string().optional(),
+  }).passthrough().transform((data, context) => {
+    // Ensure we have a valid path string
+    const contextPath = String(context.id || context.path || '');
+    
+    // Extract client name from path if in client-content
+    const pathParts = contextPath.split('/');
+    const isClientContent = pathParts.includes('client-content');
+    const client = isClientContent ? pathParts[pathParts.indexOf('client-content') + 1] : null;
+    
+    // Get filename for slug generation
+    const filename = contextPath.split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Derive title from og_title or filename
+    const title = data.title || data.og_title || filename.replace(/[-_]/g, ' ');
+    
+    return {
+      ...data,
+      title,
+      client: data.client || client,
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+    };
+  })
 });
 
 

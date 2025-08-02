@@ -58,6 +58,10 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'toolkit'
   },
   {
+    contentPath: 'tooling/Portfolio',
+    routePath: 'portfolio'
+  },
+  {
     contentPath: 'vertical-toolkits',
     routePath: 'toolkit/vertical'
   },

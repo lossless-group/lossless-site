@@ -1,0 +1,87 @@
+---
+import ClientPortalLayout from '@layouts/ClientPortalLayout.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug, toProperCase } from '@utils/slugify';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+
+export async function getStaticPaths() {
+  const portfolio = await getCollection('portfolio');
+  
+  // Get unique client names from portfolio items
+  const clients = [...new Set(
+    portfolio
+      .filter(item => item.data.client)
+      .map(item => item.data.client)
+  )];
+  
+  return clients.map(client => ({
+    params: { client: getReferenceSlug(client) },
+    props: { 
+      client,
+      portfolioItems: portfolio.filter(item => 
+        item.data.client?.toLowerCase() === client.toLowerCase()
+      )
+    }
+  }));
+}
+
+const { client, portfolioItems } = Astro.props;
+
+// Transform portfolio items to match ReferenceItem interface
+const portfolioReferences = portfolioItems.map(item => ({
+  id: item.id,
+  slug: item.slug || getReferenceSlug(item.id),
+  collection: 'portfolio',
+  data: {
+    title: item.data.title,
+    description: item.data.og_description || item.data.zinger || '',
+    tags: item.data.tags || [],
+    aliases: [],
+    banner_image: item.data.og_image || item.data.banner_image,
+    portrait_image: item.data.portrait_image,
+  },
+  originalFilename: item.id
+}));
+---
+
+<ClientPortalLayout client={client}>
+  <div class="portfolio-section">
+    <h1>Portfolio for {toProperCase(client)}</h1>
+    <p class="portfolio-description">
+      Explore our portfolio of work and case studies for {toProperCase(client)}.
+    </p>
+    
+    {portfolioReferences.length > 0 ? (
+      <ReferenceGrid items={portfolioReferences} />
+    ) : (
+      <p class="no-portfolio">No portfolio items available yet.</p>
+    )}
+  </div>
+</ClientPortalLayout>
+
+<style>
+  .portfolio-section {
+    padding: 2rem 0;
+    max-width: var(--content-width, 1200px);
+    margin: 0 auto;
+  }
+  
+  .portfolio-section h1 {
+    font-size: var(--fs-900);
+    margin-bottom: 1rem;
+    color: var(--clr-heading--primary);
+  }
+  
+  .portfolio-description {
+    font-size: var(--fs-500);
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    opacity: 0.9;
+  }
+  
+  .no-portfolio {
+    text-align: center;
+    padding: 4rem 0;
+    opacity: 0.7;
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import OneArticle from '@layouts/OneArticle.astro';
+import Layout from '@layouts/Layout.astro';
+import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  const portfolio = await getCollection('portfolio');
+  
+  return portfolio
+    .filter(entry => !entry.data.client) // Only general portfolio items
+    .map(entry => {
+      const filename = path.basename(entry.id).replace(/\.md$/, '');
+      const slug = getReferenceSlug(filename);
+      
+      return {
+        params: { slug },
+        props: { entry },
+      };
+    });
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Layout frontmatter={entry.data}>
+  <OneArticle 
+    Component={AstroMarkdown}
+    title={entry.data.title}
+    data={entry.data}
+    content={entry.body}
+    markdownFile={entry.id}
+  >
+    <Content />
+  </OneArticle>
+</Layout>
