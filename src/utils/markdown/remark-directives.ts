@@ -202,11 +202,9 @@ export function remarkDirectiveTransform() {
  */
 export function remarkDirectiveToComponent() {
   return (tree: any) => {
-    console.log('[remarkDirectiveToComponent] Plugin called, processing tree...');
     visit(tree, (node: any) => {
       if (node.type === 'leafDirective' || node.type === 'containerDirective') {
         const directiveName = node.name;
-        console.log(`[remarkDirectiveToComponent] Found directive: ${directiveName}, type: ${node.type}`);
         
         // Validate that this is a supported directive
         if (isSupportedDirective(directiveName)) {

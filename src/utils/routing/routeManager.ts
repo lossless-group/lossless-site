@@ -100,8 +100,8 @@ let customRouteMappings: RouteMapping[] = [];
 
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
-import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
-import { getReferenceSlug, slugify } from '@utils/slugify';
+import { contentBasePath, DEBUG_BACKLINKS } from '../envUtils';
+import { getReferenceSlug, slugify } from '../slugify';
 
 function isValidContentFile(contentPath: string): boolean {
   // Check if the path already has a .md extension

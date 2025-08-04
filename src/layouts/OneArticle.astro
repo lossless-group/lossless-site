@@ -30,12 +30,12 @@ const { Component, title, data, content, markdownFile } = Astro.props; // Added 
 
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
-  .use(remarkParse)           // 1. Parse markdown to MDAST
+  .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkDirective)       // 2. Parse directive syntax
-  .use(remarkDirectiveToComponent) // 3. Preserve directives for AstroMarkdown
-  .use(remarkImages)         
-  .use(remarkBacklinks)          
+  .use(remarkBacklinks)
+  .use(remarkImages)
+  .use(remarkDirective)
+  .use(remarkDirectiveToComponent)
   .use(remarkCitations)
   .use(remarkTableOfContents)
 
