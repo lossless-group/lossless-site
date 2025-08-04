@@ -508,13 +508,16 @@ const portfolioCollection = defineCollection({
     site_uuid: z.string().optional(),
     slug: z.string().optional(),
   }).passthrough().transform((data, context) => {
-    // Ensure we have a valid path string
-    const contextPath = String(context.id || context.path || '');
+    // Handle context.path - it might be an array in glob loaders
+    const contextPath = Array.isArray(context.path) 
+      ? context.path.join('/') 
+      : String(context.path || '');
     
     // Extract client name from path if in client-content
     const pathParts = contextPath.split('/');
     const isClientContent = pathParts.includes('client-content');
-    const client = isClientContent ? pathParts[pathParts.indexOf('client-content') + 1] : null;
+    const clientIndex = pathParts.indexOf('client-content');
+    const client = isClientContent && clientIndex !== -1 ? pathParts[clientIndex + 1] : null;
     
     // Get filename for slug generation
     const filename = contextPath.split('/').pop()?.replace(/\.md$/, '') || '';

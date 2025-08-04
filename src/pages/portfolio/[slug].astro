@@ -1,0 +1,44 @@
+---
+import OneArticle from '@layouts/OneArticle.astro';
+import Layout from '@layouts/Layout.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  const portfolio = await getCollection('portfolio');
+  
+  return portfolio
+    .filter(entry => !entry.data.client) // Only general portfolio items
+    .map(entry => {
+      const filename = path.basename(entry.id).replace(/\.md$/, '');
+      const slug = getReferenceSlug(filename);
+      
+      return {
+        params: { slug },
+        props: { entry },
+      };
+    });
+}
+
+const { entry } = Astro.props;
+// With glob loader, entries don't have render() method, so we use the body directly
+
+// Prepare data for OneArticle component - include path property
+const contentData = {
+  ...entry.data,
+  path: Astro.url.pathname,
+  id: entry.id,
+};
+---
+
+<Layout frontmatter={entry.data}>
+  <OneArticle 
+    Component={OneArticleOnPage}
+    title={entry.data.title}
+    data={contentData}
+    content={entry.body}
+    markdownFile={entry.id}
+  />
+</Layout>
