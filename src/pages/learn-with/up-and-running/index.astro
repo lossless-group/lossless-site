@@ -3,7 +3,7 @@
 // Collection-specific page for up-and-running collection with toggle navigation
 
 import { getCollection, type CollectionEntry } from 'astro:content';
-import MagazineIndexLayout from '../../../layouts/MagazineIndexLayout.astro'; 
+import GuideIndexLayout from '../../../layouts/GuideIndexLayout.astro'; 
 import { slugify } from '../../../utils/slugify'; 
 import { collectionPublishingDefaults } from '../../../content.config'; 
 import Hero from '../../../components/basics/Hero.astro';
@@ -46,7 +46,7 @@ const collectionConfig = {
 };
 
 // Transform entries for up-and-running collection
-const articles = allEntries.map((entry) => {
+const guides = allEntries.map((entry) => {
   const data = entry.data as any;
   
   function normalizeToArray(singularKey: string, pluralKey: string): string[] {
@@ -91,10 +91,10 @@ const articles = allEntries.map((entry) => {
 });
 ---
 
-<MagazineIndexLayout
+<GuideIndexLayout
   title={collectionConfig.title} 
   description={collectionConfig.description}
-  articles={articles}
+  guides={guides}
   collectionDisplayName={collectionConfig.title} 
 >
   <div slot="hero-content" style="position: relative;">
@@ -109,7 +109,7 @@ const articles = allEntries.map((entry) => {
       />
     </AnimationWrapper>
   </div>
-</MagazineIndexLayout>
+</GuideIndexLayout>
 
 <style>
   .chevron-navigation {

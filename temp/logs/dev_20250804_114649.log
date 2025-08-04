@@ -1,0 +1,119 @@
+
+> site@0.0.0.93 dev /home/mps/code/lossless-monorepo/site
+> astro dev
+
+Using content directory: /home/mps/code/lossless-monorepo/site/src/generated-content
+Environment Configuration: {
+  NODE_ENV: 'development',
+  APP_ENV: 'development',
+  DEPLOY_ENV: 'LocalSiteOnly',
+  isProduction: false,
+  isDevelopment: true,
+  contentBasePath: '/home/mps/code/lossless-monorepo/site/src/generated-content',
+  DEBUG_AST: false,
+  DEBUG_ARTICLE: false,
+  DEBUG_CITATIONS: false,
+  DEBUG_BACKLINKS: false,
+  DEBUG_TOOLING: false,
+  DEBUG_TOC: false,
+  resolvedContentPath: '/home/mps/code/lossless-monorepo/site/src/generated-content',
+  envFile: '/home/mps/code/lossless-monorepo/site/.env',
+  cwd: '/home/mps/code/lossless-monorepo/site'
+}
+Environment in astro.config.mjs: {
+  NODE_ENV: 'development',
+  isProduction: false,
+  isDevelopment: true,
+  CWD: '/home/mps/code/lossless-monorepo/site',
+  ENV_FILE: 'Found'
+}
+11:46:50 [types] Generated 0ms
+Using content directory: /home/mps/code/lossless-monorepo/site/src/generated-content
+Environment Configuration: {
+  NODE_ENV: 'development',
+  APP_ENV: 'development',
+  DEPLOY_ENV: 'LocalSiteOnly',
+  isProduction: false,
+  isDevelopment: true,
+  contentBasePath: '/home/mps/code/lossless-monorepo/site/src/generated-content',
+  DEBUG_AST: false,
+  DEBUG_ARTICLE: false,
+  DEBUG_CITATIONS: false,
+  DEBUG_BACKLINKS: false,
+  DEBUG_TOOLING: false,
+  DEBUG_TOC: false,
+  resolvedContentPath: '/home/mps/code/lossless-monorepo/site/src/generated-content',
+  envFile: '/home/mps/code/lossless-monorepo/site/.env',
+  cwd: '/home/mps/code/lossless-monorepo/site'
+}
+11:46:51 [content] Syncing content
+11:46:51 [content] Synced content
+11:46:51 [vite] Forced re-optimization of dependencies
+
+ astro  v5.12.0 ready in 1776 ms
+
+┃ Local    http://localhost:4321/
+┃ Network  use --host to expose
+
+11:46:51 watching for file changes...
+Found 14 portfolio entries
+Entry: id="hypernova/portfolio/aalo atomics.md", slug="NO_SLUG"
+Entry: id="hypernova/portfolio/class5 global.md", slug="class5-global"
+Entry: id="hypernova/portfolio/don't quit.md", slug="dont-quit"
+Entry: id="hypernova/portfolio/kearnyjackson.md", slug="kearny-jackson"
+Entry: id="hypernova/portfolio/maven clinic.md", slug="maven-clinic"
+Entry: id="hypernova/portfolio/list.md", slug="portfolio-list"
+Entry: id="hypernova/portfolio/ontra.md", slug="NO_SLUG"
+Entry: id="hypernova/portfolio/watershed.md", slug="watershed"
+Entry: id="hypernova/portfolio/theoryforge.md", slug="theoryforge"
+Entry: id="hypernova/portfolio/trela.md", slug="NO_SLUG"
+Entry: id="hypernova/portfolio/javelin venture partners.md", slug="javelin-venture-partners"
+Entry: id="hypernova/portfolio/star catcher.md", slug="star-catcher"
+Entry: id="hypernova/portfolio/yassir.md", slug="yassir"
+Entry: id="avalanche/portfolio/pencil spaces.md", slug="pencil-spaces"
+Generating path: client="Hypernova", slug="aalo-atomics" from entry.id="hypernova/portfolio/aalo atomics.md"
+Generating path: client="Hypernova", slug="class5-global" from entry.id="hypernova/portfolio/class5 global.md"
+Generating path: client="Hypernova", slug="dont-quit" from entry.id="hypernova/portfolio/don't quit.md"
+Generating path: client="Hypernova", slug="kearny-jackson" from entry.id="hypernova/portfolio/kearnyjackson.md"
+Generating path: client="Hypernova", slug="maven-clinic" from entry.id="hypernova/portfolio/maven clinic.md"
+Generating path: client="Hypernova", slug="portfolio-list" from entry.id="hypernova/portfolio/list.md"
+Generating path: client="Hypernova", slug="ontra" from entry.id="hypernova/portfolio/ontra.md"
+Generating path: client="Hypernova", slug="watershed" from entry.id="hypernova/portfolio/watershed.md"
+Generating path: client="Hypernova", slug="theoryforge" from entry.id="hypernova/portfolio/theoryforge.md"
+Generating path: client="Hypernova", slug="trela" from entry.id="hypernova/portfolio/trela.md"
+Generating path: client="Hypernova", slug="javelin-venture-partners" from entry.id="hypernova/portfolio/javelin venture partners.md"
+Generating path: client="Hypernova", slug="star-catcher" from entry.id="hypernova/portfolio/star catcher.md"
+Generating path: client="Hypernova", slug="yassir" from entry.id="hypernova/portfolio/yassir.md"
+Generating path: client="Avalanche", slug="pencil-spaces" from entry.id="avalanche/portfolio/pencil spaces.md"
+Generated 14 paths
+Found 14 portfolio entries
+Entry: id="hypernova/portfolio/aalo atomics.md", slug="NO_SLUG"
+Entry: id="hypernova/portfolio/class5 global.md", slug="class5-global"
+Entry: id="hypernova/portfolio/don't quit.md", slug="dont-quit"
+Entry: id="hypernova/portfolio/kearnyjackson.md", slug="kearny-jackson"
+Entry: id="hypernova/portfolio/maven clinic.md", slug="maven-clinic"
+Entry: id="hypernova/portfolio/list.md", slug="portfolio-list"
+Entry: id="hypernova/portfolio/ontra.md", slug="NO_SLUG"
+Entry: id="hypernova/portfolio/watershed.md", slug="watershed"
+Entry: id="hypernova/portfolio/theoryforge.md", slug="theoryforge"
+Entry: id="hypernova/portfolio/trela.md", slug="NO_SLUG"
+Entry: id="hypernova/portfolio/javelin venture partners.md", slug="javelin-venture-partners"
+Entry: id="hypernova/portfolio/star catcher.md", slug="star-catcher"
+Entry: id="hypernova/portfolio/yassir.md", slug="yassir"
+Entry: id="avalanche/portfolio/pencil spaces.md", slug="pencil-spaces"
+Generating path: client="Hypernova", slug="aalo-atomics" from entry.id="hypernova/portfolio/aalo atomics.md"
+Generating path: client="Hypernova", slug="class5-global" from entry.id="hypernova/portfolio/class5 global.md"
+Generating path: client="Hypernova", slug="dont-quit" from entry.id="hypernova/portfolio/don't quit.md"
+Generating path: client="Hypernova", slug="kearny-jackson" from entry.id="hypernova/portfolio/kearnyjackson.md"
+Generating path: client="Hypernova", slug="maven-clinic" from entry.id="hypernova/portfolio/maven clinic.md"
+Generating path: client="Hypernova", slug="portfolio-list" from entry.id="hypernova/portfolio/list.md"
+Generating path: client="Hypernova", slug="ontra" from entry.id="hypernova/portfolio/ontra.md"
+Generating path: client="Hypernova", slug="watershed" from entry.id="hypernova/portfolio/watershed.md"
+Generating path: client="Hypernova", slug="theoryforge" from entry.id="hypernova/portfolio/theoryforge.md"
+Generating path: client="Hypernova", slug="trela" from entry.id="hypernova/portfolio/trela.md"
+Generating path: client="Hypernova", slug="javelin-venture-partners" from entry.id="hypernova/portfolio/javelin venture partners.md"
+Generating path: client="Hypernova", slug="star-catcher" from entry.id="hypernova/portfolio/star catcher.md"
+Generating path: client="Hypernova", slug="yassir" from entry.id="hypernova/portfolio/yassir.md"
+Generating path: client="Avalanche", slug="pencil-spaces" from entry.id="avalanche/portfolio/pencil spaces.md"
+Generated 14 paths
+11:46:54 [200] /client/Hypernova/portfolio/portfolio-list 341ms
