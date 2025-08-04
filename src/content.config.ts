@@ -179,6 +179,8 @@ const clientPortfoliosCollection = defineCollection({
     }
   }),
   schema: z.object({
+    title: z.string().optional(), // Declare title as optional
+    site_name: z.string().optional(), // Declare site_name as optional  
     aliases: z.union([
       z.string().transform(str => [str]),
       z.array(z.string()),
@@ -187,16 +189,10 @@ const clientPortfoliosCollection = defineCollection({
     ]).transform(val => val ?? []).default([]),
     slug: z.string().optional(), // Allow custom slugs from frontmatter
   }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
-
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-
     return {
       ...data,
-      title: displayTitle,
-      slug: data.slug || filename.toLowerCase().replace(/\s+/g, '-'), // Respect frontmatter slug
+      // Let the route handle title generation since it has access to entry.id
+      slug: data.slug, // Respect frontmatter slug if provided
     };
   })
 });

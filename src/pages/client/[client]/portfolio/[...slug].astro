@@ -62,10 +62,13 @@ export const getStaticPaths = async () => {
 
 const { client, entry, slug } = Astro.props;
 
+// Use title from frontmatter as first priority
+const displayTitle = entry.data.title || entry.data.site_name || toProperCase(slug);
+
 const contentData = {
   path: Astro.url.pathname,
   id: entry.id.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, ''),
-  title: entry.data.title,
+  title: displayTitle,
   ...entry.data,
   date_created: entry.data.date_created || new Date().toISOString(),
   date_modified: entry.data.date_modified || new Date().toISOString()
@@ -74,7 +77,7 @@ const contentData = {
 ---
 
 <Layout 
-  title={entry.data.title || 'Portfolio Item'}
+  title={displayTitle}
   frontmatter={entry.data}
 >
   <OneArticle
@@ -82,6 +85,6 @@ const contentData = {
     content={entry.body}
     markdownFile={entry.id}
     data={contentData}
-    title={entry.data.title}
+    title={displayTitle}
   />
 </Layout>
