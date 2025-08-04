@@ -1,13 +1,20 @@
 <a href="https://lossless.group"><img src="https://i.imgur.com/jrZBIAb.png" alt="The Lossless Group"></a>
 
-
+> Version 0.0.0.93 pushed to GitHub on 2025-08-04
 
 # Basics
 
 ## Features
 - Responsive Layout
 - Extensible Collections
+    - Collections with multiple paths
 - Extended Markdown Render Pipeline
+    - New (Direcives with syntax) 
+    ```
+    :::<directive-name> 
+       - New (translate extended markdown syntax to custom html, css, and js).
+    :::
+    ``` 
 - Logo Scroller
 - Hero Banner
 - Open Graph image handling per file content frontmatter.
@@ -137,15 +144,14 @@ The processing flow follows this sequence:
 
 ### Remark Plugins (Markdown AST Processing)
 Located in `/src/utils/remark/`:
-- **remark-mermaid** - Converts Mermaid code blocks to diagram components
-- **remark-math** - Processes mathematical expressions for KaTeX
+- **remark-mermaid** - Converts Mermaid code blocks to diagram component
 - **remark-container** - Custom container blocks (callouts, info boxes)
+- **remark-directive** - Custom container blocks (custom components)
 - **remark-backlinks** - Generates bidirectional content linking
 - **remark-toc** - Auto-generates table of contents from headers
 
 ### Rehype Plugins (HTML AST Processing)  
 Located in `/src/utils/rehype/`:
-- **rehype-katex** - Renders mathematical expressions
 - **rehype-autolink-headings** - Adds shareable anchor links to headers
 - **rehype-slug** - Generates URL-friendly header IDs
 - **rehype-external-links** - Processes external link handling
@@ -155,10 +161,11 @@ Located in `/src/utils/rehype/`:
 - **Code Block Enhancement** - Custom syntax highlighting with copy buttons
 - **Image Processing** - External image optimization via ImageKit API
 - **Frontmatter Integration** - YAML metadata processing for pages and collections
+- **Obsidian friendly** - We develop content with Obsidian, and keep the content in a git submodule. It's public, check it out at https://github.com/lossless-group/lossless-content
 
 ### Syntax Highlighting
 Uses Shiki with custom themes supporting:
-- 100+ programming languages
+- 15+ programming languages
 - Custom code block types (`imageGallery`, `toolingGallery`, `litegal`)
 - Dark mode optimized color schemes
 - Line highlighting and annotations

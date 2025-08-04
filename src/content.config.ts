@@ -169,6 +169,34 @@ const clientProjectsCollection = defineCollection({
   })
 });
 
+const clientPortfoliosCollection = defineCollection({
+  loader: glob({
+    pattern: "**/Portfolio/**/*.{md,mdx}", // Match any Portfolio directory at any depth
+    base: resolveContentPath("client-content"),
+    generateId: ({ entry }) => {
+      // Ensure proper ID generation to avoid conflicts
+      return entry.replace(/^client-content\//, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    title: z.string().optional(), // Declare title as optional
+    site_name: z.string().optional(), // Declare site_name as optional  
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+    slug: z.string().optional(), // Allow custom slugs from frontmatter
+  }).passthrough().transform((data, context) => {
+    return {
+      ...data,
+      // Let the route handle title generation since it has access to entry.id
+      slug: data.slug, // Respect frontmatter slug if provided
+    };
+  })
+});
+
 const visualsCollection = defineCollection({
   loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
   schema: z.object({
@@ -479,18 +507,59 @@ const upAndRunningCollection = defineCollection({
   }))
 });
 
-const portfolioCollection = createMultiPathCollection({
-  paths: [
-    'content/client-content/Hypernova/Portfolio',
-    'content/client-content/Avalanche/Portfolio',
-  ],
+const portfolioCollection = defineCollection({
+  loader: glob({ 
+    pattern: [
+      'tooling/Portfolio/*.md',
+      'client-content/*/Portfolio/*.md'
+    ], 
+    base: resolveContentPath('') 
+  }),
   schema: z.object({
-    publish: z.boolean().optional(), // Allows individual entries to override collection default
-  }).passthrough().transform((data) => ({
-    ...data // Pass through all original frontmatter fields.
-            // Astro will automatically create 'id' and 'slug' properties for the entry.
-            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
-  }))
+    // Make title optional and derive from og_title or filename
+    title: z.string().optional(),
+    og_title: z.string().optional(),
+    og_description: z.string().optional(),
+    og_image: z.string().optional(),
+    og_favicon: z.string().optional(),
+    og_last_fetch: z.union([z.string(), z.date()]).optional(),
+    url: z.string().optional(),
+    zinger: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    tags: z.array(z.string()).optional(),
+    portfolios: z.array(z.string()).optional(),
+    client: z.string().optional(),
+    status: z.string().optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+    description_site_cp: z.string().optional(),
+    site_uuid: z.string().optional(),
+    slug: z.string().optional(),
+  }).passthrough().transform((data, context) => {
+    // Handle context.path - it might be an array in glob loaders
+    const contextPath = Array.isArray(context.path) 
+      ? context.path.join('/') 
+      : String(context.path || '');
+    
+    // Extract client name from path if in client-content
+    const pathParts = contextPath.split('/');
+    const isClientContent = pathParts.includes('client-content');
+    const clientIndex = pathParts.indexOf('client-content');
+    const client = isClientContent && clientIndex !== -1 ? pathParts[clientIndex + 1] : null;
+    
+    // Get filename for slug generation
+    const filename = contextPath.split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Derive title from og_title or filename
+    const title = data.title || data.og_title || filename.replace(/[-_]/g, ' ');
+    
+    return {
+      ...data,
+      title,
+      client: data.client || client,
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+    };
+  })
 });
 
 
@@ -531,6 +600,7 @@ export const paths = {
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-projects': resolveContentPath('client-content'),
+  'client-portfolios': resolveContentPath('client-content'),
 };
 
 // Export the collections
@@ -558,5 +628,6 @@ export const collections = {
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-projects': clientProjectsCollection,
+  'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
 };

@@ -9,6 +9,7 @@ import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import IconHeaderMessageCardGrid from '@components/basics/messages/IconHeaderMessageCardGrid.astro';
+import IconHeaderMessageCard from '@components/basics/messages/IconHeaderMessageCard.astro';
 import ToolingGallery from '@components/markdown/ToolingGallery.astro';
 import ClientReferenceSection from '@components/client-portals/ClientReferenceSection.astro';
 
@@ -122,6 +123,16 @@ try {
   console.warn(`No tool-gallery.yaml for ${client}`);
 }
 
+// Load and process client portal cards
+let clientPortalCards = [];
+try {
+  const cardsPath = path.resolve(process.cwd(), 'src/content/messages/clientPortalCards.json');
+  const rawCards = await fs.readFile(cardsPath, 'utf-8');
+  clientPortalCards = JSON.parse(rawCards);
+  console.log(`Loaded ${clientPortalCards.length} cards from messages/clientPortalCards.json`);
+} catch (error) {
+  console.error('Error loading client portal cards:', error);
+}
 
 ---
 
@@ -166,10 +177,25 @@ try {
       </div>
 
       <section class="client-portal-cards-grid-section" style="--client-portal-section-top-margin: 0.5rem;">
-        <IconHeaderMessageCardGrid 
-          jsonPath="messages/clientPortalCards.json"
-          style="margin-top: 0; margin-bottom: 0;"
-        />
+        <div class="icon-header-message-card-grid" style="margin-top: 0; margin-bottom: 0;">
+          {clientPortalCards.map(card => (
+            <div class="card-container">
+              <IconHeaderMessageCard
+                title={card.title}
+                description={card.description}
+                badge={card.badge}
+                verified={card.verified}
+                to_path={card.to_path?.replace('[client]', client)}
+              >
+                {card.icon && card.icon.trim().endsWith('.svg') ? (
+                  <img src={card.icon} alt={card.title} width="64" height="64" loading="lazy" />
+                ) : (
+                  <span set:html={card.icon} />
+                )}
+              </IconHeaderMessageCard>
+            </div>
+          ))}
+        </div>
       </section>
     </section>
 
