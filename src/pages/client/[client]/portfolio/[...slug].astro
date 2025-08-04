@@ -1,62 +1,66 @@
 ---
-/**
- * /client/[client]/portfolio/[...slug].astro — Dynamic Route for Client Portfolio
- * Renders a single portfolio item
- */
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import { processEntries, getReferenceSlug, toProperCase } from '@utils/slugify';
+import path from 'node:path';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 
-// Ensure page is prerendered as static HTML
-export const prerender = true;
+export const getStaticPaths = async () => {
+  const allEntries = await getCollection('client-portfolios');
+  console.log(`Found ${allEntries.length} portfolio entries`);
+  
+  allEntries.forEach(entry => {
+    console.log(`Entry: id="${entry.id}", slug="${entry.data.slug || 'NO_SLUG'}"`);
+  });
+  
+  // Get list of client directories from filesystem to preserve case
+  const fs = await import('node:fs/promises');
+  const { contentBasePath } = await import('@utils/envUtils');
+  
+  const clientContentDir = path.resolve(`${contentBasePath}/client-content`);
+  const clientDirs = await fs.readdir(clientContentDir, { withFileTypes: true });
+  const clientNames = clientDirs
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name);
+  
+  // Create a case-insensitive map to preserve original case
+  const clientCaseMap = new Map(
+    clientNames.map(name => [name.toLowerCase(), name])
+  );
 
-export async function getStaticPaths() {
-  const portfolioEntries = await getCollection('portfolio');
-  const paths = [];
+  const paths = allEntries
+    .map(entry => {
+      const pathParts = entry.id.split('/');
+      
+      // For entries like "hypernova/Portfolio/file", extract the client (first part)
+      const clientLower = pathParts[0];
+      const client = clientCaseMap.get(clientLower) || clientLower;
+      
+      const filename = path.basename(entry.id).replace(/\.(md|mdx)$/, '');
+      const slug = entry.data.slug || getReferenceSlug(filename);
 
-  for (const entry of portfolioEntries) {
-    // Only include client-specific portfolio items
-    if (!entry.data.client) continue;
-    
-    const entryPath = entry.id.replace(/\\/g, '/');
-    const pathParts = entryPath.split('/');
-    
-    const client = entry.data.client.toLowerCase();
-    const slug = pathParts.pop()?.replace(/\.md$/, '');
-    
-    paths.push({
-      params: { 
-        client,
-        slug: slug ? [slug] : undefined
-      },
-      props: {
-        entry: {
-          ...entry,
-          data: {
-            ...entry.data,
-            title: entry.data.title || entry.id.split('/').pop()?.replace(/\.md$/, '') || 'Untitled'
-          }
-        }
-      }
+      console.log(`Generating path: client="${client}", slug="${slug}" from entry.id="${entry.id}"`);
+
+      return {
+        params: {
+          client,
+          slug: slug,
+        },
+        props: {
+          client,
+          entry,
+          slug: slug,
+          portfolios: allEntries.filter(e => e.id.startsWith(`${clientLower}/`)),
+        },
+      };
     });
-  }
-
+    
+  console.log(`Generated ${paths.length} paths`);
   return paths;
-}
+};
 
-interface Props {
-  entry: {
-    id: string;
-    body: string;
-    data: {
-      title: string;
-      [key: string]: any;
-    }
-  };
-}
-
-const { entry } = Astro.props as Props;
+const { client, entry, slug } = Astro.props;
 
 const contentData = {
   path: Astro.url.pathname,
@@ -66,7 +70,9 @@ const contentData = {
   date_created: entry.data.date_created || new Date().toISOString(),
   date_modified: entry.data.date_modified || new Date().toISOString()
 };
+
 ---
+
 <Layout 
   title={entry.data.title || 'Portfolio Item'}
   frontmatter={entry.data}

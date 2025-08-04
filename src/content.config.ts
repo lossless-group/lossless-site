@@ -169,6 +169,38 @@ const clientProjectsCollection = defineCollection({
   })
 });
 
+const clientPortfoliosCollection = defineCollection({
+  loader: glob({
+    pattern: "**/Portfolio/**/*.{md,mdx}", // Match any Portfolio directory at any depth
+    base: resolveContentPath("client-content"),
+    generateId: ({ entry }) => {
+      // Ensure proper ID generation to avoid conflicts
+      return entry.replace(/^client-content\//, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+    slug: z.string().optional(), // Allow custom slugs from frontmatter
+  }).passthrough().transform((data, context) => {
+    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
+
+    const displayTitle = data.title
+      ? data.title
+      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+
+    return {
+      ...data,
+      title: displayTitle,
+      slug: data.slug || filename.toLowerCase().replace(/\s+/g, '-'), // Respect frontmatter slug
+    };
+  })
+});
+
 const visualsCollection = defineCollection({
   loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
   schema: z.object({
@@ -572,6 +604,7 @@ export const paths = {
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-projects': resolveContentPath('client-content'),
+  'client-portfolios': resolveContentPath('client-content'),
 };
 
 // Export the collections
@@ -599,5 +632,6 @@ export const collections = {
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-projects': clientProjectsCollection,
+  'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
 };

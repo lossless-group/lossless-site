@@ -6,5 +6,9 @@
    "Windsurf": [
      {"Windsurf_Trademark--Lightest": "https://ik.imagekit.io/xvpgfijuw/lossless-content-embeds/trademark__Windsurf--Lightest.svg"},
      {"Windsurf_appIcon--Brand": "https://ik.imagekit.io/xvpgfijuw/lossless-content-embeds/icon__Windsurf--Lightest.svg"}
+   ],
+   "Claude Code": [
+     {"ClaudeCode_Trademark--Lighter": "https://claude.ai/assets/claude-icon.svg"},
+     {"ClaudeCode_appIcon--Brand": "https://claude.ai/assets/claude-icon.svg"}
    ]
 }
