@@ -1,0 +1,171 @@
+---
+/**
+ * /client/[client]/portfolio/[slug].astro — Dynamic Route for Client Portfolio
+ * Renders a single portfolio item
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+// Get the portfolio entry for the current page
+export async function getStaticPaths() {
+  const portfolioEntries = await getCollection('portfolio');
+  const paths = [];
+  
+  for (const entry of portfolioEntries) {
+    // Skip unpublished entries unless in development
+    if (entry.data.publish === false && import.meta.env.PROD) {
+      continue;
+    }
+    
+    // Extract client name from the file path
+    const filePath = entry.id;
+    const pathParts = filePath.split('/');
+    const clientIndex = pathParts.indexOf('client-content');
+    
+    if (clientIndex === -1 || clientIndex >= pathParts.length - 1) {
+      continue; // Skip if we can't determine the client
+    }
+    
+    const clientName = pathParts[clientIndex + 1].toLowerCase();
+    const itemPath = pathParts.slice(clientIndex + 3).join('/').replace(/\.md$/, '');
+    
+    // Get the title from frontmatter or generate from filename
+    const title = entry.data.title || 
+      pathParts[pathParts.length - 1]
+        .replace(/\.md$/, '')
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase()) || 
+      'Portfolio Item';
+    
+    // Add the path with the correct client name and slug
+    paths.push({
+      params: { 
+        client: clientName,
+        slug: itemPath.toLowerCase()
+      },
+      props: {
+        entry: {
+          ...entry,
+          data: {
+            ...entry.data,
+            title,
+            client: clientName,
+            slug: itemPath.toLowerCase()
+          }
+        }
+      }
+    });
+  }
+
+  return paths;
+}
+
+interface Props {
+  entry: {
+    id: string;
+    body: string;
+    data: {
+      title: string;
+      [key: string]: any;
+    }
+  };
+}
+
+const { entry } = Astro.props as Props;
+
+// Define the type for our portfolio entry
+type PortfolioEntry = {
+  id: string;
+  collection: string;
+  data: {
+    title: string;
+    publish?: boolean;
+    date_created?: string | Date;
+    date_modified?: string | Date;
+    url?: string;
+    [key: string]: unknown;
+  };
+  body: string;
+};
+
+// Get the entry from props
+const { entry } = Astro.props as { entry: PortfolioEntry };
+
+// Get the client name from the URL
+const { client } = Astro.params;
+const formattedClient = typeof client === 'string' 
+  ? client.charAt(0).toUpperCase() + client.slice(1)
+  : 'Portfolio';
+
+// Set the page title
+const pageTitle = entry.data.title || 'Portfolio Item';
+
+// Format dates if they exist
+const formatDate = (date: string | Date | undefined): string => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Prepare content data for the OneArticle component
+const contentData = {
+  ...entry.data,
+  date_created: entry.data.date_created || new Date().toISOString(),
+  date_modified: entry.data.date_modified || new Date().toISOString()
+};
+
+---
+
+<Layout 
+  title={`${pageTitle} | ${formattedClient} Portfolio`}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component="article"
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+    title={pageTitle}
+  >
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold mb-2">{pageTitle}</h1>
+      {entry.data.date_created && (
+        <p class="text-gray-500">
+          {formatDate(entry.data.date_created)}
+          {entry.data.date_modified && ` • Updated ${formatDate(entry.data.date_modified)}`}
+        </p>
+      )}
+    </header>
+    
+    <div class="prose max-w-none">
+      {entry.body && (
+        <div set:html={entry.body} />
+      )}
+    </div>
+    
+    {entry.data.url && (
+      <div class="mt-8">
+        <a 
+          href={entry.data.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-flex items-center text-blue-600 hover:text-blue-800"
+        >
+          View Project
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+            <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+          </svg>
+        </a>
+      </div>
+    )}
+  </OneArticle>
+</Layout>

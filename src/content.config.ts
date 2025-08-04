@@ -23,6 +23,8 @@ function resolveContentPath(relativePath: string): string {
 // Function to create a collection that loads from multiple paths
 function createMultiPathCollection({
   paths,
+  schema,
+  loader,
   ...config
 }: {
   paths: string[];
@@ -31,13 +33,30 @@ function createMultiPathCollection({
 }) {
   // Create a glob pattern that combines all paths
   const patterns = paths.map(path => `${path}/**/*.md`);
-  const base = process.cwd(); // Use current working directory as base
-
+  
   return defineCollection({
     ...config,
-    loader: config.loader || glob({
+    type: 'content',
+    schema: schema,
+    loader: loader || glob({
       pattern: patterns,
-      base
+      base: process.cwd(),
+      generateId: ({ entry }) => {
+        // Generate ID based on the file path relative to the client-content directory
+        const path = entry.replace(/\\/g, '/');
+        const parts = path.split('/');
+        const clientIndex = parts.findIndex(part => part === 'client-content');
+        
+        if (clientIndex >= 0 && clientIndex < parts.length - 1) {
+          // Extract client name and portfolio item path
+          const clientName = parts[clientIndex + 1].toLowerCase();
+          const itemPath = parts.slice(clientIndex + 3).join('/').replace(/\.md$/, '');
+          return `${clientName}/${itemPath}`.toLowerCase();
+        }
+        
+        // Fallback to the file path if we can't determine the client
+        return path.toLowerCase().replace(/\.md$/, '');
+      }
     })
   });
 }
@@ -362,13 +381,10 @@ const toolCollection = defineCollection({
 
 const verticalToolkitsCollection = defineCollection({
   loader: glob({
-    pattern: "**/*.md", 
-    base: resolveContentPath("vertical-toolkits"),
-    // Custom ID generation to preserve the full directory path
+    pattern: '**/*.md',
+    base: resolveContentPath('vertical-toolkits'),
     generateId: ({ entry }) => {
-      // entry is the relative path from base, e.g., "FinTech/Alviere.md"
-      // We want to preserve the directory structure but lowercase it for consistency
-      // Remove the .md extension and convert to lowercase
+      // Remove the .md extension and convert to lowercase for consistent routing
       return entry.replace(/\.md$/, '').toLowerCase();
     }
   }),
@@ -468,6 +484,20 @@ const toHeroCollection = defineCollection({
   }))
 });
 
+// Portfolio collection for client portfolio items
+const portfolioCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    url: z.string().optional(),
+    publish: z.boolean().optional().default(true),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+  }).passthrough()
+});
+
+// Up and Running collection
 const upAndRunningCollection = defineCollection({
   loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/up-and-running") }),
   schema: z.object({
@@ -475,22 +505,39 @@ const upAndRunningCollection = defineCollection({
   }).passthrough().transform((data) => ({
     ...data // Pass through all original frontmatter fields.
             // Astro will automatically create 'id' and 'slug' properties for the entry.
-            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
-  }))
-});
-
-const portfolioCollection = createMultiPathCollection({
-  paths: [
-    'content/client-content/Hypernova/Portfolio',
-    'content/client-content/Avalanche/Portfolio',
-  ],
   schema: z.object({
-    publish: z.boolean().optional(), // Allows individual entries to override collection default
-  }).passthrough().transform((data) => ({
-    ...data // Pass through all original frontmatter fields.
-            // Astro will automatically create 'id' and 'slug' properties for the entry.
-            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
-  }))
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    url: z.string().optional(),
+    publish: z.boolean().optional().default(true),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    // Allow any other frontmatter fields
+  }).transform((data, ctx) => {
+    // Use the entry's ID to get the filename as a fallback for title
+    const entryId = typeof data.id === 'string' ? data.id : '';
+    const filename = entryId.split('/').pop()?.replace(/\.md$/, '') || '';
+    const title = data.title || filename;
+    
+    // Convert date objects to ISO strings if needed
+    const dateToISOString = (date: any) => {
+      if (!date) return undefined;
+      if (date instanceof Date) return date.toISOString();
+      if (typeof date === 'string') return date;
+      return new Date().toISOString();
+    };
+    
+    return {
+      ...data,
+      title,
+      // Ensure we have a slug for routing
+      slug: data.slug || filename.toLowerCase(),
+      // Ensure dates are in string format
+      date_created: dateToISOString(data.date_created),
+      date_modified: dateToISOString(data.date_modified),
+      url: data.url || '',
+    };
+  })
 });
 
 
@@ -531,6 +578,11 @@ export const paths = {
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-projects': resolveContentPath('client-content'),
+  'portfolio': [
+    resolveContentPath('client-content/Hypernova/Portfolio'),
+    resolveContentPath('client-content/Avalanche/Portfolio'),
+    resolveContentPath('tooling/Portfolio')
+  ],
 };
 
 // Export the collections
