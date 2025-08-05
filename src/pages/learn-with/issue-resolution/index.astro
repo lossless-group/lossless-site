@@ -46,6 +46,9 @@ const articles = allEntries.map((entry) => {
   
   const customSlug = data?.slug || slugify(data?.title || entry.id);
   
+  // Ensure the slug includes the full path for proper routing
+  const fullSlug = `/learn-with/issue-resolution/${customSlug}`;
+  
   let dateValue = data?.date_modified;
   if (dateValue instanceof Date) {
     dateValue = dateValue.toISOString().split('T')[0];
@@ -54,10 +57,10 @@ const articles = allEntries.map((entry) => {
   return {
     id: entry.id, 
     title: data?.title || 'Untitled',
-    slug: customSlug, 
+    slug: fullSlug, // Use the full path for the slug
     banner_image: data?.banner_image, 
     portrait_image: data?.portrait_image, 
-    imageAlt: `Image for ${data?.title || 'Untitled'}`, 
+    imageAlt: `Image for ${data?.title || 'Untitled'}`,
     date: dateValue, // Map date_modified to date for ArticleGrid compatibility 
     lede: data?.lede || '', 
     tags: normalizeToArray('tag', 'tags'),

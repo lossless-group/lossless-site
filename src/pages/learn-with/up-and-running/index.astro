@@ -64,14 +64,17 @@ const guides = allEntries.map((entry) => {
     dateValue = dateValue.toISOString().split('T')[0];
   }
   
+  // Ensure the slug includes the full path for proper routing
+  const fullSlug = `/learn-with/up-and-running/${customSlug}`;
+  
   return {
     id: entry.id, 
     title: data?.title || 'Untitled',
-    slug: customSlug, 
+    slug: fullSlug, // Use the full path for the slug
     collection: 'up-and-running',
     banner_image: data?.banner_image, 
     portrait_image: data?.portrait_image, 
-    imageAlt: `Image for ${data?.title || 'Untitled'}`, 
+    imageAlt: `Image for ${data?.title || 'Untitled'}`,
     date: dateValue,
     date_of_event: dateValue,
     lede: data?.lede || data?.description || '', 
