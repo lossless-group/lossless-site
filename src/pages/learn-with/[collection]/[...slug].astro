@@ -5,48 +5,102 @@
 export const prerender = true;
 
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { slugify } from '@utils/slugify'; // Adjusted path/ To be created
+import { slugify } from '@utils/slugify';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 
-export async function getStaticPaths() {
-  // Define which collections this dynamic route should handle
-  const collectionsConfig = {
-    'issue-resolution': 'issue-resolution',
-    'talks': 'our-talks'
-  } as const;
-  
-  const paths = [];
+// Import collection configuration
+import { COLLECTION_ROUTES } from '../../../config/collections';
 
-  for (const [collectionName, urlPath] of Object.entries(collectionsConfig)) {
-    // Use CollectionEntry with the correct collection name
-    const entries = await getCollection(collectionName as keyof typeof collectionsConfig);
-    
-    for (const entry of entries) {
-      // Now TypeScript knows entry has a data property
-      const slug = entry.data.slug || slugify(entry.data.title || 'Untitled Issue');
+type CollectionKey = keyof typeof COLLECTION_ROUTES;
+
+// Type for our entry data
+type EntryData = {
+  title?: string;
+  slug?: string;
+  date_created?: Date | string;
+  date_modified?: Date | string;
+  date_of_event?: Date | string;
+  date_reported?: Date | string;
+  participants?: string | string[];
+  participant?: string | string[];
+  author?: string | string[];
+  authors?: string | string[];
+  tag?: string | string[];
+  tags?: string | string[];
+  category?: string | string[];
+  categories?: string | string[];
+  banner_image?: string;
+  portrait_image?: string;
+  lede?: string;
+  excerpt?: string;
+  publish?: boolean;
+  [key: string]: unknown;
+};
+
+// Type for our entry
+type Entry = CollectionEntry<'talks' | 'issue-resolution'> & {
+  data: EntryData;
+};
+
+export async function getStaticPaths() {
+  const paths = [];
+  
+  // Get all collection names that we want to handle
+  const collectionNames = Object.keys(COLLECTION_ROUTES) as CollectionKey[];
+  
+  for (const collectionName of collectionNames) {
+    try {
+      // Get the URL path for this collection
+      const urlPath = COLLECTION_ROUTES[collectionName];
       
-      paths.push({
-        params: { collection: urlPath, slug },
-        props: { entry, collection: collectionName },
-      });
+      // Get collection entries
+      const entries = await getCollection(collectionName);
+      
+      for (const entry of entries) {
+        // Skip if no entry data
+        if (!entry.data) continue;
+        
+        // Skip unpublished entries
+        if (entry.data.publish === false) continue;
+        
+        // Use the slug from frontmatter if available, otherwise generate from title
+        let slug = (entry.data.slug as string) || 
+                  slugify((entry.data.title as string) || 'untitled-article');
+        
+        // Convert to lowercase and replace spaces with hyphens for consistency
+        slug = slug.toLowerCase().replace(/\s+/g, '-');
+        
+        paths.push({
+          params: { 
+            collection: urlPath,
+            slug: slug
+          },
+          props: {
+            entry,
+            collection: collectionName
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing collection ${collectionName}:`, error);
+      continue;
     }
   }
+  
   return paths;
 }
 
 // Define an interface for the props passed by getStaticPaths
 interface Props {
-  entry: CollectionEntry<'issue-resolution' | 'talks'>;
-  collection: string;
+  entry: Entry;
+  collection: CollectionKey;
 }
 
-// Explicitly cast Astro.props, then assign to typed variables
-const astroProps = Astro.props as Props;
-const entry: CollectionEntry<'issue-resolution' | 'talks'> = astroProps.entry;
-const collection: string = astroProps.collection;
-const data = entry.data; // 'data' is 'any' due to CollectionEntry<any>
+// Get the entry and collection from props
+const { entry, collection } = Astro.props as Props;
+const data = entry.data;
 
 // Helper function to normalize fields that might be a single string or an array of strings.
 // Also handles cases where keys might be singular (e.g., 'author') instead of plural ('authors').
@@ -78,43 +132,53 @@ if (collection === 'talks') {
   authorsValue = normalizeToArray(data, 'author', 'authors');
 }
 
+// Prepare article data with proper type safety
 const articleData = {
-  title: data.title || 'Untitled Article',
-  // The main content of the article will be passed via <Content />
+  title: typeof data.title === 'string' ? data.title : 'Untitled Article',
   date: dateValue,
   authors: authorsValue,
   tags: normalizeToArray(data, 'tag', 'tags'),
   categories: normalizeToArray(data, 'category', 'categories'),
-  banner_image: data.banner_image || data.portrait_image || '/visuals/bannerImage__The-Lossless-Group.png',
-  lede: data.lede || data.excerpt || '', // For description
+  banner_image: typeof data.banner_image === 'string' 
+    ? data.banner_image 
+    : typeof data.portrait_image === 'string' 
+      ? data.portrait_image 
+      : '/visuals/bannerImage__The-Lossless-Group.png',
+  lede: typeof data.lede === 'string' 
+    ? data.lede 
+    : typeof data.excerpt === 'string' 
+      ? data.excerpt 
+      : ''
 };
 
 const pageTitle = articleData.title;
 const pageDescription = articleData.lede || 'Detailed article view.';
 
-// Data for the OneArticle component - pass the complete entry data
+// Data for the OneArticle component - ensure all required fields are present
 const contentDataForOneArticle = {
-  ...entry.data, // Include ALL the original entry data (participants, authors, etc.)
+  title: articleData.title,
+  description: pageDescription,
+  lede: articleData.lede,
+  banner_image: articleData.banner_image,
+  portrait_image: typeof data.portrait_image === 'string' ? data.portrait_image : undefined,
+  // Include any other required fields for the OneArticle component
+  ...data, // Spread the rest of the data
   path: Astro.url.pathname,
   id: entry.id,
-  collection: collection, // collection name from Astro.props
+  collection: collection,
 };
 
 ---
-{(async () => {
-  return (
-    <Layout 
-      title={pageTitle} 
-      description={pageDescription}
-      frontmatter={entry.data}
-    >
-      <OneArticle
-        Component={OneArticleOnPage}
-        content={entry.body} {/* Pass raw Markdown body */}
-        markdownFile={entry.id}
-        data={contentDataForOneArticle}
-        {...articleData} {/* Spread articleData props to OneArticle */}
-      />
-    </Layout>
-  );
-})()}
+<Layout 
+  title={pageTitle} 
+  description={pageDescription}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentDataForOneArticle}
+    {...articleData}
+  />
+</Layout>

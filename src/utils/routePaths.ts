@@ -9,6 +9,7 @@ export const ROUTE_PATHS = {
   LEARN_WITH: {
     BASE: '/learn-with',
     ISSUE_RESOLUTION: '/learn-with/issue-resolution',
+    OUR_TALKS: '/learn-with/our-talks',
     // Add other learn-with subpaths here
   },
   
@@ -47,6 +48,8 @@ export function getCollectionBasePath(collectionName: string): string {
       return ROUTE_PATHS.MARKET_MAP.FOR;
     case 'issue-resolution':
       return ROUTE_PATHS.LEARN_WITH.ISSUE_RESOLUTION;
+    case 'talks':
+      return ROUTE_PATHS.LEARN_WITH.OUR_TALKS;
     case 'vertical-toolkits':
       return ROUTE_PATHS.TOOLKIT.VERTICAL;
     // Add other collection mappings here

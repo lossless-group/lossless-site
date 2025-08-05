@@ -51,14 +51,17 @@ const articles = allEntries.map((entry) => {
     dateValue = dateValue.toISOString().split('T')[0];
   }
   
+  // Ensure the slug includes the full path for proper routing
+  const fullSlug = `/learn-with/our-talks/${customSlug}`;
+  
   return {
     id: entry.id, 
     title: data?.title || 'Untitled',
-    slug: customSlug, 
+    slug: fullSlug, // Use the full path for the slug
     collection: 'our-talks',
     banner_image: data?.banner_image, 
     portrait_image: data?.portrait_image, 
-    imageAlt: `Image for ${data?.title || 'Untitled'}`, 
+    imageAlt: `Image for ${data?.title || 'Untitled'}`,
     date: dateValue, // Map date_of_event to date for ArticleGrid compatibility
     date_of_event: dateValue, // Keep original field for UpcomingSection
     lede: data?.lede || '', 
