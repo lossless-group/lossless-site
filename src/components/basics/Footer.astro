@@ -216,12 +216,27 @@ try {
   font-size: 1.07em;
 }
 .footer-link-column ul {
-  list-style: none;
+  list-style: none !important;
   padding: 0;
   margin: 0;
+  border-left: none !important;
 }
 .footer-link-column li {
   margin-bottom: 0.45em;
+  list-style: none !important;
+  margin-left: 0 !important;
+}
+
+/* Override global markdown styles for footer lists */
+.footer-container ul {
+  list-style: none !important;
+  margin-left: 0 !important;
+  border-left: none !important;
+}
+
+.footer-container li {
+  list-style: none !important;
+  margin-left: 0 !important;
 }
 .footer-link-column a {
   color: inherit;

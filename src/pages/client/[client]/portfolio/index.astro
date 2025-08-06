@@ -1,0 +1,180 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
+import BarePortfolioCard from '@components/tool-components/BarePortfolioCard.astro';
+import { getReferenceSlug, toProperCase } from '@utils/slugify';
+export const prerender = false;
+
+// Get the client from the URL parameter
+const { client } = Astro.params;
+
+if (!client) {
+  return Astro.redirect('/404');
+}
+
+// Get all portfolio entries
+const allPortfolios = await getCollection('client-portfolios');
+
+// Filter for the specific client's portfolio companies and process them for display
+const allClientPortfolios = allPortfolios
+  .filter(entry => entry.id.toLowerCase().startsWith(`${client.toLowerCase()}/portfolio/`))
+  .map(entry => {
+    const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || '';
+    const id = getReferenceSlug(filename);
+    const data = entry.data as any; // Type assertion to avoid TS errors
+    
+    return {
+      id,
+      filename,
+      filePath: entry.id,
+      ...data,
+      // Ensure all required fields are present
+      url: data.url || '#',
+      tags: data.tags || [],
+      portfolios: data.portfolios || [],
+    };
+  })
+  .filter(portfolio => portfolio.filename !== 'List'); // Exclude the List.md file
+
+// Separate portfolios with and without images
+const portfoliosWithImages = allClientPortfolios.filter(portfolio => 
+  portfolio.image || portfolio.og_image || portfolio.og_image_url || portfolio.og_screenshot_url
+);
+const portfoliosWithoutImages = allClientPortfolios.filter(portfolio => 
+  !portfolio.image && !portfolio.og_image && !portfolio.og_image_url && !portfolio.og_screenshot_url
+);
+
+console.log(`Found ${allClientPortfolios.length} portfolio companies for ${client}:`, allClientPortfolios.map(p => p.filename));
+console.log(`With images: ${portfoliosWithImages.length}, Without images: ${portfoliosWithoutImages.length}`);
+---
+
+<Layout title={`${toProperCase(client)} Portfolio`}>
+  <main class="portfolio-page">
+    <div class="container">
+      <header class="page-header">
+        <h1>{toProperCase(client)} Portfolio</h1>
+        <p class="page-description">
+          Our portfolio companies are building the future across various industries and technologies.
+        </p>
+      </header>
+
+      <section class="portfolio-section">
+        <div class="portfolio-grid">
+          <!-- Render PortfolioCards for companies with images -->
+          {portfoliosWithImages.map(portfolio => (
+            <PortfolioCard 
+              {...portfolio} 
+              id={portfolio.id}
+              filePath={portfolio.filePath} 
+              class="portfolio-card-item" 
+              data-tags={JSON.stringify(portfolio.tags || [])} 
+            />
+          ))}
+          <!-- Render BarePortfolioCards for companies without images -->
+          {portfoliosWithoutImages.map(portfolio => (
+            <BarePortfolioCard 
+              {...portfolio} 
+              id={portfolio.id}
+              filePath={portfolio.filePath} 
+              class="portfolio-card-item" 
+              data-tags={JSON.stringify(portfolio.tags || [])} 
+            />
+          ))}
+        </div>
+        
+        {allClientPortfolios.length === 0 && (
+          <p class="no-portfolios">No portfolio companies found for {toProperCase(client)}</p>
+        )}
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .portfolio-page {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .page-header h1 {
+    font-size: var(--fs-700);
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
+    margin-bottom: 1rem;
+  }
+
+  .page-description {
+    font-size: var(--fs-400);
+    color: var(--clr-body);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .portfolio-section {
+    margin-bottom: 4rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    align-items: start;
+  }
+
+  .portfolio-card-item {
+    width: 100%;
+    height: auto;
+  }
+
+  .no-portfolios {
+    text-align: center;
+    color: var(--clr-body);
+    font-style: italic;
+    padding: 2rem;
+    grid-column: 1 / -1;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .portfolio-page {
+      padding: 1rem 0.5rem;
+    }
+
+    .page-header h1 {
+      font-size: var(--fs-600);
+    }
+
+    .page-description {
+      font-size: var(--fs-350);
+    }
+
+    .portfolio-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .portfolio-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+</style>

@@ -196,9 +196,108 @@ export async function resolveToolId(input: string, allTools: any[]): Promise<str
   const normMatch = allTools.find(tool => slugify(tool.id) === normalized);
   if (normMatch) return normMatch.id;
 
-  // 3. Try recursive routeManager resolution
+  // 3. Try case-insensitive filename match with space handling
+  const filename = input.split('/').pop() || input;
+  const filenameMatch = allTools.find(tool => {
+    const toolFilename = tool.id.split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Compare both original and slugified versions
+    const inputLower = filename.toLowerCase();
+    const toolLower = toolFilename.toLowerCase();
+    const inputSlugified = slugify(filename);
+    const toolSlugified = slugify(toolFilename);
+    
+    return inputLower === toolLower || 
+           inputSlugified === toolSlugified ||
+           inputLower.replace(/[-_]/g, ' ') === toolLower ||
+           toolLower.replace(/[-_]/g, ' ') === inputLower;
+  });
+  if (filenameMatch) return filenameMatch.id;
+
+  // 4. Try matching by slugified filename across all tools
+  const slugifiedInput = slugify(input);
+  const slugMatch = allTools.find(tool => {
+    const toolFilename = tool.id.split('/').pop()?.replace(/\.md$/, '') || '';
+    return slugify(toolFilename) === slugifiedInput;
+  });
+  if (slugMatch) return slugMatch.id;
+
+  // 5. Try partial path matching for route-transformed inputs
+  // Handle cases like "toolkit/ai-toolkit/flowise" -> "flowise"
+  if (input.includes('/')) {
+    const pathSegments = input.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    // Try to find by converting slugified back to spaced version
+    const unslugified = lastSegment.replace(/-/g, ' ');
+    const unslugifiedMatch = allTools.find(tool => {
+      const toolFilename = tool.id.split('/').pop()?.replace(/\.md$/, '') || '';
+      return toolFilename.toLowerCase() === unslugified.toLowerCase();
+    });
+    if (unslugifiedMatch) return unslugifiedMatch.id;
+  }
+
+  // 6. Try recursive routeManager resolution as last resort
   const route = transformContentPathToRoute(input);
   const finalSlug = route.split('/').pop();
   const finalMatch = allTools.find(tool => slugify(tool.id).endsWith(finalSlug || ''));
+  return finalMatch?.id || null;
+}
+
+export async function resolvePortfolioId(input: string, allPortfolios: any[]): Promise<string | null> {
+  // 1. Try exact match
+  const directMatch = allPortfolios.find(portfolio => portfolio.id === input);
+  if (directMatch) return directMatch.id;
+
+  // 2. Try normalized match
+  const normalized = slugify(input);
+  const normMatch = allPortfolios.find(portfolio => slugify(portfolio.id) === normalized);
+  if (normMatch) return normMatch.id;
+
+  // 3. Try case-insensitive filename match with space handling
+  const filename = input.split('/').pop() || input;
+  const filenameMatch = allPortfolios.find(portfolio => {
+    const portfolioFilename = portfolio.id.split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Compare both original and slugified versions
+    const inputLower = filename.toLowerCase();
+    const portfolioLower = portfolioFilename.toLowerCase();
+    const inputSlugified = slugify(filename);
+    const portfolioSlugified = slugify(portfolioFilename);
+    
+    return inputLower === portfolioLower || 
+           inputSlugified === portfolioSlugified ||
+           inputLower.replace(/[-_]/g, ' ') === portfolioLower ||
+           portfolioLower.replace(/[-_]/g, ' ') === inputLower;
+  });
+  if (filenameMatch) return filenameMatch.id;
+
+  // 4. Try matching by slugified filename across all portfolios
+  const slugifiedInput = slugify(input);
+  const slugMatch = allPortfolios.find(portfolio => {
+    const portfolioFilename = portfolio.id.split('/').pop()?.replace(/\.md$/, '') || '';
+    return slugify(portfolioFilename) === slugifiedInput;
+  });
+  if (slugMatch) return slugMatch.id;
+
+  // 5. Try partial path matching for route-transformed inputs
+  // Handle cases like "client/hypernova/portfolio/maven-clinic" -> "maven clinic"
+  if (input.includes('/')) {
+    const pathSegments = input.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    // Try to find by converting slugified back to spaced version
+    const unslugified = lastSegment.replace(/-/g, ' ');
+    const unslugifiedMatch = allPortfolios.find(portfolio => {
+      const portfolioFilename = portfolio.id.split('/').pop()?.replace(/\.md$/, '') || '';
+      return portfolioFilename.toLowerCase() === unslugified.toLowerCase();
+    });
+    if (unslugifiedMatch) return unslugifiedMatch.id;
+  }
+
+  // 6. Try recursive routeManager resolution as last resort
+  const route = transformContentPathToRoute(input);
+  const finalSlug = route.split('/').pop();
+  const finalMatch = allPortfolios.find(portfolio => slugify(portfolio.id).endsWith(finalSlug || ''));
   return finalMatch?.id || null;
 }

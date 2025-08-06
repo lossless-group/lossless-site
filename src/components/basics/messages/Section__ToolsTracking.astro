@@ -114,16 +114,33 @@ const allTags = [
   /* Full-bleed container for the ribbon */
   #ribbon-container {
     width: 100vw;
+    max-width: 100vw;
     position: relative;
     left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    overflow: visible;
+    transform: translateX(-50%);
+    overflow: hidden;
   }
   
   .trademark-ribbon-wrapper {
     width: 100%;
-    overflow: visible;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Mobile-specific fixes for ribbon positioning */
+  @media (max-width: 768px) {
+    #ribbon-container {
+      width: 100vw;
+      max-width: 100vw;
+      left: 50%;
+      transform: translateX(-50%);
+      overflow: hidden;
+    }
+    
+    .trademark-ribbon-wrapper {
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+    }
   }
 </style>

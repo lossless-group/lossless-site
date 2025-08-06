@@ -7,13 +7,14 @@ import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
+import PortfolioGallery from '@components/tool-components/PortfolioGallery.astro';
 import SlidesEmbed from '@components/SlidesEmbed.astro';
 import ToolShowcaseIsland from '@components/toolkit/ToolShowcaseIsland.astro';
 import { getCollection } from "astro:content";
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
 import CopyLinkButton from './CopyLinkButton.astro';
-import { resolveToolId } from '@utils/toolUtils';
+import { resolveToolId, resolvePortfolioId } from '@utils/toolUtils';
 /*
       Compose a unique id for markdown headings using ONLY the main heading text.
       - This function takes a heading MDAST node and returns a slugified version of the primary text content.
@@ -90,7 +91,7 @@ const handled_types = [
     "toolingGallery",
     "thematicBreak", 
     "leafDirective", 
-    "containerDirective" 
+    "containerDirective"
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -144,7 +145,6 @@ if (isToolingGallery) {
   }]));
 
   const tools = [];
-  const toolGalleryErrors = [];
 
   // Resolve toolIds
   for (const input of rawToolIds) {
@@ -194,6 +194,318 @@ if (isToolingGallery) {
   toolGalleryTools = tools;
 
 }
+
+// Portfolio Gallery Logic - handle async work upfront
+const isPortfolioGallery = (
+  node.type === "containerDirective" && 
+  (node.name === 'portfolio-gallery' || node.name === 'portfolioGallery')
+);
+
+let portfolioGalleryPortfolios = null;
+let portfolioGalleryErrors: string[] = [];
+let portfolioGalleryConfig: Record<string, any> = {};
+
+// Tooling Gallery Directive Logic - handle async work upfront
+const isToolingGalleryDirective = (
+  node.type === "containerDirective" && 
+  (node.name === 'tooling-gallery' || node.name === 'toolingGallery')
+);
+
+let toolingGalleryDirectiveTools = null;
+let toolingGalleryDirectiveErrors: string[] = [];
+let toolingGalleryDirectiveConfig: Record<string, any> = {};
+
+// Image Gallery Directive Logic - handle async work upfront
+const isImageGalleryDirective = (
+  node.type === "containerDirective" && 
+  (node.name === 'image-gallery' || node.name === 'imageGallery')
+);
+
+let imageGalleryDirectiveCode = '';
+let imageGalleryDirectiveConfig: Record<string, any> = {};
+
+if (isPortfolioGallery) {
+  portfolioGalleryConfig = node.attributes || {};
+  const rawPortfolioIds = [];
+  const tagFilters = [];
+  
+  if (node.children) {
+    // Find list nodes in the container
+    const listNodes = node.children.filter(child => child.type === 'list');
+    
+    for (const listNode of listNodes) {
+      if (listNode.children) {
+        for (const listItem of listNode.children) {
+          if (listItem.type === 'listItem' && listItem.children) {
+            // Look for paragraph containing text or link
+            const paragraph = listItem.children.find(child => child.type === 'paragraph');
+            if (paragraph && paragraph.children) {
+              // Check if this is a tag filter line
+              const textContent = paragraph.children
+                .map(child => child.type === 'text' ? child.value : child.type === 'link' ? child.children[0]?.value || '' : '')
+                .join('').trim();
+              
+              const tagMatch = textContent.match(/^tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+              if (tagMatch) {
+                const tagName = (tagMatch[1] ?? tagMatch[2]).trim();
+                if (tagName) {
+                  tagFilters.push(tagName);
+                  console.log('[portfolioGallery] Added tag filter:', tagName);
+                }
+                continue;
+              }
+              
+              // Otherwise look for portfolio link
+              const link = paragraph.children.find(child => child.type === 'link');
+              if (link && link.url) {
+                // Extract the portfolio path from the backlink URL
+                const url = link.url;
+                // Remove leading slash and .md extension if present
+                const portfolioPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                rawPortfolioIds.push(portfolioPath);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Load portfolio collection
+  const allPortfolios = await getCollection('client-portfolios');
+  const portfolioMap = new Map(allPortfolios.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const portfolios = [];
+  const portfolioErrors = [];
+
+  // Resolve portfolioIds using the same pattern as toolingGallery
+  for (const input of rawPortfolioIds) {
+    let id = input;
+
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolvePortfolioId(id, allPortfolios);
+    if (resolvedId && portfolioMap.has(resolvedId)) {
+      const portfolio = portfolioMap.get(resolvedId);
+      const filename = resolvedId.split('/').pop()?.replace(/\.md$/, '') || '';
+      
+      portfolios.push({
+        id: filename.toLowerCase().replace(/\s+/g, '-'),
+        filename,
+        filePath: resolvedId,
+        ...portfolio,
+        url: portfolio.url || '#',
+        tags: portfolio.tags || [],
+        portfolios: portfolio.portfolios || [],
+      });
+    } else {
+      portfolioErrors.push(input);
+    }
+  }
+
+  // Add portfolios matching tagFilters
+  const normalizeTag = tag => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    console.log('[portfolioGallery] Searching for portfolios with tags:', tagFilters);
+    
+    const tagFilteredPortfolios = allPortfolios
+      .filter(portfolio => portfolio.data.tags?.some(tag =>
+        tagFilters.some(filterTag =>
+          normalizeTag(filterTag) === normalizeTag(tag)
+        )
+      ))
+      .map(entry => {
+        const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || '';
+        return {
+          id: filename.toLowerCase().replace(/\s+/g, '-'),
+          filename,
+          filePath: entry.id,
+          ...entry.data,
+          url: entry.data.url || '#',
+          tags: entry.data.tags || [],
+          portfolios: entry.data.portfolios || [],
+        };
+      });
+    
+    console.log('[portfolioGallery] Found', tagFilteredPortfolios.length, 'portfolios matching tags');
+    
+    // Add tag-matched portfolios if not already added
+    for (const portfolio of tagFilteredPortfolios) {
+      if (!portfolios.some(p => p.filePath === portfolio.filePath)) {
+        portfolios.push(portfolio);
+      }
+    }
+  }
+
+  if (portfolioErrors.length > 0) {
+    console.warn('[portfolioGallery] Missing portfolios for IDs:', portfolioErrors);
+  }
+
+  portfolioGalleryPortfolios = portfolios;
+  portfolioGalleryErrors = portfolioErrors;
+}
+
+if (isToolingGalleryDirective) {
+  toolingGalleryDirectiveConfig = node.attributes || {};
+  const rawToolIds = [];
+  const tagFilters = [];
+  
+  if (node.children) {
+    // Find list nodes in the container (same as portfolio gallery)
+    const listNodes = node.children.filter(child => child.type === 'list');
+    
+    for (const listNode of listNodes) {
+      if (listNode.children) {
+        for (const listItem of listNode.children) {
+          if (listItem.type === 'listItem' && listItem.children) {
+            // Look for paragraph containing text or link
+            const paragraph = listItem.children.find(child => child.type === 'paragraph');
+            if (paragraph && paragraph.children) {
+              // Check if this is a tag filter line
+              const textContent = paragraph.children
+                .map(child => child.type === 'text' ? child.value : child.type === 'link' ? child.children[0]?.value || '' : '')
+                .join('').trim();
+              
+              const tagMatch = textContent.match(/^tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+              if (tagMatch) {
+                const tagName = (tagMatch[1] ?? tagMatch[2]).trim();
+                if (tagName) {
+                  tagFilters.push(tagName);
+                  console.log('[toolingGallery] Added tag filter:', tagName);
+                }
+                continue;
+              }
+              
+              // Otherwise look for tool link
+              const link = paragraph.children.find(child => child.type === 'link');
+              if (link && link.url) {
+                // Extract the tool path from the backlink URL
+                const url = link.url;
+                // Remove leading slash and .md extension if present
+                const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                rawToolIds.push(toolPath);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Load tooling collection
+  const allTools = await getCollection('tooling');
+  const toolMap = new Map(allTools.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const tools = [];
+  const toolGalleryErrors = [];
+
+  // Resolve toolIds
+  for (const input of rawToolIds) {
+    let id = input;
+
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolveToolId(id, allTools);
+    if (resolvedId && toolMap.has(resolvedId)) {
+      tools.push(toolMap.get(resolvedId));
+    } else {
+      toolGalleryErrors.push(input);
+    }
+  }
+
+  // Add tools matching tagFilters
+  const normalizeTag = tag => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    console.log('[toolingGallery] Searching for tools with tags:', tagFilters);
+    
+    const tagFilteredTools = allTools
+      .filter(tool => tool.data.tags?.some(tag =>
+        tagFilters.some(filterTag =>
+          normalizeTag(filterTag) === normalizeTag(tag)
+        )
+      ))
+      .map(entry => ({
+        ...entry.data,
+        id: entry.id,
+        filePath: entry.id,
+      }));
+    
+    console.log('[toolingGallery] Found', tagFilteredTools.length, 'tools matching tags');
+    
+    // Add tag-matched tools if not already added
+    for (const tool of tagFilteredTools) {
+      if (!tools.some(t => t.id === tool.id)) {
+        tools.push(tool);
+      }
+    }
+  }
+
+  if (toolGalleryErrors.length > 0) {
+    console.warn('[toolingGallery] Missing tools for IDs:', toolGalleryErrors);
+  }
+
+  toolingGalleryDirectiveTools = tools;
+  toolingGalleryDirectiveErrors = toolGalleryErrors;
+}
+
+if (isImageGalleryDirective) {
+  imageGalleryDirectiveConfig = node.attributes || {};
+  
+  // Extract content from directive children
+  if (node.children) {
+    // Find list nodes in the container
+    const listNodes = node.children.filter(child => child.type === 'list');
+    
+    for (const listNode of listNodes) {
+      if (listNode.children) {
+        for (const listItem of listNode.children) {
+          if (listItem.type === 'listItem' && listItem.children) {
+            // Look for paragraph containing link or text
+            const paragraph = listItem.children.find(child => child.type === 'paragraph');
+            if (paragraph && paragraph.children) {
+              // Check if there's a link node (for URLs)
+              const link = paragraph.children.find(child => child.type === 'link');
+              if (link && link.url) {
+                // Extract URL from link node
+                imageGalleryDirectiveCode += '- ' + link.url + '\n';
+              } else {
+                // Fallback to text content
+                const textContent = paragraph.children
+                  .map(child => child.type === 'text' ? child.value : '')
+                  .join('').trim();
+                
+                if (textContent) {
+                  imageGalleryDirectiveCode += '- ' + textContent + '\n';
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  imageGalleryDirectiveCode = imageGalleryDirectiveCode.trim();
+  
+  console.log('[imageGallery] Extracted code:', imageGalleryDirectiveCode);
+}
+
 // Debug output to see AST structure
 if (DEBUG_AST) {
   console.log(`=== AstroMarkdown Debug ===`)
@@ -543,40 +855,120 @@ if (DEBUG_AST) {
     lang === 'imageGallery' || (lang === 'yaml' && meta === 'imageGallery')
   );
 
-  if (toolGalleryTools?.length > 0) {
+  if (toolGalleryTools?.length > 0 || toolGalleryErrors.length > 0) {
       return (
-          <>
-            <ToolingGallery tools={toolGalleryTools} small={isSmallToolGallery}/>
-            {toolGalleryErrors.length > 0 && (
-              <div class="tool-gallery-error">
-                ⚠️ Tool(s) not found:
-                <ul>
-                  {toolGalleryErrors.map(id => <li><code>{id}</code></li>)}
-                </ul>
-              </div>
-
-              <style>
-                .tool-gallery-error {
-                    color: #ff6b6b;
-                    background-color: rgba(255, 0, 0, 0.05);
-                    border: 1px solid rgba(255, 0, 0, 0.2);
-                    padding: 0.75rem;
-                    margin-top: 2rem;
-                    border-radius: 0.5rem;
-                    font-size: 0.9rem;
-                  }
-
-                  .tool-gallery-error ul {
-                    margin: 0.5rem 0 0;
-                    padding-left: 1.25rem;
-                  }
-              </style>
-            )}
-          </>
-      )}
+        <>
+          <div class="deprecation-warning">
+            <div class="warning-header">
+              <span class="warning-icon">⚠️</span>
+              <span class="warning-title">Deprecation Warning</span>
+            </div>
+            <div class="warning-content">
+              <p>The <code>```yaml toolingGallery</code> syntax is deprecated. Please use <code>:::tooling-gallery</code> directive syntax instead.</p>
+            </div>
+          </div>
+          <ToolingGallery tools={toolGalleryTools || []} small={isSmallToolGallery} errors={toolGalleryErrors}/>
+          <style>
+            .deprecation-warning {
+              margin: 1rem 0;
+              padding: 1rem;
+              background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+              border: 1px solid rgba(245, 158, 11, 0.3);
+              border-radius: 8px;
+            }
+            
+            .deprecation-warning .warning-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.5rem;
+              font-weight: 600;
+              color: #fbbf24;
+            }
+            
+            .deprecation-warning .warning-icon {
+              font-size: 1.25rem;
+            }
+            
+            .deprecation-warning .warning-title {
+              font-size: 0.9rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .deprecation-warning .warning-content {
+              color: #f1f5f9;
+              line-height: 1.5;
+              font-size: 0.9rem;
+            }
+            
+            .deprecation-warning code {
+              background: rgba(255, 255, 255, 0.1);
+              padding: 0.2em 0.4em;
+              border-radius: 4px;
+              font-family: monospace;
+            }
+          </style>
+        </>
+      );
+    }
 
   if (isImageGallery) {
-    return <ImageGallery code={value} dirpath={data.dirpath} />;
+    return (
+      <>
+        <div class="deprecation-warning">
+          <div class="warning-header">
+            <span class="warning-icon">⚠️</span>
+            <span class="warning-title">Deprecation Warning</span>
+          </div>
+          <div class="warning-content">
+            <p>The <code>```yaml imageGallery</code> syntax is deprecated. Please use <code>:::image-gallery</code> directive syntax instead.</p>
+          </div>
+        </div>
+        <ImageGallery code={value} dirpath={data.dirpath} />
+        <style>
+          .deprecation-warning {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+          }
+          
+          .deprecation-warning .warning-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #fbbf24;
+          }
+          
+          .deprecation-warning .warning-icon {
+            font-size: 1.25rem;
+          }
+          
+          .deprecation-warning .warning-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .deprecation-warning .warning-content {
+            color: #f1f5f9;
+            line-height: 1.5;
+            font-size: 0.9rem;
+          }
+          
+          .deprecation-warning code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: monospace;
+          }
+        </style>
+      </>
+    );
   }
 
   if (lang === 'mermaid') {
@@ -587,402 +979,6 @@ if (DEBUG_AST) {
   const blockType = lang?.toLowerCase();
   
   switch (blockType) {
-    case 'emphasis':
-    case 'em':
-      return (
-        <>
-          <div class="block-emphasis">
-            <div class="emphasis-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-emphasis {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(59, 130, 246, 0.08) 0%, 
-                rgba(59, 130, 246, 0.04) 100%);
-              border-left: 4px solid #3b82f6;
-              border-radius: 0 8px 8px 0;
-              position: relative;
-            }
-            
-            .emphasis-content {
-              font-size: 1.1em;
-              line-height: 1.6;
-              color: #e2e8f0;
-              font-weight: 500;
-            }
-            
-            .block-emphasis::before {
-              content: "💡";
-              position: absolute;
-              left: -0.5rem;
-              top: 1rem;
-              background: #1e293b;
-              padding: 0.25rem;
-              border-radius: 50%;
-              font-size: 0.875rem;
-            }
-          </style>
-        </>
-      );
-
-    case 'alert':
-    case 'warning':
-      return (
-        <>
-          <div class="block-alert">
-            <div class="alert-header">
-              <span class="alert-icon">⚠️</span>
-              <span class="alert-title">Warning</span>
-            </div>
-            <div class="alert-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-alert {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(245, 158, 11, 0.1) 0%, 
-                rgba(245, 158, 11, 0.05) 100%);
-              border: 1px solid rgba(245, 158, 11, 0.3);
-              border-radius: 8px;
-              position: relative;
-            }
-            
-            .alert-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #fbbf24;
-            }
-            
-            .alert-icon {
-              font-size: 1.25rem;
-            }
-            
-            .alert-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .alert-content {
-              color: #f1f5f9;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'quote':
-    case 'blockquote':
-      return (
-        <>
-          <div class="block-quote">
-            <div class="quote-content">
-              {value}
-            </div>
-            <div class="quote-decoration"></div>
-          </div>
-          <style>
-            .block-quote {
-              margin: 1.5rem 0;
-              padding: 1.5rem 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.05) 0%, 
-                rgba(255, 255, 255, 0.02) 100%);
-              border-left: 4px solid #64748b;
-              border-radius: 0 8px 8px 0;
-              position: relative;
-              font-style: italic;
-            }
-            
-            .quote-content {
-              font-size: 1.1em;
-              line-height: 1.7;
-              color: #cbd5e1;
-              position: relative;
-              z-index: 1;
-            }
-            
-            .quote-decoration {
-              position: absolute;
-              top: 1rem;
-              right: 1rem;
-              font-size: 3rem;
-              color: rgba(100, 116, 139, 0.2);
-              font-family: serif;
-              line-height: 1;
-            }
-            
-            .quote-decoration::before {
-              content: """;
-            }
-          </style>
-        </>
-      );
-
-    case 'info':
-    case 'information':
-      return (
-        <>
-          <div class="block-info">
-            <div class="info-header">
-              <span class="info-icon">ℹ️</span>
-              <span class="info-title">Information</span>
-            </div>
-            <div class="info-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-info {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(59, 130, 246, 0.08) 0%, 
-                rgba(59, 130, 246, 0.04) 100%);
-              border: 1px solid rgba(59, 130, 246, 0.3);
-              border-radius: 8px;
-            }
-            
-            .info-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #60a5fa;
-            }
-            
-            .info-icon {
-              font-size: 1.25rem;
-            }
-            
-            .info-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .info-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'success':
-    case 'check':
-      return (
-        <>
-          <div class="block-success">
-            <div class="success-header">
-              <span class="success-icon">✅</span>
-              <span class="success-title">Success</span>
-            </div>
-            <div class="success-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-success {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(34, 197, 94, 0.08) 0%, 
-                rgba(34, 197, 94, 0.04) 100%);
-              border: 1px solid rgba(34, 197, 94, 0.3);
-              border-radius: 8px;
-            }
-            
-            .success-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #4ade80;
-            }
-            
-            .success-icon {
-              font-size: 1.25rem;
-            }
-            
-            .success-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .success-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'error':
-    case 'danger':
-      return (
-        <>
-          <div class="block-error">
-            <div class="error-header">
-              <span class="error-icon">❌</span>
-              <span class="error-title">Error</span>
-            </div>
-            <div class="error-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-error {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(239, 68, 68, 0.1) 0%, 
-                rgba(239, 68, 68, 0.05) 100%);
-              border: 1px solid rgba(239, 68, 68, 0.3);
-              border-radius: 8px;
-            }
-            
-            .error-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #f87171;
-            }
-            
-            .error-icon {
-              font-size: 1.25rem;
-            }
-            
-            .error-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .error-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'tip':
-    case 'hint':
-      return (
-        <>
-          <div class="block-tip">
-            <div class="tip-header">
-              <span class="tip-icon">💡</span>
-              <span class="tip-title">Tip</span>
-            </div>
-            <div class="tip-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-tip {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(168, 85, 247, 0.08) 0%, 
-                rgba(168, 85, 247, 0.04) 100%);
-              border: 1px solid rgba(168, 85, 247, 0.3);
-              border-radius: 8px;
-            }
-            
-            .tip-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #c084fc;
-            }
-            
-            .tip-icon {
-              font-size: 1.25rem;
-            }
-            
-            .tip-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .tip-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'note':
-      return (
-        <>
-          <div class="block-note">
-            <div class="note-header">
-              <span class="note-icon">📝</span>
-              <span class="note-title">Note</span>
-            </div>
-            <div class="note-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-note {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(107, 114, 128, 0.08) 0%, 
-                rgba(107, 114, 128, 0.04) 100%);
-              border: 1px solid rgba(107, 114, 128, 0.3);
-              border-radius: 8px;
-            }
-            
-            .note-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #9ca3af;
-            }
-            
-            .note-icon {
-              font-size: 1.25rem;
-            }
-            
-            .note-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .note-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
     case 'slides':
       // Parse slides configuration and links
       const lines = value.trim().split('\n');
@@ -1694,6 +1690,70 @@ if (DEBUG_AST) {
     );
   }
 
+  if (directiveName === 'portfolio-gallery' || directiveName === 'portfolioGallery') {
+    // Use pre-computed portfolio data from top-level async logic
+    if (portfolioGalleryPortfolios?.length > 0) {
+      const isSmall = portfolioGalleryConfig.small === 'true' || portfolioGalleryConfig.size === 'small';
+      const expanded = portfolioGalleryConfig.expanded !== 'false';
+      const takeUpWholeWidth = portfolioGalleryConfig.fullWidth === 'true' || portfolioGalleryConfig.full === 'true';
+      
+      return (
+        <>
+          <PortfolioGallery 
+            portfolios={portfolioGalleryPortfolios} 
+            small={isSmall}
+            expanded={expanded}
+            takeUpWholeWidth={takeUpWholeWidth}
+          />
+          {portfolioGalleryErrors.length > 0 && (
+            <div class="portfolio-gallery-error">
+              ⚠️ Portfolio(s) not found:
+              <ul>
+                {portfolioGalleryErrors.map(path => <li><code>{path}</code></li>)}
+              </ul>
+            </div>
+            <style>
+              .portfolio-gallery-error {
+                color: #ff6b6b;
+                background-color: rgba(255, 0, 0, 0.05);
+                border: 1px solid rgba(255, 0, 0, 0.2);
+                padding: 0.75rem;
+                margin-top: 2rem;
+                border-radius: 0.5rem;
+                font-size: 0.9rem;
+              }
+              .portfolio-gallery-error ul {
+                margin: 0.5rem 0 0;
+                padding-left: 1.25rem;
+              }
+            </style>
+          )}
+        </>
+      );
+    }
+    
+    return (
+      <div class="portfolio-gallery-empty">
+        <p>No portfolios found in portfolio-gallery directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, config: portfolioGalleryConfig, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .portfolio-gallery-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
   if (directiveName === 'slides' || directiveName === 'slideshow') {
     // Parse the container content for markdown list items with slide backlinks
     const slides = [];
@@ -1739,6 +1799,324 @@ if (DEBUG_AST) {
         </details>
         <style>
           .slides-directive-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
+  // Handle callout directives
+  const calloutTypes = {
+    'emphasis': { icon: '💡', title: 'Emphasis', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.04)' },
+    'em': { icon: '💡', title: 'Emphasis', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.04)' },
+    'warning': { icon: '⚠️', title: 'Warning', color: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)' },
+    'alert': { icon: '⚠️', title: 'Alert', color: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)' },
+    'info': { icon: 'ℹ️', title: 'Information', color: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)' },
+    'information': { icon: 'ℹ️', title: 'Information', color: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)' },
+    'success': { icon: '✅', title: 'Success', color: '#4ade80', bgColor: 'rgba(34, 197, 94, 0.08)', borderColor: 'rgba(34, 197, 94, 0.3)' },
+    'check': { icon: '✅', title: 'Success', color: '#4ade80', bgColor: 'rgba(34, 197, 94, 0.08)', borderColor: 'rgba(34, 197, 94, 0.3)' },
+    'error': { icon: '❌', title: 'Error', color: '#f87171', bgColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' },
+    'danger': { icon: '❌', title: 'Error', color: '#f87171', bgColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' },
+    'tip': { icon: '💡', title: 'Tip', color: '#c084fc', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)' },
+    'hint': { icon: '💡', title: 'Tip', color: '#c084fc', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)' },
+    'note': { icon: '📝', title: 'Note', color: '#9ca3af', bgColor: 'rgba(107, 114, 128, 0.08)', borderColor: 'rgba(107, 114, 128, 0.3)' },
+    'quote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true },
+    'blockquote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true }
+  };
+
+  if (calloutTypes[directiveName]) {
+    console.log(`[AstroMarkdown] Processing callout directive: ${directiveName}, type: ${node.type}`);
+    console.log(`[AstroMarkdown] Node children:`, node.children);
+    
+    const callout = calloutTypes[directiveName];
+    const customTitle = props.title || callout.title;
+    
+    // Extract content from directive children
+    let content;
+    if (node.type === 'containerDirective' && node.children) {
+      // For container directives, process all children
+      content = node.children.map(child => (
+        <Astro.self node={child} data={data} />
+      ));
+    } else if (node.type === 'leafDirective' && node.value) {
+      // For leaf directives, use the node value
+      content = [<span>{node.value}</span>];
+    } else {
+      content = [];
+    }
+    
+    console.log(`[AstroMarkdown] Extracted content:`, content);
+
+    if (callout.isQuote) {
+      // Special handling for quote directive
+      return (
+        <>
+          <div class="directive-quote">
+            <div class="quote-content">
+              {content}
+            </div>
+            <div class="quote-decoration"></div>
+          </div>
+          <style>
+            .directive-quote {
+              margin: 1.5rem 0;
+              padding: 1.5rem 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                rgba(255, 255, 255, 0.02) 100%);
+              border-left: 4px solid #64748b;
+              border-radius: 0 8px 8px 0;
+              position: relative;
+              font-style: italic;
+            }
+            
+            .directive-quote .quote-content {
+              font-size: 1.1em;
+              line-height: 1.7;
+              color: #cbd5e1;
+              position: relative;
+              z-index: 1;
+            }
+            
+            .directive-quote .quote-decoration {
+              position: absolute;
+              top: 1rem;
+              right: 1rem;
+              font-size: 3rem;
+              color: rgba(100, 116, 139, 0.2);
+              font-family: serif;
+              line-height: 1;
+            }
+            
+            .directive-quote .quote-decoration::before {
+              content: """;
+            }
+          </style>
+        </>
+      );
+    }
+
+    if (directiveName === 'emphasis' || directiveName === 'em') {
+      // Special handling for emphasis directive with left border
+      return (
+        <>
+          <div class="directive-emphasis">
+            <div class="emphasis-content">
+              {content}
+            </div>
+          </div>
+          <style>
+            .directive-emphasis {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.08) 0%, 
+                rgba(59, 130, 246, 0.04) 100%);
+              border-left: 4px solid #3b82f6;
+              border-radius: 0 8px 8px 0;
+              position: relative;
+            }
+            
+            .directive-emphasis .emphasis-content {
+              font-size: 1.1em;
+              line-height: 1.6;
+              color: #e2e8f0;
+              font-weight: 500;
+            }
+            
+            .directive-emphasis::before {
+              content: "💡";
+              position: absolute;
+              left: -0.5rem;
+              top: 1rem;
+              background: #1e293b;
+              padding: 0.25rem;
+              border-radius: 50%;
+              font-size: 0.875rem;
+            }
+          </style>
+        </>
+      );
+    }
+
+    // Standard callout with header and content
+    console.log(`[AstroMarkdown] Rendering callout: ${directiveName} with content:`, content);
+    
+    return (
+      <>
+        <div class={`directive-callout directive-${directiveName}`} style={`border: 2px solid ${callout.borderColor}; background: ${callout.bgColor};`}>
+          <div class="callout-header">
+            <span class="callout-icon">{callout.icon}</span>
+            <span class="callout-title">{customTitle}</span>
+          </div>
+          <div class="callout-content">
+            {content}
+          </div>
+        </div>
+        <style>
+          .directive-callout {
+            margin: 1.5rem 0;
+            padding: 1.25rem;
+            border-radius: 8px;
+            position: relative;
+          }
+          
+          /* Warning/Alert styles */
+          .directive-warning, .directive-alert {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+          }
+          .directive-warning .callout-header, .directive-alert .callout-header {
+            color: #fbbf24;
+          }
+          
+          /* Info styles */
+          .directive-info, .directive-information {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+          }
+          .directive-info .callout-header, .directive-information .callout-header {
+            color: #60a5fa;
+          }
+          
+          /* Success styles */
+          .directive-success, .directive-check {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+          }
+          .directive-success .callout-header, .directive-check .callout-header {
+            color: #4ade80;
+          }
+          
+          /* Error styles */
+          .directive-error, .directive-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+          }
+          .directive-error .callout-header, .directive-danger .callout-header {
+            color: #f87171;
+          }
+          
+          /* Tip styles */
+          .directive-tip, .directive-hint {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+          }
+          .directive-tip .callout-header, .directive-hint .callout-header {
+            color: #c084fc;
+          }
+          
+          /* Note styles */
+          .directive-note {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.08) 0%, rgba(107, 114, 128, 0.04) 100%);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+          }
+          .directive-note .callout-header {
+            color: #9ca3af;
+          }
+          
+          .directive-callout .callout-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+          }
+          
+          .directive-callout .callout-icon {
+            font-size: 1.25rem;
+          }
+          
+          .directive-callout .callout-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .directive-callout .callout-content {
+            color: #e2e8f0;
+            line-height: 1.6;
+          }
+          
+          .directive-callout .callout-content > *:first-child {
+            margin-top: 0;
+          }
+          
+          .directive-callout .callout-content > *:last-child {
+            margin-bottom: 0;
+          }
+        </style>
+      </>
+    );
+  }
+
+  // Handle toolingGallery directive
+  if (directiveName === 'tooling-gallery' || directiveName === 'toolingGallery') {
+    console.log(`[AstroMarkdown] Processing toolingGallery directive: ${directiveName}`);
+    
+    // Use pre-computed data from top-level async logic
+    if (toolingGalleryDirectiveTools?.length > 0 || toolingGalleryDirectiveErrors.length > 0) {
+      const isSmall = toolingGalleryDirectiveConfig.small === 'true' || toolingGalleryDirectiveConfig.size === 'small';
+      
+      return (
+        <>
+          <ToolingGallery tools={toolingGalleryDirectiveTools || []} small={isSmall} errors={toolingGalleryDirectiveErrors}/>
+        </>
+      );
+    }
+    
+    return (
+      <div class="tooling-gallery-empty">
+        <p>No tools found in tooling-gallery directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, config: toolingGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .tooling-gallery-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
+  // Handle imageGallery directive
+  if (directiveName === 'image-gallery' || directiveName === 'imageGallery') {
+    console.log(`[AstroMarkdown] Processing imageGallery directive: ${directiveName}`);
+    console.log(`[AstroMarkdown] imageGalleryDirectiveCode:`, imageGalleryDirectiveCode);
+    
+    // Use pre-computed data from top-level async logic
+    if (imageGalleryDirectiveCode) {
+      return (
+        <>
+          <ImageGallery code={imageGalleryDirectiveCode} dirpath={data.dirpath} />
+        </>
+      );
+    }
+    
+    return (
+      <div class="image-gallery-empty">
+        <p>No content found in image-gallery directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, config: imageGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .image-gallery-empty {
             padding: 2rem;
             text-align: center;
             background: rgba(255, 165, 0, 0.1);

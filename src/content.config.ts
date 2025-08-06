@@ -180,7 +180,22 @@ const clientPortfoliosCollection = defineCollection({
   }),
   schema: z.object({
     title: z.string().optional(), // Declare title as optional
-    site_name: z.string().optional(), // Declare site_name as optional  
+    site_name: z.string().optional(), // Declare site_name as optional
+    url: z.string().optional(), // Portfolio company URL
+    og_title: z.string().optional(), // Open Graph title
+    og_description: z.string().optional(), // Open Graph description
+    og_image: z.string().optional(), // Open Graph image
+    og_favicon: z.string().optional(), // Open Graph favicon
+    og_last_fetch: z.union([z.string(), z.date()]).optional(), // Last OG fetch
+    description: z.string().optional(), // Description
+    description_site_cp: z.string().optional(), // Site-specific description
+    zinger: z.string().optional(), // Short catchy phrase
+    image: z.string().optional(), // Company image
+    favicon: z.string().optional(), // Company favicon
+    tags: z.array(z.string()).optional().default([]), // Tags for categorization
+    portfolios: z.array(z.string()).optional().default([]), // Which portfolios/funds
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
     aliases: z.union([
       z.string().transform(str => [str]),
       z.array(z.string()),
@@ -193,6 +208,8 @@ const clientPortfoliosCollection = defineCollection({
       ...data,
       // Let the route handle title generation since it has access to entry.id
       slug: data.slug, // Respect frontmatter slug if provided
+      tags: data.tags || [], // Ensure tags is always an array
+      portfolios: data.portfolios || [], // Ensure portfolios is always an array
     };
   })
 });

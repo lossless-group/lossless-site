@@ -172,25 +172,41 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
 const bannerImage = originalData.banner_image || "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp";
 const lede = originalData.lede;
 const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
+
+// Check if we have any article info to display (same logic as InfoSidebar)
+const hasArticleInfo = 
+  categories.length > 0 || 
+  semanticVersion || 
+  authorForHandle || 
+  participants || 
+  formattedDateModified || 
+  formattedDateCreated || 
+  formattedDateOfEvent || 
+  tags.length > 0 || 
+  augmentedWith || 
+  originalData.google_maps_url || 
+  originalData.googleMapsUrl;
 ---
 
 <div class="content-wrapper">
-    <InfoSidebar 
-      categories={categories}
-      semanticVersion={semanticVersion}
-      authorForHandle={authorForHandle}
-      participants={participants}
-      augmentedWith={augmentedWith}
-      formattedDateModified={formattedDateModified}
-      formattedDateCreated={formattedDateCreated}
-      formattedDateOfEvent={formattedDateOfEvent}
-      tags={tags}
-      id={originalData.id}
-      path={originalData.path}
-      contentType={originalData.contentType}
-      google_maps_url={originalData.google_maps_url}
-      googleMapsUrl={originalData.googleMapsUrl}
-  />
+    {hasArticleInfo && (
+      <InfoSidebar 
+        categories={categories}
+        semanticVersion={semanticVersion}
+        authorForHandle={authorForHandle}
+        participants={participants}
+        augmentedWith={augmentedWith}
+        formattedDateModified={formattedDateModified}
+        formattedDateCreated={formattedDateCreated}
+        formattedDateOfEvent={formattedDateOfEvent}
+        tags={tags}
+        id={originalData.id}
+        path={originalData.path}
+        contentType={originalData.contentType}
+        google_maps_url={originalData.google_maps_url}
+        googleMapsUrl={originalData.googleMapsUrl}
+      />
+    )}
   <div class="content-inner">
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}

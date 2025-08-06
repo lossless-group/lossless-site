@@ -7,6 +7,7 @@ interface Props {
   galleryId?: string;
   small?: boolean;
   takeUpWholeWidth?: boolean;
+  errors?: string[];
 }
 
 const {
@@ -14,6 +15,7 @@ const {
   expanded = true,
   small,
   takeUpWholeWidth = false,
+  errors = [],
   galleryId = `tooling-gallery-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 } = Astro.props;
 ---
@@ -32,6 +34,15 @@ const {
       </div>
     ))}
   </div>
+  
+  {errors.length > 0 && (
+    <div class="tool-gallery-error">
+      ⚠️ Tool(s) not found:
+      <ul>
+        {errors.map(id => <li><code>{id}</code></li>)}
+      </ul>
+    </div>
+  )}
 </div>
 
 <style>
@@ -152,6 +163,21 @@ const {
     /* Full width on mobile */
     max-width: 100%;
   }
+}
+
+.tool-gallery-error {
+  color: #ff6b6b;
+  background-color: rgba(255, 0, 0, 0.05);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  padding: 0.75rem;
+  margin: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.tool-gallery-error ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
 }
 </style>
 

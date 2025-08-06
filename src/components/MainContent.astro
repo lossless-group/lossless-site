@@ -184,12 +184,11 @@ const clients = clientsData.clients;
   /* Full-bleed container for stealth clients */
   .stealth-clients-fullbleed {
     width: 100vw;
+    max-width: 100vw;
     position: relative;
     left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    overflow: visible;
+    transform: translateX(-50%);
+    overflow: hidden;
     padding: 4rem 0 0.5rem 0;
     display: flex;
     justify-content: center;
@@ -202,5 +201,20 @@ const clients = clientsData.clients;
     margin: 0 auto;
     display: flex;
     justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Mobile adjustments for full-bleed sections */
+  @media (max-width: 768px) {
+    .stealth-clients-fullbleed {
+      max-width: 100vw;
+      overflow: hidden;
+    }
+    
+    .stealth-clients-content {
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+    }
   }
 </style>
