@@ -174,12 +174,12 @@ const { clients, title = "Current Work" } = Astro.props;
       const middleCard = cards[middleIndex] as HTMLElement;
       
       if (middleCard) {
-        // Scroll to center the middle card
-        middleCard.scrollIntoView({ 
-          behavior: 'instant', 
-          block: 'nearest', 
-          inline: 'center' 
-        });
+        // Scroll to center the middle card within its container only
+        // Use scrollLeft instead of scrollIntoView to avoid page-level scrolling
+        const cardRect = middleCard.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const scrollLeft = middleCard.offsetLeft - (scrollContainer.clientWidth / 2) + (middleCard.offsetWidth / 2);
+        scrollContainer.scrollLeft = scrollLeft;
       }
       
       // Setup global navigation functions

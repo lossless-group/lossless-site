@@ -3,6 +3,7 @@ import type { Root, Text, Link } from 'mdast';
 import markdownDebugger from './markdownDebugger';
 import { transformContentPathToRoute } from '../routing/routeManager';
 import { DEBUG_BACKLINKS } from '../envUtils';
+import { slugify } from '../slugify';
 // Match [[...]] but skip if it's a visual path
 const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
 
@@ -45,16 +46,24 @@ export default function remarkBacklinks() {
 
           // Use the route manager to transform the path
           const transformedPath = transformContentPathToRoute(path);
+          
+          // Slugify the URL path segments to ensure proper kebab-case URLs
+          const slugifiedUrl = transformedPath.split('/').map((segment, index) => {
+            // Don't slugify the first empty segment (from leading slash)
+            if (index === 0 || !segment) return segment;
+            return slugify(segment);
+          }).join('/');
+          
           const finalDisplayText = displayText || path.split('/').pop()?.replace(/\.md$/, '').replace(/-/g, ' ') || '';
           
           if (DEBUG_BACKLINKS) {
-            console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath}`);
+            console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath} → ${slugifiedUrl}`);
           }
           
           // Create a standard MDAST link node instead of a custom backLink node
           newNodes.push({
             type: 'link',
-            url: transformedPath,
+            url: slugifiedUrl,
             data: {
               hProperties: {
                 'data-internal-link': ''
