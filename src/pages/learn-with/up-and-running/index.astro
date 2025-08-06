@@ -64,8 +64,8 @@ const guides = allEntries.map((entry) => {
     dateValue = dateValue.toISOString().split('T')[0];
   }
   
-  // Ensure the slug includes the full path for proper routing
-  const fullSlug = `/learn-with/up-and-running/${customSlug}`;
+  // Ensure the slug includes the full path for proper routing with the /with/ segment
+  const fullSlug = `/learn-with/up-and-running/with/${customSlug}`;
   
   return {
     id: entry.id, 
