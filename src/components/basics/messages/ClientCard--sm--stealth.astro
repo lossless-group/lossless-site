@@ -22,9 +22,10 @@ interface Props {
   description: string;
   industry: string;
   engagement: string;
+  clientId?: string;
 }
 
-const { name, logo, description, industry, engagement } = Astro.props;
+const { name, logo, description, industry, engagement, clientId } = Astro.props;
 ---
 
 <div class="stealth-client-card--sm">
@@ -46,7 +47,13 @@ const { name, logo, description, industry, engagement } = Astro.props;
   <p class="client-description">{description}</p>
   
   <div class="stealth-indicator">
-    <TextCTA text="Access Portal" />
+    {clientId ? (
+      <a href={`/client/${clientId}`} class="portal-link">
+        <TextCTA text="Access Portal" />
+      </a>
+    ) : (
+      <TextCTA text="Access Portal" />
+    )}
   </div>
 </div>
 
@@ -146,6 +153,13 @@ const { name, logo, description, industry, engagement } = Astro.props;
     display: flex;
     justify-content: center;
     margin-top: auto;
+  }
+  
+  .portal-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
   }
   
 </style>

@@ -62,6 +62,7 @@ const { clients, title = "Current Work" } = Astro.props;
           description={client["stealth-description"]}
           industry={client.industry}
           engagement={client.engagement}
+          clientId={client.id}
           data-index={index}
         />
       ))}

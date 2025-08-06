@@ -44,10 +44,11 @@ export const getStaticPaths = async () => {
 
       return {
         params: {
-          client,
+          client: client.toLowerCase(),
           slug: slug,
         },
         props: {
+          actualClientName: client,
           client,
           entry,
           slug: slug,

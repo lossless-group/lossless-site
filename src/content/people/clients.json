@@ -1,13 +1,13 @@
 {
   "clients": [
     {
-      "id": "leardal",
-      "name": "Leardal",
+      "id": "laerdal",
+      "name": "Laerdal",
       "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Laerdal.png",
       "description": "Medical simulation equipment and software development and manufacturing",
       "industry": "Medical Practice & Simulation",
       "engagement": "2024-Present",
-      "website": "https://leardal.com",
+      "website": "https://laerdal.com",
       "stealth-name": "Mission to Save Lives",
       "stealth-logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Laerdal.png",
       "stealth-description": "Medical simulation development and manufacturing",
@@ -27,7 +27,7 @@
       "stealth-passcode": "beloved-brand-TW"
     },
     {
-      "id": "param-tech",
+      "id": "param",
       "name": "Param Tech",
       "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Param.png",
       "description": "Market leading FinTech innovator",
@@ -77,6 +77,32 @@
       "stealth-logo": "/visuals/appIcon__Flourish-Schools.svg",
       "stealth-description": "ESA programs are creating an open space for innovators.",
       "stealth-passcode": "flourish-2025"
+    },
+    {
+      "id": "colearn",
+      "name": "Colearn",
+      "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Colearn.svg",
+      "description": "AI-powered personalized learning platform",
+      "industry": "Education Technology",
+      "engagement": "2023-Present",
+      "website": "https://colearn.com",
+      "stealth-name": "Personalized Learning Platform",
+      "stealth-logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Colearn.svg",
+      "stealth-description": "AI-powered personalized learning experiences for students.",
+      "stealth-passcode": "colearn-2025"
+    },
+    {
+      "id": "obsidian-plugin-community",
+      "name": "Obsidian Plugin Community",
+      "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Obsidian.svg",
+      "description": "Community plugins and tools for Obsidian knowledge management",
+      "industry": "Developer Tools",
+      "engagement": "2023-Present",
+      "website": "https://obsidian.md",
+      "stealth-name": "Knowledge Management Tools",
+      "stealth-logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Obsidian.svg",
+      "stealth-description": "Community-driven plugins for enhanced knowledge management workflows.",
+      "stealth-passcode": "obsidian-community-2025"
     }
   ]
 }

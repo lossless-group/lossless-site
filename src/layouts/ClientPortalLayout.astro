@@ -37,7 +37,9 @@ let openGraphData: OpenGraphData = {
 };
 
 try {
-  const ogPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/opengraph.json`);
+  // Use the actual client name (capitalized) for file system access
+  const clientForFiles = client.charAt(0).toUpperCase() + client.slice(1);
+  const ogPath = path.resolve(contentBasePath, `client-content/${clientForFiles}/opengraph.json`);
   const rawOg = await fs.readFile(ogPath, 'utf-8');
   const parsedOg = JSON.parse(rawOg);
 
@@ -61,8 +63,7 @@ try {
 
   if (!config) {
     console.warn(`No valid tool gallery config found for ${client}`);
-    return;
-  }
+  } else {
 
   const tagFilters = [];
   const rawToolIds = [];
@@ -119,6 +120,7 @@ try {
   }
 
   toolGalleryTools = tools;
+  }
 } catch (err) {
   console.warn(`No tool-gallery.yaml for ${client}`);
 }
@@ -185,7 +187,7 @@ try {
                 description={card.description}
                 badge={card.badge}
                 verified={card.verified}
-                to_path={card.to_path?.replace('[client]', client)}
+                to_path={card.to_path?.replace('[client]', client.toLowerCase())}
               >
                 {card.icon && card.icon.trim().endsWith('.svg') ? (
                   <img src={card.icon} alt={card.title} width="64" height="64" loading="lazy" />
@@ -488,6 +490,36 @@ try {
   }
 }
 
+/* Icon Header Message Card Grid Styles */
+.icon-header-message-card-grid {
+  display: grid;
+  max-width: 1200px;
+  width: 95%;
+  gap: 1.5rem;
+  margin: 2rem auto;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.card-container {
+  /* Ensure the container takes up the full grid cell width */
+  width: 100%;
+  min-width: 0; /* Prevent overflow in grid cells */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .icon-header-message-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Center the third item when there are exactly 3 items */
+  .icon-header-message-card-grid:has(.card-container:nth-child(3):last-child) .card-container:last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 340px;
+  }
+}
+
 @media (max-width: 768px) {
   .client-reader-wrapper {
     padding: 3rem 2rem;
@@ -496,6 +528,12 @@ try {
   .client-portal-cards-section {
     padding: 1.5rem;
     margin: 1.5rem 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .icon-header-message-card-grid {
+    grid-template-columns: 1fr;
   }
 }
 

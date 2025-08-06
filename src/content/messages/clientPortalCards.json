@@ -4,7 +4,7 @@
     "description": "Browse and read curated content and essays",
     "badge": "Content",
     "verified": true,
-    "to_path": "/client/laerdal/read",
+    "to_path": "/client/[client]/read",
     "icon": "<svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"color: var(--clr-lossless-accent--brightest);\"><path d=\"M2 3H8C9.06087 3 10.0783 3.42143 10.8284 4.17157C11.5786 4.92172 12 5.93913 12 7V21C12 19.9391 11.5786 18.9217 10.8284 18.1716C10.0783 17.4214 9.06087 17 8 17H2V3Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M22 3H16C14.9391 3 13.9217 3.42143 13.1716 4.17157C12.4214 4.92172 12 5.93913 12 7V21C12 19.9391 12.4214 18.9217 13.1716 18.1716C13.9217 17.4214 14.9391 17 16 17H22V3Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
   },
   {
@@ -12,7 +12,7 @@
     "description": "Strategic recommendations and insights",
     "badge": "ASAP",
     "verified": true,
-    "to_path": "/client/laerdal/thread/recommendations",
+    "to_path": "/client/[client]/thread/recommendations",
     "icon": "<svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"color: var(--clr-lossless-accent--brightest);\"><path d=\"M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
   },
   {
@@ -20,15 +20,15 @@
     "description": "Active projects and case studies",
     "badge": "Projects",
     "verified": true,
-    "to_path": "/client/laerdal/thread/projects",
+    "to_path": "/client/[client]/thread/projects",
     "icon": "<svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"color: var(--clr-lossless-accent--brightest);\"><path d=\"M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M8 3V7M16 3V7M3 11H21\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
   },
   {
     "title": "Portfolio",
-    "description": "View our portfolio of completed projects and case studies",
+    "description": "Browse portfolio items in a threaded magazine format",
     "badge": "Portfolio",
     "verified": true,
-    "to_path": "/client/[client]/portfolio",
+    "to_path": "/client/[client]/thread/portfolio",
     "icon": "<svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"color: var(--clr-lossless-accent--brightest);\"><path d=\"M20 6L9 17L4 12\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M12 2L2 7L12 12L22 7L12 2Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M2 17L12 22L22 17\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
   }
 ] 
