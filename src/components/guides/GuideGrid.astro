@@ -30,6 +30,7 @@ interface GuideData {
   slug: string;
   date?: string;
   lede?: string;
+  og_favicon?: string;
   description?: string;
   tags?: string[];
   collection?: string;
@@ -60,6 +61,7 @@ const processedGuides = guides.map(guide => ({
       tags={guide.tags || []}
       slug={guide.slug}
       collection={guide.collection}
+      og_favicon={guide.og_favicon}
     />
   ))}
 </div>

@@ -48,6 +48,10 @@ const collectionConfig = {
 // Transform entries for up-and-running collection
 const guides = allEntries.map((entry) => {
   const data = entry.data as any;
+  console.log('Guide data:', { 
+    title: data?.title, 
+    og_favicon: data?.og_favicon 
+  });
   
   function normalizeToArray(singularKey: string, pluralKey: string): string[] {
     const singularValue = data?.[singularKey];
@@ -81,6 +85,7 @@ const guides = allEntries.map((entry) => {
     tags: normalizeToArray('tag', 'tags'),
     participants: normalizeToArray('participant', 'participants'),
     categories: normalizeToArray('category', 'categories'),
+    og_favicon: data?.og_favicon, 
   };
 }).sort((a, b) => {
   // Sort by date descending (most recent first)
