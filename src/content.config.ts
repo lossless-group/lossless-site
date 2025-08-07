@@ -524,6 +524,30 @@ const upAndRunningCollection = defineCollection({
   }))
 });
 
+const mapOfContentsCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("moc") }),
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    type: z.string().optional(),
+    MAX_CARDS: z.number().optional(),
+  }).passthrough().transform((data, context) => {
+    // Get the filename without extension
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    // Use provided title or generate from filename
+    const displayTitle = data.title
+      ? data.title
+      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    return {
+      ...data,
+      title: displayTitle,
+      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+    };
+  })
+});
+
 const portfolioCollection = defineCollection({
   loader: glob({ 
     pattern: [
@@ -618,6 +642,7 @@ export const paths = {
   'client-recommendations': resolveContentPath('client-content'),
   'client-projects': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
+  'moc': resolveContentPath('moc'),
 };
 
 // Export the collections
@@ -647,4 +672,5 @@ export const collections = {
   'client-projects': clientProjectsCollection,
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
+  'moc': mapOfContentsCollection,
 };

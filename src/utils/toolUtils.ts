@@ -301,3 +301,160 @@ export async function resolvePortfolioId(input: string, allPortfolios: any[]): P
   const finalMatch = allPortfolios.find(portfolio => slugify(portfolio.id).endsWith(finalSlug || ''));
   return finalMatch?.id || null;
 }
+
+/**
+ * Parse MOC content and extract tool IDs and tag filters
+ * This function replicates the logic from AstroMarkdown's tooling gallery directive
+ * 
+ * @param content The markdown content from the MOC file
+ * @returns Object containing rawToolIds and tagFilters arrays
+ */
+export function parseMocContent(content: string): { rawToolIds: string[], tagFilters: string[] } {
+  const rawToolIds: string[] = [];
+  const tagFilters: string[] = [];
+  
+  // Split content into lines and handle different line endings
+  const lines = content.split(/\r?\n/);
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    // Skip empty lines and frontmatter
+    if (!trimmedLine || trimmedLine.startsWith('---')) continue;
+    
+    console.log('[parseMocContent] Processing line:', trimmedLine);
+    
+    // Check if this is a tag filter line
+    const tagMatch = trimmedLine.match(/^-\s*tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+    if (tagMatch) {
+      const tagName = (tagMatch[1] ?? tagMatch[2]).trim();
+      if (tagName) {
+        tagFilters.push(tagName);
+        console.log('[parseMocContent] Added tag filter:', tagName);
+      }
+      continue;
+    }
+    
+    // Check if this is a tool link (backlink format)
+    const backlinkMatch = trimmedLine.match(/^-\s*\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      const toolId = backlinkMatch[1].trim();
+      rawToolIds.push(toolId);
+      console.log('[parseMocContent] Added tool ID:', toolId);
+      continue;
+    }
+    
+    // Check if this is a regular list item with a link
+    const linkMatch = trimmedLine.match(/^-\s*\[.*?\]\((.*?)\)/);
+    if (linkMatch) {
+      const url = linkMatch[1];
+      // Remove leading slash and .md extension if present
+      const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+      rawToolIds.push(toolPath);
+      console.log('[parseMocContent] Added tool path:', toolPath);
+    }
+  }
+  
+  console.log('[parseMocContent] Final result:', { rawToolIds, tagFilters });
+  return { rawToolIds, tagFilters };
+}
+
+/**
+ * Load tools from a MOC entry using the same logic as AstroMarkdown
+ * 
+ * @param mocEntry The MOC collection entry
+ * @param allTools Array of all available tools
+ * @returns Array of resolved tools
+ */
+export async function loadToolsFromMoc(mocEntry: any, allTools: any[]): Promise<any[]> {
+  const { rawToolIds, tagFilters } = parseMocContent(mocEntry.body);
+  const maxCards = mocEntry.data.MAX_CARDS || 20; // Default to 20 if not specified
+  
+  const toolMap = new Map(allTools.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const tools: any[] = [];
+  const toolErrors: string[] = [];
+
+  // Resolve toolIds
+  for (const input of rawToolIds) {
+    let id = input;
+
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolveToolId(id, allTools);
+    if (resolvedId && toolMap.has(resolvedId)) {
+      tools.push(toolMap.get(resolvedId));
+    } else {
+      toolErrors.push(input);
+    }
+  }
+
+  // Add tools matching tagFilters
+  const normalizeTag = (tag: string) => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    console.log('[loadToolsFromMoc] Searching for tools with tags:', tagFilters);
+    
+    // Debug: Log all available tags in the tooling collection
+    const allAvailableTags = new Set<string>();
+    allTools.forEach(tool => {
+      if (tool.data.tags) {
+        tool.data.tags.forEach(tag => allAvailableTags.add(tag));
+      }
+    });
+    console.log('[loadToolsFromMoc] All available tags in tooling collection:', Array.from(allAvailableTags));
+    
+    const tagFilteredTools = allTools
+      .filter(tool => {
+        if (!tool.data.tags) return false;
+        
+        const hasMatchingTag = tool.data.tags.some(tag => {
+          const normalizedToolTag = normalizeTag(tag);
+          const hasMatch = tagFilters.some(filterTag => {
+            const normalizedFilterTag = normalizeTag(filterTag);
+            const matches = normalizedFilterTag === normalizedToolTag;
+            if (matches) {
+              console.log(`[loadToolsFromMoc] Tag match found: "${filterTag}" (${normalizedFilterTag}) matches "${tag}" (${normalizedToolTag}) in tool "${tool.id}"`);
+            }
+            return matches;
+          });
+          return hasMatch;
+        });
+        
+        return hasMatchingTag;
+      })
+      .map(entry => ({
+        ...entry.data,
+        id: entry.id,
+        filePath: entry.id,
+      }));
+    
+    console.log('[loadToolsFromMoc] Found', tagFilteredTools.length, 'tools matching tags');
+    
+    // Add tag-matched tools if not already added
+    for (const tool of tagFilteredTools) {
+      if (!tools.some(t => t.id === tool.id)) {
+        tools.push(tool);
+      }
+    }
+  }
+
+  if (toolErrors.length > 0) {
+    console.warn('[loadToolsFromMoc] Missing tools for IDs:', toolErrors);
+  }
+
+  // Apply MAX_CARDS limit
+  const limitedTools = tools.slice(0, maxCards);
+  if (tools.length > maxCards) {
+    console.log(`[loadToolsFromMoc] Limited tools from ${tools.length} to ${maxCards} (MAX_CARDS limit)`);
+  }
+
+  return limitedTools;
+}

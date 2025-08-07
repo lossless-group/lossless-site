@@ -12,8 +12,7 @@ import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json
 import Section__VibeCodeWithUs from "@components/basics/messages/Section__VibeCodeWithUs.astro";
 import ClientListHorizontalScrollerStealth from "@components/basics/messages/ClientListHorizontalScroller--stealth.astro";
 import clientsData from "../content/people/clients.json";
-import { readdirSync } from 'fs';
-import { join } from 'path';
+import { loadToolsFromMoc } from "@utils/toolUtils";
 
 
 interface Tool {
@@ -27,10 +26,11 @@ interface Tool {
   id: string;
 }
 
-const TOOL_CARDGRID_LIMIT = 6;
-
+// Load tools from Home.md MOC file
+const mocEntries = await getCollection("moc");
+const homeMocEntry = mocEntries.find(entry => entry.id === "home");
 const toolEntries = await getCollection("tooling");
-const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id } as Tool));
+const tools = homeMocEntry ? await loadToolsFromMoc(homeMocEntry, toolEntries) : [];
 
 // Extract the questionsAndAnswers array for the "main" page
 const qaList = questionsAndAnswersData.page === "main"
@@ -128,7 +128,7 @@ const clients = clientsData.clients;
   <section>
     {
       tools && tools.length > 0 ? (
-        <CardGrid gap="2rem" tools={tools.slice(0, TOOL_CARDGRID_LIMIT)} />
+        <CardGrid gap="2rem" tools={tools} />
       ) : (
         <p>No tools found</p>
       )
