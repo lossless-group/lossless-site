@@ -88,6 +88,11 @@ interface Props {
   style?: string;
 
   /**
+   * Optional inline styles to apply to the inner hero content container
+   */
+  innerStyle?: string;
+
+  /**
    * Whether to enable animations
    * @default true
    */
@@ -130,6 +135,7 @@ const {
   fullBleed = false,
   classes = '',
   style = '',
+  innerStyle = '',
   animate = true,
   noBottomMargin = false,
   subtitleClass = '',
@@ -189,7 +195,7 @@ const imageAnimationAttributes = animate ? {
   style={`--hero-margin-top: 0; ${style}`}
   {...animationAttributes}
 >
-  <div class="hero-content">
+  <div class="hero-content" style={innerStyle}>
     {hasImage && imagePosition === 'top' && (
       <div class="hero-image-container">
         <div class="hero-image-wrapper">

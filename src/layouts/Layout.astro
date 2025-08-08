@@ -30,6 +30,7 @@ interface Props {
   // Direct props that .astro pages might pass (e.g., for title, description)
   title?: string;
   description?: string;
+  class?: string;
 
   // Props from Markdown/MDX page frontmatter, which Astro nests under `frontmatter`
   frontmatter?: {
@@ -48,6 +49,7 @@ const fm = Astro.props.frontmatter || {};
 const pageTitle = fm.title || Astro.props.title;
 const pageDescription = fm.lede || fm.description || Astro.props.description;
 const pageImageUrl = fm.banner_image || fm.portrait_image;
+const pageClass = Astro.props.class || '';
 
 // PageMeta.astro will handle all defaults if these are undefined
 ---
@@ -77,7 +79,7 @@ const pageImageUrl = fm.banner_image || fm.portrait_image;
     {/* Import global avatar and author handle styles */}
     <link rel="stylesheet" href="/src/styles/avatars.css" />
   </head>
-  <body>
+  <body class={pageClass}>
     <Header />
     <main>
       <slot />
