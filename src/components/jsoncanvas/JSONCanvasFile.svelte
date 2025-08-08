@@ -130,8 +130,8 @@
     class="file-name"
     x="32"
     y="20"
-    fill="var(--clr-canvas-file-text, #1e293b)"
-    font-family="var(--font-family-primary, system-ui)"
+    fill="var(--clr-heading)"
+    font-family="var(--ff-base)"
     font-size="12"
     font-weight="600"
     text-anchor="start"
@@ -145,8 +145,8 @@
       class="file-path"
       x="12"
       y="50"
-      fill="var(--clr-canvas-file-path, #64748b)"
-      font-family="var(--font-family-mono, monospace)"
+      fill="var(--clr-body)"
+      font-family="var(--ff-legible)"
       font-size="10"
       text-anchor="start"
     >
@@ -205,12 +205,9 @@
   }
 
   .canvas-file:hover .file-background {
-    stroke: var(--clr-canvas-file-border-hover, #cbd5e1);
+    stroke: var(--clr-lossless-accent--brightest);
     stroke-width: 2;
-  }
-
-  .canvas-file:hover .file-header {
-    fill: var(--clr-canvas-file-header-bg-hover, #f1f5f9);
+    filter: drop-shadow(0 0 8px var(--clr-lossless-accent--brightest));
   }
 
   .canvas-file:focus {
