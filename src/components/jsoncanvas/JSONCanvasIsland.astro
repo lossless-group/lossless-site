@@ -5,7 +5,10 @@
  * Follows the Island Wrapper Pattern from ToolShowcaseIsland.astro
  */
 
-import { readFile } from 'node:fs/promises';
+import { readFile, existsSync } from 'fs';
+import { readFile as readFileAsync } from 'fs/promises';
+import { dirname, resolve as pathResolve } from 'path';
+import { contentBasePath } from '../../utils/envUtils.js';
 import JSONCanvasRenderer from './JSONCanvasRenderer.svelte';
 import { parseJSONCanvas, transformCoordinates } from '../../utils/jsonCanvasUtils';
 import type { JSONCanvas, ParsedCanvas } from '../../types/json-canvas';
@@ -26,7 +29,7 @@ let debugInfo: any = {};
 try {
   if (canvasPath) {
     try {
-      canvasData = await readFile(canvasPath, 'utf-8');
+      canvasData = await readFileAsync(canvasPath, 'utf-8');
       canvasSource = 'file';
       debugInfo.foundIn = `File: ${canvasPath}`;
       debugInfo.fileSize = canvasData.length;
@@ -55,6 +58,28 @@ if (canvasData) {
     if (parsedCanvas.canvas) {
       // Transform coordinates for web rendering
       transformedCanvas = transformCoordinates(parsedCanvas.canvas);
+      
+      // Read file contents for file nodes
+      if (transformedCanvas.nodes) {
+        for (const node of transformedCanvas.nodes) {
+          if (node.type === 'file' && node.file) {
+            try {
+              // Resolve file path relative to content base directory
+              const filePath = pathResolve(contentBasePath, node.file);
+              
+              if (existsSync(filePath)) {
+                const fileContent = await readFileAsync(filePath, 'utf-8');
+                // Truncate content for display (first 300 characters)
+                (node as any).fileContent = fileContent.substring(0, 300) + (fileContent.length > 300 ? '...' : '');
+              } else {
+                (node as any).fileContent = `File not found: ${node.file}\nLooked in: ${filePath}`;
+              }
+            } catch (fileError) {
+              (node as any).fileContent = `Error reading file: ${node.file}\n${fileError}`;
+            }
+          }
+        }
+      }
     }
   } catch (error) {
     debugInfo.parseError = error instanceof Error ? error.message : 'Unknown error';

@@ -141,32 +141,19 @@
     </text>
   {/if}
 
-  <!-- Content preview area -->
-  <rect
-    class="content-preview"
+  <!-- File content area -->
+  <foreignObject
     x="12"
     y="60"
     width={width - 24}
     height={height - 72}
-    fill="var(--clr-canvas-file-content-bg, #fefefe)"
-    stroke="var(--clr-canvas-file-content-border, #f1f5f9)"
-    stroke-width="1"
-    rx="4"
-    ry="4"
-  />
-
-  <!-- Placeholder content lines -->
-  {#each Array(Math.min(4, Math.floor((height - 80) / 16))) as _, i}
-    <rect
-      class="content-line"
-      x="16"
-      y={68 + i * 16}
-      width={Math.max(20, width - 40 - Math.random() * 60)}
-      height="2"
-      fill="var(--clr-canvas-file-content-line, #cbd5e1)"
-      rx="1"
-    />
-  {/each}
+  >
+    <div class="file-content">
+      <div class="content-text">
+        {(node as any).fileContent || 'Loading file content...'}
+      </div>
+    </div>
+  </foreignObject>
 
   <!-- Selection indicator -->
   {#if isSelected}
@@ -245,6 +232,27 @@
 
   .file-type-image .file-icon {
     fill: var(--clr-file-image, #10b981);
+  }
+
+  .file-content {
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    background: var(--clr-canvas-file-content-bg, #fefefe);
+    border: 1px solid var(--clr-canvas-file-content-border, #f1f5f9);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: var(--font-family-mono, monospace);
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .content-text {
+    color: var(--clr-canvas-file-text, #374151);
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   @keyframes dash {
