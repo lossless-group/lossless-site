@@ -77,8 +77,8 @@
     height={height}
     rx="8"
     ry="8"
-    fill="var(--clr-canvas-file-bg, #ffffff)"
-    stroke="var(--clr-canvas-file-border, #e2e8f0)"
+    fill="rgba(255, 255, 255, 0.1)"
+    stroke="rgba(255, 255, 255, 0.2)"
     stroke-width="1"
   />
   
@@ -89,7 +89,7 @@
     height="32"
     rx="8"
     ry="8"
-    fill="var(--clr-canvas-file-header-bg, #f8fafc)"
+    fill="rgba(255, 255, 255, 0.15)"
     stroke="none"
   />
   
@@ -100,7 +100,7 @@
     y="24"
     width={width}
     height="8"
-    fill="var(--clr-canvas-file-header-bg, #f8fafc)"
+    fill="rgba(255, 255, 255, 0.15)"
   />
 
   <!-- File type icon -->
@@ -139,6 +139,19 @@
     >
       {node.file.length > 35 ? '...' + node.file.substring(node.file.length - 32) : node.file}
     </text>
+  {/if}
+
+  <!-- Frontmatter indicator -->
+  {#if (node as any).frontmatter}
+    <g class="frontmatter-indicator">
+      <circle
+        cx={width - 20}
+        cy="20"
+        r="4"
+        fill="var(--clr-lossless-accent--brightest)"
+      />
+      <title>Has frontmatter metadata</title>
+    </g>
   {/if}
 
   <!-- File content area -->
@@ -238,21 +251,24 @@
     width: 100%;
     height: 100%;
     padding: 8px;
-    background: var(--clr-canvas-file-content-bg, #fefefe);
-    border: 1px solid var(--clr-canvas-file-content-border, #f1f5f9);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
     overflow: hidden;
-    font-family: var(--font-family-mono, monospace);
-    font-size: 10px;
-    line-height: 1.4;
+    font-family: 'Krub', sans-serif;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
   .content-text {
-    color: var(--clr-canvas-file-text, #374151);
+    color: #1a1a1a;
     white-space: pre-wrap;
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 400;
   }
 
   @keyframes dash {

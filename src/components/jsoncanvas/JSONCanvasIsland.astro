@@ -69,10 +69,22 @@ if (canvasData) {
               
               if (existsSync(filePath)) {
                 const fileContent = await readFileAsync(filePath, 'utf-8');
-                // Truncate content for display (first 300 characters)
-                (node as any).fileContent = fileContent.substring(0, 300) + (fileContent.length > 300 ? '...' : '');
+                
+                // Separate frontmatter from content
+                const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+                if (frontmatterMatch) {
+                  const [, frontmatter, content] = frontmatterMatch;
+                  // Store both frontmatter and content separately
+                  (node as any).frontmatter = frontmatter.trim();
+                  (node as any).fileContent = content.substring(0, 400) + (content.length > 400 ? '...' : '');
+                } else {
+                  // No frontmatter, treat entire content as body
+                  (node as any).fileContent = fileContent.substring(0, 400) + (fileContent.length > 400 ? '...' : '');
+                  (node as any).frontmatter = null;
+                }
               } else {
                 (node as any).fileContent = `File not found: ${node.file}\nLooked in: ${filePath}`;
+                (node as any).frontmatter = null;
               }
             } catch (fileError) {
               (node as any).fileContent = `Error reading file: ${node.file}\n${fileError}`;
