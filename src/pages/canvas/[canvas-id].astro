@@ -1,0 +1,320 @@
+---
+/**
+ * Dynamic Canvas Page
+ * Renders individual JSON Canvas files using the Island wrapper pattern
+ * Similar to slides/[...slug].astro but for canvas files
+ */
+
+import { getCollection } from 'astro:content';
+import JSONCanvasLayout from '../../layouts/JSONCanvasLayout.astro';
+import JSONCanvasIsland from '../../components/jsoncanvas/JSONCanvasIsland.astro';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+
+  try {
+    // Try to get canvas files from various collections
+    const collections = await Promise.allSettled([
+      getCollection('canvas').catch(() => []),
+      getCollection('concepts').catch(() => []),
+      getCollection('vocabulary').catch(() => []),
+      getCollection('tooling').catch(() => [])
+    ]);
+
+    const allEntries: any[] = [];
+    collections.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        const collectionName = ['canvas', 'concepts', 'vocabulary', 'tooling'][index];
+        allEntries.push(...result.value.map((entry: any) => ({
+          ...entry,
+          source: collectionName
+        })));
+      }
+    });
+
+    // Find canvas files or entries with canvas data
+    const canvasEntries = allEntries.filter(entry => {
+      return entry.id.endsWith('.canvas') || 
+             (entry.data && typeof entry.data === 'object' && 'nodes' in entry.data);
+    });
+
+    // Create paths for each canvas
+    for (const entry of canvasEntries) {
+      const canvasId = entry.id.replace(/\.canvas$/, '');
+      const title = entry.data?.title || canvasId;
+      const description = entry.data?.description || entry.data?.lede || `Interactive visualization of ${title}`;
+      
+      paths.push({
+        params: { 'canvas-id': canvasId },
+        props: {
+          canvasId,
+          title,
+          description,
+          source: entry.source,
+          entry
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('Error generating canvas paths:', error);
+  }
+
+  return paths;
+}
+
+interface Props {
+  canvasId: string;
+  title: string;
+  description: string;
+  source: string;
+  entry: any;
+}
+
+const { canvasId, title, description, source, entry } = Astro.props;
+
+// Additional metadata for the page
+const pageTitle = `${title} - Canvas Viewer`;
+const pageDescription = description || `Interactive JSON Canvas visualization: ${title}`;
+---
+
+<JSONCanvasLayout 
+  title={pageTitle}
+  description={pageDescription}
+  canvasId={canvasId}
+>
+  <div class="canvas-page-content">
+    <!-- Canvas metadata -->
+    <div class="canvas-metadata">
+      <div class="metadata-item">
+        <span class="metadata-label">Source:</span>
+        <span class="metadata-value">{source}</span>
+      </div>
+      {entry.data?.date_created && (
+        <div class="metadata-item">
+          <span class="metadata-label">Created:</span>
+          <span class="metadata-value">
+            {new Date(entry.data.date_created).toLocaleDateString()}
+          </span>
+        </div>
+      )}
+      {entry.data?.date_modified && (
+        <div class="metadata-item">
+          <span class="metadata-label">Modified:</span>
+          <span class="metadata-value">
+            {new Date(entry.data.date_modified).toLocaleDateString()}
+          </span>
+        </div>
+      )}
+    </div>
+
+    <!-- Main canvas renderer -->
+    <div class="canvas-renderer-container">
+      <JSONCanvasIsland canvasId={canvasId} />
+    </div>
+
+    <!-- Additional information -->
+    {entry.data?.tags && entry.data.tags.length > 0 && (
+      <div class="canvas-tags">
+        <h3>Tags</h3>
+        <div class="tag-list">
+          {entry.data.tags.map((tag: string) => (
+            <span key={tag} class="tag">{tag}</span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {(entry.data?.lede || entry.data?.description) && (
+      <div class="canvas-details">
+        <h3>About This Canvas</h3>
+        <p>{entry.data.lede || entry.data.description}</p>
+      </div>
+    )}
+
+    <!-- Navigation -->
+    <div class="canvas-navigation">
+      <a href="/canvas" class="nav-link">
+        ← Back to Canvas Gallery
+      </a>
+    </div>
+  </div>
+</JSONCanvasLayout>
+
+<style>
+  .canvas-page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .canvas-metadata {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .metadata-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .metadata-label {
+    font-weight: 500;
+    color: var(--clr-lossless-primary-medium);
+    font-size: 0.9rem;
+  }
+
+  .metadata-value {
+    color: var(--clr-lossless-primary-light);
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  .canvas-renderer-container {
+    /* Full width container for the canvas */
+    width: 100%;
+    margin: 0;
+  }
+
+  .canvas-tags {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+  }
+
+  .canvas-tags h3 {
+    margin: 0 0 1rem 0;
+    color: var(--clr-lossless-accent--bright);
+    font-size: 1.1rem;
+  }
+
+  .tag-list {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: var(--clr-lossless-accent--bright);
+    color: var(--clr-lossless-bg-dark);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
+    text-transform: lowercase;
+  }
+
+  .canvas-details {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+  }
+
+  .canvas-details h3 {
+    margin: 0 0 1rem 0;
+    color: var(--clr-lossless-accent--bright);
+    font-size: 1.1rem;
+  }
+
+  .canvas-details p {
+    margin: 0;
+    color: var(--clr-lossless-primary-medium);
+    line-height: 1.6;
+  }
+
+  .canvas-navigation {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-link {
+    color: var(--clr-lossless-accent--bright);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--clr-lossless-accent--bright);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover {
+    background: var(--clr-lossless-accent--bright);
+    color: var(--clr-lossless-bg-dark);
+    transform: translateY(-2px);
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .canvas-metadata {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .metadata-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    .canvas-tags,
+    .canvas-details {
+      padding: 1rem;
+    }
+
+    .tag-list {
+      gap: 0.25rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .canvas-metadata {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+    }
+
+    .metadata-label,
+    .metadata-value {
+      color: #333 !important;
+    }
+
+    .canvas-tags,
+    .canvas-details {
+      background: #f9f9f9;
+    }
+
+    .canvas-tags h3,
+    .canvas-details h3 {
+      color: #333 !important;
+    }
+
+    .canvas-details p {
+      color: #666 !important;
+    }
+
+    .tag {
+      background: #333 !important;
+      color: #fff !important;
+    }
+
+    .canvas-navigation {
+      display: none;
+    }
+  }
+</style>

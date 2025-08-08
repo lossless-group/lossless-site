@@ -1,0 +1,300 @@
+---
+/**
+ * JSONCanvasIsland.astro
+ * Server island component that fetches JSON Canvas data and renders Svelte component
+ * Follows the Island Wrapper Pattern from ToolShowcaseIsland.astro
+ */
+
+import { getCollection } from 'astro:content';
+import JSONCanvasRenderer from './JSONCanvasRenderer.svelte';
+import { parseJSONCanvas, transformCoordinates } from '../../utils/jsonCanvasUtils.ts';
+import type { JSONCanvas, ParsedCanvas } from '../../utils/jsonCanvasUtils.ts';
+
+interface Props {
+  canvasId: string;
+  showDebug?: boolean;
+}
+
+const { canvasId, showDebug = false } = Astro.props;
+
+// Try to fetch from different collections that might contain canvas files
+let canvasData: string | null = null;
+let canvasSource: string = '';
+let debugInfo: any = {};
+
+try {
+  // First, try to find in a dedicated canvas collection (if it exists)
+  try {
+    const canvasCollection = await getCollection('canvas').catch(() => []);
+    const canvasEntry = canvasCollection.find(entry => 
+      entry.id === canvasId || 
+      entry.id.endsWith(`/${canvasId}`) ||
+      entry.slug === canvasId
+    );
+    
+    if (canvasEntry) {
+      canvasData = canvasEntry.body || JSON.stringify(canvasEntry.data);
+      canvasSource = 'canvas collection';
+    }
+  } catch (error) {
+    debugInfo.canvasCollectionError = error instanceof Error ? error.message : 'Unknown error';
+  }
+
+  // If not found, try other collections
+  if (!canvasData) {
+    const [concepts, vocabulary, tooling] = await Promise.all([
+      getCollection('concepts').catch(() => []),
+      getCollection('vocabulary').catch(() => []),
+      getCollection('tooling').catch(() => [])
+    ]);
+
+    const allEntries = [...concepts, ...vocabulary, ...tooling];
+    
+    // Look for canvas files or entries with canvas data
+    const canvasEntry = allEntries.find(entry => {
+      const entryId = entry.id.toLowerCase().replace(/\\/g, '/');
+      const searchId = canvasId.toLowerCase().replace(/\\/g, '/');
+      
+      return entryId === searchId || 
+             entryId.endsWith('/' + searchId) ||
+             entryId.includes(searchId) ||
+             entry.slug === canvasId ||
+             (entry.data && typeof entry.data === 'object' && 'nodes' in entry.data);
+    });
+
+    if (canvasEntry) {
+      // Check if it's a canvas file or has canvas data
+      if (canvasEntry.id.endsWith('.canvas')) {
+        canvasData = canvasEntry.body;
+        canvasSource = 'file content';
+      } else if (canvasEntry.data && typeof canvasEntry.data === 'object' && 'nodes' in canvasEntry.data) {
+        canvasData = JSON.stringify(canvasEntry.data);
+        canvasSource = 'frontmatter data';
+      }
+    }
+
+    debugInfo.searchedCollections = {
+      concepts: concepts.length,
+      vocabulary: vocabulary.length,
+      tooling: tooling.length,
+      totalEntries: allEntries.length
+    };
+  }
+
+} catch (error) {
+  debugInfo.fetchError = error instanceof Error ? error.message : 'Unknown error';
+}
+
+// Parse the canvas data
+let parsedCanvas: ParsedCanvas | null = null;
+let transformedCanvas: JSONCanvas | null = null;
+
+if (canvasData) {
+  try {
+    parsedCanvas = parseJSONCanvas(canvasData);
+    
+    if (parsedCanvas.canvas) {
+      // Transform coordinates for web rendering
+      transformedCanvas = transformCoordinates(parsedCanvas.canvas);
+    }
+  } catch (error) {
+    debugInfo.parseError = error instanceof Error ? error.message : 'Unknown error';
+  }
+}
+
+// Prepare props for Svelte component
+const canvasProps = transformedCanvas ? {
+  canvas: transformedCanvas,
+  canvasId: canvasId
+} : null;
+
+debugInfo.canvasFound = !!canvasData;
+debugInfo.canvasSource = canvasSource;
+debugInfo.parseSuccess = !!transformedCanvas;
+---
+
+{transformedCanvas && canvasProps ? (
+  <JSONCanvasRenderer 
+    canvas={canvasProps.canvas} 
+    canvasId={canvasProps.canvasId}
+    client:load 
+  />
+) : (
+  <div class="json-canvas-error">
+    <h4>JSON Canvas Error</h4>
+    <p>Unable to load canvas: <strong>{canvasId}</strong></p>
+    
+    {parsedCanvas?.validation.errors.length > 0 && (
+      <div class="error-details">
+        <h5>Validation Errors:</h5>
+        <ul>
+          {parsedCanvas.validation.errors.map(error => (
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {parsedCanvas?.validation.warnings.length > 0 && (
+      <div class="warning-details">
+        <h5>Warnings:</h5>
+        <ul>
+          {parsedCanvas.validation.warnings.map(warning => (
+            <li key={warning}>{warning}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <details class="debug-details">
+      <summary>Debug Information</summary>
+      <div class="debug-info">
+        <p><strong>Canvas ID:</strong> {canvasId}</p>
+        <p><strong>Canvas Found:</strong> {debugInfo.canvasFound ? 'Yes' : 'No'}</p>
+        {debugInfo.canvasSource && (
+          <p><strong>Source:</strong> {debugInfo.canvasSource}</p>
+        )}
+        
+        {parsedCanvas && (
+          <div class="parse-info">
+            <p><strong>Parse Success:</strong> {debugInfo.parseSuccess ? 'Yes' : 'No'}</p>
+            <p><strong>Nodes:</strong> {parsedCanvas.debugInfo.nodeCount}</p>
+            <p><strong>Edges:</strong> {parsedCanvas.debugInfo.edgeCount}</p>
+            {Object.keys(parsedCanvas.debugInfo.nodeTypes).length > 0 && (
+              <div>
+                <p><strong>Node Types:</strong></p>
+                <ul>
+                  {Object.entries(parsedCanvas.debugInfo.nodeTypes).map(([type, count]) => (
+                    <li key={type}>{type}: {count}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {parsedCanvas.debugInfo.invalidEdges.length > 0 && (
+              <div>
+                <p><strong>Invalid Edges:</strong></p>
+                <ul>
+                  {parsedCanvas.debugInfo.invalidEdges.map(edgeId => (
+                    <li key={edgeId}>{edgeId}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {debugInfo.searchedCollections && (
+          <div class="search-info">
+            <p><strong>Searched Collections:</strong></p>
+            <ul>
+              {Object.entries(debugInfo.searchedCollections).map(([collection, count]) => (
+                <li key={collection}>{collection}: {count}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {debugInfo.fetchError && (
+          <p class="error"><strong>Fetch Error:</strong> {debugInfo.fetchError}</p>
+        )}
+        
+        {debugInfo.parseError && (
+          <p class="error"><strong>Parse Error:</strong> {debugInfo.parseError}</p>
+        )}
+        
+        {debugInfo.canvasCollectionError && (
+          <p class="warning"><strong>Canvas Collection Error:</strong> {debugInfo.canvasCollectionError}</p>
+        )}
+      </div>
+    </details>
+  </div>
+)}
+
+<style>
+  .json-canvas-error {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 12px;
+    color: var(--clr-lossless-primary-light);
+  }
+
+  .json-canvas-error h4 {
+    color: #ffa500;
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+
+  .json-canvas-error h5 {
+    color: #ffa500;
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1rem;
+  }
+
+  .error-details {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 8px;
+  }
+
+  .warning-details {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 8px;
+  }
+
+  .debug-details {
+    margin-top: 1.5rem;
+  }
+
+  .debug-details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--clr-lossless-accent--bright);
+  }
+
+  .debug-details summary:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .debug-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+
+  .debug-info p {
+    margin: 0.5rem 0;
+  }
+
+  .debug-info ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .debug-info li {
+    margin: 0.25rem 0;
+    font-family: monospace;
+  }
+
+  .debug-info .error {
+    color: #ff6b6b;
+  }
+
+  .debug-info .warning {
+    color: #ffa726;
+  }
+
+  .parse-info, .search-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+</style>

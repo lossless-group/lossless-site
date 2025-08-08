@@ -1,0 +1,207 @@
+---
+/**
+ * JSONCanvasLayout.astro
+ * Canvas-specific layout extending the base Layout component
+ * Provides optimized styling and structure for JSON Canvas rendering
+ */
+
+import Layout from './Layout.astro';
+import AnimationWrapper from '../components/basics/AnimationWrapper.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canvasId?: string;
+}
+
+const { 
+  title = 'JSON Canvas Viewer',
+  description = 'Interactive JSON Canvas visualization',
+  canvasId = ''
+} = Astro.props;
+
+const pageTitle = canvasId ? `${canvasId} - ${title}` : title;
+---
+
+<Layout 
+  title={pageTitle}
+  description={description}
+  class="json-canvas-page"
+>
+  <AnimationWrapper>
+    <main class="canvas-main">
+      <div class="canvas-header">
+        {canvasId && (
+          <div class="canvas-breadcrumb">
+            <a href="/canvas">Canvas Gallery</a>
+            <span class="separator">›</span>
+            <span class="current">{canvasId}</span>
+          </div>
+        )}
+        
+        <div class="canvas-title-section">
+          <h1 class="canvas-title" data-animate="fade-up">
+            {pageTitle}
+          </h1>
+          {description && (
+            <p class="canvas-description" data-animate="fade-up" data-delay="100">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div class="canvas-content" data-animate="fade-up" data-delay="200">
+        <slot />
+      </div>
+    </main>
+  </AnimationWrapper>
+</Layout>
+
+<style>
+  .canvas-main {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .canvas-header {
+    padding: 2rem 1rem 1rem 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .canvas-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-medium);
+  }
+
+  .canvas-breadcrumb a {
+    color: var(--clr-lossless-accent--bright);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .canvas-breadcrumb a:hover {
+    color: var(--clr-lossless-accent--brightest);
+    text-decoration: underline;
+  }
+
+  .separator {
+    color: var(--clr-lossless-primary-medium);
+  }
+
+  .current {
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .canvas-title-section {
+    text-align: center;
+  }
+
+  .canvas-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    background: linear-gradient(
+      135deg,
+      var(--clr-lossless-accent--bright),
+      var(--clr-lossless-accent--brightest)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  .canvas-description {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-medium);
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .canvas-content {
+    padding: 0 1rem 2rem 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Full-width canvas container */
+  :global(.json-canvas-container) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* Canvas-specific page styling */
+  :global(.json-canvas-page) {
+    background: var(--clr-lossless-bg-darker);
+  }
+
+  :global(.json-canvas-page .site-header) {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .canvas-header {
+      padding: 1rem 0.5rem 0.5rem 0.5rem;
+    }
+
+    .canvas-content {
+      padding: 0 0.5rem 1rem 0.5rem;
+    }
+
+    .canvas-breadcrumb {
+      font-size: 0.8rem;
+    }
+
+    .canvas-title {
+      font-size: clamp(1.5rem, 8vw, 2.5rem);
+    }
+
+    .canvas-description {
+      font-size: 1rem;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .canvas-header {
+      padding: 1rem 0;
+    }
+
+    .canvas-breadcrumb {
+      display: none;
+    }
+
+    .canvas-title {
+      color: #000 !important;
+      -webkit-text-fill-color: #000 !important;
+      background: none !important;
+    }
+
+    .canvas-description {
+      color: #666 !important;
+    }
+
+    :global(.canvas-controls) {
+      display: none !important;
+    }
+
+    :global(.info-panel) {
+      display: none !important;
+    }
+  }
+</style>

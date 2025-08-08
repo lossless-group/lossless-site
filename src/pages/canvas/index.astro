@@ -1,0 +1,389 @@
+---
+/**
+ * Canvas Gallery Index Page
+ * Lists all available JSON Canvas files for viewing
+ * Similar to slides/index.astro but for canvas files
+ */
+
+import { getCollection } from 'astro:content';
+import JSONCanvasLayout from '../../layouts/JSONCanvasLayout.astro';
+import TextCTA from '../../components/basics/TextCTA.astro';
+import Card from '../../components/basics/Card.astro';
+
+// Try to fetch canvas files from various collections
+let canvasFiles: any[] = [];
+let debugInfo: any = {};
+
+try {
+  // First, try dedicated canvas collection
+  try {
+    const canvasCollection = await getCollection('canvas').catch(() => []);
+    canvasFiles.push(...canvasCollection.map(entry => ({
+      ...entry,
+      source: 'canvas'
+    })));
+  } catch (error) {
+    debugInfo.canvasCollectionError = error instanceof Error ? error.message : 'Unknown error';
+  }
+
+  // Then try other collections for .canvas files or canvas data
+  const [concepts, vocabulary, tooling] = await Promise.all([
+    getCollection('concepts').catch(() => []),
+    getCollection('vocabulary').catch(() => []),
+    getCollection('tooling').catch(() => [])
+  ]);
+
+  const allEntries = [
+    ...concepts.map(e => ({ ...e, source: 'concepts' })),
+    ...vocabulary.map(e => ({ ...e, source: 'vocabulary' })),
+    ...tooling.map(e => ({ ...e, source: 'tooling' }))
+  ];
+
+  // Find canvas files or entries with canvas data
+  const canvasEntries = allEntries.filter(entry => {
+    return entry.id.endsWith('.canvas') || 
+           (entry.data && typeof entry.data === 'object' && 'nodes' in entry.data);
+  });
+
+  canvasFiles.push(...canvasEntries);
+
+  debugInfo.searchedCollections = {
+    concepts: concepts.length,
+    vocabulary: vocabulary.length,
+    tooling: tooling.length,
+    totalEntries: allEntries.length,
+    foundCanvas: canvasEntries.length
+  };
+
+} catch (error) {
+  debugInfo.fetchError = error instanceof Error ? error.message : 'Unknown error';
+}
+
+// Process canvas files for display
+const processedCanvases = canvasFiles.map(entry => {
+  const id = entry.id.replace(/\.canvas$/, '');
+  const title = entry.data?.title || id;
+  const description = entry.data?.description || entry.data?.lede || 'JSON Canvas visualization';
+  
+  // Try to extract some basic info from canvas data
+  let nodeCount = 0;
+  let edgeCount = 0;
+  
+  try {
+    let canvasData;
+    if (entry.id.endsWith('.canvas')) {
+      canvasData = JSON.parse(entry.body || '{}');
+    } else if (entry.data && 'nodes' in entry.data) {
+      canvasData = entry.data;
+    }
+    
+    if (canvasData) {
+      nodeCount = Array.isArray(canvasData.nodes) ? canvasData.nodes.length : 0;
+      edgeCount = Array.isArray(canvasData.edges) ? canvasData.edges.length : 0;
+    }
+  } catch (error) {
+    // Ignore parsing errors for gallery display
+  }
+  
+  return {
+    id,
+    title,
+    description,
+    source: entry.source,
+    nodeCount,
+    edgeCount,
+    slug: entry.slug || id,
+    data: entry.data
+  };
+});
+
+// Sort by title
+processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<JSONCanvasLayout 
+  title="Canvas Gallery"
+  description="Interactive JSON Canvas visualizations and mind maps"
+>
+  <div class="canvas-gallery">
+    {processedCanvases.length > 0 ? (
+      <div class="canvas-grid">
+        {processedCanvases.map(canvas => (
+          <Card key={canvas.id} class="canvas-card">
+            <div class="canvas-card-content">
+              <div class="canvas-header">
+                <h3 class="canvas-card-title">{canvas.title}</h3>
+                <div class="canvas-meta">
+                  <span class="source-badge">{canvas.source}</span>
+                  {canvas.nodeCount > 0 && (
+                    <span class="stat-badge">
+                      {canvas.nodeCount} nodes
+                    </span>
+                  )}
+                  {canvas.edgeCount > 0 && (
+                    <span class="stat-badge">
+                      {canvas.edgeCount} edges
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <p class="canvas-card-description">{canvas.description}</p>
+              
+              <div class="canvas-card-actions">
+                <TextCTA 
+                  href={`/canvas/${canvas.id}`}
+                  text="View Canvas"
+                  variant="primary"
+                />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    ) : (
+      <div class="no-canvas-found">
+        <div class="no-canvas-content">
+          <h2>No Canvas Files Found</h2>
+          <p>No JSON Canvas files were found in the available collections.</p>
+          
+          <details class="debug-details">
+            <summary>Debug Information</summary>
+            <div class="debug-info">
+              <p><strong>Total Canvas Files:</strong> {canvasFiles.length}</p>
+              
+              {debugInfo.searchedCollections && (
+                <div>
+                  <p><strong>Searched Collections:</strong></p>
+                  <ul>
+                    {Object.entries(debugInfo.searchedCollections).map(([collection, count]) => (
+                      <li key={collection}>{collection}: {count}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {debugInfo.fetchError && (
+                <p class="error"><strong>Fetch Error:</strong> {debugInfo.fetchError}</p>
+              )}
+              
+              {debugInfo.canvasCollectionError && (
+                <p class="warning"><strong>Canvas Collection Error:</strong> {debugInfo.canvasCollectionError}</p>
+              )}
+            </div>
+          </details>
+          
+          <div class="getting-started">
+            <h3>Getting Started</h3>
+            <p>To add canvas files:</p>
+            <ol>
+              <li>Create <code>.canvas</code> files in your content collections</li>
+              <li>Or add canvas data to frontmatter with <code>nodes</code> and <code>edges</code> properties</li>
+              <li>Files will automatically appear in this gallery</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</JSONCanvasLayout>
+
+<style>
+  .canvas-gallery {
+    min-height: 50vh;
+  }
+
+  .canvas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .canvas-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .canvas-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .canvas-card-content {
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .canvas-header {
+    margin-bottom: 1rem;
+  }
+
+  .canvas-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--clr-lossless-primary-light);
+    line-height: 1.3;
+  }
+
+  .canvas-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .source-badge {
+    background: var(--clr-lossless-accent--bright);
+    color: var(--clr-lossless-bg-dark);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+  }
+
+  .stat-badge {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--clr-lossless-primary-medium);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-family: monospace;
+  }
+
+  .canvas-card-description {
+    color: var(--clr-lossless-primary-medium);
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+  }
+
+  .canvas-card-actions {
+    margin-top: auto;
+  }
+
+  .no-canvas-found {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+  }
+
+  .no-canvas-content {
+    max-width: 600px;
+    padding: 2rem;
+  }
+
+  .no-canvas-content h2 {
+    color: var(--clr-lossless-primary-light);
+    margin-bottom: 1rem;
+  }
+
+  .no-canvas-content p {
+    color: var(--clr-lossless-primary-medium);
+    margin-bottom: 1.5rem;
+  }
+
+  .debug-details {
+    margin: 2rem 0;
+    text-align: left;
+  }
+
+  .debug-details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--clr-lossless-accent--bright);
+    margin-bottom: 1rem;
+  }
+
+  .debug-details summary:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .debug-info {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .debug-info p {
+    margin: 0.5rem 0;
+  }
+
+  .debug-info ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .debug-info li {
+    margin: 0.25rem 0;
+    font-family: monospace;
+  }
+
+  .debug-info .error {
+    color: #ff6b6b;
+  }
+
+  .debug-info .warning {
+    color: #ffa726;
+  }
+
+  .getting-started {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: left;
+  }
+
+  .getting-started h3 {
+    color: var(--clr-lossless-accent--bright);
+    margin: 0 0 1rem 0;
+  }
+
+  .getting-started p {
+    margin: 0 0 1rem 0;
+  }
+
+  .getting-started ol {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .getting-started li {
+    margin: 0.5rem 0;
+    color: var(--clr-lossless-primary-medium);
+  }
+
+  .getting-started code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .canvas-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .canvas-card-content {
+      padding: 1.25rem;
+    }
+
+    .canvas-meta {
+      gap: 0.25rem;
+    }
+
+    .no-canvas-content {
+      padding: 1rem;
+    }
+  }
+</style>
