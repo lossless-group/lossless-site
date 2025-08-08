@@ -55,7 +55,7 @@
     fill="var(--clr-canvas-group-bg, #1a1a1a)"
     stroke="var(--clr-canvas-group-border, #333333)"
     stroke-width="2"
-    opacity="0.9"
+    opacity="0.2"
   />
   
   <!-- Group label if present -->
@@ -98,8 +98,8 @@
   }
 
   .canvas-group:hover .group-background {
-    stroke: var(--clr-canvas-group-border-hover, #555555);
-    opacity: 1;
+    stroke: var(--clr-lossless-accent--brightest);
+    stroke-width: 2;
   }
 
   .canvas-group:focus {

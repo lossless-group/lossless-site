@@ -197,13 +197,20 @@
     
     if (!fromNode || !toNode) return '';
     
-    // Simple straight line for now
-    const fromX = fromNode.x + fromNode.width / 2;
-    const fromY = fromNode.y + fromNode.height / 2;
-    const toX = toNode.x + toNode.width / 2;
-    const toY = toNode.y + toNode.height / 2;
+    // Calculate absolute positions for nodes (accounting for groups)
+    function getAbsolutePosition(node: any) {
+      // For file nodes, use their absolute coordinates directly
+      // The coordinates in the canvas file are already absolute
+      return {
+        x: node.x + (node.width || 200) / 2,
+        y: node.y + (node.height || 150) / 2
+      };
+    }
     
-    return `M ${fromX} ${fromY} L ${toX} ${toY}`;
+    const fromPos = getAbsolutePosition(fromNode);
+    const toPos = getAbsolutePosition(toNode);
+    
+    return `M ${fromPos.x} ${fromPos.y} L ${toPos.x} ${toPos.y}`;
   }
 
   onMount(() => {
@@ -275,10 +282,11 @@
         {#each canvas.edges as edge (edge.id)}
           <path
             d={getEdgePath(edge)}
-            stroke={edge.color ? resolveColor(edge.color) : '#666'}
-            stroke-width="2"
+            stroke={edge.color ? resolveColor(edge.color) : 'var(--clr-lossless-accent--brightest)'}
+            stroke-width="3"
             fill="none"
             marker-end="url(#arrowhead)"
+            opacity="0.8"
           />
           {#if edge.label}
             <text
@@ -379,7 +387,7 @@
         >
           <polygon
             points="0 0, 10 3.5, 0 7"
-            fill="#666"
+            fill="var(--clr-lossless-accent--brightest)"
           />
         </marker>
       </defs>
