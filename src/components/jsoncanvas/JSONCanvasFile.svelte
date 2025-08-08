@@ -96,11 +96,13 @@
   <!-- File header section -->
   <rect
     class="file-header"
+    x="0"
+    y="0"
     width={width}
     height="32"
     rx="8"
     ry="8"
-    fill="rgba(255, 255, 255, 0.15)"
+    fill="var(--clr-primary-bg)"
     stroke="none"
   />
   
@@ -111,7 +113,7 @@
     y="24"
     width={width}
     height="8"
-    fill="rgba(255, 255, 255, 0.15)"
+    fill="var(--clr-primary-bg)"
   />
 
   <!-- File type icon -->
@@ -258,66 +260,73 @@
     fill: var(--clr-file-image, #10b981);
   }
 
+
+
   .file-content {
     width: 100%;
     height: 100%;
     padding: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--clr-primary-bg);
+    border: 1px solid var(--clr-lossless-primary-glass--lighter);
     border-radius: 6px;
     overflow: hidden;
-    font-family: 'Krub', sans-serif;
-    font-size: 0.7rem;
+    font-family: var(--ff-legible);
+    font-size: var(--fs-200);
     line-height: 1.5;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
 
   .content-text {
-    color: #1a1a1a;
+    color: var(--clr-body);
     word-break: break-word;
     overflow: hidden;
-    font-weight: 400;
+    font-weight: var(--fw-regular);
   }
 
-  /* Markdown element styles */
+  /* Markdown element styles using theme variables */
   .content-text :global(.markdown-h1),
   .content-text :global(.markdown-h2),
   .content-text :global(.markdown-h3) {
-    font-weight: 600;
+    font-family: var(--ff-base);
+    font-weight: var(--fw-semi-bold);
+    color: var(--clr-heading);
     margin: 0.5em 0 0.3em 0;
     line-height: 1.2;
   }
 
-  .content-text :global(.markdown-h1) { font-size: 0.9rem; }
-  .content-text :global(.markdown-h2) { font-size: 0.8rem; }
-  .content-text :global(.markdown-h3) { font-size: 0.75rem; }
+  .content-text :global(.markdown-h1) { font-size: var(--fs-300); }
+  .content-text :global(.markdown-h2) { font-size: var(--fs-250); }
+  .content-text :global(.markdown-h3) { font-size: var(--fs-200); }
 
   .content-text :global(.markdown-p) {
     margin: 0.4em 0;
     line-height: 1.4;
+    color: var(--clr-body);
   }
 
   .content-text :global(.backlink) {
-    color: #0066cc;
+    color: var(--clr-link);
     text-decoration: underline;
     cursor: pointer;
   }
 
   .content-text :global(.backlink:hover) {
-    color: #004499;
+    color: var(--clr-lossless-accent--brightest);
   }
 
   .content-text :global(.inline-code) {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--clr-lossless-primary-glass--lighter);
     padding: 0.1em 0.3em;
     border-radius: 3px;
     font-family: monospace;
-    font-size: 0.9em;
+    font-size: var(--fs-150);
+    color: var(--clr-body);
   }
 
   .content-text :global(strong) {
-    font-weight: 600;
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
   }
 
   .content-text :global(em) {
