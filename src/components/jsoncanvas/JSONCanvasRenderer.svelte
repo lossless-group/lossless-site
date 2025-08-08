@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import type { JSONCanvas, CanvasNode, CanvasEdge } from '../../types/json-canvas';
   import { resolveColor, getCanvasDimensions } from '../../utils/jsonCanvasUtils';
+  import JSONCanvasGroup from './JSONCanvasGroup.svelte';
+  import JSONCanvasFile from './JSONCanvasFile.svelte';
 
   export let canvas: JSONCanvas;
 
@@ -296,81 +298,72 @@
       <!-- Nodes -->
       <g class="nodes-layer">
         {#each canvas.nodes as node (node.id)}
-          <g 
-            class="canvas-node"
-            class:selected={selectedNodeId === node.id}
-            role="button"
-            tabindex="0"
-            aria-label="Canvas node: {node.type}"
-            on:click={() => selectNode(node.id)}
-            on:keydown={(e) => e.key === 'Enter' || e.key === ' ' ? selectNode(node.id) : null}
-          >
-            <!-- Node background -->
-            <rect
-              x={node.x}
-              y={node.y}
-              width={node.width}
-              height={node.height}
-              style={getNodeStyle(node)}
-              class="node-background"
+          {#if node.type === 'group'}
+            <JSONCanvasGroup 
+              {node}
+              isSelected={selectedNodeId === node.id}
+              onClick={() => selectNode(node.id)}
+              onKeydown={(e) => e.key === 'Enter' || e.key === ' ' ? selectNode(node.id) : null}
             />
-            
-            <!-- Node content based on type -->
-            {#if node.type === 'text'}
-              <foreignObject
-                x={node.x + 8}
-                y={node.y + 8}
-                width={node.width - 16}
-                height={node.height - 16}
-              >
-                <div class="node-text">
-                  {node.text}
-                </div>
-              </foreignObject>
-            {:else if node.type === 'file'}
-              <foreignObject
-                x={node.x + 8}
-                y={node.y + 8}
-                width={node.width - 16}
-                height={node.height - 16}
-              >
-                <div class="node-file">
-                  <div class="file-icon">📄</div>
-                  <div class="file-name">{node.file}</div>
-                  {#if node.subpath}
-                    <div class="file-subpath">{node.subpath}</div>
-                  {/if}
-                </div>
-              </foreignObject>
-            {:else if node.type === 'link'}
-              <foreignObject
-                x={node.x + 8}
-                y={node.y + 8}
-                width={node.width - 16}
-                height={node.height - 16}
-              >
-                <div class="node-link">
-                  <div class="link-icon">🔗</div>
-                  <a href={node.url} target="_blank" rel="noopener noreferrer">
-                    {node.url}
-                  </a>
-                </div>
-              </foreignObject>
-            {:else if node.type === 'group'}
-              <foreignObject
-                x={node.x + 8}
-                y={node.y + 8}
-                width={node.width - 16}
-                height={node.height - 16}
-              >
-                <div class="node-group">
-                  {#if node.label}
-                    <div class="group-label">{node.label}</div>
-                  {/if}
-                </div>
-              </foreignObject>
-            {/if}
-          </g>
+          {:else if node.type === 'file'}
+            <JSONCanvasFile 
+              {node}
+              isSelected={selectedNodeId === node.id}
+              onClick={() => selectNode(node.id)}
+              onKeydown={(e) => e.key === 'Enter' || e.key === ' ' ? selectNode(node.id) : null}
+            />
+          {:else}
+            <!-- Fallback for text and link nodes - keep existing simple rendering -->
+            <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+            <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+            <g 
+              class="canvas-node"
+              class:selected={selectedNodeId === node.id}
+              role="button"
+              tabindex="0"
+              aria-label="Canvas node: {node.type}"
+              on:click={() => selectNode(node.id)}
+              on:keydown={(e) => e.key === 'Enter' || e.key === ' ' ? selectNode(node.id) : null}
+            >
+              <!-- Node background -->
+              <rect
+                x={node.x}
+                y={node.y}
+                width={node.width}
+                height={node.height}
+                style={getNodeStyle(node)}
+                class="node-background"
+              />
+              
+              <!-- Node content based on type -->
+              {#if node.type === 'text'}
+                <foreignObject
+                  x={node.x + 8}
+                  y={node.y + 8}
+                  width={node.width - 16}
+                  height={node.height - 16}
+                >
+                  <div class="node-text">
+                    {node.text}
+                  </div>
+                </foreignObject>
+              {:else if node.type === 'link'}
+                <foreignObject
+                  x={node.x + 8}
+                  y={node.y + 8}
+                  width={node.width - 16}
+                  height={node.height - 16}
+                >
+                  <div class="node-link">
+                    <div class="link-icon">🔗</div>
+                    <a href={node.url} target="_blank" rel="noopener noreferrer">
+                      {node.url}
+                    </a>
+                  </div>
+                </foreignObject>
+              {/if}
+            </g>
+          {/if}
         {/each}
       </g>
 
@@ -506,31 +499,7 @@
     word-wrap: break-word;
   }
 
-  .node-file {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: #333;
-  }
 
-  .file-icon {
-    font-size: 24px;
-    margin-bottom: 0.5rem;
-  }
-
-  .file-name {
-    font-size: 12px;
-    font-weight: 500;
-    word-break: break-all;
-  }
-
-  .file-subpath {
-    font-size: 10px;
-    opacity: 0.7;
-    margin-top: 0.25rem;
-  }
 
   .node-link {
     display: flex;
@@ -557,18 +526,7 @@
     text-decoration: underline;
   }
 
-  .node-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: #333;
-  }
 
-  .group-label {
-    font-size: 16px;
-    font-weight: 600;
-  }
 
   .edge-label {
     font-size: 12px;

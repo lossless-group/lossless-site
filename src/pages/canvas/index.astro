@@ -8,7 +8,6 @@
 import { getCollection } from 'astro:content';
 import JSONCanvasLayout from '../../layouts/Section__JSONCanvasLayout.astro';
 import TextCTA from '../../components/basics/cta/TextCTA.astro';
-import Card from '../../components/basics/Card.astro';
 
 // Try to fetch canvas files from various collections
 let canvasFiles: any[] = [];
@@ -103,7 +102,7 @@ processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
     {processedCanvases.length > 0 ? (
       <div class="canvas-grid">
         {processedCanvases.map(canvas => (
-          <Card classes="canvas-card">
+          <div class="canvas-card">
             <div class="canvas-card-content">
               <div class="canvas-header">
                 <h3 class="canvas-card-title">{canvas.title}</h3>
@@ -131,7 +130,7 @@ processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
                 />
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     ) : (
