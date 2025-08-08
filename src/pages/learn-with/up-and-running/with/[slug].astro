@@ -1,0 +1,112 @@
+---
+// site/src/pages/learn-with/up-and-running/with/[slug].astro
+// This dynamic page renders individual up-and-running guide pages.
+
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import { slugify } from '@utils/slugify';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+interface UpAndRunningEntry {
+  data: {
+    title?: string;
+    slug?: string;
+    banner_image?: string;
+    portrait_image?: string;
+    date_modified?: string | Date;
+    date_created?: string | Date;
+    lede?: string;
+    excerpt?: string;
+    publish?: boolean;
+    authors?: string | string[];
+    tags?: string | string[];
+    categories?: string | string[];
+    [key: string]: unknown;
+  };
+  body: string;
+  id: string;
+  collection: string;
+  slug: string;
+}
+
+export async function getStaticPaths() {
+  const collectionName = 'up-and-running';
+  const entries = (await getCollection(collectionName)) as unknown as UpAndRunningEntry[];
+  
+  return entries.map(entry => {
+    const slug = entry.data.slug || slugify(entry.data.title || 'untitled-up-and-running');
+    
+    return {
+      params: { slug },
+      props: { 
+        entry: {
+          ...entry,
+          data: {
+            ...entry.data,
+            date_created: entry.data.date_created 
+              ? new Date(entry.data.date_created).toISOString() 
+              : new Date().toISOString(),
+            date_modified: entry.data.date_modified 
+              ? new Date(entry.data.date_modified).toISOString()
+              : new Date().toISOString()
+          }
+        },
+        collection: collectionName,
+      },
+    };
+  });
+}
+
+// Define the props type for the component
+interface Props {
+  entry: UpAndRunningEntry;
+  collection: string;
+}
+
+const { entry, collection } = Astro.props as Props;
+
+// Set default values for the article data
+const articleData = {
+  ...entry.data,
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data.title || 'Untitled Up and Running',
+  authors: Array.isArray(entry.data.authors) 
+    ? entry.data.authors.filter((a): a is string => typeof a === 'string')
+    : typeof entry.data.authors === 'string' 
+      ? [entry.data.authors].filter(Boolean) 
+      : [],
+  tags: Array.isArray(entry.data.tags)
+    ? entry.data.tags.filter((t): t is string => typeof t === 'string')
+    : typeof entry.data.tags === 'string'
+      ? [entry.data.tags].filter(Boolean)
+      : [],
+  banner_image: entry.data.banner_image || entry.data.portrait_image || '/visuals/bannerImage__The-Lossless-Group.png',
+  portrait_image: entry.data.portrait_image || entry.data.banner_image || '/visuals/bannerImage__The-Lossless-Group.png',
+  lede: entry.data.lede || entry.data.excerpt || 'A guide to up and running with one of our favorite tools.'
+};
+
+// Set the page title and description
+const pageTitle = `${articleData.title} | The Lossless Group`;
+
+// Data for the OneArticle component
+const contentDataForOneArticle = {
+  ...entry.data,
+  path: Astro.url.pathname,
+  id: entry.id,
+  collection: collection,
+};
+---
+
+<Layout title={pageTitle} description={articleData.lede} frontmatter={entry.data}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentDataForOneArticle}
+    title={articleData.title}
+  />
+</Layout>

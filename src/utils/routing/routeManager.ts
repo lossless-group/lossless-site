@@ -24,6 +24,10 @@ export const ROUTE_PATHS = {
     BASE: '/market-map',
     FOR: '/market-map/for',
   },
+  UP_AND_RUNNING: {
+    BASE: '/learn-with/up-and-running',
+    WITH: '/learn-with/up-and-running/with',
+  },
   DEFAULTS: {
     LEARN: '/learn-with/issue-resolution',
     IMAGE_FALLBACK: 'visuals/bannerImage__The-Lossless-Group.png',
@@ -47,7 +51,7 @@ const defaultRouteMappings: RouteMapping[] = [
     contentPath: 'market-maps',
     routePath: 'market-map/for',
     baseDir: 'lost-in-public',
-    collectionName: 'market-maps' // Explicitly set the collection name
+    collectionName: 'market-maps'
   },
   {
     contentPath: 'specs',

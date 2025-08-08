@@ -48,6 +48,10 @@ const collectionConfig = {
 // Transform entries for up-and-running collection
 const guides = allEntries.map((entry) => {
   const data = entry.data as any;
+  console.log('Guide data:', { 
+    title: data?.title, 
+    og_favicon: data?.og_favicon 
+  });
   
   function normalizeToArray(singularKey: string, pluralKey: string): string[] {
     const singularValue = data?.[singularKey];
@@ -64,8 +68,8 @@ const guides = allEntries.map((entry) => {
     dateValue = dateValue.toISOString().split('T')[0];
   }
   
-  // Ensure the slug includes the full path for proper routing
-  const fullSlug = `/learn-with/up-and-running/${customSlug}`;
+  // Ensure the slug includes the full path for proper routing with the /with/ segment
+  const fullSlug = `/learn-with/up-and-running/with/${customSlug}`;
   
   return {
     id: entry.id, 
@@ -81,6 +85,7 @@ const guides = allEntries.map((entry) => {
     tags: normalizeToArray('tag', 'tags'),
     participants: normalizeToArray('participant', 'participants'),
     categories: normalizeToArray('category', 'categories'),
+    og_favicon: data?.og_favicon, 
   };
 }).sort((a, b) => {
   // Sort by date descending (most recent first)
