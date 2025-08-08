@@ -548,6 +548,30 @@ const mapOfContentsCollection = defineCollection({
   })
 });
 
+const projectsCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("projects") }),
+  schema: z.object({
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    publish: z.boolean().optional(),
+  }).passthrough().transform((data, context) => {
+    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
+    
+    const displayTitle = data.title
+      ? data.title
+      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    // Preserve frontmatter slug if it exists, otherwise generate from filename
+    const slug = data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    
+    return {
+      ...data,
+      title: displayTitle,
+      slug: slug,
+    };
+  })
+});
+
 const portfolioCollection = defineCollection({
   loader: glob({ 
     pattern: [
@@ -643,6 +667,7 @@ export const paths = {
   'client-projects': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
   'moc': resolveContentPath('moc'),
+  'projects': resolveContentPath('projects'),
 };
 
 // Export the collections
@@ -673,4 +698,5 @@ export const collections = {
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,
+  'projects': projectsCollection,
 };

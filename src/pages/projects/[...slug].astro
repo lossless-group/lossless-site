@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { processEntries, getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const allProjects = await getCollection('projects');
+  const processedProjects = processEntries(allProjects);
+
+  const allPaths = processedProjects.map(entry => {
+    // For projects, we want to keep the full path structure
+    const entryPath = String(entry.id);
+    const pathParts = entryPath.split('/');
+    
+    // Convert the path to URL-friendly format
+    const projectSlug = pathParts
+      .map(part => getReferenceSlug(part))
+      .join('/');
+    
+    return {
+      params: { slug: projectSlug },
+      props: {
+        entry
+      }
+    };
+  });
+
+  return allPaths;
+}
+
+const { slug } = Astro.params;
+const { entry } = Astro.props;
+
+const { Content } = await entry.render();
+---
+
+<Layout 
+  title={entry.data.title}
+  description={entry.data.description || `Project: ${entry.data.title}`}
+>
+  <OneArticle>
+    <OneArticleOnPage 
+      title={entry.data.title}
+      date={entry.data.date_created}
+      tags={entry.data.tags}
+      entry={entry}
+    >
+      <Content />
+    </OneArticleOnPage>
+  </OneArticle>
+</Layout>

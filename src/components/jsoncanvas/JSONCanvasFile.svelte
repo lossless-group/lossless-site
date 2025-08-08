@@ -2,6 +2,7 @@
   import type { FileNode } from '../../types/json-canvas';
   import { renderSimpleMarkdown, truncateRenderedMarkdown } from '../../utils/simpleMarkdownRenderer';
 
+
   export let node: FileNode;
   export let isSelected: boolean = false;
   export let onClick: ((event: MouseEvent) => void) | undefined = undefined;
@@ -64,6 +65,67 @@
     }
   }
 
+  // Convert file system path to site URL using existing utilities
+  function convertFilePathToSiteUrl(filePath: string): string {
+    console.log('🔄 Converting path:', filePath);
+    
+    // Extract the relative content path from the file path
+    let contentPath = '';
+    
+    // Check if it's already a relative path (starts with content type)
+    if (filePath.startsWith('client-content/') || filePath.startsWith('lost-in-public/') || filePath.startsWith('vocabulary/') || filePath.startsWith('projects/')) {
+      contentPath = filePath;
+      console.log('📁 Using relative path directly:', contentPath);
+    } else {
+      // Try to extract content path from absolute path
+      const contentMatch = filePath.match(/.*\/content\/(.+)$/);
+      if (contentMatch) {
+        contentPath = contentMatch[1];
+        console.log('📁 Extracted from absolute path:', contentPath);
+      } else {
+        console.warn('⚠️ Could not extract content path from:', filePath);
+        return filePath; // Fallback to original path
+      }
+    }
+    
+    // Simple client-side path conversion for client-content structure
+    let siteUrl = '';
+    
+    if (contentPath.startsWith('client-content/')) {
+      const pathParts = contentPath.split('/');
+      // ["client-content", "Laerdal", "Projects", "Augment-It", "Specs", "RecordCollector-Tanuj.md"]
+      
+      if (pathParts.length >= 4 && pathParts[2].toLowerCase() === 'projects') {
+        const clientName = pathParts[1].toLowerCase(); // "Laerdal" → "laerdal"
+        const projectPathParts = pathParts.slice(3); // Skip client-content, Client, Projects
+        
+        // Slugify function matching server-side utils/slugify.ts exactly
+        const slugify = (str: string) => str
+          .toLowerCase()                           // Convert to lowercase
+          .replace(/\.[a-z0-9]+$/, '')            // Remove file extension like .md (only if it's just letters/numbers)
+          .replace(/[^a-z0-9\s\-_]/g, '')         // Remove all non-alphanumeric except space, dash, underscore (REMOVE dots)
+          .replace(/[\s_]+/g, '-')                // Replace spaces and underscores with dashes
+          .replace(/-+/g, '-')                    // Collapse multiple dashes
+          .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
+        
+        const projectSlug = projectPathParts
+          .map(part => slugify(part))
+          .join('/');
+        
+        siteUrl = `/client/${clientName}/projects/${projectSlug}`;
+      } else {
+        // Fallback for other client-content structures
+        siteUrl = `/${contentPath.replace(/\.md$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-')}`;
+      }
+    } else {
+      // Fallback for other content types
+      siteUrl = `/${contentPath.replace(/\.md$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-')}`;
+    }
+    
+    console.log('🎯 Converted to site URL:', siteUrl);
+    return siteUrl;
+  }
+
   // Handle opening file in new tab
   function handleOpenInNewTab(event: MouseEvent) {
     console.log('🚀 handleOpenInNewTab called!');
@@ -74,12 +136,11 @@
     event.stopPropagation(); // Prevent triggering the file selection
     
     try {
-      // Create a URL for the markdown file to be rendered by AstroMarkdown
-      const encodedPath = encodeURIComponent(node.file);
-      const markdownUrl = `/markdown-preview?file=${encodedPath}`;
+      // Convert file system path to proper site URL
+      const siteUrl = convertFilePathToSiteUrl(node.file);
       
-      console.log('🔗 Opening URL:', markdownUrl);
-      const newWindow = window.open(markdownUrl, '_blank', 'noopener,noreferrer');
+      console.log('🔗 Opening URL:', siteUrl);
+      const newWindow = window.open(siteUrl, '_blank', 'noopener,noreferrer');
       
       if (!newWindow) {
         console.error('❌ Failed to open new window - popup blocked?');
