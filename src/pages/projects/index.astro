@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
 import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
 ---
 
@@ -8,13 +9,17 @@ import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
   title="Our Lossless Projects" 
   description="Explore our innovative projects and interactive visualizations"
 >
-  <Hero
-    title="Our Lossless Projects"
-    subtitle="Innovation in Action"
-    description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
-    alignment="center"
-    animate={true}
-  />
+  <AnimationWrapper>
+    <Hero
+      title="Our Lossless Projects"
+      subtitle="Innovation in Action"
+      description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
+      alignment="center"
+      fullBleed={true}
+      animate={true}
+      innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+    />
+  </AnimationWrapper>
 
   <section class="projects-section">
     <div class="projects-container">
