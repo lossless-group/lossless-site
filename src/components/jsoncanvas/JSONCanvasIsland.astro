@@ -76,10 +76,10 @@ if (canvasData) {
                   const [, frontmatter, content] = frontmatterMatch;
                   // Store both frontmatter and content separately
                   (node as any).frontmatter = frontmatter.trim();
-                  (node as any).fileContent = content.substring(0, 400) + (content.length > 400 ? '...' : '');
+                  (node as any).fileContent = content;
                 } else {
                   // No frontmatter, treat entire content as body
-                  (node as any).fileContent = fileContent.substring(0, 400) + (fileContent.length > 400 ? '...' : '');
+                  (node as any).fileContent = fileContent;
                   (node as any).frontmatter = null;
                 }
               } else {

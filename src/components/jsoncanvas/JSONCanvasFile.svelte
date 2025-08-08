@@ -64,7 +64,7 @@
     }
     
     const rendered = renderSimpleMarkdown(fileContent);
-    return truncateRenderedMarkdown(rendered, 300);
+    return rendered;
   })();
 </script>
 
@@ -266,7 +266,8 @@
     background: var(--clr-primary-bg);
     border: 1px solid var(--clr-lossless-primary-glass--lighter);
     border-radius: 6px;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     font-family: var(--ff-legible);
     font-size: var(--fs-200);
     line-height: 1.5;
@@ -277,7 +278,6 @@
   .content-text {
     color: var(--clr-body);
     word-break: break-word;
-    overflow: hidden;
     font-weight: var(--fw-regular);
   }
 
