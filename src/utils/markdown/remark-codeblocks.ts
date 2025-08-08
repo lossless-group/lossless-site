@@ -61,6 +61,8 @@ const remarkCodeblocks: Plugin<[], Root> = function() {
           componentName = 'LitegalCodeblockDisplay';
         } else if (lang === 'dataview') {
           componentName = 'DataviewCodeblockDisplay';
+        } else if (lang === 'mermaid') {
+          componentName = 'MermaidChart';
         }
         
         // Create an MDX component node

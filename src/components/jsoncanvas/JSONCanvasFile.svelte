@@ -269,7 +269,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     font-family: var(--ff-legible);
-    font-size: var(--fs-200);
+    font-size: 12px; /* Base font size for content */
     line-height: 1.5;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -302,31 +302,95 @@
     opacity: 1;
   }
 
-  /* Markdown element styles using theme variables */
-  .content-text :global(.markdown-h1),
-  .content-text :global(.markdown-h2),
-  .content-text :global(.markdown-h3) {
-    font-family: var(--ff-base);
-    font-weight: var(--fw-semi-bold);
-    color: var(--clr-heading);
-    margin: 0.5em 0 0.3em 0;
-    line-height: 1.2;
+  /* Markdown element styles using theme variables - multiple selectors for maximum compatibility */
+  .file-content .content-text :global(.markdown-h1),
+  .file-content .content-text :global(.markdown-h2),
+  .file-content .content-text :global(.markdown-h3),
+  .file-content .content-text :global(.markdown-h4),
+  .file-content .content-text :global(.markdown-h5),
+  .file-content .content-text :global(.markdown-h6),
+  .content-text :global(h1),
+  .content-text :global(h2),
+  .content-text :global(h3),
+  .content-text :global(h4),
+  .content-text :global(h5),
+  .content-text :global(h6) {
+    font-family: var(--ff-base) !important;
+    font-weight: var(--fw-semi-bold) !important;
+    color: var(--clr-heading) !important;
+    margin: 0.5em 0 0.3em 0 !important;
+    line-height: 1.2 !important;
   }
 
-  .content-text :global(.markdown-h1) { font-size: var(--fs-300); }
-  .content-text :global(.markdown-h2) { font-size: var(--fs-250); }
-  .content-text :global(.markdown-h3) { font-size: var(--fs-200); }
+  .file-content .content-text :global(.markdown-h1),
+  .content-text :global(h1) { font-size: 19px !important; } /* 1.6em of 12px base */
+  
+  .file-content .content-text :global(.markdown-h2),
+  .content-text :global(h2) { font-size: 18px !important; } /* 1.5em of 12px base */
+  
+  .file-content .content-text :global(.markdown-h3),
+  .content-text :global(h3) { font-size: 17px !important; } /* 1.4em of 12px base */
+  
+  .file-content .content-text :global(.markdown-h4),
+  .content-text :global(h4) { font-size: 16px !important; } /* 1.3em of 12px base */
+  
+  .file-content .content-text :global(.markdown-h5),
+  .content-text :global(h5) { font-size: 14px !important; } /* 1.2em of 12px base */
+  
+  .file-content .content-text :global(.markdown-h6),
+  .content-text :global(h6) { font-size: 13px !important; } /* 1.1em of 12px base */
 
   .content-text :global(.markdown-p) {
     margin: 0.4em 0;
     line-height: 1.4;
     color: var(--clr-body);
+    font-size: 12px !important; /* Match base font size */
   }
 
   .content-text :global(.backlink) {
     color: var(--clr-link);
     text-decoration: underline;
     cursor: pointer;
+  }
+
+  /* Mermaid chart styling for JSON Canvas - matches MermaidChart.astro structure */
+  .content-text :global(.mermaid-breakout) {
+    position: relative;
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  .content-text :global(.mermaid-chart-shell) {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow-x: auto;
+    background: var(--clr-primary-bg);
+    border: 1px solid var(--clr-lossless-accent--brightest);
+    border-radius: 6px;
+    padding: 0.5rem;
+    display: block;
+  }
+
+  .content-text :global(.mermaid) {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 10px !important;
+    max-width: 100%;
+  }
+
+  .content-text :global(.mermaid svg) {
+    max-width: 100%;
+    height: auto;
   }
 
   .content-text :global(.backlink:hover) {

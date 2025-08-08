@@ -64,8 +64,8 @@ const { node, data } = Astro.props;
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
 const handled_types = [
     "root",
-    "link",        // Handle standard MDAST link nodes
-    "blockquote",  // Handle blockquotes before paragraphs since they contain paragraphs
+    "link",       
+    "blockquote", 
     "paragraph",
     "text",
     "heading",

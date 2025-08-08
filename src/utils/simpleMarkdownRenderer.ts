@@ -1,10 +1,14 @@
 /**
- * Simple Markdown Renderer for JSON Canvas File Previews
+ * Remark-based Markdown Renderer for JSON Canvas File Previews
  * 
- * This is a lightweight renderer that handles the most common markdown patterns
- * used in the project, specifically designed for file previews in JSON Canvas.
- * It focuses on readability and performance over full feature completeness.
+ * Uses remark for proper AST parsing and rendering, ensuring accurate
+ * header hierarchy and markdown processing.
  */
+
+import { remark } from 'remark';
+import remarkHtml from 'remark-html';
+import remarkGfm from 'remark-gfm';
+import remarkJsonCanvasCodeblocks from './markdown/remark-jsoncanvas-codeblocks.js';
 
 export interface RenderedMarkdown {
   html: string;
@@ -19,48 +23,47 @@ export function renderSimpleMarkdown(content: string): RenderedMarkdown {
     return { html: '', plainText: '' };
   }
 
-  let html = content;
-  
-  // Extract plain text for fallback
-  const plainText = content
-    .replace(/\[\[([^\]|]+)(\|[^\]]+)?\]\]/g, '$1') // Remove backlinks
-    .replace(/#{1,6}\s+/g, '') // Remove headers
-    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-    .replace(/\*(.*?)\*/g, '$1') // Remove italic
-    .replace(/`([^`]+)`/g, '$1') // Remove inline code
-    .trim();
+  try {
+    // Process markdown with remark
+    const processor = remark()
+      .use(remarkGfm)
+      .use(remarkJsonCanvasCodeblocks)
+      .use(remarkHtml, { sanitize: false });
 
-  // Handle headers (##, ###, etc.)
-  html = html.replace(/^(#{1,6})\s+(.+)$/gm, (match, hashes, text) => {
-    const level = hashes.length;
-    return `<h${level} class="markdown-h${level}">${text.trim()}</h${level}>`;
-  });
+    let html = String(processor.processSync(content));
+    
+    // Extract plain text for fallback
+    const plainText = content
+      .replace(/\[\[([^\]|]+)(\|[^\]]+)?\]\]/g, '$1') // Remove backlinks
+      .replace(/#{1,6}\s+/g, '') // Remove headers
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic
+      .replace(/`([^`]+)`/g, '$1') // Remove inline code
+      .trim();
 
-  // Handle backlinks [[path|display]] or [[path]]
-  html = html.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (match, path, _, display) => {
-    const linkText = display || path.split('/').pop()?.replace(/\.md$/, '') || path;
-    return `<span class="backlink" title="${path}">${linkText}</span>`;
-  });
+    // Add CSS classes to elements for styling
+    html = html
+      .replace(/<h1>/g, '<h1 class="markdown-h1">')
+      .replace(/<h2>/g, '<h2 class="markdown-h2">')
+      .replace(/<h3>/g, '<h3 class="markdown-h3">')
+      .replace(/<h4>/g, '<h4 class="markdown-h4">')
+      .replace(/<h5>/g, '<h5 class="markdown-h5">')
+      .replace(/<h6>/g, '<h6 class="markdown-h6">')
+      .replace(/<p>/g, '<p class="markdown-p">')
+      .replace(/<code>/g, '<code class="inline-code">');
 
-  // Handle bold text **text**
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Handle backlinks [[path|display]] or [[path]]
+    html = html.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (match, path, _, display) => {
+      const linkText = display || path.split('/').pop()?.replace(/\.md$/, '') || path;
+      return `<span class="backlink" title="${path}">${linkText}</span>`;
+    });
 
-  // Handle italic text *text*
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-  // Handle inline code `code`
-  html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
-
-  // Handle line breaks
-  html = html.replace(/\n\n/g, '</p><p class="markdown-p">');
-  html = html.replace(/\n/g, '<br>');
-
-  // Wrap in paragraph if not already wrapped
-  if (!html.startsWith('<h') && !html.startsWith('<p')) {
-    html = `<p class="markdown-p">${html}</p>`;
+    return { html, plainText };
+  } catch (error) {
+    console.error('Error processing markdown:', error);
+    // Fallback to plain text if remark fails
+    return { html: `<p class="markdown-p">${content}</p>`, plainText: content };
   }
-
-  return { html, plainText };
 }
 
 /**

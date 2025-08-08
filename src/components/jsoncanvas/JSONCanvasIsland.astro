@@ -283,3 +283,53 @@ debugInfo.parseSuccess = !!transformedCanvas;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>
+
+<script is:inline>
+  // Mermaid initialization for JSON Canvas context
+  // This ensures mermaid is available for file previews with mermaid diagrams
+  function getCssVar(name, fallback) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  }
+
+  const bodyColor = getCssVar('--clr-body', '#e0e0e0');
+  const primaryNodeBg = getCssVar('--clr-primary-bg', '#181818');
+  const edgeLabelBg = getCssVar('--clr-aquamarine', '#64d4a4');
+  const hippieBlue = getCssVar('--clr-hippie-blue', '#50a3b3');
+  const secondaryTextClr = getCssVar('--clr-hippie-blue', '#50a3b3');
+  const clusterBkg = getCssVar('--clr-gunmetal', '#283139');
+  const lineClr = getCssVar('--clr-aqua-brightest', '#69e2e3');
+  const fontFmly = 'Open Sans, sans-serif';
+
+  const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      darkMode: true,
+      background: 'transparent',
+      primaryColor: primaryNodeBg,
+      primaryBorderColor: '#6fffd6',
+      primaryTextColor: bodyColor,
+      secondaryColor: '#BF23F7',
+      secondaryTextColor: secondaryTextClr,
+      clusterBkg: clusterBkg,
+      lineColor: lineClr,
+      fontFamily: fontFmly,
+    }
+  };
+
+  if (!window.__MERMAID_LOADED__) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
+      .then((mermaid) => {
+        mermaid.default.initialize(mermaidConfig);
+        window.mermaid = mermaid.default;
+        window.__MERMAID_LOADED__ = true;
+        
+        // Render any existing mermaid diagrams that are waiting
+        const existingDiagrams = document.querySelectorAll('.mermaid:not([data-processed])');
+        if (existingDiagrams.length > 0) {
+          mermaid.default.run({ nodes: Array.from(existingDiagrams) });
+        }
+      })
+      .catch(console.error);
+  }
+</script>
