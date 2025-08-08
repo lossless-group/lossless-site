@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FileNode } from '../../types/json-canvas';
+  import { renderSimpleMarkdown, truncateRenderedMarkdown } from '../../utils/simpleMarkdownRenderer';
 
   export let node: FileNode;
   export let isSelected: boolean = false;
@@ -44,17 +45,27 @@
     }
   }
 
+  // Handle keyboard navigation
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      if (onClick) {
-        onClick(event as any);
-      }
+      handleClick(event as any);
     }
     if (onKeydown) {
       onKeydown(event);
     }
   }
+
+  // Render markdown content
+  $: renderedContent = (() => {
+    const fileContent = (node as any).fileContent;
+    if (!fileContent || fileContent.includes('File not found') || fileContent.includes('Error reading')) {
+      return { html: fileContent || 'Loading file content...', plainText: fileContent || 'Loading file content...' };
+    }
+    
+    const rendered = renderSimpleMarkdown(fileContent);
+    return truncateRenderedMarkdown(rendered, 300);
+  })();
 </script>
 
 <!-- File node with proper ARIA attributes -->
@@ -163,7 +174,7 @@
   >
     <div class="file-content">
       <div class="content-text">
-        {(node as any).fileContent || 'Loading file content...'}
+        {@html renderedContent.html}
       </div>
     </div>
   </foreignObject>
@@ -264,11 +275,53 @@
 
   .content-text {
     color: #1a1a1a;
-    white-space: pre-wrap;
     word-break: break-word;
     overflow: hidden;
-    text-overflow: ellipsis;
     font-weight: 400;
+  }
+
+  /* Markdown element styles */
+  .content-text :global(.markdown-h1),
+  .content-text :global(.markdown-h2),
+  .content-text :global(.markdown-h3) {
+    font-weight: 600;
+    margin: 0.5em 0 0.3em 0;
+    line-height: 1.2;
+  }
+
+  .content-text :global(.markdown-h1) { font-size: 0.9rem; }
+  .content-text :global(.markdown-h2) { font-size: 0.8rem; }
+  .content-text :global(.markdown-h3) { font-size: 0.75rem; }
+
+  .content-text :global(.markdown-p) {
+    margin: 0.4em 0;
+    line-height: 1.4;
+  }
+
+  .content-text :global(.backlink) {
+    color: #0066cc;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .content-text :global(.backlink:hover) {
+    color: #004499;
+  }
+
+  .content-text :global(.inline-code) {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+
+  .content-text :global(strong) {
+    font-weight: 600;
+  }
+
+  .content-text :global(em) {
+    font-style: italic;
   }
 
   @keyframes dash {
