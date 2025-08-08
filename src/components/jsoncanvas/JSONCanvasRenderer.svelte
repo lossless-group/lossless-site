@@ -62,13 +62,41 @@
     isDragging = false;
   }
 
+  // Check if mouse is over a selected file node
+  function isMouseOverSelectedFile(mouseX: number, mouseY: number): boolean {
+    if (!selectedNodeId) return false;
+    
+    const selectedNode = canvas.nodes.find(n => n.id === selectedNodeId);
+    if (!selectedNode || selectedNode.type !== 'file') return false;
+    
+    // Convert mouse coordinates to canvas coordinates
+    const canvasX = (mouseX - translateX) / scale;
+    const canvasY = (mouseY - translateY) / scale;
+    
+    // Check if mouse is within the selected file node bounds
+    const nodeLeft = selectedNode.x;
+    const nodeTop = selectedNode.y;
+    const nodeRight = selectedNode.x + (selectedNode.width || 200);
+    const nodeBottom = selectedNode.y + (selectedNode.height || 150);
+    
+    return canvasX >= nodeLeft && canvasX <= nodeRight && 
+           canvasY >= nodeTop && canvasY <= nodeBottom;
+  }
+
   // Zoom functionality
   function handleWheel(e: WheelEvent) {
-    e.preventDefault();
-    
     const rect = viewportElement.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+    
+    // If mouse is over a selected file node, allow scroll to pass through
+    if (isMouseOverSelectedFile(mouseX, mouseY)) {
+      // Don't prevent default - let the scroll event reach the file content
+      return;
+    }
+    
+    // Otherwise, handle as canvas zoom
+    e.preventDefault();
     
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newScale = Math.max(0.1, Math.min(3, scale * zoomFactor));
@@ -140,6 +168,32 @@
   // Node selection
   function selectNode(nodeId: string) {
     selectedNodeId = selectedNodeId === nodeId ? null : nodeId;
+  }
+
+  // Check if any child nodes of a group are selected
+  function hasSelectedChild(groupNode: any): boolean {
+    if (!selectedNodeId || !groupNode || groupNode.type !== 'group') return false;
+    
+    // Find nodes that are visually inside this group
+    // A node is inside a group if it's positioned within the group's bounds
+    const groupLeft = groupNode.x;
+    const groupTop = groupNode.y;
+    const groupRight = groupNode.x + (groupNode.width || 200);
+    const groupBottom = groupNode.y + (groupNode.height || 150);
+    
+    return canvas.nodes.some(node => {
+      if (node.id === selectedNodeId && node.id !== groupNode.id) {
+        // Check if this selected node is within the group bounds
+        const nodeLeft = node.x;
+        const nodeTop = node.y;
+        const nodeRight = node.x + (node.width || 200);
+        const nodeBottom = node.y + (node.height || 150);
+        
+        return nodeLeft >= groupLeft && nodeTop >= groupTop && 
+               nodeRight <= groupRight && nodeBottom <= groupBottom;
+      }
+      return false;
+    });
   }
 
   // Keyboard navigation for accessibility
@@ -369,6 +423,7 @@
             <JSONCanvasGroup 
               {node}
               isSelected={selectedNodeId === node.id}
+              hasSelectedChild={hasSelectedChild(node)}
               onClick={() => selectNode(node.id)}
               onKeydown={(e) => e.key === 'Enter' || e.key === ' ' ? selectNode(node.id) : null}
             />

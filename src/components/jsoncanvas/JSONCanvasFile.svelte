@@ -281,6 +281,27 @@
     font-weight: var(--fw-regular);
   }
 
+  /* Custom scrollbar styling */
+  .file-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .file-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .file-content::-webkit-scrollbar-thumb {
+    background: var(--clr-lossless-accent--brightest);
+    border-radius: 3px;
+    opacity: 0.7;
+  }
+
+  .file-content::-webkit-scrollbar-thumb:hover {
+    background: var(--clr-lossless-accent--bright);
+    opacity: 1;
+  }
+
   /* Markdown element styles using theme variables */
   .content-text :global(.markdown-h1),
   .content-text :global(.markdown-h2),

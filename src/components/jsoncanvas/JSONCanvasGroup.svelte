@@ -3,6 +3,7 @@
 
   export let node: GroupNode;
   export let isSelected: boolean = false;
+  export let hasSelectedChild: boolean = false;
   export let onClick: ((event: MouseEvent) => void) | undefined = undefined;
   export let onKeydown: ((event: KeyboardEvent) => void) | undefined = undefined;
 
@@ -38,6 +39,7 @@
 <g 
   class="canvas-group" 
   class:selected={isSelected}
+  class:child-selected={hasSelectedChild}
   role="group"
   aria-label={node.label || 'Canvas group'}
   tabindex="0"
@@ -97,9 +99,19 @@
     transition: all 0.2s ease;
   }
 
-  .canvas-group:hover .group-background {
+  .canvas-group:hover:not(.child-selected) .group-background {
     stroke: var(--clr-lossless-accent--brightest);
     stroke-width: 2;
+  }
+
+  /* Disable hover when a child is selected */
+  .canvas-group.child-selected {
+    pointer-events: none;
+  }
+
+  /* Re-enable pointer events for child elements when group has child-selected */
+  .canvas-group.child-selected * {
+    pointer-events: auto;
   }
 
   .canvas-group:focus {
