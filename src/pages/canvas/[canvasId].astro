@@ -6,7 +6,7 @@
  */
 
 import { getCollection } from 'astro:content';
-import JSONCanvasLayout from '../../layouts/JSONCanvasLayout.astro';
+import JSONCanvasLayout from '../../layouts/Section__JSONCanvasLayout.astro';
 import JSONCanvasIsland from '../../components/jsoncanvas/JSONCanvasIsland.astro';
 
 export async function getStaticPaths() {
@@ -14,21 +14,23 @@ export async function getStaticPaths() {
 
   try {
     // Try to get canvas files from various collections
+    // Skip 'canvas' collection since it doesn't exist
     const collections = await Promise.allSettled([
-      getCollection('canvas').catch(() => []),
-      getCollection('concepts').catch(() => []),
-      getCollection('vocabulary').catch(() => []),
-      getCollection('tooling').catch(() => [])
+      getCollection('concepts'),
+      getCollection('vocabulary'),
+      getCollection('tooling')
     ]);
 
     const allEntries: any[] = [];
+    const collectionNames = ['concepts', 'vocabulary', 'tooling'];
+    
     collections.forEach((result, index) => {
       if (result.status === 'fulfilled') {
-        const collectionName = ['canvas', 'concepts', 'vocabulary', 'tooling'][index];
-        allEntries.push(...result.value.map((entry: any) => ({
+        const entries = result.value.map((entry: any) => ({
           ...entry,
-          source: collectionName
-        })));
+          source: collectionNames[index]
+        }));
+        allEntries.push(...entries);
       }
     });
 
@@ -45,7 +47,7 @@ export async function getStaticPaths() {
       const description = entry.data?.description || entry.data?.lede || `Interactive visualization of ${title}`;
       
       paths.push({
-        params: { 'canvas-id': canvasId },
+        params: { canvasId },
         props: {
           canvasId,
           title,
@@ -119,7 +121,7 @@ const pageDescription = description || `Interactive JSON Canvas visualization: $
         <h3>Tags</h3>
         <div class="tag-list">
           {entry.data.tags.map((tag: string) => (
-            <span key={tag} class="tag">{tag}</span>
+            <span class="tag">{tag}</span>
           ))}
         </div>
       </div>

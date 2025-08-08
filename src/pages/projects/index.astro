@@ -1,0 +1,114 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/basics/Hero.astro';
+import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
+---
+
+<Layout 
+  title="Our Lossless Projects" 
+  description="Explore our innovative projects and interactive visualizations"
+>
+  <Hero
+    title="Our Lossless Projects"
+    subtitle="Innovation in Action"
+    description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
+    alignment="center"
+    animate={true}
+  />
+
+  <section class="projects-section">
+    <div class="projects-container">
+      <h2>Projects</h2>
+      
+      <div class="project-showcase">
+        <div class="project-header">
+          <h3>Augment-It Project</h3>
+          <p>Interactive project visualization and specification overview</p>
+        </div>
+        
+        <div class="canvas-container">
+          <JSONCanvasIsland canvasPath="/Users/mpstaton/code/lossless-monorepo/content/client-content/Laerdal/Projects/Augment-It/Specs/Augment-It.canvas" />
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .projects-section {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .projects-container {
+    width: 100%;
+  }
+
+  .projects-container h2 {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-800);
+    color: var(--clr-heading);
+    text-align: center;
+    margin-bottom: 3rem;
+    background: linear-gradient(90deg, var(--clr-lossless-primary-light) 0%, var(--clr-lossless-accent--brightest) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .project-showcase {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .project-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .project-header h3 {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-700);
+    color: var(--clr-heading);
+    margin-bottom: 0.5rem;
+  }
+
+  .project-header p {
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    color: var(--clr-body);
+    opacity: 0.8;
+  }
+
+  .canvas-container {
+    width: 100%;
+    min-height: 600px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--clr-primary-bg);
+  }
+
+  @media (max-width: 768px) {
+    .projects-section {
+      padding: 2rem 1rem;
+    }
+
+    .project-showcase {
+      padding: 1.5rem;
+    }
+
+    .canvas-container {
+      min-height: 400px;
+    }
+  }
+</style>

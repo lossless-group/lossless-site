@@ -5,84 +5,43 @@
  * Follows the Island Wrapper Pattern from ToolShowcaseIsland.astro
  */
 
-import { getCollection } from 'astro:content';
+import { readFile } from 'node:fs/promises';
 import JSONCanvasRenderer from './JSONCanvasRenderer.svelte';
-import { parseJSONCanvas, transformCoordinates } from '../../utils/jsonCanvasUtils.ts';
-import type { JSONCanvas, ParsedCanvas } from '../../utils/jsonCanvasUtils.ts';
+import { parseJSONCanvas, transformCoordinates } from '../../utils/jsonCanvasUtils';
+import type { JSONCanvas, ParsedCanvas } from '../../types/json-canvas';
 
 interface Props {
-  canvasId: string;
+  canvasPath?: string;
+  canvasId?: string;
   showDebug?: boolean;
 }
 
-const { canvasId, showDebug = false } = Astro.props;
+const { canvasPath, canvasId, showDebug = false } = Astro.props;
 
-// Try to fetch from different collections that might contain canvas files
+// Read canvas data from file path
 let canvasData: string | null = null;
 let canvasSource: string = '';
 let debugInfo: any = {};
 
 try {
-  // First, try to find in a dedicated canvas collection (if it exists)
-  try {
-    const canvasCollection = await getCollection('canvas').catch(() => []);
-    const canvasEntry = canvasCollection.find(entry => 
-      entry.id === canvasId || 
-      entry.id.endsWith(`/${canvasId}`) ||
-      entry.slug === canvasId
-    );
-    
-    if (canvasEntry) {
-      canvasData = canvasEntry.body || JSON.stringify(canvasEntry.data);
-      canvasSource = 'canvas collection';
+  if (canvasPath) {
+    try {
+      canvasData = await readFile(canvasPath, 'utf-8');
+      canvasSource = 'file';
+      debugInfo.foundIn = `File: ${canvasPath}`;
+      debugInfo.fileSize = canvasData.length;
+    } catch (fileError) {
+      // Handle file reading errors gracefully
+      debugInfo.fetchError = fileError instanceof Error ? fileError.message : 'File read error';
+      debugInfo.attemptedPath = canvasPath;
+      console.warn(`Failed to read canvas file: ${canvasPath}`, fileError);
     }
-  } catch (error) {
-    debugInfo.canvasCollectionError = error instanceof Error ? error.message : 'Unknown error';
+  } else {
+    debugInfo.error = 'No canvasPath provided';
   }
-
-  // If not found, try other collections
-  if (!canvasData) {
-    const [concepts, vocabulary, tooling] = await Promise.all([
-      getCollection('concepts').catch(() => []),
-      getCollection('vocabulary').catch(() => []),
-      getCollection('tooling').catch(() => [])
-    ]);
-
-    const allEntries = [...concepts, ...vocabulary, ...tooling];
-    
-    // Look for canvas files or entries with canvas data
-    const canvasEntry = allEntries.find(entry => {
-      const entryId = entry.id.toLowerCase().replace(/\\/g, '/');
-      const searchId = canvasId.toLowerCase().replace(/\\/g, '/');
-      
-      return entryId === searchId || 
-             entryId.endsWith('/' + searchId) ||
-             entryId.includes(searchId) ||
-             entry.slug === canvasId ||
-             (entry.data && typeof entry.data === 'object' && 'nodes' in entry.data);
-    });
-
-    if (canvasEntry) {
-      // Check if it's a canvas file or has canvas data
-      if (canvasEntry.id.endsWith('.canvas')) {
-        canvasData = canvasEntry.body;
-        canvasSource = 'file content';
-      } else if (canvasEntry.data && typeof canvasEntry.data === 'object' && 'nodes' in canvasEntry.data) {
-        canvasData = JSON.stringify(canvasEntry.data);
-        canvasSource = 'frontmatter data';
-      }
-    }
-
-    debugInfo.searchedCollections = {
-      concepts: concepts.length,
-      vocabulary: vocabulary.length,
-      tooling: tooling.length,
-      totalEntries: allEntries.length
-    };
-  }
-
 } catch (error) {
   debugInfo.fetchError = error instanceof Error ? error.message : 'Unknown error';
+  debugInfo.attemptedPath = canvasPath;
 }
 
 // Parse the canvas data
@@ -104,8 +63,7 @@ if (canvasData) {
 
 // Prepare props for Svelte component
 const canvasProps = transformedCanvas ? {
-  canvas: transformedCanvas,
-  canvasId: canvasId
+  canvas: transformedCanvas
 } : null;
 
 debugInfo.canvasFound = !!canvasData;
@@ -113,23 +71,24 @@ debugInfo.canvasSource = canvasSource;
 debugInfo.parseSuccess = !!transformedCanvas;
 ---
 
-{transformedCanvas && canvasProps ? (
+{transformedCanvas && canvasProps && (
   <JSONCanvasRenderer 
-    canvas={canvasProps.canvas} 
-    canvasId={canvasProps.canvasId}
+    canvas={canvasProps.canvas}
     client:load 
   />
-) : (
+)}
+
+{(!transformedCanvas || !canvasProps) && (
   <div class="json-canvas-error">
     <h4>JSON Canvas Error</h4>
-    <p>Unable to load canvas: <strong>{canvasId}</strong></p>
+    <p>Unable to load canvas: <strong>{canvasPath || canvasId}</strong></p>
     
     {parsedCanvas?.validation.errors.length > 0 && (
       <div class="error-details">
         <h5>Validation Errors:</h5>
         <ul>
           {parsedCanvas.validation.errors.map(error => (
-            <li key={error}>{error}</li>
+            <li>{error}</li>
           ))}
         </ul>
       </div>
@@ -140,7 +99,7 @@ debugInfo.parseSuccess = !!transformedCanvas;
         <h5>Warnings:</h5>
         <ul>
           {parsedCanvas.validation.warnings.map(warning => (
-            <li key={warning}>{warning}</li>
+            <li>{warning}</li>
           ))}
         </ul>
       </div>
@@ -149,7 +108,7 @@ debugInfo.parseSuccess = !!transformedCanvas;
     <details class="debug-details">
       <summary>Debug Information</summary>
       <div class="debug-info">
-        <p><strong>Canvas ID:</strong> {canvasId}</p>
+        <p><strong>Canvas Path:</strong> {canvasPath || 'Not provided'}</p>
         <p><strong>Canvas Found:</strong> {debugInfo.canvasFound ? 'Yes' : 'No'}</p>
         {debugInfo.canvasSource && (
           <p><strong>Source:</strong> {debugInfo.canvasSource}</p>
@@ -165,7 +124,7 @@ debugInfo.parseSuccess = !!transformedCanvas;
                 <p><strong>Node Types:</strong></p>
                 <ul>
                   {Object.entries(parsedCanvas.debugInfo.nodeTypes).map(([type, count]) => (
-                    <li key={type}>{type}: {count}</li>
+                    <li>{type}: {count}</li>
                   ))}
                 </ul>
               </div>
@@ -175,7 +134,7 @@ debugInfo.parseSuccess = !!transformedCanvas;
                 <p><strong>Invalid Edges:</strong></p>
                 <ul>
                   {parsedCanvas.debugInfo.invalidEdges.map(edgeId => (
-                    <li key={edgeId}>{edgeId}</li>
+                    <li>{edgeId}</li>
                   ))}
                 </ul>
               </div>
@@ -183,16 +142,7 @@ debugInfo.parseSuccess = !!transformedCanvas;
           </div>
         )}
 
-        {debugInfo.searchedCollections && (
-          <div class="search-info">
-            <p><strong>Searched Collections:</strong></p>
-            <ul>
-              {Object.entries(debugInfo.searchedCollections).map(([collection, count]) => (
-                <li key={collection}>{collection}: {count}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+
 
         {debugInfo.fetchError && (
           <p class="error"><strong>Fetch Error:</strong> {debugInfo.fetchError}</p>
@@ -202,9 +152,7 @@ debugInfo.parseSuccess = !!transformedCanvas;
           <p class="error"><strong>Parse Error:</strong> {debugInfo.parseError}</p>
         )}
         
-        {debugInfo.canvasCollectionError && (
-          <p class="warning"><strong>Canvas Collection Error:</strong> {debugInfo.canvasCollectionError}</p>
-        )}
+
       </div>
     </details>
   </div>

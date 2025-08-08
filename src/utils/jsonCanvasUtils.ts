@@ -4,87 +4,24 @@
  * Following JSON Canvas Specification v1.0
  */
 
-// Base interface for all canvas nodes
-interface BaseCanvasNode {
-  id: string;
-  type: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color?: CanvasColor;
-}
+import type {
+  CanvasColor,
+  CanvasNode,
+  CanvasEdge,
+  JSONCanvas,
+  ParsedCanvas,
+  ValidationResult
+} from '../types/json-canvas';
 
-// Text node - contains markdown text
-export interface TextNode extends BaseCanvasNode {
-  type: 'text';
-  text: string;
-}
-
-// File node - references a file path
-export interface FileNode extends BaseCanvasNode {
-  type: 'file';
-  file: string;
-  subpath?: string;
-}
-
-// Link node - references a URL
-export interface LinkNode extends BaseCanvasNode {
-  type: 'link';
-  url: string;
-}
-
-// Group node - visual container for other nodes
-export interface GroupNode extends BaseCanvasNode {
-  type: 'group';
-  label?: string;
-  background?: string;
-  backgroundStyle?: 'cover' | 'ratio' | 'repeat';
-}
-
-// Union type for all node types
-export type CanvasNode = TextNode | FileNode | LinkNode | GroupNode;
-
-// Edge interface - connects one node to another
-export interface CanvasEdge {
-  id: string;
-  fromNode: string;
-  fromSide?: 'top' | 'right' | 'bottom' | 'left';
-  fromEnd?: 'none' | 'arrow';
-  toNode: string;
-  toSide?: 'top' | 'right' | 'bottom' | 'left';
-  toEnd?: 'none' | 'arrow';
-  color?: CanvasColor;
-  label?: string;
-}
-
-// Color type - hex format or preset number
-export type CanvasColor = string;
-
-// Main JSON Canvas interface
-export interface JSONCanvas {
-  nodes: CanvasNode[];
-  edges: CanvasEdge[];
-}
-
-// Validation result interface
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
-
-// Parsed canvas with validation info
-export interface ParsedCanvas {
-  canvas: JSONCanvas | null;
-  validation: ValidationResult;
-  debugInfo: {
-    nodeCount: number;
-    edgeCount: number;
-    nodeTypes: Record<string, number>;
-    invalidEdges: string[];
-  };
-}
+// Re-export types for convenience
+export type {
+  CanvasColor,
+  CanvasNode,
+  CanvasEdge,
+  JSONCanvas,
+  ParsedCanvas,
+  ValidationResult
+} from '../types/json-canvas';
 
 // Preset colors mapping (implementation-specific values)
 export const PRESET_COLORS = {
@@ -384,12 +321,23 @@ export function transformCoordinates(canvas: JSONCanvas): JSONCanvas {
  * Resolve color value (hex or preset)
  */
 export function resolveColor(color: CanvasColor): string {
-  if (color.startsWith('#')) {
-    return color;
+  // Handle string colors
+  if (typeof color === 'string') {
+    if (color.startsWith('#')) {
+      return color;
+    }
+    if (color in PRESET_COLORS) {
+      return PRESET_COLORS[color as keyof typeof PRESET_COLORS];
+    }
+    return color; // Return as-is if not a preset
   }
   
-  if (color in PRESET_COLORS) {
-    return PRESET_COLORS[color as keyof typeof PRESET_COLORS];
+  // Handle numeric preset colors
+  if (typeof color === 'number') {
+    const colorKey = color.toString();
+    if (colorKey in PRESET_COLORS) {
+      return PRESET_COLORS[colorKey as keyof typeof PRESET_COLORS];
+    }
   }
   
   // Fallback to a default color

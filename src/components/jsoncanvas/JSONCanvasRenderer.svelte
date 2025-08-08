@@ -1,10 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { JSONCanvas, CanvasNode, CanvasEdge } from '../../utils/jsonCanvasUtils.ts';
-  import { resolveColor, getCanvasDimensions } from '../../utils/jsonCanvasUtils.ts';
+  import type { JSONCanvas, CanvasNode, CanvasEdge } from '../../types/json-canvas';
+  import { resolveColor, getCanvasDimensions } from '../../utils/jsonCanvasUtils';
 
   export let canvas: JSONCanvas;
-  export let canvasId: string;
 
   // Viewport state
   let viewportElement: HTMLElement;
@@ -141,6 +140,23 @@
     selectedNodeId = selectedNodeId === nodeId ? null : nodeId;
   }
 
+  // Keyboard navigation for accessibility
+  function handleKeydown(e: KeyboardEvent) {
+    // Basic keyboard navigation - can be expanded
+    switch (e.key) {
+      case 'r':
+      case 'R':
+        resetView();
+        e.preventDefault();
+        break;
+      case 'f':
+      case 'F':
+        fitToView();
+        e.preventDefault();
+        break;
+    }
+  }
+
   // Reset view
   function resetView() {
     scale = 1;
@@ -206,7 +222,7 @@
 <div class="json-canvas-container">
   <!-- Controls -->
   <div class="canvas-controls">
-    <button class="control-btn" on:click={resetView} title="Reset View">
+    <button class="control-btn" on:click={resetView} title="Reset View" aria-label="Reset View">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
         <path d="M21 3v5h-5"/>
@@ -215,7 +231,7 @@
       </svg>
     </button>
     
-    <button class="control-btn" on:click={fitToView} title="Fit to View">
+    <button class="control-btn" on:click={fitToView} title="Fit to View" aria-label="Fit to View">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
         <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
@@ -230,14 +246,20 @@
   </div>
 
   <!-- Canvas Viewport -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
   <div 
     class="canvas-viewport"
+    role="application"
+    aria-label="Interactive JSON Canvas - drag to pan, scroll to zoom"
+    tabindex="0"
     bind:this={viewportElement}
     on:mousedown={handleMouseDown}
     on:wheel={handleWheel}
     on:touchstart={handleTouchStart}
     on:touchmove={handleTouchMove}
     on:touchend={handleTouchEnd}
+    on:keydown={handleKeydown}
   >
     <svg 
       bind:this={svgElement}
@@ -258,10 +280,10 @@
           />
           {#if edge.label}
             <text
-              x={(canvas.nodes.find(n => n.id === edge.fromNode)?.x || 0) + 
-                 (canvas.nodes.find(n => n.id === edge.toNode)?.x || 0)} / 2
-              y={(canvas.nodes.find(n => n.id === edge.fromNode)?.y || 0) + 
-                 (canvas.nodes.find(n => n.id === edge.toNode)?.y || 0)} / 2
+              x={((canvas.nodes.find(n => n.id === edge.fromNode)?.x || 0) + 
+                 (canvas.nodes.find(n => n.id === edge.toNode)?.x || 0)) / 2}
+              y={((canvas.nodes.find(n => n.id === edge.fromNode)?.y || 0) + 
+                 (canvas.nodes.find(n => n.id === edge.toNode)?.y || 0)) / 2}
               text-anchor="middle"
               class="edge-label"
             >
@@ -277,7 +299,11 @@
           <g 
             class="canvas-node"
             class:selected={selectedNodeId === node.id}
+            role="button"
+            tabindex="0"
+            aria-label="Canvas node: {node.type}"
             on:click={() => selectNode(node.id)}
+            on:keydown={(e) => e.key === 'Enter' || e.key === ' ' ? selectNode(node.id) : null}
           >
             <!-- Node background -->
             <rect
@@ -297,7 +323,7 @@
                 width={node.width - 16}
                 height={node.height - 16}
               >
-                <div class="node-text" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="node-text">
                   {node.text}
                 </div>
               </foreignObject>
@@ -308,7 +334,7 @@
                 width={node.width - 16}
                 height={node.height - 16}
               >
-                <div class="node-file" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="node-file">
                   <div class="file-icon">📄</div>
                   <div class="file-name">{node.file}</div>
                   {#if node.subpath}
@@ -323,7 +349,7 @@
                 width={node.width - 16}
                 height={node.height - 16}
               >
-                <div class="node-link" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="node-link">
                   <div class="link-icon">🔗</div>
                   <a href={node.url} target="_blank" rel="noopener noreferrer">
                     {node.url}
@@ -337,7 +363,7 @@
                 width={node.width - 16}
                 height={node.height - 16}
               >
-                <div class="node-group" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="node-group">
                   {#if node.label}
                     <div class="group-label">{node.label}</div>
                   {/if}

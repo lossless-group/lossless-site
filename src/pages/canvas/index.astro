@@ -6,8 +6,8 @@
  */
 
 import { getCollection } from 'astro:content';
-import JSONCanvasLayout from '../../layouts/JSONCanvasLayout.astro';
-import TextCTA from '../../components/basics/TextCTA.astro';
+import JSONCanvasLayout from '../../layouts/Section__JSONCanvasLayout.astro';
+import TextCTA from '../../components/basics/cta/TextCTA.astro';
 import Card from '../../components/basics/Card.astro';
 
 // Try to fetch canvas files from various collections
@@ -15,29 +15,23 @@ let canvasFiles: any[] = [];
 let debugInfo: any = {};
 
 try {
-  // First, try dedicated canvas collection
-  try {
-    const canvasCollection = await getCollection('canvas').catch(() => []);
-    canvasFiles.push(...canvasCollection.map(entry => ({
-      ...entry,
-      source: 'canvas'
-    })));
-  } catch (error) {
-    debugInfo.canvasCollectionError = error instanceof Error ? error.message : 'Unknown error';
-  }
-
-  // Then try other collections for .canvas files or canvas data
-  const [concepts, vocabulary, tooling] = await Promise.all([
-    getCollection('concepts').catch(() => []),
-    getCollection('vocabulary').catch(() => []),
-    getCollection('tooling').catch(() => [])
+  // Try other collections for .canvas files or canvas data
+  // Skip 'canvas' collection since it doesn't exist
+  const collections = await Promise.allSettled([
+    getCollection('concepts'),
+    getCollection('vocabulary'), 
+    getCollection('tooling')
   ]);
 
-  const allEntries = [
-    ...concepts.map(e => ({ ...e, source: 'concepts' })),
-    ...vocabulary.map(e => ({ ...e, source: 'vocabulary' })),
-    ...tooling.map(e => ({ ...e, source: 'tooling' }))
-  ];
+  const allEntries: any[] = [];
+  const collectionNames = ['concepts', 'vocabulary', 'tooling'];
+  
+  collections.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      const entries = result.value.map((e: any) => ({ ...e, source: collectionNames[index] }));
+      allEntries.push(...entries);
+    }
+  });
 
   // Find canvas files or entries with canvas data
   const canvasEntries = allEntries.filter(entry => {
@@ -48,9 +42,9 @@ try {
   canvasFiles.push(...canvasEntries);
 
   debugInfo.searchedCollections = {
-    concepts: concepts.length,
-    vocabulary: vocabulary.length,
-    tooling: tooling.length,
+    concepts: collections[0].status === 'fulfilled' ? collections[0].value.length : 0,
+    vocabulary: collections[1].status === 'fulfilled' ? collections[1].value.length : 0,
+    tooling: collections[2].status === 'fulfilled' ? collections[2].value.length : 0,
     totalEntries: allEntries.length,
     foundCanvas: canvasEntries.length
   };
@@ -109,7 +103,7 @@ processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
     {processedCanvases.length > 0 ? (
       <div class="canvas-grid">
         {processedCanvases.map(canvas => (
-          <Card key={canvas.id} class="canvas-card">
+          <Card classes="canvas-card">
             <div class="canvas-card-content">
               <div class="canvas-header">
                 <h3 class="canvas-card-title">{canvas.title}</h3>
@@ -134,7 +128,6 @@ processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
                 <TextCTA 
                   href={`/canvas/${canvas.id}`}
                   text="View Canvas"
-                  variant="primary"
                 />
               </div>
             </div>
@@ -157,7 +150,7 @@ processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
                   <p><strong>Searched Collections:</strong></p>
                   <ul>
                     {Object.entries(debugInfo.searchedCollections).map(([collection, count]) => (
-                      <li key={collection}>{collection}: {count}</li>
+                      <li>{collection}: {count}</li>
                     ))}
                   </ul>
                 </div>
@@ -165,10 +158,6 @@ processedCanvases.sort((a, b) => a.title.localeCompare(b.title));
               
               {debugInfo.fetchError && (
                 <p class="error"><strong>Fetch Error:</strong> {debugInfo.fetchError}</p>
-              )}
-              
-              {debugInfo.canvasCollectionError && (
-                <p class="warning"><strong>Canvas Collection Error:</strong> {debugInfo.canvasCollectionError}</p>
               )}
             </div>
           </details>
