@@ -197,20 +197,77 @@
     
     if (!fromNode || !toNode) return '';
     
-    // Calculate absolute positions for nodes (accounting for groups)
-    function getAbsolutePosition(node: any) {
-      // For file nodes, use their absolute coordinates directly
-      // The coordinates in the canvas file are already absolute
-      return {
-        x: node.x + (node.width || 200) / 2,
-        y: node.y + (node.height || 150) / 2
-      };
+    // Calculate border connection point based on side
+    function getBorderPoint(node: any, side: string) {
+      const x = node.x;
+      const y = node.y;
+      const width = node.width || 200;
+      const height = node.height || 150;
+      
+      switch (side) {
+        case 'top':
+          return { x: x + width / 2, y: y };
+        case 'bottom':
+          return { x: x + width / 2, y: y + height };
+        case 'left':
+          return { x: x, y: y + height / 2 };
+        case 'right':
+          return { x: x + width, y: y + height / 2 };
+        default:
+          // Fallback to center
+          return { x: x + width / 2, y: y + height / 2 };
+      }
     }
     
-    const fromPos = getAbsolutePosition(fromNode);
-    const toPos = getAbsolutePosition(toNode);
+    const fromPos = getBorderPoint(fromNode, edge.fromSide || 'right');
+    const toPos = getBorderPoint(toNode, edge.toSide || 'left');
     
     return `M ${fromPos.x} ${fromPos.y} L ${toPos.x} ${toPos.y}`;
+  }
+
+  // Calculate edge length for dynamic arrow sizing
+  function getEdgeLength(edge: CanvasEdge): number {
+    const fromNode = canvas.nodes.find(n => n.id === edge.fromNode);
+    const toNode = canvas.nodes.find(n => n.id === edge.toNode);
+    
+    if (!fromNode || !toNode) return 100;
+    
+    function getBorderPoint(node: any, side: string) {
+      const x = node.x;
+      const y = node.y;
+      const width = node.width || 200;
+      const height = node.height || 150;
+      
+      switch (side) {
+        case 'top': return { x: x + width / 2, y: y };
+        case 'bottom': return { x: x + width / 2, y: y + height };
+        case 'left': return { x: x, y: y + height / 2 };
+        case 'right': return { x: x + width, y: y + height / 2 };
+        default: return { x: x + width / 2, y: y + height / 2 };
+      }
+    }
+    
+    const fromPos = getBorderPoint(fromNode, edge.fromSide || 'right');
+    const toPos = getBorderPoint(toNode, edge.toSide || 'left');
+    
+    return Math.sqrt(Math.pow(toPos.x - fromPos.x, 2) + Math.pow(toPos.y - fromPos.y, 2));
+  }
+
+  // Get arrow size based on edge length
+  function getArrowSize(edgeLength: number): { width: number, height: number, scale: number } {
+    const minSize = 6;
+    const maxSize = 10;
+    const minLength = 100;
+    const maxLength = 300;
+    
+    const normalizedLength = Math.max(0, Math.min(1, (edgeLength - minLength) / (maxLength - minLength)));
+    const size = minSize + (maxSize - minSize) * normalizedLength;
+    
+    return {
+      width: size,
+      height: size * 0.7,
+      scale: size / 10 // Scale factor for the marker
+    };
   }
 
   onMount(() => {
@@ -280,12 +337,14 @@
       <!-- Edges -->
       <g class="edges-layer">
         {#each canvas.edges as edge (edge.id)}
+          {@const edgeLength = getEdgeLength(edge)}
+          {@const arrowSize = getArrowSize(edgeLength)}
           <path
             d={getEdgePath(edge)}
             stroke={edge.color ? resolveColor(edge.color) : 'var(--clr-lossless-accent--brightest)'}
             stroke-width="3"
             fill="none"
-            marker-end="url(#arrowhead)"
+            marker-end="url(#arrowhead-{edge.id})"
             opacity="0.8"
           />
           {#if edge.label}
@@ -375,21 +434,25 @@
         {/each}
       </g>
 
-      <!-- Arrow marker definition -->
+      <!-- Dynamic arrow marker definitions -->
       <defs>
-        <marker
-          id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
-          orient="auto"
-        >
-          <polygon
-            points="0 0, 10 3.5, 0 7"
-            fill="var(--clr-lossless-accent--brightest)"
-          />
-        </marker>
+        {#each canvas.edges as edge (edge.id)}
+          {@const edgeLength = getEdgeLength(edge)}
+          {@const arrowSize = getArrowSize(edgeLength)}
+          <marker
+            id="arrowhead-{edge.id}"
+            markerWidth="{arrowSize.width}"
+            markerHeight="{arrowSize.height}"
+            refX="{arrowSize.width - 1}"
+            refY="{arrowSize.height / 2}"
+            orient="auto"
+          >
+            <polygon
+              points="0 0, {arrowSize.width} {arrowSize.height / 2}, 0 {arrowSize.height}"
+              fill="var(--clr-lossless-accent--brightest)"
+            />
+          </marker>
+        {/each}
       </defs>
     </svg>
   </div>
