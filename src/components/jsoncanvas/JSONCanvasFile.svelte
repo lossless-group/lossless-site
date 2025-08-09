@@ -228,7 +228,7 @@
     fill="var(--clr-primary-bg)"
   />
 
-  <!-- File type icon (always render, but hide when selected) -->
+  <!-- File type icon (indicates file type) -->
   <circle
     class="file-icon"
     class:hidden={isSelected}
@@ -252,11 +252,11 @@
     {fileName.length > 25 ? fileName.substring(0, 22) + '...' : fileName}
   </text>
 
-  <!-- Open in new tab icon (appears when selected) -->
+  <!-- Open in new tab icon (only appears when selected) -->
   <g 
     class="open-tab-icon"
     class:visible={isSelected}
-    transform="translate({width - 20}, 6)"
+    transform="translate({width - 24}, 4)"
     on:click={handleOpenInNewTab}
     on:mousedown={handleOpenInNewTab}
     on:keydown={(e) => {
@@ -273,36 +273,44 @@
     tabindex={isSelected ? 0 : -1}
     role="button"
     aria-label="Open file in new tab"
-    style="cursor: pointer;"
+    style="cursor: pointer; display: {isSelected ? 'block' : 'none'};"
   >
-    <!-- Background circle for better click target -->
-    <circle
-      cx="10"
-      cy="10"
-      r="10"
-      fill="rgba(255, 255, 255, 0.1)"
-      stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
-      stroke-width="1"
-      class="icon-bg"
-    />
-    <!-- External link icon -->
-    <g transform="translate(6, 6)">
-      <path
-        d="M6 6h2v2M8 4v2l-4 4"
+    <!-- Refined external link icon matching design system -->
+    <g transform="translate(2, 2)">
+      <!-- Background for better visibility -->
+      <rect
+        x="0"
+        y="0"
+        width="16"
+        height="16"
+        rx="3"
+        fill="rgba(0, 0, 0, 0.6)"
         stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
-        stroke-width="1.2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        fill="none"
+        stroke-width="0.5"
+        class="icon-bg"
       />
-      <path
-        d="M6 4h2v2"
-        stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
-        stroke-width="1.2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        fill="none"
-      />
+      <!-- External link icon - cleaner design -->
+      <g transform="translate(3, 3)">
+        <!-- Arrow pointing up-right -->
+        <path
+          d="M7 3L3 7M7 3H4M7 3V6"
+          stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
+        <!-- Box outline -->
+        <path
+          d="M1 1h2v2M1 9h8V1"
+          stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+          opacity="0.7"
+        />
+      </g>
     </g>
   </g>
 
@@ -321,18 +329,7 @@
     </text>
   {/if}
 
-  <!-- Frontmatter indicator -->
-  {#if (node as any).frontmatter}
-    <g class="frontmatter-indicator">
-      <circle
-        cx={width - 20}
-        cy="20"
-        r="4"
-        fill="var(--clr-lossless-accent--brightest)"
-      />
-      <title>Has frontmatter metadata</title>
-    </g>
-  {/if}
+  <!-- Frontmatter indicator removed - was the unwanted bright blue dot -->
 
   <!-- File content area -->
   <foreignObject
@@ -703,14 +700,14 @@
   }
 
   .open-tab-icon:hover .icon-bg {
-    fill: rgba(255, 255, 255, 0.2);
+    fill: rgba(0, 0, 0, 0.8);
     stroke: var(--clr-lossless-accent--brightest, #4a9eff);
-    stroke-width: 1.5;
+    stroke-width: 1;
   }
 
   .open-tab-icon:active .icon-bg {
-    fill: rgba(255, 255, 255, 0.3);
-    stroke-width: 2;
+    fill: rgba(0, 0, 0, 0.9);
+    stroke-width: 1.5;
   }
 
   .open-tab-icon:focus {
@@ -719,7 +716,7 @@
 
   .open-tab-icon:focus .icon-bg {
     stroke: var(--clr-lossless-accent--brightest, #4a9eff);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 4px var(--clr-lossless-accent--brightest, #4a9eff));
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 3px var(--clr-lossless-accent--brightest, #4a9eff));
   }
 </style>

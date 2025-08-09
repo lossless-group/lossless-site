@@ -6,24 +6,33 @@
 
 ## Features
 - Responsive Layout
+- CSS themes, mode, and Tailwind CSS theme.
 - Extensible Collections
     - Collections with multiple paths
-- Extended Markdown Render Pipeline
-    - New (Direcives with syntax) 
-    ```
+- [Extended Markdown Render Pipeline](#custom-markdown-extensions)
+    - New: Direcives with syntax
+    ```markdown
     :::<directive-name> 
-       - New (translate extended markdown syntax to custom html, css, and js).
+       - `[[backlink/path/to/file]]`
     :::
     ``` 
-- Logo Scroller
-- Hero Banner
-- Open Graph image handling per file content frontmatter.
-- Filtered Lists
+    - New: Figma embeds
+    ```markdown
+    :::figma url="https://www.figma.com/file/..." />
+    ```
+    - Smart YouTube Link Rendering
+- Standard Components
+    - Logo Scroller
+    - Hero Banner
+    - Cards with Open Graph image handling, rendering from YAML Frontmatter.
+    - Interactive Tags
+        - Filtered Lists
+- JSON Canvas (for client-side interactivity) according to the [JSON Canvas Specification](https://jsoncanvas.com/)
 - Environment-based Content Delivery
 - Header
 - Footer
-- Cards
 - Feature Image with Side Text
+- AST Debugger
 
 ## Stack:
 This is an Astro project, with robust support for Markdown, Extended Markdown, MDX, and Markdown+YAML frontmatter.
@@ -39,6 +48,14 @@ A preference for `pnpm` over `npm` or `yarn`.
 - [Svelte](https://svelte.dev) for client-side interactivity.
 - [MDX](https://mdxjs.com) for Markdown+JSX for component heavy content.
 
+# Getting Started
+
+## Prerequisites
+
+```bash
+brew install git-lfs
+```
+
 ```bash
 pnpm install --save-dev
 ```
@@ -53,14 +70,6 @@ pnpm build
 
 ```bash
 pnpm dev
-```
-
-# Getting Started
-
-## Prerequisites
-
-```bash
-brew install git-lfs
 ```
 
 ## Environment Variables
@@ -210,6 +219,32 @@ We have working:
 - [ ] Callouts that feed the Table of Contents with their headers.
 - [ ] Image Embeds (advanced Styling)
 - [ ] Internal Image Embeds (using a relative path to the image in the visualsCollection)
+
+
+## JSON Canvas
+
+Our JSON Canvas implementation provides interactive project visualization and specification overviews. The system renders `.canvas` files according to the [JSON Canvas Specification](https://jsoncanvas.com/) with enhanced features for content integration.
+
+**Key Components:**
+- `JSONCanvasIsland.astro` - Server-side canvas file processing and coordinate transformation
+- `JSONCanvasRenderer.svelte` - Client-side interactive canvas rendering with pan/zoom
+- `JSONCanvasFile.svelte` - Individual canvas file node rendering with markdown support
+- `ProjectShowcase.astro` - Project container that integrates canvas with metadata
+
+**Features:**
+- Automatic coordinate transformation and viewport optimization
+- Markdown file node content rendering with full pipeline support
+- Interactive pan/zoom navigation with mouse and touch support
+- Client-specific project routing via MOC (Map of Contents) system
+- Canvas path resolution relative to content base directory
+
+**Usage:**
+Canvas files are integrated into projects via the MOC system using syntax like:
+```markdown
+:::projects
+- [[projects/Project-Name/Specs/canvas-file.canvas|Project Display Name]]
+:::
+```
 
 
 ## 🧞 Commands
