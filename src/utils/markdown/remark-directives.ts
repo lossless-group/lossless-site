@@ -25,6 +25,24 @@ export const directiveComponentMap: Record<string, string> = {
   'portfolio': 'direct', // Handled directly in ClientPortalLayout.astro
   'vocabulary': 'direct', // Handled directly in ClientPortalLayout.astro
   'concepts': 'direct', // Handled directly in ClientPortalLayout.astro
+  'projects': 'direct', // Handled directly in ClientPortalLayout.astro
+  'tooling-gallery': 'markdown/ToolingGallery.astro',
+  'portfolio-gallery': 'direct', // Handled directly in AstroMarkdown.astro
+  'image-gallery': 'markdown/ImageGallery.astro',
+  // Custom Shiki language directives that route to callout components
+  'warning': 'markdown/callouts/ArticleCallout.astro',
+  'info': 'markdown/callouts/ArticleCallout.astro',
+  'success': 'markdown/callouts/ArticleCallout.astro',
+  'error': 'markdown/callouts/ArticleCallout.astro',
+  'tip': 'markdown/callouts/ArticleCallout.astro',
+  'note': 'markdown/callouts/ArticleCallout.astro',
+  'quote': 'markdown/callouts/ArticleCallout.astro',
+  'emphasis': 'markdown/callouts/ArticleCallout.astro',
+  // Special directive languages
+  'litegal': 'direct', // Legal content formatting
+  'tree': 'direct', // File tree or hierarchy display
+  'dataview': 'direct', // Data visualization
+  'dataviewjs': 'direct', // JavaScript data visualization
   // Future components following the same pattern:
   // 'miro-board': 'Miro-Board--Embed.astro',
   // 'notion-page': 'Notion-Page--Preview.astro',

@@ -5,6 +5,7 @@ import { pathToFileURL } from 'url';
 
 // Import environment utilities
 import { contentBasePath } from './utils/envUtils.js';
+import { getReferenceSlug } from './utils/slugify.js';
 
 
 // Function to resolve content paths based on environment
@@ -558,30 +559,47 @@ const mapOfContentsCollection = defineCollection({
 });
 
 const projectsCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: resolveContentPath("projects") }),
+  loader: glob({
+    pattern: "**/*.md",
+    base: "../content/projects",
+    generateId: ({ entry }) => {
+      console.log(`[PROJECTS] Processing entry: "${entry}"`);
+      
+      // Remove .md extension from entry path
+      const pathWithoutExt = entry.replace(/\.md$/, '');
+      console.log(`[PROJECTS] Path without extension: "${pathWithoutExt}"`);
+      
+      // Extract project root directory and internal path
+      const pathParts = pathWithoutExt.split('/');
+      if (pathParts.length === 0) {
+        console.log(`[PROJECTS] ERROR: Empty path parts`);
+        return 'unknown';
+      }
+      
+      // First part is the project root directory (e.g., "Augment-It")
+      const projectRoot = pathParts[0];
+      
+      // Generate slug: project-root/internal/path
+      let slug;
+      if (pathParts.length === 1) {
+        // Just the project root file
+        slug = getReferenceSlug(projectRoot);
+      } else {
+        // Project root + internal path
+        const internalPath = pathParts.slice(1).join('/');
+        slug = `${getReferenceSlug(projectRoot)}/${getReferenceSlug(internalPath)}`;
+      }
+      
+      console.log(`[PROJECTS] Generated slug: "${slug}"`);
+      return slug;
+    }
+  }),
   schema: z.object({
     title: z.string().optional(),
-    slug: z.string().optional(),
-    publish: z.boolean().optional(),
-    description: z.string().optional(),
-    date_created: z.union([z.string(), z.date()]).optional(),
     tags: z.array(z.string()).optional(),
-  }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    // Preserve frontmatter slug if it exists, otherwise generate from filename
-    const slug = data.slug || filename.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
-    
-    return {
-      ...data,
-      title: displayTitle,
-      slug: slug,
-    };
-  })
+    slug: z.string().optional(),
+    publish: z.boolean().default(true),
+  }),
 });
 
 const portfolioCollection = defineCollection({
@@ -643,14 +661,14 @@ const portfolioCollection = defineCollection({
 // ---- NEW: Configuration for Publishing Defaults ----
 export const collectionPublishingDefaults = {
   'issue-resolution': {
-    publishByDefault: true, // true = publish all EXCEPT items with publish: false
-                            // false = publish none EXCEPT items with publish: true
+    publishByDefault: true, 
   },
   'talks': {
-    publishByDefault: true, // true = publish all EXCEPT items with publish: false
-                            // false = publish none EXCEPT items with publish: true
+    publishByDefault: true, 
   },
-  // Add other collections here as needed
+  'projects': {
+    publishByDefault: true, 
+  },
 };
 // ---- END NEW ----
 
@@ -685,9 +703,7 @@ export const paths = {
 // Export the collections
 export const collections = {
   'cards': cardCollection,
-  'concepts': conceptsCollection,
-  'market-maps': marketMapsCollection,
-  'essays': essaysCollection,
+  'projects': projectsCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,
   'changelog--code': changelogCodeCollection,
@@ -710,5 +726,4 @@ export const collections = {
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,
-  'projects': projectsCollection,
 };

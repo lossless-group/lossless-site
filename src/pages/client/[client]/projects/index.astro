@@ -1,0 +1,19 @@
+---
+/**
+ * /client/[client]/projects/index.astro — Client Projects Index Route
+ *
+ * This route is disabled - client projects should redirect to canonical project URLs
+ */
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Return empty array to disable this route
+  return [];
+}
+---
+
+<div>
+  <h1>Client Projects</h1>
+  <p>This route has been disabled. Client projects should redirect to canonical project URLs.</p>
+</div>
