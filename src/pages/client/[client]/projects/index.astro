@@ -1,0 +1,300 @@
+---
+/**
+ * /client/[client]/projects/index.astro — Dynamic Client Projects Index
+ * 
+ * Uses the Map of Contents (MOC) system to dynamically list projects for each client
+ * based on the :::projects directive in their MOC file (content/moc/<Client>.md).
+ * 
+ * Example MOC structure:
+ * :::projects
+ * - [[Augment-It]]
+ * - [[Another Project]]
+ * :::
+ */
+
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { getCollection } from 'astro:content';
+import { toProperCase } from '@utils/slugify';
+import { contentBasePath } from '@utils/envUtils';
+
+// Layout and component imports
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/basics/Hero.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import ProjectShowcase from '@components/projects/ProjectShowcase.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Get all available clients from the moc directory
+  const mocDir = path.resolve(contentBasePath, 'moc');
+  
+  try {
+    const mocFiles = await fs.readdir(mocDir);
+    const clientFiles = mocFiles.filter(file => file.endsWith('.md'));
+    
+    const paths = clientFiles.map(file => {
+      const client = file.replace('.md', '').toLowerCase();
+      return {
+        params: { client },
+        props: { client }
+      };
+    });
+    
+    console.log(`[CLIENT PROJECTS INDEX] Generated paths for clients:`, paths.map(p => p.params.client));
+    return paths;
+  } catch (error) {
+    console.error('[CLIENT PROJECTS INDEX] Error reading MOC directory:', error);
+    return [];
+  }
+}
+
+const { client } = Astro.props;
+const properClient = toProperCase(client);
+
+// Load projects from the client's MOC file
+let clientProjects: any[] = [];
+let mocProjectNames: string[] = [];
+
+try {
+  const clientMocPath = path.resolve(contentBasePath, 'moc', `${properClient}.md`);
+  const rawClientMoc = await fs.readFile(clientMocPath, 'utf-8');
+  
+  // Extract the :::projects ... ::: block
+  const projectsBlockMatch = rawClientMoc.match(/:::projects([\s\S]*?):::/i);
+  
+  if (projectsBlockMatch) {
+    const block = projectsBlockMatch[1] || '';
+    const projectLines = block
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.startsWith('-') || line.startsWith('*'));
+    
+    const mocProjectEntries = projectLines
+      .map(line => {
+        // Handle [[Project Name|canvas/path.canvas]] syntax
+        const linkMatch = line.match(/^[-*]\s*\[\[(.*?)(?:\|(.*?))?\]\]/);
+        if (linkMatch) {
+          return {
+            name: linkMatch[1].trim(),
+            canvasPath: linkMatch[2] ? linkMatch[2].trim() : null
+          };
+        }
+        
+        // Handle plain list items
+        const plainText = line.replace(/^[-*]\s*/, '').trim();
+        return plainText ? { name: plainText, canvasPath: null } : null;
+      })
+      .filter(Boolean);
+    
+    console.log(`[CLIENT PROJECTS INDEX] Found ${mocProjectEntries.length} project entries in MOC for ${properClient}:`, mocProjectEntries);
+    
+    if (mocProjectEntries.length > 0) {
+      // Get all projects from the collection
+      const allProjects = await getCollection('projects');
+      
+      // Match MOC project names to actual project entries
+      for (const entry of mocProjectEntries) {
+        // Try to find a matching project by title or slug with exact matching
+        const matchingProject = allProjects.find(project => {
+          const title = project.data.title || '';
+          const slug = project.id || '';
+          
+          // First try exact matches
+          if (title.toLowerCase() === entry.name.toLowerCase() ||
+              slug.toLowerCase() === entry.name.toLowerCase()) {
+            return true;
+          }
+          
+          // Then try if the slug starts with the project name (for nested projects)
+          const normalizedEntryName = entry.name.toLowerCase().replace(/[-\s]/g, '-');
+          const slugParts = slug.toLowerCase().split('/');
+          return slugParts[0] === normalizedEntryName;
+        });
+        
+        if (matchingProject) {
+          // Add canvas path from MOC if specified
+          const projectWithCanvas = {
+            ...matchingProject,
+            canvasPath: entry.canvasPath || `content/projects/${matchingProject.id}.canvas`
+          };
+          clientProjects.push(projectWithCanvas);
+          console.log(`[CLIENT PROJECTS INDEX] Matched "${entry.name}" to project: ${matchingProject.id}${entry.canvasPath ? ` with canvas: ${entry.canvasPath}` : ''}`);
+        } else {
+          console.warn(`[CLIENT PROJECTS INDEX] Could not find project matching "${entry.name}" for ${properClient}`);
+        }
+      }
+    }
+  } else {
+    console.warn(`[CLIENT PROJECTS INDEX] No :::projects directive found in moc/${properClient}.md`);
+  }
+} catch (error) {
+  console.error(`[CLIENT PROJECTS INDEX] Error loading MOC file for ${properClient}:`, error);
+}
+
+// Fallback: if no projects found via MOC, show message
+const hasProjects = clientProjects.length > 0;
+
+const pageTitle = `${properClient} Projects`;
+const pageDescription = hasProjects 
+  ? `Explore ${clientProjects.length} project${clientProjects.length === 1 ? '' : 's'} for ${properClient}.`
+  : `No projects currently configured for ${properClient}.`;
+---
+
+<Layout 
+  title={pageTitle}
+  description={pageDescription}
+>
+  <main>
+    <Hero 
+      title={pageTitle}
+      description={pageDescription}
+    />
+    
+    <AnimationWrapper>
+      <section class="projects-section">
+        {hasProjects ? (
+          <div class="projects-grid">
+            {clientProjects.map(project => (
+              <ProjectShowcase 
+                title={project.data.title || project.id}
+                description={project.data.description || `Project documentation and specifications for ${project.data.title || project.id}`}
+                canvasPath={project.canvasPath || `content/projects/${project.id}.canvas`}
+              />
+            ))}
+          </div>
+        ) : (
+          <div class="no-projects-message">
+            <h2>No Projects Available</h2>
+            <p>
+              Projects for {properClient} are configured via the MOC (Map of Contents) system.
+              To add projects, update the <code>:::projects</code> section in 
+              <code>content/moc/{properClient}.md</code>.
+            </p>
+            <details class="moc-help">
+              <summary>How to configure projects</summary>
+              <div class="moc-example">
+                <h4>Add this to <code>content/moc/{properClient}.md</code>:</h4>
+                <pre><code>:::projects
+- [[Project Name]]
+- [[Another Project]]
+:::</code></pre>
+                <p>
+                  Project names should match the titles or slugs of projects in the 
+                  <code>content/projects/</code> directory.
+                </p>
+              </div>
+            </details>
+          </div>
+        )}
+      </section>
+    </AnimationWrapper>
+  </main>
+</Layout>
+
+<style>
+.projects-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.no-projects-message {
+  text-align: center;
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: var(--clr-surface-secondary, #f8f9fa);
+  border-radius: 1rem;
+  border: 1px solid var(--clr-border-subtle, #e1e5e9);
+}
+
+.no-projects-message h2 {
+  color: var(--clr-text-primary, #1a1a1a);
+  margin-bottom: 1rem;
+  font-size: var(--fs-600, 1.5rem);
+}
+
+.no-projects-message p {
+  color: var(--clr-text-secondary, #666);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.no-projects-message code {
+  background: var(--clr-surface-tertiary, #e9ecef);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: var(--ff-mono, 'Fira Code', monospace);
+  font-size: 0.9em;
+}
+
+.moc-help {
+  text-align: left;
+  margin-top: 2rem;
+}
+
+.moc-help summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--clr-lossless-primary, #333);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.moc-help summary:hover {
+  background: var(--clr-surface-tertiary, #e9ecef);
+}
+
+.moc-example {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--clr-surface-primary, #fff);
+  border-radius: 0.5rem;
+  border: 1px solid var(--clr-border-subtle, #e1e5e9);
+}
+
+.moc-example h4 {
+  margin-bottom: 0.5rem;
+  color: var(--clr-text-primary, #1a1a1a);
+  font-size: var(--fs-400, 1rem);
+}
+
+.moc-example pre {
+  background: var(--clr-surface-tertiary, #e9ecef);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.moc-example code {
+  font-family: var(--ff-mono, 'Fira Code', monospace);
+  font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .projects-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .no-projects-message {
+    margin: 2rem auto;
+    padding: 1.5rem;
+  }
+}
+</style>
