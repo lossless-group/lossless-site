@@ -22,7 +22,7 @@ import { contentBasePath } from '@utils/envUtils';
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
-import ProjectShowcase from '@components/projects/ProjectShowcase.astro';
+import Section__Project_Container from '@components/projects/Section__Project-Container.astro';
 
 export const prerender = true;
 
@@ -73,12 +73,12 @@ try {
     
     const mocProjectEntries = projectLines
       .map(line => {
-        // Handle [[Project Name|canvas/path.canvas]] syntax
-        const linkMatch = line.match(/^[-*]\s*\[\[(.*?)(?:\|(.*?))?\]\]/);
+        // Handle [[canvas/path.canvas|Project Name]] syntax
+        const linkMatch = line.match(/^[-*]\s*\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
         if (linkMatch) {
           return {
-            name: linkMatch[1].trim(),
-            canvasPath: linkMatch[2] ? linkMatch[2].trim() : null
+            name: linkMatch[2] ? linkMatch[2].trim() : linkMatch[1].trim(),
+            canvasPath: linkMatch[2] ? linkMatch[1].trim() : null
           };
         }
         
@@ -153,18 +153,10 @@ const pageDescription = hasProjects
     />
     
     <AnimationWrapper>
-      <section class="projects-section">
-        {hasProjects ? (
-          <div class="projects-grid">
-            {clientProjects.map(project => (
-              <ProjectShowcase 
-                title={project.data.title || project.id}
-                description={project.data.description || `Project documentation and specifications for ${project.data.title || project.id}`}
-                canvasPath={project.canvasPath || `content/projects/${project.id}.canvas`}
-              />
-            ))}
-          </div>
-        ) : (
+      {hasProjects ? (
+        <Section__Project_Container title={`${properClient} Projects`} />
+      ) : (
+        <section class="projects-section">
           <div class="no-projects-message">
             <h2>No Projects Available</h2>
             <p>
@@ -187,8 +179,8 @@ const pageDescription = hasProjects
               </div>
             </details>
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </AnimationWrapper>
   </main>
 </Layout>
