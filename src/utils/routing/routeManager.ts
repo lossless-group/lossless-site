@@ -8,9 +8,32 @@
 interface RouteMapping {
   contentPath: string;  // The path prefix in the content directory
   routePath: string;    // The corresponding web route
+  baseDir?: string;     // Optional base directory for content resolution
+  collectionName?: string; // Optional explicit collection name
 }
 
 // Define the default route mappings
+// Export route constants for use throughout the app
+export const ROUTE_PATHS = {
+  LEARN_WITH: {
+    BASE: '/learn-with',
+    ISSUE_RESOLUTION: '/learn-with/issue-resolution',
+    UP_AND_RUNNING: '/learn-with/up-and-running',
+  },
+  MARKET_MAP: {
+    BASE: '/market-map',
+    FOR: '/market-map/for',
+  },
+  UP_AND_RUNNING: {
+    BASE: '/learn-with/up-and-running',
+    WITH: '/learn-with/up-and-running/with',
+  },
+  DEFAULTS: {
+    LEARN: '/learn-with/issue-resolution',
+    IMAGE_FALLBACK: 'visuals/bannerImage__The-Lossless-Group.png',
+  },
+} as const;
+
 const defaultRouteMappings: RouteMapping[] = [
   {
     contentPath: 'vocabulary',
@@ -25,6 +48,12 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'vibe-with'
   },
   {
+    contentPath: 'market-maps',
+    routePath: 'market-map/for',
+    baseDir: 'lost-in-public',
+    collectionName: 'market-maps'
+  },
+  {
     contentPath: 'specs',
     routePath: 'vibe-with/specs'
   },
@@ -33,8 +62,28 @@ const defaultRouteMappings: RouteMapping[] = [
     routePath: 'toolkit'
   },
   {
+    contentPath: 'tooling/Portfolio',
+    routePath: 'portfolio'
+  },
+  {
+    contentPath: 'vertical-toolkits',
+    routePath: 'toolkit/vertical'
+  },
+  {
+    contentPath: 'essays',
+    routePath: 'read/essays'
+  },
+  {
     contentPath: 'client-content',
     routePath: 'client'
+  },
+  {
+    contentPath: 'slides',
+    routePath: 'slides'
+  },
+  {
+    contentPath: 'projects',
+    routePath: 'projects'
   },
   // {
   //   contentPath: 'content/visuals',
@@ -59,12 +108,28 @@ let customRouteMappings: RouteMapping[] = [];
 
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
-import { contentBasePath, DEBUG_BACKLINKS } from '@utils/envUtils';
-import { getReferenceSlug, slugify } from '@utils/slugify';
+import { contentBasePath, DEBUG_BACKLINKS } from '../envUtils';
+import { getReferenceSlug, slugify } from '../slugify';
 
 function isValidContentFile(contentPath: string): boolean {
-  const fullPath = path.resolve(contentBasePath, `${contentPath}.md`);
-  return existsSync(fullPath);
+  // Check if the path already has a .md extension
+  const hasMdExtension = contentPath.endsWith('.md');
+  const fullPath = path.resolve(
+    contentBasePath, 
+    hasMdExtension ? contentPath : `${contentPath}.md`
+  );
+  
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] Checking if file exists:', fullPath);
+  }
+  
+  const exists = existsSync(fullPath);
+  
+  if (DEBUG_BACKLINKS) {
+    console.log('[routeManager] File exists:', exists);
+  }
+  
+  return exists;
 }
 
 function resolveWithMappings(normalizedPath: string): string {
@@ -76,24 +141,55 @@ function resolveWithMappings(normalizedPath: string): string {
   const contentType = segments[0];
 
   const allMappings = [...customRouteMappings, ...defaultRouteMappings];
-  const mapping = allMappings.find(m =>
+  
+  // First try to find a mapping that matches the full path with baseDir
+  const mappingWithBaseDir = allMappings.find(m => 
+    m.baseDir && normalizedPath === `${m.baseDir}/${m.contentPath}` ||
+    m.baseDir && normalizedPath.startsWith(`${m.baseDir}/${m.contentPath}/`)
+  );
+
+  // If no match with baseDir, try without baseDir
+  const mapping = mappingWithBaseDir || allMappings.find(m =>
     contentType === m.contentPath ||
     normalizedPath.startsWith(`${m.contentPath}/`)
   );
 
   if (mapping) {
-    const relativePath = normalizedPath.substring(mapping.contentPath.length + 1);
-    return `/${mapping.routePath}/${relativePath}`;
+    let relativePath: string;
+    
+    if (mapping.baseDir) {
+      // For mappings with baseDir, strip both baseDir and contentPath
+      const prefixToRemove = `${mapping.baseDir}/${mapping.contentPath}`;
+      relativePath = normalizedPath.startsWith(prefixToRemove + '/') 
+        ? normalizedPath.substring(prefixToRemove.length + 1)
+        : '';
+    } else {
+      // For regular mappings, just strip contentPath
+      relativePath = normalizedPath.startsWith(mapping.contentPath + '/')
+        ? normalizedPath.substring(mapping.contentPath.length + 1)
+        : '';
+    }
+    
+    return `/${mapping.routePath}${relativePath ? `/${relativePath}` : ''}`;
   }
 
-  return `/not-found?path=${encodeURIComponent(normalizedPath)}`;
+  // Return 404 page with the attempted path
+  return `/404`;
 }
 
 function collectAllMappingPaths(): RouteMapping[] {
   const all: RouteMapping[] = [];
 
   for (const mapping of [...customRouteMappings, ...defaultRouteMappings]) {
-    const root = path.resolve(contentBasePath, mapping.contentPath);
+    // Consider baseDir when resolving the root path
+    const root = mapping.baseDir 
+      ? path.resolve(contentBasePath, mapping.baseDir, mapping.contentPath)
+      : path.resolve(contentBasePath, mapping.contentPath);
+
+    // Skip if the directory doesn't exist
+    if (!existsSync(root)) {
+      continue;
+    }
 
     function walk(currentPath: string, relativePath = '') {
       const entries = readdirSync(currentPath);
@@ -127,11 +223,21 @@ function collectAllMappingPaths(): RouteMapping[] {
 }
 
 export function transformContentPathToRoute(input: string): string {
-  const segments = input.split('/');
+  if (!input) {
+    if (DEBUG_BACKLINKS) {
+      console.log("[routeManager] transformContentPathToRoute called with empty input");
+    }
+    return '/404';
+  }
+
   const normalizedInput = getReferenceSlug(input);
+  const segments = normalizedInput.split('/');
 
   // Case 1: Full path (contains slash)
   if (segments.length > 1) {
+    if (DEBUG_BACKLINKS) {
+      console.log("[routeManager] Full path detected:", normalizedInput);
+    }
     return resolveWithMappings(normalizedInput);
   }
 
@@ -139,26 +245,50 @@ export function transformContentPathToRoute(input: string): string {
   const allMappings = collectAllMappingPaths();
   
   if (DEBUG_BACKLINKS) {
-    console.log("[routeManager] No path provided! Searching...")
+    console.log("[routeManager] No full path provided, searching mappings for:", input);
   }
 
+  // First try with baseDir mappings
+  for (const mapping of allMappings) {
+    if (mapping.baseDir) {
+      const candidate = `${mapping.baseDir}/${mapping.contentPath}/${input}`;
+      
+      if (DEBUG_BACKLINKS) {
+        console.log("[routeManager] Trying with baseDir:", candidate);
+      }
+
+      if (isValidContentFile(candidate)) {
+        const result = resolveWithMappings(candidate);
+        if (DEBUG_BACKLINKS) {
+          console.log("[routeManager] Found with baseDir, resolved to:", result);
+        }
+        return result;
+      }
+    }
+  }
+
+  // Then try without baseDir
   for (const mapping of allMappings) {
     const candidate = `${mapping.contentPath}/${input}`;
     
     if (DEBUG_BACKLINKS) {
-      console.log("[routeManager] Trying", candidate)
+      console.log("[routeManager] Trying without baseDir:", candidate);
     }
 
     if (isValidContentFile(candidate)) {
-      return transformContentPathToRoute(candidate); // Recurse as if it's a full path
+      const result = resolveWithMappings(candidate);
+      if (DEBUG_BACKLINKS) {
+        console.log("[routeManager] Found without baseDir, resolved to:", result);
+      }
+      return result;
     }
   }
 
   if (DEBUG_BACKLINKS) {
-    console.log("No path found for path", input, "\n\n")
+    console.log("[routeManager] No path found for:", input, "\n");
   }
-  // Fallback
-  return `/not-found?path=${encodeURIComponent(input)}`;
+  
+  return '/404';
 }
 
 /**

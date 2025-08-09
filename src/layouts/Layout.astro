@@ -44,7 +44,7 @@ interface Props {
 // Process frontmatter data with clear priority order
 const fm = Astro.props.frontmatter || {};
 
-// Extract values with clear priority (frontmatter takes precedence over direct props)
+// Extract values with clear priority
 const pageTitle = fm.title || Astro.props.title;
 const pageDescription = fm.lede || fm.description || Astro.props.description;
 const pageImageUrl = fm.banner_image || fm.portrait_image;
@@ -57,7 +57,7 @@ const pageImageUrl = fm.banner_image || fm.portrait_image;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/visuals/appIcon__Lossless_Record--Rounded-Rectangle.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="google-site-verification" content="DxG05i6VcG3uGrOped0ZQGyw5Oorv30KqRY9EPadxCc" />
     

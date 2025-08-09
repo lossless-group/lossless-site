@@ -45,6 +45,16 @@ if (originalData?.authors && Array.isArray(originalData.authors) && originalData
   authorForHandle = originalData.author;
 }
 
+// Determine participants for talks/events
+let participants: string | string[] | undefined = undefined;
+if (originalData?.participants && Array.isArray(originalData.participants) && originalData.participants.length > 0) {
+  participants = originalData.participants;
+} else if (originalData?.participant && typeof originalData.participant === 'string') {
+  participants = originalData.participant;
+}
+
+
+
 let semanticVersion: string | undefined = undefined;
 if (originalData?.at_semantic_version) {
   semanticVersion = originalData.at_semantic_version;
@@ -85,6 +95,11 @@ if (originalData?.date_modified) {
 let formattedDateCreated: string | null = null;
 if (originalData?.date_created) {
   formattedDateCreated = formatDate(originalData.date_created);
+}
+
+let formattedDateOfEvent: string | null = null;
+if (originalData?.date_of_event) {
+  formattedDateOfEvent = formatDate(originalData.date_of_event);
 }
 
 // Prepare data for AstroMarkdown, conditionally removing title if effectiveHeading is used
@@ -157,21 +172,41 @@ const tocNode = children.find(child => child?.type === 'tableOfContents');
 const bannerImage = originalData.banner_image || "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp";
 const lede = originalData.lede;
 const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
+
+// Check if we have any article info to display (same logic as InfoSidebar)
+const hasArticleInfo = 
+  categories.length > 0 || 
+  semanticVersion || 
+  authorForHandle || 
+  participants || 
+  formattedDateModified || 
+  formattedDateCreated || 
+  formattedDateOfEvent || 
+  tags.length > 0 || 
+  augmentedWith || 
+  originalData.google_maps_url || 
+  originalData.googleMapsUrl;
 ---
 
 <div class="content-wrapper">
-    <InfoSidebar 
-      categories={categories}
-      semanticVersion={semanticVersion}
-      authorForHandle={authorForHandle}
-      augmentedWith={augmentedWith}
-      formattedDateModified={formattedDateModified}
-      formattedDateCreated={formattedDateCreated}
-      tags={tags}
-      id={originalData.id}
-      path={originalData.path}
-      contentType={originalData.contentType}
-  />
+    {hasArticleInfo && (
+      <InfoSidebar 
+        categories={categories}
+        semanticVersion={semanticVersion}
+        authorForHandle={authorForHandle}
+        participants={participants}
+        augmentedWith={augmentedWith}
+        formattedDateModified={formattedDateModified}
+        formattedDateCreated={formattedDateCreated}
+        formattedDateOfEvent={formattedDateOfEvent}
+        tags={tags}
+        id={originalData.id}
+        path={originalData.path}
+        contentType={originalData.contentType}
+        google_maps_url={originalData.google_maps_url}
+        googleMapsUrl={originalData.googleMapsUrl}
+      />
+    )}
   <div class="content-inner">
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
@@ -214,27 +249,60 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
   }
 
   .prose > :global(h1:first-child) {  
-    font-size: 2rem;
+    font-size: 2.75rem;
     margin-bottom: 2rem;
+    color: var(--clr-lossless-accent--brightest);
   }
 
   .prose :global(h1) {
-    font-size: 2rem;
+    font-size: 2.75rem;
+    margin-bottom: 1.5rem;
     color: var(--clr-lossless-accent--brightest);
   }
 
   .prose :global(h2) {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
     margin-top: 2rem;
     margin-bottom: 1rem;
     color: var(--clr-lossless-accent--brightest);
   }
 
   .prose :global(h3) {
-    font-size: 1.25rem;
+    font-size: 1.875rem;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
     color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h4) {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h5) {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .prose :global(h6) {
+    font-size: 1.125rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  /* Add responsive styles for headings */
+  @media (max-width: 768px) {
+    .prose :global(h1), .prose > :global(h1:first-child) { font-size: 2.25rem; }
+    .prose :global(h2) { font-size: 1.875rem; }
+    .prose :global(h3) { font-size: 1.5rem; }
+    .prose :global(h4) { font-size: 1.25rem; }
+    .prose :global(h5) { font-size: 1.125rem; }
+    .prose :global(h6) { font-size: 1rem; }
   }
 
   .prose :global(p), .prose :global(.paragraph) {
@@ -495,13 +563,14 @@ const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
   }
 
 
+  /* Removed scroll-margin-top as it conflicts with dynamic header calculation */
   .prose :global(h1),
   .prose :global(h2),
   .prose :global(h3),
   .prose :global(h4),
   .prose :global(h5),
   .prose :global(h6) {
-    scroll-margin-top: 10rem;
+    /* Headings styled by TOC JavaScript for proper scroll positioning */
   }
 
 

@@ -1,0 +1,344 @@
+---
+// Figma-Object--Display.astro
+// Component for embedding Figma objects using the Figma Embed Kit
+// Supports both direct component usage and remark-directive integration
+
+// Import auth helper with fallback
+let getAuthTokenKey;
+try {
+  ({ getAuthTokenKey } = await import('@utils/markdown/remark-directives'));
+} catch {
+  // Fallback auth token key generation
+  getAuthTokenKey = (service: string, user?: string) => {
+    const serviceUpper = service.toUpperCase();
+    if (user) {
+      return `${serviceUpper}_${user.toUpperCase()}_TOKEN`;
+    }
+    return `${serviceUpper}_DEFAULT_TOKEN`;
+  };
+}
+
+// Primary props (from remark directives)
+export interface Props {
+  src?: string;           // Primary Figma URL (directive prop)
+  url?: string;           // Alternative URL prop (direct usage)
+  'auth-user'?: string;   // User for authentication (directive prop)
+  authUser?: string;      // Alternative auth prop (direct usage)
+  width?: string;         // Component width
+  height?: string;        // Component height
+  'embed-host'?: string;  // Embed host (directive prop)
+  embedHost?: string;     // Alternative embed host (direct usage)
+  'initial-view'?: string; // Initial view (directive prop)
+  initialView?: string;   // Alternative initial view (direct usage)
+  'page-id'?: string;     // Page ID (directive prop)
+  pageId?: string;        // Alternative page ID (direct usage)
+  'node-id'?: string;     // Node ID (directive prop)
+  nodeId?: string;        // Alternative node ID (direct usage)
+  'hide-ui'?: string | boolean; // Hide UI (directive prop)
+  hideUi?: boolean;       // Alternative hide UI (direct usage)
+  'hotspot-hints'?: string | number; // Hotspot hints (directive prop)
+  hotspotHints?: number;  // Alternative hotspot hints (direct usage)
+  scaling?: string;       // Scaling mode
+  'allow-fullscreen'?: string | boolean; // Allow fullscreen (directive prop)
+  allowFullscreen?: boolean; // Alternative allow fullscreen (direct usage)
+  chrome?: string;        // Chrome visibility
+}
+
+const {
+  src,
+  url,
+  'auth-user': authUserDirective,
+  authUser,
+  width = '100%',
+  height = '500px',
+  'embed-host': embedHostDirective,
+  embedHost,
+  'initial-view': initialViewDirective,
+  initialView,
+  'page-id': pageIdDirective,
+  pageId,
+  'node-id': nodeIdDirective, 
+  nodeId,
+  'hide-ui': hideUiDirective,
+  hideUi,
+  'hotspot-hints': hotspotHintsDirective,
+  hotspotHints,
+  scaling,
+  'allow-fullscreen': allowFullscreenDirective,
+  allowFullscreen,
+  chrome
+} = Astro.props as Props;
+
+// Resolve props (directive props take precedence)
+const figmaUrl = src || url;
+const resolvedAuthUser = authUserDirective || authUser;
+const resolvedEmbedHost = embedHostDirective || embedHost || 'lossless.group';
+const resolvedInitialView = initialViewDirective || initialView;
+const resolvedPageId = pageIdDirective || pageId;
+const resolvedNodeId = nodeIdDirective || nodeId;
+const resolvedHideUi = hideUiDirective !== undefined ? 
+  (typeof hideUiDirective === 'string' ? hideUiDirective === 'true' : hideUiDirective) : 
+  hideUi;
+const resolvedHotspotHints = hotspotHintsDirective !== undefined ?
+  (typeof hotspotHintsDirective === 'string' ? parseInt(hotspotHintsDirective) : hotspotHintsDirective) :
+  hotspotHints;
+const resolvedAllowFullscreen = allowFullscreenDirective !== undefined ?
+  (typeof allowFullscreenDirective === 'string' ? allowFullscreenDirective === 'true' : allowFullscreenDirective) :
+  allowFullscreen;
+
+// Validation
+if (!figmaUrl) {
+  throw new Error('Figma-Object--Display: src or url prop is required');
+}
+
+// Authentication handling
+// Check for specific user token first, then fallback to FIGMA_EMBED_USER_TOKEN
+const authTokenKey = resolvedAuthUser ? getAuthTokenKey('FIGMA', resolvedAuthUser) : 'FIGMA_EMBED_USER_TOKEN';
+const authToken = import.meta.env[authTokenKey] || import.meta.env.FIGMA_EMBED_USER_TOKEN;
+
+// For API integration - construct headers if token is available
+const figmaHeaders = authToken ? {
+  'X-Figma-Token': authToken,
+  'Content-Type': 'application/json'
+} : null;
+
+// Extract file and node information from Figma URL
+function parseFigmaUrl(url: string) {
+  const urlObj = new URL(url);
+  const pathParts = urlObj.pathname.split('/');
+  const fileId = pathParts[2]; // /design/FILE_ID/...
+  const nodeId = urlObj.searchParams.get('node-id');
+  const isPrototype = urlObj.pathname.includes('/proto/');
+  
+  return { fileId, nodeId, isPrototype };
+}
+
+// Fetch node metadata from Figma API
+async function fetchNodeMetadata(fileId: string, nodeId: string, headers: any) {
+  try {
+    const response = await fetch(`https://api.figma.com/v1/files/${fileId}/nodes?ids=${nodeId}`, {
+      headers
+    });
+    
+    if (!response.ok) {
+      console.warn('Failed to fetch Figma node metadata:', response.status);
+      return null;
+    }
+    
+    const data = await response.json();
+    const nodeData = data.nodes?.[nodeId]?.document;
+    
+    if (nodeData) {
+      return {
+        type: nodeData.type,
+        name: nodeData.name,
+        absoluteBoundingBox: nodeData.absoluteBoundingBox,
+        backgroundColor: nodeData.backgroundColor,
+        isFrame: nodeData.type === 'FRAME'
+      };
+    }
+  } catch (error) {
+    console.warn('Error fetching Figma metadata:', error);
+  }
+  
+  return null;
+}
+
+// Parse Figma URL and fetch metadata if possible
+const { fileId, nodeId, isPrototype } = parseFigmaUrl(figmaUrl);
+let nodeMetadata = null;
+
+if (figmaHeaders && fileId && nodeId) {
+  nodeMetadata = await fetchNodeMetadata(fileId, nodeId, figmaHeaders);
+}
+
+// Calculate optimal dimensions based on frame metadata
+function calculateOptimalSize(metadata: any, defaultWidth: string, defaultHeight: string) {
+  if (!metadata?.absoluteBoundingBox) {
+    return { width: defaultWidth, height: defaultHeight };
+  }
+  
+  const bbox = metadata.absoluteBoundingBox;
+  const aspectRatio = bbox.width / bbox.height;
+  
+  // Parse default width to number, fallback to 800
+  const targetWidth = parseInt(defaultWidth) || 800;
+  const calculatedHeight = Math.round(targetWidth / aspectRatio);
+  
+  return {
+    width: `${targetWidth}px`,
+    height: `${calculatedHeight}px`
+  };
+}
+
+// Determine optimal embed parameters based on content type
+const optimalDimensions = nodeMetadata ? 
+  calculateOptimalSize(nodeMetadata, width, height) : 
+  { width, height };
+
+// Set intelligent defaults based on content type
+const smartInitialView = resolvedInitialView || (isPrototype ? 'prototype' : 'design');
+const smartScaling = scaling || (nodeMetadata?.isFrame ? 'contain' : 'min-zoom');
+const smartHideUi = resolvedHideUi !== undefined ? resolvedHideUi : true; // Default to cleaner UI
+
+// Build embed URL with intelligent parameters
+const embedUrl = new URL('https://www.figma.com/embed');
+embedUrl.searchParams.set('embed_host', resolvedEmbedHost);
+embedUrl.searchParams.set('url', figmaUrl);
+
+// Use smart defaults based on content analysis
+embedUrl.searchParams.set('initial_view', smartInitialView);
+embedUrl.searchParams.set('scaling', smartScaling);
+embedUrl.searchParams.set('hide_ui', smartHideUi.toString());
+
+// Add explicit parameters if provided (these override smart defaults)
+if (resolvedPageId) embedUrl.searchParams.set('pageId', resolvedPageId);
+if (resolvedNodeId) embedUrl.searchParams.set('nodeId', resolvedNodeId);
+if (resolvedHotspotHints !== undefined) embedUrl.searchParams.set('hotspot-hints', resolvedHotspotHints.toString());
+if (resolvedAllowFullscreen !== undefined) embedUrl.searchParams.set('allow-fullscreen', resolvedAllowFullscreen.toString());
+if (chrome) embedUrl.searchParams.set('chrome', chrome);
+
+// Development mode debugging
+if (import.meta.env.DEV) {
+  console.log('Figma Embed Debug:', {
+    figmaUrl,
+    fileId,
+    nodeId,
+    isPrototype,
+    nodeMetadata,
+    optimalDimensions,
+    smartInitialView,
+    smartScaling,
+    resolvedAuthUser,
+    authTokenKey,
+    hasAuthToken: !!authToken,
+    embedUrl: embedUrl.toString()
+  });
+}
+---
+
+<!-- Figma Embed Component -->
+<div class="figma-embed-wrapper">
+  {/* Optional metadata display for frames */}
+  {nodeMetadata && import.meta.env.DEV && (
+    <div class="figma-metadata">
+      <span class="metadata-item">
+        <strong>{nodeMetadata.type}:</strong> {nodeMetadata.name}
+      </span>
+      {nodeMetadata.absoluteBoundingBox && (
+        <span class="metadata-item">
+          {Math.round(nodeMetadata.absoluteBoundingBox.width)} × {Math.round(nodeMetadata.absoluteBoundingBox.height)}px
+        </span>
+      )}
+      <span class="metadata-item">
+        Mode: {isPrototype ? 'Prototype' : 'Design'}
+      </span>
+    </div>
+  )}
+  
+  <div class="figma-embed-container" style={`width: ${optimalDimensions.width}; height: ${optimalDimensions.height};`}>
+    <iframe
+      src={embedUrl.toString()}
+      allowfullscreen
+      loading="lazy"
+      title={nodeMetadata ? `Figma ${nodeMetadata.type}: ${nodeMetadata.name}` : `Figma embed: ${figmaUrl}`}
+      class="figma-embed-iframe"
+      style="border: none; width: 100%; height: 100%; border-radius: 8px;"
+    ></iframe>
+    
+    {/* Fallback content if iframe fails to load */}
+    <noscript>
+      <div class="figma-embed-fallback">
+        <p>Figma embed requires JavaScript to display.</p>
+        <a href={figmaUrl} target="_blank" rel="noopener noreferrer">
+          View in Figma
+        </a>
+      </div>
+    </noscript>
+  </div>
+</div>
+
+<!-- Error boundary for development -->>
+{import.meta.env.DEV && !figmaUrl && (
+  <div class="figma-embed-error" style="
+    border: 2px dashed #ef4444; 
+    padding: 1rem; 
+    border-radius: 8px; 
+    background: #fef2f2; 
+    color: #dc2626;
+  ">
+    <h4>Figma Embed Error</h4>
+    <p>Missing required 'src' or 'url' prop</p>
+    <code>Usage: ::figma-embed{{src="https://www.figma.com/file/..."}}</code>
+  </div>
+)}
+
+<style>
+  .figma-embed-wrapper {
+    margin: 1rem 0;
+  }
+  
+  .figma-metadata {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .metadata-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .figma-embed-container {
+    position: relative;
+    background: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
+  
+  .figma-embed-iframe {
+    display: block;
+  }
+  
+  .figma-embed-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 2rem;
+    background: #f8fafc;
+  }
+  
+  .figma-embed-fallback a {
+    color: #3b82f6;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  
+  .figma-embed-error {
+    font-family: system-ui, sans-serif;
+  }
+  
+  .figma-embed-error h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+  
+  .figma-embed-error code {
+    background: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+</style>
+

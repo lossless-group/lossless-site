@@ -18,6 +18,7 @@
  * - class?: string - Optional additional CSS classes for the root <a> element.
  * - All other attributes are passed to the root <a> element.
  */
+
 import type { HTMLAttributes } from 'astro/types';
 import { formatDate } from "@utils/formatDate";
 
@@ -30,12 +31,13 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
   description?: string;
   imgWidth?: number | string;
   imgHeight?: number | string;
-  class?: string; 
+  class?: string;
+  collection?: string;
   [key: string]: any;
 }
 
 const {
-  slug,
+  slug: slugProp,
   imageSrc,
   imageAlt,
   title,
@@ -43,12 +45,15 @@ const {
   description,
   imgWidth,
   imgHeight,
-  class: customClasses,
+  class: customClasses = '', 
+  collection = 'issue-resolution', 
   ...attrs 
 } = Astro.props as Props;
 
-const collectionBasePath = 'issue-resolution'; 
-const href = `/learn-with/${collectionBasePath}/${slug}`;
+import { ROUTE_PATHS } from '@utils/routing/routeManager';
+
+// Use the slug as-is since it should already contain the full path
+const href = slugProp.startsWith('/') ? slugProp : `/${slugProp}`;
 
 // Format the date consistently if it exists
 // Ensure date is treated as Date object for formatting
@@ -60,16 +65,22 @@ if (date) {
   } catch (error) {
     console.error(`Error formatting date for PostCard--Bare ('${title}'):`, error);
     // Fallback to original date string if formatting fails or if it's already a pre-formatted string
-    displayDate = typeof date === 'string' ? date : date.toLocaleDateString(); 
+    displayDate = typeof date === 'string' ? date : (date as Date).toLocaleDateString(); 
   }
 } else {
   displayDate = ""; // Or some default like 'Date not available'
 }
-
 ---
 
 <a
-  class:list={["flex flex-col group", customClasses]}
+  class:list={[
+    'group relative block h-full w-full overflow-hidden rounded-lg',
+    'transition-all duration-300 ease-in-out',
+    'hover:shadow-xl hover:ring-2 hover:ring-primary-500/20',
+    'focus:outline-none focus:ring-2 focus:ring-primary-500/50',
+    'p-2', // Add padding to prevent ring from overlaying content
+    customClasses,
+  ]}
   href={href}
   {...attrs}
 >

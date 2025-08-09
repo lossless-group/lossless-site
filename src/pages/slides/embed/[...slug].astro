@@ -1,0 +1,167 @@
+---
+/**
+ * Embedded slide deck renderer
+ * Creates an embedded presentation view from multiple markdown content files
+ * Reuses the MarkdownSlideDeck component for consistency
+ */
+export const prerender = false;
+
+import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
+import { readFile } from 'fs/promises';
+import path from 'path';
+
+// Get slug from path parameters
+const { slug } = Astro.params;
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+// Get query parameters for configuration
+const { url } = Astro;
+const searchParams = new URLSearchParams(url.search);
+
+// Get configuration from query params
+const config = {
+  theme: searchParams.get('theme') || 'black',
+  transition: searchParams.get('transition') || 'slide',
+  controls: searchParams.get('controls') !== 'false',
+  progress: searchParams.get('progress') !== 'false',
+  autoSlide: parseInt(searchParams.get('autoSlide') || '0', 10),
+  loop: searchParams.get('loop') === 'true',
+};
+
+// Convert slug array to path
+const slidePath = Array.isArray(slug) ? slug.join('/') : slug;
+
+// Load slide content directly from filesystem like the working markdown route
+let combinedMarkdown = '';
+let title = 'Embedded Presentation';
+
+try {
+  // Read markdown file directly from filesystem
+  const slidesDir = path.join(process.cwd(), 'src', 'generated-content', 'slides');
+  const fullPath = path.join(slidesDir, `${slidePath}.md`);
+  
+  console.log(`Reading slide from: ${fullPath}`);
+  
+  const fileContent = await readFile(fullPath, 'utf-8');
+  
+  // Parse frontmatter and content (simple approach)
+  const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  
+  if (frontmatterMatch) {
+    const frontmatterText = frontmatterMatch[1];
+    combinedMarkdown = frontmatterMatch[2];
+    
+    // Extract title from frontmatter
+    const titleMatch = frontmatterText.match(/title:\s*(.+)/);
+    if (titleMatch) {
+      title = titleMatch[1].trim().replace(/['"]/g, '');
+    }
+    
+    console.log(`Loaded slide: ${title}`);
+  } else {
+    combinedMarkdown = fileContent;
+  }
+} catch (error) {
+  console.error(`Failed to load slide: ${slidePath}`, error);
+  combinedMarkdown = `# Slide Not Found\n\nThe requested slide "${slidePath}" could not be loaded.`;
+}
+
+// If no slides were loaded, show error
+if (!combinedMarkdown) {
+  combinedMarkdown = `# No Content Available\n\nThe requested slides could not be loaded.`;
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  
+  <style>
+    /* Reset for embedded context */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+    }
+    
+    /* Hide control buttons in embedded view */
+    .control-buttons {
+      display: none !important;
+    }
+    
+    /* Adjust container for full viewport */
+    .reveal-container {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      height: 100vh !important;
+    }
+    
+    /* Ensure reveal takes full space */
+    .reveal {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    /* Theme override will be handled via JavaScript */
+  </style>
+</head>
+<body>
+  <!-- Use the MarkdownSlideDeck component -->
+  <MarkdownSlideDeck markdownContent={combinedMarkdown} title={title} />
+  
+  <!-- Override configuration based on query params -->
+  <script define:vars={{ config }}>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait a bit for Reveal to initialize
+      setTimeout(() => {
+        if (window.Reveal) {
+          // Update configuration
+          Reveal.configure({
+            controls: config.controls,
+            progress: config.progress,
+            transition: config.transition,
+            autoSlide: config.autoSlide,
+            loop: config.loop,
+            
+            // Embedded specific settings
+            embedded: true,
+            keyboard: true,
+            touch: true,
+            hideInactiveCursor: false
+          });
+          
+          // Update theme if different from default
+          if (config.theme !== 'black') {
+            const themeLink = document.getElementById('theme');
+            if (themeLink) {
+              themeLink.href = `https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/${config.theme}.min.css`;
+            }
+          }
+          
+          // Post message to parent window when slide changes
+          Reveal.on('slidechanged', event => {
+            window.parent.postMessage({
+              type: 'reveal-slide-changed',
+              currentSlide: event.indexh,
+              indexv: event.indexv
+            }, '*');
+          });
+          
+          // Listen for messages from parent window
+          window.addEventListener('message', event => {
+            if (event.data.type === 'reveal-goto-slide') {
+              Reveal.slide(event.data.slide);
+            }
+          });
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

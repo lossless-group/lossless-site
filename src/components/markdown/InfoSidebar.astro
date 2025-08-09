@@ -61,16 +61,20 @@ interface Props {
   categories?: string[];
   semanticVersion?: string;
   authorForHandle?: string | string[];
+  participants?: string | string[];
   augmentedWith?: string;
   augmentedBy?: string;
   augmented_with?: string;
   augmented_by?: string;
   formattedDateModified?: string | null;
   formattedDateCreated?: string | null;
+  formattedDateOfEvent?: string | null;
   tags?: string[];
   id?: string;
   path?: string;
   contentType?: string;
+  google_maps_url?: string;
+  googleMapsUrl?: string;
 }
 
 // Process component props
@@ -78,12 +82,16 @@ const {
   categories = [],
   semanticVersion,
   authorForHandle,
+  participants,
   formattedDateModified,
   formattedDateCreated,
+  formattedDateOfEvent,
   tags = [],
   id,
   path,
   contentType,
+  google_maps_url,
+  googleMapsUrl,
   ...restProps
 } = Astro.props as Props;
 
@@ -99,59 +107,112 @@ const augmentedWithData = augmentedWith ? {
   name: augmentedWith,
   imageUrl: findTrademarkImage(augmentedWith)
 } : null;
+
+// Process Google Maps URL
+const mapsUrl = google_maps_url || googleMapsUrl;
+const hasLocationInfo = Boolean(mapsUrl);
+
+// Check if we have any article info to display
+const hasArticleInfo = 
+  categories.length > 0 || 
+  semanticVersion || 
+  authorForHandle || 
+  participants || 
+  formattedDateModified || 
+  formattedDateCreated || 
+  formattedDateOfEvent || 
+  tags.length > 0 || 
+  augmentedWithData || 
+  hasLocationInfo;
 ---
 
-<aside class="info-sidebar">
-  <div class="info-scroll-area">
-    <div class="info-list">
-      {categories.length > 0 && (
-        <div class="categories-container">
-          <div class="categories-wrapper">
-            {categories.map(category => (
-              <span class="category-pill">
-                {category}
-              </span>
-            ))}
+<aside class="info-sidebar" id="info-sidebar">
+  <div class="info-header">
+    <h2 class="info-title">Article Info</h2>
+    <button class="info-collapse-btn" aria-label="Collapse Info Sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9,18 15,12 9,6"></polyline>
+      </svg>
+    </button>
+  </div>
+  
+  <div class="info-scroll-area" id="info-scroll-area">
+    {hasArticleInfo ? (
+      <div class="info-list">
+        {categories.length > 0 && (
+          <div class="categories-container">
+            <div class="categories-wrapper">
+              {categories.map(category => (
+                <span class="category-pill">
+                  {category}
+                </span>
+              ))}
+            </div>
+            <div class="title-separator"></div>
           </div>
-          <div class="title-separator"></div>
+        )}
+
+        <div class="publish-info">
+          {semanticVersion && (
+            <div class="version-number">
+              v.{semanticVersion}
+            </div>
+          )}
+
+          {(formattedDateOfEvent || formattedDateModified || formattedDateCreated) && (
+            <div class="text-xs">
+              {formattedDateOfEvent ? (
+                <div class="text-center">
+                  <span class="date-label">Event Date</span>
+                  <div class="date-value">{formatDate(formattedDateOfEvent)}</div>
+                </div>
+              ) : (
+                <div class="flex justify-between">
+                  {formattedDateCreated && (
+                    <div>
+                      <span class="date-label">Created</span>
+                      <div class="date-value">{formatDate(formattedDateCreated)}</div>
+                    </div>
+                  )}
+                  {formattedDateModified && (
+                    <div class="text-right">
+                      <span class="date-label">Updated</span>
+                      <div class="date-value">{formatDate(formattedDateModified)}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
 
-<div class="publish-info">
-      {semanticVersion && (
-        <div class="version-number">
-          v.{semanticVersion}
-        </div>
-      )}
-
-
-
-    {(formattedDateModified || formattedDateCreated) && (
-      <div class="text-xs">
-        <div class="flex justify-between">
-          {formattedDateCreated && (
+        {hasLocationInfo && (
+          <div class="location-info">
+            <div class="location-separator"></div>
             <div>
-              <span class="date-label">Created</span>
-              <div class="date-value">{formatDate(formattedDateCreated)}</div>
+              <span class="date-label">Location</span>
+              <div class="location-content">
+                <a class="location-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                  View on Google Maps
+                </a>
+              </div>
             </div>
-          )}
-          {formattedDateModified && (
-            <div class="text-right">
-              <span class="date-label">Updated</span>
-              <div class="date-value">{formatDate(formattedDateModified)}</div>
-            </div>
-          )}
-        </div>
-      </div>
-    )}
-</div>
+          </div>
+        )}
 
-<div class="author-info">
-      <div class="author-separator"></div>
-      {authorForHandle && (
-        <div>
-          <span class="date-label">Author</span>
-          <AuthorHandle authors={authorForHandle} showName={true} showRole={false} />
+        <div class="author-info">
+          <div class="author-separator"></div>
+          {authorForHandle ? (
+            <div>
+              <span class="date-label">Author</span>
+              <AuthorHandle authors={authorForHandle} showName={true} showRole={false} alternateLayout={true} />
+            </div>
+          ) : participants ? (
+            <div>
+              <span class="date-label">Participants</span>
+              <AuthorHandle authors={participants} showName={true} showRole={false} alternateLayout={true} />
+            </div>
+          ) : null}
           {augmentedWithData && (
             <div class="mt-2 w-[80%] ml-auto">
               <span class="augmented-with">Augmented with</span>
@@ -171,33 +232,116 @@ const augmentedWithData = augmentedWith ? {
             </div>
           )}
         </div>
-      )}
-</div>
 
-      {tags.length > 0 && (
-        <div class="mt-4 flex flex-wrap justify-end gap-2">
-          {tags.map(tag => (
-            <TagChip tagString={tag} />
-          ))}
-        </div>
-      )}
-    </div>
+        {tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            {tags.map(tag => (
+              <TagChip tagString={tag} />
+            ))}
+          </div>
+        )}
+      </div>
+    ) : (
+      <div class="info-empty-message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14,2 14,8 20,8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10,9 9,9 8,9"></polyline>
+        </svg>
+        <span>No article info available</span>
+      </div>
+    )}
   </div>
 </aside>
 
 <style>
+/* ===== Modern Info Sidebar Styles (matching TableOfContents) ===== */
+
 .info-sidebar {
-  position: sticky;
-  top: 1rem;
   margin-right: 1rem;
+  min-width: 280px;
+  max-width: 320px;
+  width: 320px;
+  position: sticky;
+  top: 2rem;
   align-self: flex-start;
-  width: 220px;
-  flex-shrink: 0;
-  padding: 0.5rem 0.75rem 0.75rem;
-  border-right: 1px solid var(--clr-lossless-accent--brightest);
-  background: rgba(255, 255, 255, 0.02);
-  font-size: 0.85rem;
-  line-height: 1.4;
+  max-height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.info-sidebar:hover:not(.collapsed) {
+  border-color: var(--clr-lossless-accent--brightest);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  width: 800px;
+  max-width: 800px;
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--clr-lossless-accent--brightest);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-collapse-btn {
+  background: none;
+  border: none;
+  color: var(--clr-lossless-primary-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--clr-lossless-accent--brightest);
+  transform: translateY(-1px);
+}
+
+.info-scroll-area {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding: 0.75rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--clr-lossless-accent--brightest) transparent;
+}
+
+.info-scroll-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.info-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.info-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--clr-lossless-accent--brightest);
+  border-radius: 2px;
 }
 
 /* Categories and separator */
@@ -232,7 +376,7 @@ const augmentedWithData = augmentedWith ? {
 
 .info-list {
   list-style: none;
-  padding: 0;
+  padding: 0 1.25rem;
   margin: 0;
   color: var(--clr-lossless-primary-light);
 }
@@ -306,6 +450,45 @@ const augmentedWithData = augmentedWith ? {
   margin-top: 0.1rem;
 }
 
+/* Location info section */
+.location-info {
+  margin: 1.25rem 0;
+  padding: 0.75rem 0 0;
+  position: relative;
+}
+
+.location-separator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--clr-lossless-accent--brightest);
+  opacity: 0.2;
+}
+
+.location-content {
+  margin-top: 0.1rem;
+}
+
+.location-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--clr-lossless-accent--brightest);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.location-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+
+
 /* Author info section */
 .author-info {
   margin: 1.25rem 0;
@@ -354,9 +537,114 @@ const augmentedWithData = augmentedWith ? {
   display: block;
 }
 
-@media (max-width: 1250px) {
+/* Animation for collapse/expand */
+.info-sidebar.collapsed {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+.info-sidebar.collapsed .info-scroll-area {
+  display: none;
+}
+
+.info-sidebar.collapsed .info-title {
+  display: none;
+}
+
+.info-sidebar.collapsed .info-collapse-btn svg {
+  transform: rotate(180deg);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .info-sidebar {
+    min-width: 260px;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
   .info-sidebar {
     display: none;
   }
 }
+
+/* Focus styles for accessibility */
+.info-collapse-btn:focus {
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: 2px;
+}
+
+/* Empty state message styling - matching TableOfContents empty state */
+.info-empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--clr-lossless-primary-light);
+  opacity: 0.7;
+}
+
+.info-empty-message svg {
+  opacity: 0.5;
+}
+
+.info-empty-message span {
+  font-size: 0.875rem;
+  font-style: italic;
+}
 </style>
+
+<script>
+class InfoSidebarManager {
+  infoSidebar;
+  collapseBtn;
+
+  constructor() {
+    this.infoSidebar = document.getElementById('info-sidebar');
+    this.collapseBtn = this.infoSidebar?.querySelector('.info-collapse-btn');
+    
+    if (this.infoSidebar) {
+      this.init();
+    }
+  }
+
+  init() {
+    console.log('[InfoSidebar] Initializing InfoSidebarManager');
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    // Collapse/expand functionality
+    this.collapseBtn?.addEventListener('click', () => {
+      this.toggleCollapse();
+    });
+  }
+
+  toggleCollapse() {
+    this.infoSidebar?.classList.toggle('collapsed');
+    
+    // Update aria-label for horizontal collapse
+    const isCollapsed = this.infoSidebar?.classList.contains('collapsed');
+    if (this.collapseBtn) {
+      this.collapseBtn.setAttribute('aria-label', 
+        isCollapsed ? 'Expand Info Sidebar' : 'Collapse Info Sidebar'
+      );
+    }
+  }
+
+  // Location info is now handled with simple links, no API calls needed
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    new InfoSidebarManager();
+  });
+} else {
+  new InfoSidebarManager();
+}
+</script>

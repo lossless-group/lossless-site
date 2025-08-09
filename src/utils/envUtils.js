@@ -94,3 +94,4 @@ console.log('Environment Configuration:', {
   cwd: process.cwd()
 });
 
+export const resolvedContentPath = path.resolve(contentBasePath);

@@ -1,0 +1,53 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { processEntries, getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const allProjects = await getCollection('projects', ({ data }) => {
+    return data.publish === true;
+  });
+
+  console.log(`Total projects found: ${allProjects.length}`);
+
+  const allPaths = allProjects.map(entry => {
+    // The entry.id is now our generated slug from generateId
+    const finalSlug = entry.id;
+    console.log(`[PROJECTS ROUTE] Entry ID: ${entry.id}, using as slug: ${finalSlug}`);
+    
+    return {
+      params: { slug: finalSlug },
+      props: {
+        entry
+      }
+    };
+  });
+
+  console.log(`Generated ${allPaths.length} project paths`);
+  return allPaths;
+}
+
+const { entry } = Astro.props;
+const { slug } = Astro.params;
+
+const contentData = {
+  ...entry.data,
+  path: Astro.url.pathname,
+  id: entry.id,
+  slug: slug,
+};
+---
+
+<Layout frontmatter={entry.data}>
+  <OneArticle 
+    Component={OneArticleOnPage}
+    title={entry.data.title}
+    data={contentData}
+    content={entry.body}
+    markdownFile={entry.id}
+  />
+</Layout>

@@ -1,0 +1,86 @@
+---
+/**
+ * ProjectGrid.astro
+ * 
+ * Grid container for displaying project cards
+ * Responsive grid that adapts to different screen sizes
+ * 
+ * PROPS:
+ * - projects (array, required): Array of project objects with properties:
+ *   - icon: string
+ *   - title: string
+ *   - description: string
+ *   - link?: string
+ * - title (string, optional): Section title (defaults to "Current Projects")
+ */
+
+import ProjectCard from './ProjectCard.astro';
+
+interface Project {
+  icon: string;
+  title: string;
+  description: string;
+  link?: string;
+}
+
+interface Props {
+  projects: Project[];
+  title?: string;
+}
+
+const { projects, title = "Current Projects" } = Astro.props;
+---
+
+<section class="project-grid-section">
+  <h2 class="section-title">{title}</h2>
+  <div class="projects-grid">
+    {projects.map((project) => (
+      <ProjectCard 
+        icon={project.icon}
+        title={project.title}
+        description={project.description}
+        link={project.link}
+      />
+    ))}
+  </div>
+</section>
+
+<style>
+  .project-grid-section {
+    margin-bottom: 5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 2rem;
+  }
+  
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  /* Ensure cards stretch to fill grid cells */
+  .projects-grid > :global(*) {
+    height: 100%;
+  }
+  
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+  
+  /* Tablet - 2 columns max */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .projects-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+  }
+</style>

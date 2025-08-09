@@ -1,0 +1,177 @@
+---
+/**
+ * Web Performance Presentation
+ * Best practices for building fast websites
+ */
+import Layout from '@layouts/Layout.astro';
+import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+
+const title = "Web Performance Optimization";
+const description = "Essential techniques for building lightning-fast websites";
+
+const frontmatter = {
+  title: title,
+  description: description,
+  lede: description
+};
+---
+
+<Layout frontmatter={frontmatter}>
+  <OneSlideDeck>
+      <!-- Title Slide -->
+      <section class="title-slide">
+        <h1>Web Performance</h1>
+        <h2>Optimization</h2>
+        <p>Building faster experiences for users</p>
+      </section>
+
+      <!-- Why Performance Matters -->
+      <section>
+        <h2>Why Performance Matters</h2>
+        <ul>
+          <li>53% of mobile users abandon sites that take > 3s to load</li>
+          <li>Every 100ms delay costs 1% in sales</li>
+          <li>Better performance = Better SEO</li>
+          <li>Improved user experience and engagement</li>
+        </ul>
+      </section>
+
+      <!-- Core Web Vitals -->
+      <section>
+        <h2>Core Web Vitals</h2>
+        <ul>
+          <li class="fragment"><strong>LCP</strong> - Largest Contentful Paint (&lt; 2.5s)</li>
+          <li class="fragment"><strong>FID</strong> - First Input Delay (&lt; 100ms)</li>
+          <li class="fragment"><strong>CLS</strong> - Cumulative Layout Shift (&lt; 0.1)</li>
+        </ul>
+      </section>
+
+      <!-- Loading Performance -->
+      <section>
+        <section>
+          <h2>Loading Performance</h2>
+          <p>Techniques to improve initial load</p>
+          <p>↓</p>
+        </section>
+        <section>
+          <h3>Optimize Critical Path</h3>
+          <ul>
+            <li>Inline critical CSS</li>
+            <li>Defer non-critical JavaScript</li>
+            <li>Preload key resources</li>
+            <li>Remove render-blocking resources</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Resource Hints</h3>
+          <pre><code class="html" data-trim data-line-numbers>
+<!-- DNS Prefetch -->
+<link rel="dns-prefetch" href="//example.com">
+
+<!-- Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<!-- Preload -->
+<link rel="preload" href="font.woff2" as="font" crossorigin>
+
+<!-- Prefetch -->
+<link rel="prefetch" href="next-page.html">
+          </code></pre>
+        </section>
+      </section>
+
+      <!-- Image Optimization -->
+      <section>
+        <h2>Image Optimization</h2>
+        <ul>
+          <li class="fragment">Use modern formats (WebP, AVIF)</li>
+          <li class="fragment">Implement responsive images</li>
+          <li class="fragment">Lazy load below-the-fold images</li>
+          <li class="fragment">Optimize with proper compression</li>
+        </ul>
+      </section>
+
+      <!-- JavaScript Performance -->
+      <section>
+        <h2>JavaScript Optimization</h2>
+        <pre>
+          <code class="javascript" data-trim data-line-numbers>{`// Code splitting
+import('./heavy-module.js').then(module => {
+  // Use module when needed
+});
+
+// Tree shaking
+export { usedFunction } from './utils';
+
+// Debouncing expensive operations
+const debounce = (fn, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+};`}
+</code></pre>
+      </section>
+
+      <!-- Caching Strategies -->
+      <section>
+        <h2>Caching Strategies</h2>
+        <ul>
+          <li>Browser caching with proper headers</li>
+          <li>Service Workers for offline support</li>
+          <li>CDN for static assets</li>
+          <li>Edge caching for dynamic content</li>
+        </ul>
+      </section>
+
+      <!-- Measuring Performance -->
+      <section>
+        <h2>Measuring Performance</h2>
+        <ul>
+          <li>Lighthouse (Chrome DevTools)</li>
+          <li>WebPageTest</li>
+          <li>Chrome User Experience Report</li>
+          <li>Real User Monitoring (RUM)</li>
+        </ul>
+      </section>
+
+      <!-- Performance Budget -->
+      <section>
+        <h2>Performance Budget</h2>
+        <table>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+          </tr>
+          <tr>
+            <td>JavaScript</td>
+            <td>&lt; 170KB (gzipped)</td>
+          </tr>
+          <tr>
+            <td>CSS</td>
+            <td>&lt; 50KB (gzipped)</td>
+          </tr>
+          <tr>
+            <td>HTML</td>
+            <td>&lt; 50KB (gzipped)</td>
+          </tr>
+          <tr>
+            <td>Images</td>
+            <td>&lt; 500KB total</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- Key Takeaways -->
+      <section>
+        <h2>Key Takeaways</h2>
+        <ul>
+          <li>Performance is a feature</li>
+          <li>Measure before and after optimizing</li>
+          <li>Focus on user-centric metrics</li>
+          <li>Make performance part of your workflow</li>
+        </ul>
+      </section>
+  </OneSlideDeck>
+</Layout>

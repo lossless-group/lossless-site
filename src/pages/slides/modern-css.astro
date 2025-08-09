@@ -1,0 +1,249 @@
+---
+/**
+ * Modern CSS Presentation
+ * Latest CSS features and techniques
+ */
+import Layout from '@layouts/Layout.astro';
+import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+
+const title = "Modern CSS Features";
+const description = "Exploring the latest and most powerful CSS capabilities";
+
+const frontmatter = {
+  title: title,
+  description: description,
+  lede: description
+};
+---
+
+<Layout frontmatter={frontmatter}>
+  <OneSlideDeck>
+      <!-- Title Slide -->
+      <section class="title-slide">
+        <h1>Modern CSS</h1>
+        <h2>Features & Techniques</h2>
+        <p>The future of styling is here</p>
+      </section>
+
+      <!-- CSS Grid -->
+      <section>
+        <h2>CSS Grid Layout</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  /* Named grid areas */
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "footer footer footer";
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Container Queries -->
+      <section>
+        <h2>Container Queries</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+.card-container {
+  container-type: inline-size;
+  container-name: card;
+}
+
+@container card (min-width: 400px) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+  }
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- CSS Nesting -->
+      <section>
+        <section>
+          <h2>Native CSS Nesting</h2>
+          <p>No preprocessor needed!</p>
+          <p>↓</p>
+        </section>
+        <section>
+          <h3>Nesting Example</h3>
+          {`
+          <pre><code class="css" data-trim data-line-numbers>
+.card {
+  padding: 1rem;
+  background: white;
+  
+  & .title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    
+    &:hover {
+      color: blue;
+    }
+  }
+  
+  &.featured {
+    border: 2px solid gold;
+  }
+}
+          </code></pre>
+          `}
+        </section>
+      </section>
+
+      <!-- Custom Properties -->
+      <section>
+        <h2>CSS Custom Properties</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+:root {
+  --primary-color: #007bff;
+  --spacing-unit: 1rem;
+  --border-radius: 8px;
+}
+
+.button {
+  background: var(--primary-color);
+  padding: calc(var(--spacing-unit) * 0.5) var(--spacing-unit);
+  border-radius: var(--border-radius);
+  
+  &:hover {
+    --primary-color: #0056b3;
+  }
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Logical Properties -->
+      <section>
+        <h2>Logical Properties</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+/* Instead of: */
+.old {
+  margin-left: 1rem;
+  padding-right: 2rem;
+}
+
+/* Use: */
+.modern {
+  margin-inline-start: 1rem;
+  padding-inline-end: 2rem;
+  
+  /* Works with all directions */
+  border-block-start: 2px solid;
+  inline-size: 100%; /* width */
+  block-size: 50vh; /* height */
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Cascade Layers -->
+      <section>
+        <h2>Cascade Layers</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+/* Define layer order */
+@layer reset, base, components, utilities;
+
+/* Add styles to layers */
+@layer reset {
+  * { margin: 0; padding: 0; }
+}
+
+@layer components {
+  .button { /* button styles */ }
+}
+
+@layer utilities {
+  .m-4 { margin: 1rem; }
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- New Selectors -->
+      <section>
+        <h2>Modern Selectors</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+/* :has() - Parent selector */
+.card:has(img) {
+  display: grid;
+}
+
+/* :is() and :where() */
+:is(h1, h2, h3):has(+ p) {
+  margin-bottom: 0.5rem;
+}
+
+/* :not() with complex selectors */
+.item:not(:hover, :focus) {
+  opacity: 0.7;
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Color Functions -->
+      <section>
+        <h2>Modern Color Functions</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+:root {
+  --brand: oklch(70% 0.25 150);
+  
+  /* Color mixing */
+  --tint: color-mix(in oklch, var(--brand), white 20%);
+  
+  /* Relative colors */
+  --darker: oklch(from var(--brand) calc(l - 0.2) c h);
+  
+  /* Wide gamut colors */
+  --vivid: color(display-p3 1 0 0);
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Scroll-driven Animations -->
+      <section>
+        <h2>Scroll-driven Animations</h2>
+        {`
+        <pre><code class="css" data-trim data-line-numbers>
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.element {
+  animation: fade-in linear both;
+  animation-timeline: view();
+  animation-range: entry 25% cover 50%;
+}
+        </code></pre>
+        `}
+      </section>
+
+      <!-- Future is Bright -->
+      <section>
+        <h2>The Future is Bright</h2>
+        <ul>
+          <li>CSS is more powerful than ever</li>
+          <li>Less need for JavaScript</li>
+          <li>Better performance</li>
+          <li>More maintainable code</li>
+        </ul>
+        <p><small>Keep exploring and learning!</small></p>
+      </section>
+  </OneSlideDeck>
+</Layout>

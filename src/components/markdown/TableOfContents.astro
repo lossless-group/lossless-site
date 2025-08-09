@@ -9,214 +9,573 @@ interface Props {
   } | undefined;
 }
 
+interface TocItem {
+  text: string;
+  slug: string;
+  depth: number;
+  children?: TocItem[];
+}
+
 const { node } = Astro.props;
+
+// Debug: Log the entire node AST tree structure
+if (DEBUG_TOC) {
+  console.log('[TableOfContents] Raw node AST tree:', JSON.stringify(node, null, 2));
+  console.log('[TableOfContents] Node type:', node?.type);
+  console.log('[TableOfContents] Node children count:', node?.children?.length);
+  console.log('[TableOfContents] Node children types:', node?.children?.map(child => child?.type));
+}
 
 const isValidToc = node?.type === 'list' && Array.isArray(node.children);
 
-function getLinkText(linkNode) {
+function getLinkText(linkNode): string {
   if (Array.isArray(linkNode?.children)) {
-    return "•   " + extractAllText(linkNode.children)
-      .replace(/:\s*$/, ''); // strip trailing colon
+    return extractAllText(linkNode.children)
+      .replace(/:\s*$/, '') // strip trailing colon
+      .replace(/^•\s*/, ''); // strip bullet prefix
   }
   return '';
 }
+
+function buildTocTree(listNode, depth = 0): TocItem[] {
+  if (!listNode?.children || !Array.isArray(listNode.children)) {
+    if (DEBUG_TOC) {
+      console.log(`[TableOfContents] buildTocTree: Invalid listNode or children at depth ${depth}:`, listNode);
+    }
+    return [];
+  }
+
+  const result: TocItem[] = [];
+
+  for (const item of listNode.children) {
+    if (!item || item.type !== 'listItem') {
+      continue;
+    }
+
+    // Find the first paragraph with a link (the main heading)
+    const paragraph = item.children?.find(child => child.type === 'paragraph');
+    const link = paragraph?.children?.find(child => child.type === 'link');
+    
+    let text = '';
+    let slug = '';
+    
+    if (link) {
+      text = getLinkText(link);
+      if (text.trim()) {
+        slug = slugify(text.trim());
+      }
+    }
+    
+    // If no direct link found, check if this listItem contains nested lists with links
+    if (!text.trim()) {
+      const nestedLists = item.children?.filter(child => child.type === 'list') || [];
+      if (nestedLists.length > 0) {
+        // This listItem contains nested lists, process them recursively
+        const nestedChildren = buildTocTree(nestedLists[0], depth);
+        result.push(...nestedChildren);
+        continue;
+      }
+    }
+    
+    if (!text.trim()) {
+      continue;
+    }
+
+    // Find only the direct nested lists (immediate children of this listItem)
+    const directNestedLists = item.children?.filter(child => child.type === 'list') || [];
+    const allChildren: TocItem[] = [];
+    
+    if (DEBUG_TOC && directNestedLists.length > 0) {
+      console.log(`[TableOfContents] Processing ${directNestedLists.length} nested lists for "${text}"`);
+    }
+    
+    // Process each direct nested list
+    for (const nestedList of directNestedLists) {
+      const nestedChildren = buildTocTree(nestedList, depth + 1);
+      if (DEBUG_TOC) {
+        console.log(`[TableOfContents] Found ${nestedChildren.length} children in nested list for "${text}"`);
+      }
+      allChildren.push(...nestedChildren);
+    }
+
+    if (DEBUG_TOC) {
+      console.log(`[TableOfContents] Building item:`, { 
+        text, 
+        slug, 
+        depth, 
+        hasChildren: allChildren.length > 0,
+        nestedListsCount: directNestedLists.length
+      });
+    }
+
+    const tocItem = {
+      text: text.trim(),
+      slug,
+      depth,
+      children: allChildren
+    };
+
+    result.push(tocItem);
+  }
+
+  return result;
+}
+
+const tocItems = isValidToc ? buildTocTree(node) : [];
+
+if (DEBUG_TOC) {
+  console.log('[TableOfContents] isValidToc:', isValidToc);
+  console.log('[TableOfContents] tocItems length:', tocItems.length);
+  console.log('[TableOfContents] tocItems:', tocItems);
+  
+  // Debug: Show the tree structure more clearly
+  function logTree(items: TocItem[], indent = '') {
+    items.forEach(item => {
+      console.log(`${indent}${item.text} (depth: ${item.depth}, children: ${item.children?.length || 0})`);
+      if (item.children && item.children.length > 0) {
+        logTree(item.children, indent + '  ');
+      }
+    });
+  }
+  console.log('[TableOfContents] Tree structure:');
+  logTree(tocItems);
+}
+
+// Keep the tree structure for proper toggle functionality
+const tocItemsWithHasChildren = tocItems.map(item => ({
+  ...item,
+  hasChildren: item.children && item.children.length > 0
+}));
+
+if (DEBUG_TOC) {
+  console.log('[TableOfContents] tocItemsWithHasChildren count:', tocItemsWithHasChildren.length);
+  console.log('[TableOfContents] tocItemsWithHasChildren:', tocItemsWithHasChildren.map(item => ({
+    text: item.text,
+    slug: item.slug,
+    depth: item.depth,
+    hasChildren: item.hasChildren,
+    childrenCount: item.children?.length || 0
+  })));
+}
 ---
 
-<aside class="toc-sidebar">
-  <h2 class="toc-title">Table of Contents</h2>
-  <div class="toc-scroll-area">
-    {isValidToc ? (
-      <ul>
-        {node.children.map(item => {
-          const firstLink = item.children?.[0]?.children?.[0];
-          const text = getLinkText(firstLink);
-          const slug = slugify(text.trim());
-          const href = `#${slug}`;
-          const depth = 1;
-          
-          if (DEBUG_TOC) {
-            console.log('[TableOfContents] Rendering item:', { text, href, depth });
-          }
-
-          return (
-            <li class={`toc-depth-${depth}`}>
-              {firstLink ? <a href={href}>{text}</a> : text}
-
-              {item.children?.find(child => child.type === 'list') && (
-                <ul>
-                  {item.children
-                    .filter(child => child.type === 'list')
-                    .flatMap(child => child.children)
-                    .map(subItem => {
-                      const subLink = subItem.children?.[0]?.children?.[0];
-                      const subText = getLinkText(subLink);
-                      const subSlug = slugify(subText.trim());
-                      const subHref = `#${subSlug}`;
-                      const subDepth = depth + 1;
-                      
-                      if (DEBUG_TOC) {
-                        console.log('[TableOfContents] Rendering subItem:', { subText, subHref, subDepth });
-                      }
-
-                      return (
-                        <li class={`toc-depth-${subDepth}`}>
-                          {subLink ? <a href={subHref}>{subText}</a> : subText}
-
-                          {subItem.children?.find(child => child.type === 'list') && (
-                            <ul>
-                              {subItem.children
-                                .filter(child => child.type === 'list')
-                                .flatMap(child => child.children)
-                                .map(subSubItem => {
-                                  const subSubLink = subSubItem.children?.[0]?.children?.[0];
-                                  const subSubText = getLinkText(subSubLink);
-                                  const subSubSlug = slugify(subSubText.trim());
-                                  const subSubHref = `#${subSubSlug}`;
-                                  const subSubDepth = subDepth + 1;
-                                  
-                                  if (DEBUG_TOC) {
-                                    console.log('[TableOfContents] Rendering subSubItem:', { subSubText, subSubHref, subSubDepth });
-                                  }
-
-                                  return (
-                                    <li class={`toc-depth-${subSubDepth}`}>
-                                      {subSubLink ? <a href={subSubHref}>{subSubText}</a> : subSubText}
-                                    </li>
-                                  );
-                                })}
-                            </ul>
-                          )}
-                        </li>
-                      );
-                    })}
-                </ul>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+<aside class="toc-sidebar" id="toc-sidebar">
+  <div class="toc-header">
+    <button class="toc-collapse-btn" aria-label="Collapse Table of Contents">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9,18 15,12 9,6"></polyline>
+      </svg>
+    </button>
+    <h2 class="toc-title">Table of Contents</h2>
+  </div>
+  
+  <div class="toc-scroll-area" id="toc-scroll-area">
+    {tocItemsWithHasChildren.length > 0 ? (
+      <Fragment>
+        <nav aria-label="Table of Contents">
+          <ul class="toc-list">
+            {tocItemsWithHasChildren.map((item, index) => {
+              function renderTocItem(tocItem: any) {
+                const depthClass = `toc-item toc-depth-${tocItem.depth}`;
+                const hasChildren = tocItem.children && tocItem.children.length > 0;
+                
+                return (
+                  <li class={depthClass} data-depth={tocItem.depth} data-slug={tocItem.slug}>
+                    <a 
+                      href={`#${tocItem.slug}`} 
+                      class="toc-link"
+                      data-slug={tocItem.slug}
+                      title={tocItem.text}
+                    >
+                      {hasChildren ? (
+                        <button 
+                          class="toc-toggle" 
+                          data-parent-slug={tocItem.slug}
+                          data-expanded="true"
+                          aria-label={`Toggle ${tocItem.text} section`}
+                        >
+                          <svg class="toc-chevron expanded" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6,9 12,15 18,9"></polyline>
+                          </svg>
+                        </button>
+                      ) : (
+                        // Only show bullet if header is not numbered
+                        /^\d+\./.test(tocItem.text) ? (
+                          <span class="toc-spacer"></span>
+                        ) : (
+                          <span class="toc-bullet"></span>
+                        )
+                      )}
+                      <span class="toc-text">{tocItem.text}</span>
+                    </a>
+                    {hasChildren && (
+                      <ul class="toc-sublist">
+                        {tocItem.children?.map((child: any, childIndex: number) => renderTocItem(child))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              }
+              
+              return renderTocItem(item);
+            })}
+          </ul>
+        </nav>
+        
+        <div class="toc-progress-bar">
+          <div class="toc-progress-fill" id="toc-progress-fill"></div>
+        </div>
+      </Fragment>
     ) : (
-      <div class="toc-empty-message">No Table of Contents available.</div>
+      <div class="toc-empty-message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14,2 14,8 20,8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10,9 9,9 8,9"></polyline>
+        </svg>
+        <span>No table of contents available</span>
+      </div>
     )}
   </div>
 </aside>
 
+
 <style>
+/* ===== Modern Table of Contents Styles ===== */
+
 .toc-sidebar {
   margin-left: 1rem;
-  min-width: 35ch;
+  min-width: 280px;
+  max-width: 320px;
+  width: 320px;
   position: sticky;
+  top: 2rem;
   align-self: flex-start;
   max-height: calc(100vh - 4rem);
   display: flex;
   flex-direction: column;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.toc-sidebar:hover:not(.collapsed) {
+  border-color: var(--clr-lossless-accent--brightest);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  width: 800px;
+  max-width: 800px;
+}
+
+.toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .toc-title {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--clr-lossless-accent--brightest);
-}
-
-.toc-scroll-area ul,
-.toc-scroll-area ul ul,
-.toc-scroll-area ul ul ul,
-.toc-scroll-area ul ul ul ul,
-.toc-scroll-area ul ul ul ul ul {
-  list-style-type: none;
   margin: 0;
-  padding: 0;
-
+  color: var(--clr-lossless-accent--brightest);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.toc-scroll-area li::marker {
-  content: none;
+.toc-collapse-btn {
+  background: none;
+  border: none;
+  color: var(--clr-lossless-primary-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toc-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--clr-lossless-accent--brightest);
+  transform: translateY(-1px);
 }
 
 .toc-scroll-area {
   overflow-y: auto;
-  list-style-type: none;
   flex-grow: 1;
-  padding-right: 0.5rem;
-  border-left: 1px solid var(--clr-lossless-accent--brightest);
-  padding-left: 1rem;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 0.75rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--clr-lossless-accent--brightest) transparent;
 }
 
-.toc-scroll-area ul {
-  list-style-type: none;
-  padding-left: 0;
+.toc-scroll-area::-webkit-scrollbar {
+  width: 4px;
 }
 
-.toc-scroll-area li {
-  margin: 0.3rem 0;
+.toc-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.toc-depth-1 a { 
-  font-size: 1.1em; 
-  font-weight: 400; 
-  padding-left: 0; 
-  display: inline-block;
-  word-wrap: break-word;
-  hyphens: auto;
-}
-.toc-depth-2 a { 
-  font-size: 1em; 
-  font-weight: 400; 
-  padding-left: 1em; 
-  display: inline-block;
-  word-wrap: break-word;
-  hyphens: auto;
-}
-.toc-depth-3 a { 
-  font-size: 0.95em; 
-  font-weight: 350; 
-  padding-left: 2em; 
-  display: inline-block;
-  word-wrap: break-word;
-  hyphens: auto;
-}
-.toc-depth-4 a { 
-  font-size: 0.92em; 
-  font-weight: 300; 
-  padding-left: 3em; 
-  display: inline-block;
-  word-wrap: break-word;
-  hyphens: auto;
-}
-.toc-depth-5 a { 
-  font-size: 0.92em; 
-  font-weight: 300; 
-  padding-left: 4em; 
-  display: inline-block;
-  word-wrap: break-word;
-  hyphens: auto;
-}
-.toc-depth-6 a { 
-  font-size: 0.92em; 
-  font-weight: 300; 
-  padding-left: 5em; 
-  display: inline-block;
-  word-wrap: break-word;
-  hyphens: auto;
+.toc-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--clr-lossless-accent--brightest);
+  border-radius: 2px;
 }
 
-.toc-scroll-area a {
+.toc-list,
+.toc-sublist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-sublist {
+  margin-top: 0.25rem;
+}
+
+.toc-item {
+  margin: 0;
+  position: relative;
+  transition: opacity 0.2s ease, max-height 0.2s ease;
+}
+
+.toc-item.hidden {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.toc-link {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
   text-decoration: none;
-  color: #ccc;
+  color: var(--clr-lossless-primary-light);
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  position: relative;
+  overflow: hidden;
+  flex-grow: 1;
 }
 
-.toc-scroll-area a:hover {
+.toc-link::before,
+.toc-link::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, 
+    var(--clr-lossless-accent--brightest), 
+    rgba(255, 255, 255, 0.1)
+  );
+  transition: width 0.3s ease;
+}
+
+.toc-link::before {
+  top: 0;
+  left: 0;
+}
+
+.toc-link::after {
+  bottom: 0;
+  left: 0;
+}
+
+.toc-link:hover::before,
+.toc-link:hover::after,
+.toc-link.active::before,
+.toc-link.active::after {
+  width: 100%;
+}
+
+.toc-link:hover {
   color: white;
+  border-left-color: var(--clr-lossless-accent--brightest);
+}
+
+.toc-link.active,
+.toc-item .toc-link.active {
+  color: white !important;
+  border-left-color: var(--clr-lossless-accent--brightest) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 0 0 1px var(--clr-lossless-accent--brightest) !important;
+  font-weight: 600 !important;
+}
+
+.toc-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.toc-chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--clr-lossless-primary-light);
+  transition: all 0.2s ease;
+}
+
+.toc-chevron.expanded {
+  transform: rotate(0deg);
+}
+
+.toc-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.toc-link:hover .toc-toggle .toc-chevron,
+.toc-toggle:hover .toc-chevron {
+  color: var(--clr-lossless-accent--brightest);
+}
+
+.toc-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.toc-spacer {
+  width: 6px;
+  height: 6px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.toc-link:hover .toc-bullet,
+.toc-link.active .toc-bullet {
+  background: white !important;
+  transform: scale(1.3) !important;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5) !important;
+}
+
+.toc-text {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+  position: relative;
+  z-index: 1;
+}
+
+/* Depth-based styling */
+.toc-depth-0 .toc-link {
+  font-weight: 500;
+  padding-left: 1rem;
+}
+
+.toc-depth-1 .toc-link {
+  font-size: 0.85rem;
+  padding-left: 2rem;
+}
+
+.toc-depth-2 .toc-link {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  padding-left: 3rem;
+}
+
+.toc-depth-3 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 4rem;
+}
+
+.toc-depth-4 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 5rem;
+}
+
+.toc-depth-5 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 6rem;
+}
+
+.toc-depth-6 .toc-link {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  padding-left: 7rem;
+}
+
+/* Mobile adjustments for all depths */
+@media (max-width: 768px) {
+  .toc-depth-0 .toc-link { padding-left: 0.75rem; }
+  .toc-depth-1 .toc-link { padding-left: 1.5rem; }
+  .toc-depth-2 .toc-link { padding-left: 2.25rem; }
+  .toc-depth-3 .toc-link { padding-left: 3rem; }
+  .toc-depth-4 .toc-link { padding-left: 3.75rem; }
+  .toc-depth-5 .toc-link { padding-left: 4.5rem; }
+  .toc-depth-6 .toc-link { padding-left: 5.25rem; }
+}
+
+.toc-progress-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  margin: 0.5rem 1rem 1rem;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.toc-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--clr-lossless-accent--brightest), 
+    #00ff88
+  );
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 2px;
 }
 
 .toc-empty-message {
-  padding: 1rem;
-  font-size: 0.95rem;
-  color: var(--clr-lossless-primary-light);
-  opacity: 0.8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
   text-align: center;
+  color: var(--clr-lossless-primary-light);
+  opacity: 0.7;
+}
+
+.toc-empty-message svg {
+  opacity: 0.5;
+}
+
+.toc-empty-message span {
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .toc-sidebar {
+    min-width: 260px;
+    max-width: 280px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -224,4 +583,363 @@ function getLinkText(linkNode) {
     display: none;
   }
 }
+
+/* Mobile TOC (if needed in future) */
+@media (max-width: 768px) {
+  .toc-sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: right 0.3s ease;
+    border-radius: 0;
+    border-right: none;
+  }
+  
+  .toc-sidebar.mobile-open {
+    right: 0;
+  }
+}
+
+/* Animation for collapse/expand */
+.toc-sidebar.collapsed {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+.toc-sidebar.collapsed .toc-scroll-area {
+  display: none;
+}
+
+.toc-sidebar.collapsed .toc-title {
+  display: none;
+}
+
+.toc-sidebar.collapsed .toc-collapse-btn svg {
+  transform: rotate(180deg);
+}
+
+/* Focus styles for accessibility */
+.toc-link:focus {
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: 2px;
+}
+
+.toc-collapse-btn:focus {
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: 2px;
+}
+
+
 </style>
+
+<script>
+class TableOfContentsManager {
+  private tocSidebar: HTMLElement | null;
+  private tocScrollArea: HTMLElement | null;
+  private tocProgressFill: HTMLElement | null;
+  private collapseBtn: HTMLElement | null;
+  private tocLinks: NodeListOf<Element> | null;
+  private headings: Array<{element: Element, id: string, top: number}>;
+  private currentActiveLink: HTMLElement | null;
+  private scrollTimeout: ReturnType<typeof setTimeout> | null;
+
+  constructor() {
+    this.tocSidebar = document.getElementById('toc-sidebar');
+    this.tocScrollArea = document.getElementById('toc-scroll-area');
+    this.tocProgressFill = document.getElementById('toc-progress-fill');
+    this.collapseBtn = this.tocSidebar?.querySelector('.toc-collapse-btn') as HTMLElement | null;
+    this.tocLinks = this.tocSidebar?.querySelectorAll('.toc-link') || null;
+    this.headings = [];
+    this.currentActiveLink = null;
+    this.scrollTimeout = null;
+    
+    console.log('[TOC] Progress fill element found:', !!this.tocProgressFill);
+    
+    if (this.tocSidebar) {
+      this.init();
+    }
+  }
+
+  init() {
+    console.log('[TOC] Initializing TableOfContentsManager');
+    this.collectHeadings();
+    this.setupEventListeners();
+    this.updateActiveLink();
+    this.updateScrollProgress();
+    console.log('[TOC] Found', this.tocLinks?.length || 0, 'TOC links');
+    console.log('[TOC] Found', this.headings.length, 'headings on page');
+  }
+
+  collectHeadings() {
+    // Collect all headings that have IDs (generated by the markdown processor)
+    this.headings = Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'))
+      .map(heading => ({
+        element: heading,
+        id: heading.id,
+        top: 0
+      }));
+    
+    this.updateHeadingPositions();
+  }
+
+  updateHeadingPositions() {
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    
+    this.headings.forEach(heading => {
+      if (collectionReaderPane) {
+        // If using collection-reader-pane, calculate position relative to that container
+        const containerRect = collectionReaderPane.getBoundingClientRect();
+        const headingRect = heading.element.getBoundingClientRect();
+        heading.top = headingRect.top - containerRect.top + collectionReaderPane.scrollTop;
+      } else {
+        // Fallback to window-based calculation
+        heading.top = heading.element.getBoundingClientRect().top + window.scrollY;
+      }
+    });
+  }
+
+  setupEventListeners() {
+    // Collapse/expand functionality
+    this.collapseBtn?.addEventListener('click', () => {
+      this.toggleCollapse();
+    });
+
+    // Toggle functionality for nested items
+    const toggleButtons = this.tocSidebar?.querySelectorAll('.toc-toggle');
+    toggleButtons?.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleSection(button as HTMLElement);
+      });
+    });
+
+    // Smooth scrolling for TOC links
+    this.tocLinks?.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        console.log('[TOC] Click event fired for:', href);
+        
+        // Direct, simple approach
+        if (href && href.startsWith('#')) {
+          const id = href.substring(1);
+          const element = document.getElementById(id);
+          console.log('[TOC] Looking for element with id:', id, 'Found:', !!element);
+          console.log('[TOC] Element:', element);
+          if (element) {
+            // Add scroll margin
+            element.style.scrollMarginTop = '150px';
+            
+            // Just use the native behavior
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.history.replaceState(null, null, href);
+          }
+        }
+      });
+    });
+
+    // Scroll tracking with throttling
+    let scrollTimeout;
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    if (collectionReaderPane) {
+      collectionReaderPane.addEventListener('scroll', () => {
+        console.log('[TOC] Collection reader pane scroll event fired');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          this.updateActiveLink();
+          this.updateScrollProgress();
+        });
+      }, { passive: true });
+    } else {
+      // Fallback to window scroll if collection-reader-pane not found
+      window.addEventListener('scroll', () => {
+        console.log('[TOC] Window scroll event fired (fallback)');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          this.updateActiveLink();
+          this.updateScrollProgress();
+        });
+      }, { passive: true });
+    }
+
+    // Update positions on resize
+    window.addEventListener('resize', () => {
+      clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = setTimeout(() => {
+        this.updateHeadingPositions();
+        this.updateActiveLink();
+      }, 100);
+    });
+  }
+
+  toggleCollapse() {
+    this.tocSidebar?.classList.toggle('collapsed');
+    
+    // Update aria-label for horizontal collapse
+    const isCollapsed = this.tocSidebar?.classList.contains('collapsed');
+    if (this.collapseBtn) {
+      this.collapseBtn.setAttribute('aria-label', 
+        isCollapsed ? 'Expand Table of Contents' : 'Collapse Table of Contents'
+      );
+    }
+  }
+
+    toggleSection(button: HTMLElement) {
+    const isExpanded = button.getAttribute('data-expanded') === 'true';
+    const parentSlug = button.getAttribute('data-parent-slug');
+    const chevron = button.querySelector('.toc-chevron');
+    
+    console.log('[TOC] Toggling section:', parentSlug, 'Currently expanded:', isExpanded);
+    
+    // Find the parent item
+    const parentItem = this.tocSidebar?.querySelector(`[data-slug="${parentSlug}"]`);
+    if (!parentItem) return;
+    
+    // Find the nested sublist within this parent item
+    const sublist = parentItem.querySelector('.toc-sublist');
+    if (!sublist) return;
+    
+    console.log('[TOC] Found sublist for', parentSlug);
+    
+    if (isExpanded) {
+      // Collapse: hide sublist
+      sublist.classList.add('hidden');
+      button.setAttribute('data-expanded', 'false');
+      chevron?.classList.remove('expanded');
+      chevron?.classList.add('collapsed');
+    } else {
+      // Expand: show sublist
+      sublist.classList.remove('hidden');
+      button.setAttribute('data-expanded', 'true');
+      chevron?.classList.remove('collapsed');
+      chevron?.classList.add('expanded');
+    }
+  }
+
+
+
+  updateActiveLink() {
+    if (!this.headings.length || !this.tocLinks) return;
+
+    // Get the scroll container (collection-reader-pane or window)
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    const scrollContainer = collectionReaderPane || window;
+    
+    const scrollTop = collectionReaderPane ? collectionReaderPane.scrollTop : window.scrollY;
+    const viewportHeight = collectionReaderPane ? collectionReaderPane.clientHeight : window.innerHeight;
+    
+    // Find the currently visible heading
+    let activeHeading = null;
+    
+    // Check if we're at the bottom of the page
+    const scrollHeight = collectionReaderPane ? collectionReaderPane.scrollHeight : document.documentElement.scrollHeight;
+    if (scrollTop + viewportHeight >= scrollHeight - 10) {
+      activeHeading = this.headings[this.headings.length - 1];
+    } else {
+      // Find the heading that's currently in view or just passed
+      for (let i = this.headings.length - 1; i >= 0; i--) {
+        if (scrollTop >= this.headings[i].top - 200) {
+          activeHeading = this.headings[i];
+          break;
+        }
+      }
+    }
+
+    // Update active link
+    if (activeHeading) {
+      const activeLink = this.tocSidebar?.querySelector(`[data-slug="${activeHeading.id}"]`) as HTMLElement | null;
+      
+      console.log('[TOC] Active heading:', activeHeading.id, 'Found link:', !!activeLink);
+      
+      if (activeLink !== this.currentActiveLink) {
+        // Remove previous active state
+        if (this.currentActiveLink) {
+          this.currentActiveLink.style.color = '';
+          this.currentActiveLink.style.borderLeftColor = '';
+          this.currentActiveLink.style.background = '';
+          this.currentActiveLink.style.boxShadow = '';
+          this.currentActiveLink.style.fontWeight = '';
+          console.log('[TOC] Removed active styles from:', this.currentActiveLink.textContent);
+        }
+        
+        // Add new active state with direct style manipulation
+        if (activeLink) {
+          activeLink.style.color = 'white';
+          activeLink.style.borderLeftColor = 'var(--clr-lossless-accent--brightest)';
+          activeLink.style.background = 'rgba(255, 255, 255, 0.1)';
+          activeLink.style.boxShadow = 'inset 0 0 0 1px var(--clr-lossless-accent--brightest)';
+          activeLink.style.fontWeight = '600';
+          console.log('[TOC] Added active styles to:', activeLink.textContent);
+        }
+        
+        this.currentActiveLink = activeLink;
+        
+        // Scroll the TOC to show the active item
+        this.scrollTocToActiveItem(activeLink);
+      }
+    }
+  }
+
+  scrollTocToActiveItem(activeLink: HTMLElement) {
+    if (!activeLink || !this.tocScrollArea) return;
+
+    const containerRect = this.tocScrollArea.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    
+    if (linkRect.top < containerRect.top || linkRect.bottom > containerRect.bottom) {
+      const scrollTop = this.tocScrollArea.scrollTop;
+      const linkOffsetTop = activeLink.offsetTop;
+      const containerHeight = this.tocScrollArea.clientHeight;
+      console.log('[TOC] Scrolling to active item:', linkOffsetTop - containerHeight / 2);
+      
+      this.tocScrollArea.scrollTo({
+        top: linkOffsetTop - containerHeight / 4,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  updateScrollProgress() {
+    if (!this.tocProgressFill) {
+      console.log('[TOC] Progress fill element not found');
+      return;
+    }
+
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    if (collectionReaderPane) {
+      const scrollTop = collectionReaderPane.scrollTop;
+      const scrollHeight = collectionReaderPane.scrollHeight;
+      const clientHeight = collectionReaderPane.clientHeight;
+      const scrollPercentage = Math.min(100, Math.max(0, (scrollTop / (scrollHeight - clientHeight)) * 100));
+      
+      this.tocProgressFill.style.width = `${scrollPercentage}%`;
+    } else {
+      // Fallback to window scroll calculation
+      const scrollTop = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = Math.min(100, Math.max(0, (scrollTop / documentHeight) * 100));
+      
+
+      this.tocProgressFill.style.width = `${scrollPercentage}%`;
+    }
+  }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    new TableOfContentsManager();
+  });
+} else {
+  new TableOfContentsManager();
+}
+</script>

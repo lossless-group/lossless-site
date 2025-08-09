@@ -1,12 +1,11 @@
 ---
-const { id, label, title, bannerImage } = Astro.props;
+const { id, label, title, bannerImage, articleTitle } = Astro.props;
 
 ---
 <button
   class="copy-btn"
   data-copy-id={id}
-  data-title={title}
-  data-banner={bannerImage}
+  data-header-title={label}
   title={`Copy link to ${label}`}
   aria-label={`Copy link to ${label}`}
 >
@@ -24,7 +23,10 @@ const { id, label, title, bannerImage } = Astro.props;
     if (!btn) return;
 
     const headingId = btn.dataset.copyId;
-    const url = window.location.origin + window.location.pathname + "#" + headingId;
+    
+    // Create URL with just the hash fragment for direct heading navigation
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = `${baseUrl}#${headingId}`;
 
     navigator.clipboard.writeText(url)
       .then(() => {

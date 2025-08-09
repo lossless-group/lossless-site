@@ -8,10 +8,12 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCitations from '@utils/markdown/remark-citations';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
 import '@styles/markdown.css';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
@@ -28,10 +30,12 @@ const { Component, title, data, content, markdownFile } = Astro.props; // Added 
 
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
-  .use(remarkParse)           // 1. Parse markdown to MDAST
+  .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkImages)         
-  .use(remarkBacklinks)          
+  .use(remarkBacklinks)
+  .use(remarkImages)
+  .use(remarkDirective)
+  .use(remarkDirectiveToComponent)
   .use(remarkCitations)
   .use(remarkTableOfContents)
 
@@ -42,9 +46,9 @@ const mdast = processor.parse(content || '');
 const transformedMdast = await processor.run(mdast);
 
 // Debug output to see AST structure
-markdownDebugger.log('OneArticle.astro Debug');
-markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
-markdownDebugger.verbose('MDAST structure:', transformedMdast);
+// markdownDebugger.log('OneArticle.astro Debug');
+// markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
+// markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
 // Helper function to normalize author data, adapted from ChangelogLayout.astro
 const normalizeDataWithAuthors = (pageData) => {
@@ -60,7 +64,7 @@ const normalizeDataWithAuthors = (pageData) => {
   }
 
   return {
-    ...pageData,
+    ...pageData, // Preserve ALL original fields including participants
     // id: pageData.id, // Assuming id is already part of pageData if needed elsewhere
     // body: pageData.body, // body is handled separately as 'content' prop
     // slug: pageData.slug || (pageData.id ? path.basename(pageData.id, ".md") : undefined),
@@ -69,7 +73,6 @@ const normalizeDataWithAuthors = (pageData) => {
 };
 
 const normalizedData = normalizeDataWithAuthors(data);
-
 
 ---
 

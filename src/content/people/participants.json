@@ -1,0 +1,16 @@
+{
+  "network-people": [
+    {
+      "id": "oz-silahtar",
+      "name": "Oz Silahtar",
+      "headshotOf": "https://ik.imagekit.io/xvpgfijuw/lossless-content-embeds/headshotOf__Oz-Silahtar.jpeg",
+      "socialLinks": {
+         "linkedin": "https://www.linkedin.com/in/ozsilahtar/"
+       },
+       "metadata": {
+         "createdAt": "2025-04-06T20:32:45-07:00",
+         "updatedAt": "2025-07-21T20:11:02+03:00"
+       }
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+---
+/**
+ * ToolShowcaseItem--Wide-Responsive.astro
+ * Responsive tool showcase component for embedding in markdown
+ */
+
+interface Props {
+  title: string;
+  og_image?: string;
+  image?: string;
+  og_screenshot?: string;
+  og_screenshot_url?: string;
+  og_favicon?: string;
+  favicon?: string;
+  og_title?: string;
+  url?: string;
+  og_description?: string;
+  description_site_cp?: string;
+  inCarousel?: boolean;
+}
+
+const { 
+  title, 
+  og_image, 
+  image, 
+  og_screenshot, 
+  og_screenshot_url,
+  og_favicon, 
+  favicon,
+  og_title,
+  url,
+  og_description,
+  description_site_cp,
+  inCarousel = false 
+} = Astro.props;
+
+// Determine the best banner image to use (priority order)
+const bannerImage = og_image || image || og_screenshot || og_screenshot_url;
+
+// Determine the best icon to use
+const companyIcon = og_favicon || favicon;
+
+// Use og_title if available, otherwise use the title
+const displayTitle = og_title || title;
+
+// Determine the best description to use (priority order)
+const companyDescription = og_description || description_site_cp;
+---
+
+<div class="tool-showcase-wide">
+  {bannerImage && (
+    <div class="banner-container">
+      <img 
+        src={bannerImage} 
+        alt={`${displayTitle} banner`}
+        class="banner-image"
+        loading="lazy"
+        width="1200"
+        height="630"
+      />
+      <div class="banner-overlay"></div>
+    </div>
+  )}
+  
+  <div class="company-header">
+    <div class="company-info">
+      {companyIcon && (
+        <div class="company-icon">
+          <img 
+            src={companyIcon} 
+            alt={`${displayTitle} logo`}
+            class="icon-image"
+            loading="lazy"
+            width="40"
+            height="40"
+          />
+        </div>
+      )}
+      
+      <div class="company-details">
+        <span class="company-left">
+          <h3 class="company-name">{displayTitle}</h3>
+          {url && (
+            <a href={url} target="_blank" rel="noopener noreferrer" class="company-url">
+              {url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+            </a>
+          )}
+        </span>
+        
+        {companyDescription && (
+          <span class="company-right">
+            <p class="company-description">{companyDescription}</p>
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .tool-showcase-wide {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .tool-showcase-wide:hover {
+    border-color: var(--clr-lossless-accent--brightest);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .banner-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+
+  .banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 70%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  }
+
+  .company-header {
+    position: relative;
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+  }
+
+  .company-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .company-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .icon-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+  }
+
+  .company-details {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 2rem;
+    width: 100%;
+  }
+
+  .company-left {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    max-width: 40%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .company-right {
+    flex: 1;
+    min-width: 0;
+    max-width: 60%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Make company-name styles more specific */
+  .tool-showcase-wide .company-name {
+    margin: 0 0 0.25rem !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: white !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    font-family: inherit !important;
+  }
+
+  .tool-showcase-wide .company-url {
+    display: inline-block !important;
+    color: var(--clr-lossless-accent--bright) !important;
+    font-size: 0.85rem !important;
+    text-decoration: none !important;
+    margin-top: 0.25rem !important;
+    word-break: break-all !important;
+    font-family: inherit !important;
+  }
+
+  .company-url:hover {
+    text-decoration: underline;
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .tool-showcase-wide .company-description {
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    font-family: inherit !important;
+  }
+
+  @media (max-width: 768px) {
+    .company-details {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .company-left,
+    .company-right {
+      min-width: 100%;
+      width: 100%;
+    }
+    
+    .company-header {
+      padding: 1rem;
+    }
+  }
+</style>

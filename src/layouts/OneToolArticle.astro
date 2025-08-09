@@ -1,0 +1,113 @@
+---
+/**
+ * OneToolArticle.astro
+ * Layout for displaying a single tool/toolkit article in a centered, readable format
+ * Based on OneArticle.astro but customized for toolkit pages
+ * Handles markdown processing with remark plugins
+ */
+
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkImages from '@utils/markdown/remark-images';
+import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
+import DebugMarkdown from '@components/markdown/DebugMarkdown.astro';
+import CompanyShowcase from '@components/toolkit/CompanyShowcase.astro';
+import '@styles/markdown.css';
+import { markdownDebugger } from '@utils/markdown/markdownDebugger';
+
+interface Props {
+  Component: any;
+  title: string; // Added title prop
+  data: Record<string, any>;
+  content: string;
+  markdownFile?: string;
+}
+
+const { Component, title, data, content, markdownFile } = Astro.props; // Added title
+
+// Process with our custom remark plugins to get MDAST
+const processor = unified()
+  .use(remarkParse)           // 1. Parse markdown to MDAST
+  .use(remarkGfm)
+  .use(remarkDirective)       // 2. Parse directive syntax
+  .use(remarkDirectiveToComponent) // 3. Preserve directives for AstroMarkdown
+  .use(remarkImages)         
+  .use(remarkBacklinks)          
+  .use(remarkCitations)
+  .use(remarkTableOfContents)
+
+// First parse to MDAST
+const mdast = processor.parse(content || '');
+// console.log("=== Raw MDAST ===", JSON.stringify(mdast, null, 2));
+
+const transformedMdast = await processor.run(mdast);
+
+// Debug output to see AST structure
+// markdownDebugger.log('OneToolArticle.astro Debug');
+// markdownDebugger.writeDebugFile('transformed-mdast', transformedMdast);
+// markdownDebugger.verbose('MDAST structure:', transformedMdast);
+
+// Helper function to normalize author data, adapted from ChangelogLayout.astro
+const normalizeDataWithAuthors = (pageData) => {
+  if (!pageData) return { authors: [] }; // Return a default if pageData is null/undefined
+
+  let authorList = [];
+  if (pageData.authors) {
+    authorList = Array.isArray(pageData.authors)
+      ? pageData.authors
+      : [pageData.authors]; // Ensure it's an array
+  } else if (pageData.author) {
+    authorList = [pageData.author]; // Ensure it's an array
+  }
+
+  return {
+    ...pageData, // Preserve ALL original fields including participants
+    // id: pageData.id, // Assuming id is already part of pageData if needed elsewhere
+    // body: pageData.body, // body is handled separately as 'content' prop
+    // slug: pageData.slug || (pageData.id ? path.basename(pageData.id, ".md") : undefined),
+    authors: authorList, // Ensure 'authors' is always an array
+  };
+};
+
+const normalizedData = normalizeDataWithAuthors(data);
+
+---
+
+<div class="one-tool-article">
+  {/* Company Showcase - prominently display the company */}
+  <CompanyShowcase 
+    title={title}
+    {...data}
+  />
+  
+  {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
+  <Component 
+    content={transformedMdast}
+    data={normalizedData}
+    articleHeading={title} // Renamed prop to avoid conflict
+  >
+    <slot />
+  </Component>
+</div>
+
+<style>
+  .one-tool-article {
+    width: 100%;
+    max-width: var(--content-width, 1200px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+
+  /* @media (min-width: 768px) {
+    .one-tool-article {
+      padding: 4rem 2rem;
+    }
+  } */
+
+</style>

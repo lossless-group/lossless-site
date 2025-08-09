@@ -1,0 +1,85 @@
+---
+/**
+ * /toolkit/vertical/[...slug].astro — Dynamic Route for Vertical Toolkits Collection Content
+ *
+ * Modeled after /toolkit/[...slug].astro
+ * 
+ * - Fetches content from the 'vertical-toolkits' collection
+ * - Uses the relative path from the vertical-toolkits directory as the slug
+ * - Generates static paths for all entries
+ * - Renders content using Layout, OneToolArticle, and OneArticleOnPage components
+ */
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneToolArticle from '@layouts/OneToolArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { getReferenceSlug } from '@utils/slugify';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Get all entries from the vertical-toolkits collection
+  const verticalToolkitsEntries = await getCollection('vertical-toolkits');
+  
+  // Debug: Log the number of entries found
+  console.log(`Found ${verticalToolkitsEntries.length} entries in the vertical-toolkits collection`);
+  
+  // Process vertical-toolkits entries to create static paths
+  return verticalToolkitsEntries.map(entry => {
+    // Log the entry ID to debug
+    console.log(`Entry ID: ${entry.id}`);
+    const generatedSlug = getReferenceSlug(entry.id);
+    console.log(`Generated vertical-toolkits path: /toolkit/vertical/${generatedSlug}`);
+
+    return {
+      params: { slug: generatedSlug },
+      props: {
+        entry,
+        contentType: 'vertical-toolkits'
+      }
+    };
+  });
+}
+
+// Define the props interface for type safety
+interface Props {
+  entry: {
+    id: string;
+    body: string;
+    data: {
+      title: string;
+      slug: string;
+      tags: string[];
+      [key: string]: any;
+    }
+  };
+  contentType: 'vertical-toolkits';
+}
+
+// Destructure only what is sent in props
+const { entry, contentType } = Astro.props;
+
+// Add content metadata for downstream components
+// Always use entry.data.title as the single source of truth for the display title
+const contentData = {
+  path: Astro.url.pathname,
+  // Only use the filename (no directory, no extension), preserving exact casing
+  id: entry.id.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, ''),
+  contentType: contentType,
+  title: entry.data.title,
+};
+---
+
+<Layout 
+  title={entry.data.title || entry.id.replace(/\.md$/, '')}
+  frontmatter={entry.data}
+>
+  <OneToolArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={{...contentData, ...entry.data}}
+    title={entry.data.title}
+  />
+</Layout>

@@ -1,4 +1,5 @@
 ---
+import TextCTA from "@basics/cta/TextCTA.astro";
 import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
 ---
 
@@ -9,10 +10,14 @@ import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMes
        <p class="hero-subtitle">Our Systems have come a long way.</p>
        <h1 class="hero-title">Vibe Code with Us</h1>
        <p class="hero-description">
-         We've been down the rabbit holes, shaved our yaks, and present our tender, love, care, and the results of untold frustration for you here.</p>
+         We've been down the rabbit holes, shaved our yaks, and present our tender, love, care, and the results of untold frustration for you here.
+       </p>
+       <TextCTA
+         text="Get Started"
+         path="/vibe-with/us"
+       />
      </div>
    </div>
-
    <section class="vibe-with-us-section" style="--vibe-section-top-margin: 0.5rem;">
       <IconHeaderMessageCardGrid 
       jsonPath="messages/vibeCodingIconHeaderMessages.json"
@@ -80,7 +85,7 @@ import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMes
      line-height: 1.6;
      opacity: 0.9;
      max-width: 60ch;
-     margin-bottom: 0;
+     margin-bottom: 1.5rem;
      margin-left: auto;
      margin-right: auto;
    }

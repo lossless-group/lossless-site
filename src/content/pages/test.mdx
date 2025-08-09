@@ -1,19 +1,45 @@
 ---
 title: 'Testing MDX Integration'
+layout: '../../layouts/MDXLayout.astro'
 ---
 import BaseCodeblock from '../../components/codeblocks/BaseCodeblock.astro';
 import LitegalCodeblock from '../../components/codeblocks/LitegalCodeblockDisplay.astro';
 import DataviewCodeblock from '../../components/codeblocks/DataviewCodeblockDisplay.astro';
+import TeamBios from '../../components/TeamBios.svelte';
 
-# Testing MDX Integration
+# About The Lossless Group
 
-Here's a test of our custom code blocks:
+The Lossless Group is a loose collection of innovators trying to find winning formulae for the Age of AI. 
 
-<LitegalCodeblock code={`function test() {
-  console.log("Hello from litegal!");
-}`} />
+## Less of Company, more of a Social Club
 
-<DataviewCodeblock code={`dataview
-table file.name, tags
-from "content"
-where file.name = this.file.name`} />
+The Lossless Group is not an actualy company. It is a social club for innovators. 
+
+When we are not Investing through VC funds, advising tiny startup companies, or eating tacos, we sometimes get asked to consult for large companies. This is the pseudo-brand under which we do that work. 
+
+### Follow Us on GitHub
+[https://github.com/lossless-group](https://github.com/lossless-group)
+
+Current Projects:
+
+- Making pure Markdown a first class citizen for beautiful, content-rich websites using Astro.
+- A "Content Farm" -- a universe of Obsidian plugins that give deep thinkers superpowers to put out content.
+- A "Home Lab" playbook and toolkit to help make sure everyone can win in the Age of AI.
+
+### Seeking Contributors
+
+We are always looking for contributors to help us build out our content and our open source projects. If you are interested in contributing, please reach out to [Michael Staton](mailto:mpstaton@gmail.com).
+
+The only constraint is we need to become friends. We are not looking for employees, we are looking for collaborators. 
+
+## Our Team
+
+<TeamBios client:load />
+
+## Collaborators
+
+Nicholas Cooper
+Tugce Ergul
+Katelyn Donnelly
+
+

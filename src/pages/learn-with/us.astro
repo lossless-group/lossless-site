@@ -1,112 +1,226 @@
 ---
-// site/src/pages/learn-with/us.astro
-// This page serves as an overview for various collections under /learn-with/.
-// Initially, it's hardcoded to display the 'issue-resolution' collection.
+// Issue Resolution collection page
+// Defines how issue-resolution entries should be transformed and rendered
 
-import { getCollection, type CollectionEntry } from 'astro:content';
-import MagazineIndexLayout from '../../layouts/MagazineIndexLayout.astro'; 
+import { getCollection } from 'astro:content';
+import MagazineIndexLayout from '@layouts/MagazineIndexLayout.astro'; 
 import { slugify } from '../../utils/slugify'; 
 import { collectionPublishingDefaults } from '../../content.config'; 
 import Hero from '../../components/basics/Hero.astro';
 import AnimationWrapper from '../../components/basics/AnimationWrapper.astro';
 
-// Define the collection to display. Hardcoded to 'issue-resolution' for now.
-// This will generate the page for the URL: /learn-with/issue-resolution
-const collectionName = 'issue-resolution' as keyof typeof collectionPublishingDefaults; 
+// Collection-specific configuration
+const collectionName = 'issue-resolution';
+const collectionConfig = {
+  title: 'Issue Resolutions',
+  subtitle: 'Insights & Solutions',
+  description: 'A little frustration for a lot of issues. Worked through, resolved, and documented to share.'
+};
 
-// Fetch all entries from the specified collection.
-// 'issue-resolution' should be a key in the `collections` export of `src/content/config.ts`.
-const allEntriesUnfiltered = await getCollection('issue-resolution'); 
+// Fetch and process issue-resolution entries
+const allEntriesUnfiltered = await getCollection(collectionName);
 
 // Apply publishing filter logic
 const defaultPublishBehavior = collectionPublishingDefaults[collectionName]?.publishByDefault ?? true;
 
 const allEntries = allEntriesUnfiltered.filter((entry) => {
-  const itemPublishFlag = (entry.data as Record<string, any>).publish; 
-
+  const itemPublishFlag = (entry.data as any).publish; 
+  
   if (defaultPublishBehavior === true) {
-    // Collection publishes by default. Hide only if item has publish: false.
     return itemPublishFlag !== false;
   }
-  // Collection does NOT publish by default. Show only if item has publish: true.
   return itemPublishFlag === true;
 });
 
-
-// Transform the raw collection entries into a format suitable for the ArticleGrid component.
+// Transform entries with issue-resolution specific logic
 const articles = allEntries.map((entry) => {
-  const data = entry.data as Record<string, any>; 
-
-  // Helper function to normalize fields that might be a single string or an array of strings.
-  // Also handles cases where keys might be singular (e.g., 'author') instead of plural ('authors').
-  const normalizeToArray = (singularKey: string, pluralKey: string): string[] => {
-    let value = data[pluralKey] || data[singularKey];
-    if (typeof value === 'string') {
-      // If it's a non-empty string, put it into an array.
-      return value.trim() ? [value.trim()] : [];
-    }
-    if (Array.isArray(value)) {
-      // Filter out non-strings or empty strings from the array.
-      return value
-        .filter((item): item is string => typeof item === 'string' && item.trim() !== '')
-        .map(item => item.trim());
-    }
-    return []; // Default to an empty array if the field is missing or not a string/array.
-  };
-
-  // Generate a custom slug using the imported slugify function. 
-  // The slug will be generated from the article's title.
-  const customSlug = slugify(data.title || 'Untitled Issue'); 
-
-  // Construct the full slug for the article page using the custom slug.
-  // const articleUrl = `/learn-with/${collectionName}/${customSlug}`; // Kept for reference, but ArticleGrid will use raw slug
-
-  // Determine the display date, falling back through various date fields or to current date.
-  let dateValue = data.date_reported || data.date_created || data.date_modified;
-  if (dateValue instanceof Date) {
-    dateValue = dateValue.toISOString();
-  } else if (!dateValue) {
-    dateValue = new Date().toISOString();
+  const data = entry.data as any;
+  
+  function normalizeToArray(singularKey: string, pluralKey: string): string[] {
+    const singularValue = data?.[singularKey];
+    const pluralValue = data?.[pluralKey];
+    
+    const combined = [singularValue, pluralValue].filter(Boolean).flat();
+    return combined.length > 0 ? combined : [];
   }
-  // If dateValue was already a string from frontmatter, it remains a string.
-
+  
+  const customSlug = data?.slug || slugify(data?.title || entry.id);
+  
+  let dateValue = data?.date_modified;
+  if (dateValue instanceof Date) {
+    dateValue = dateValue.toISOString().split('T')[0];
+  }
+  
   return {
     id: entry.id, 
-    title: data.title || 'Untitled Issue',
+    title: data?.title || 'Untitled',
     slug: customSlug, 
-    banner_image: data.banner_image, 
-    portrait_image: data.portrait_image, 
-    imageAlt: `Image for ${data.title || 'Untitled Issue'}`, 
-    date: dateValue, 
-    lede: data.lede || '', 
+    banner_image: data?.banner_image, 
+    portrait_image: data?.portrait_image, 
+    imageAlt: `Image for ${data?.title || 'Untitled'}`, 
+    date: dateValue, // Map date_modified to date for ArticleGrid compatibility 
+    lede: data?.lede || '', 
     tags: normalizeToArray('tag', 'tags'),
     authors: normalizeToArray('author', 'authors'),
     categories: normalizeToArray('category', 'categories'),
   };
+}).sort((a, b) => {
+  // Sort by date descending (most recent first)
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+  
+  const dateA = new Date(a.date);
+  const dateB = new Date(b.date);
+  return dateB.getTime() - dateA.getTime();
 });
-
-// Define page metadata. This can be made dynamic if 'us.astro' handles multiple collections in the future.
-const pageTitle = "Issue Resolutions"; 
-const pageDescription = "An overview of resolved issues and their detailed analysis."; 
-
 ---
 
 <MagazineIndexLayout
-  title={pageTitle} 
-  description={pageDescription}
+  title={collectionConfig.title} 
+  description={collectionConfig.description}
   articles={articles}
-  collectionDisplayName={pageTitle} 
+  collectionDisplayName={collectionConfig.title} 
 >
-  <div slot="hero-content">
+  <div slot="hero-content" style="position: relative;">
     <AnimationWrapper>
       <Hero
-        title="Explore Issue Resolutions"
-        subtitle="Insights & Solutions"
-        description="A little frustration for a lot of issues. Worked through, resolved, and documented to share."
+        title={collectionConfig.title}
+        subtitle={collectionConfig.subtitle}
+        description={collectionConfig.description}
         alignment="center"
         fullBleed={false}
         animate={true}
       />
     </AnimationWrapper>
+    
+    <!-- Glassmorphic Chevron Navigation -->
+    <div class="chevron-navigation">
+      <!-- Left Chevron - to talks -->
+      <a 
+        href="/learn-with/our-talks"
+        class="chevron-nav chevron-left"
+        aria-label="Previous: Talks & Presentations"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      
+      <!-- Right Chevron - to talks -->
+      <a 
+        href="/learn-with/our-talks"
+        class="chevron-nav chevron-right"
+        aria-label="Next: Talks & Presentations"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
   </div>
 </MagazineIndexLayout>
+
+<style>
+  .chevron-navigation {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 20;
+  }
+  
+  .chevron-nav {
+    position: absolute;
+    top: 0;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    z-index: 21;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  .chevron-left {
+    left: 2rem;
+  }
+  
+  .chevron-right {
+    right: 2rem;
+  }
+  
+  .chevron-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .chevron-nav:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+  
+  /* Mobile-only adjustments - move to bottom */
+  @media (max-width: 768px) {
+    .chevron-navigation {
+      top: auto;
+      bottom: 1.5rem;
+    }
+    
+    .chevron-nav {
+      top: auto;
+      bottom: 0;
+      transform: none;
+      width: 50px;
+      height: 50px;
+    }
+    
+    .chevron-nav:hover {
+      transform: scale(1.1);
+    }
+    
+    .chevron-nav:active {
+      transform: scale(0.95);
+    }
+    
+    .chevron-left {
+      left: 1rem;
+    }
+    
+    .chevron-right {
+      right: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .chevron-navigation {
+      bottom: 1rem;
+    }
+    
+    .chevron-nav {
+      width: 44px;
+      height: 44px;
+    }
+    
+    .chevron-left {
+      left: 0.5rem;
+    }
+    
+    .chevron-right {
+      right: 0.5rem;
+    }
+  }
+</style>

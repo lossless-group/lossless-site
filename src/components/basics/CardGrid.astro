@@ -70,7 +70,7 @@ const itemsPerPage = 50;
 
   .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--gap);
     width: 100%;
     align-items: start;
@@ -104,5 +104,11 @@ const itemsPerPage = 50;
 
   .load-more-btn:hover {
     background-color: var(--clr-lossless-primary-dark);
+  }
+
+  @media (max-width: 600px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

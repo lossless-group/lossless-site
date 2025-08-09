@@ -1,0 +1,182 @@
+---
+// MDXLayout.astro
+// Layout wrapper for MDX content that applies consistent markdown styles
+
+import Layout from './Layout.astro';
+import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
+
+const { frontmatter } = Astro.props;
+
+// This approach won't work because we can't intercept MDX rendering
+// We need to use the mdx integration's components option instead
+---
+
+<Layout>
+  <article class="mdx-article markdown-content">
+    <slot />
+  </article>
+</Layout>
+
+<style is:global>
+  /* MDX content styling - copied directly from AstroMarkdown.astro */
+  .mdx-article {
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+  }
+  
+  /* Headings - Note: These won't have copy buttons without custom components */
+  .mdx-article h1,
+  .mdx-article h2,
+  .mdx-article h3,
+  .mdx-article h4,
+  .mdx-article h5,
+  .mdx-article h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #f1f5f9; /* Same as AstroMarkdown headings */
+  }
+  
+  .mdx-article h1 { font-size: 2.25rem; }
+  .mdx-article h2 { font-size: 1.875rem; }
+  .mdx-article h3 { font-size: 1.5rem; }
+  .mdx-article h4 { font-size: 1.25rem; }
+  .mdx-article h5 { font-size: 1.125rem; }
+  .mdx-article h6 { font-size: 1rem; }
+  
+  /* Paragraphs */
+  .mdx-article p {
+    margin-bottom: 1rem;
+  }
+  
+  /* Inline code - matching AstroMarkdown exactly */
+  .mdx-article code:not(pre code) {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    font-size: 0.875em;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.08) 0%, 
+      rgba(255, 255, 255, 0.04) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    
+    padding: 0.2em 0.4em;
+    margin: 0 0.1em;
+    display: inline;
+    
+    color: #e2e8f0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .mdx-article code:not(pre code):hover {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.12) 0%, 
+      rgba(255, 255, 255, 0.08) 100%);
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+  }
+  
+  /* Code blocks */
+  .mdx-article pre {
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+  
+  /* Lists */
+  .mdx-article ul,
+  .mdx-article ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+  }
+  
+  .mdx-article li {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Links */
+  .mdx-article a {
+    color: #60a5fa;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s;
+  }
+  
+  .mdx-article a:hover {
+    color: #93c5fd;
+  }
+  
+  /* Blockquotes */
+  .mdx-article blockquote {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-left: 4px solid #64748b;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.02) 100%);
+    font-style: italic;
+    color: #cbd5e1;
+  }
+  
+  /* Tables - matching AstroMarkdown */
+  .mdx-article table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    margin: 1.5rem 0;
+  }
+  
+  .mdx-article th,
+  .mdx-article td {
+    border: 1px solid rgb(255, 255, 255);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  
+  .mdx-article tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+  
+  /* Strong and emphasis */
+  .mdx-article strong {
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+  
+  .mdx-article em {
+    font-style: italic;
+  }
+  
+  /* Horizontal rules */
+  .mdx-article hr {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Images */
+  .mdx-article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+  }
+</style>

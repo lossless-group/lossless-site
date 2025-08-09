@@ -2,18 +2,17 @@
 import "@styles/global.css";
 import Hero from "@components/basics/Hero.astro";
 import CardGrid from "@basics/CardGrid.astro";
-import TagCloud from "@components/tool-components/TagCloud.astro";
-import ToolCount from "@components/basics/ToolCount.astro";
 import { getEntry, getCollection } from "astro:content";
-import TrademarkRibbon from "@components/trademarks/TrademarkRibbon.astro";
+import Section__ToolsTracking from "@components/basics/messages/Section__ToolsTracking.astro";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 import AlternatingSideImageComponent from "@components/basics/messages/AlternatingSideImage.astro";
 import Section__IconHeaderMessage from "@components/basics/messages/Section__IconHeaderMessage.astro";
 import Section__QuestionsAnswers from "./reference/Section__QuestionsAnswers.astro";
 import questionsAndAnswersData from "../content/q-and-a/questionsAndAnswers.json";
 import Section__VibeCodeWithUs from "@components/basics/messages/Section__VibeCodeWithUs.astro";
-import { readdirSync } from 'fs';
-import { join } from 'path';
+import ClientListHorizontalScrollerStealth from "@components/basics/messages/ClientListHorizontalScroller--stealth.astro";
+import clientsData from "../content/people/clients.json";
+import { loadToolsFromMoc } from "@utils/toolUtils";
 
 
 interface Tool {
@@ -27,37 +26,19 @@ interface Tool {
   id: string;
 }
 
-const TRADEMARK_CONFIG = {
-  sourceDir: "./public/visuals/Tooling-Trademarks/usable--darkmode",
-};
-
-const TOOL_CARDGRID_LIMIT = 6;
-
-// ... existing type definitions ...
-
+// Load tools from Home.md MOC file
+const mocEntries = await getCollection("moc");
+const homeMocEntry = mocEntries.find(entry => entry.id === "home");
 const toolEntries = await getCollection("tooling");
-const tools = toolEntries.map(entry => ({ ...entry.data, id: entry.id } as Tool));
-
-const tagFrequencies = tools.reduce(
-  (tagCounts: Record<string, number>, tool: Tool) => {
-    tool.tags?.forEach((tag: any) => {
-      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-    });
-    return tagCounts;
-  },
-  {} as Record<string, number>
-);
-// Get all unique tags from all tools
-const allTags = [
-  ...new Set(
-    tools.flatMap((tool) => tool.tags || []).filter((tag) => tag) // Remove any undefined/null values
-  ),
-];
+const tools = homeMocEntry ? await loadToolsFromMoc(homeMocEntry, toolEntries) : [];
 
 // Extract the questionsAndAnswers array for the "main" page
 const qaList = questionsAndAnswersData.page === "main"
   ? questionsAndAnswersData.questionsAndAnswers
   : [];
+
+// Load clients data for stealth section
+const clients = clientsData.clients;
 
 ---
 
@@ -71,52 +52,28 @@ const qaList = questionsAndAnswersData.page === "main"
 
 <Section__VibeCodeWithUs />
 
-<!-- Content section with tools -->
+<!-- Tools Tracking Section -->
 <div class="content-wrapper">
-  <section>
-    <div class="tools-header">
-      <h2>We're tracking
-        <ToolCount asBadge={true} />
-        tools.
-      </h2>
-    </div>
-    <div class="tools-tag-cloud">
-      <TagCloud
-        tags={allTags}
-        tagFrequencies={tagFrequencies}
-        visibleTagRowLimit={4}
-        maxWidth="96%"
-        tagRoute="toolkit"
-      />
-    </div>
-  </section>
+  <Section__ToolsTracking />
 </div>
 
-<!-- Full-bleed ribbon container -->
-<div id="ribbon-container">
-  <div id="ribbon-context">
-    <h2>Tech we're watching.</h2>
-  </div>
-  <div class="trademark-ribbon-wrapper">
-    <TrademarkRibbon
-      sourceDir={TRADEMARK_CONFIG.sourceDir}
-      width="auto"
-      maxWidth="92%"
-    />
-  </div>
-</div>
-
-<!-- Full-bleed separator with more prominent styling -->
+<!-- Full-bleed separator with subtle styling -->
 <ThinGradientBleedSeparator 
-  height="3px" 
-  marginTop="1.5rem" 
-  marginBottom="1.5rem" 
+  height="1px" 
+  marginTop="0.5rem" 
+  marginBottom="1rem" 
   color="var(--grd__primary-bg)" 
-  animate={true}
 />
 
+<!-- Full-bleed Stealth Clients Section -->
+<div class="stealth-clients-fullbleed">
+  <div class="stealth-clients-content">
+    <ClientListHorizontalScrollerStealth clients={clients} />
+  </div>
+</div>
+
 <!-- Section: IconHeaderMessage grid for homepage (index instance) -->
-<section class="content-wrapper">
+<section class="content-wrapper content-wrapper--tight-top">
   <Section__IconHeaderMessage instance="index" />
 </section>
 
@@ -171,7 +128,7 @@ const qaList = questionsAndAnswersData.page === "main"
   <section>
     {
       tools && tools.length > 0 ? (
-        <CardGrid gap="2rem" tools={tools.slice(0, TOOL_CARDGRID_LIMIT)} />
+        <CardGrid gap="2rem" tools={tools} />
       ) : (
         <p>No tools found</p>
       )
@@ -196,20 +153,12 @@ const qaList = questionsAndAnswersData.page === "main"
     align-items: center;
     justify-content: center;
   }
-
-  .tools-header {
-    margin-bottom: 1rem;
-    display: block;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2rem;
-    width: 100%;
-    & > h2 {
-      text-align: center;
-      font-size: var(--fs-500);
-      font-weight: var(--fw-semi-bold);
-    }
+  
+  /* Tight spacing variant for sections that need less top padding */
+  .content-wrapper--tight-top {
+    padding-top: 0;
   }
+
 
   #hero-container {
     display: flex;
@@ -231,25 +180,41 @@ const qaList = questionsAndAnswersData.page === "main"
     justify-content: center;
   }
 
-  #ribbon-context {
-    width: 100%;
-    text-align: center;
-    margin: 0 auto 0 auto;
-  }
 
-  /* Full-bleed container for the ribbon */
-  #ribbon-container {
+  /* Full-bleed container for stealth clients */
+  .stealth-clients-fullbleed {
     width: 100vw;
+    max-width: 100vw;
     position: relative;
     left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    overflow: visible;
+    transform: translateX(-50%);
+    overflow: hidden;
+    padding: 4rem 0 0.5rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
-  .trademark-ribbon-wrapper {
-    width: 100%;
-    overflow: visible;
+  .stealth-clients-content {
+    width: 92%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Mobile adjustments for full-bleed sections */
+  @media (max-width: 768px) {
+    .stealth-clients-fullbleed {
+      max-width: 100vw;
+      overflow: hidden;
+    }
+    
+    .stealth-clients-content {
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+    }
   }
 </style>

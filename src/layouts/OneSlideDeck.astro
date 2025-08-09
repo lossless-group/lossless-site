@@ -51,9 +51,18 @@ const revealOptions = {
 
 <!-- RevealJS container -->
 <div class="reveal-container">
-  <!-- Print PDF button in top right -->
-  <div class="print-button">
-    <a href="?print-pdf" target="_blank" title="Export to PDF">
+  <!-- Control buttons positioned in the container -->
+  <div class="control-buttons">
+    <!-- Exit button -->
+    <a href="/slides/" class="control-button exit-button" title="Back to Presentations">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      Exit
+    </a>
+    
+    <!-- PDF button -->
+    <a href="?print-pdf" target="_blank" class="control-button pdf-button" title="Export to PDF">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 9L6 2H18L18 9"></path>
         <path d="M6 18H4C3.46957 18 2.96086 17.7893 2.58579 17.4142C2.21071 17.0391 2 16.5304 2 16V11C2 10.4696 2.21071 9.96086 2.58579 9.58579C2.96086 9.21071 3.46957 9 4 9H20C20.5304 9 21.0391 9.21071 21.4142 9.58579C21.7893 9.96086 22 10.4696 22 11V16C22 16.5304 21.7893 17.0391 21.4142 17.4142C21.0391 17.7893 20.5304 18 20 18H18"></path>
@@ -63,6 +72,7 @@ const revealOptions = {
     </a>
   </div>
   
+  <!-- The actual reveal.js presentation -->
   <div class="reveal">
     <div class="slides">
       <slot />
@@ -130,18 +140,41 @@ const revealOptions = {
     justify-content: center;
     margin-top: -4.5rem; /* Offset the header margin */
     padding-top: 4.5rem;
-    position: relative; /* For absolute positioning of print button */
-  }
-
-  /* Print button styling - positioned in top right */
-  .print-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000; /* Ensure it's above presentation content */
+    position: relative;
   }
   
-  .print-button a {
+  /* Set default size for RevealJS */
+  .reveal {
+    /* These CSS variables are used by RevealJS */
+    --r-width: 1600;
+    --r-height: 900;
+  }
+
+  /* Control buttons container - positioned to align with slide content */
+  .control-buttons {
+    position: absolute;
+    top: max(5rem, 50% - 450px - 40px); /* Position above the 900px tall slides */
+    right: max(20px, 50% - 800px); /* Align with the 1600px wide slides */
+    z-index: 30;
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 1640px) {
+    .control-buttons {
+      right: 20px;
+    }
+  }
+  
+  @media (max-height: 1000px) {
+    .control-buttons {
+      top: 5rem;
+    }
+  }
+  
+  /* Shared button styles */
+  .control-button {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -153,16 +186,27 @@ const revealOptions = {
     font-size: 14px;
     font-weight: 500;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
   }
   
-  .print-button a:hover {
+  .control-button:hover {
     background-color: var(--clr-primary-dark, #0056b3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
   
-  /* Hide print button when in print mode */
+  /* Exit button specific styling */
+  .exit-button {
+    background-color: #6c757d;
+  }
+  
+  .exit-button:hover {
+    background-color: #5a6268;
+  }
+  
+  /* Hide control buttons when in print mode */
   @media print {
-    .print-button {
+    .control-buttons {
       display: none;
     }
   }
@@ -171,13 +215,6 @@ const revealOptions = {
   .reveal .slides {
     font-family: "Poppins", sans-serif;
     background-color: var(--clr-primary-bg);
-  }
-  
-  /* Set default size for RevealJS */
-  .reveal {
-    /* These CSS variables are used by RevealJS */
-    --r-width: 1600;
-    --r-height: 900;
   }
   
   .reveal h1, .reveal h2, .reveal h3, .reveal h4 {

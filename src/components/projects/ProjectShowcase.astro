@@ -1,0 +1,91 @@
+---
+/**
+ * ProjectShowcase.astro
+ *
+ * Renders a single project showcase with header and canvas container.
+ * Full width design with gradient separators at top and bottom.
+ *
+ * Props:
+ * - title: string - Project title
+ * - description: string - Project description
+ * - canvasPath: string - Path to the JSON Canvas file
+ *
+ * Usage Example:
+ * <ProjectShowcase 
+ *   title="Augment-It Project"
+ *   description="Interactive project visualization and specification overview"
+ *   canvasPath="src/generated-content/projects/Augment-It/Specs/Augment-It.canvas"
+ * />
+ */
+
+import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
+import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  canvasPath: string;
+}
+
+const { title, description, canvasPath } = Astro.props;
+---
+
+<ThinGradientBleedSeparator />
+
+<div class="project-showcase">
+  <div class="project-header">
+    <h3>{title}</h3>
+    <p>{description}</p>
+  </div>
+  
+  <div class="canvas-container">
+    <JSONCanvasIsland canvasPath={canvasPath} />
+  </div>
+</div>
+
+<ThinGradientBleedSeparator />
+
+<style>
+  .project-showcase {
+    width: 100%;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .project-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .project-header h3 {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-semi-bold);
+    font-size: var(--fs-700);
+    color: var(--clr-heading);
+    margin-bottom: 0.5rem;
+  }
+
+  .project-header p {
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    color: var(--clr-body);
+    opacity: 0.8;
+  }
+
+  .canvas-container {
+    width: 100%;
+    min-height: 600px;
+    overflow: hidden;
+    background: var(--clr-primary-bg);
+  }
+
+  @media (max-width: 768px) {
+    .project-showcase {
+      padding: 1.5rem;
+    }
+
+    .canvas-container {
+      min-height: 400px;
+    }
+  }
+</style>

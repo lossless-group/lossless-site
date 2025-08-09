@@ -44,22 +44,21 @@ const defaultGridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6
 
 const processedArticles = articles.map(article => {
   const passthroughAttrs: { [key: string]: any } = {};
-  // Define props that PostCardBare will receive directly based on ArticleData fields
-  // These are the source field names from ArticleData that are used to form PostCardBare props.
+  // Define props that PostCardBare will receive directly
   const definedProps = [
-    'slug', 'banner_image', 'portrait_image', 'imageAlt', 'title', 'date', 'lede', 
-    'imgWidth', 'imgHeight', 'class'
-    // id, tags, authors, categories will go into passthroughAttrs if not listed here
+    'slug', 'banner_image', 'portrait_image', 'imageAlt', 'title', 'date', 'lede',
+    'imgWidth', 'imgHeight', 'class', 'basePath'
   ];
 
+  // Pass through any additional props
   for (const key in article) {
     if (Object.prototype.hasOwnProperty.call(article, key) && !definedProps.includes(key)) {
-      const value = article[key];
-      passthroughAttrs[key] = value;
+      passthroughAttrs[key] = article[key];
     }
   }
+  
   return {
-    ...article, 
+    ...article,
     passthroughAttrs,
   };
 });
@@ -70,13 +69,14 @@ const processedArticles = articles.map(article => {
     return (
       <PostCardBare
         slug={p.slug}       
-        imageSrc={p.banner_image || p.portrait_image || '/images/placeholders/default-banner.jpg'}
+        imageSrc={p.banner_image || p.portrait_image || 'visuals/bannerImage__The-Lossless-Group.png'}
         imageAlt={p.imageAlt}
         title={p.title}
         date={p.date}
         description={p.lede}
         imgWidth={p.imgWidth}
         imgHeight={p.imgHeight}
+        basePath={p.basePath}
         class={p.class} 
         {...p.passthroughAttrs}
       />

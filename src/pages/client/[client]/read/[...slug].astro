@@ -27,7 +27,8 @@ export async function getStaticPaths() {
   }
 
   // Generate paths for each client
-  for (const [client, essays] of essaysByClient) {
+  for (const [originalClient, essays] of essaysByClient) {
+    const client = originalClient.toLowerCase();
     // Add the main reader page for each client (no slug)
     paths.push({
       params: { 
@@ -35,7 +36,8 @@ export async function getStaticPaths() {
         slug: undefined
       },
       props: { 
-        client, 
+        client: originalClient, 
+        actualClientName: originalClient,
         essaySlug: undefined,
         essay: undefined
       }
@@ -52,7 +54,8 @@ export async function getStaticPaths() {
           slug: essaySlug
         },
         props: { 
-          client, 
+          client: originalClient, 
+          actualClientName: originalClient,
           essaySlug,
           essay
         }

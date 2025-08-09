@@ -1,0 +1,335 @@
+---
+/**
+ * JSONCanvasIsland.astro
+ * Server island component that fetches JSON Canvas data and renders Svelte component
+ * Follows the Island Wrapper Pattern from ToolShowcaseIsland.astro
+ */
+
+import { readFile, existsSync } from 'fs';
+import { readFile as readFileAsync } from 'fs/promises';
+import { dirname, resolve as pathResolve } from 'path';
+import { contentBasePath } from '../../utils/envUtils.js';
+import JSONCanvasRenderer from './JSONCanvasRenderer.svelte';
+import { parseJSONCanvas, transformCoordinates } from '../../utils/jsonCanvasUtils';
+import type { JSONCanvas, ParsedCanvas } from '../../types/json-canvas';
+
+interface Props {
+  canvasPath?: string;
+  canvasId?: string;
+  showDebug?: boolean;
+}
+
+const { canvasPath, canvasId, showDebug = false } = Astro.props;
+
+// Read canvas data from file path
+let canvasData: string | null = null;
+let canvasSource: string = '';
+let debugInfo: any = {};
+
+try {
+  if (canvasPath) {
+    try {
+      canvasData = await readFileAsync(canvasPath, 'utf-8');
+      canvasSource = 'file';
+      debugInfo.foundIn = `File: ${canvasPath}`;
+      debugInfo.fileSize = canvasData.length;
+    } catch (fileError) {
+      // Handle file reading errors gracefully
+      debugInfo.fetchError = fileError instanceof Error ? fileError.message : 'File read error';
+      debugInfo.attemptedPath = canvasPath;
+      console.warn(`Failed to read canvas file: ${canvasPath}`, fileError);
+    }
+  } else {
+    debugInfo.error = 'No canvasPath provided';
+  }
+} catch (error) {
+  debugInfo.fetchError = error instanceof Error ? error.message : 'Unknown error';
+  debugInfo.attemptedPath = canvasPath;
+}
+
+// Parse the canvas data
+let parsedCanvas: ParsedCanvas | null = null;
+let transformedCanvas: JSONCanvas | null = null;
+
+if (canvasData) {
+  try {
+    parsedCanvas = parseJSONCanvas(canvasData);
+    
+    if (parsedCanvas.canvas) {
+      // Transform coordinates for web rendering
+      transformedCanvas = transformCoordinates(parsedCanvas.canvas);
+      
+      // Read file contents for file nodes
+      if (transformedCanvas.nodes) {
+        for (const node of transformedCanvas.nodes) {
+          if (node.type === 'file' && node.file) {
+            try {
+              // Resolve file path relative to content base directory
+              const filePath = pathResolve(contentBasePath, node.file);
+              
+              if (existsSync(filePath)) {
+                const fileContent = await readFileAsync(filePath, 'utf-8');
+                
+                // Separate frontmatter from content
+                const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+                if (frontmatterMatch) {
+                  const [, frontmatter, content] = frontmatterMatch;
+                  // Store both frontmatter and content separately
+                  (node as any).frontmatter = frontmatter.trim();
+                  (node as any).fileContent = content;
+                } else {
+                  // No frontmatter, treat entire content as body
+                  (node as any).fileContent = fileContent;
+                  (node as any).frontmatter = null;
+                }
+              } else {
+                (node as any).fileContent = `File not found: ${node.file}\nLooked in: ${filePath}`;
+                (node as any).frontmatter = null;
+              }
+            } catch (fileError) {
+              (node as any).fileContent = `Error reading file: ${node.file}\n${fileError}`;
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    debugInfo.parseError = error instanceof Error ? error.message : 'Unknown error';
+  }
+}
+
+// Prepare props for Svelte component
+const canvasProps = transformedCanvas ? {
+  canvas: transformedCanvas
+} : null;
+
+debugInfo.canvasFound = !!canvasData;
+debugInfo.canvasSource = canvasSource;
+debugInfo.parseSuccess = !!transformedCanvas;
+---
+
+{transformedCanvas && canvasProps && (
+  <JSONCanvasRenderer 
+    canvas={canvasProps.canvas}
+    client:load 
+  />
+)}
+
+{(!transformedCanvas || !canvasProps) && (
+  <div class="json-canvas-error">
+    <h4>JSON Canvas Error</h4>
+    <p>Unable to load canvas: <strong>{canvasPath || canvasId}</strong></p>
+    
+    {parsedCanvas?.validation.errors.length > 0 && (
+      <div class="error-details">
+        <h5>Validation Errors:</h5>
+        <ul>
+          {parsedCanvas.validation.errors.map(error => (
+            <li>{error}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {parsedCanvas?.validation.warnings.length > 0 && (
+      <div class="warning-details">
+        <h5>Warnings:</h5>
+        <ul>
+          {parsedCanvas.validation.warnings.map(warning => (
+            <li>{warning}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <details class="debug-details">
+      <summary>Debug Information</summary>
+      <div class="debug-info">
+        <p><strong>Canvas Path:</strong> {canvasPath || 'Not provided'}</p>
+        <p><strong>Canvas Found:</strong> {debugInfo.canvasFound ? 'Yes' : 'No'}</p>
+        {debugInfo.canvasSource && (
+          <p><strong>Source:</strong> {debugInfo.canvasSource}</p>
+        )}
+        
+        {parsedCanvas && (
+          <div class="parse-info">
+            <p><strong>Parse Success:</strong> {debugInfo.parseSuccess ? 'Yes' : 'No'}</p>
+            <p><strong>Nodes:</strong> {parsedCanvas.debugInfo.nodeCount}</p>
+            <p><strong>Edges:</strong> {parsedCanvas.debugInfo.edgeCount}</p>
+            {Object.keys(parsedCanvas.debugInfo.nodeTypes).length > 0 && (
+              <div>
+                <p><strong>Node Types:</strong></p>
+                <ul>
+                  {Object.entries(parsedCanvas.debugInfo.nodeTypes).map(([type, count]) => (
+                    <li>{type}: {count}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {parsedCanvas.debugInfo.invalidEdges.length > 0 && (
+              <div>
+                <p><strong>Invalid Edges:</strong></p>
+                <ul>
+                  {parsedCanvas.debugInfo.invalidEdges.map(edgeId => (
+                    <li>{edgeId}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+
+
+        {debugInfo.fetchError && (
+          <p class="error"><strong>Fetch Error:</strong> {debugInfo.fetchError}</p>
+        )}
+        
+        {debugInfo.parseError && (
+          <p class="error"><strong>Parse Error:</strong> {debugInfo.parseError}</p>
+        )}
+        
+
+      </div>
+    </details>
+  </div>
+)}
+
+<style>
+  .json-canvas-error {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 12px;
+    color: var(--clr-lossless-primary-light);
+  }
+
+  .json-canvas-error h4 {
+    color: #ffa500;
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+
+  .json-canvas-error h5 {
+    color: #ffa500;
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1rem;
+  }
+
+  .error-details {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 8px;
+  }
+
+  .warning-details {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 8px;
+  }
+
+  .debug-details {
+    margin-top: 1.5rem;
+  }
+
+  .debug-details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--clr-lossless-accent--bright);
+  }
+
+  .debug-details summary:hover {
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .debug-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+
+  .debug-info p {
+    margin: 0.5rem 0;
+  }
+
+  .debug-info ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .debug-info li {
+    margin: 0.25rem 0;
+    font-family: monospace;
+  }
+
+  .debug-info .error {
+    color: #ff6b6b;
+  }
+
+  .debug-info .warning {
+    color: #ffa726;
+  }
+
+  .parse-info, .search-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+</style>
+
+<script is:inline>
+  // Mermaid initialization for JSON Canvas context
+  // This ensures mermaid is available for file previews with mermaid diagrams
+  function getCssVar(name, fallback) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  }
+
+  const bodyColor = getCssVar('--clr-body', '#e0e0e0');
+  const primaryNodeBg = getCssVar('--clr-primary-bg', '#181818');
+  const edgeLabelBg = getCssVar('--clr-aquamarine', '#64d4a4');
+  const hippieBlue = getCssVar('--clr-hippie-blue', '#50a3b3');
+  const secondaryTextClr = getCssVar('--clr-hippie-blue', '#50a3b3');
+  const clusterBkg = getCssVar('--clr-gunmetal', '#283139');
+  const lineClr = getCssVar('--clr-aqua-brightest', '#69e2e3');
+  const fontFmly = 'Open Sans, sans-serif';
+
+  const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      darkMode: true,
+      background: 'transparent',
+      primaryColor: primaryNodeBg,
+      primaryBorderColor: '#6fffd6',
+      primaryTextColor: bodyColor,
+      secondaryColor: '#BF23F7',
+      secondaryTextColor: secondaryTextClr,
+      clusterBkg: clusterBkg,
+      lineColor: lineClr,
+      fontFamily: fontFmly,
+    }
+  };
+
+  if (!window.__MERMAID_LOADED__) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
+      .then((mermaid) => {
+        mermaid.default.initialize(mermaidConfig);
+        window.mermaid = mermaid.default;
+        window.__MERMAID_LOADED__ = true;
+        
+        // Render any existing mermaid diagrams that are waiting
+        const existingDiagrams = document.querySelectorAll('.mermaid:not([data-processed])');
+        if (existingDiagrams.length > 0) {
+          mermaid.default.run({ nodes: Array.from(existingDiagrams) });
+        }
+      })
+      .catch(console.error);
+  }
+</script>

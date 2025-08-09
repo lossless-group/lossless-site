@@ -7,11 +7,14 @@ import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
+import PortfolioGallery from '@components/tool-components/PortfolioGallery.astro';
+import SlidesEmbed from '@components/SlidesEmbed.astro';
+import ToolShowcaseIsland from '@components/toolkit/ToolShowcaseIsland.astro';
 import { getCollection } from "astro:content";
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
 import CopyLinkButton from './CopyLinkButton.astro';
-import { resolveToolId } from '@utils/toolUtils';
+import { resolveToolId, resolvePortfolioId } from '@utils/toolUtils';
 /*
       Compose a unique id for markdown headings using ONLY the main heading text.
       - This function takes a heading MDAST node and returns a slugified version of the primary text content.
@@ -42,6 +45,9 @@ interface Props {
         };
         label?: string;
         meta?: string;
+        // Directive-specific properties
+        name?: string; // directive name (e.g., 'figma-embed')
+        attributes?: Record<string, any>; // directive attributes
     };
     data: {
         path: string;
@@ -58,8 +64,8 @@ const { node, data } = Astro.props;
 // Order matters! Container types (like blockquote) should be handled before their children (like paragraph)
 const handled_types = [
     "root",
-    "link",        // Handle standard MDAST link nodes
-    "blockquote",  // Handle blockquotes before paragraphs since they contain paragraphs
+    "link",       
+    "blockquote", 
     "paragraph",
     "text",
     "heading",
@@ -83,7 +89,9 @@ const handled_types = [
     "tableOfContents",
     "imageGallery",
     "toolingGallery",
-    "thematicBreak" // Add support for horizontal rules
+    "thematicBreak", 
+    "leafDirective", 
+    "containerDirective"
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -137,9 +145,6 @@ if (isToolingGallery) {
   }]));
 
   const tools = [];
-  const toolGalleryErrors = [];
-
-  console.log(toolMap.values().next().value);
 
   // Resolve toolIds
   for (const input of rawToolIds) {
@@ -189,6 +194,318 @@ if (isToolingGallery) {
   toolGalleryTools = tools;
 
 }
+
+// Portfolio Gallery Logic - handle async work upfront
+const isPortfolioGallery = (
+  node.type === "containerDirective" && 
+  (node.name === 'portfolio-gallery' || node.name === 'portfolioGallery')
+);
+
+let portfolioGalleryPortfolios = null;
+let portfolioGalleryErrors: string[] = [];
+let portfolioGalleryConfig: Record<string, any> = {};
+
+// Tooling Gallery Directive Logic - handle async work upfront
+const isToolingGalleryDirective = (
+  node.type === "containerDirective" && 
+  (node.name === 'tooling-gallery' || node.name === 'toolingGallery')
+);
+
+let toolingGalleryDirectiveTools = null;
+let toolingGalleryDirectiveErrors: string[] = [];
+let toolingGalleryDirectiveConfig: Record<string, any> = {};
+
+// Image Gallery Directive Logic - handle async work upfront
+const isImageGalleryDirective = (
+  node.type === "containerDirective" && 
+  (node.name === 'image-gallery' || node.name === 'imageGallery')
+);
+
+let imageGalleryDirectiveCode = '';
+let imageGalleryDirectiveConfig: Record<string, any> = {};
+
+if (isPortfolioGallery) {
+  portfolioGalleryConfig = node.attributes || {};
+  const rawPortfolioIds = [];
+  const tagFilters = [];
+  
+  if (node.children) {
+    // Find list nodes in the container
+    const listNodes = node.children.filter(child => child.type === 'list');
+    
+    for (const listNode of listNodes) {
+      if (listNode.children) {
+        for (const listItem of listNode.children) {
+          if (listItem.type === 'listItem' && listItem.children) {
+            // Look for paragraph containing text or link
+            const paragraph = listItem.children.find(child => child.type === 'paragraph');
+            if (paragraph && paragraph.children) {
+              // Check if this is a tag filter line
+              const textContent = paragraph.children
+                .map(child => child.type === 'text' ? child.value : child.type === 'link' ? child.children[0]?.value || '' : '')
+                .join('').trim();
+              
+              const tagMatch = textContent.match(/^tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+              if (tagMatch) {
+                const tagName = (tagMatch[1] ?? tagMatch[2]).trim();
+                if (tagName) {
+                  tagFilters.push(tagName);
+                  console.log('[portfolioGallery] Added tag filter:', tagName);
+                }
+                continue;
+              }
+              
+              // Otherwise look for portfolio link
+              const link = paragraph.children.find(child => child.type === 'link');
+              if (link && link.url) {
+                // Extract the portfolio path from the backlink URL
+                const url = link.url;
+                // Remove leading slash and .md extension if present
+                const portfolioPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                rawPortfolioIds.push(portfolioPath);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Load portfolio collection
+  const allPortfolios = await getCollection('client-portfolios');
+  const portfolioMap = new Map(allPortfolios.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const portfolios = [];
+  const portfolioErrors = [];
+
+  // Resolve portfolioIds using the same pattern as toolingGallery
+  for (const input of rawPortfolioIds) {
+    let id = input;
+
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolvePortfolioId(id, allPortfolios);
+    if (resolvedId && portfolioMap.has(resolvedId)) {
+      const portfolio = portfolioMap.get(resolvedId);
+      const filename = resolvedId.split('/').pop()?.replace(/\.md$/, '') || '';
+      
+      portfolios.push({
+        id: filename.toLowerCase().replace(/\s+/g, '-'),
+        filename,
+        filePath: resolvedId,
+        ...portfolio,
+        url: portfolio.url || '#',
+        tags: portfolio.tags || [],
+        portfolios: portfolio.portfolios || [],
+      });
+    } else {
+      portfolioErrors.push(input);
+    }
+  }
+
+  // Add portfolios matching tagFilters
+  const normalizeTag = tag => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    console.log('[portfolioGallery] Searching for portfolios with tags:', tagFilters);
+    
+    const tagFilteredPortfolios = allPortfolios
+      .filter(portfolio => portfolio.data.tags?.some(tag =>
+        tagFilters.some(filterTag =>
+          normalizeTag(filterTag) === normalizeTag(tag)
+        )
+      ))
+      .map(entry => {
+        const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || '';
+        return {
+          id: filename.toLowerCase().replace(/\s+/g, '-'),
+          filename,
+          filePath: entry.id,
+          ...entry.data,
+          url: entry.data.url || '#',
+          tags: entry.data.tags || [],
+          portfolios: entry.data.portfolios || [],
+        };
+      });
+    
+    console.log('[portfolioGallery] Found', tagFilteredPortfolios.length, 'portfolios matching tags');
+    
+    // Add tag-matched portfolios if not already added
+    for (const portfolio of tagFilteredPortfolios) {
+      if (!portfolios.some(p => p.filePath === portfolio.filePath)) {
+        portfolios.push(portfolio);
+      }
+    }
+  }
+
+  if (portfolioErrors.length > 0) {
+    console.warn('[portfolioGallery] Missing portfolios for IDs:', portfolioErrors);
+  }
+
+  portfolioGalleryPortfolios = portfolios;
+  portfolioGalleryErrors = portfolioErrors;
+}
+
+if (isToolingGalleryDirective) {
+  toolingGalleryDirectiveConfig = node.attributes || {};
+  const rawToolIds = [];
+  const tagFilters = [];
+  
+  if (node.children) {
+    // Find list nodes in the container (same as portfolio gallery)
+    const listNodes = node.children.filter(child => child.type === 'list');
+    
+    for (const listNode of listNodes) {
+      if (listNode.children) {
+        for (const listItem of listNode.children) {
+          if (listItem.type === 'listItem' && listItem.children) {
+            // Look for paragraph containing text or link
+            const paragraph = listItem.children.find(child => child.type === 'paragraph');
+            if (paragraph && paragraph.children) {
+              // Check if this is a tag filter line
+              const textContent = paragraph.children
+                .map(child => child.type === 'text' ? child.value : child.type === 'link' ? child.children[0]?.value || '' : '')
+                .join('').trim();
+              
+              const tagMatch = textContent.match(/^tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+              if (tagMatch) {
+                const tagName = (tagMatch[1] ?? tagMatch[2]).trim();
+                if (tagName) {
+                  tagFilters.push(tagName);
+                  console.log('[toolingGallery] Added tag filter:', tagName);
+                }
+                continue;
+              }
+              
+              // Otherwise look for tool link
+              const link = paragraph.children.find(child => child.type === 'link');
+              if (link && link.url) {
+                // Extract the tool path from the backlink URL
+                const url = link.url;
+                // Remove leading slash and .md extension if present
+                const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                rawToolIds.push(toolPath);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Load tooling collection
+  const allTools = await getCollection('tooling');
+  const toolMap = new Map(allTools.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const tools = [];
+  const toolGalleryErrors = [];
+
+  // Resolve toolIds
+  for (const input of rawToolIds) {
+    let id = input;
+
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolveToolId(id, allTools);
+    if (resolvedId && toolMap.has(resolvedId)) {
+      tools.push(toolMap.get(resolvedId));
+    } else {
+      toolGalleryErrors.push(input);
+    }
+  }
+
+  // Add tools matching tagFilters
+  const normalizeTag = tag => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    console.log('[toolingGallery] Searching for tools with tags:', tagFilters);
+    
+    const tagFilteredTools = allTools
+      .filter(tool => tool.data.tags?.some(tag =>
+        tagFilters.some(filterTag =>
+          normalizeTag(filterTag) === normalizeTag(tag)
+        )
+      ))
+      .map(entry => ({
+        ...entry.data,
+        id: entry.id,
+        filePath: entry.id,
+      }));
+    
+    console.log('[toolingGallery] Found', tagFilteredTools.length, 'tools matching tags');
+    
+    // Add tag-matched tools if not already added
+    for (const tool of tagFilteredTools) {
+      if (!tools.some(t => t.id === tool.id)) {
+        tools.push(tool);
+      }
+    }
+  }
+
+  if (toolGalleryErrors.length > 0) {
+    console.warn('[toolingGallery] Missing tools for IDs:', toolGalleryErrors);
+  }
+
+  toolingGalleryDirectiveTools = tools;
+  toolingGalleryDirectiveErrors = toolGalleryErrors;
+}
+
+if (isImageGalleryDirective) {
+  imageGalleryDirectiveConfig = node.attributes || {};
+  
+  // Extract content from directive children
+  if (node.children) {
+    // Find list nodes in the container
+    const listNodes = node.children.filter(child => child.type === 'list');
+    
+    for (const listNode of listNodes) {
+      if (listNode.children) {
+        for (const listItem of listNode.children) {
+          if (listItem.type === 'listItem' && listItem.children) {
+            // Look for paragraph containing link or text
+            const paragraph = listItem.children.find(child => child.type === 'paragraph');
+            if (paragraph && paragraph.children) {
+              // Check if there's a link node (for URLs)
+              const link = paragraph.children.find(child => child.type === 'link');
+              if (link && link.url) {
+                // Extract URL from link node
+                imageGalleryDirectiveCode += '- ' + link.url + '\n';
+              } else {
+                // Fallback to text content
+                const textContent = paragraph.children
+                  .map(child => child.type === 'text' ? child.value : '')
+                  .join('').trim();
+                
+                if (textContent) {
+                  imageGalleryDirectiveCode += '- ' + textContent + '\n';
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  imageGalleryDirectiveCode = imageGalleryDirectiveCode.trim();
+  
+  console.log('[imageGallery] Extracted code:', imageGalleryDirectiveCode);
+}
+
 // Debug output to see AST structure
 if (DEBUG_AST) {
   console.log(`=== AstroMarkdown Debug ===`)
@@ -238,7 +555,7 @@ if (DEBUG_AST) {
   }
 </style>
 
-      <CopyLinkButton id={id} label={currentHeaderText} />
+      <CopyLinkButton id={id} label={currentHeaderText} articleTitle={data.title} />
     </>
   );
 
@@ -538,40 +855,120 @@ if (DEBUG_AST) {
     lang === 'imageGallery' || (lang === 'yaml' && meta === 'imageGallery')
   );
 
-  if (toolGalleryTools?.length > 0) {
+  if (toolGalleryTools?.length > 0 || toolGalleryErrors.length > 0) {
       return (
-          <>
-            <ToolingGallery tools={toolGalleryTools} small={isSmallToolGallery}/>
-            {toolGalleryErrors.length > 0 && (
-              <div class="tool-gallery-error">
-                ⚠️ Tool(s) not found:
-                <ul>
-                  {toolGalleryErrors.map(id => <li><code>{id}</code></li>)}
-                </ul>
-              </div>
-
-              <style>
-                .tool-gallery-error {
-                    color: #ff6b6b;
-                    background-color: rgba(255, 0, 0, 0.05);
-                    border: 1px solid rgba(255, 0, 0, 0.2);
-                    padding: 0.75rem;
-                    margin-top: 2rem;
-                    border-radius: 0.5rem;
-                    font-size: 0.9rem;
-                  }
-
-                  .tool-gallery-error ul {
-                    margin: 0.5rem 0 0;
-                    padding-left: 1.25rem;
-                  }
-              </style>
-            )}
-          </>
-      )}
+        <>
+          <div class="deprecation-warning">
+            <div class="warning-header">
+              <span class="warning-icon">⚠️</span>
+              <span class="warning-title">Deprecation Warning</span>
+            </div>
+            <div class="warning-content">
+              <p>The <code>```yaml toolingGallery</code> syntax is deprecated. Please use <code>:::tooling-gallery</code> directive syntax instead.</p>
+            </div>
+          </div>
+          <ToolingGallery tools={toolGalleryTools || []} small={isSmallToolGallery} errors={toolGalleryErrors}/>
+          <style>
+            .deprecation-warning {
+              margin: 1rem 0;
+              padding: 1rem;
+              background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+              border: 1px solid rgba(245, 158, 11, 0.3);
+              border-radius: 8px;
+            }
+            
+            .deprecation-warning .warning-header {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.5rem;
+              font-weight: 600;
+              color: #fbbf24;
+            }
+            
+            .deprecation-warning .warning-icon {
+              font-size: 1.25rem;
+            }
+            
+            .deprecation-warning .warning-title {
+              font-size: 0.9rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .deprecation-warning .warning-content {
+              color: #f1f5f9;
+              line-height: 1.5;
+              font-size: 0.9rem;
+            }
+            
+            .deprecation-warning code {
+              background: rgba(255, 255, 255, 0.1);
+              padding: 0.2em 0.4em;
+              border-radius: 4px;
+              font-family: monospace;
+            }
+          </style>
+        </>
+      );
+    }
 
   if (isImageGallery) {
-    return <ImageGallery code={value} dirpath={data.dirpath} />;
+    return (
+      <>
+        <div class="deprecation-warning">
+          <div class="warning-header">
+            <span class="warning-icon">⚠️</span>
+            <span class="warning-title">Deprecation Warning</span>
+          </div>
+          <div class="warning-content">
+            <p>The <code>```yaml imageGallery</code> syntax is deprecated. Please use <code>:::image-gallery</code> directive syntax instead.</p>
+          </div>
+        </div>
+        <ImageGallery code={value} dirpath={data.dirpath} />
+        <style>
+          .deprecation-warning {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+          }
+          
+          .deprecation-warning .warning-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #fbbf24;
+          }
+          
+          .deprecation-warning .warning-icon {
+            font-size: 1.25rem;
+          }
+          
+          .deprecation-warning .warning-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .deprecation-warning .warning-content {
+            color: #f1f5f9;
+            line-height: 1.5;
+            font-size: 0.9rem;
+          }
+          
+          .deprecation-warning code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: monospace;
+          }
+        </style>
+      </>
+    );
   }
 
   if (lang === 'mermaid') {
@@ -582,400 +979,54 @@ if (DEBUG_AST) {
   const blockType = lang?.toLowerCase();
   
   switch (blockType) {
-    case 'emphasis':
-    case 'em':
+    case 'slides':
+      // Parse slides configuration and links
+      const lines = value.trim().split('\n');
+      const config = {};
+      const slides = [];
+      let configSection = true;
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        // Skip empty lines
+        if (!trimmedLine) continue;
+        
+        // Check if this is a slide link
+        if (trimmedLine.startsWith('- [[')) {
+          configSection = false;
+          const linkMatch = trimmedLine.match(/\[\[(.*?)\|(.*?)\]\]/);
+          if (linkMatch) {
+            slides.push({
+              path: linkMatch[1],
+              title: linkMatch[2]
+            });
+          }
+        } else if (configSection) {
+          // Parse configuration options
+          // Support both "key: value" and "key=value" syntax
+          const colonMatch = trimmedLine.match(/^(\w+):\s*(.+)$/);
+          const equalsMatch = trimmedLine.match(/^(\w+)=(.+)$/);
+          
+          if (colonMatch) {
+            config[colonMatch[1]] = colonMatch[2].trim();
+          } else if (equalsMatch) {
+            config[equalsMatch[1]] = equalsMatch[2].trim();
+          } else if (trimmedLine.includes('=')) {
+            // Handle inline config like "theme=dark transition=slide"
+            const pairs = trimmedLine.split(/\s+/);
+            for (const pair of pairs) {
+              const [key, value] = pair.split('=');
+              if (key && value) {
+                config[key] = value;
+              }
+            }
+          }
+        }
+      }
+      
       return (
-        <>
-          <div class="block-emphasis">
-            <div class="emphasis-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-emphasis {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(59, 130, 246, 0.08) 0%, 
-                rgba(59, 130, 246, 0.04) 100%);
-              border-left: 4px solid #3b82f6;
-              border-radius: 0 8px 8px 0;
-              position: relative;
-            }
-            
-            .emphasis-content {
-              font-size: 1.1em;
-              line-height: 1.6;
-              color: #e2e8f0;
-              font-weight: 500;
-            }
-            
-            .block-emphasis::before {
-              content: "💡";
-              position: absolute;
-              left: -0.5rem;
-              top: 1rem;
-              background: #1e293b;
-              padding: 0.25rem;
-              border-radius: 50%;
-              font-size: 0.875rem;
-            }
-          </style>
-        </>
-      );
-
-    case 'alert':
-    case 'warning':
-      return (
-        <>
-          <div class="block-alert">
-            <div class="alert-header">
-              <span class="alert-icon">⚠️</span>
-              <span class="alert-title">Warning</span>
-            </div>
-            <div class="alert-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-alert {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(245, 158, 11, 0.1) 0%, 
-                rgba(245, 158, 11, 0.05) 100%);
-              border: 1px solid rgba(245, 158, 11, 0.3);
-              border-radius: 8px;
-              position: relative;
-            }
-            
-            .alert-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #fbbf24;
-            }
-            
-            .alert-icon {
-              font-size: 1.25rem;
-            }
-            
-            .alert-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .alert-content {
-              color: #f1f5f9;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'quote':
-    case 'blockquote':
-      return (
-        <>
-          <div class="block-quote">
-            <div class="quote-content">
-              {value}
-            </div>
-            <div class="quote-decoration"></div>
-          </div>
-          <style>
-            .block-quote {
-              margin: 1.5rem 0;
-              padding: 1.5rem 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.05) 0%, 
-                rgba(255, 255, 255, 0.02) 100%);
-              border-left: 4px solid #64748b;
-              border-radius: 0 8px 8px 0;
-              position: relative;
-              font-style: italic;
-            }
-            
-            .quote-content {
-              font-size: 1.1em;
-              line-height: 1.7;
-              color: #cbd5e1;
-              position: relative;
-              z-index: 1;
-            }
-            
-            .quote-decoration {
-              position: absolute;
-              top: 1rem;
-              right: 1rem;
-              font-size: 3rem;
-              color: rgba(100, 116, 139, 0.2);
-              font-family: serif;
-              line-height: 1;
-            }
-            
-            .quote-decoration::before {
-              content: """;
-            }
-          </style>
-        </>
-      );
-
-    case 'info':
-    case 'information':
-      return (
-        <>
-          <div class="block-info">
-            <div class="info-header">
-              <span class="info-icon">ℹ️</span>
-              <span class="info-title">Information</span>
-            </div>
-            <div class="info-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-info {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(59, 130, 246, 0.08) 0%, 
-                rgba(59, 130, 246, 0.04) 100%);
-              border: 1px solid rgba(59, 130, 246, 0.3);
-              border-radius: 8px;
-            }
-            
-            .info-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #60a5fa;
-            }
-            
-            .info-icon {
-              font-size: 1.25rem;
-            }
-            
-            .info-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .info-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'success':
-    case 'check':
-      return (
-        <>
-          <div class="block-success">
-            <div class="success-header">
-              <span class="success-icon">✅</span>
-              <span class="success-title">Success</span>
-            </div>
-            <div class="success-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-success {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(34, 197, 94, 0.08) 0%, 
-                rgba(34, 197, 94, 0.04) 100%);
-              border: 1px solid rgba(34, 197, 94, 0.3);
-              border-radius: 8px;
-            }
-            
-            .success-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #4ade80;
-            }
-            
-            .success-icon {
-              font-size: 1.25rem;
-            }
-            
-            .success-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .success-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'error':
-    case 'danger':
-      return (
-        <>
-          <div class="block-error">
-            <div class="error-header">
-              <span class="error-icon">❌</span>
-              <span class="error-title">Error</span>
-            </div>
-            <div class="error-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-error {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(239, 68, 68, 0.1) 0%, 
-                rgba(239, 68, 68, 0.05) 100%);
-              border: 1px solid rgba(239, 68, 68, 0.3);
-              border-radius: 8px;
-            }
-            
-            .error-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #f87171;
-            }
-            
-            .error-icon {
-              font-size: 1.25rem;
-            }
-            
-            .error-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .error-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'tip':
-    case 'hint':
-      return (
-        <>
-          <div class="block-tip">
-            <div class="tip-header">
-              <span class="tip-icon">💡</span>
-              <span class="tip-title">Tip</span>
-            </div>
-            <div class="tip-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-tip {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(168, 85, 247, 0.08) 0%, 
-                rgba(168, 85, 247, 0.04) 100%);
-              border: 1px solid rgba(168, 85, 247, 0.3);
-              border-radius: 8px;
-            }
-            
-            .tip-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #c084fc;
-            }
-            
-            .tip-icon {
-              font-size: 1.25rem;
-            }
-            
-            .tip-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .tip-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
-      );
-
-    case 'note':
-      return (
-        <>
-          <div class="block-note">
-            <div class="note-header">
-              <span class="note-icon">📝</span>
-              <span class="note-title">Note</span>
-            </div>
-            <div class="note-content">
-              {value}
-            </div>
-          </div>
-          <style>
-            .block-note {
-              margin: 1.5rem 0;
-              padding: 1.25rem;
-              background: linear-gradient(135deg, 
-                rgba(107, 114, 128, 0.08) 0%, 
-                rgba(107, 114, 128, 0.04) 100%);
-              border: 1px solid rgba(107, 114, 128, 0.3);
-              border-radius: 8px;
-            }
-            
-            .note-header {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              margin-bottom: 0.75rem;
-              font-weight: 600;
-              color: #9ca3af;
-            }
-            
-            .note-icon {
-              font-size: 1.25rem;
-            }
-            
-            .note-title {
-              font-size: 1rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            }
-            
-            .note-content {
-              color: #e2e8f0;
-              line-height: 1.6;
-            }
-          </style>
-        </>
+        <SlidesEmbed slides={slides} config={config} />
       );
 
     default:
@@ -1162,6 +1213,7 @@ if (DEBUG_AST) {
     margin-top: 1em;
     border-top: 1px solid #666;
     padding-top: 0.5em;
+    scroll-margin-top: 10vh;
   }
 
 </style>
@@ -1204,6 +1256,891 @@ if (DEBUG_AST) {
 {(node.type === "text") && 
     <span>{node.value}</span>
 }
+
+{/* Handle directive nodes from remark-directive */}
+{(node.type === "leafDirective" || node.type === "containerDirective") && (() => {
+  const directiveName = node.name;
+  let props = node.attributes || {};
+  
+  // Debug: Log all directives being processed
+  if (DEBUG_AST) {
+    console.log(`[AstroMarkdown] Processing directive: ${directiveName}, type: ${node.type}`);
+  }
+  
+  // For container directives, parse content as key-value pairs
+  if (node.type === "containerDirective" && node.children) {
+    const content = node.children
+      .filter(child => child.type === 'paragraph')
+      .map(child => child.children
+        .filter(subchild => subchild.type === 'text')
+        .map(subchild => subchild.value)
+        .join(''))
+      .join('\n');
+    
+    // Parse key="value" pairs from content
+    const contentProps = {};
+    const lines = content.split('\n').filter(line => line.trim());
+    for (const line of lines) {
+      const match = line.match(/^\s*(\S+)\s*=\s*["']([^"']*)["']\s*$/);
+      if (match) {
+        contentProps[match[1]] = match[2];
+      }
+    }
+    props = { ...props, ...contentProps };
+  }
+  
+  if (directiveName === 'figma-embed') {
+    const figmaUrl = props.src || props.url || '';
+    const width = props.width || '800';
+    const height = props.height || '600';
+    const authUser = props['auth-user'] || '';
+    const embedId = `figma-embed-${Math.random().toString(36).slice(2, 10)}`;
+    
+    // Enhanced Figma embed URL with proper node focusing
+    let embedUrl = `https://www.figma.com/embed?embed_host=lossless.group&url=${encodeURIComponent(figmaUrl)}`;
+    
+    // Add node-specific parameters for better focusing
+    if (figmaUrl.includes('node-id=')) {
+      embedUrl += '&node-id=' + (figmaUrl.match(/node-id=([^&]+)/)?.[1] || '');
+    }
+    
+    embedUrl += '&viewer=1&scaling=min-zoom&page-id=&starting-point-node-id=';
+    
+    return (
+      <>
+        <div id={embedId} class="figma-breakout" tabindex="0">
+          <div class="figma-embed-shell">
+            <button
+              type="button"
+              class="figma-expand-btn"
+              aria-label="Expand Figma design"
+              aria-expanded="false"
+              data-embed-id={embedId}
+              data-figma-url={figmaUrl}
+              data-width={width}
+              data-height={height}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"></path>
+                <path d="M3 16.2V21m0 0h4.8M3 21l6-6"></path>
+                <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"></path>
+                <path d="M3 7.8V3m0 0h4.8M3 3l6 6"></path>
+              </svg>
+            </button>
+            <div class="figma-embed-container" data-directive="figma-embed">
+              <div class="figma-embed-wrapper">
+                <iframe
+                  src={embedUrl}
+                  allowfullscreen
+                  loading="lazy"
+                  title="Figma embed"
+                  style={`border: none; width: ${width}px; height: ${height}px; border-radius: 8px; max-width: 100%;`}
+                ></iframe>
+              </div>
+              <div class="figma-embed-footer">
+                <a href={figmaUrl} target="_blank" rel="noopener">Open in Figma →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fullscreen Modal -->
+        <div
+          id={`modal-${embedId}`}
+          class="figma-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={`modal-title-${embedId}`}
+          hidden
+        >
+          <div class="figma-modal-content">
+            <h2 id={`modal-title-${embedId}`} class="visually-hidden">Expanded Figma Design</h2>
+            <button
+              type="button"
+              class="figma-modal-close-btn"
+              aria-label="Close expanded design"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+            <div class="figma-modal-embed-container">
+              <iframe
+                src={embedUrl}
+                allowfullscreen
+                title="Figma embed (expanded)"
+                style="border: none; width: 100%; height: 100%; border-radius: 8px;"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+        
+        <style>
+          /* Breakout layout similar to Mermaid */
+          .figma-breakout {
+            position: relative;
+            z-index: 10;
+            left: 50%;
+            right: 50%;
+            width: 100vw;
+            margin-left: -50vw;
+            max-width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            box-sizing: border-box;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+          }
+          
+          .figma-embed-shell {
+            position: relative;
+            min-width: 760px;
+            width: auto;
+            max-width: 1200px;
+            margin: 1.25rem 0;
+            overflow-x: auto;
+            background: var(--bastille, #19141D);
+            box-shadow: 0 4px 48px rgba(0,0,0,0.25);
+            border-radius: 10px;
+            border: 2px solid var(--clr-lossless-accent--brightest, #04e5e5);
+            margin: 0 auto;
+            display: block;
+            padding: 1rem;
+          }
+          
+          .figma-expand-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 1.5rem;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: all 0.2s ease;
+          }
+          
+          .figma-expand-btn:hover,
+          .figma-expand-btn:focus {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.9);
+            border-color: var(--clr-lossless-accent--brightest, #04e5e5);
+            outline: none;
+          }
+          
+          .figma-embed-container {
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          
+          .figma-embed-wrapper {
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .figma-embed-wrapper iframe {
+            display: block;
+            border: none;
+          }
+          
+          .figma-embed-footer {
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: right;
+          }
+          
+          .figma-embed-footer a {
+            color: var(--clr-lossless-accent--brightest, #04e5e5);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+          }
+          
+          .figma-embed-footer a:hover {
+            color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+          }
+          
+          /* Modal styles */
+          .figma-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s linear;
+            pointer-events: none;
+          }
+          
+          .figma-modal[data-visible="true"] {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+            pointer-events: auto;
+          }
+          
+          .figma-modal-content {
+            position: relative;
+            background-color: var(--bastille, #19141D);
+            padding: 4rem 2rem 2rem 2rem;
+            border-radius: 8px;
+            width: 95vw;
+            height: 95vh;
+            max-width: 1600px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+            border: 2px solid var(--clr-lossless-accent--brightest, #04e5e5);
+          }
+          
+          .figma-modal-embed-container {
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+          }
+          
+          .figma-modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            cursor: pointer;
+            padding: 0.75rem;
+            line-height: 1;
+            z-index: 10;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+          }
+          
+          .figma-modal-close-btn:hover {
+            background: rgba(255, 0, 0, 0.7);
+            border-color: #ff6b6b;
+          }
+          
+          .visually-hidden {
+            border: 0;
+            clip: rect(0 0 0 0);
+            height: 1px;
+            margin: -1px;
+            overflow: hidden;
+            padding: 0;
+            position: absolute;
+            width: 1px;
+            white-space: nowrap;
+          }
+          
+          @media (max-width: 768px) {
+            .figma-breakout {
+              left: auto;
+              right: auto;
+              width: 100%;
+              margin-left: 0;
+              max-width: 100%;
+              padding: 0 0.5rem;
+            }
+            
+            .figma-embed-shell {
+              min-width: auto;
+              max-width: 100%;
+              width: 100%;
+              padding: 0.5rem;
+            }
+            
+            .figma-embed-wrapper iframe {
+              height: 400px !important;
+              width: 100% !important;
+            }
+            
+            .figma-modal-content {
+              width: 95vw;
+              height: 95vh;
+              padding: 3rem 1rem 1rem 1rem;
+            }
+          }
+        </style>
+        
+        <script is:inline define:vars={{ embedId, figmaUrl, width, height }}>
+          // Modal functionality for Figma embeds
+          document.addEventListener('DOMContentLoaded', () => {
+            const expandBtn = document.querySelector(`[data-embed-id="${embedId}"]`);
+            const modal = document.getElementById(`modal-${embedId}`);
+            
+            if (expandBtn && modal) {
+              const closeBtn = modal.querySelector('.figma-modal-close-btn');
+              let previouslyFocusedElement;
+              
+              const openModal = () => {
+                previouslyFocusedElement = document.activeElement;
+                modal.hidden = false;
+                setTimeout(() => {
+                  modal.setAttribute('data-visible', 'true');
+                  document.body.style.overflow = 'hidden';
+                  expandBtn.setAttribute('aria-expanded', 'true');
+                  if (closeBtn) closeBtn.focus();
+                }, 10);
+              };
+              
+              const closeModal = () => {
+                modal.setAttribute('data-visible', 'false');
+                setTimeout(() => {
+                  modal.hidden = true;
+                }, 300);
+                document.body.style.overflow = '';
+                expandBtn.setAttribute('aria-expanded', 'false');
+                if (previouslyFocusedElement) {
+                  previouslyFocusedElement.focus();
+                }
+              };
+              
+              expandBtn.addEventListener('click', openModal);
+              if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+              }
+              
+              // Close with Escape key
+              modal.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                  closeModal();
+                }
+              });
+            }
+          });
+        </script>
+      </>
+    );
+  }
+
+  if (directiveName === 'tool-showcase') {
+    // Parse the container content for markdown list items with backlinks
+    let toolPaths = [];
+    
+    if (node.type === "containerDirective" && node.children) {
+      // Find list nodes in the container
+      const listNodes = node.children.filter(child => child.type === 'list');
+      
+      for (const listNode of listNodes) {
+        if (listNode.children) {
+          for (const listItem of listNode.children) {
+            if (listItem.type === 'listItem' && listItem.children) {
+              // Look for paragraph containing a link
+              const paragraph = listItem.children.find(child => child.type === 'paragraph');
+              if (paragraph && paragraph.children) {
+                const link = paragraph.children.find(child => child.type === 'link');
+                if (link && link.url) {
+                  // Extract the tool path from the backlink URL
+                  const url = link.url;
+                  // Remove leading slash and .md extension if present
+                  const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+                  toolPaths.push(toolPath);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    if (toolPaths.length > 0) {
+      return <ToolShowcaseIsland toolPaths={toolPaths} />;
+    }
+    
+    return (
+      <div class="tool-showcase-empty">
+        <p>No tools found in showcase directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, toolPaths, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .tool-showcase-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
+  if (directiveName === 'portfolio-gallery' || directiveName === 'portfolioGallery') {
+    // Use pre-computed portfolio data from top-level async logic
+    if (portfolioGalleryPortfolios?.length > 0) {
+      const isSmall = portfolioGalleryConfig.small === 'true' || portfolioGalleryConfig.size === 'small';
+      const expanded = portfolioGalleryConfig.expanded !== 'false';
+      const takeUpWholeWidth = portfolioGalleryConfig.fullWidth === 'true' || portfolioGalleryConfig.full === 'true';
+      
+      return (
+        <>
+          <PortfolioGallery 
+            portfolios={portfolioGalleryPortfolios} 
+            small={isSmall}
+            expanded={expanded}
+            takeUpWholeWidth={takeUpWholeWidth}
+          />
+          {portfolioGalleryErrors.length > 0 && (
+            <div class="portfolio-gallery-error">
+              ⚠️ Portfolio(s) not found:
+              <ul>
+                {portfolioGalleryErrors.map(path => <li><code>{path}</code></li>)}
+              </ul>
+            </div>
+            <style>
+              .portfolio-gallery-error {
+                color: #ff6b6b;
+                background-color: rgba(255, 0, 0, 0.05);
+                border: 1px solid rgba(255, 0, 0, 0.2);
+                padding: 0.75rem;
+                margin-top: 2rem;
+                border-radius: 0.5rem;
+                font-size: 0.9rem;
+              }
+              .portfolio-gallery-error ul {
+                margin: 0.5rem 0 0;
+                padding-left: 1.25rem;
+              }
+            </style>
+          )}
+        </>
+      );
+    }
+    
+    return (
+      <div class="portfolio-gallery-empty">
+        <p>No portfolios found in portfolio-gallery directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, config: portfolioGalleryConfig, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .portfolio-gallery-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
+  if (directiveName === 'slides' || directiveName === 'slideshow') {
+    // Parse the container content for markdown list items with slide backlinks
+    const slides = [];
+    const config = node.attributes || {};
+    
+    
+    if (node.type === "containerDirective" && node.children) {
+      // Find list nodes in the container
+      const listNodes = node.children.filter(child => child.type === 'list');
+      
+      for (const listNode of listNodes) {
+        if (listNode.children) {
+          for (const listItem of listNode.children) {
+            if (listItem.type === 'listItem' && listItem.children) {
+              // Look for paragraph containing a link
+              const paragraph = listItem.children.find(child => child.type === 'paragraph');
+              if (paragraph && paragraph.children) {
+                const link = paragraph.children.find(child => child.type === 'link');
+                if (link && link.url) {
+                  // Extract slide path and title from backlink
+                  const path = link.url.replace(/^\//, '').replace(/\.md$/, '');
+                  const title = link.children?.[0]?.value || path.split('/').pop() || path;
+                  
+                  slides.push({ path, title });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    if (slides.length > 0) {
+      return <SlidesEmbed slides={slides} config={config} />;
+    }
+    
+    return (
+      <div class="slides-directive-empty">
+        <p>No slides found in slides directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, slides, config, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .slides-directive-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
+  // Handle callout directives
+  const calloutTypes = {
+    'emphasis': { icon: '💡', title: 'Emphasis', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.04)' },
+    'em': { icon: '💡', title: 'Emphasis', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.04)' },
+    'warning': { icon: '⚠️', title: 'Warning', color: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)' },
+    'alert': { icon: '⚠️', title: 'Alert', color: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)' },
+    'info': { icon: 'ℹ️', title: 'Information', color: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)' },
+    'information': { icon: 'ℹ️', title: 'Information', color: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)' },
+    'success': { icon: '✅', title: 'Success', color: '#4ade80', bgColor: 'rgba(34, 197, 94, 0.08)', borderColor: 'rgba(34, 197, 94, 0.3)' },
+    'check': { icon: '✅', title: 'Success', color: '#4ade80', bgColor: 'rgba(34, 197, 94, 0.08)', borderColor: 'rgba(34, 197, 94, 0.3)' },
+    'error': { icon: '❌', title: 'Error', color: '#f87171', bgColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' },
+    'danger': { icon: '❌', title: 'Error', color: '#f87171', bgColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' },
+    'tip': { icon: '💡', title: 'Tip', color: '#c084fc', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)' },
+    'hint': { icon: '💡', title: 'Tip', color: '#c084fc', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)' },
+    'note': { icon: '📝', title: 'Note', color: '#9ca3af', bgColor: 'rgba(107, 114, 128, 0.08)', borderColor: 'rgba(107, 114, 128, 0.3)' },
+    'quote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true },
+    'blockquote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true }
+  };
+
+  if (calloutTypes[directiveName]) {
+    console.log(`[AstroMarkdown] Processing callout directive: ${directiveName}, type: ${node.type}`);
+    console.log(`[AstroMarkdown] Node children:`, node.children);
+    
+    const callout = calloutTypes[directiveName];
+    const customTitle = props.title || callout.title;
+    
+    // Extract content from directive children
+    let content;
+    if (node.type === 'containerDirective' && node.children) {
+      // For container directives, process all children
+      content = node.children.map(child => (
+        <Astro.self node={child} data={data} />
+      ));
+    } else if (node.type === 'leafDirective' && node.value) {
+      // For leaf directives, use the node value
+      content = [<span>{node.value}</span>];
+    } else {
+      content = [];
+    }
+    
+    console.log(`[AstroMarkdown] Extracted content:`, content);
+
+    if (callout.isQuote) {
+      // Special handling for quote directive
+      return (
+        <>
+          <div class="directive-quote">
+            <div class="quote-content">
+              {content}
+            </div>
+            <div class="quote-decoration"></div>
+          </div>
+          <style>
+            .directive-quote {
+              margin: 1.5rem 0;
+              padding: 1.5rem 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                rgba(255, 255, 255, 0.02) 100%);
+              border-left: 4px solid #64748b;
+              border-radius: 0 8px 8px 0;
+              position: relative;
+              font-style: italic;
+            }
+            
+            .directive-quote .quote-content {
+              font-size: 1.1em;
+              line-height: 1.7;
+              color: #cbd5e1;
+              position: relative;
+              z-index: 1;
+            }
+            
+            .directive-quote .quote-decoration {
+              position: absolute;
+              top: 1rem;
+              right: 1rem;
+              font-size: 3rem;
+              color: rgba(100, 116, 139, 0.2);
+              font-family: serif;
+              line-height: 1;
+            }
+            
+            .directive-quote .quote-decoration::before {
+              content: """;
+            }
+          </style>
+        </>
+      );
+    }
+
+    if (directiveName === 'emphasis' || directiveName === 'em') {
+      // Special handling for emphasis directive with left border
+      return (
+        <>
+          <div class="directive-emphasis">
+            <div class="emphasis-content">
+              {content}
+            </div>
+          </div>
+          <style>
+            .directive-emphasis {
+              margin: 1.5rem 0;
+              padding: 1.25rem;
+              background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.08) 0%, 
+                rgba(59, 130, 246, 0.04) 100%);
+              border-left: 4px solid #3b82f6;
+              border-radius: 0 8px 8px 0;
+              position: relative;
+            }
+            
+            .directive-emphasis .emphasis-content {
+              font-size: 1.1em;
+              line-height: 1.6;
+              color: #e2e8f0;
+              font-weight: 500;
+            }
+            
+            .directive-emphasis::before {
+              content: "💡";
+              position: absolute;
+              left: -0.5rem;
+              top: 1rem;
+              background: #1e293b;
+              padding: 0.25rem;
+              border-radius: 50%;
+              font-size: 0.875rem;
+            }
+          </style>
+        </>
+      );
+    }
+
+    // Standard callout with header and content
+    console.log(`[AstroMarkdown] Rendering callout: ${directiveName} with content:`, content);
+    
+    return (
+      <>
+        <div class={`directive-callout directive-${directiveName}`} style={`border: 2px solid ${callout.borderColor}; background: ${callout.bgColor};`}>
+          <div class="callout-header">
+            <span class="callout-icon">{callout.icon}</span>
+            <span class="callout-title">{customTitle}</span>
+          </div>
+          <div class="callout-content">
+            {content}
+          </div>
+        </div>
+        <style>
+          .directive-callout {
+            margin: 1.5rem 0;
+            padding: 1.25rem;
+            border-radius: 8px;
+            position: relative;
+          }
+          
+          /* Warning/Alert styles */
+          .directive-warning, .directive-alert {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+          }
+          .directive-warning .callout-header, .directive-alert .callout-header {
+            color: #fbbf24;
+          }
+          
+          /* Info styles */
+          .directive-info, .directive-information {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+          }
+          .directive-info .callout-header, .directive-information .callout-header {
+            color: #60a5fa;
+          }
+          
+          /* Success styles */
+          .directive-success, .directive-check {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+          }
+          .directive-success .callout-header, .directive-check .callout-header {
+            color: #4ade80;
+          }
+          
+          /* Error styles */
+          .directive-error, .directive-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+          }
+          .directive-error .callout-header, .directive-danger .callout-header {
+            color: #f87171;
+          }
+          
+          /* Tip styles */
+          .directive-tip, .directive-hint {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+          }
+          .directive-tip .callout-header, .directive-hint .callout-header {
+            color: #c084fc;
+          }
+          
+          /* Note styles */
+          .directive-note {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.08) 0%, rgba(107, 114, 128, 0.04) 100%);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+          }
+          .directive-note .callout-header {
+            color: #9ca3af;
+          }
+          
+          .directive-callout .callout-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+          }
+          
+          .directive-callout .callout-icon {
+            font-size: 1.25rem;
+          }
+          
+          .directive-callout .callout-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .directive-callout .callout-content {
+            color: #e2e8f0;
+            line-height: 1.6;
+          }
+          
+          .directive-callout .callout-content > *:first-child {
+            margin-top: 0;
+          }
+          
+          .directive-callout .callout-content > *:last-child {
+            margin-bottom: 0;
+          }
+        </style>
+      </>
+    );
+  }
+
+  // Handle toolingGallery directive
+  if (directiveName === 'tooling-gallery' || directiveName === 'toolingGallery') {
+    console.log(`[AstroMarkdown] Processing toolingGallery directive: ${directiveName}`);
+    
+    // Use pre-computed data from top-level async logic
+    if (toolingGalleryDirectiveTools?.length > 0 || toolingGalleryDirectiveErrors.length > 0) {
+      const isSmall = toolingGalleryDirectiveConfig.small === 'true' || toolingGalleryDirectiveConfig.size === 'small';
+      
+      return (
+        <>
+          <ToolingGallery tools={toolingGalleryDirectiveTools || []} small={isSmall} errors={toolingGalleryDirectiveErrors}/>
+        </>
+      );
+    }
+    
+    return (
+      <div class="tooling-gallery-empty">
+        <p>No tools found in tooling-gallery directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, config: toolingGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .tooling-gallery-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+
+  // Handle imageGallery directive
+  if (directiveName === 'image-gallery' || directiveName === 'imageGallery') {
+    console.log(`[AstroMarkdown] Processing imageGallery directive: ${directiveName}`);
+    console.log(`[AstroMarkdown] imageGalleryDirectiveCode:`, imageGalleryDirectiveCode);
+    
+    // Use pre-computed data from top-level async logic
+    if (imageGalleryDirectiveCode) {
+      return (
+        <>
+          <ImageGallery code={imageGalleryDirectiveCode} dirpath={data.dirpath} />
+        </>
+      );
+    }
+    
+    return (
+      <div class="image-gallery-empty">
+        <p>No content found in image-gallery directive</p>
+        <details>
+          <summary>Debug Info</summary>
+          <pre>{JSON.stringify({ name: directiveName, config: imageGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}</pre>
+        </details>
+        <style>
+          .image-gallery-empty {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            color: var(--clr-lossless-primary-light);
+            margin: 2rem 0;
+          }
+        </style>
+      </div>
+    );
+  }
+  
+  // Handle other directive types or show debug info
+  return (
+    <div class="unknown-directive" data-directive={directiveName}>
+      <p>Unknown directive: <code>{directiveName}</code></p>
+      <details>
+        <summary>Debug Info</summary>
+        <pre>{JSON.stringify({ name: directiveName, attributes: props }, null, 2)}</pre>
+      </details>
+    </div>
+  );
+})()}
 
 {other_type && 
     <div class={`unhandled-${node.type}`}>

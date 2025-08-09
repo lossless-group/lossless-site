@@ -1,0 +1,85 @@
+---
+/**
+ * ProjectCard.astro
+ * 
+ * Individual project card component for displaying project information
+ * Features hover effects and consistent styling with the design system
+ * 
+ * PROPS:
+ * - icon (string, required): Emoji or icon to display
+ * - title (string, required): Project title
+ * - description (string, required): Project description
+ * - link (string, optional): URL to link to when clicked
+ */
+
+import TextCTA from '../basics/cta/TextCTA.astro';
+
+interface Props {
+  icon: string;
+  title: string;
+  description: string;
+  link?: string;
+}
+
+const { icon, title, description, link } = Astro.props;
+---
+
+<div class="project-card">
+  <h3 class="project-title">
+    <span class="project-icon">{icon}</span>
+    {title}
+  </h3>
+  <p class="project-description">{description}</p>
+  
+  {link && (
+    <TextCTA href={link} text="Learn More" />
+  )}
+</div>
+
+<style>
+  .project-card {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+  }
+  
+  :global(.dark) .project-card {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .project-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    border-image: var(--grd--lossless-eastern-crimson, linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)) 1;
+    border-width: 2.5px;
+    border-style: solid;
+  }
+  
+  .project-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .project-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  
+  .project-description {
+    color: #cbd5e1;
+    line-height: 1.6;
+    margin: 0;
+    flex: 1;
+  }
+  
+</style>

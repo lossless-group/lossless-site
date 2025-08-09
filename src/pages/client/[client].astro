@@ -10,14 +10,17 @@ export async function getStaticPaths() {
 
   return entries
     .filter(entry => entry.isDirectory())
-    .map(entry => ({ params: { client: entry.name } }));
+    .map(entry => ({ 
+      params: { client: entry.name.toLowerCase() },
+      props: { actualClientName: entry.name }
+    }));
 }
 
 const { client } = Astro.params;
-
+const { actualClientName } = Astro.props;
 
 ---
 
 <ClientPortalLayout 
-  client={client}
+  client={actualClientName}
 />

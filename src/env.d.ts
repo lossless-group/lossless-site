@@ -34,5 +34,13 @@ declare namespace NodeJS {
   interface ProcessEnv extends ImportMetaEnv {}
 }
 
+// Global window functions for client navigation
+declare global {
+  interface Window {
+    scrollStealthClientsLeft?: () => void;
+    scrollStealthClientsRight?: () => void;
+  }
+}
+
 // Export the types for use in your application
 export {};

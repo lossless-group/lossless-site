@@ -1,5 +1,4 @@
 {
-  "$schema": "../schemas/people.schema.json",
   "authors": [
     {
       "id": "mpstaton",
@@ -10,11 +9,12 @@
       "socialLinks": {
         "twitter": "https://twitter.com/mpstaton",
         "github": "https://github.com/mpstaton",
+        "linkedin": "https://linkedin.com/in/mpstaton",
         "bluesky": "https://bsky.app/profile/mpstaton.bsky.social"
       },
       "metadata": {
         "createdAt": "2025-04-06T20:32:45-07:00",
-        "updatedAt": "2025-04-19T20:32:45-07:00"
+        "updatedAt": "2025-07-21T20:11:02+03:00"
       }
     },
     {
@@ -47,12 +47,27 @@
     },
     {
       "id": "sslava",
-      "name": "Sergey Sobolev",
+      "name": "Slava Sobolev",
       "role": "Creator",
       "bio": "Developer @ Lossless Group",
-      "headshotOf": "/images/headshot__Sergey-Sobolev.jpeg",
+      "headshotOf": "/images/headshotOf__Slava-Sobolev.jpeg",
       "socialLinks": {
         "github": "https://github.com/sslava"
+      },
+      "metadata": {
+        "createdAt": "2025-03-12T20:32:45-07:00",
+        "updatedAt": "2025-04-20T20:32:45-07:00"
+      }
+    },
+    {
+      "id": "sarahmaikenis",
+      "name": "Sarah Mikenis",
+      "role": "Art Director",
+      "bio": "Art Director @ Lossless Group",
+      "headshotOf": "/images/headshotOf__Sarah-Mikenis.png",
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/sarahmakenis",
+        "personal_site": "https://sarahmikenis.com/home.html"
       },
       "metadata": {
         "createdAt": "2025-03-12T20:32:45-07:00",

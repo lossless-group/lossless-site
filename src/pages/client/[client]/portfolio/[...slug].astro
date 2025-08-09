@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import { processEntries, getReferenceSlug, toProperCase } from '@utils/slugify';
+import path from 'node:path';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+export const getStaticPaths = async () => {
+  const allEntries = await getCollection('client-portfolios');
+  console.log(`Found ${allEntries.length} portfolio entries`);
+  
+  allEntries.forEach(entry => {
+    console.log(`Entry: id="${entry.id}", slug="${entry.data.slug || 'NO_SLUG'}"`);
+  });
+  
+  // Get list of client directories from filesystem to preserve case
+  const fs = await import('node:fs/promises');
+  const { contentBasePath } = await import('@utils/envUtils');
+  
+  const clientContentDir = path.resolve(`${contentBasePath}/client-content`);
+  const clientDirs = await fs.readdir(clientContentDir, { withFileTypes: true });
+  const clientNames = clientDirs
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name);
+  
+  // Create a case-insensitive map to preserve original case
+  const clientCaseMap = new Map(
+    clientNames.map(name => [name.toLowerCase(), name])
+  );
+
+  const paths = allEntries
+    .map(entry => {
+      const pathParts = entry.id.split('/');
+      
+      // For entries like "hypernova/Portfolio/file", extract the client (first part)
+      const clientLower = pathParts[0];
+      const client = clientCaseMap.get(clientLower) || clientLower;
+      
+      const filename = path.basename(entry.id).replace(/\.(md|mdx)$/, '');
+      const slug = entry.data.slug || getReferenceSlug(filename);
+
+      console.log(`Generating path: client="${client}", slug="${slug}" from entry.id="${entry.id}"`);
+
+      return {
+        params: {
+          client: client.toLowerCase(),
+          slug: slug,
+        },
+        props: {
+          actualClientName: client,
+          client,
+          entry,
+          slug: slug,
+          portfolios: allEntries.filter(e => e.id.startsWith(`${clientLower}/`)),
+        },
+      };
+    });
+    
+  console.log(`Generated ${paths.length} paths`);
+  return paths;
+};
+
+const { client, entry, slug } = Astro.props;
+
+// Use title from frontmatter as first priority
+const displayTitle = entry.data.title || entry.data.site_name || toProperCase(slug);
+
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, ''),
+  title: displayTitle,
+  ...entry.data,
+  date_created: entry.data.date_created || new Date().toISOString(),
+  date_modified: entry.data.date_modified || new Date().toISOString()
+};
+
+---
+
+<Layout 
+  title={displayTitle}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+    title={displayTitle}
+  />
+</Layout>

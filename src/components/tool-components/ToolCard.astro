@@ -1,5 +1,6 @@
 ---
 import { filterTitle, getEffectiveSiteName } from "@utils/toolUtils";
+import { toProperCase } from "@utils/slugify";
 import TagCloud from "./TagCloud.astro";
 import TextCTA from "@components/basics/cta/TextCTA.astro";
 import { getReferenceSlug } from "@utils/slugify";
@@ -73,8 +74,11 @@ if (!id) {
 // Ensure tags is always an array
 const safeTags = tags || [];
 
+// Extract filename from filePath if filename is not provided
+const effectiveFilename = filename || (filePath ? filePath.split('/').pop()?.replace(/\.md$/, '') : undefined);
+
 // Get the effective site name using the utility function
-const effectiveSiteName = getEffectiveSiteName(site_name, filename, url);
+const effectiveSiteName = toProperCase(getEffectiveSiteName(site_name, effectiveFilename, url));
 
 // Get the effective title with fallback order: zinger → title → og_title
 const effectiveTitle = zinger || title || og_title || "";
@@ -142,7 +146,6 @@ const toolkitPath = generateToolkitPath();
     }
     <div class="tool-card__header">
       <div class="tool-card__site-name">
-        {favicon && <img class="tool-favicon" src={favicon} alt="" />}
         <a href={url} target="_blank" rel="noopener noreferrer">
           <h2><span class="text-wrapper">{effectiveSiteName}</span></h2>
         </a>
@@ -285,11 +288,14 @@ const toolkitPath = generateToolkitPath();
     border-radius: 8px 8px 0 0;
     overflow: hidden;
     margin-bottom: 0.5em;
+    max-height: 180px;
+    flex-shrink: 0;
   }
 
   .tool-card-image img {
     width: 100%;
-    height: 180px;
+    height: 100%;
+    max-height: 180px;
     object-fit: cover;
     border-radius: 0.5em;
     transition: transform 0.3s ease-in-out;
@@ -321,12 +327,7 @@ const toolkitPath = generateToolkitPath();
     overflow: hidden; /* Prevent overflow */
   }
 
-  .tool-favicon {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    display: block;
-  }
+
 
   .tool-card h4 {
     color: var(--clr-heading);
@@ -430,15 +431,22 @@ const toolkitPath = generateToolkitPath();
 
 
 .tool-card.small {
-  height: auto !important;
-  max-height: 240px !important;
-  min-height: unset !important;
+  height: 200px !important;
+  max-height: 200px !important;
+  min-height: 200px !important;
   flex: unset !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
 }
 
 .tool-card.small .content-wrapper {
-  height: auto !important;
+  height: 100% !important;
   flex-grow: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .tool-card.small .tool-card__footer,
@@ -447,8 +455,34 @@ const toolkitPath = generateToolkitPath();
   display: none !important;
 }
 
+.tool-card.small .tool-card-image {
+  height: 50% !important;
+  max-height: 50% !important;
+  margin-bottom: 0 !important;
+  border-radius: 0.5em 0.5em 0 0 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
 .tool-card.small .tool-card-image img {
-  height: 120px;
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0.5em 0.5em 0 0 !important;
+  flex: 1 !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+.tool-card.small .tool-card__header {
+  padding: 0.4em 0.5em 0.5em 0.5em !important;
+  margin-bottom: 0 !important;
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
 
 /* Responsive styles for better adaptation to smaller widths */

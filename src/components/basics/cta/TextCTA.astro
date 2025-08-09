@@ -18,6 +18,8 @@ interface Props {
    * If not provided, a <button> element will be used instead
    */
   href?: string;
+
+  path?: string;
   
   /**
    * The text to display on the CTA
@@ -42,16 +44,17 @@ interface Props {
 
 const { 
   href, 
-  text, 
+  text,
+  path,
   showArrow = true, 
   class: className = "", 
   onClick 
 } = Astro.props;
 ---
 
-{href ? (
+{href || path ? (
   <a 
-    href={href} 
+    href={href || path} 
     class:list={["text-cta", className]} 
     {...onClick ? { onclick: onClick } : {}}
   >
@@ -112,8 +115,7 @@ const {
   
   /* Text styling with letter spacing */
   .text-cta-text {
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
     position: relative;
     background: var(--grd-text-cta);
     -webkit-background-clip: text;

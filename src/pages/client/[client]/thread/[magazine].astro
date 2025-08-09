@@ -11,34 +11,41 @@ export async function getStaticPaths() {
   const collectionMap = {
     'recommendations': { collection: 'client-recommendations', urlPrefix: '/client/' },
     'projects': { collection: 'client-projects', urlPrefix: '/client/' },
+    'portfolio': { collection: 'client-portfolios', urlPrefix: '/client/' },
   };
 
   const paths = [];
 
-  // Dynamically get all entries from both collections to discover clients
+  // Dynamically get all entries from all collections to discover clients
   const allRecommendations = await getCollection('client-recommendations');
   const allProjects = await getCollection('client-projects');
-  const allEntries = [...allRecommendations, ...allProjects];
+  const allPortfolios = await getCollection('client-portfolios');
+  const allEntries = [...allRecommendations, ...allProjects, ...allPortfolios];
   
-  // Extract unique client names from the entry paths
-  const clients = [...new Set(allEntries.map(entry => {
+  // Extract unique client names from the entry paths, preserving original case
+  const clientsMap = new Map();
+  allEntries.forEach(entry => {
     const entryPath = String(entry.id);
-    // Extract client name from path like "Laerdal/Recommendations/file.md" -> "laerdal"
     const pathParts = entryPath.split('/');
-    return pathParts[0].toLowerCase();
-  }))];
+    const originalClientName = pathParts[0];
+    const lowercaseClientName = originalClientName.toLowerCase();
+    if (!clientsMap.has(lowercaseClientName)) {
+      clientsMap.set(lowercaseClientName, originalClientName);
+    }
+  });
 
   for (const [magazineKey, { collection, urlPrefix }] of Object.entries(collectionMap)) {
     const entries = await getCollection(collection);
     const processedEntries = processEntries(entries);
+    console.log("===PROCESSED ENTRIES===", processedEntries.map(entry => entry.id));
 
     // For each dynamically discovered client, filter and generate paths
-    for (const client of clients) {
+    for (const [lowercaseClient, originalClient] of clientsMap.entries()) {
       // Filter entries for this specific client
       const clientEntries = processedEntries.filter(entry => {
         // Check if the entry path contains the client name
         const entryPath = String(entry.id);
-        return entryPath.toLowerCase().includes(client.toLowerCase());
+        return entryPath.toLowerCase().includes(lowercaseClient);
       });
 
       const sortedEntries = clientEntries.slice().sort((a, b) => {
@@ -73,10 +80,10 @@ export async function getStaticPaths() {
       
       paths.push({
         params: { 
-          client: client.toLowerCase(),
+          client: lowercaseClient,
           magazine: magazineKey 
         },
-        props: { contentThreads },
+        props: { contentThreads, actualClientName: originalClient },
       });
     }
   }

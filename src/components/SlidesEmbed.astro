@@ -1,0 +1,137 @@
+---
+export interface Props {
+  slides: Array<{
+    path: string;
+    title: string;
+  }>;
+  config?: {
+    theme?: string;
+    transition?: string;
+    controls?: string | boolean;
+    progress?: string | boolean;
+    autoSlide?: string | number;
+    loop?: string | boolean;
+    width?: string;
+    height?: string;
+  };
+}
+
+const { slides, config = {} } = Astro.props;
+
+// Convert string booleans to actual booleans
+const normalizeConfig = (config: Props['config']) => {
+  const normalized: any = { ...config };
+  
+  ['controls', 'progress', 'loop'].forEach(key => {
+    if (typeof normalized[key] === 'string') {
+      normalized[key] = normalized[key] === 'true';
+    }
+  });
+  
+  if (typeof normalized.autoSlide === 'string') {
+    normalized.autoSlide = parseInt(normalized.autoSlide, 10);
+  }
+  
+  return normalized;
+};
+
+const normalizedConfig = normalizeConfig(config);
+
+// Set defaults
+const finalConfig = {
+  theme: 'black',
+  transition: 'slide',
+  controls: true,
+  progress: true,
+  autoSlide: 0,
+  loop: false,
+  width: '100%',
+  height: '600px',
+  ...normalizedConfig
+};
+
+// Sanitize paths to prevent directory traversal
+const sanitizePath = (path: string) => {
+  // Remove any .. or absolute paths
+  return path.replace(/\.\./g, '').replace(/^\//, '');
+};
+
+// Build URL for the embed - use first slide as the main slug
+const firstSlide = slides[0];
+if (!firstSlide) {
+  throw new Error('No slides provided');
+}
+
+// Extract slug from path (remove slides/ prefix and .md extension)
+const slug = sanitizePath(firstSlide.path).replace(/^slides\//, '').replace(/\.md$/, '');
+const embedUrl = new URL(`/slides/embed/${slug}`, Astro.url.origin);
+
+// Add config parameters as query params
+Object.entries(finalConfig).forEach(([key, value]) => {
+  if (key !== 'width' && key !== 'height') {
+    embedUrl.searchParams.set(key, String(value));
+  }
+});
+---
+
+<div class="presentation-embed" data-slides={JSON.stringify(slides)}>
+  <iframe
+    src={embedUrl.toString()}
+    width={finalConfig.width}
+    height={finalConfig.height}
+    frameborder="0"
+    allowfullscreen
+    loading="lazy"
+    title="Embedded Presentation"
+  />
+</div>
+
+<style>
+  .presentation-embed {
+    margin: 2rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0f172a;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .presentation-embed iframe {
+    display: block;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+  
+  /* Responsive aspect ratio */
+  @media (max-width: 768px) {
+    .presentation-embed iframe {
+      height: 400px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .presentation-embed iframe {
+      height: 300px;
+    }
+  }
+</style>
+
+<script>
+  // Optional: Add error handling for iframe loading
+  document.querySelectorAll('.presentation-embed iframe').forEach(iframe => {
+    iframe.addEventListener('error', (e) => {
+      console.error('Failed to load presentation embed:', e);
+      const container = iframe.closest('.presentation-embed');
+      if (container) {
+        container.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: #ef4444;">
+            <p>⚠️ Failed to load presentation</p>
+            <p style="font-size: 0.875rem; color: #9ca3af; margin-top: 0.5rem;">
+              Please check that the presentation route is available.
+            </p>
+          </div>
+        `;
+      }
+    });
+  });
+</script>

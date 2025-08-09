@@ -1,6 +1,38 @@
 <a href="https://lossless.group"><img src="https://i.imgur.com/jrZBIAb.png" alt="The Lossless Group"></a>
 
+> Version 0.0.0.93 pushed to GitHub on 2025-08-04
+
 # Basics
+
+## Features
+- Responsive Layout
+- CSS themes, mode, and Tailwind CSS theme.
+- Extensible Collections
+    - Collections with multiple paths
+- [Extended Markdown Render Pipeline](#custom-markdown-extensions)
+    - New: Direcives with syntax
+    ```markdown
+    :::<directive-name> 
+       - `[[backlink/path/to/file]]`
+    :::
+    ``` 
+    - New: Figma embeds
+    ```markdown
+    :::figma url="https://www.figma.com/file/..." />
+    ```
+    - Smart YouTube Link Rendering
+- Standard Components
+    - Logo Scroller
+    - Hero Banner
+    - Cards with Open Graph image handling, rendering from YAML Frontmatter.
+    - Interactive Tags
+        - Filtered Lists
+- JSON Canvas (for client-side interactivity) according to the [JSON Canvas Specification](https://jsoncanvas.com/)
+- Environment-based Content Delivery
+- Header
+- Footer
+- Feature Image with Side Text
+- AST Debugger
 
 ## Stack:
 This is an Astro project, with robust support for Markdown, Extended Markdown, MDX, and Markdown+YAML frontmatter.
@@ -15,6 +47,14 @@ A preference for `pnpm` over `npm` or `yarn`.
 - [Tailwind CSS](https://tailwindcss.com) for inline styling, usually in the development phase.
 - [Svelte](https://svelte.dev) for client-side interactivity.
 - [MDX](https://mdxjs.com) for Markdown+JSX for component heavy content.
+
+# Getting Started
+
+## Prerequisites
+
+```bash
+brew install git-lfs
+```
 
 ```bash
 pnpm install --save-dev
@@ -32,12 +72,6 @@ pnpm build
 pnpm dev
 ```
 
-# BEFORE PROCEEDING
-
-```bash
-brew install git-lfs
-```
-
 ## Environment Variables
 Copy the example.env text file and rename it to .env. Fill in the values for the environment variables.
 ```shellscript
@@ -46,6 +80,22 @@ APP_ENV=development
 
 DEPLOY_ENV=LocalSiteOnly
 ```
+
+## Running the Development Server
+
+The development server can be started with:
+```bash
+pnpm dev
+```
+
+**Note:** If the server doesn't start or isn't accessible, you may need to run it in the background:
+```bash
+pnpm dev > /tmp/astro-dev.log 2>&1 &
+```
+This runs the server in the background and redirects output to a log file. The server will be available at `http://localhost:4321/` after a few seconds.
+
+## Deployment Context
+
 Lossless has one deployment on Vercel, which uses only the astro project as the root directory, and the content is in the 'generated_content' directory in `src` as a git submodule.
 
 The team that also manages the content uses the lossless-monorepo, which has the astro project as the 'site' submodule. The content is then in the 'content' submodule.
@@ -86,33 +136,115 @@ Once you have the content submodule cloned, use symbolic links to point from the
 ## Image Handling:
 While Astro is supposed to handle images extremely well, I find that sometimes there are just "dud rendering" issues that are not immediately apparent. As a result, I have a preference for using image APIs, I'm using [ImageKit](https://imagekit.io) for this.
 
-## Markdown Handling:
+## Markdown Render Pipeline:
 
-There are any number of libraries and plugins that allow Astro to "extend" Markdown and support various kinds of Markdown syntax, rendered as either HMTL or custom components.  Honestly, we're still figuring all this out, and it's been quite the rabbit hole of yak shaving.
+The site uses a sophisticated multi-stage Markdown processing pipeline that transforms raw Markdown content into rich, interactive web components. This pipeline handles everything from basic formatting to complex custom components and syntax highlighting.
 
-At the moment, we're using [remark-gfm](https://github.com/remarkjs/remark-gfm) for GitHub Flavored Markdown, and [remark-mermaid](https://github.com/mermaid-js/mermaid) for Mermaid diagrams. 
+### Pipeline Architecture
+
+The processing flow follows this sequence:
+1. **Raw Markdown** → **Remark Plugins** → **Rehype Plugins** → **Custom Components** → **Final HTML**
+
+### Core Dependencies
+- **[remark-gfm](https://github.com/remarkjs/remark-gfm)** - GitHub Flavored Markdown support
+- **[Shiki](https://shiki.style/)** - Advanced syntax highlighting with custom themes
+- **[KaTeX](https://katex.org/)** - Mathematical notation rendering
+- **[Mermaid](https://mermaid-js.github.io/mermaid)** - Diagram and flowchart generation
+
+### Remark Plugins (Markdown AST Processing)
+Located in `/src/utils/remark/`:
+- **remark-mermaid** - Converts Mermaid code blocks to diagram component
+- **remark-container** - Custom container blocks (callouts, info boxes)
+- **remark-directive** - Custom container blocks (custom components)
+- **remark-backlinks** - Generates bidirectional content linking
+- **remark-toc** - Auto-generates table of contents from headers
+
+### Rehype Plugins (HTML AST Processing)  
+Located in `/src/utils/rehype/`:
+- **rehype-autolink-headings** - Adds shareable anchor links to headers
+- **rehype-slug** - Generates URL-friendly header IDs
+- **rehype-external-links** - Processes external link handling
+
+### Custom Processing Features
+- **YouTube Auto-embeds** - Converts YouTube URLs to embedded players
+- **Code Block Enhancement** - Custom syntax highlighting with copy buttons
+- **Image Processing** - External image optimization via ImageKit API
+- **Frontmatter Integration** - YAML metadata processing for pages and collections
+- **Obsidian friendly** - We develop content with Obsidian, and keep the content in a git submodule. It's public, check it out at https://github.com/lossless-group/lossless-content
+
+### Syntax Highlighting
+Uses Shiki with custom themes supporting:
+- 15+ programming languages
+- Custom code block types (`imageGallery`, `toolingGallery`, `litegal`)
+- Dark mode optimized color schemes
+- Line highlighting and annotations
+
+### Debug Configuration
+Enable debugging in `.env`:
+```bash
+SHOW_DEBUG_MARKDOWN_AST=true  # Outputs processing AST to /debug/
+DEBUG_CITATIONS=true          # Debug citation processing  
+DEBUG_BACKLINKS=true          # Debug backlink generation
+DEBUG_TOC=true               # Debug table of contents
+```
+
+### Custom Markdown Extensions
+The pipeline supports several non-standard Markdown syntaxes:
+- **Obsidian-style backlinks** - `[[Internal Links]]`
+- **Custom callouts** - `> [!info]`, `> [!warning]`, etc.
+- **Image galleries** - Special code block syntax for multi-image displays
+- **Embedded components** - MDX-style component integration 
 
 We have working:
-- Codeblocks
-- Tables
-- Backlinks
-- iFrames with HTML and CSS (mainly used for embedding videos)
-- Autogenerated YouTube embeds from YouTube links in the markdown. 
-- Callouts (basic).
-- Footnotes (one set per page)
-- Image Embeds (external, using an image href) (basic, no styling or sizing)
-- Image Galleries (basic, no styling or sizing)
-- Mermaid Diagrams
-- Table of Contents (basic, having trouble with nested headers and ordered lists)
-- Info Sidebar (renders Author avatar component, a special "augmented with" component that can display AI//LLM trademarks, as well as semantic version, date created, date modified, and tags)
-- Autogenerated Header Links, allows for sharing to specific headers in any document.
-- Banner and Portrait images, sourced from URLs in the frontmatter.
+- [x]**Codeblocks**
+- [x]**Tables**
+- [x]**Backlinks**
+- [x]**iFrames with HTML and CSS** (mainly used for embedding videos)
+- [x]**Autogenerated YouTube embeds** from YouTube links in the markdown. 
+- [x]**Callouts** (basic).
+- [x]**Directives** (basic).
+    - [x]**Figma Embeds** via Figma Embed Kit. (requires API key in .env)
+- [x]**Footnotes** (one set per page)
+- [x]**Image Embeds** (external, using an image href) (basic, no styling or sizing)
+- [x]**Image Galleries** (basic, no styling or sizing)
+- [x]**Mermaid Diagrams**
+- [x]**Table of Contents** (basic, having trouble with nested headers and ordered lists)
+- [x]**Info Sidebar** (renders Author avatar component, a special "augmented with" component that can display AI//LLM trademarks, as well as semantic version, date created, date modified, and tags)
+- [x]**Autogenerated Header Links** (allows for sharing to specific headers in any document)
+- [x]**Banner and Portrait images** (sourced from URLs in the frontmatter)
 
 #### TODO for Extended Markdown:
-- Callouts (advanced, using Syntax of the Callout class box to route to different components for different use cases and styles)
-- Callouts that contain all the functionality of our general Markdown rendering, especially self-containing their own footnotes. 
-- Image Embeds (advanced Styling)
-- Internal Image Embeds (using a relative path to the image in the visualsCollection)
+- [ ] Callouts (advanced, using Syntax of the Callout class box to route to different components for different use cases and styles)
+- [ ] Callouts that contain all the functionality of our general Markdown rendering, especially self-containing their own footnotes. 
+- [ ] Callouts that feed the Table of Contents with their headers.
+- [ ] Image Embeds (advanced Styling)
+- [ ] Internal Image Embeds (using a relative path to the image in the visualsCollection)
+
+
+## JSON Canvas
+
+Our JSON Canvas implementation provides interactive project visualization and specification overviews. The system renders `.canvas` files according to the [JSON Canvas Specification](https://jsoncanvas.com/) with enhanced features for content integration.
+
+**Key Components:**
+- `JSONCanvasIsland.astro` - Server-side canvas file processing and coordinate transformation
+- `JSONCanvasRenderer.svelte` - Client-side interactive canvas rendering with pan/zoom
+- `JSONCanvasFile.svelte` - Individual canvas file node rendering with markdown support
+- `ProjectShowcase.astro` - Project container that integrates canvas with metadata
+
+**Features:**
+- Automatic coordinate transformation and viewport optimization
+- Markdown file node content rendering with full pipeline support
+- Interactive pan/zoom navigation with mouse and touch support
+- Client-specific project routing via MOC (Map of Contents) system
+- Canvas path resolution relative to content base directory
+
+**Usage:**
+Canvas files are integrated into projects via the MOC system using syntax like:
+```markdown
+:::projects
+- [[projects/Project-Name/Specs/canvas-file.canvas|Project Display Name]]
+:::
+```
 
 
 ## 🧞 Commands
@@ -124,6 +256,7 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm install`            | Installs dependencies                            |
 | `pnpm approve-builds`     | Approves a few packages that need additional approval. This is a one-time operation. |
 | `pnpm run dev`            | Starts local dev server at `localhost:4321`      |
+| `pnpm run dev > /tmp/astro-dev.log 2>&1 &` | Starts dev server in background (if having issues) |
 | `pnpm run build`          | Build your production site to `./dist/`          |
 | `pnpm run preview`        | Preview your build locally, before deploying     |
 | `pnpm run astro ...`      | Run CLI commands like `astro add`, `astro check` |

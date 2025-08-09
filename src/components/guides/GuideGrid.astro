@@ -1,0 +1,95 @@
+---
+/**
+ * GuideGrid Component
+ *
+ * Renders a responsive grid of guide previews using the GuideCard--sm component.
+ * Designed specifically for collections that don't have images (like up-and-running).
+ *
+ * Props:
+ * - guides: Array<GuideData> - An array of guide objects
+ *   Each GuideData object should have:
+ *   {
+ *     id: string;
+ *     title: string;
+ *     slug: string;
+ *     date?: string;
+ *     lede?: string;
+ *     tags?: string[];
+ *     collection?: string;
+ *   }
+ * - gridClass?: string - Optional additional CSS classes for the grid container
+ * - class?: string - Optional CSS classes for the root grid element
+ */
+
+import GuideCard from '@components/basics/messages/GuideCard--sm.astro';
+import type { HTMLAttributes } from 'astro/types';
+
+interface GuideData {
+  id: string;
+  title: string;
+  slug: string;
+  date?: string;
+  lede?: string;
+  og_favicon?: string;
+  description?: string;
+  tags?: string[];
+  collection?: string;
+}
+
+interface Props extends Omit<HTMLAttributes<'div'>, 'class'> {
+  guides: GuideData[];
+  gridClass?: string;
+  class?: string;
+}
+
+const { guides, gridClass, class: customRootClass, ...attrs } = Astro.props as Props;
+
+const defaultGridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+
+const processedGuides = guides.map(guide => ({
+  ...guide,
+  description: guide.lede || guide.description || '',
+}));
+---
+
+<div class:list={[defaultGridClasses, gridClass, customRootClass]} {...attrs}>
+  {processedGuides.map(guide => (
+    <GuideCard
+      title={guide.title}
+      description={guide.description}
+      date={guide.date}
+      tags={guide.tags || []}
+      slug={guide.slug}
+      collection={guide.collection}
+      og_favicon={guide.og_favicon}
+    />
+  ))}
+</div>
+
+<style>
+  /* Additional grid-specific styling if needed */
+  .grid {
+    padding: 1rem 0;
+  }
+  
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+  
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1025px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+  }
+</style>

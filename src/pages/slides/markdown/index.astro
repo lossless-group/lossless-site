@@ -1,0 +1,148 @@
+---
+/**
+ * Markdown Slides Index Page
+ * Lists all available markdown presentations
+ */
+import Layout from '@layouts/Layout.astro';
+import TextCTA from '@components/basics/cta/TextCTA.astro';
+
+const title = "Markdown Presentations";
+const description = "Browse available markdown-based slide presentations";
+
+const frontmatter = {
+  title: title,
+  description: description,
+  lede: description
+};
+
+// Define available markdown presentations
+const markdownPresentations = [
+  {
+    title: "Git Basics",
+    description: "Introduction to version control with Git",
+    url: "/slides/markdown/git-basics",
+    icon: "🔀"
+  },
+  {
+    title: "Introduction to Docker",
+    description: "Containerization fundamentals and Docker basics",
+    url: "/slides/markdown/docker-intro",
+    icon: "🐳"
+  },
+  {
+    title: "TypeScript Fundamentals",
+    description: "Type-safe JavaScript development with TypeScript",
+    url: "/slides/markdown/typescript-fundamentals",
+    icon: "🔧"
+  }
+];
+---
+
+<Layout frontmatter={frontmatter}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-lg opacity-80 max-w-2xl mx-auto">
+        These presentations are created from markdown files and rendered with RevealJS
+      </p>
+    </div>
+    
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+      {markdownPresentations.map(presentation => (
+        <div class="presentation-card block p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 transform">
+          <div class="text-4xl mb-4">{presentation.icon}</div>
+          <h2 class="text-xl font-semibold mb-2">{presentation.title}</h2>
+          <p class="opacity-80">{presentation.description}</p>
+          <div class="mt-4">
+            <TextCTA href={presentation.url} text="View Presentation" />
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <div class="mt-12 text-center">
+      <div class="mb-6">
+        <TextCTA href="/slides/" text="← Back to All Presentations" />
+      </div>
+      
+      <div class="bg-[var(--clr-secondary-bg,#1a1a1a)] border border-[var(--clr-border,#333)] rounded-lg p-6 max-w-2xl mx-auto">
+        <h3 class="text-lg font-semibold mb-3">How to Create Markdown Slides</h3>
+        <div class="text-left text-sm space-y-2">
+          <p>1. Create a <code class="px-2 py-1 bg-[var(--clr-primary-bg,#2a2a2a)] rounded">.md</code> file in <code class="px-2 py-1 bg-[var(--clr-primary-bg,#2a2a2a)] rounded">src/content/slides/</code></p>
+          <p>2. Separate slides with <code class="px-2 py-1 bg-[var(--clr-primary-bg,#2a2a2a)] rounded">---</code> (three dashes)</p>
+          <p>3. Use <code class="px-2 py-1 bg-[var(--clr-primary-bg,#2a2a2a)] rounded">--</code> (two dashes) for vertical slides</p>
+          <p>4. Access at <code class="px-2 py-1 bg-[var(--clr-primary-bg,#2a2a2a)] rounded">/slides/markdown/slides/filename</code></p>
+        </div>
+      </div>
+      
+      <div class="mt-8">
+        <p class="help-text">
+          All presentations support keyboard navigation, speaker notes, and PDF export.
+        </p>
+        <p class="help-text mt-2">
+          Press <kbd class="keyboard-hint">F</kbd> for fullscreen, 
+          <kbd class="keyboard-hint">S</kbd> for speaker notes, 
+          or <kbd class="keyboard-hint">ESC</kbd> for overview.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .presentation-card {
+    background-color: var(--clr-secondary-bg, #1a1a1a);
+    border: 1px solid var(--clr-border, #333);
+    color: var(--clr-text, #e0e0e0);
+  }
+  
+  .presentation-card:hover {
+    background-color: var(--clr-hover-bg, #252525);
+    border-color: var(--clr-primary, #0078ff);
+  }
+  
+  /* Fallback for light mode if CSS variables aren't available */
+  @media (prefers-color-scheme: light) {
+    .presentation-card {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+      color: #212529;
+    }
+    
+    .presentation-card:hover {
+      background-color: #e9ecef;
+    }
+  }
+  
+  /* Help text styling */
+  .help-text {
+    color: var(--clr-text-muted, #999);
+    opacity: 0.9;
+  }
+  
+  /* Keyboard hint styling */
+  .keyboard-hint {
+    padding: 0.25rem 0.5rem;
+    background-color: var(--clr-secondary-bg, #2a2a2a);
+    border: 1px solid var(--clr-border, #444);
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.875em;
+    color: var(--clr-text, #e0e0e0);
+    display: inline-block;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Light mode fallback for keyboard hints */
+  @media (prefers-color-scheme: light) {
+    .help-text {
+      color: #6c757d;
+    }
+    
+    .keyboard-hint {
+      background-color: #e9ecef;
+      border-color: #ced4da;
+      color: #495057;
+    }
+  }
+</style>

@@ -61,11 +61,14 @@ const { entry, contentType } = Astro.props;
 
 
 // Prepare contentData object (consistent with Articles page)
+// Include all frontmatter data from entry.data so InfoSidebar can access authors, augmented_with, etc.
 const contentData = {
   path: Astro.url.pathname,
   id: entry.id,
   title: entry.data?.title,
-  contentType
+  contentType,
+  // Spread all frontmatter data so InfoSidebar can access authors, tags, dates, etc.
+  ...entry.data
 };
 ---
 

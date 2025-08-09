@@ -1,0 +1,628 @@
+---
+import { filterTitle, getEffectiveSiteName } from "@utils/toolUtils";
+import { toProperCase } from "@utils/slugify";
+import TagCloud from "./TagCloud.astro";
+import TextCTA from "@components/basics/cta/TextCTA.astro";
+import { getReferenceSlug } from "@utils/slugify";
+
+interface Portfolio {
+  site_name?: string;
+  title?: string;
+  zinger?: string;
+  og_title?: string;
+  url: string;
+  image?: string;
+  og_image?: string;
+  og_image_url?: string;
+  favicon?: string;
+  og_favicon?: string;
+  description?: string;
+  og_description?: string;
+  description_site_cp?: string;
+  tags?: string[];
+  filename?: string;
+  og_screenshot_url?: string;
+  portfolios?: string[];
+}
+
+interface Props {
+  [key: string]: any; // Allow arbitrary HTML attributes (class, data-*, aria-*, etc.)
+  portfolio?: Portfolio;
+  // Support for direct properties
+  site_name?: string;
+  title?: string;
+  zinger?: string;
+  og_title?: string;
+  url?: string;
+  image?: string;
+  og_image?: string;
+  og_image_url?: string;
+  favicon?: string;
+  og_favicon?: string;
+  description?: string;
+  og_description?: string;
+  description_site_cp?: string;
+  tags?: string[];
+  filename?: string;
+  og_screenshot_url?: string;
+  filePath?: string; // Allow filePath to be passed as a prop
+  small?: boolean;
+  portfolios?: string[];
+}
+
+const {
+  id,
+  site_name,
+  title,
+  zinger,
+  og_title,
+  url,
+  image,
+  og_image,
+  og_image_url,
+  favicon,
+  og_favicon,
+  description,
+  og_description,
+  description_site_cp,
+  tags = [],
+  filename,
+  og_screenshot_url,
+  filePath,
+  small = false,
+  portfolios = [],
+  // Allow all other HTML attributes like class, data-*, aria-*
+  ...rest
+} = Astro.props;
+
+if (!id) {
+  throw new Error(`Missing portfolio ID in PortfolioCard.astro.\n\nProps: ${JSON.stringify(Astro.props, null, 2)}`);
+}
+
+// Ensure tags is always an array
+const safeTags = tags || [];
+
+// Extract filename from filePath if filename is not provided
+const effectiveFilename = filename || (filePath ? filePath.split('/').pop()?.replace(/\.md$/, '') : undefined);
+
+// Get the effective site name using the utility function
+const effectiveSiteName = toProperCase(getEffectiveSiteName(site_name, effectiveFilename, url));
+
+// Get the effective title with fallback order: zinger → title → og_title
+const effectiveTitle = zinger || title || og_title || "";
+
+// Only filter the title if it exists, otherwise leave it blank
+const displayTitle = effectiveTitle ? filterTitle(effectiveTitle, effectiveSiteName || "") : "";
+
+// More robust description handling - prioritize og_description for portfolio companies
+const hasDescriptionSiteCp =
+  description_site_cp !== undefined &&
+  description_site_cp !== null &&
+  description_site_cp.trim() !== "";
+const hasOgDescription =
+  og_description !== undefined &&
+  og_description !== null &&
+  og_description.trim() !== "";
+const hasDescription =
+  description !== undefined &&
+  description !== null &&
+  description.trim() !== "";
+
+const effectiveDescription = hasDescriptionSiteCp
+  ? description_site_cp
+  : hasOgDescription
+    ? og_description
+    : hasDescription
+      ? description
+      : "";
+
+// Use og_image as fallback for image
+const effectiveImage = image || og_image || og_image_url || og_screenshot_url;
+
+// Generate a portfolio path - extract client from filePath
+function generatePortfolioPath(): string {
+  // Extract client name from filePath (e.g., "hypernova/portfolio/company" -> "hypernova")
+  const clientFromPath = filePath?.split('/')[0] || 'hypernova';
+  
+  // If id contains a path (e.g., "hypernova/portfolio/aalo-atomics"), extract just the filename
+  let portfolioId = id;
+  if (id && id.includes('/')) {
+    portfolioId = id.split('/').pop() || id;
+  }
+  
+  return `/client/${clientFromPath}/portfolio/${getReferenceSlug(portfolioId)}`;
+}
+
+// Get the portfolio path for this company
+const portfolioPath = generatePortfolioPath();
+
+---
+
+<div class={`portfolio-card card card-hover-effect${small ? ' small' : ''}`} data-tags={JSON.stringify(safeTags)}>
+  <div class="content-wrapper">
+    {
+      effectiveImage && (
+        <div class="portfolio-card-image">
+          <img
+            src={effectiveImage}
+            alt={displayTitle}
+            data-primary-image={effectiveImage}
+            data-screenshot-url={og_screenshot_url}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      )
+    }
+    <div class="portfolio-card__header">
+      <div class="portfolio-card__site-name">
+        <a href={url} target="_blank" rel="noopener noreferrer">
+          <h2><span class="text-wrapper">{effectiveSiteName}</span></h2>
+        </a>
+      </div>
+      <h4><span class="text-wrapper">{displayTitle}</span></h4>
+    </div>
+
+    {!small && effectiveDescription && (
+      <p class="portfolio-description">
+        <span class="description-text">{effectiveDescription}</span>
+      </p>
+    )}
+
+    {!small && safeTags.length > 0 && (
+      <div class="portfolio-card__footer">
+        <TagCloud tags={safeTags} />
+      </div>
+    )}
+
+    {!small && portfolios.length > 0 && (
+      <div class="portfolio-funds">
+        <span class="funds-label">Funds:</span>
+        <div class="funds-list">
+          {portfolios.map(fund => (
+            <span class="fund-tag">{fund}</span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {!small && (
+      <div class="portfolio-card__cta">
+        <TextCTA 
+          href={portfolioPath} 
+          text="View Details" 
+          showArrow={true}
+          class="portfolio-details-cta"
+        />
+      </div>
+    )}
+  </div>
+</div>
+
+<script>
+  // Handle image loading and fallback
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".portfolio-card-image img").forEach((img) => {
+      const imgElement = img as HTMLImageElement;
+      imgElement.addEventListener(
+        "error",
+        function () {
+          const imageElement = imgElement;
+          const primaryImage = imageElement.getAttribute("data-primary-image");
+          const screenshotUrl = imageElement.getAttribute(
+            "data-screenshot-url"
+          );
+
+          // If this is the primary image failing and we have a screenshot URL
+          if (imageElement.src === primaryImage && screenshotUrl) {
+            console.log(
+              "Primary image failed to load, falling back to screenshot URL"
+            );
+            imageElement.src = screenshotUrl;
+
+            // Set up error handler for the fallback image
+            imageElement.addEventListener(
+              "error",
+              function () {
+                console.log(
+                  "Screenshot image also failed to load, hiding image container"
+                );
+                const container = imageElement.closest(
+                  ".portfolio-card-image"
+                ) as HTMLElement;
+                if (container) container.style.display = "none";
+              },
+              { once: true }
+            );
+          } else {
+            // Either the fallback failed or we don't have a fallback
+            console.log(
+              "Image failed to load and no fallback available, hiding image container"
+            );
+            const container = imageElement.closest(
+              ".portfolio-card-image"
+            ) as HTMLElement;
+            if (container) container.style.display = "none";
+          }
+        },
+        { once: true }
+      );
+    });
+  });
+</script>
+
+<style>
+  .portfolio-card {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    color: aliceblue;
+    padding: 0.15em;
+    border-radius: 1em;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    max-height: 100%;
+    margin-bottom: 2px;
+    box-sizing: border-box;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms ease, transform 300ms ease, box-shadow 300ms ease;
+    will-change: opacity, transform, box-shadow;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .portfolio-card.fade-in {
+    animation: fadeInUp 400ms ease forwards;
+  }
+
+  .portfolio-card.fade-out {
+    animation: fadeOutDown 300ms ease forwards;
+    pointer-events: none;
+  }
+
+  .portfolio-card h2 {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25em;
+  }
+
+  .portfolio-card .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    height: 100%;
+    width: 100%;
+    padding: 0.5em;
+    box-sizing: border-box;
+  }
+
+  .portfolio-card-image {
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    margin-bottom: 0.5em;
+    max-height: 180px;
+    flex-shrink: 0;
+  }
+
+  .portfolio-card-image img {
+    width: 100%;
+    height: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 0.5em;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .portfolio-card:hover .portfolio-card-image img {
+    transform: scale(1.1);
+  }
+
+  .portfolio-card__header {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .portfolio-card__site-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    width: 100%;
+  }
+
+  .portfolio-card__site-name h2 {
+    margin: 0;
+    line-height: 1;
+    width: 100%;
+    overflow: hidden;
+  }
+
+
+
+  .portfolio-card h4 {
+    color: var(--clr-heading);
+    font-size: var(--fs-350);
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .portfolio-description {
+    color: var(--clr-body);
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-300);
+    margin-bottom: 0.5em;
+    flex-grow: 1;
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .description-text {
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+  }
+
+  /* Common text wrapping styles for all text elements */
+  .text-wrapper {
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Apply text wrapping to headings */
+  .portfolio-card h2, 
+  .portfolio-card h4 {
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .portfolio-card h4 {
+    color: var(--clr-heading);
+    font-size: var(--fs-350);
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .portfolio-card__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    margin-top: 0.5em;
+  }
+
+  .portfolio-funds {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    margin-top: 0.5em;
+    padding: 0.5em;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5em;
+  }
+
+  .funds-label {
+    font-size: var(--fs-200);
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
+  }
+
+  .funds-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+  }
+
+  .fund-tag {
+    font-size: var(--fs-150);
+    padding: 0.25em 0.5em;
+    background: var(--clr-lossless-ui-btn-border);
+    border-radius: 0.25em;
+    color: black;
+  }
+
+  .portfolio-card__cta {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .portfolio-details-cta {
+    margin-top: 0.25em;
+  }
+
+  @keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.portfolio-card.small {
+  height: 200px !important;
+  max-height: 200px !important;
+  min-height: 200px !important;
+  flex: unset !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.portfolio-card.small .content-wrapper {
+  height: 100% !important;
+  flex-grow: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.portfolio-card.small .portfolio-card__footer,
+.portfolio-card.small .portfolio-card__cta,
+.portfolio-card.small .portfolio-description,
+.portfolio-card.small .portfolio-funds {
+  display: none !important;
+}
+
+.portfolio-card.small .portfolio-card-image {
+  height: 50% !important;
+  max-height: 50% !important;
+  margin-bottom: 0 !important;
+  border-radius: 0.5em 0.5em 0 0 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.portfolio-card.small .portfolio-card-image img {
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0.5em 0.5em 0 0 !important;
+  flex: 1 !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+.portfolio-card.small .portfolio-card__header {
+  padding: 0.4em 0.5em 0.5em 0.5em !important;
+  margin-bottom: 0 !important;
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* Responsive styles for better adaptation to smaller widths */
+@media (max-width: 1024px) {
+  .portfolio-card {
+    padding: 0.1em;
+  }
+  
+  .portfolio-card .content-wrapper {
+    padding: 0.4em;
+  }
+  
+  .portfolio-card-image img {
+    height: 160px;
+  }
+  
+  .portfolio-card h2 {
+    font-size: var(--fs-400);
+  }
+  
+  .portfolio-card h4 {
+    font-size: var(--fs-300);
+  }
+  
+  .portfolio-description {
+    font-size: var(--fs-250);
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-card-image img {
+    height: 140px;
+  }
+  
+  .portfolio-card h2 {
+    font-size: var(--fs-350);
+  }
+  
+  .portfolio-card h4 {
+    font-size: var(--fs-250);
+  }
+  
+  .portfolio-description {
+    font-size: var(--fs-200);
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-card-image img {
+    height: 120px;
+  }
+  
+  .portfolio-card h2 {
+    font-size: var(--fs-300);
+  }
+  
+  .portfolio-card h4 {
+    font-size: var(--fs-200);
+  }
+  
+  .portfolio-description {
+    font-size: var(--fs-150);
+  }
+}
+
+/* When sidebar is expanded (hover state on desktop) */
+@media (min-width: 1025px) {
+  .collection-reader-layout:has(.collection-sidebar:hover) .portfolio-card {
+    padding: 0.1em;
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .portfolio-card .content-wrapper {
+    padding: 0.4em;
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .portfolio-card-image img {
+    height: 160px;
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .portfolio-card h2 {
+    font-size: var(--fs-400);
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .portfolio-card h4 {
+    font-size: var(--fs-300);
+  }
+  
+  .collection-reader-layout:has(.collection-sidebar:hover) .portfolio-description {
+    font-size: var(--fs-250);
+  }
+}
+
+</style>

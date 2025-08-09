@@ -44,7 +44,7 @@ const renderedGridItems = items.map((item) => {
     className // Include any passed-in class
   ]}>
   {renderedGridItems.map(({ collection, entry }) => (
-    <div>
+    <div data-searchable>
       {collection === 'vocabulary' ? (
         <VocabularyPreviewCard entry={entry} />
       ) : collection === 'concepts' ? (

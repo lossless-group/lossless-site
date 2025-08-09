@@ -11,7 +11,7 @@
     "baseUrl": ".",
     "strictNullChecks": false,
     "allowJs": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "module": "ESNext",
     "esModuleInterop": true,
     "skipLibCheck": true,

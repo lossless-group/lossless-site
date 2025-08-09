@@ -1,0 +1,232 @@
+---
+import { filterTitle, getEffectiveSiteName } from "@utils/toolUtils";
+import { toProperCase, getReferenceSlug } from "@utils/slugify";
+import TextCTA from "@components/basics/cta/TextCTA.astro";
+
+interface Portfolio {
+  site_name?: string;
+  title?: string;
+  og_title?: string;
+  url: string;
+  tags?: string[];
+  portfolios?: string[];
+  filename?: string;
+}
+
+interface Props {
+  [key: string]: any;
+  portfolio?: Portfolio;
+  // Support for direct properties
+  site_name?: string;
+  title?: string;
+  og_title?: string;
+  url?: string;
+  tags?: string[];
+  portfolios?: string[];
+  filename?: string;
+  filePath?: string; // Explicitly declare filePath as optional
+  id?: string; // Add id for generating portfolio path
+}
+
+const { portfolio, ...directProps } = Astro.props;
+
+// Use portfolio props if provided, otherwise use direct props
+const {
+  site_name = directProps.site_name,
+  title = directProps.title,
+  og_title = directProps.og_title,
+  url = directProps.url,
+  tags = directProps.tags || [],
+  portfolios = directProps.portfolios || [],
+  filename = directProps.filename,
+  filePath = directProps.filePath,
+  id = directProps.id,
+} = portfolio || directProps;
+
+// Ensure tags and portfolios are always arrays
+const safeTags = tags || [];
+const safePortfolios = portfolios || [];
+
+// Get the effective site name using the utility function
+const effectiveSiteName = toProperCase(getEffectiveSiteName(site_name, filename, url));
+
+// Get the effective title with fallback order: title → og_title
+const effectiveTitle = title || og_title || "";
+
+// Only set displayTitle if title exists, otherwise leave it blank
+const displayTitle = effectiveTitle ? filterTitle(effectiveTitle, effectiveSiteName || "") : "";
+
+// Generate a portfolio path - extract client from filePath
+function generatePortfolioPath(): string {
+  // Extract client name from filePath (e.g., "hypernova/portfolio/company" -> "hypernova")
+  const clientFromPath = filePath?.split('/')[0] || 'hypernova';
+  
+  // If id contains a path (e.g., "hypernova/portfolio/aalo-atomics"), extract just the filename
+  let portfolioId = id || '';
+  if (portfolioId && portfolioId.includes('/')) {
+    portfolioId = portfolioId.split('/').pop() || portfolioId;
+  }
+  
+  return `/client/${clientFromPath}/portfolio/${getReferenceSlug(portfolioId)}`;
+}
+
+// Get the portfolio path for this company
+const portfolioPath = generatePortfolioPath();
+---
+
+<div class="bare-portfolio-card card portfolio-card" data-tags={JSON.stringify(safeTags)}>
+  <a href={url} target="_blank" rel="noopener noreferrer">
+    <div class="bare-portfolio-card__header">
+      <h2>{effectiveSiteName}</h2>
+      {displayTitle && <h4>{displayTitle}</h4>}
+    </div>
+    
+    {safeTags.length > 0 && (
+      <div class="bare-portfolio-tags">
+        {safeTags.map((tag) => (
+          <span class="bare-portfolio-tag">
+            <p>{tag}</p>
+          </span>
+        ))}
+      </div>
+    )}
+    
+    {safePortfolios.length > 0 && (
+      <div class="bare-portfolio-funds">
+        <span class="funds-label">Funds:</span>
+        <div class="funds-list">
+          {safePortfolios.map(fund => (
+            <span class="bare-fund-tag">{fund}</span>
+          ))}
+        </div>
+      </div>
+    )}
+    
+    {id && (
+      <div class="bare-portfolio-card__cta">
+        <TextCTA 
+          href={portfolioPath} 
+          text="View Details" 
+          showArrow={true}
+          class="portfolio-details-cta"
+        />
+      </div>
+    )}
+  </a>
+</div>
+
+<style>
+  .bare-portfolio-card {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 90%
+    );
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    padding: 0.5em;
+    border-radius: 0.75em;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 2px;
+    color: aliceblue;
+  }
+
+  .bare-portfolio-card a {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .bare-portfolio-card:hover {
+    background: color-mix(
+      in oklab,
+      var(--clr-lossless-primary-glass),
+      var(--clr-lossless-primary-dark) 20%
+    );
+    transform: translateY(-2px);
+    margin-bottom: 0;
+  }
+
+  .bare-portfolio-card__header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5em;
+  }
+
+  .bare-portfolio-card h2 {
+    font-size: var(--fs-400);
+    font-weight: var(--fw-bold);
+    margin: 0;
+    line-height: 1.2;
+    color: aliceblue;
+  }
+
+  .bare-portfolio-card h4 {
+    color: var(--clr-heading);
+    font-size: var(--fs-300);
+    margin: 0.25em 0 0 0;
+  }
+
+  .bare-portfolio-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .bare-portfolio-tag {
+    background: var(--clr-lossless-primary-dark);
+    color: var(--clr-lossless-primary-glass);
+    font-size: var(--fs-200);
+    padding: 0.2em 0.6em;
+    border-radius: 0.25em;
+    white-space: nowrap;
+
+    & p {
+      font-size: var(--fs-200);
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .bare-portfolio-funds {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    margin-top: 0.5em;
+    padding: 0.5em;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5em;
+  }
+
+  .funds-label {
+    font-size: var(--fs-200);
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
+  }
+
+  .funds-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+  }
+
+  .bare-fund-tag {
+    font-size: var(--fs-150);
+    padding: 0.25em 0.5em;
+    background: var(--clr-lossless-ui-btn-border);
+    border-radius: 0.25em;
+    color: black;
+  }
+
+  .bare-portfolio-card__cta {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 0.5em;
+  }
+
+  .portfolio-details-cta {
+    margin-top: 0.25em;
+  }
+</style>

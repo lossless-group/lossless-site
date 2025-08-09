@@ -1,0 +1,135 @@
+---
+/**
+ * GuideIndexLayout.astro
+ * Layout specifically for guide collections that don't have images
+ * Uses GuideGrid instead of ArticleGrid for better visual presentation
+ * Based on MagazineIndexLayout but adapted for guides
+ */
+
+import Layout from '@layouts/Layout.astro';
+import GuideGrid from '@components/guides/GuideGrid.astro';
+
+interface GuideData {
+  id: string;
+  title: string;
+  slug: string;
+  date?: string;
+  lede?: string;
+  description?: string;
+  tags?: string[];
+  collection?: string;
+  og_favicon?: string;
+  banner_image?: string;
+  portrait_image?: string;
+  imageAlt?: string;
+  date_of_event?: string;
+  participants?: string[];
+  categories?: string[];
+}
+
+export interface Props {
+  guides: GuideData[];
+  title: string;
+  description?: string;
+  collectionDisplayName?: string;
+}
+
+const { 
+  guides = [], 
+  title, 
+  description,
+  collectionDisplayName
+} = Astro.props as Props;
+---
+
+<Layout title={title} description={description}>
+  <main class="guide-index-container">
+    <!-- Slot for hero content to be injected from the page using this layout -->
+    <slot name="hero-content" />
+    
+    <!-- Slot for additional content between hero and guides -->
+    <slot name="additional-content" />
+    
+    <!-- Collection name and description (commented out as hero handles this)
+    {(collectionDisplayName || description) && (
+      <header class="guide-index-header">
+        {collectionDisplayName && <h1 class="collection-title">{collectionDisplayName}</h1>}
+        {description && <p class="collection-description">{description}</p>}
+      </header>
+    )} -->
+
+    {guides.length > 0 ? (
+      <div class="guides-section">
+        <GuideGrid guides={guides} />
+      </div>
+    ) : (
+      <div class="guide-empty">No guides found in this collection.</div>
+    )}
+  </main>
+</Layout>
+
+<style>
+  .guide-index-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem);
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+    max-width: var(--max-width-container, 1200px);
+  }
+
+  .guide-index-header {
+    text-align: center;
+    margin-bottom: var(--spacing-6, 1.5rem);
+    padding: var(--spacing-4, 1rem) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .collection-title {
+    font-size: var(--font-size-xxl, 2.5rem);
+    font-weight: var(--font-weight-bold, 700);
+    color: var(--color-text-primary, #f1f5f9);
+    margin-bottom: var(--spacing-2, 0.5rem);
+  }
+
+  .collection-description {
+    font-size: var(--font-size-md, 1.125rem);
+    color: var(--color-text-secondary, #cbd5e1);
+    max-width: 80ch;
+    margin: 0 auto;
+  }
+
+  .guides-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .guide-empty {
+    color: var(--color-text-secondary, #94a3b8);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-md, 0.5rem);
+    padding: var(--spacing-8, 2rem) var(--spacing-6, 1.5rem);
+    text-align: center;
+    font-size: var(--font-size-lg, 1.25rem);
+    margin-top: var(--spacing-8, 2rem);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .guide-index-container {
+      margin: 1rem auto;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+    
+    .collection-title {
+      font-size: 2rem;
+    }
+    
+    .collection-description {
+      font-size: 1rem;
+    }
+  }
+</style>

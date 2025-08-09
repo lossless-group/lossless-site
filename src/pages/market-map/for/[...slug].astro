@@ -1,0 +1,129 @@
+---
+// site/src/pages/market-map/for/[...slug].astro
+// This dynamic page renders individual market map pages.
+
+export const prerender = true;
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { slugify } from '@utils/slugify';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+export async function getStaticPaths() {
+  const collectionName = 'market-maps';
+  const entries = await getCollection(collectionName);
+  
+  return entries.map(entry => {
+    const slug = entry.data.slug || slugify(entry.data.title || 'Untitled Market Map');
+    
+    return {
+      params: { slug },
+      props: { 
+        entry,
+        collection: collectionName,
+      },
+    };
+  });
+}
+
+// Define an interface for the props passed by getStaticPaths
+interface Props {
+  entry: CollectionEntry<'market-maps'> & {
+    body: string;
+  };
+  collection: string;
+}
+
+// Extend the MarketMapData interface to include all possible fields
+interface MarketMapData {
+  title?: string;
+  slug?: string;
+  banner_image?: string;
+  portrait_image?: string;
+  date_modified?: string | Date;
+  date_created?: string | Date;
+  lede?: string;
+  excerpt?: string;
+  publish?: boolean;
+  authors?: string | string[];
+  tags?: string | string[];
+  categories?: string | string[];
+  [key: string]: unknown;
+}
+
+// Explicitly cast Astro.props, then assign to typed variables
+const { entry, collection } = Astro.props as Props;
+
+// Extract the data we need with type assertion
+const data = entry.data as MarketMapData;
+
+const { 
+  title = 'Untitled Market Map',
+  lede = 'Market map and industry analysis.',
+  excerpt = '',
+  date_created,
+  date_modified,
+  banner_image,
+  portrait_image,
+  authors = [],
+  tags = [],
+  categories = []
+} = data;
+
+// Helper function to ensure we always return an array
+const toArray = (value: any): any[] => {
+  if (Array.isArray(value)) return value;
+  if (value) return [value];
+  return [];
+};
+
+// Prepare the article data to match OneArticleOnPage expected type
+const articleData = {
+  // Required fields from OneArticleOnPage.Props['data']
+  path: Astro.url.pathname,
+  
+  // Optional fields with proper typing
+  id: entry.id,
+  title: title || 'Untitled Market Map',
+  // Ensure authors is a string array as expected by OneArticleOnPage
+  authors: Array.isArray(authors) 
+    ? authors.filter((a): a is string => typeof a === 'string')
+    : typeof authors === 'string' 
+      ? [authors].filter(Boolean) 
+      : [],
+  date_created: date_created ? new Date(date_created).toISOString() : new Date().toISOString(),
+  date_modified: date_modified ? new Date(date_modified).toISOString() : new Date().toISOString(),
+  tags: Array.isArray(tags) 
+    ? tags.filter((t): t is string => typeof t === 'string')
+    : typeof tags === 'string'
+      ? [tags].filter(Boolean)
+      : [],
+  
+  // Additional fields that might be used by the component
+  banner_image: banner_image || portrait_image || '/visuals/bannerImage__The-Lossless-Group.png',
+  portrait_image: portrait_image || banner_image || '/visuals/bannerImage__The-Lossless-Group.png',
+  lede: lede || excerpt || 'Market map and industry analysis.'
+};
+
+// Set the page title and description
+const pageTitle = `${articleData.title} | The Lossless Group`;
+
+// Data for the OneArticle component - include all entry data
+const contentDataForOneArticle = {
+  ...entry.data, // Include ALL the original entry data
+  path: Astro.url.pathname,
+  id: entry.id,
+  collection: collection,
+};
+---
+
+<Layout title={pageTitle} description={articleData.lede} frontmatter={entry.data}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body} {/* Pass raw Markdown body */}
+    markdownFile={entry.id}
+    data={contentDataForOneArticle}
+    title={articleData.title}
+  />
+</Layout>

@@ -1,0 +1,346 @@
+---
+/**
+ * ToolShowcaseCarousel.astro
+ * Carousel wrapper for multiple ToolShowcaseItem--Wide-Responsive components
+ * Used by the ::tool-showcase directive
+ */
+
+import { getCollection } from 'astro:content';
+import ToolShowcaseItem from './ToolShowcaseItem--Wide-Responsive.astro';
+
+const { toolPaths = [] } = Astro.props;
+const carouselId = `carousel-${Math.random().toString(36).substr(2, 9)}`;
+const allTools = await getCollection('vertical-toolkits');
+
+// Match tools by path and ensure all properties are strings
+const matchedTools = toolPaths.map(path => {
+  const tool = allTools.find(t => {
+    const id = typeof t.id === 'string' ? t.id : '';
+    return id.endsWith(path) || id.includes(path);
+  });
+  return { path, tool };
+}).filter(Boolean);
+
+---
+
+{matchedTools.length > 0 ? (
+  <div class="tool-showcase-carousel" id={carouselId}>
+    <div class="carousel-container">
+      <div class="carousel-track">
+        {matchedTools.map((item, index) => (
+          <div class="carousel-slide" data-slide={index}>
+            <ToolShowcaseItem 
+              title={String(item.tool?.data?.title || '')}
+              og_image={String(item.tool?.data?.og_image || '')}
+              image={String(item.tool?.data?.image || '')}
+              og_screenshot={String(item.tool?.data?.og_screenshot || '')}
+              og_screenshot_url={String(item.tool?.data?.og_screenshot_url || '')}
+              og_favicon={String(item.tool?.data?.og_favicon || '')}
+              favicon={String(item.tool?.data?.favicon || '')}
+              og_title={String(item.tool?.data?.og_title || '')}
+              url={String(item.tool?.data?.url || '')}
+              og_description={String(item.tool?.data?.og_description || '')}
+              description_site_cp={String(item.tool?.data?.description_site_cp || '')}
+              inCarousel={true}
+            />
+          </div>
+        ))}
+      </div>
+      
+      {matchedTools.length > 1 && (
+        <>
+          <button class="carousel-nav carousel-prev" aria-label="Previous tool" data-carousel={carouselId}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+          </button>
+          <button class="carousel-nav carousel-next" aria-label="Next tool" data-carousel={carouselId}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+          </button>
+          <div class="carousel-indicators">
+            {matchedTools.map((_, index) => (
+              <button 
+                class={`carousel-dot ${index === 0 ? 'active' : ''}`}
+                data-slide={index}
+                data-carousel={carouselId}
+                aria-label={`Go to tool ${index + 1}`}
+              ></button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+) : (
+  <div class="tool-showcase-empty">
+    <p>No matching tools found for: {toolPaths.join(', ')}</p>
+  </div>
+)}
+
+<style>
+  .tool-showcase-carousel {
+    position: relative;
+    margin: clamp(1.5rem, 3vw, 2rem) 0;
+    width: 100%;
+    max-width: 100%;
+    contain: content;
+  }
+
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: clamp(8px, 1vw, 12px);
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.3s ease;
+    width: 100%;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+  }
+
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: clamp(40px, 4vw, 48px);
+    height: clamp(40px, 4vw, 48px);
+    display: flex;      
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .carousel-nav:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .carousel-prev {
+    left: 8px;
+  }
+
+  .carousel-next {
+    right: 8px;
+  }
+
+  .carousel-indicators {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 10;
+  }
+
+  .carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+  }
+
+  .carousel-dot.active,
+  .carousel-dot:hover {
+    background: var(--clr-lossless-accent--brightest);
+    border-color: var(--clr-lossless-accent--brightest);
+  }
+
+  .tool-showcase-empty {
+    padding: 1rem;
+    text-align: center;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 8px;
+    color: var(--clr-lossless-primary-light);
+  }
+</style>
+
+<script>
+  class ToolShowcaseCarousel {
+    private carousel: HTMLElement;
+    private track: HTMLElement;
+    private slides: NodeListOf<HTMLElement>;
+    private prevButton: HTMLElement | null;
+    private nextButton: HTMLElement | null;
+    private dots: NodeListOf<HTMLElement> | null;
+    private currentSlide: number = 0;
+    private isAnimating: boolean = false;
+    private animationDuration: number = 300;
+    private autoplayInterval: number | null = null;
+    private autoplayDelay: number = 5000;
+
+    constructor(carouselId: string) {
+      this.carousel = document.getElementById(carouselId) as HTMLElement;
+      if (!this.carousel) return;
+
+      this.track = this.carousel.querySelector('.carousel-track') as HTMLElement;
+      this.slides = this.carousel.querySelectorAll('.carousel-slide') as NodeListOf<HTMLElement>;
+      this.prevButton = this.carousel.querySelector('.carousel-prev');
+      this.nextButton = this.carousel.querySelector('.carousel-next');
+      this.dots = this.carousel.querySelectorAll('.carousel-dot');
+
+      if (this.slides.length <= 1) return;
+
+      this.init();
+    }
+
+    private init(): void {
+      // Set initial active state
+      this.updateActiveState();
+
+      // Event listeners for navigation
+      if (this.prevButton) {
+        this.prevButton.addEventListener('click', () => this.prev());
+      }
+
+      if (this.nextButton) {
+        this.nextButton.addEventListener('click', () => this.next());
+      }
+
+      // Event listeners for dot navigation
+      if (this.dots) {
+        this.dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => this.goToSlide(index));
+        });
+      }
+
+      // Keyboard navigation
+      this.carousel.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          this.prev();
+        } else if (e.key === 'ArrowRight') {
+          this.next();
+        }
+      });
+
+      // Touch events for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      this.carousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      this.carousel.addEventListener('touchmove', (e) => {
+        touchEndX = e.touches[0].clientX;
+      }, { passive: true });
+
+      this.carousel.addEventListener('touchend', () => {
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) { // Minimum swipe distance
+          if (diff > 0) {
+            this.next();
+          } else {
+            this.prev();
+          }
+        }
+      }, { passive: true });
+
+      // Autoplay
+      this.startAutoplay();
+
+      // Pause autoplay on hover
+      this.carousel.addEventListener('mouseenter', () => this.stopAutoplay());
+      this.carousel.addEventListener('mouseleave', () => this.startAutoplay());
+    }
+
+    private updateActiveState(): void {
+      // Update slide positions
+      this.slides.forEach((slide, index) => {
+        slide.setAttribute('aria-hidden', (index !== this.currentSlide).toString());
+        slide.style.transform = `translateX(${(index - this.currentSlide) * 100}%)`;
+      });
+
+      // Update active dot
+      if (this.dots) {
+        this.dots.forEach((dot, index) => {
+          dot.classList.toggle('active', index === this.currentSlide);
+          dot.setAttribute('aria-current', (index === this.currentSlide).toString());
+        });
+      }
+    }
+
+    private goToSlide(index: number): void {
+      if (this.isAnimating || index < 0 || index >= this.slides.length) return;
+      
+      this.currentSlide = index;
+      this.updateActiveState();
+      
+      // Reset autoplay timer when manually navigating
+      this.resetAutoplay();
+    }
+
+    private next(): void {
+      if (this.isAnimating) return;
+      
+      this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+      this.updateActiveState();
+      this.resetAutoplay();
+    }
+
+    private prev(): void {
+      if (this.isAnimating) return;
+      
+      this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+      this.updateActiveState();
+      this.resetAutoplay();
+    }
+
+    private startAutoplay(): void {
+      if (this.slides.length <= 1) return;
+      
+      this.stopAutoplay();
+      
+      this.autoplayInterval = window.setInterval(() => {
+        this.next();
+      }, this.autoplayDelay);
+    }
+
+    private stopAutoplay(): void {
+      if (this.autoplayInterval) {
+        clearInterval(this.autoplayInterval);
+        this.autoplayInterval = null;
+      }
+    }
+
+    private resetAutoplay(): void {
+      this.stopAutoplay();
+      this.startAutoplay();
+    }
+  }
+
+  // Initialize carousels on the page
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.tool-showcase-carousel').forEach(carousel => {
+      if (carousel instanceof HTMLElement && carousel.id) {
+        new ToolShowcaseCarousel(carousel.id);
+      }
+    });
+  });
+</script>

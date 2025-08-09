@@ -1,0 +1,193 @@
+---
+// Core imports
+import { getCollection } from "astro:content";
+import { processEntries } from '@utils/slugify';
+// Intentionally avoid auto-casing transformations to preserve original capitalization
+import type { ReferenceItem } from '../../types/client-data.d';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import "../../styles/global.css";
+
+interface Props {
+  client: string;
+  contentBasePath: string;
+  selectedVocabulary?: string[];
+  selectedConcepts?: string[];
+}
+
+const { client, contentBasePath, selectedVocabulary = [], selectedConcepts = [] } = Astro.props as Props;
+
+// Prepare reference terms. Prefer values passed from layout (parsed from MOC) over JSON file.
+let referenceTerms: { vocabulary: string[]; concepts: string[] } = { vocabulary: [], concepts: [] };
+
+console.log('client:', client);
+
+referenceTerms = {
+  vocabulary: selectedVocabulary,
+  concepts: selectedConcepts,
+};
+console.log('Using reference terms from props (required):', referenceTerms);
+
+// Helper functions
+function normalizeTerm(term: string): string {
+  return term.toLowerCase().replace(/-/g, '');
+}
+
+function toReferenceItems(entries: any[], collection: 'vocabulary' | 'concepts'): ReferenceItem[] {
+  if (!Array.isArray(entries)) {
+    console.warn('Expected entries to be an array, got:', entries);
+    return [];
+  }
+
+  return entries
+    .map(entry => {
+      if (!entry) {
+        console.warn('Encountered undefined entry in entries array');
+        return null;
+      }
+
+      const rawId = String(entry.slug || entry.id || '').trim();
+      // Use only the filename (last segment) without extension for fallback title
+      const baseName = rawId.split('/').pop()?.replace(/\.md$/i, '') || rawId;
+      // Preserve original capitalization; only replace separators with spaces and trim
+      const title = entry.data?.title || baseName.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+      return {
+        id: entry.id || rawId || `missing-id-${Math.random().toString(36).substr(2, 9)}`,
+        slug: rawId,
+        collection,
+        data: {
+          title,
+          aliases: Array.isArray(entry.data?.aliases) ? entry.data.aliases : [],
+          description: entry.data?.lede || entry.data?.description || '',
+          tags: Array.isArray(entry.data?.tags) ? entry.data.tags : []
+        },
+        originalFilename: entry.id || rawId || ''
+      };
+    })
+    .filter((item): item is ReferenceItem => item !== null);
+}
+
+function createLookupMap(items: ReferenceItem[]): Map<string, ReferenceItem> {
+  const map = new Map<string, ReferenceItem>();
+  for (const item of items) {
+    map.set(normalizeTerm(item.data.title), item);
+  }
+  return map;
+}
+
+// Get and process collections, using processEntries to normalize titles/slugs
+const vocabRaw = await getCollection('vocabulary');
+const conceptsRaw = await getCollection('concepts');
+
+const processedVocabularyEntries = processEntries(vocabRaw as any);
+const processedConceptsEntries = processEntries(conceptsRaw as any);
+
+// Convert processed entries into ReferenceItem shape for lookups and rendering
+function toReferenceItemsFromProcessed(
+  entries: Array<{ id: string; slug: string; data: { title: string; [key: string]: any } }>,
+  collection: 'vocabulary' | 'concepts'
+): ReferenceItem[] {
+  return entries.map((entry) => ({
+    id: entry.id,
+    slug: entry.slug,
+    collection,
+    data: {
+      title: entry.data.title,
+      aliases: Array.isArray((entry as any).data?.aliases) ? (entry as any).data.aliases : [],
+      description: (entry as any).data?.lede || (entry as any).data?.description || '',
+      tags: Array.isArray((entry as any).data?.tags) ? (entry as any).data.tags : [],
+    },
+    originalFilename: entry.id,
+  }));
+}
+
+const allVocabItems = toReferenceItemsFromProcessed(processedVocabularyEntries as any, 'vocabulary');
+const allConceptItems = toReferenceItemsFromProcessed(processedConceptsEntries as any, 'concepts');
+
+const vocabMap = createLookupMap(allVocabItems);
+const conceptMap = createLookupMap(allConceptItems);
+
+function findMatchingItems(titles: string[], map: Map<string, ReferenceItem>): ReferenceItem[] {
+  return titles
+    .map(title => map.get(normalizeTerm(title)))
+    .filter((item): item is ReferenceItem => item !== undefined);
+}
+
+const clientVocab = findMatchingItems(referenceTerms.vocabulary, vocabMap);
+const clientConcepts = findMatchingItems(referenceTerms.concepts, conceptMap);
+---
+
+<!-- Reference Section HTML -->
+<section class="reference-section">
+  <!-- Vocabulary Section -->
+  {clientVocab.length > 0 && (
+    <div class="reference-category">
+      <h2>Vocabulary</h2>
+      <ReferenceGrid items={clientVocab} />
+    </div>
+  )}
+
+  <!-- Concepts Section -->
+  {clientConcepts.length > 0 && (
+    <div class="reference-category">
+      <h2>Concepts</h2>
+      <ReferenceGrid items={clientConcepts} />
+    </div>
+  )}
+</section>
+
+<style>
+  .reference-section {
+    padding: 2rem 0;
+    opacity: 1;
+    transform: none;
+  }
+
+  .reference-category {
+    margin-bottom: 3.5rem;
+  }
+
+  .reference-category h2 {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: 1.75rem;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--clr-heading--secondary); /* --hippie-blue from theme */
+    position: relative;
+    padding-bottom: 0.75rem;
+  }
+
+  .reference-category h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 3rem;
+    height: 3px;
+    background: linear-gradient(90deg, var(--clr-lossless-primary-light), var(--clr-lossless-accent--brightest));
+    border-radius: 3px;
+  }
+
+  @keyframes fadeInSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .reference-section {
+      padding: 1.5rem 0;
+    }
+    
+    .reference-category h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+  }
+</style>

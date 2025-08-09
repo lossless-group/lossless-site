@@ -1,0 +1,213 @@
+---
+/**
+ * ClientListHorizontalScroller--stealth.astro
+ * 
+ * Horizontal scrolling container for stealth client cards
+ * Shows stealth information instead of public client details
+ * 
+ * PROPS:
+ * - clients (array, required): Array of client objects with stealth properties:
+ *   - stealth-name: string
+ *   - stealth-logo?: string  
+ *   - stealth-description: string
+ *   - industry: string
+ *   - engagement: string
+ *   - (stealth-passcode is excluded for security)
+ * - title (string, optional): Section title (defaults to "Confidential Projects")
+ */
+
+import ClientCardSm from './ClientCard--sm--stealth.astro';
+import GlassmorphicNavButton from '../navigation/GlassmorphicNavButton.astro';
+
+interface Client {
+  id: string;
+  "stealth-name": string;
+  "stealth-logo"?: string;
+  "stealth-description": string;
+  industry: string;
+  engagement: string;
+  // Note: stealth-passcode is intentionally excluded
+}
+
+interface Props {
+  clients: Client[];
+  title?: string;
+}
+
+const { clients, title = "Current Work" } = Astro.props;
+---
+
+<section class="stealth-client-list-section">
+  <div class="section-header">
+    <GlassmorphicNavButton 
+      direction="left" 
+      label="Previous clients"
+      onClick="window.scrollStealthClientsLeft()"
+      class="nav-left"
+    />
+    <h2 class="section-title">{title}</h2>
+    <GlassmorphicNavButton 
+      direction="right" 
+      label="Next clients"
+      onClick="window.scrollStealthClientsRight()"
+      class="nav-right"
+    />
+  </div>
+  <div class="clients-container">
+    <div class="clients-scroll">
+      {clients.map((client, index) => (
+        <ClientCardSm 
+          name={client["stealth-name"]}
+          logo={client["stealth-logo"]}
+          description={client["stealth-description"]}
+          industry={client.industry}
+          engagement={client.engagement}
+          clientId={client.id}
+          data-index={index}
+        />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .stealth-client-list-section {
+    margin-bottom: 5rem;
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+    gap: 2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+    text-align: center;
+  }
+  
+  .nav-left {
+    position: absolute;
+    left: 0;
+  }
+  
+  .nav-right {
+    position: absolute;
+    right: 0;
+  }
+  
+  /* Clients Container */
+  .clients-container {
+    position: relative;
+    margin: 2rem -1rem;
+    padding: 0 1rem;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+  
+  .clients-scroll {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem calc(50% - 160px) 2rem calc(50% - 160px);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+  }
+
+  /* JavaScript to center the middle card on load */
+  
+  .clients-scroll > :global(*) {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+  }
+  
+  /* Custom Scrollbar Styling */
+  .clients-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  .clients-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Firefox Scrollbar */
+  @supports (scrollbar-width: thin) {
+    .clients-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  /* Mobile Adjustments */
+  @media (max-width: 768px) {
+    .clients-container {
+      margin: 1rem -1rem;
+      max-width: 100vw;
+      overflow: hidden;
+    }
+    
+    .clients-scroll {
+      gap: 1rem;
+      padding: 0.5rem 0 1.5rem;
+      max-width: 100vw;
+      /* Adjust padding for mobile to prevent overflow */
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // Center the middle card on page load and setup navigation
+  document.addEventListener('DOMContentLoaded', () => {
+    const scrollContainer = document.querySelector('.stealth-client-list-section .clients-scroll');
+    if (scrollContainer) {
+      const cards = scrollContainer.children;
+      const middleIndex = Math.floor(cards.length / 2);
+      const middleCard = cards[middleIndex] as HTMLElement;
+      
+      if (middleCard) {
+        // Scroll to center the middle card within its container only
+        // Use scrollLeft instead of scrollIntoView to avoid page-level scrolling
+        const cardRect = middleCard.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const scrollLeft = middleCard.offsetLeft - (scrollContainer.clientWidth / 2) + (middleCard.offsetWidth / 2);
+        scrollContainer.scrollLeft = scrollLeft;
+      }
+      
+      // Setup global navigation functions
+      window.scrollStealthClientsLeft = () => {
+        const cardWidth = 320 + 24; // card width + gap
+        scrollContainer.scrollBy({ 
+          left: -cardWidth, 
+          behavior: 'smooth' 
+        });
+      };
+      
+      window.scrollStealthClientsRight = () => {
+        const cardWidth = 320 + 24; // card width + gap
+        scrollContainer.scrollBy({ 
+          left: cardWidth, 
+          behavior: 'smooth' 
+        });
+      };
+    }
+  });
+</script>

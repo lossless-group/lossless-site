@@ -1,0 +1,156 @@
+---
+// site/src/pages/learn-with/zero-to/index.astro
+// Collection-specific page for to-hero collection with toggle navigation
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import MagazineIndexLayout from '../../../layouts/MagazineIndexLayout.astro'; 
+import { slugify } from '../../../utils/slugify'; 
+import { collectionPublishingDefaults } from '../../../content.config'; 
+import Hero from '../../../components/basics/Hero.astro';
+import AnimationWrapper from '../../../components/basics/AnimationWrapper.astro';
+
+// Define the entry type for the to-hero collection
+interface ToHeroEntry {
+  id: string;
+  data: {
+    title?: string;
+    slug?: string;
+    banner_image?: string;
+    portrait_image?: string;
+    date_of_event?: string | Date;
+    date?: string | Date;
+    lede?: string;
+    description?: string;
+    publish?: boolean;
+    tag?: string | string[];
+    tags?: string | string[];
+    participant?: string | string[];
+    participants?: string | string[];
+    category?: string | string[];
+    categories?: string | string[];
+  };
+}
+
+// Get all to-hero entries
+const allEntriesUnfiltered = await getCollection('to-hero') as unknown as ToHeroEntry[];
+
+// Apply publishing filter logic
+const defaultPublishBehavior = collectionPublishingDefaults['to-hero']?.publishByDefault ?? true;
+
+const allEntries = allEntriesUnfiltered.filter((entry) => {
+  const itemPublishFlag = entry.data?.publish; 
+  
+  if (defaultPublishBehavior === true) {
+    return itemPublishFlag !== false;
+  }
+  return itemPublishFlag === true;
+});
+
+// Collection configuration for to-hero
+const collectionConfig = {
+  title: 'Zero to Hero',
+  subtitle: "From beginner to expert in no time.",
+  description: 'Guides and tutorials to help you go from zero to hero in various topics.'
+};
+
+// Transform entries for to-hero collection
+const articles = allEntries.map((entry) => {
+  const data = entry.data as any;
+  
+  function normalizeToArray(singularKey: string, pluralKey: string): string[] {
+    const singularValue = data?.[singularKey];
+    const pluralValue = data?.[pluralKey];
+    
+    const combined = [singularValue, pluralValue].filter(Boolean).flat();
+    return combined.length > 0 ? combined : [];
+  }
+  
+  const customSlug = data?.slug || slugify(data?.title || entry.id);
+  
+  let dateValue = data?.date_of_event || data?.date;
+  if (dateValue instanceof Date) {
+    dateValue = dateValue.toISOString().split('T')[0];
+  }
+  
+  return {
+    id: entry.id, 
+    title: data?.title || 'Untitled',
+    slug: customSlug, 
+    collection: 'zero-to',
+    date_created: dateValue,
+    lede: data?.lede || data?.description || '', 
+    tags: normalizeToArray('tag', 'tags')
+  };
+}).sort((a, b) => {
+  // Sort by date descending (most recent first)
+  if (!a.date_created && !b.date_created) return 0;
+  if (!a.date_created) return 1;
+  if (!b.date_created) return -1;
+  
+  const dateA = new Date(a.date_created);
+  const dateB = new Date(b.date_created);
+  return dateB.getTime() - dateA.getTime();
+});
+---
+
+<MagazineIndexLayout
+  title={collectionConfig.title} 
+  description={collectionConfig.description}
+  articles={articles}
+  collectionDisplayName={collectionConfig.title} 
+>
+  <div slot="hero-content" style="position: relative;">
+    <AnimationWrapper>
+      <Hero
+        title={collectionConfig.title}
+        subtitle={collectionConfig.subtitle}
+        description={collectionConfig.description}
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+      />
+    </AnimationWrapper>
+  </div>
+</MagazineIndexLayout>
+
+<style>
+  .chevron-navigation {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  
+  .chevron-navigation a {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .chevron-navigation a:hover {
+    background: white;
+    transform: scale(1.1);
+  }
+  
+  .chevron-navigation svg {
+    width: 24px;
+    height: 24px;
+    color: var(--color-text);
+  }
+  
+  @media (max-width: 768px) {
+    .chevron-navigation {
+      display: none;
+    }
+  }
+</style>
