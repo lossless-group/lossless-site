@@ -561,16 +561,12 @@ const projectsCollection = defineCollection({
     pattern: "**/*.md",
     base: "../content/projects",
     generateId: ({ entry }) => {
-      console.log(`[PROJECTS] Processing entry: "${entry}"`);
-      
       // Remove .md extension from entry path
       const pathWithoutExt = entry.replace(/\.md$/, '');
-      console.log(`[PROJECTS] Path without extension: "${pathWithoutExt}"`);
       
       // Extract project root directory and internal path
       const pathParts = pathWithoutExt.split('/');
       if (pathParts.length === 0) {
-        console.log(`[PROJECTS] ERROR: Empty path parts`);
         return 'unknown';
       }
       
@@ -588,7 +584,6 @@ const projectsCollection = defineCollection({
         slug = `${getReferenceSlug(projectRoot)}/${getReferenceSlug(internalPath)}`;
       }
       
-      console.log(`[PROJECTS] Generated slug: "${slug}"`);
       return slug;
     }
   }),
