@@ -12,11 +12,12 @@ import IconHeaderMessageCardGrid from '@components/basics/messages/IconHeaderMes
 import IconHeaderMessageCard from '@components/basics/messages/IconHeaderMessageCard.astro';
 import ToolingGallery from '@components/markdown/ToolingGallery.astro';
 import ClientReferenceSection from '@components/client-portals/ClientReferenceSection.astro';
+import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
 
 // Utility imports
 import { getCollection } from "astro:content";
-import { toProperCase, slugify } from '@utils/slugify';
-import { resolveToolId } from '@utils/toolUtils';
+import { toProperCase, slugify, getReferenceSlug } from '@utils/slugify';
+import { resolveToolId, resolvePortfolioId } from '@utils/toolUtils';
 import { extractFrontmatter } from '@utils/yamlFrontmatter';
 
 // Type imports
@@ -136,6 +137,149 @@ try {
   console.error('Error loading client portal cards:', error);
 }
 
+// Optional per-client feature filter via content/moc/<Client>.md using :::features directive
+try {
+  const clientMdPath = path.resolve(contentBasePath, 'moc', `${toProperCase(client)}.md`);
+  const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+
+  // Extract the first :::features ... ::: block
+  const featuresBlockMatch = rawClientMd.match(/:::features([\s\S]*?):::/i);
+  if (featuresBlockMatch) {
+    const block = featuresBlockMatch[1] || '';
+    const featureLines = block
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('-') || line.startsWith('*'));
+
+    const requestedFeatures = featureLines
+      .map((line) => line.replace(/^[-*]\s*/, '').trim())
+      .filter(Boolean);
+
+    if (requestedFeatures.length > 0) {
+      // Normalize and alias common variants/typos
+      const aliasMap = new Map<string, string>([
+        ['recs', 'recommendations'],
+        ['recommendation', 'recommendations'],
+        ['recommendations', 'recommendations'],
+        ['reccomendations', 'recommendations'], // common misspelling
+        ['projects', 'projects'],
+        ['portfolio', 'portfolio'],
+        ['reader', 'reader'],
+      ]);
+
+      const normalizeFeature = (name: string): string => {
+        const slug = slugify(name).toLowerCase();
+        return aliasMap.get(slug) || slug;
+      };
+
+      const allowed = new Set(requestedFeatures.map((f) => normalizeFeature(f)));
+
+      const originalCards = clientPortalCards;
+      const filtered = originalCards.filter((card: any) => allowed.has(normalizeFeature(card.title)));
+
+      if (filtered.length > 0) {
+        clientPortalCards = filtered;
+        console.log(`Filtered clientPortalCards for ${toProperCase(client)} to features:`, [...allowed].join(', '));
+      } else {
+        console.warn(`Features directive found for ${toProperCase(client)} but no card titles matched. Keeping all cards.`);
+      }
+    }
+  } else {
+    console.warn(`No :::features directive found in moc/${toProperCase(client)}.md (optional).`);
+  }
+} catch (err) {
+  console.warn(`No per-client features file found at content/moc/${toProperCase(client)}.md (optional).`);
+}
+
+// Featured portfolio items via :::portfolio directive in content/moc/<Client>.md
+let featuredPortfolios: any[] = [];
+try {
+  const clientMdPath = path.resolve(contentBasePath, 'moc', `${toProperCase(client)}.md`);
+  const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+  const portfolioBlockMatch = rawClientMd.match(/:::portfolio([\s\S]*?):::/i);
+  if (portfolioBlockMatch) {
+    const block = portfolioBlockMatch[1] || '';
+    const lines = block
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith('-') || l.startsWith('*'));
+
+    const requested = lines
+      .map((line) => {
+        // Try to extract [[Name]] allowing for a missing closing brackets
+        const m = line.match(/^[-*]\s*\[\[(.*?)(?:\]\])?\s*$/);
+        if (m && m[1]) return m[1].trim();
+        return line.replace(/^[-*]\s*/, '').trim();
+      })
+      .filter(Boolean);
+
+    if (requested.length > 0) {
+      const allPortfolios = await getCollection('client-portfolios');
+
+      // Resolve each requested name to a portfolio entry and preserve order
+      for (const name of requested) {
+        const resolvedId = await resolvePortfolioId(name, allPortfolios);
+        if (!resolvedId) continue;
+        const entry = allPortfolios.find((e) => e.id === resolvedId);
+        if (!entry) continue;
+
+        const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || '';
+        const idForCard = getReferenceSlug(filename);
+        const data: any = (entry as any).data || {};
+
+        featuredPortfolios.push({
+          ...data,
+          id: idForCard,
+          filename,
+          filePath: entry.id,
+          url: data.url || '#',
+          tags: data.tags || [],
+          portfolios: data.portfolios || [],
+        });
+      }
+
+      console.log(`Loaded ${featuredPortfolios.length} featured portfolio items for ${toProperCase(client)} from MOC`);
+    } else {
+      console.warn(`:::portfolio block found for ${toProperCase(client)} but no list items detected.`);
+    }
+  } else {
+    console.warn(`No :::portfolio directive found in moc/${toProperCase(client)}.md (optional).`);
+  }
+} catch (err) {
+  console.warn(`No per-client portfolio file found at content/moc/${toProperCase(client)}.md (optional).`);
+}
+
+// Reference terms: :::vocabulary and :::concepts blocks in content/moc/<Client>.md
+let selectedVocabulary: string[] = [];
+let selectedConcepts: string[] = [];
+try {
+  const clientMdPath = path.resolve(contentBasePath, 'moc', `${toProperCase(client)}.md`);
+  const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+
+  const extractList = (blockName: string): string[] => {
+    const m = rawClientMd.match(new RegExp(`:::${blockName}([\\s\\S]*?):::`,'i'));
+    if (!m) return [];
+    return (m[1] || '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith('-') || l.startsWith('*'))
+      .map((l) => {
+        const mm = l.match(/^[-*]\s*\[\[(.*?)(?:\]\])?\s*$/);
+        return (mm && mm[1] ? mm[1] : l.replace(/^[-*]\s*/, '')).trim();
+      })
+      .filter(Boolean);
+  };
+
+  selectedVocabulary = extractList('vocabulary');
+  selectedConcepts = extractList('concepts');
+
+  if (selectedVocabulary.length > 0 || selectedConcepts.length > 0) {
+    console.log(`Loaded reference term selections for ${toProperCase(client)}:`, { selectedVocabulary, selectedConcepts });
+  }
+} catch (err) {
+  // Optional; silently continue
+}
+
 ---
 
 <Layout 
@@ -162,51 +306,77 @@ try {
       />
     </AnimationWrapper>
 
-    <!-- Separator between Hero and Client Portal Cards -->
+    <!-- Separator between Hero and Featured Portfolio -->
     <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="2rem" />
 
   <div class="client-reader-wrapper">
-    <!-- Client Portal Cards Section -->
-    <section class="client-portal-cards-section">
-      <div class="client-portal-cards-content">
-        <div class="client-portal-cards-text">
-          <p class="client-portal-cards-subtitle">Client Resources</p>
-          <h2 class="client-portal-cards-title">Explore {toProperCase(client)} Content</h2>
-          <p class="client-portal-cards-description">
-            Access strategic recommendations, active projects, and case studies tailored specifically for {toProperCase(client)}.
-          </p>
+    <!-- Featured Portfolio Section (from :::portfolio) -->
+    {featuredPortfolios.length > 0 && (
+      <section class="featured-portfolio-section">
+        <div class="featured-portfolio-content">
+          <div class="featured-portfolio-text">
+            <p class="client-portal-cards-subtitle">Featured Portfolio</p>
+            <h2 class="client-portal-cards-title">Companies {toProperCase(client)} Follows</h2>
+          </div>
         </div>
-      </div>
-
-      <section class="client-portal-cards-grid-section" style="--client-portal-section-top-margin: 0.5rem;">
-        <div class="icon-header-message-card-grid" style="margin-top: 0; margin-bottom: 0;">
-          {clientPortalCards.map(card => (
-            <div class="card-container">
-              <IconHeaderMessageCard
-                title={card.title}
-                description={card.description}
-                badge={card.badge}
-                verified={card.verified}
-                to_path={card.to_path?.replace('[client]', client.toLowerCase())}
-              >
-                {card.icon && card.icon.trim().endsWith('.svg') ? (
-                  <img src={card.icon} alt={card.title} width="64" height="64" loading="lazy" />
-                ) : (
-                  <span set:html={card.icon} />
-                )}
-              </IconHeaderMessageCard>
+        <div class="featured-portfolio-grid">
+          {featuredPortfolios.map((p) => (
+            <div class="portfolio-card-container">
+              <PortfolioCard {...p} id={p.id} filePath={p.filePath} />
             </div>
           ))}
         </div>
       </section>
-    </section>
+    )}
+
+    <!-- Client Portal Cards Section (fallback or supplemental) -->
+    {clientPortalCards.length > 0 && (
+      <section class="client-portal-cards-section">
+        <div class="client-portal-cards-content">
+          <div class="client-portal-cards-text">
+            <p class="client-portal-cards-subtitle">Client Resources</p>
+            <h2 class="client-portal-cards-title">Explore {toProperCase(client)} Content</h2>
+            <p class="client-portal-cards-description">
+              Access strategic recommendations, active projects, and case studies tailored specifically for {toProperCase(client)}.
+            </p>
+          </div>
+        </div>
+
+        <section class="client-portal-cards-grid-section" style="--client-portal-section-top-margin: 0.5rem;">
+          <div class="icon-header-message-card-grid" style="margin-top: 0; margin-bottom: 0;">
+            {clientPortalCards.map(card => (
+              <div class="card-container">
+                <IconHeaderMessageCard
+                  title={card.title}
+                  description={card.description}
+                  badge={card.badge}
+                  verified={card.verified}
+                  to_path={card.to_path?.replace('[client]', client.toLowerCase())}
+                >
+                  {card.icon && card.icon.trim().endsWith('.svg') ? (
+                    <img src={card.icon} alt={card.title} width="64" height="64" loading="lazy" />
+                  ) : (
+                    <span set:html={card.icon} />
+                  )}
+                </IconHeaderMessageCard>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+    )}
 
     <!-- Separator between Client Portal Cards and Reference Section -->
     <ThinGradientBleedSeparator height="2px" marginTop="3rem" marginBottom="2rem" />
 
     <div class="client-portal-container">
       <div id="reference-section">
-        <ClientReferenceSection client={client} contentBasePath={contentBasePath} />
+        <ClientReferenceSection 
+          client={client} 
+          contentBasePath={contentBasePath}
+          selectedVocabulary={typeof selectedVocabulary !== 'undefined' ? selectedVocabulary : undefined}
+          selectedConcepts={typeof selectedConcepts !== 'undefined' ? selectedConcepts : undefined}
+        />
       </div>
 
       {toolGalleryTools.length > 0 && (
@@ -500,6 +670,39 @@ try {
   grid-template-columns: repeat(4, 1fr);
 }
 
+/* Featured Portfolio Grid */
+.featured-portfolio-section {
+  margin-bottom: 0;
+  margin-top: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1rem;
+  animation: fadeInSlideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.featured-portfolio-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.featured-portfolio-text {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.featured-portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 1rem auto 0 auto;
+}
+
+.portfolio-card-container {
+  display: flex;
+}
+
 .card-container {
   /* Ensure the container takes up the full grid cell width */
   width: 100%;
@@ -549,6 +752,9 @@ try {
   .icon-header-message-card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .featured-portfolio-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   
   /* Center the third item when there are exactly 3 items */
   .icon-header-message-card-grid:has(.card-container:nth-child(3):last-child) .card-container:last-child {
@@ -571,6 +777,9 @@ try {
 
 @media (max-width: 640px) {
   .icon-header-message-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .featured-portfolio-grid {
     grid-template-columns: 1fr;
   }
 }
