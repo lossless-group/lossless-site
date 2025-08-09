@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { JSONCanvas, CanvasNode, CanvasEdge } from '../../types/json-canvas';
+  import FrontmatterSVG from '../../assets/Icons/frontmatter-indicator.svg?raw';
+  import MaximizeSVG from '../../assets/Icons/arrows-maximize.svg?raw';
+  import MinimizeSVG from '../../assets/Icons/arrows-minimize.svg?raw';
   import { resolveColor, getCanvasDimensions } from '../../utils/jsonCanvasUtils';
   import JSONCanvasGroup from './JSONCanvasGroup.svelte';
   import JSONCanvasFile from './JSONCanvasFile.svelte';
@@ -29,6 +32,9 @@
 
   // Selected node
   let selectedNodeId: string | null = null;
+  let canvasElement: HTMLDivElement;
+  let isFullscreen = false;
+  let containerElement: HTMLDivElement;
 
   $: if (canvas) {
     canvasDimensions = getCanvasDimensions(canvas);
@@ -98,7 +104,7 @@
     // Otherwise, handle as canvas zoom
     e.preventDefault();
     
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const zoomFactor = e.deltaY > 0 ? 0.98 : 1.02;
     const newScale = Math.max(0.1, Math.min(3, scale * zoomFactor));
     
     // Zoom towards mouse position
@@ -163,6 +169,68 @@
     if (svgElement) {
       svgElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     }
+  }
+
+  // Zoom adjustment function for arrow controls
+  function adjustZoom(delta: number) {
+    const newScale = Math.max(0.1, Math.min(3, scale + delta));
+    scale = newScale;
+    updateTransform();
+  }
+
+  // Handle keyboard input in zoom input field
+  function handleZoomInputKeydown(e: KeyboardEvent) {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const increment = e.shiftKey ? 0.1 : 0.05; // 10% with shift, 5% without
+      const delta = e.key === 'ArrowUp' ? increment : -increment;
+      adjustZoom(delta);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      (e.target as HTMLInputElement).blur();
+    }
+  }
+
+  // Handle zoom input field focus
+  function handleZoomInputFocus(e: FocusEvent) {
+    const input = e.target as HTMLInputElement;
+    input.select(); // Select all text for easy editing
+  }
+
+  // Handle zoom input field blur (when user finishes editing)
+  function handleZoomInputBlur(e: FocusEvent) {
+    const input = e.target as HTMLInputElement;
+    const value = input.value.replace('%', '');
+    const newZoom = parseInt(value);
+    
+    if (!isNaN(newZoom) && newZoom > 0) {
+      const newScale = Math.max(0.1, Math.min(3, newZoom / 100));
+      scale = newScale;
+      updateTransform();
+    }
+    
+    // Reset input to current scale value
+    input.value = `${Math.round(scale * 100)}%`;
+  }
+
+  // Fullscreen functionality
+  async function toggleFullscreen() {
+    if (!containerElement) return;
+    
+    try {
+      if (!isFullscreen) {
+        await containerElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.warn('Fullscreen not supported or failed:', error);
+    }
+  }
+
+  // Handle fullscreen change events
+  function handleFullscreenChange() {
+    isFullscreen = !!document.fullscreenElement;
   }
 
   // Node selection
@@ -332,14 +400,18 @@
     // Initial fit to view
     setTimeout(fitToView, 100);
     
+    // Add fullscreen change listener
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   });
 </script>
 
-<div class="json-canvas-container">
+<div class="json-canvas-container" bind:this={containerElement}>
   <!-- Controls -->
   <div class="canvas-controls">
     <button class="control-btn" on:click={resetView} title="Reset View" aria-label="Reset View">
@@ -360,8 +432,41 @@
       </svg>
     </button>
     
+    <button 
+      class="control-btn" 
+      on:click={toggleFullscreen} 
+      title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"} 
+      aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+    >
+      {@html isFullscreen ? MinimizeSVG : MaximizeSVG}
+    </button>
+    
     <div class="zoom-info">
-      {Math.round(scale * 100)}%
+      <div class="zoom-controls">
+        <button 
+          class="zoom-arrow zoom-up" 
+          on:click={() => adjustZoom(0.05)}
+          aria-label="Zoom in 5%"
+        >
+          ▲
+        </button>
+        <button 
+          class="zoom-arrow zoom-down" 
+          on:click={() => adjustZoom(-0.05)}
+          aria-label="Zoom out 5%"
+        >
+          ▼
+        </button>
+      </div>
+      <input 
+        type="text" 
+        class="zoom-input"
+        value="{Math.round(scale * 100)}%"
+        on:keydown={handleZoomInputKeydown}
+        on:blur={handleZoomInputBlur}
+        on:focus={handleZoomInputFocus}
+        aria-label="Zoom percentage"
+      />
     </div>
   </div>
 
@@ -577,10 +682,69 @@
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem;
     color: var(--clr-lossless-primary-light);
     font-size: 0.85rem;
     font-family: monospace;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .zoom-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .zoom-arrow {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    color: var(--clr-lossless-primary-light);
+    font-size: 0.7rem;
+    width: 16px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .zoom-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--clr-lossless-accent--brightest);
+  }
+
+  .zoom-arrow:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+  }
+
+  .zoom-input {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    color: var(--clr-lossless-primary-light);
+    font-family: monospace;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    width: 50px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  .zoom-input:focus {
+    outline: none;
+    border-color: var(--clr-lossless-accent--brightest);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .zoom-input:hover {
+    border-color: rgba(255, 255, 255, 0.4);
   }
 
   .canvas-viewport {
