@@ -24,7 +24,7 @@ export function renderSimpleMarkdown(content: string): RenderedMarkdown {
   }
 
   try {
-    // Process markdown with remark
+    // Process markdown with remark (no syntax highlighting to avoid Shiki conflicts)
     const processor = remark()
       .use(remarkGfm)
       .use(remarkJsonCanvasCodeblocks)

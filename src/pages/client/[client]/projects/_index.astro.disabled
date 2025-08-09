@@ -9,6 +9,7 @@
  * - Generates static paths for all client project entries
  * - Renders content using Layout, OneArticle, and OneArticleOnPage components
  */
+/**
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
@@ -17,7 +18,7 @@ import { processEntries, getReferenceSlug } from '@utils/slugify';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
-
+ */
 /**
  * getStaticPaths — Generates all static paths for the /client/[client]/projects/[slug] dynamic route.
  *
@@ -27,6 +28,7 @@ export const prerender = true;
  * - Ensures each entry has a slug and title (generates if missing)
  * - Returns array of { params, props } objects for Astro static generation
  */
+/**
 export async function getStaticPaths() {
   const allProjects = await getCollection('client-projects');
   const processedProjects = processEntries(allProjects);
@@ -77,16 +79,18 @@ export async function getStaticPaths() {
 
   return allPaths;
 }
+*/ 
 
 /**
  * Props interface for page rendering.
  * Supports client projects with client name and entry data.
- */
+
 interface Props {
   entry: any;
   client: string;
 }
-
+*/
+/**
 const { entry, client } = Astro.props;
 
 // Add content type to the data object for potential use in components
@@ -96,9 +100,9 @@ const contentData = {
   title: entry.data.title?.replace(/\.(md|mdx)$/, '') || entry.data.title,
   client: client
 };
-
+ */
 ---
-
+<!--
 <Layout 
   title={entry.data.title?.replace(/\.(md|mdx)$/, '') || entry.data.title}
   frontmatter={entry.data}
@@ -110,3 +114,8 @@ const contentData = {
     data={contentData}
   />
 </Layout> 
+-->
+<div>
+  <h1>Client Projects</h1>
+  <p>Need to fix route generation to prioritize canonical projects...</p>
+</div>

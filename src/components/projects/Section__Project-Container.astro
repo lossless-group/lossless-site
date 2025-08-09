@@ -1,0 +1,79 @@
+---
+/**
+ * Section__Project-Container.astro
+ *
+ * Renders a contained section for project showcases with proper width constraints.
+ * Prevents layout issues from wide JSON Canvas components by constraining container width.
+ *
+ * Props:
+ * - title: string (optional) - Section title
+ * - description: string (optional) - Section description
+ *
+ * Usage Example:
+ * <Section__Project-Container title="Projects" />
+ */
+
+import ProjectShowcase from './ProjectShowcase.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Projects", description } = Astro.props;
+---
+
+<section class="projects-section">
+  <div class="projects-container">
+    <h2>{title}</h2>
+    {description && <p class="section-description">{description}</p>}
+    
+    <ProjectShowcase 
+      title="Augment-It Project"
+      description="Interactive project visualization and specification overview"
+      canvasPath="src/generated-content/projects/Augment-It/Specs/Augment-It.canvas"
+    />
+  </div>
+</section>
+
+<style>
+  .projects-section {
+    padding: 4rem 2rem;
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  .projects-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .projects-container h2 {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-800);
+    color: var(--clr-heading);
+    text-align: center;
+    margin-bottom: 3rem;
+    background: linear-gradient(90deg, var(--clr-lossless-primary-light) 0%, var(--clr-lossless-accent--brightest) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-description {
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    color: var(--clr-body);
+    text-align: center;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 768px) {
+    .projects-section {
+      padding: 2rem 1rem;
+    }
+  }
+</style>

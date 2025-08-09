@@ -2,6 +2,7 @@
   import type { FileNode } from '../../types/json-canvas';
   import { renderSimpleMarkdown, truncateRenderedMarkdown } from '../../utils/simpleMarkdownRenderer';
 
+
   export let node: FileNode;
   export let isSelected: boolean = false;
   export let onClick: ((event: MouseEvent) => void) | undefined = undefined;
@@ -49,10 +50,121 @@
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      handleClick(event as any);
+      // Create a synthetic mouse event for onClick callback
+      const syntheticEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      if (onClick) {
+        onClick(syntheticEvent);
+      }
     }
     if (onKeydown) {
       onKeydown(event);
+    }
+  }
+
+  // Convert file system path to site URL using existing utilities
+  function convertFilePathToSiteUrl(filePath: string): string {
+    console.log('🔄 Converting path:', filePath);
+    
+    // Extract the relative content path from the file path
+    let contentPath = '';
+    
+    // Check if it's already a relative path (starts with content type)
+    if (filePath.startsWith('client-content/') || filePath.startsWith('lost-in-public/') || filePath.startsWith('vocabulary/') || filePath.startsWith('projects/')) {
+      contentPath = filePath;
+      console.log('📁 Using relative path directly:', contentPath);
+    } else {
+      // Try to extract content path from absolute path
+      const contentMatch = filePath.match(/.*\/content\/(.+)$/);
+      if (contentMatch) {
+        contentPath = contentMatch[1];
+        console.log('📁 Extracted from absolute path:', contentPath);
+      } else {
+        console.warn('⚠️ Could not extract content path from:', filePath);
+        return filePath; // Fallback to original path
+      }
+    }
+    
+    // Simple client-side path conversion for client-content structure
+    let siteUrl = '';
+    
+    if (contentPath.startsWith('client-content/')) {
+      const pathParts = contentPath.split('/');
+      // ["client-content", "Laerdal", "Projects", "Augment-It", "Specs", "RecordCollector-Tanuj.md"]
+      
+      if (pathParts.length >= 4 && pathParts[2].toLowerCase() === 'projects') {
+        const clientName = pathParts[1].toLowerCase(); // "Laerdal" → "laerdal"
+        const projectPathParts = pathParts.slice(3); // Skip client-content, Client, Projects
+        
+        // Slugify function matching server-side utils/slugify.ts exactly
+        const slugify = (str: string) => str
+          .toLowerCase()                           // Convert to lowercase
+          .replace(/\.[a-z0-9]+$/, '')            // Remove file extension like .md (only if it's just letters/numbers)
+          .replace(/[^a-z0-9\s\-_]/g, '')         // Remove all non-alphanumeric except space, dash, underscore (REMOVE dots)
+          .replace(/[\s_]+/g, '-')                // Replace spaces and underscores with dashes
+          .replace(/-+/g, '-')                    // Collapse multiple dashes
+          .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
+        
+        const projectSlug = projectPathParts
+          .map(part => slugify(part))
+          .join('/');
+        
+        siteUrl = `/client/${clientName}/projects/${projectSlug}`;
+      } else {
+        // Fallback for other client-content structures
+        siteUrl = `/${contentPath.replace(/\.md$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-')}`;
+      }
+    } else if (contentPath.startsWith('projects/')) {
+      // Handle regular projects directory - use frontmatter slug if available
+      // For now, use the same logic as the collection until we can read frontmatter
+      const projectPath = contentPath.replace(/\.md$/, '');
+      
+      // Convert to lowercase and replace non-alphanumeric with dashes, preserving directory structure
+      const slugifiedPath = projectPath
+        .toLowerCase()
+        .replace(/[^a-z0-9\/]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/\/-+/g, '/')
+        .replace(/-+\//g, '/');
+      
+      siteUrl = `/${slugifiedPath}`;
+    } else {
+      // Fallback for other content types
+      siteUrl = `/${contentPath.replace(/\.md$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-')}`;
+    }
+    
+    console.log('🎯 Converted to site URL:', siteUrl);
+    return siteUrl;
+  }
+
+  // Handle opening file in new tab
+  function handleOpenInNewTab(event: MouseEvent) {
+    console.log('🚀 handleOpenInNewTab called!');
+    console.log('📁 File:', node.file);
+    console.log('🎯 Event target:', event.target);
+    
+    event.preventDefault();
+    event.stopPropagation(); // Prevent triggering the file selection
+    
+    try {
+      // Convert file system path to proper site URL
+      const siteUrl = convertFilePathToSiteUrl(node.file);
+      
+      console.log('🔗 Opening URL:', siteUrl);
+      const newWindow = window.open(siteUrl, '_blank', 'noopener,noreferrer');
+      
+      if (!newWindow) {
+        console.error('❌ Failed to open new window - popup blocked?');
+        alert('Could not open new tab. Please check popup blocker settings.');
+      } else {
+        console.log('✅ New tab opened successfully');
+      }
+    } catch (error) {
+      console.error('❌ Error opening new tab:', error);
     }
   }
 
@@ -116,9 +228,10 @@
     fill="var(--clr-primary-bg)"
   />
 
-  <!-- File type icon -->
+  <!-- File type icon (always render, but hide when selected) -->
   <circle
     class="file-icon"
+    class:hidden={isSelected}
     cx="16"
     cy="16"
     r="6"
@@ -138,6 +251,60 @@
   >
     {fileName.length > 25 ? fileName.substring(0, 22) + '...' : fileName}
   </text>
+
+  <!-- Open in new tab icon (appears when selected) -->
+  <g 
+    class="open-tab-icon"
+    class:visible={isSelected}
+    transform="translate({width - 20}, 6)"
+    on:click={handleOpenInNewTab}
+    on:mousedown={handleOpenInNewTab}
+    on:keydown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const syntheticEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        handleOpenInNewTab(syntheticEvent);
+      }
+    }}
+    tabindex={isSelected ? 0 : -1}
+    role="button"
+    aria-label="Open file in new tab"
+    style="cursor: pointer;"
+  >
+    <!-- Background circle for better click target -->
+    <circle
+      cx="10"
+      cy="10"
+      r="10"
+      fill="rgba(255, 255, 255, 0.1)"
+      stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
+      stroke-width="1"
+      class="icon-bg"
+    />
+    <!-- External link icon -->
+    <g transform="translate(6, 6)">
+      <path
+        d="M6 6h2v2M8 4v2l-4 4"
+        stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+      />
+      <path
+        d="M6 4h2v2"
+        stroke="var(--clr-lossless-accent--brightest, #4a9eff)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+      />
+    </g>
+  </g>
 
   <!-- File path (if different from name) -->
   {#if node.file !== fileName}
@@ -406,6 +573,84 @@
     color: var(--clr-body);
   }
 
+  /* Code block styling for JSON Canvas - matches BaseCodeblock.astro structure */
+  .content-text :global(.codeblock-container) {
+    position: relative;
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background: var(--clr-code-bg, #1e1e1e);
+  }
+  
+  .content-text :global(.codeblock-header) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.8rem;
+  }
+  
+  .content-text :global(.codeblock-language) {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--clr-code-lang, #8a8a8a);
+    letter-spacing: 0.05em;
+  }
+  
+  .content-text :global(.copy-button) {
+    background: transparent;
+    border: none;
+    color: var(--clr-code-lang, #8a8a8a);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .content-text :global(.copy-button:hover) {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .content-text :global(.copy-button.copied) {
+    color: var(--clr-lossless-accent--brightest, #4a9eff);
+  }
+  
+  .content-text :global(.codeblock-content) {
+    margin: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding: 0;
+    overflow-x: auto;
+    background-color: var(--clr-code-bg, #1e1e1e);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .content-text :global(.codeblock-content pre) {
+    margin: 0;
+    padding: 1em;
+    background: transparent;
+    border-radius: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .content-text :global(.codeblock-content code) {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-family: var(--ff-monospace, 'Fira Code', 'Consolas', monospace);
+  }
+
   .content-text :global(strong) {
     font-weight: var(--fw-bold);
     color: var(--clr-heading);
@@ -430,5 +675,51 @@
     .file-path {
       font-size: 9px;
     }
+  }
+
+  /* File icon visibility */
+  .file-icon.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* Open in new tab icon styling */
+  .open-tab-icon {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .open-tab-icon.visible {
+    opacity: 0.8;
+    visibility: visible;
+    pointer-events: all;
+  }
+
+  .open-tab-icon:hover {
+    opacity: 1;
+  }
+
+  .open-tab-icon:hover .icon-bg {
+    fill: rgba(255, 255, 255, 0.2);
+    stroke: var(--clr-lossless-accent--brightest, #4a9eff);
+    stroke-width: 1.5;
+  }
+
+  .open-tab-icon:active .icon-bg {
+    fill: rgba(255, 255, 255, 0.3);
+    stroke-width: 2;
+  }
+
+  .open-tab-icon:focus {
+    outline: none;
+  }
+
+  .open-tab-icon:focus .icon-bg {
+    stroke: var(--clr-lossless-accent--brightest, #4a9eff);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 4px var(--clr-lossless-accent--brightest, #4a9eff));
   }
 </style>

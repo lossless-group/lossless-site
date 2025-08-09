@@ -81,6 +81,10 @@ const defaultRouteMappings: RouteMapping[] = [
     contentPath: 'slides',
     routePath: 'slides'
   },
+  {
+    contentPath: 'projects',
+    routePath: 'projects'
+  },
   // {
   //   contentPath: 'content/visuals',
   //   routePath: 'content/visuals'

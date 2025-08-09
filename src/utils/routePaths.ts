@@ -21,7 +21,6 @@ export const ROUTE_PATHS = {
   CLIENT: {
     BASE: '/client',
     PORTFOLIO: '/client/[client]/portfolio',
-    PROJECTS: '/client/[client]/projects',
     RECOMMENDATIONS: '/client/[client]/recommendations',
   },
   
@@ -32,6 +31,10 @@ export const ROUTE_PATHS = {
   TOOLKIT: {
     BASE: '/toolkit',
     VERTICAL: '/toolkit/vertical',
+  },
+
+  PROJECTS: {
+    BASE: '/projects',
   },
   
   // Default fallback paths

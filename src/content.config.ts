@@ -5,6 +5,7 @@ import { pathToFileURL } from 'url';
 
 // Import environment utilities
 import { contentBasePath } from './utils/envUtils.js';
+import { getReferenceSlug } from './utils/slugify.js';
 
 
 // Function to resolve content paths based on environment
@@ -145,12 +146,11 @@ const clientRecommendationsCollection = defineCollection({
 const pathId = (entry: string) =>
   entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
 
+/**
 const clientProjectsCollection = defineCollection({
   loader: glob({
-    pattern: "**/Projects/**/*.{md,mdx}", // Include both .md and .mdx files
     base: resolveContentPath("client-content"),
     generateId: ({ entry }) => {
-      // Ensure proper ID generation to avoid conflicts
       return pathId(entry);
     }
   }),
@@ -175,6 +175,7 @@ const clientProjectsCollection = defineCollection({
     };
   })
 });
+*/
 
 const clientPortfoliosCollection = defineCollection({
   loader: glob({
@@ -555,6 +556,50 @@ const mapOfContentsCollection = defineCollection({
   })
 });
 
+const projectsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: "../content/projects",
+    generateId: ({ entry }) => {
+      console.log(`[PROJECTS] Processing entry: "${entry}"`);
+      
+      // Remove .md extension from entry path
+      const pathWithoutExt = entry.replace(/\.md$/, '');
+      console.log(`[PROJECTS] Path without extension: "${pathWithoutExt}"`);
+      
+      // Extract project root directory and internal path
+      const pathParts = pathWithoutExt.split('/');
+      if (pathParts.length === 0) {
+        console.log(`[PROJECTS] ERROR: Empty path parts`);
+        return 'unknown';
+      }
+      
+      // First part is the project root directory (e.g., "Augment-It")
+      const projectRoot = pathParts[0];
+      
+      // Generate slug: project-root/internal/path
+      let slug;
+      if (pathParts.length === 1) {
+        // Just the project root file
+        slug = getReferenceSlug(projectRoot);
+      } else {
+        // Project root + internal path
+        const internalPath = pathParts.slice(1).join('/');
+        slug = `${getReferenceSlug(projectRoot)}/${getReferenceSlug(internalPath)}`;
+      }
+      
+      console.log(`[PROJECTS] Generated slug: "${slug}"`);
+      return slug;
+    }
+  }),
+  schema: z.object({
+    title: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    slug: z.string().optional(),
+    publish: z.boolean().default(true),
+  }),
+});
+
 const portfolioCollection = defineCollection({
   loader: glob({ 
     pattern: [
@@ -647,14 +692,15 @@ export const paths = {
   'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
-  'client-projects': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
   'moc': resolveContentPath('moc'),
+  'projects': resolveContentPath('projects'),
 };
 
 // Export the collections
 export const collections = {
   'cards': cardCollection,
+  'projects': projectsCollection,
   'concepts': conceptsCollection,
   'market-maps': marketMapsCollection,
   'essays': essaysCollection,
@@ -676,7 +722,6 @@ export const collections = {
   'to-hero': toHeroCollection,
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
-  'client-projects': clientProjectsCollection,
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,
