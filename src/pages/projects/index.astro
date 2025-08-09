@@ -17,7 +17,7 @@ import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
       alignment="center"
       fullBleed={true}
       animate={true}
-      innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+      style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
     />
   </AnimationWrapper>
 
@@ -32,7 +32,8 @@ import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
         </div>
         
         <div class="canvas-container">
-          <JSONCanvasIsland canvasPath="/Users/mpstaton/code/lossless-monorepo/content/client-content/Laerdal/Projects/Augment-It/Specs/Augment-It.canvas" />
+          <!-- Temporary fix: point to generated content path until dynamic canvas resolution is implemented -->
+          <JSONCanvasIsland canvasPath="src/generated-content/projects/Augment-It/Specs/Augment-It.canvas" />
         </div>
       </div>
     </div>

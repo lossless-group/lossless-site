@@ -1,9 +1,8 @@
 ---
 // Core imports
 import { getCollection } from "astro:content";
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { toProperCase } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
+// Intentionally avoid auto-casing transformations to preserve original capitalization
 import type { ReferenceItem } from '../../types/client-data.d';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import "../../styles/global.css";
@@ -11,64 +10,22 @@ import "../../styles/global.css";
 interface Props {
   client: string;
   contentBasePath: string;
+  selectedVocabulary?: string[];
+  selectedConcepts?: string[];
 }
 
-const { client, contentBasePath } = Astro.props;
+const { client, contentBasePath, selectedVocabulary = [], selectedConcepts = [] } = Astro.props as Props;
 
-// Load reference-terms.json
-let referenceTerms = { vocabulary: [], concepts: [] };
+// Prepare reference terms. Prefer values passed from layout (parsed from MOC) over JSON file.
+let referenceTerms: { vocabulary: string[]; concepts: string[] } = { vocabulary: [], concepts: [] };
 
-// Import contentBasePath from envUtils which handles the correct path based on DEPLOY_ENV
-import { resolvedContentPath } from '@utils/envUtils';
-
-// Debug: Log the contentBasePath and current working directory
-console.log('contentBasePath from envUtils:', resolvedContentPath);
-console.log('process.cwd():', process.cwd());
 console.log('client:', client);
 
-// First try with the exact client name, then with proper case
-try {
-  // Try exact client name - use contentBasePath from envUtils
-  const exactPath = path.join(resolvedContentPath, 'client-content', client, 'reference-terms.json');
-  console.log('Trying to load reference terms from:', exactPath);
-  
-  try {
-    // Check if file exists first
-    await fs.access(exactPath, fs.constants.F_OK);
-    console.log('File exists, attempting to read...');
-    
-    const raw = await fs.readFile(exactPath, 'utf-8');
-    referenceTerms = JSON.parse(raw);
-    console.log('Successfully loaded reference terms from exact path');
-  } catch (fileErr) {
-    console.error('Error reading exact path:', fileErr);
-    throw fileErr; // Re-throw to trigger the outer catch
-  }
-} catch (firstErr) {
-  console.log('First attempt failed, trying with proper case...');
-  try {
-    // If that fails, try with proper case
-    const properClient = toProperCase(client);
-    const properCasePath = path.join(contentBasePath, 'client-content', properClient, 'reference-terms.json');
-    console.log('Trying to load reference terms from:', properCasePath);
-    
-    try {
-      // Check if file exists first
-      await fs.access(properCasePath, fs.constants.F_OK);
-      console.log('File exists, attempting to read...');
-      
-      const raw = await fs.readFile(properCasePath, 'utf-8');
-      referenceTerms = JSON.parse(raw);
-      console.log('Successfully loaded reference terms from proper case path');
-    } catch (fileErr) {
-      console.error('Error reading proper case path:', fileErr);
-      throw fileErr; // Re-throw to trigger the outer catch
-    }
-  } catch (secondErr) {
-    console.warn(`No reference terms found for client: ${client} (tried both exact and proper case)`);
-    console.warn('Error details:', secondErr);
-  }
-}
+referenceTerms = {
+  vocabulary: selectedVocabulary,
+  concepts: selectedConcepts,
+};
+console.log('Using reference terms from props (required):', referenceTerms);
 
 // Helper functions
 function normalizeTerm(term: string): string {
@@ -88,13 +45,15 @@ function toReferenceItems(entries: any[], collection: 'vocabulary' | 'concepts')
         return null;
       }
 
-      const slug = String(entry.slug || entry.id || '').trim();
-      const title = entry.data?.title || 
-                   (slug ? toProperCase(slug.replace(/[-_]/g, ' ')) : 'Untitled');
+      const rawId = String(entry.slug || entry.id || '').trim();
+      // Use only the filename (last segment) without extension for fallback title
+      const baseName = rawId.split('/').pop()?.replace(/\.md$/i, '') || rawId;
+      // Preserve original capitalization; only replace separators with spaces and trim
+      const title = entry.data?.title || baseName.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
 
       return {
-        id: entry.id || slug || `missing-id-${Math.random().toString(36).substr(2, 9)}`,
-        slug,
+        id: entry.id || rawId || `missing-id-${Math.random().toString(36).substr(2, 9)}`,
+        slug: rawId,
         collection,
         data: {
           title,
@@ -102,7 +61,7 @@ function toReferenceItems(entries: any[], collection: 'vocabulary' | 'concepts')
           description: entry.data?.lede || entry.data?.description || '',
           tags: Array.isArray(entry.data?.tags) ? entry.data.tags : []
         },
-        originalFilename: entry.id || slug || ''
+        originalFilename: entry.id || rawId || ''
       };
     })
     .filter((item): item is ReferenceItem => item !== null);
@@ -116,12 +75,34 @@ function createLookupMap(items: ReferenceItem[]): Map<string, ReferenceItem> {
   return map;
 }
 
-// Get and process collections
-const vocabEntries = await getCollection('vocabulary');
-const conceptEntries = await getCollection('concepts');
+// Get and process collections, using processEntries to normalize titles/slugs
+const vocabRaw = await getCollection('vocabulary');
+const conceptsRaw = await getCollection('concepts');
 
-const allVocabItems = toReferenceItems(vocabEntries, 'vocabulary');
-const allConceptItems = toReferenceItems(conceptEntries, 'concepts');
+const processedVocabularyEntries = processEntries(vocabRaw as any);
+const processedConceptsEntries = processEntries(conceptsRaw as any);
+
+// Convert processed entries into ReferenceItem shape for lookups and rendering
+function toReferenceItemsFromProcessed(
+  entries: Array<{ id: string; slug: string; data: { title: string; [key: string]: any } }>,
+  collection: 'vocabulary' | 'concepts'
+): ReferenceItem[] {
+  return entries.map((entry) => ({
+    id: entry.id,
+    slug: entry.slug,
+    collection,
+    data: {
+      title: entry.data.title,
+      aliases: Array.isArray((entry as any).data?.aliases) ? (entry as any).data.aliases : [],
+      description: (entry as any).data?.lede || (entry as any).data?.description || '',
+      tags: Array.isArray((entry as any).data?.tags) ? (entry as any).data.tags : [],
+    },
+    originalFilename: entry.id,
+  }));
+}
+
+const allVocabItems = toReferenceItemsFromProcessed(processedVocabularyEntries as any, 'vocabulary');
+const allConceptItems = toReferenceItemsFromProcessed(processedConceptsEntries as any, 'concepts');
 
 const vocabMap = createLookupMap(allVocabItems);
 const conceptMap = createLookupMap(allConceptItems);
