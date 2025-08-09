@@ -238,6 +238,30 @@
     fill="var(--clr-canvas-file-icon, #64748b)"
   />
   
+  <!-- Frontmatter icon (appears when selected, replacing file type dot) -->
+  <g 
+    class="frontmatter-icon"
+    class:visible={isSelected}
+    transform="translate(10, 10)"
+  >
+    <!-- Document icon with lines representing frontmatter -->
+    <rect
+      x="0"
+      y="0"
+      width="12"
+      height="12"
+      rx="1"
+      fill="none"
+      stroke="var(--clr-canvas-text, #374151)"
+      stroke-width="1"
+    />
+    <!-- Frontmatter separator lines -->
+    <line x1="2" y1="3" x2="10" y2="3" stroke="var(--clr-canvas-text, #374151)" stroke-width="0.5"/>
+    <line x1="2" y1="5" x2="8" y2="5" stroke="var(--clr-canvas-text, #374151)" stroke-width="0.5"/>
+    <line x1="2" y1="9" x2="10" y2="9" stroke="var(--clr-canvas-text, #374151)" stroke-width="0.5"/>
+    <title>File has frontmatter metadata</title>
+  </g>
+  
   <!-- File name -->
   <text
     class="file-name"
@@ -678,6 +702,22 @@
   .file-icon.hidden {
     opacity: 0;
     visibility: hidden;
+  }
+
+  /* Frontmatter icon visibility - appears when file is selected */
+  .frontmatter-icon {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .frontmatter-icon.visible {
+    opacity: 0.7;
+    visibility: visible;
+  }
+
+  .frontmatter-icon:hover {
+    opacity: 1;
   }
 
   /* Open in new tab icon styling */
