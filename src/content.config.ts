@@ -142,10 +142,17 @@ const clientRecommendationsCollection = defineCollection({
   })
 });
 
+const pathId = (entry: string) =>
+  entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
+
 const clientProjectsCollection = defineCollection({
   loader: glob({
     pattern: "**/Projects/**/*.{md,mdx}", // Include both .md and .mdx files
-    base: resolveContentPath("client-content")
+    base: resolveContentPath("client-content"),
+    generateId: ({ entry }) => {
+      // Ensure proper ID generation to avoid conflicts
+      return pathId(entry);
+    }
   }),
   schema: z.object({
     aliases: z.union([

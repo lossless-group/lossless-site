@@ -37,7 +37,7 @@ export async function getStaticPaths() {
   for (const [magazineKey, { collection, urlPrefix }] of Object.entries(collectionMap)) {
     const entries = await getCollection(collection);
     const processedEntries = processEntries(entries);
-    console.log("===PROCESSED RECOMMENDATIONS===", processedEntries.map(entry => entry.id));
+    console.log("===PROCESSED ENTRIES===", processedEntries.map(entry => entry.id));
 
     // For each dynamically discovered client, filter and generate paths
     for (const [lowercaseClient, originalClient] of clientsMap.entries()) {
