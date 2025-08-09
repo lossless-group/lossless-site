@@ -971,12 +971,15 @@ if (DEBUG_AST) {
     );
   }
 
-  if (lang === 'mermaid') {
-    return <MermaidChart code={value} />;
-  }
+
 
   // Enhanced block types support using switch statement
   const blockType = lang?.toLowerCase();
+  
+  // Handle Mermaid diagrams first
+  if (blockType === 'mermaid') {
+    return <MermaidChart code={value} />;
+  }
   
   switch (blockType) {
     case 'slides':

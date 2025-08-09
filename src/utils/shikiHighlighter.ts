@@ -42,7 +42,7 @@ export async function getShikiHighlighter(): Promise<Highlighter> {
 const CUSTOM_DIRECTIVE_LANGUAGES = new Set([
   'litegal', 'tree', 'dataview', 'dataviewjs', 'emphasis', 
   'warning', 'info', 'success', 'error', 'tip', 'note', 
-  'quote', 'slides', 'tool-showcase'
+  'quote', 'slides', 'tool-showcase', 'mermaid'
 ]);
 
 /**
