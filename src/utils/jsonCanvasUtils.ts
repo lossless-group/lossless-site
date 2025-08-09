@@ -352,10 +352,13 @@ export function getCanvasDimensions(canvas: JSONCanvas): { width: number; height
     return { width: 800, height: 600 };
   }
 
+  // Transform coordinates to normalize positions first
+  const transformed = transformCoordinates(canvas);
+  
   let maxX = 0;
   let maxY = 0;
 
-  for (const node of canvas.nodes) {
+  for (const node of transformed.nodes) {
     maxX = Math.max(maxX, node.x + node.width);
     maxY = Math.max(maxY, node.y + node.height);
   }

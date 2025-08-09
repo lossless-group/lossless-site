@@ -2,119 +2,37 @@
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
-import JSONCanvasIsland from '@components/jsoncanvas/JSONCanvasIsland.astro';
+import Section__Project_Container from '@components/projects/Section__Project-Container.astro';
 ---
 
 <Layout 
   title="Our Lossless Projects" 
   description="Explore our innovative projects and interactive visualizations"
 >
-  <AnimationWrapper>
-    <Hero
-      title="Our Lossless Projects"
-      subtitle="Innovation in Action"
-      description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
-      alignment="center"
-      fullBleed={true}
-      animate={true}
-      style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
-    />
-  </AnimationWrapper>
+  <div class="projects-page-container">
+    <AnimationWrapper>
+      <Hero
+        title="Our Lossless Projects"
+        subtitle="Innovation in Action"
+        description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+        style="margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+      />
+    </AnimationWrapper>
 
-  <section class="projects-section">
-    <div class="projects-container">
-      <h2>Projects</h2>
-      
-      <div class="project-showcase">
-        <div class="project-header">
-          <h3>Augment-It Project</h3>
-          <p>Interactive project visualization and specification overview</p>
-        </div>
-        
-        <div class="canvas-container">
-          <!-- Temporary fix: point to generated content path until dynamic canvas resolution is implemented -->
-          <JSONCanvasIsland canvasPath="src/generated-content/projects/Augment-It/Specs/Augment-It.canvas" />
-        </div>
-      </div>
-    </div>
-  </section>
+    <Section__Project_Container title="Projects" />
+  </div>
 </Layout>
 
 <style>
-  .projects-section {
-    padding: 4rem 2rem;
-    max-width: 96vw;
-    margin: 0 auto;
-  }
-
-  .projects-container {
+  .projects-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem);
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
     width: 100%;
-  }
-
-  .projects-container h2 {
-    font-family: var(--ff-base);
-    font-weight: var(--fw-bold);
-    font-size: var(--fs-800);
-    color: var(--clr-heading);
-    text-align: center;
-    margin-bottom: 3rem;
-    background: linear-gradient(90deg, var(--clr-lossless-primary-light) 0%, var(--clr-lossless-accent--brightest) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .project-showcase {
-    background: color-mix(
-      in oklab,
-      var(--clr-lossless-primary-glass),
-      var(--clr-lossless-primary-dark) 90%
-    );
-    border: 1px solid var(--clr-lossless-ui-btn-border);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  .project-header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-
-  .project-header h3 {
-    font-family: var(--ff-base);
-    font-weight: var(--fw-semi-bold);
-    font-size: var(--fs-700);
-    color: var(--clr-heading);
-    margin-bottom: 0.5rem;
-  }
-
-  .project-header p {
-    font-family: var(--ff-legible);
-    font-size: var(--fs-400);
-    color: var(--clr-body);
-    opacity: 0.8;
-  }
-
-  .canvas-container {
-    width: 100%;
-    min-height: 600px;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    background: var(--clr-primary-bg);
-  }
-
-  @media (max-width: 768px) {
-    .projects-section {
-      padding: 2rem 1rem;
-    }
-
-    .project-showcase {
-      padding: 1.5rem;
-    }
-
-    .canvas-container {
-      min-height: 400px;
-    }
   }
 </style>

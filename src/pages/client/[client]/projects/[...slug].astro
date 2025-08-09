@@ -28,51 +28,65 @@ export const prerender = true;
  * - Returns array of { params, props } objects for Astro static generation
  */
 export async function getStaticPaths() {
-  const allProjects = await getCollection('client-projects');
-  const processedProjects = processEntries(allProjects);
-
-  // Define the clients we want to generate paths for
-  const clients = [...new Set(allProjects.map(entry => {
-    const entryPath = String(entry.id);
-    // Extract client name from path like "Laerdal/Projects/file.md" -> "laerdal"
-    const pathParts = entryPath.split('/');
-    return pathParts[0].toLowerCase();
-  }))];
+  // Get all projects from the general projects collection
+  const allProjects = await getCollection('projects');
+  
+  // Get all MoC files to determine client-project mappings
+  const allMoC = await getCollection('moc');
   
   const allPaths = [];
 
-  for (const client of clients) {
-    // Filter projects for this specific client
-    const clientProjects = processedProjects.filter(entry => {
-      const entryPath = String(entry.id);
-      return entryPath.toLowerCase().includes(client.toLowerCase());
-    });
-
-    const clientPaths = clientProjects.map(entry => {
-
-      // For nested projects, we want to keep the full path structure
-      // Remove the client prefix and convert to URL-friendly format
-      const entryPath = String(entry.id);
-      const pathParts = entryPath.split('/');
+  // Process each MoC file to find client project assignments
+  for (const mocEntry of allMoC) {
+    const clientName = mocEntry.id.replace(/\.md$/, '').toLowerCase();
+    
+    // Parse the MoC content to find :::projects directive
+    const mocContent = mocEntry.body;
+    const projectsMatch = mocContent.match(/:::projects\s*\n(.*?)\n:::/s);
+    
+    if (projectsMatch) {
+      // Extract project names from the directive
+      const projectsList = projectsMatch[1];
+      const projectNames = projectsList
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('- [[') && line.endsWith(']]'))
+        .map(line => line.replace(/^- \[\[/, '').replace(/\]\]$/, ''));
       
-      // Remove the client name (first part) and "Projects" (second part)
-      const projectPathParts = pathParts.slice(2); // Skip client and "Projects"
-      
-      // Convert the remaining path to URL-friendly format
-      const projectSlug = projectPathParts
-        .map(part => getReferenceSlug(part))
-        .join('/');
-      
-      return {
-        params: { client, slug: projectSlug },
-        props: {
-          entry,
-          client
+      // Find matching projects in the general projects collection
+      for (const projectName of projectNames) {
+        const matchingProjects = allProjects.filter(project => {
+          const projectPath = String(project.id);
+          // Check if project path contains the project name
+          return projectPath.toLowerCase().includes(projectName.toLowerCase());
+        });
+        
+        // Generate paths for matching projects
+        for (const project of matchingProjects) {
+          const entryPath = String(project.id);
+          const pathParts = entryPath.split('/');
+          
+          // Use frontmatter slug if available, otherwise generate from path
+          const finalSlug = project.data.slug || pathParts[pathParts.length - 1].replace(/\.md$/, '').toLowerCase();
+          
+          // Convert directory parts to lowercase with dashes
+          const slugifiedDirectories = pathParts.slice(0, -1).map(part => 
+            part.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '')
+          );
+          
+          // Combine directory structure with final slug
+          const projectSlug = [...slugifiedDirectories, finalSlug].join('/');
+          
+          allPaths.push({
+            params: { client: clientName, slug: projectSlug },
+            props: {
+              entry: project,
+              client: clientName
+            }
+          });
         }
-      };
-    });
-
-    allPaths.push(...clientPaths);
+      }
+    }
   }
 
   return allPaths;

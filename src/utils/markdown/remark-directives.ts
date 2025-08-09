@@ -20,6 +20,11 @@ export const directiveComponentMap: Record<string, string> = {
   'tool-showcase': 'toolkit/ToolShowcaseIsland.astro',
   'slides': 'direct', // Handled directly in AstroMarkdown.astro
   'slideshow': 'direct', // Alternative name to avoid conflict with slides codeblock
+  // MOC (Map of Content) directives for client portal configuration
+  'features': 'direct', // Handled directly in ClientPortalLayout.astro
+  'portfolio': 'direct', // Handled directly in ClientPortalLayout.astro
+  'vocabulary': 'direct', // Handled directly in ClientPortalLayout.astro
+  'concepts': 'direct', // Handled directly in ClientPortalLayout.astro
   // Future components following the same pattern:
   // 'miro-board': 'Miro-Board--Embed.astro',
   // 'notion-page': 'Notion-Page--Preview.astro',

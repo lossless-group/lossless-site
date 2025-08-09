@@ -117,6 +117,21 @@
         // Fallback for other client-content structures
         siteUrl = `/${contentPath.replace(/\.md$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-')}`;
       }
+    } else if (contentPath.startsWith('projects/')) {
+      // Handle regular projects directory - use frontmatter slug if available
+      // For now, use the same logic as the collection until we can read frontmatter
+      const projectPath = contentPath.replace(/\.md$/, '');
+      
+      // Convert to lowercase and replace non-alphanumeric with dashes, preserving directory structure
+      const slugifiedPath = projectPath
+        .toLowerCase()
+        .replace(/[^a-z0-9\/]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/\/-+/g, '/')
+        .replace(/-+\//g, '/');
+      
+      siteUrl = `/${slugifiedPath}`;
     } else {
       // Fallback for other content types
       siteUrl = `/${contentPath.replace(/\.md$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-')}`;

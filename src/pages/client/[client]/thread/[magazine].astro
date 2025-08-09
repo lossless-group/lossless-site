@@ -10,7 +10,7 @@ export const prerender = true;
 export async function getStaticPaths() {
   const collectionMap = {
     'recommendations': { collection: 'client-recommendations', urlPrefix: '/client/' },
-    'projects': { collection: 'client-projects', urlPrefix: '/client/' },
+    'projects': { collection: 'projects', urlPrefix: '/client/' },
     'portfolio': { collection: 'client-portfolios', urlPrefix: '/client/' },
   };
 
@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 
   // Dynamically get all entries from all collections to discover clients
   const allRecommendations = await getCollection('client-recommendations');
-  const allProjects = await getCollection('client-projects');
+  const allProjects = await getCollection('projects', ({ data }) => data.publish === true);
   const allPortfolios = await getCollection('client-portfolios');
   const allEntries = [...allRecommendations, ...allProjects, ...allPortfolios];
   

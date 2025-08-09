@@ -145,12 +145,13 @@ const clientRecommendationsCollection = defineCollection({
 const pathId = (entry: string) =>
   entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
 
+// Temporarily disabled to fix general projects routing
+/*
 const clientProjectsCollection = defineCollection({
   loader: glob({
-    pattern: "**/Projects/**/*.{md,mdx}", // Include both .md and .mdx files
+    pattern: "* /Projects/** /*.{md,mdx}", 
     base: resolveContentPath("client-content"),
     generateId: ({ entry }) => {
-      // Ensure proper ID generation to avoid conflicts
       return pathId(entry);
     }
   }),
@@ -175,6 +176,7 @@ const clientProjectsCollection = defineCollection({
     };
   })
 });
+*/
 
 const clientPortfoliosCollection = defineCollection({
   loader: glob({
@@ -561,6 +563,9 @@ const projectsCollection = defineCollection({
     title: z.string().optional(),
     slug: z.string().optional(),
     publish: z.boolean().optional(),
+    description: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    tags: z.array(z.string()).optional(),
   }).passthrough().transform((data, context) => {
     const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
     
@@ -569,7 +574,7 @@ const projectsCollection = defineCollection({
       : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
     
     // Preserve frontmatter slug if it exists, otherwise generate from filename
-    const slug = data.slug || filename.toLowerCase().replace(/\s+/g, '-');
+    const slug = data.slug || filename.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
     
     return {
       ...data,
@@ -701,7 +706,7 @@ export const collections = {
   'to-hero': toHeroCollection,
   'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
-  'client-projects': clientProjectsCollection,
+  // 'client-projects': clientProjectsCollection, // Temporarily disabled to fix general projects routing
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,

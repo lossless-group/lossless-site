@@ -34,6 +34,10 @@ export const ROUTE_PATHS = {
     VERTICAL: '/toolkit/vertical',
   },
   
+  PROJECTS: {
+    BASE: '/projects',
+  },
+  
   // Default fallback paths
   DEFAULTS: {
     LEARN: '/learn-with/issue-resolution',
@@ -52,6 +56,8 @@ export function getCollectionBasePath(collectionName: string): string {
       return ROUTE_PATHS.LEARN_WITH.OUR_TALKS;
     case 'vertical-toolkits':
       return ROUTE_PATHS.TOOLKIT.VERTICAL;
+    case 'projects':
+      return ROUTE_PATHS.PROJECTS.BASE;
     // Add other collection mappings here
     default:
       return `${ROUTE_PATHS.LEARN_WITH.BASE}/${collectionName}`;
