@@ -13,6 +13,7 @@
     "postinstall": "[ \"$CI\" != \"true\" ] && pnpx playwright-core install --with-deps chromium || echo 'Skipping Playwright install in CI'"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "4.3.1",
     "@astrojs/node": "9.3.0",
     "@astrojs/prism": "3.3.0",

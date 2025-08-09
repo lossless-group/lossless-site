@@ -1,8 +1,11 @@
 ---
-const { code } = Astro.props;
-const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
+import { sanitizeMermaidCode } from '../../utils/shikiHighlighter.js';
 import ExpandIcon from '@assets/Icons/arrows-maximize.svg';
 import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
+
+const { code } = Astro.props;
+const sanitizedCode = sanitizeMermaidCode(code);
+const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
 
 ---
 <div id={chartId} class="mermaid-breakout" tabindex="0">
@@ -12,10 +15,10 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
       class="mermaid-expand-btn"
       aria-label="Expand chart"
       aria-expanded="false"
-      data-chart-id={chartId} data-mermaid-code={code}>
+      data-chart-id={chartId} data-mermaid-code={sanitizedCode}>
       <ExpandIcon />
     </button>
-    <div class="mermaid">{code}</div>
+    <div class="mermaid">{sanitizedCode}</div>
   </div>
 </div>
 
@@ -38,7 +41,7 @@ import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
       <CollapseIcon />
     </button>
     <div class="mermaid-modal-chart-container">
-      <div class="mermaid">{code}</div>
+      <div class="mermaid">{sanitizedCode}</div>
     </div>
   </div>
 </div>

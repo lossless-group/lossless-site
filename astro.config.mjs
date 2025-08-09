@@ -37,15 +37,7 @@ console.log('Environment in astro.config.mjs:', {
  */
 
 
-/** @type {ShikiLang[]} */
-const langs = [
-  'javascript',
-  'typescript',
-  'html',
-  'css',
-  'shellscript',
-  'python'
-];
+// Minimal Shiki config - let the singleton utility handle language loading
 
 
 // Verify the content directory exists
@@ -55,12 +47,8 @@ if (!fs.existsSync(contentBasePath)) {
 
 export default defineConfig({
   markdown: {
-    syntaxHighlight: 'shiki',
-    // Syntax Highlighting with Shiki in codeblocks
-    shikiConfig: {
-      theme: 'github-dark',
-      langs: /** @type {any} */ (langs)
-    },
+    syntaxHighlight: false, // Disable Astro's built-in Shiki - use our singleton utility instead
+    // Custom syntax highlighting handled by our singleton utility
     // TODO: Check if this is actually doing anything. 90% this is already being ran in AstroMarkdown.astro. As a rule of thumb, we have moved away from using remarkPlugins
     remarkPlugins: [
       /** @type {any} */ (normalizeShellLangs),
@@ -68,6 +56,7 @@ export default defineConfig({
       /** @type {any} */ (remarkBacklinks),
       /** @type {any} */ (remarkDirective),
       /** @type {any} */ (remarkDirectiveToComponent),
+      /** @type {any} */ (remarkGfm),
     ],
     remarkRehype: {
       allowDangerousHtml: true,

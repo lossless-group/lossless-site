@@ -14,7 +14,13 @@ interface Props {
   data?: Record<string, unknown>;
 }
 
-const { node, data = { path: '/default-path' } } = Astro.props;
+const { node, data = {} } = Astro.props;
+
+// Ensure data has required path property for AstroMarkdown
+const markdownData = {
+  path: '/default-path',
+  ...data
+};
 
 
 // Default values
@@ -65,7 +71,7 @@ if (contentNode.children.length > 0) {
   )}
   <div class="callout-content">
     {contentNode.children.map(child => (
-      <AstroMarkdown node={child} data={data} />
+      <AstroMarkdown node={child} data={markdownData} />
     ))}
   </div>
 </article>
@@ -119,6 +125,91 @@ if (contentNode.children.length > 0) {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/* Type-specific callout styling */
+.callout-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.callout-warning .callout-header {
+  color: #ffc107;
+}
+
+.callout-error {
+  background-color: rgba(220, 53, 69, 0.1);
+  border-color: #dc3545;
+  color: #721c24;
+}
+
+.callout-error .callout-header {
+  color: #dc3545;
+}
+
+.callout-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-color: #28a745;
+  color: #155724;
+}
+
+.callout-success .callout-header {
+  color: #28a745;
+}
+
+.callout-info {
+  background-color: rgba(23, 162, 184, 0.1);
+  border-color: #17a2b8;
+  color: #0c5460;
+}
+
+.callout-info .callout-header {
+  color: #17a2b8;
+}
+
+.callout-tip {
+  background-color: rgba(102, 16, 242, 0.1);
+  border-color: #6610f2;
+  color: #3d0a91;
+}
+
+.callout-tip .callout-header {
+  color: #6610f2;
+}
+
+.callout-note {
+  background-color: rgba(108, 117, 125, 0.1);
+  border-color: #6c757d;
+  color: #383d41;
+}
+
+.callout-note .callout-header {
+  color: #6c757d;
+}
+
+.callout-quote {
+  background-color: rgba(52, 58, 64, 0.1);
+  border-color: #343a40;
+  color: #1b1e21;
+  border-left: 4px solid #343a40;
+  font-style: italic;
+}
+
+.callout-quote .callout-header {
+  color: #343a40;
+}
+
+.callout-emphasis {
+  background-color: rgba(255, 107, 107, 0.1);
+  border-color: #ff6b6b;
+  color: #c92a2a;
+  border-left: 4px solid #ff6b6b;
+}
+
+.callout-emphasis .callout-header {
+  color: #ff6b6b;
+  font-weight: 700;
 }
 
 </style>

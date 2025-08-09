@@ -1,0 +1,189 @@
+---
+/**
+ * markdown-preview.astro
+ * 
+ * Route for rendering markdown files in a new tab from JSON Canvas file nodes.
+ * This provides a full AstroMarkdown rendered view of the file content.
+ */
+
+import Layout from '@layouts/Layout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import { renderSimpleMarkdown } from '@utils/simpleMarkdownRenderer';
+
+// Get the file parameter from the URL
+const url = new URL(Astro.request.url);
+const filePath = url.searchParams.get('file');
+
+if (!filePath) {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: '/404' }
+  });
+}
+
+// Security: Ensure the file path is safe and within allowed directories
+const safePath = path.resolve(filePath);
+const allowedPaths = [
+  path.resolve('/Users/mpstaton/code/lossless-monorepo/content'),
+  path.resolve('/Users/mpstaton/code/lossless-monorepo/site/src'),
+];
+
+const isAllowedPath = allowedPaths.some(allowedPath => 
+  safePath.startsWith(allowedPath)
+);
+
+if (!isAllowedPath) {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: '/404' }
+  });
+}
+
+// Read the file content
+let fileContent = '';
+let fileName = '';
+let error = '';
+
+try {
+  if (fs.existsSync(safePath)) {
+    fileContent = fs.readFileSync(safePath, 'utf-8');
+    fileName = path.basename(safePath);
+  } else {
+    error = 'File not found';
+  }
+} catch (e) {
+  error = 'Error reading file';
+  console.error('Error reading file:', e);
+}
+
+// Process markdown content
+let renderedMarkdown = { html: '', plainText: '' };
+if (fileContent && !error) {
+  renderedMarkdown = renderSimpleMarkdown(fileContent);
+}
+
+// Create frontmatter for the layout
+const frontmatter = {
+  title: fileName ? `Preview: ${fileName}` : 'File Preview',
+  description: `Markdown preview of ${fileName || filePath}`,
+};
+---
+
+<Layout frontmatter={frontmatter}>
+  <div class="markdown-preview-container">
+    <div class="preview-header">
+      <h1>File Preview</h1>
+      <p class="file-path">{filePath}</p>
+      <div class="preview-actions">
+        <button onclick="window.close()" class="close-button">
+          Close Tab
+        </button>
+      </div>
+    </div>
+
+    {error ? (
+      <div class="error-message">
+        <h2>Error</h2>
+        <p>{error}</p>
+      </div>
+    ) : (
+      <div class="markdown-content">
+        <div set:html={renderedMarkdown.html} />
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .markdown-preview-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--clr-border, #333);
+  }
+
+  .preview-header h1 {
+    margin: 0;
+    color: var(--clr-heading);
+    font-size: 1.5rem;
+  }
+
+  .file-path {
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.875rem;
+    color: var(--clr-body-secondary, #888);
+    margin: 0.5rem 0 0 0;
+    word-break: break-all;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .close-button {
+    background: var(--clr-lossless-accent--brightest, #4a9eff);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
+
+  .close-button:hover {
+    background: var(--clr-lossless-accent, #3a8eef);
+    transform: translateY(-1px);
+  }
+
+  .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .error-message h2 {
+    color: #ef4444;
+    margin: 0 0 1rem 0;
+  }
+
+  .error-message p {
+    color: var(--clr-body);
+    margin: 0;
+  }
+
+  .markdown-content {
+    background: var(--clr-primary-bg);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .markdown-preview-container {
+      padding: 1rem;
+    }
+
+    .preview-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .markdown-content {
+      padding: 1rem;
+    }
+  }
+</style>

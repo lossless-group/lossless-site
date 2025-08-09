@@ -3,17 +3,18 @@ import {dirname} from 'path'
 import ArticleCallout from './callouts/ArticleCallout.astro';
 import ArticleCitationsBlock from './citations/ArticleCitations.astro';
 import ArticleCitation from './citations/ArticleCitation.astro';
-import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import MermaidChart from '../codeblocks/MermaidChart.astro';
+import BaseCodeblock from '../codeblocks/BaseCodeblock.astro';
 import ImageGallery from './ImageGallery.astro';
 import ToolingGallery from './ToolingGallery.astro';
 import PortfolioGallery from '@components/tool-components/PortfolioGallery.astro';
+import CopyLinkButton from './CopyLinkButton.astro';
+import { getLanguageRoutingStrategy, isSpecialRendererLanguage } from '../../utils/shikiHighlighter.js';
 import SlidesEmbed from '@components/SlidesEmbed.astro';
 import ToolShowcaseIsland from '@components/toolkit/ToolShowcaseIsland.astro';
 import { getCollection } from "astro:content";
 import { DEBUG_AST } from '@utils/envUtils';
 import { slugify, extractAllText } from '@utils/slugify';
-import CopyLinkButton from './CopyLinkButton.astro';
 import { resolveToolId, resolvePortfolioId } from '@utils/toolUtils';
 /*
       Compose a unique id for markdown headings using ONLY the main heading text.
@@ -971,8 +972,14 @@ if (DEBUG_AST) {
     );
   }
 
-  if (lang === 'mermaid') {
-    return <MermaidChart code={value} />;
+  // Use centralized language routing strategy
+  const routingStrategy = getLanguageRoutingStrategy(lang || 'text');
+  
+  // Handle special renderer languages
+  if (routingStrategy === 'special-renderer') {
+    if (lang === 'mermaid') {
+      return <MermaidChart code={value} />;
+    }
   }
 
   // Enhanced block types support using switch statement
