@@ -1,15 +1,6 @@
 ---
 import type { Root, RootContent, Parent, PhrasingContent, Paragraph, CitationNode, CitationsNode } from 'mdast';
 import AstroMarkdown from '../AstroMarkdown.astro';
-import LLMResponse from './styled/LLMResponse.astro';
-import Warning from './styled/Warning.astro';
-import Info from './styled/Info.astro';
-import Note from './styled/Note.astro';
-import Success from './styled/Success.astro';
-import Error from './styled/Error.astro';
-import Tip from './styled/Tip.astro';
-import Emphasis from './styled/Emphasis.astro';
-import Quote from './styled/Quote.astro';
 
 interface Props {
   node: {
@@ -162,50 +153,103 @@ if (shouldUseStyledComponent) {
 
 {shouldUseStyledComponent ? (
   calloutType === 'llm-response' ? (
-    <LLMResponse 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-llm-response">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">🤖</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : (calloutType === 'warning' || calloutType === 'alert') ? (
-    <Warning 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-warning">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">⚠️</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : (calloutType === 'info' || calloutType === 'information') ? (
-    <Info 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-info">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">ℹ️</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : calloutType === 'note' ? (
-    <Note 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-note">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">📝</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : (calloutType === 'success' || calloutType === 'check') ? (
-    <Success 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-success">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">✅</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : (calloutType === 'error' || calloutType === 'danger') ? (
-    <Error 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-error">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">❌</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : (calloutType === 'tip' || calloutType === 'hint') ? (
-    <Tip 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-tip">
+      {calloutTitle && (
+        <div class="callout-title">
+          <span class="callout-icon">💡</span>
+          <span class="callout-title-text">{calloutTitle}</span>
+        </div>
+      )}
+      <div class="callout-content">
+        <Fragment set:html={processedContent} />
+      </div>
+    </div>
   ) : (calloutType === 'emphasis' || calloutType === 'em') ? (
-    <Emphasis 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-emphasis">
+      <div class="emphasis-content">
+        <Fragment set:html={processedContent} />
+      </div>
+      <div class="emphasis-decoration"></div>
+    </div>
   ) : (calloutType === 'quote' || calloutType === 'blockquote') ? (
-    <Quote 
-      title={calloutTitle}
-      content={processedContent}
-    />
+    <div class="callout callout-quote">
+      <div class="quote-content">
+        <Fragment set:html={processedContent} />
+      </div>
+      <div class="quote-decoration"></div>
+    </div>
   ) : (
     // Fallback to base rendering for styled components without specific components
     <div class={`directive-callout directive-${calloutType}`} style={`border: 2px solid ${calloutConfig.borderColor}; background: ${calloutConfig.bgColor};`}>
@@ -252,6 +296,531 @@ if (shouldUseStyledComponent) {
 )}
 
 <style>
+  /* ====== STYLED COMPONENT STYLES ====== */
+  
+  /* LLM Response Callout */
+  .callout-llm-response {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: #f8fafc;
+  }
+
+  .callout-llm-response .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .callout-llm-response .callout-icon {
+    font-size: 1.25rem;
+  }
+
+  .callout-llm-response .callout-content {
+    margin-top: 0.5rem;
+    line-height: 1.6;
+  }
+
+  /* Warning Callout */
+  .callout-warning {
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    border-left: 6px solid #f59e0b;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+      rgba(245, 158, 11, 0.12) 0%, 
+      rgba(245, 158, 11, 0.06) 100%);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .callout-warning .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: #d97706;
+    font-size: 1.1rem;
+  }
+
+  .callout-warning .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout-warning .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout-warning .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    color: #92400e;
+    font-weight: 500;
+  }
+
+  /* Info Callout */
+  .callout-info {
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    border-left: 6px solid #3b82f6;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.1) 0%, 
+      rgba(59, 130, 246, 0.05) 100%);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+  }
+
+  .callout-info .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    font-size: 1.1rem;
+  }
+
+  .callout-info .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout-info .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout-info .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    color: #1e40af;
+    font-weight: 500;
+  }
+
+  /* Note Callout */
+  .callout-note {
+    border: 2px solid rgba(107, 114, 128, 0.4);
+    border-left: 6px solid #6b7280;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+      rgba(107, 114, 128, 0.08) 0%, 
+      rgba(107, 114, 128, 0.04) 100%);
+    box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.1);
+  }
+
+  .callout-note .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: #4b5563;
+    font-size: 1.1rem;
+  }
+
+  .callout-note .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout-note .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout-note .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  /* Success Callout */
+  .callout-success {
+    border: 2px solid rgba(34, 197, 94, 0.4);
+    border-left: 6px solid #22c55e;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+      rgba(34, 197, 94, 0.1) 0%, 
+      rgba(34, 197, 94, 0.05) 100%);
+    box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1);
+  }
+
+  .callout-success .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: #16a34a;
+    font-size: 1.1rem;
+  }
+
+  .callout-success .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout-success .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout-success .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    color: #15803d;
+    font-weight: 500;
+  }
+
+  /* Error Callout */
+  .callout-error {
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    border-left: 6px solid #ef4444;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+      rgba(239, 68, 68, 0.12) 0%, 
+      rgba(239, 68, 68, 0.06) 100%);
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1);
+  }
+
+  .callout-error .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: #dc2626;
+    font-size: 1.1rem;
+  }
+
+  .callout-error .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout-error .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout-error .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    color: #b91c1c;
+    font-weight: 500;
+  }
+
+  /* Tip Callout */
+  .callout-tip {
+    border: 2px solid rgba(168, 85, 247, 0.4);
+    border-left: 6px solid #a855f7;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+      rgba(168, 85, 247, 0.1) 0%, 
+      rgba(168, 85, 247, 0.05) 100%);
+    box-shadow: 0 4px 6px -1px rgba(168, 85, 247, 0.1);
+  }
+
+  .callout-tip .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: #9333ea;
+    font-size: 1.1rem;
+  }
+
+  .callout-tip .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout-tip .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout-tip .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    color: #7c3aed;
+    font-weight: 500;
+  }
+
+  /* Emphasis Callout */
+  .callout-emphasis {
+    position: relative;
+    margin: 1.75rem 0;
+    padding: 1.5rem 1.25rem;
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.08) 0%, 
+      rgba(59, 130, 246, 0.04) 100%);
+    border-left: 5px solid #3b82f6;
+    border-radius: 0 12px 12px 0;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+    overflow: hidden;
+  }
+
+  .callout-emphasis .emphasis-content {
+    font-size: 1.15em;
+    line-height: 1.65;
+    color: #1e40af;
+    font-weight: 600;
+    position: relative;
+    z-index: 2;
+  }
+
+  .callout-emphasis .emphasis-decoration {
+    position: absolute;
+    top: 1rem;
+    left: -0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    z-index: 1;
+  }
+
+  .callout-emphasis .emphasis-decoration::before {
+    content: "💡";
+    font-size: 1.25rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Quote Callout */
+  .callout-quote {
+    position: relative;
+    margin: 1.75rem 0;
+    padding: 1.75rem 1.5rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.06) 0%, 
+      rgba(255, 255, 255, 0.02) 100%);
+    border-left: 5px solid #64748b;
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.08);
+  }
+
+  .callout-quote .quote-content {
+    font-size: 1.125em;
+    line-height: 1.75;
+    color: #475569;
+    position: relative;
+    z-index: 2;
+    font-weight: 500;
+  }
+
+  .callout-quote .quote-decoration {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    font-size: 4rem;
+    color: rgba(100, 116, 139, 0.15);
+    font-family: Georgia, serif;
+    line-height: 1;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .callout-quote .quote-decoration::before {
+    content: """;
+  }
+
+  /* Common callout styles */
+  .callout .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .callout .callout-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .callout .callout-title-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .callout .callout-content {
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    font-weight: 500;
+  }
+
+  .callout .callout-content p {
+    margin: 0.5rem 0;
+  }
+
+  .callout .callout-content p:first-child {
+    margin-top: 0;
+  }
+
+  .callout .callout-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Enhanced styling for links within callouts */
+  .callout .callout-content a {
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease;
+  }
+
+  .callout .callout-content a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .callout-warning {
+      background: linear-gradient(135deg, 
+        rgba(245, 158, 11, 0.15) 0%, 
+        rgba(245, 158, 11, 0.08) 100%);
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+    
+    .callout-warning .callout-title {
+      color: #fbbf24;
+    }
+    
+    .callout-warning .callout-content {
+      color: #fcd34d;
+    }
+
+    .callout-info {
+      background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.12) 0%, 
+        rgba(59, 130, 246, 0.06) 100%);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+    
+    .callout-info .callout-title {
+      color: #60a5fa;
+    }
+    
+    .callout-info .callout-content {
+      color: #93c5fd;
+    }
+
+    .callout-note {
+      background: linear-gradient(135deg, 
+        rgba(107, 114, 128, 0.12) 0%, 
+        rgba(107, 114, 128, 0.06) 100%);
+      border-color: rgba(107, 114, 128, 0.5);
+    }
+    
+    .callout-note .callout-title {
+      color: #9ca3af;
+    }
+    
+    .callout-note .callout-content {
+      color: #d1d5db;
+    }
+
+    .callout-success {
+      background: linear-gradient(135deg, 
+        rgba(34, 197, 94, 0.12) 0%, 
+        rgba(34, 197, 94, 0.06) 100%);
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+    
+    .callout-success .callout-title {
+      color: #4ade80;
+    }
+    
+    .callout-success .callout-content {
+      color: #86efac;
+    }
+
+    .callout-error {
+      background: linear-gradient(135deg, 
+        rgba(239, 68, 68, 0.15) 0%, 
+        rgba(239, 68, 68, 0.08) 100%);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    
+    .callout-error .callout-title {
+      color: #f87171;
+    }
+    
+    .callout-error .callout-content {
+      color: #fca5a5;
+    }
+
+    .callout-tip {
+      background: linear-gradient(135deg, 
+        rgba(168, 85, 247, 0.12) 0%, 
+        rgba(168, 85, 247, 0.06) 100%);
+      border-color: rgba(168, 85, 247, 0.5);
+    }
+    
+    .callout-tip .callout-title {
+      color: #c084fc;
+    }
+    
+    .callout-tip .callout-content {
+      color: #d8b4fe;
+    }
+
+    .callout-emphasis {
+      background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.15) 0%, 
+        rgba(59, 130, 246, 0.08) 100%);
+      border-color: #60a5fa;
+    }
+    
+    .callout-emphasis .emphasis-content {
+      color: #93c5fd;
+    }
+    
+    .callout-emphasis .emphasis-decoration {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    }
+
+    .callout-quote {
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.08) 0%, 
+        rgba(255, 255, 255, 0.03) 100%);
+      border-color: #94a3b8;
+    }
+    
+    .callout-quote .quote-content {
+      color: #cbd5e1;
+    }
+    
+    .callout-quote .quote-decoration {
+      color: rgba(148, 163, 184, 0.2);
+    }
+  }
+
+  /* ====== LEGACY DIRECTIVE STYLES ====== */
+  
   /* Quote directive styles */
   .directive-quote {
     margin: 1.5rem 0;
