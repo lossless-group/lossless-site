@@ -138,24 +138,8 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
 }
 
 // ====== CONTENT PROCESSING FOR STYLED COMPONENTS ======
-// Process content for styled components that need HTML strings
-
-let processedContent = '';
-if (shouldUseStyledComponent) {
-  // For styled components, we need to render the content to HTML
-  // This is a simplified approach - in a full implementation, you'd use a proper AST to HTML converter
-  processedContent = contentNode.children.map(child => {
-    if (child.type === 'paragraph' && child.children) {
-      return '<p>' + child.children.map(textChild => {
-        if (textChild.type === 'text') {
-          return textChild.value;
-        }
-        return '';
-      }).join('') + '</p>';
-    }
-    return '';
-  }).join('');
-}
+// For styled components, we'll pass the AST nodes directly instead of pre-processing HTML
+// This ensures proper markdown rendering with all formatting preserved
 
 // ====== End content processing ======
 ---
@@ -164,47 +148,56 @@ if (shouldUseStyledComponent) {
   calloutType === 'llm-response' ? (
     <LLMResponse 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'warning' || calloutType === 'alert') ? (
     <Warning 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'info' || calloutType === 'information') ? (
     <Info 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : calloutType === 'note' ? (
     <Note 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'success' || calloutType === 'check') ? (
     <Success 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'error' || calloutType === 'danger') ? (
     <Error 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'tip' || calloutType === 'hint') ? (
     <Tip 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'emphasis' || calloutType === 'em') ? (
     <Emphasis 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (calloutType === 'quote' || calloutType === 'blockquote') ? (
     <Quote 
       title={calloutTitle}
-      content={processedContent}
+      content={contentNode.children}
+      data={markdownData}
     />
   ) : (
     // Fallback to base rendering for styled components without specific components
