@@ -1,0 +1,114 @@
+---
+interface Props {
+  title?: string;
+  content: string;
+  className?: string;
+  [key: string]: any;
+}
+
+const { title, content, className = 'callout callout-success', ...attrs } = Astro.props;
+---
+
+<div class={className} {...attrs}>
+  {title && (
+    <div class="callout-title">
+      <span class="callout-icon">✅</span>
+      <span class="callout-title-text">{title}</span>
+    </div>
+  )}
+  <div class="callout-content">
+    <Fragment set:html={content} />
+  </div>
+</div>
+
+<style>
+.callout-success {
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  border-left: 6px solid #22c55e;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.1) 0%, 
+    rgba(34, 197, 94, 0.05) 100%);
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1);
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  color: #16a34a;
+  font-size: 1.1rem;
+}
+
+.callout-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.callout-title-text {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.callout-content {
+  margin-top: 0.75rem;
+  line-height: 1.7;
+  color: #15803d;
+  font-weight: 500;
+}
+
+.callout-content p {
+  margin: 0.5rem 0;
+}
+
+.callout-content p:first-child {
+  margin-top: 0;
+}
+
+.callout-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Enhanced styling for links within success callouts */
+.callout-content a {
+  color: #16a34a;
+  text-decoration: underline;
+  text-decoration-color: rgba(22, 163, 74, 0.4);
+  transition: all 0.2s ease;
+}
+
+.callout-content a:hover {
+  color: #15803d;
+  text-decoration-color: #15803d;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .callout-success {
+    background: linear-gradient(135deg, 
+      rgba(34, 197, 94, 0.12) 0%, 
+      rgba(34, 197, 94, 0.06) 100%);
+    border-color: rgba(34, 197, 94, 0.5);
+  }
+  
+  .callout-title {
+    color: #4ade80;
+  }
+  
+  .callout-content {
+    color: #86efac;
+  }
+  
+  .callout-content a {
+    color: #4ade80;
+  }
+  
+  .callout-content a:hover {
+    color: #86efac;
+  }
+}
+</style>

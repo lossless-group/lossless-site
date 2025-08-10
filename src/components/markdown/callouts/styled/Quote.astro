@@ -1,0 +1,92 @@
+---
+interface Props {
+  title?: string;
+  content: string;
+  className?: string;
+  [key: string]: any;
+}
+
+const { title, content, className = 'callout callout-quote', ...attrs } = Astro.props;
+---
+
+<div class={className} {...attrs}>
+  <div class="quote-content">
+    <Fragment set:html={content} />
+  </div>
+</div>
+
+<style>
+.callout-quote {
+  position: relative;
+  margin: 1.75rem 0;
+  padding: 1.75rem 1.5rem;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.06) 0%, 
+    rgba(255, 255, 255, 0.02) 100%);
+  border-left: 5px solid #64748b;
+  border-radius: 0 12px 12px 0;
+  font-style: italic;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.08);
+}
+
+.quote-content {
+  font-size: 1.125em;
+  line-height: 1.75;
+  color: #475569;
+  position: relative;
+  z-index: 2;
+  font-weight: 500;
+}
+
+.quote-content p {
+  margin: 0.75rem 0;
+}
+
+.quote-content p:first-child {
+  margin-top: 0;
+}
+
+.quote-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Enhanced styling for links within quotes */
+.quote-content a {
+  color: #64748b;
+  text-decoration: underline;
+  text-decoration-color: rgba(100, 116, 139, 0.4);
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.quote-content a:hover {
+  color: #334155;
+  text-decoration-color: #334155;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .callout-quote {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.08) 0%, 
+      rgba(255, 255, 255, 0.03) 100%);
+    border-color: #94a3b8;
+  }
+  
+  .quote-content {
+    color: #cbd5e1;
+  }
+  
+  .quote-decoration {
+    color: rgba(148, 163, 184, 0.2);
+  }
+  
+  .quote-content a {
+    color: #94a3b8;
+  }
+  
+  .quote-content a:hover {
+    color: #e2e8f0;
+  }
+}
+</style>

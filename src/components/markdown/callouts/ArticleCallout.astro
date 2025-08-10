@@ -1,6 +1,15 @@
 ---
 import type { Root, RootContent, Parent, PhrasingContent, Paragraph, CitationNode, CitationsNode } from 'mdast';
 import AstroMarkdown from '../AstroMarkdown.astro';
+import LLMResponse from './styled/LLMResponse.astro';
+import Warning from './styled/Warning.astro';
+import Info from './styled/Info.astro';
+import Note from './styled/Note.astro';
+import Success from './styled/Success.astro';
+import Error from './styled/Error.astro';
+import Tip from './styled/Tip.astro';
+import Emphasis from './styled/Emphasis.astro';
+import Quote from './styled/Quote.astro';
 
 interface Props {
   node: {
@@ -22,17 +31,43 @@ const markdownData = {
   ...data
 };
 
+// Callout type definitions
+const calloutTypes = {
+  'emphasis': { icon: '💡', title: 'Emphasis', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.04)', hasStyledComponent: true },
+  'em': { icon: '💡', title: 'Emphasis', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.04)', hasStyledComponent: true },
+  'warning': { icon: '⚠️', title: 'Warning', color: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)', hasStyledComponent: true },
+  'alert': { icon: '⚠️', title: 'Alert', color: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)', hasStyledComponent: true },
+  'info': { icon: 'ℹ️', title: 'Information', color: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)', hasStyledComponent: true },
+  'information': { icon: 'ℹ️', title: 'Information', color: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)', hasStyledComponent: true },
+  'success': { icon: '✅', title: 'Success', color: '#4ade80', bgColor: 'rgba(34, 197, 94, 0.08)', borderColor: 'rgba(34, 197, 94, 0.3)', hasStyledComponent: true },
+  'check': { icon: '✅', title: 'Success', color: '#4ade80', bgColor: 'rgba(34, 197, 94, 0.08)', borderColor: 'rgba(34, 197, 94, 0.3)', hasStyledComponent: true },
+  'error': { icon: '❌', title: 'Error', color: '#f87171', bgColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)', hasStyledComponent: true },
+  'danger': { icon: '❌', title: 'Error', color: '#f87171', bgColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)', hasStyledComponent: true },
+  'tip': { icon: '💡', title: 'Tip', color: '#c084fc', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)', hasStyledComponent: true },
+  'hint': { icon: '💡', title: 'Tip', color: '#c084fc', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)', hasStyledComponent: true },
+  'note': { icon: '📝', title: 'Note', color: '#9ca3af', bgColor: 'rgba(107, 114, 128, 0.08)', borderColor: 'rgba(107, 114, 128, 0.3)', hasStyledComponent: true },
+  'quote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true, hasStyledComponent: true },
+  'blockquote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true, hasStyledComponent: true },
+  'llm-response': { icon: '🤖', title: 'LLM Response', color: '#a855f7', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)', hasStyledComponent: true }
+};
 
 // Default values
 let calloutType = 'info';
 let calloutTitle = '';
+let customTitle = '';
+let calloutConfig = calloutTypes[calloutType];
 
 let contentNode: Root = { 
   type: 'root',
   children: node.children || []
 };
 
-// ====== TITLE EXTRACTION LOGIC ======
+// ====== CALLOUT TYPE AND TITLE EXTRACTION LOGIC ======
+// Look for [!Type] or [!Type] Custom Title syntax in blockquotes (Obsidian-style)
+// Also support legacy [type] syntax for backward compatibility
+
+let isObsidianCallout = false;
+let useStyledComponent = false;
 
 if (contentNode.children.length > 0) {
   const firstChild = contentNode.children[0];
@@ -41,12 +76,45 @@ if (contentNode.children.length > 0) {
     const textNode = firstChild.children.find(child => child.type === 'text');
 
     if (textNode && typeof textNode.value === 'string') {
-      const match = textNode.value.match(/^\[!(.*?)\]/);
+      // First try to match Obsidian-style [!Type] pattern
+      let match = textNode.value.match(/^\[!([^\]]+)\](?:\s+(.+))?/);
+      
       if (match) {
-        calloutTitle = match[1].trim();
+        isObsidianCallout = true;
+        useStyledComponent = true; // Obsidian callouts use styled components
+      } else {
+        // Fallback to legacy [type] pattern for backward compatibility
+        match = textNode.value.match(/^\[([^\]]+)\](?:\s+(.+))?/);
+      }
 
-        // Remove the [!Title] from the paragraph text
-        textNode.value = textNode.value.replace(/^\[!(.*?)\]\s*/, '');
+      if (match) {
+        const detectedType = match[1].trim();
+        customTitle = match[2] ? match[2].trim() : '';
+
+        // Normalize the type for component lookup (handle case variations)
+        const normalizedType = detectedType
+          .replace(/([a-z])([A-Z])/g, '$1-$2') // Handle camelCase
+          .replace(/\s+/g, '-') // Handle spaces
+          .toLowerCase() // Lowercase everything
+          .replace(/-+/g, '-'); // Clean up double hyphens
+
+        // Check if the detected type is a valid callout type
+        if (calloutTypes[normalizedType]) {
+          calloutType = normalizedType;
+          calloutConfig = calloutTypes[calloutType];
+          calloutTitle = customTitle || calloutConfig.title;
+        } else {
+          // If not a valid type, treat as regular blockquote but keep the title
+          calloutType = 'info';
+          calloutConfig = calloutTypes[calloutType];
+          calloutTitle = detectedType; // Use the original detected type as title
+        }
+
+        // Remove the [!type] or [type] Title from the paragraph text
+        const pattern = isObsidianCallout ? 
+          /^\[!([^\]]+)\](?:\s+(.+))?\s*/ : 
+          /^\[([^\]]+)\](?:\s+(.+))?\s*/;
+        textNode.value = textNode.value.replace(pattern, '');
 
         // If the paragraph is now empty after removing, delete it
         const isParagraphEmpty = firstChild.children.every(child => 
@@ -60,156 +128,317 @@ if (contentNode.children.length > 0) {
   }
 }
 
-// ====== End title extraction ======
+// ====== COMPONENT ROUTING LOGIC ======
+// Check if a styled component exists for this callout type
+
+let shouldUseStyledComponent = false;
+
+if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent) {
+  shouldUseStyledComponent = true;
+}
+
+// ====== CONTENT PROCESSING FOR STYLED COMPONENTS ======
+// Process content for styled components that need HTML strings
+
+let processedContent = '';
+if (shouldUseStyledComponent) {
+  // For styled components, we need to render the content to HTML
+  // This is a simplified approach - in a full implementation, you'd use a proper AST to HTML converter
+  processedContent = contentNode.children.map(child => {
+    if (child.type === 'paragraph' && child.children) {
+      return '<p>' + child.children.map(textChild => {
+        if (textChild.type === 'text') {
+          return textChild.value;
+        }
+        return '';
+      }).join('') + '</p>';
+    }
+    return '';
+  }).join('');
+}
+
+// ====== End content processing ======
 ---
 
-<article class={`callout callout-${calloutType.toLowerCase()}`} data-debug-enabled>
-  {calloutTitle && (
-    <div class="callout-header">
-      {calloutTitle}
+{shouldUseStyledComponent ? (
+  calloutType === 'llm-response' ? (
+    <LLMResponse 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'warning' || calloutType === 'alert') ? (
+    <Warning 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'info' || calloutType === 'information') ? (
+    <Info 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : calloutType === 'note' ? (
+    <Note 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'success' || calloutType === 'check') ? (
+    <Success 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'error' || calloutType === 'danger') ? (
+    <Error 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'tip' || calloutType === 'hint') ? (
+    <Tip 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'emphasis' || calloutType === 'em') ? (
+    <Emphasis 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (calloutType === 'quote' || calloutType === 'blockquote') ? (
+    <Quote 
+      title={calloutTitle}
+      content={processedContent}
+    />
+  ) : (
+    // Fallback to base rendering for styled components without specific components
+    <div class={`directive-callout directive-${calloutType}`} style={`border: 2px solid ${calloutConfig.borderColor}; background: ${calloutConfig.bgColor};`}>
+      <div class="callout-header">
+        <span class="callout-icon">{calloutConfig.icon}</span>
+        <span class="callout-title">{calloutTitle}</span>
+      </div>
+      <div class="callout-content">
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
+      </div>
     </div>
-  )}
-  <div class="callout-content">
-    {contentNode.children.map(child => (
-      <AstroMarkdown node={child} data={markdownData} />
-    ))}
+  )
+) : calloutConfig.isQuote ? (
+  <div class="directive-quote">
+    <div class="quote-content">
+      {contentNode.children.map(child => (
+        <AstroMarkdown node={child} data={markdownData} />
+      ))}
+    </div>
+    <div class="quote-decoration"></div>
   </div>
-</article>
+) : calloutType === 'emphasis' || calloutType === 'em' ? (
+  <div class="directive-emphasis">
+    <div class="emphasis-content">
+      {contentNode.children.map(child => (
+        <AstroMarkdown node={child} data={markdownData} />
+      ))}
+    </div>
+  </div>
+) : (
+  <div class={`directive-callout directive-${calloutType}`} style={`border: 2px solid ${calloutConfig.borderColor}; background: ${calloutConfig.bgColor};`}>
+    <div class="callout-header">
+      <span class="callout-icon">{calloutConfig.icon}</span>
+      <span class="callout-title">{calloutTitle}</span>
+    </div>
+    <div class="callout-content">
+      {contentNode.children.map(child => (
+        <AstroMarkdown node={child} data={markdownData} />
+      ))}
+    </div>
+  </div>
+)}
 
 <style>
-  .callout {
-    margin: 1rem 0;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    background-color: var(--clr-lossless-primary-dark);
-    border: 1px solid var(--clr-lossless-accent--brightest);
+  /* Quote directive styles */
+  .directive-quote {
+    margin: 1.5rem 0;
+    padding: 1.5rem 1.25rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(255, 255, 255, 0.02) 100%);
+    border-left: 4px solid #64748b;
+    border-radius: 0 8px 8px 0;
+    position: relative;
+    font-style: italic;
+  }
+  
+  .directive-quote .quote-content {
+    font-size: 1.1em;
+    line-height: 1.7;
+    color: #cbd5e1;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .directive-quote .quote-decoration {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 3rem;
+    color: rgba(100, 116, 139, 0.2);
+    font-family: serif;
+    line-height: 1;
+  }
+  
+  .directive-quote .quote-decoration::before {
+    content: """;
   }
 
-  .callout-header {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    color: var(--clr-lossless-accent--brightest);
-    font-size: 1.1rem;
+  /* Emphasis directive styles */
+  .directive-emphasis {
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.08) 0%, 
+      rgba(59, 130, 246, 0.04) 100%);
+    border-left: 4px solid #3b82f6;
+    border-radius: 0 8px 8px 0;
+    position: relative;
+  }
+  
+  .directive-emphasis .emphasis-content {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+  
+  .directive-emphasis::before {
+    content: "💡";
+    position: absolute;
+    left: -0.5rem;
+    top: 1rem;
+    background: #1e293b;
+    padding: 0.25rem;
+    border-radius: 50%;
+    font-size: 0.875rem;
   }
 
- .callout {
-  margin: 1rem 0;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background-color: var(--clr-lossless-primary-dark);
-  border: 1px solid var(--clr-lossless-accent--brightest);
-  overflow: hidden; /* NEW: basic clipping */
-}
+  /* Standard callout styles */
+  .directive-callout {
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    border-radius: 8px;
+    position: relative;
+  }
+  
+  /* Warning/Alert styles */
+  .directive-warning, .directive-alert {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  .directive-warning .callout-header, .directive-alert .callout-header {
+    color: #fbbf24;
+  }
+  
+  /* Info styles */
+  .directive-info, .directive-information {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  .directive-info .callout-header, .directive-information .callout-header {
+    color: #60a5fa;
+  }
+  
+  /* Success styles */
+  .directive-success, .directive-check {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+  .directive-success .callout-header, .directive-check .callout-header {
+    color: #4ade80;
+  }
+  
+  /* Error styles */
+  .directive-error, .directive-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .directive-error .callout-header, .directive-danger .callout-header {
+    color: #f87171;
+  }
+  
+  /* Tip styles */
+  .directive-tip, .directive-hint {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+  }
+  .directive-tip .callout-header, .directive-hint .callout-header {
+    color: #c084fc;
+  }
+  
+  /* Note styles */
+  .directive-note {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.08) 0%, rgba(107, 114, 128, 0.04) 100%);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+  }
+  .directive-note .callout-header {
+    color: #9ca3af;
+  }
+  
+  .directive-callout .callout-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .directive-callout .callout-icon {
+    font-size: 1.25rem;
+  }
+  
+  .directive-callout .callout-title {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .directive-callout .callout-content, 
+  .directive-emphasis .emphasis-content,
+  .directive-quote .quote-content {
+    color: #e2e8f0;
+    line-height: 1.6;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  
+  .directive-callout .callout-content > *:first-child,
+  .directive-emphasis .emphasis-content > *:first-child,
+  .directive-quote .quote-content > *:first-child {
+    margin-top: 0;
+  }
+  
+  .directive-callout .callout-content > *:last-child,
+  .directive-emphasis .emphasis-content > *:last-child,
+  .directive-quote .quote-content > *:last-child {
+    margin-bottom: 0;
+  }
 
-.callout-content {
-  color: var(--clr-lossless-primary-light);
-  overflow-x: auto; /* NEW: allow horizontal scroll if needed */
-  max-width: 100%;   /* NEW: prevent growing beyond container */
-}
+  /* Content styling inside callouts */
+  .callout-content iframe, 
+  .emphasis-content iframe, 
+  .quote-content iframe {
+    max-width: 100%;
+    height: auto;
+    border: none;
+  }
 
-/* OPTIONAL: Style iframes inside callouts */
-.callout-content iframe {
-  max-width: 100%;
-  height: auto;
-  border: none;
-}
+  .callout-content table, 
+  .emphasis-content table, 
+  .quote-content table {
+    width: 100%;
+    border-collapse: collapse;
+  }
 
-/* OPTIONAL: Wrap tables nicely inside callouts */
-.callout-content table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* Ensure images shrink inside callouts */
-.callout-content img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Type-specific callout styling */
-.callout-warning {
-  background-color: rgba(255, 193, 7, 0.1);
-  border-color: #ffc107;
-  color: #856404;
-}
-
-.callout-warning .callout-header {
-  color: #ffc107;
-}
-
-.callout-error {
-  background-color: rgba(220, 53, 69, 0.1);
-  border-color: #dc3545;
-  color: #721c24;
-}
-
-.callout-error .callout-header {
-  color: #dc3545;
-}
-
-.callout-success {
-  background-color: rgba(40, 167, 69, 0.1);
-  border-color: #28a745;
-  color: #155724;
-}
-
-.callout-success .callout-header {
-  color: #28a745;
-}
-
-.callout-info {
-  background-color: rgba(23, 162, 184, 0.1);
-  border-color: #17a2b8;
-  color: #0c5460;
-}
-
-.callout-info .callout-header {
-  color: #17a2b8;
-}
-
-.callout-tip {
-  background-color: rgba(102, 16, 242, 0.1);
-  border-color: #6610f2;
-  color: #3d0a91;
-}
-
-.callout-tip .callout-header {
-  color: #6610f2;
-}
-
-.callout-note {
-  background-color: rgba(108, 117, 125, 0.1);
-  border-color: #6c757d;
-  color: #383d41;
-}
-
-.callout-note .callout-header {
-  color: #6c757d;
-}
-
-.callout-quote {
-  background-color: rgba(52, 58, 64, 0.1);
-  border-color: #343a40;
-  color: #1b1e21;
-  border-left: 4px solid #343a40;
-  font-style: italic;
-}
-
-.callout-quote .callout-header {
-  color: #343a40;
-}
-
-.callout-emphasis {
-  background-color: rgba(255, 107, 107, 0.1);
-  border-color: #ff6b6b;
-  color: #c92a2a;
-  border-left: 4px solid #ff6b6b;
-}
-
-.callout-emphasis .callout-header {
-  color: #ff6b6b;
-  font-weight: 700;
-}
-
+  .callout-content img, 
+  .emphasis-content img, 
+  .quote-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
 </style>

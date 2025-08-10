@@ -1,0 +1,114 @@
+---
+interface Props {
+  title?: string;
+  content: string;
+  className?: string;
+  [key: string]: any;
+}
+
+const { title, content, className = 'callout callout-emphasis', ...attrs } = Astro.props;
+---
+
+<div class={className} {...attrs}>
+  <div class="emphasis-content">
+    <Fragment set:html={content} />
+  </div>
+  <div class="emphasis-decoration"></div>
+</div>
+
+<style>
+.callout-emphasis {
+  position: relative;
+  margin: 1.75rem 0;
+  padding: 1.5rem 1.25rem;
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.08) 0%, 
+    rgba(59, 130, 246, 0.04) 100%);
+  border-left: 5px solid #3b82f6;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  overflow: hidden;
+}
+
+.emphasis-content {
+  font-size: 1.15em;
+  line-height: 1.65;
+  color: #1e40af;
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+}
+
+.emphasis-content p {
+  margin: 0.5rem 0;
+}
+
+.emphasis-content p:first-child {
+  margin-top: 0;
+}
+
+.emphasis-content p:last-child {
+  margin-bottom: 0;
+}
+
+.emphasis-decoration {
+  position: absolute;
+  top: 1rem;
+  left: -0.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  z-index: 1;
+}
+
+.emphasis-decoration::before {
+  content: "💡";
+  font-size: 1.25rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Enhanced styling for links within emphasis callouts */
+.emphasis-content a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-decoration-color: rgba(29, 78, 216, 0.4);
+  transition: all 0.2s ease;
+  font-weight: 700;
+}
+
+.emphasis-content a:hover {
+  color: #1e3a8a;
+  text-decoration-color: #1e3a8a;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .callout-emphasis {
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.15) 0%, 
+      rgba(59, 130, 246, 0.08) 100%);
+    border-color: #60a5fa;
+  }
+  
+  .emphasis-content {
+    color: #93c5fd;
+  }
+  
+  .emphasis-decoration {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  }
+  
+  .emphasis-content a {
+    color: #93c5fd;
+  }
+  
+  .emphasis-content a:hover {
+    color: #bfdbfe;
+  }
+}
+</style>

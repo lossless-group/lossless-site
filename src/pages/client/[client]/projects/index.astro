@@ -63,7 +63,9 @@ let debugInfo = {
   projectsBlockFound: false,
   projectsBlock: '',
   parsedProjects: [],
+  allProjects: [],
   matchingProjects: [],
+  matchingAttempts: [],
   error: null
 };
 
@@ -111,25 +113,67 @@ try {
     if (mocProjectEntries.length > 0) {
       // Get all projects from the collection
       const allProjects = await getCollection('projects');
+      debugInfo.allProjects = allProjects.map(p => ({
+        id: p.id,
+        title: p.data?.title || 'No title',
+        dataSlug: p.data?.slug || 'No data slug'
+      }));
+      
+      console.log(`[CLIENT PROJECTS INDEX] Found ${allProjects.length} projects in collection:`, debugInfo.allProjects);
       
       // Match MOC project names to actual project entries
       for (const entry of mocProjectEntries) {
         // Try to find a matching project by title or slug with exact matching
+        const matchingAttempt = {
+          entryName: entry.name,
+          normalizedEntryName: entry.name.toLowerCase().replace(/[-\s]/g, '-'),
+          attempts: []
+        };
+        
         const matchingProject = allProjects.find(project => {
           const title = project.data.title || '';
           const slug = project.id || '';
           
           // First try exact matches
-          if (title.toLowerCase() === entry.name.toLowerCase() ||
-              slug.toLowerCase() === entry.name.toLowerCase()) {
+          const exactTitleMatch = title.toLowerCase() === entry.name.toLowerCase();
+          const exactSlugMatch = slug.toLowerCase() === entry.name.toLowerCase();
+          
+          matchingAttempt.attempts.push({
+            method: 'exact_title',
+            projectTitle: title,
+            projectSlug: slug,
+            match: exactTitleMatch
+          });
+          
+          matchingAttempt.attempts.push({
+            method: 'exact_slug',
+            projectTitle: title,
+            projectSlug: slug,
+            match: exactSlugMatch
+          });
+          
+          if (exactTitleMatch || exactSlugMatch) {
             return true;
           }
           
           // Then try if the slug starts with the project name (for nested projects)
           const normalizedEntryName = entry.name.toLowerCase().replace(/[-\s]/g, '-');
           const slugParts = slug.toLowerCase().split('/');
-          return slugParts[0] === normalizedEntryName;
+          const slugStartMatch = slugParts[0] === normalizedEntryName;
+          
+          matchingAttempt.attempts.push({
+            method: 'slug_start',
+            projectTitle: title,
+            projectSlug: slug,
+            normalizedEntryName,
+            slugParts,
+            match: slugStartMatch
+          });
+          
+          return slugStartMatch;
         });
+        
+        debugInfo.matchingAttempts.push(matchingAttempt);
         
         if (matchingProject) {
           // Add canvas path from MOC if specified
@@ -217,6 +261,12 @@ const pageDescription = hasProjects
                 
                 <h4>Parsed Projects ({debugInfo.parsedProjects.length}):</h4>
                 <pre><code>{JSON.stringify(debugInfo.parsedProjects, null, 2)}</code></pre>
+                
+                <h4>All Available Projects ({debugInfo.allProjects.length}):</h4>
+                <pre><code>{JSON.stringify(debugInfo.allProjects, null, 2)}</code></pre>
+                
+                <h4>Matching Attempts:</h4>
+                <pre><code>{JSON.stringify(debugInfo.matchingAttempts, null, 2)}</code></pre>
                 
                 <h4>Matching Projects ({debugInfo.matchingProjects.length}):</h4>
                 <pre><code>{JSON.stringify(debugInfo.matchingProjects, null, 2)}</code></pre>
