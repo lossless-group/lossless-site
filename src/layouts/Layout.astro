@@ -38,6 +38,7 @@ interface Props {
     lede?: string;
     banner_image?: string;
     portrait_image?: string;
+    og_image?: string; // OpenGraph specific image for toolkit pages
   };
 }
 
@@ -47,7 +48,17 @@ const fm = Astro.props.frontmatter || {};
 // Extract values with clear priority
 const pageTitle = fm.title || Astro.props.title;
 const pageDescription = fm.lede || fm.description || Astro.props.description;
-const pageImageUrl = fm.banner_image || fm.portrait_image;
+
+// For toolkit pages, prioritize og_image over other image fields
+const isToolkitPage = Astro.url.pathname.startsWith('/toolkit/');
+const pageImageUrl = isToolkitPage && fm.og_image 
+  ? fm.og_image 
+  : fm.banner_image || fm.portrait_image;
+
+// Debug logging for toolkit pages with og_image
+if (isToolkitPage && fm.og_image) {
+  console.log(`🔗 Toolkit page ${Astro.url.pathname} using og_image: ${fm.og_image}`);
+}
 
 // PageMeta.astro will handle all defaults if these are undefined
 ---

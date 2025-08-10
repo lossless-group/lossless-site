@@ -85,6 +85,7 @@ const contentData = {
 >
   <OneArticle
     Component={OneArticleOnPage}
+    title={entry.data.title || entry.id.replace(/\.md$/, '')}
     content={entry.body}
     markdownFile={entry.id}
     data={contentData}
