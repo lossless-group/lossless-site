@@ -571,10 +571,42 @@ if (DEBUG_TOC) {
 }
 
 /* Responsive design */
+@media (max-width: 1600px) {
+  .toc-sidebar {
+    min-width: 240px;
+    max-width: 260px;
+    width: 260px;
+  }
+  
+  .toc-sidebar:hover:not(.collapsed) {
+    width: 400px;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .toc-sidebar {
+    min-width: 220px;
+    max-width: 240px;
+    width: 240px;
+  }
+  
+  .toc-sidebar:hover:not(.collapsed) {
+    width: 350px;
+    max-width: 350px;
+  }
+}
+
 @media (max-width: 1200px) {
   .toc-sidebar {
-    min-width: 260px;
-    max-width: 280px;
+    min-width: 200px;
+    max-width: 220px;
+    width: 220px;
+  }
+  
+  .toc-sidebar:hover:not(.collapsed) {
+    width: 300px;
+    max-width: 300px;
   }
 }
 

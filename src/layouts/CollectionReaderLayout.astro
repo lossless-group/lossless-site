@@ -127,6 +127,37 @@ if (effectiveEntry) {
   scroll-behavior: smooth; /* Smooth scrolling */
 }
 
+/* Constrain OneArticleOnPage sidebars when used in CollectionReaderLayout */
+.collection-reader-pane :global(.info-sidebar) {
+  min-width: 180px;
+  max-width: 200px;
+  width: 200px;
+}
+
+.collection-reader-pane :global(.info-sidebar:hover:not(.collapsed)) {
+  width: 280px;
+  max-width: 280px;
+}
+
+.collection-reader-pane :global(.toc-sidebar) {
+  min-width: 180px;
+  max-width: 200px;
+  width: 200px;
+}
+
+.collection-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+  width: 280px;
+  max-width: 280px;
+}
+
+.collection-reader-pane :global(.main-content) {
+  max-width: 65ch;
+}
+
+.collection-reader-pane :global(.content-wrapper) {
+  padding: 1rem 0.5rem;
+}
+
 /* Custom scrollbar styling for better UX */
 .collection-sidebar::-webkit-scrollbar,
 .collection-reader-pane::-webkit-scrollbar {
@@ -181,6 +212,64 @@ if (effectiveEntry) {
     padding: 1rem;
     height: auto; /* Allow natural height on mobile */
     overflow: visible;
+  }
+}
+
+/* Responsive adjustments for CollectionReaderLayout */
+@media (max-width: 1600px) {
+  .collection-reader-pane :global(.info-sidebar),
+  .collection-reader-pane :global(.toc-sidebar) {
+    min-width: 160px;
+    max-width: 180px;
+    width: 180px;
+  }
+  
+  .collection-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .collection-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 250px;
+    max-width: 250px;
+  }
+  
+  .collection-reader-pane :global(.main-content) {
+    max-width: 60ch;
+  }
+}
+
+@media (max-width: 1400px) {
+  .collection-reader-pane :global(.info-sidebar),
+  .collection-reader-pane :global(.toc-sidebar) {
+    min-width: 140px;
+    max-width: 160px;
+    width: 160px;
+  }
+  
+  .collection-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .collection-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 220px;
+    max-width: 220px;
+  }
+  
+  .collection-reader-pane :global(.main-content) {
+    max-width: 55ch;
+  }
+}
+
+@media (max-width: 1200px) {
+  .collection-reader-pane :global(.info-sidebar),
+  .collection-reader-pane :global(.toc-sidebar) {
+    min-width: 120px;
+    max-width: 140px;
+    width: 140px;
+  }
+  
+  .collection-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .collection-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 200px;
+    max-width: 200px;
+  }
+  
+  .collection-reader-pane :global(.main-content) {
+    max-width: 50ch;
   }
 }
 

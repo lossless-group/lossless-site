@@ -151,14 +151,9 @@ const restRendered = hasMoreContent ? renderSimpleMarkdown(restContent) : { html
     <div class="changelog-entry__body">
       <div class="changelog-entry__content" set:html={previewRendered.html} />
       {hasMoreContent && (
-        <>
-          <div
-            class="changelog-entry__content hidden"
-            id={`content-${id}`}
-            set:html={restRendered.html}
-          />
-          <div class="changelog-entry__button" id={`toggle-${id}`}>Read Full Entry →</div>
-        </>
+        <a href={`/log/${slug || ""}`} class="changelog-entry__button">
+          Read Full Entry →
+        </a>
       )}
     </div>
   </div>
@@ -320,7 +315,13 @@ const restRendered = hasMoreContent ? renderSimpleMarkdown(restContent) : { html
     font-size: var(--fs-300);
     font-weight: var(--fw-semi-bold);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: color 0.2s ease;
+    margin-top: 1rem;
+  }
+
+  .changelog-entry__button:hover {
+    color: var(--clr-lossless-attn-action);
+    text-decoration: none;
   }
 
   .changelog-entry__content :global(h1) {
@@ -402,12 +403,4 @@ const restRendered = hasMoreContent ? renderSimpleMarkdown(restContent) : { html
 
 </style>
 
-<script type="module" is:inline define:vars={{ id }}>
-  const toggleBtn = document.getElementById(`toggle-${id}`);
-  const content = document.getElementById(`content-${id}`);
 
-  toggleBtn.addEventListener("click", () => {
-    content.classList.remove("hidden");
-    toggleBtn.classList.add("hidden");
-  });
-</script>
