@@ -6,7 +6,6 @@ import "@styles/starwind.css";
 import "@styles/callouts.css";
 import "@styles/codeblocks.css";
 import "@styles/shiki-github-dark.css";
-import "@styles/avatars.css";
 import PageMeta from "@components/basics/PageMeta.astro";
 
 /**
@@ -95,5 +94,42 @@ const pageImageUrl = fm.banner_image || fm.portrait_image;
   h1 {
     font-family: "Poppins", sans-serif;
     color: var(--clr-lossless-primary-light);
+  }
+
+  /* Avatar styles moved from avatars.css to resolve 404 issue */
+  .author-name--changelog {
+    font-family: var(--ff-base);
+    font-size: .7rem;
+    font-weight: 400;
+    color: #f7fafc;
+    letter-spacing: 0.01em;
+  }
+
+  .author-name--article-card {
+    font-family: var(--ff-base);
+    font-size: var(--fs-200);
+    font-weight: var(--fw-semi-bold);
+    color: var(--clr-body);
+    letter-spacing: 0.01em;
+  }
+
+  .avatar-bg-attn {
+    border-color: var(--clr-lossless-attn-action) !important;
+    background: none !important;
+  }
+  .avatar-base {
+    height: 2.5rem;
+    width: 2.5rem;
+    font-size: 1rem;
+  }
+  .avatar-lg {
+    height: 3rem;
+    width: 3rem;
+    font-size: 1.25rem;
+  }
+  .avatar-sm {
+    height: 2rem;
+    width: 2rem;
+    font-size: 0.875rem;
   }
 </style>
