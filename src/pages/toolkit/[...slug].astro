@@ -15,7 +15,7 @@ import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { getReferenceSlug } from '@utils/slugify';
-import { DEBUG_TOOLING } from '@utils/envUtils';
+import { DEBUG_OG } from '@utils/envUtils';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
@@ -32,7 +32,7 @@ export async function getStaticPaths() {
   // Process tooling entries to create static paths
   return toolingEntries.map(entry => {
     const generatedSlug = getReferenceSlug(entry.id)
-    if (DEBUG_TOOLING) {
+    if (DEBUG_OG) {
       console.log(`Generated path: /toolkit/${generatedSlug}`);
     }
 
@@ -82,15 +82,14 @@ const contentData = {
 const generatedSlug = getReferenceSlug(entry.id);
 // Remove the 'tooling/' prefix from the slug since we're already in the /toolkit/ route
 const cleanSlug = generatedSlug.replace(/^tooling\//, '');
-// Use the current request origin to make it work in any environment
-const baseUrl = Astro.url.origin;
-const customOgImage = `${baseUrl}/toolkit/${cleanSlug}/og.png`;
+// Use the current request URL to make it work in any environment
+const baseUrl = Astro.url.href;
+const customOgImage = `${baseUrl}og.png`;
 
 // Debug logging for OG image generation
-if (DEBUG_TOOLING) {
+if (DEBUG_OG) {
   console.log(`🔗 Generated OG image URL for ${entry.id}: ${customOgImage}`);
-  console.log(`   Base URL: ${baseUrl}`);
-  console.log(`   Clean Slug: ${cleanSlug}`);
+  console.log(`   Image URL: ${customOgImage}`);
 }
 ---
 
