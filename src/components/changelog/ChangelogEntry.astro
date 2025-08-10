@@ -19,7 +19,7 @@
 
 import { formatDate } from "@utils/formatDate";
 import AuthorHandle from "@components/basics/AuthorHandle.astro";
-import { marked } from "marked";
+import { renderSimpleMarkdown } from "@utils/simpleMarkdownRenderer";
 
 // Props are kept flexible with minimal requirements
 const {
@@ -55,10 +55,32 @@ const categoryList = normalizeCategories();
 // Only render AuthorHandle if we have authors
 const hasAuthors = Array.isArray(authors) && authors.length > 0;
 
-//Preview the body content
-const tags = marked.lexer(body);
-const preview = tags?.slice(0, 6);
-const rest = tags?.slice(6, tags?.length);
+// Remove title heading from body content to avoid duplication
+// The title is already rendered in the header, so strip it from markdown content
+let cleanedBody = body;
+// Remove the first heading if it matches the title or is the first line starting with #
+const lines = body.split('\n');
+if (lines[0]?.startsWith('#')) {
+  // Remove the first heading line and any following empty lines
+  let startIndex = 1;
+  while (startIndex < lines.length && lines[startIndex].trim() === '') {
+    startIndex++;
+  }
+  cleanedBody = lines.slice(startIndex).join('\n');
+}
+
+// Split body content for preview functionality
+// Split on double newlines to get paragraphs, then take first few for preview
+const paragraphs = cleanedBody.split('\n\n');
+const previewParagraphs = paragraphs.slice(0, 3); // First 3 paragraphs for preview
+const restParagraphs = paragraphs.slice(3); // Remaining paragraphs
+const previewContent = previewParagraphs.join('\n\n');
+const restContent = restParagraphs.join('\n\n');
+const hasMoreContent = restParagraphs.length > 0;
+
+// Process markdown content using renderSimpleMarkdown utility
+const previewRendered = renderSimpleMarkdown(previewContent);
+const restRendered = hasMoreContent ? renderSimpleMarkdown(restContent) : { html: '', plainText: '' };
 ---
 
 <div class:list={["changelog-entry", className]}>
@@ -127,14 +149,17 @@ const rest = tags?.slice(6, tags?.length);
     </div>
 
     <div class="changelog-entry__body">
-      {/* Render the body content */}
-      <div class="changelog-entry__content" set:html={marked.parser(preview)} />
-      <div
-        class="changelog-entry__content hidden"
-        set:html={marked.parser(rest)}
-        id={`content-${id}`}
-      />
-      <div class="changelog-entry__button" id={`toggle-${id}`}>Read Full Entry →</div>
+      <div class="changelog-entry__content" set:html={previewRendered.html} />
+      {hasMoreContent && (
+        <>
+          <div
+            class="changelog-entry__content hidden"
+            id={`content-${id}`}
+            set:html={restRendered.html}
+          />
+          <div class="changelog-entry__button" id={`toggle-${id}`}>Read Full Entry →</div>
+        </>
+      )}
     </div>
   </div>
 </div>

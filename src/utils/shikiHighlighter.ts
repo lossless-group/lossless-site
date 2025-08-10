@@ -101,6 +101,17 @@ export function sanitizeMermaidCode(code: string): string {
   return code
     // Replace Obsidian wikilinks [[text]] with just text
     .replace(/\[\[([^\]]+)\]\]/g, '$1')
+    // Handle file paths in node labels - convert /path/to/file to path|to|file
+    .replace(/\[([^[\]]*\/[^[\]]*)\]/g, (match, path) => {
+      // Extract just the filename or convert slashes to pipes
+      const sanitizedPath = path.replace(/\//g, '|');
+      return `[${sanitizedPath}]`;
+    })
+    // Handle file paths in node IDs - convert /path/to/file to path_to_file
+    .replace(/([A-Z])\[([^[\]]*\/[^[\]]*)\]/g, (match, nodeId, path) => {
+      const sanitizedPath = path.replace(/\//g, '_');
+      return `${nodeId}[${sanitizedPath}]`;
+    })
     // Replace problematic characters in node labels
     .replace(/([A-Z]\s*-->\s*[A-Z]\[[^\]]*)\[([^\]]*)\]/g, '$1$2')
     // Clean up any remaining double brackets that might break parsing

@@ -9,10 +9,72 @@ import { remark } from 'remark';
 import remarkHtml from 'remark-html';
 import remarkGfm from 'remark-gfm';
 import remarkJsonCanvasCodeblocks from './markdown/remark-jsoncanvas-codeblocks.js';
+import { sanitizeMermaidCode, getShikiHighlighter, getLanguageRoutingStrategy } from './shikiHighlighter.js';
 
 export interface RenderedMarkdown {
   html: string;
   plainText: string;
+}
+
+/**
+ * Simple remark plugin to sanitize Mermaid code blocks
+ */
+function remarkSanitizeMermaid() {
+  return (tree: any) => {
+    // Find all code blocks with lang="mermaid"
+    function visit(node: any) {
+      if (node.type === 'code' && node.lang === 'mermaid') {
+        // Apply sanitization to the code value
+        node.value = sanitizeMermaidCode(node.value);
+      }
+      if (node.children) {
+        node.children.forEach(visit);
+      }
+    }
+    visit(tree);
+  };
+}
+
+/**
+ * Simple remark plugin for basic syntax highlighting using Shiki
+ */
+function remarkBasicShiki() {
+  return async (tree: any) => {
+    const highlighter = await getShikiHighlighter();
+    
+    // Find all code blocks and apply syntax highlighting
+    async function visit(node: any) {
+      if (node.type === 'code' && node.lang) {
+        const lang = node.lang;
+        const code = node.value;
+        const routingStrategy = getLanguageRoutingStrategy(lang);
+        
+        if (routingStrategy === 'shiki') {
+          try {
+            // Apply Shiki highlighting
+            const highlighted = highlighter.codeToHtml(code, {
+              lang: lang,
+              theme: 'github-dark'
+            });
+            
+            // Convert to HTML node for remark-html
+            node.type = 'html';
+            node.value = highlighted;
+            delete node.lang;
+          } catch (error) {
+            // Fallback to plain code block if highlighting fails
+            console.warn(`Failed to highlight ${lang} code:`, error);
+          }
+        }
+      }
+      if (node.children) {
+        for (const child of node.children) {
+          await visit(child);
+        }
+      }
+    }
+    await visit(tree);
+  };
 }
 
 /**
@@ -27,6 +89,7 @@ export function renderSimpleMarkdown(content: string): RenderedMarkdown {
     // Process markdown with remark (no syntax highlighting to avoid Shiki conflicts)
     const processor = remark()
       .use(remarkGfm)
+      .use(remarkSanitizeMermaid) // Sanitize Mermaid before other processing
       .use(remarkJsonCanvasCodeblocks)
       .use(remarkHtml, { sanitize: false });
 
