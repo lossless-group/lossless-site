@@ -70,15 +70,24 @@ export async function GET({ props }: Props) {
 export async function getStaticPaths() {
   const toolingEntries = await getCollection('tooling');
   
-  return toolingEntries.map(entry => {
+  console.log(`🔗 Generating ${toolingEntries.length} OG image paths for tooling entries`);
+  
+  const paths = toolingEntries.map(entry => {
     const generatedSlug = getReferenceSlug(entry.id);
+    // Remove the 'tooling/' prefix from the slug since we're already in the /toolkit/ route
+    const cleanSlug = generatedSlug.replace(/^tooling\//, '');
+    
+    console.log(`   ${entry.id} -> ${cleanSlug}`);
     
     return {
-      params: { slug: generatedSlug },
+      params: { slug: cleanSlug },
       props: { entry },
     };
   }).filter(path => {
     // Exclude vertical toolkit paths
     return !path.params.slug.startsWith('vertical/');
   });
+  
+  console.log(`✅ Generated ${paths.length} OG image paths`);
+  return paths;
 }
