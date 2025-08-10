@@ -5,7 +5,7 @@ import { pathToFileURL } from 'url';
 
 // Import environment utilities
 import { contentBasePath } from './utils/envUtils.js';
-import { getReferenceSlug } from './utils/slugify.js';
+
 
 
 // Function to resolve content paths based on environment
@@ -363,35 +363,15 @@ const mapOfContentsCollection = defineCollection({
   }).passthrough()
 });
 
+const pathId = (entry: string) =>
+  entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
+
 const projectsCollection = defineCollection({
   loader: glob({
     pattern: "**/*.md",
-    base: "../content/projects",
+    base: resolveContentPath("projects"),
     generateId: ({ entry }) => {
-      // Remove .md extension from entry path
-      const pathWithoutExt = entry.replace(/\.md$/, '');
-      
-      // Extract project root directory and internal path
-      const pathParts = pathWithoutExt.split('/');
-      if (pathParts.length === 0) {
-        return 'unknown';
-      }
-      
-      // First part is the project root directory (e.g., "Augment-It")
-      const projectRoot = pathParts[0];
-      
-      // Generate slug: project-root/internal/path
-      let slug;
-      if (pathParts.length === 1) {
-        // Just the project root file
-        slug = getReferenceSlug(projectRoot);
-      } else {
-        // Project root + internal path
-        const internalPath = pathParts.slice(1).join('/');
-        slug = `${getReferenceSlug(projectRoot)}/${getReferenceSlug(internalPath)}`;
-      }
-      
-      return slug;
+      return pathId(entry);
     }
   }),
   schema: z.object({
