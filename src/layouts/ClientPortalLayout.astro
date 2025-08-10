@@ -27,6 +27,7 @@ const { client } = Astro.props as ClientPortalProps;
 
 // Import contentBasePath from envUtils which handles the correct path based on DEPLOY_ENV
 import { contentBasePath } from '@utils/envUtils';
+import { extractBacklinkDisplayTexts } from '@utils/backlink-parser';
 
 // Debug log the content path
 console.log('Content base path from envUtils:', contentBasePath);
@@ -259,15 +260,10 @@ try {
   const extractList = (blockName: string): string[] => {
     const m = rawClientMd.match(new RegExp(`:::${blockName}([\\s\\S]*?):::`,'i'));
     if (!m) return [];
-    return (m[1] || '')
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l.startsWith('-') || l.startsWith('*'))
-      .map((l) => {
-        const mm = l.match(/^[-*]\s*\[\[(.*?)(?:\]\])?\s*$/);
-        return (mm && mm[1] ? mm[1] : l.replace(/^[-*]\s*/, '')).trim();
-      })
-      .filter(Boolean);
+    const blockContent = m[1] || '';
+    
+    // Use the new backlink parser to extract display texts for matching
+    return extractBacklinkDisplayTexts(blockContent);
   };
 
   selectedVocabulary = extractList('vocabulary');

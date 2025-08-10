@@ -1,6 +1,6 @@
-import { defineCollection, z, getCollection } from 'astro:content';
-import { file, glob } from 'astro/loaders';
-import { basename, dirname, extname, join, resolve } from 'node:path';
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { join } from 'node:path';
 import { pathToFileURL } from 'url';
 
 // Import environment utilities
@@ -19,28 +19,6 @@ function resolveContentPath(relativePath: string): string {
 
   // Convert to file:// URL
   return pathToFileURL(absolutePath).href;
-}
-
-// Function to create a collection that loads from multiple paths
-function createMultiPathCollection({
-  paths,
-  ...config
-}: {
-  paths: string[];
-  schema: any;
-  loader?: any;
-}) {
-  // Create a glob pattern that combines all paths
-  const patterns = paths.map(path => `${path}/**/*.md`);
-  const base = process.cwd(); // Use current working directory as base
-
-  return defineCollection({
-    ...config,
-    loader: config.loader || glob({
-      pattern: patterns,
-      base
-    })
-  });
 }
 
 // Cards collection - respects JSON structure with cards array
@@ -143,8 +121,8 @@ const clientRecommendationsCollection = defineCollection({
   })
 });
 
-const pathId = (entry: string) =>
-  entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
+// const pathId = (entry: string) =>
+//   entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
 
 /**
 const clientProjectsCollection = defineCollection({
