@@ -41,15 +41,12 @@ const {
   border-radius: 0.5rem;
   background-color: rgba(255, 255, 255, 0.03);
   width: 100%;
-  /* Smooth responsive width using clamp() - scales from 100% on mobile to 25vw on large screens */
-  max-width: clamp(100%, calc(100vw - 2rem), 25vw);
+  max-width: 100%;
   overflow: hidden;
   box-sizing: border-box;
   min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  /* Add smooth transition for width changes */
-  transition: max-width 0.3s ease-in-out;
 }
 
 .gallery-header {
@@ -121,66 +118,11 @@ const {
   height: auto !important;
 }
 
-/* Dynamic sizing for small galleries */
-.portfolio-gallery-container:has(.portfolio-gallery-scroll .portfolio-card-wrapper:nth-child(-n+2)) .portfolio-card-wrapper {
-  /* For galleries with 1-2 items, allow more compact sizing */
-  width: 300px;
-  max-width: 300px;
-}
-
-.portfolio-gallery-container:has(.portfolio-gallery-scroll .portfolio-card-wrapper:nth-child(-n+1)) .portfolio-card-wrapper {
-  /* For galleries with just 1 item, make it even more compact */
-  width: 280px;
-  max-width: 280px;
-}
-
-/* Compact mode for cards with minimal content */
-.portfolio-gallery-scroll .portfolio-card:not(:has(.portfolio-description)) {
-  /* Cards without descriptions can be more compact */
-  min-height: auto;
-}
-
-.portfolio-gallery-scroll .portfolio-card:not(:has(.portfolio-card__footer)) {
-  /* Cards without footer content can also be more compact */
-  min-height: auto;
-}
-
-/* JavaScript-enhanced compact sizing */
-.compact-gallery .portfolio-card-wrapper {
-  width: 300px !important;
-  max-width: 300px !important;
-}
-
-.single-card-gallery .portfolio-card-wrapper {
-  width: 280px !important;
-  max-width: 280px !important;
-}
-
-.portfolio-card.minimal-content {
-  min-height: auto !important;
-}
-
-.portfolio-card.minimal-content .content-wrapper {
-  padding: 0.75em !important;
-}
-
-.portfolio-card.minimal-content .portfolio-card-image {
-  height: 120px !important;
-  max-height: 120px !important;
-  min-height: 120px !important;
-}
-
-/* Responsive adjustments for compact galleries */
-@media (max-width: 768px) {
-  .compact-gallery .portfolio-card-wrapper {
-    width: 260px !important;
-    max-width: 260px !important;
-  }
-  
-  .single-card-gallery .portfolio-card-wrapper {
-    width: 240px !important;
-    max-width: 240px !important;
-  }
+/* Consistent card sizing for all galleries */
+.portfolio-card-wrapper {
+  width: 320px;
+  max-width: 320px;
+  min-width: 280px;
 }
 
 .portfolio-gallery-scroll .portfolio-card-image {
@@ -208,46 +150,19 @@ const {
 
 /* Ensure the gallery respects the prose container's max-width */
 .prose .portfolio-gallery-container {
-  max-width: 85ch;
+  max-width: 100%;
   width: 100%;
   overflow: hidden;
 }
 
 .prose .portfolio-gallery-scroll {
-  max-width: 85ch;
+  max-width: 100%;
   width: 100%;
   overflow-x: auto;
 }
 
-/* Smooth responsive breakpoints using container queries and CSS custom properties */
-@media (min-width: 1024px) {
-  .portfolio-gallery-container {
-    /* Smoothly scale from 25vw to 35vw as screen gets larger */
-    max-width: clamp(25vw, calc(20vw + 5vw * (100vw - 1024px) / (1600px - 1024px)), 35vw);
-  }
-}
-
-@media (min-width: 1600px) {
-  .portfolio-gallery-container {
-    /* Maintain 35vw for very large screens */
-    max-width: 35vw;
-  }
-}
-
-/* For smaller screens, use a more gradual approach */
-@media (max-width: 1023px) {
-  .portfolio-gallery-container {
-    /* Smoothly scale from 100% on mobile to 35vw on tablet */
-    max-width: clamp(100%, calc(100% - (100vw - 768px) * 0.65), 35vw);
-  }
-}
-
+/* Responsive breakpoints for full-width galleries */
 @media (max-width: 767px) {
-  .portfolio-gallery-container {
-    /* Full width on mobile */
-    max-width: 100%;
-  }
-  
   .portfolio-card-wrapper {
     width: 280px;
     max-width: 280px;
@@ -287,49 +202,7 @@ const {
     button.textContent = isVisible ? 'Click to expand' : 'Click to close';
   }
 
-  function optimizeGallerySize() {
-    document.querySelectorAll('.portfolio-gallery-container').forEach(container => {
-      const cards = container.querySelectorAll('.portfolio-card-wrapper');
-      const cardCount = cards.length;
-      
-      // Add data attributes for CSS targeting
-      container.setAttribute('data-card-count', cardCount);
-      
-      // Add compact class for small galleries
-      if (cardCount <= 2) {
-        container.classList.add('compact-gallery');
-      }
-      
-      if (cardCount === 1) {
-        container.classList.add('single-card-gallery');
-      }
-      
-      // Check each card for minimal content and mark accordingly
-      cards.forEach(cardWrapper => {
-        const card = cardWrapper.querySelector('.portfolio-card');
-        const description = card.querySelector('.portfolio-description');
-        const footer = card.querySelector('.portfolio-card__footer');
-        
-        let contentScore = 0;
-        if (description && description.textContent.trim().length > 50) contentScore++;
-        if (footer && footer.children.length > 0) contentScore++;
-        
-        if (contentScore === 0) {
-          card.classList.add('minimal-content');
-        } else if (contentScore === 1) {
-          card.classList.add('moderate-content');
-        } else {
-          card.classList.add('rich-content');
-        }
-      });
-    });
-  }
-
-  // Run optimization after DOM loads
-  document.addEventListener('DOMContentLoaded', optimizeGallerySize);
-  
-  // Re-run if content changes dynamically
-  window.addEventListener('load', optimizeGallerySize);
+  // Gallery is now fully responsive without complex sizing logic
 
   window.togglePortfolioGallery = togglePortfolioGallery;
 </script>

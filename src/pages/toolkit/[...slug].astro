@@ -77,11 +77,18 @@ const contentData = {
   contentType: contentType,
   title: entry.data.title,
 };
+
+// Generate the custom OG image URL for this toolkit entry
+const generatedSlug = getReferenceSlug(entry.id);
+const customOgImage = `${Astro.site}/toolkit/${generatedSlug}/og.png`;
 ---
 
 <Layout 
   title={entry.data.title || entry.id.replace(/\.md$/, '')}
-  frontmatter={entry.data}
+  frontmatter={{
+    ...entry.data,
+    og_image: customOgImage // Override with our custom generated image
+  }}
 >
   <OneArticle
     Component={OneArticleOnPage}

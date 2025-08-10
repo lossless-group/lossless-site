@@ -11,17 +11,11 @@ import { fileURLToPath } from 'url';
 import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import normalizeShellLangs from './src/utils/markdown/normalizeShellLangs.js';
-import remarkTableOfContents from './src/utils/markdown/remark-toc';
 import vercel from '@astrojs/vercel';
 import fs from 'fs';
 import path from 'path';
 import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
-import remarkGfm from 'remark-gfm'
-import remarkDirective from 'remark-directive';
-import { directiveComponentMap, remarkDirectiveToComponent, remarkDirectiveTransform } from './src/utils/markdown/remark-directives.ts';
-import remarkBacklinks from './src/utils/markdown/remark-backlinks.ts';
 
 // Debug log environment
 console.log('Environment in astro.config.mjs:', {
@@ -49,14 +43,10 @@ export default defineConfig({
   markdown: {
     syntaxHighlight: false, // Disable Astro's built-in Shiki - use our singleton utility instead
     // Custom syntax highlighting handled by our singleton utility
-    // TODO: Check if this is actually doing anything. 90% this is already being ran in AstroMarkdown.astro. As a rule of thumb, we have moved away from using remarkPlugins
+    // NOTE: Remark plugins have been moved to layout-level processing for better control
+    // Global remark plugins are no longer used - processing happens in OneArticle.astro, etc.
     remarkPlugins: [
-      /** @type {any} */ (normalizeShellLangs),
-      /** @type {any} */ (remarkTableOfContents),
-      /** @type {any} */ (remarkBacklinks),
-      /** @type {any} */ (remarkDirective),
-      /** @type {any} */ (remarkDirectiveToComponent),
-      /** @type {any} */ (remarkGfm),
+      // Removed: All remark plugins moved to layout-level processing
     ],
     remarkRehype: {
       allowDangerousHtml: true,

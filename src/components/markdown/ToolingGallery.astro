@@ -52,15 +52,12 @@ const {
   border-radius: 0.5rem;
   background-color: rgba(255, 255, 255, 0.03);
   width: 100%;
-  /* Smooth responsive width using clamp() - scales from 100% on mobile to 25vw on large screens */
-  max-width: clamp(100%, calc(100vw - 2rem), 25vw);
+  max-width: 100%;
   overflow: hidden;
   box-sizing: border-box;
   min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  /* Add smooth transition for width changes */
-  transition: max-width 0.3s ease-in-out;
 }
 
 .gallery-header {
@@ -107,10 +104,9 @@ const {
   scroll-snap-align: start;
   width: 320px;
   max-width: 320px;
-  min-width: 200px;
+  min-width: 280px;
   max-height: 480px;
   display: flex;
-  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -124,44 +120,36 @@ const {
 
 /* Ensure the gallery respects the prose container's max-width */
 .prose .tooling-gallery-container {
-  max-width: 85ch;
+  max-width: 100%;
   width: 100%;
   overflow: hidden;
 }
 
 .prose .tooling-gallery-scroll {
-  max-width: 85ch;
+  max-width: 100%;
   width: 100%;
   overflow-x: auto;
 }
 
-/* Smooth responsive breakpoints using container queries and CSS custom properties */
-@media (min-width: 1024px) {
-  .tooling-gallery-container {
-    /* Smoothly scale from 25vw to 35vw as screen gets larger */
-    max-width: clamp(25vw, calc(20vw + 5vw * (100vw - 1024px) / (1600px - 1024px)), 35vw);
-  }
-}
-
-@media (min-width: 1600px) {
-  .tooling-gallery-container {
-    /* Maintain 35vw for very large screens */
-    max-width: 35vw;
-  }
-}
-
-/* For smaller screens, use a more gradual approach */
-@media (max-width: 1023px) {
-  .tooling-gallery-container {
-    /* Smoothly scale from 100% on mobile to 35vw on tablet */
-    max-width: clamp(100%, calc(100% - (100vw - 768px) * 0.65), 35vw);
-  }
-}
-
+/* Responsive breakpoints for full-width galleries */
 @media (max-width: 767px) {
   .tooling-gallery-container {
     /* Full width on mobile */
     max-width: 100%;
+  }
+  
+  .tool-card-wrapper {
+    width: 280px;
+    max-width: 280px;
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-card-wrapper {
+    width: 260px;
+    max-width: 260px;
+    min-width: 240px;
   }
 }
 
