@@ -82,14 +82,10 @@ const contentData = {
 const generatedSlug = getReferenceSlug(entry.id);
 // Remove the 'tooling/' prefix from the slug since we're already in the /toolkit/ route
 const cleanSlug = generatedSlug.replace(/^tooling\//, '');
-// Use the current request URL to make it work in any environment
-const baseUrl = Astro.url.href;
-const customOgImage = `${baseUrl}og.png`;
 
 // Debug logging for OG image generation
 if (DEBUG_OG) {
-  console.log(`🔗 Generated OG image URL for ${entry.id}: ${customOgImage}`);
-  console.log(`   Image URL: ${customOgImage}`);
+  console.log(`🔗 Generated clean slug for ${entry.id}: ${cleanSlug}`);
 }
 ---
 
@@ -97,7 +93,7 @@ if (DEBUG_OG) {
   title={entry.data.title || entry.id.replace(/\.md$/, '')}
   frontmatter={{
     ...entry.data,
-    og_image: customOgImage // Override with our custom generated image
+    og_image: `og.png` // Just pass the relative path, Layout will construct the full URL
   }}
 >
   <OneArticle
