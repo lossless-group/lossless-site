@@ -59,6 +59,17 @@ const slidesCollection = defineCollection({
       // Generate slug from filename if not provided in frontmatter
       const slug = data.slug || filename.toLowerCase().replace(/\s+/g, '-');
       
+      console.log('[SLIDES] Processing:', {
+        path: context.path,
+        filename,
+        originalTitle: data.title,
+        displayTitle,
+        originalSlug: data.slug,
+        computedSlug: slug,
+        titleChanged: data.title !== displayTitle,
+        slugChanged: data.slug !== slug
+      });
+      
       return {
         ...data,
         title: displayTitle,
@@ -86,10 +97,21 @@ const clientEssaysCollection = defineCollection({
       ? data.title
       : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 
+    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+
+    console.log('[CLIENT-ESSAYS] Processing:', {
+      path: context.path,
+      filename,
+      originalTitle: data.title,
+      displayTitle,
+      computedSlug,
+      titleChanged: data.title !== displayTitle
+    });
+
     return {
       ...data,
       title: displayTitle,
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+      slug: computedSlug,
     };
   })
 });
@@ -113,10 +135,21 @@ const clientRecommendationsCollection = defineCollection({
       ? data.title
       : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 
+    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+
+    console.log('[CLIENT-RECOMMENDATIONS] Processing:', {
+      path: context.path,
+      filename,
+      originalTitle: data.title,
+      displayTitle,
+      computedSlug,
+      titleChanged: data.title !== displayTitle
+    });
+
     return {
       ...data,
       title: displayTitle,
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+      slug: computedSlug,
     };
   })
 });
@@ -224,12 +257,26 @@ const visualsCollection = defineCollection({
       .replace(/\s+/g, ' ')
       .trim();
     
+    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+    const finalTitle = data.title || displayTitle;
+
+    console.log('[VISUALS] Processing:', {
+      path: context.path,
+      filename,
+      extension,
+      originalTitle: data.title,
+      displayTitle,
+      finalTitle,
+      computedSlug,
+      titleChanged: data.title !== finalTitle
+    });
+    
     return {
       ...data,
       id: filename,  // Original filename as id
-      title: data.title || displayTitle,  // Use provided title or computed one
+      title: finalTitle,  // Use provided title or computed one
       format: extension as 'png' | 'jpg' | 'jpeg' | 'gif' | 'webp' | 'svg',
-      slug: filename.toLowerCase().replace(/\s+/g, '-')  // Add computed slug
+      slug: computedSlug  // Add computed slug
     };
   })
 });
@@ -303,11 +350,22 @@ const essaysCollection = defineCollection({
           .replace(/\s+/g, ' ')
           .trim();
     
+    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+
+    console.log('[ESSAYS] Processing:', {
+      path: context.path,
+      filename,
+      originalTitle: data.title,
+      displayTitle,
+      computedSlug,
+      titleChanged: data.title !== displayTitle
+    });
+    
     // Merge our computed values into the data object
     return {
       ...data,  // Start with existing data
       title: displayTitle,  // Override with computed title
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),  // Add computed slug
+      slug: computedSlug,  // Add computed slug
     };
   })
 });
@@ -409,6 +467,14 @@ const verticalToolkitsCollection = defineCollection({
     
     // Generate title from filename if not provided
     const displayTitle = data.title || filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    console.log('[VERTICAL-TOOLKITS] Processing:', {
+      path: context.path,
+      filename,
+      originalTitle: data.title,
+      displayTitle,
+      titleChanged: data.title !== displayTitle
+    });
     
     return {
       ...data,
@@ -526,10 +592,21 @@ const mapOfContentsCollection = defineCollection({
       ? data.title
       : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
     
+    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+
+    console.log('[MOC] Processing:', {
+      path: context.path,
+      filename,
+      originalTitle: data.title,
+      displayTitle,
+      computedSlug,
+      titleChanged: data.title !== displayTitle
+    });
+    
     return {
       ...data,
       title: displayTitle,
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+      slug: computedSlug,
     };
   })
 });
@@ -618,12 +695,24 @@ const portfolioCollection = defineCollection({
     
     // Derive title from og_title or filename
     const title = data.title || data.og_title || filename.replace(/[-_]/g, ' ');
+    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+
+    console.log('[PORTFOLIO] Processing:', {
+      path: contextPath,
+      filename,
+      originalTitle: data.title,
+      ogTitle: data.og_title,
+      computedTitle: title,
+      computedSlug,
+      client: data.client || client,
+      titleChanged: data.title !== title
+    });
     
     return {
       ...data,
       title,
       client: data.client || client,
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),
+      slug: computedSlug,
     };
   })
 });
