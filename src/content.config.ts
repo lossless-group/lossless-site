@@ -47,35 +47,7 @@ const slidesCollection = defineCollection({
       status: z.string().default('draft').optional(),
       published: z.boolean().default(true).optional(),
       // Additional fields
-    }).passthrough().transform((data, context) => {
-      // Get the filename without extension
-      const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-      
-      // Use provided title or generate from filename
-      const displayTitle = data.title
-        ? data.title
-        : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-      
-      // Generate slug from filename if not provided in frontmatter
-      const slug = data.slug || filename.toLowerCase().replace(/\s+/g, '-');
-      
-      console.log('[SLIDES] Processing:', {
-        path: context.path,
-        filename,
-        originalTitle: data.title,
-        displayTitle,
-        originalSlug: data.slug,
-        computedSlug: slug,
-        titleChanged: data.title !== displayTitle,
-        slugChanged: data.slug !== slug
-      });
-      
-      return {
-        ...data,
-        title: displayTitle,
-        slug: slug,
-      };
-    }),
+    }).passthrough(),
 });
 
 const clientEssaysCollection = defineCollection({
@@ -90,30 +62,7 @@ const clientEssaysCollection = defineCollection({
       z.null(),
       z.undefined()
     ]).transform(val => val ?? []).default([]),
-  }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-
-    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-
-    console.log('[CLIENT-ESSAYS] Processing:', {
-      path: context.path,
-      filename,
-      originalTitle: data.title,
-      displayTitle,
-      computedSlug,
-      titleChanged: data.title !== displayTitle
-    });
-
-    return {
-      ...data,
-      title: displayTitle,
-      slug: computedSlug,
-    };
-  })
+  }).passthrough()
 });
 
 const clientRecommendationsCollection = defineCollection({
@@ -128,30 +77,7 @@ const clientRecommendationsCollection = defineCollection({
       z.null(),
       z.undefined()
     ]).transform(val => val ?? []).default([]),
-  }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
-
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-
-    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-
-    console.log('[CLIENT-RECOMMENDATIONS] Processing:', {
-      path: context.path,
-      filename,
-      originalTitle: data.title,
-      displayTitle,
-      computedSlug,
-      titleChanged: data.title !== displayTitle
-    });
-
-    return {
-      ...data,
-      title: displayTitle,
-      slug: computedSlug,
-    };
-  })
+  }).passthrough()
 });
 
 // const pathId = (entry: string) =>
@@ -222,15 +148,7 @@ const clientPortfoliosCollection = defineCollection({
       z.undefined()
     ]).transform(val => val ?? []).default([]),
     slug: z.string().optional(), // Allow custom slugs from frontmatter
-  }).passthrough().transform((data, context) => {
-    return {
-      ...data,
-      // Let the route handle title generation since it has access to entry.id
-      slug: data.slug, // Respect frontmatter slug if provided
-      tags: data.tags || [], // Ensure tags is always an array
-      portfolios: data.portfolios || [], // Ensure portfolios is always an array
-    };
-  })
+  }).passthrough()
 });
 
 const visualsCollection = defineCollection({
@@ -243,51 +161,14 @@ const visualsCollection = defineCollection({
     width: z.number().optional(),
     height: z.number().optional(),
     format: z.enum(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']).optional()
-  }).passthrough().transform((data, context) => {
-    // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.[^.]+$/, '') || '';
-    const extension = String(context.path).split('.').pop()?.toLowerCase() || '';
-    
-    // Use the filename as the display title, preserving original case
-    // - Replace dashes/underscores with spaces
-    // - Collapse multiple spaces
-    // - DO NOT change the case of any letters (e.g., 'API' stays 'API')
-    const displayTitle = filename
-      .replace(/_/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-    const finalTitle = data.title || displayTitle;
-
-    console.log('[VISUALS] Processing:', {
-      path: context.path,
-      filename,
-      extension,
-      originalTitle: data.title,
-      displayTitle,
-      finalTitle,
-      computedSlug,
-      titleChanged: data.title !== finalTitle
-    });
-    
-    return {
-      ...data,
-      id: filename,  // Original filename as id
-      title: finalTitle,  // Use provided title or computed one
-      format: extension as 'png' | 'jpg' | 'jpeg' | 'gif' | 'webp' | 'svg',
-      slug: computedSlug  // Add computed slug
-    };
-  })
+  }).passthrough()
 });
 
 const talksCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/talks")}),
   schema: z.object({
     publish: z.boolean().optional(), // Allows individual entries to override collection default
-  }).passthrough().transform((data) => ({
-    ...data // Pass through all original frontmatter fields.
-  }))
+  }).passthrough()
 });
 
 const vocabularyCollection = defineCollection({
@@ -334,96 +215,33 @@ const essaysCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  }).passthrough().transform((data, context) => {
-    // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Title fallback logic for essaysCollection:
-    // - If frontmatter provides a title, use it as-is (preserve all casing).
-    // - If missing, generate a title from the filename by replacing dashes/underscores with spaces.
-    // - DO NOT change the case of any letters (e.g., 'API' stays 'API', 'AI' stays 'AI').
-    // - This preserves the author's intended casing from the filename.
-    const displayTitle = data.title
-      ? data.title
-      : filename
-          .replace(/_/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-    
-    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-
-    console.log('[ESSAYS] Processing:', {
-      path: context.path,
-      filename,
-      originalTitle: data.title,
-      displayTitle,
-      computedSlug,
-      titleChanged: data.title !== displayTitle
-    });
-    
-    // Merge our computed values into the data object
-    return {
-      ...data,  // Start with existing data
-      title: displayTitle,  // Override with computed title
-      slug: computedSlug,  // Add computed slug
-    };
-  })
+  }).passthrough()
 });
 
 const promptsCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/prompts")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 
 const remindersCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/reminders")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 
 const changelogContentCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--content")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 
 
 const changelogCodeCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--code")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 
 const changelogLaerdalCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--laerdal")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 
 const reportCollection = defineCollection({
@@ -440,13 +258,7 @@ const pagesCollection = defineCollection({
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
 const toolCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("tooling")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 
 const verticalToolkitsCollection = defineCollection({
@@ -461,30 +273,7 @@ const verticalToolkitsCollection = defineCollection({
       return entry.replace(/\.md$/, '').toLowerCase();
     }
   }),
-  schema: z.object({}).passthrough().transform((data, context) => {
-    // Get the filename for title generation
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Generate title from filename if not provided
-    const displayTitle = data.title || filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    console.log('[VERTICAL-TOOLKITS] Processing:', {
-      path: context.path,
-      filename,
-      originalTitle: data.title,
-      displayTitle,
-      titleChanged: data.title !== displayTitle
-    });
-    
-    return {
-      ...data,
-      title: displayTitle,
-      // Ensure tags is always an array, even if null/undefined in frontmatter
-      tags: Array.isArray(data.tags) ? data.tags
-        : data.tags ? [data.tags]
-        : []
-    };
-  })
+  schema: z.object({}).passthrough()
 });
 
 // ***
@@ -505,24 +294,12 @@ const marketMapsCollection = defineCollection({
     publish: z.boolean().default(true).optional(),
     tags: z.union([z.string(), z.array(z.string())]).optional(),
     authors: z.union([z.string(), z.array(z.string())]).optional(),
-  }).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  }).passthrough()
 });
 
 const specsCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("specs")}),
-  schema: z.object({}).passthrough().transform((data) => ({
-    ...data,
-    // Ensure tags is always an array, even if null/undefined in frontmatter
-    tags: Array.isArray(data.tags) ? data.tags
-      : data.tags ? [data.tags]
-      : []
-  }))
+  schema: z.object({}).passthrough()
 });
 // Includes:
 //   - specsCollection (defineCollection)
@@ -583,32 +360,7 @@ const mapOfContentsCollection = defineCollection({
     description: z.string().optional(),
     type: z.string().optional(),
     MAX_CARDS: z.number().optional(),
-  }).passthrough().transform((data, context) => {
-    // Get the filename without extension
-    const filename = String(context.path).split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Use provided title or generate from filename
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-
-    console.log('[MOC] Processing:', {
-      path: context.path,
-      filename,
-      originalTitle: data.title,
-      displayTitle,
-      computedSlug,
-      titleChanged: data.title !== displayTitle
-    });
-    
-    return {
-      ...data,
-      title: displayTitle,
-      slug: computedSlug,
-    };
-  })
+  }).passthrough()
 });
 
 const projectsCollection = defineCollection({
@@ -678,43 +430,7 @@ const portfolioCollection = defineCollection({
     description_site_cp: z.string().optional(),
     site_uuid: z.string().optional(),
     slug: z.string().optional(),
-  }).passthrough().transform((data, context) => {
-    // Handle context.path - it might be an array in glob loaders
-    const contextPath = Array.isArray(context.path) 
-      ? context.path.join('/') 
-      : String(context.path || '');
-    
-    // Extract client name from path if in client-content
-    const pathParts = contextPath.split('/');
-    const isClientContent = pathParts.includes('client-content');
-    const clientIndex = pathParts.indexOf('client-content');
-    const client = isClientContent && clientIndex !== -1 ? pathParts[clientIndex + 1] : null;
-    
-    // Get filename for slug generation
-    const filename = contextPath.split('/').pop()?.replace(/\.md$/, '') || '';
-    
-    // Derive title from og_title or filename
-    const title = data.title || data.og_title || filename.replace(/[-_]/g, ' ');
-    const computedSlug = filename.toLowerCase().replace(/\s+/g, '-');
-
-    console.log('[PORTFOLIO] Processing:', {
-      path: contextPath,
-      filename,
-      originalTitle: data.title,
-      ogTitle: data.og_title,
-      computedTitle: title,
-      computedSlug,
-      client: data.client || client,
-      titleChanged: data.title !== title
-    });
-    
-    return {
-      ...data,
-      title,
-      client: data.client || client,
-      slug: computedSlug,
-    };
-  })
+  }).passthrough()
 });
 
 
@@ -755,6 +471,7 @@ export const paths = {
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
+  'visuals': resolveContentPath('visuals'),
   'moc': resolveContentPath('moc'),
   'projects': resolveContentPath('projects'),
 };
@@ -786,5 +503,6 @@ export const collections = {
   'client-recommendations': clientRecommendationsCollection,
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
+  'visuals': visualsCollection,
   'moc': mapOfContentsCollection,
 };

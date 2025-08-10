@@ -59,6 +59,7 @@ let mocProjectNames: string[] = [];
 
 try {
   const clientMocPath = path.resolve(contentBasePath, 'moc', `${properClient}.md`);
+  console.log(`[CLIENT PROJECTS INDEX] Loading MOC file from: ${clientMocPath}`);
   const rawClientMoc = await fs.readFile(clientMocPath, 'utf-8');
   
   // Extract the :::projects ... ::: block
@@ -167,7 +168,7 @@ const pageDescription = hasProjects
             <details class="moc-help">
               <summary>How to configure projects</summary>
               <div class="moc-example">
-                <h4>Add this to <code>content/moc/{properClient}.md</code>:</h4>
+                <h4>Add this to <code>{contentBasePath}/moc/{properClient}.md</code>:</h4>
                 <pre><code>:::projects
 - [[Project Name]]
 - [[Another Project]]
