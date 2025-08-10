@@ -58,6 +58,7 @@ const pageImageUrl = isToolkitPage && fm.og_image
 // Debug logging for toolkit pages with og_image
 if (isToolkitPage && fm.og_image) {
   console.log(`🔗 Toolkit page ${Astro.url.pathname} using og_image: ${fm.og_image}`);
+  console.log(`Page URL: ${Astro.url.href}`);
 }
 
 // PageMeta.astro will handle all defaults if these are undefined
