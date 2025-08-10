@@ -6,6 +6,7 @@ import "@styles/starwind.css";
 import "@styles/callouts.css";
 import "@styles/codeblocks.css";
 import "@styles/shiki-github-dark.css";
+import "@styles/avatars.css";
 import PageMeta from "@components/basics/PageMeta.astro";
 
 /**
@@ -73,9 +74,6 @@ const pageImageUrl = fm.banner_image || fm.portrait_image;
       ogType="article" 
       twitterCardType="summary_large_image"
     />
-
-    {/* Import global avatar and author handle styles */}
-    <link rel="stylesheet" href="/src/styles/avatars.css" />
   </head>
   <body>
     <Header />

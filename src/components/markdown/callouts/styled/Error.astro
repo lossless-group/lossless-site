@@ -1,20 +1,12 @@
 ---
-import AstroMarkdown from '../../AstroMarkdown.astro';
-import type { RootContent } from 'mdast';
-
 interface Props {
   title?: string;
-  content: RootContent[];
-  data?: {
-    path: string;
-    id?: string;
-    [key: string]: any;
-  };
+  content: string;
   className?: string;
   [key: string]: any;
 }
 
-const { title, content, data = { path: '/default-path' }, className = 'callout callout-error', ...attrs } = Astro.props;
+const { title, content, className = 'callout callout-error', ...attrs } = Astro.props;
 ---
 
 <div class={className} {...attrs}>
@@ -25,9 +17,7 @@ const { title, content, data = { path: '/default-path' }, className = 'callout c
     </div>
   )}
   <div class="callout-content">
-    {content.map(child => (
-      <AstroMarkdown node={child} data={{ path: data.path || '/default-path', ...data }} />
-    ))}
+    <Fragment set:html={content} />
   </div>
 </div>
 
