@@ -22,31 +22,38 @@ export async function GET({ props }: Props) {
         {
           type: 'div',
           props: {
-            tw: 'flex flex-col items-center justify-center w-full h-full',
+            tw: 'flex flex-col items-center justify-center w-full h-full p-16',
             style: {
-              background: 'white',
-              fontFamily: 'Inter, system-ui, sans-serif',
+              background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
             },
             children: [
               {
                 type: 'div',
                 props: {
-                  tw: 'text-4xl font-bold text-gray-800 mb-4',
+                  tw: 'text-5xl font-bold text-gray-900 mb-6 tracking-tight',
                   children: siteName,
                 },
               },
               {
                 type: 'div',
                 props: {
-                  tw: 'text-2xl text-gray-600 text-center max-w-4xl px-8',
+                  tw: 'text-3xl text-gray-700 text-center max-w-5xl leading-relaxed',
                   children: title,
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  tw: 'absolute bottom-8 right-8 text-lg text-gray-500',
+                  children: 'Lossless Group',
                 },
               },
             ],
           },
         },
       ],
-      tw: 'w-full h-full flex items-center justify-center',
+      tw: 'w-full h-full flex items-center justify-center relative',
       style: {
         background: 'white',
       },
@@ -56,15 +63,6 @@ export async function GET({ props }: Props) {
   return new ImageResponse(html, {
     width: 1200,
     height: 630,
-    fonts: [
-      {
-        name: 'Inter',
-        data: await fetch(
-          'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2'
-        ).then((res) => res.arrayBuffer()),
-        style: 'normal',
-      },
-    ],
   });
 }
 
