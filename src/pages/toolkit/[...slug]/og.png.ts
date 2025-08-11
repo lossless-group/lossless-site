@@ -16,10 +16,11 @@ export async function GET({ props }: Props) {
   const ogImage = entry.data.og_image;
   const description = (entry.data.og_description || entry.data.description || '') as string;
 
-  // Load the Lossless logo SVG
-  const logoSvg = await fetch('https://www.lossless.group/visuals/appIcon__Lossless_Record--Rounded-Rectangle.svg')
-    .then(res => res.text())
-    .catch(() => null);
+  // Validate ogImage URL - skip if invalid
+  const isValidOgImage = ogImage && typeof ogImage === 'string' && ogImage.startsWith('http');
+
+  // Load the Lossless logo SVG URL
+  const logoUrl = 'https://www.lossless.group/visuals/appIcon__Lossless_Record--Rounded-Rectangle.svg';
 
   // Create the HTML structure for the OG image
   const html = {
@@ -33,6 +34,7 @@ export async function GET({ props }: Props) {
             style: {
               background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+              display: 'flex',
             },
             children: [
               // Left side - Content
@@ -40,6 +42,9 @@ export async function GET({ props }: Props) {
                 type: 'div',
                 props: {
                   tw: 'flex flex-col justify-center flex-1 p-12',
+                  style: {
+                    display: 'flex',
+                  },
                   children: [
                     // Site name (like GitHub repo name)
                     {
@@ -68,13 +73,19 @@ export async function GET({ props }: Props) {
                     // Bottom stats bar (like GitHub)
                     {
                       type: 'div',
-                      props: {
-                        tw: 'flex items-center mt-8 space-x-8',
+                                          props: {
+                      tw: 'flex items-center mt-8 space-x-8',
+                      style: {
+                        display: 'flex',
+                      },
                         children: [
                           {
                             type: 'div',
                             props: {
                               tw: 'flex items-center space-x-2',
+                              style: {
+                                display: 'flex',
+                              },
                               children: [
                                 {
                                   type: 'div',
@@ -96,6 +107,9 @@ export async function GET({ props }: Props) {
                             type: 'div',
                             props: {
                               tw: 'flex items-center space-x-2',
+                              style: {
+                                display: 'flex',
+                              },
                               children: [
                                 {
                                   type: 'div',
@@ -124,12 +138,17 @@ export async function GET({ props }: Props) {
                 type: 'div',
                 props: {
                   tw: 'flex items-center justify-center flex-1 p-8',
-                  children: ogImage ? [
+                  style: {
+                    display: 'flex',
+                  },
+                  children: isValidOgImage ? [
                     // Tool's OG image if available
                     {
                       type: 'img',
                       props: {
                         src: ogImage,
+                        width: 128,
+                        height: 128,
                         tw: 'w-32 h-32 rounded-xl object-cover shadow-lg',
                         style: {
                           maxWidth: '128px',
@@ -143,6 +162,9 @@ export async function GET({ props }: Props) {
                       type: 'div',
                       props: {
                         tw: 'w-32 h-32 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg',
+                        style: {
+                          display: 'flex',
+                        },
                         children: [
                           {
                             type: 'div',
@@ -165,35 +187,25 @@ export async function GET({ props }: Props) {
           type: 'div',
           props: {
             tw: 'absolute bottom-0 left-0 right-0 h-16 bg-gray-900 flex items-center justify-between px-8',
+            style: {
+              display: 'flex',
+            },
             children: [
               {
                 type: 'div',
                 props: {
                   tw: 'flex items-center space-x-2',
+                  style: {
+                    display: 'flex',
+                  },
                   children: [
-                    logoSvg ? {
-                      type: 'div',
+                    {
+                      type: 'img',
                       props: {
-                        tw: 'w-6 h-6 flex items-center justify-center',
-                        children: [
-                          {
-                            type: 'div',
-                            props: {
-                              dangerouslySetInnerHTML: {
-                                __html: logoSvg,
-                              },
-                              style: {
-                                width: '24px',
-                                height: '24px',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    } : {
-                      type: 'div',
-                      props: {
-                        tw: 'w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600',
+                        src: logoUrl,
+                        width: 24,
+                        height: 24,
+                        tw: 'w-6 h-6',
                       },
                     },
                     {
@@ -220,6 +232,7 @@ export async function GET({ props }: Props) {
       tw: 'w-full h-full relative',
       style: {
         background: 'white',
+        display: 'flex',
       },
     },
   };
