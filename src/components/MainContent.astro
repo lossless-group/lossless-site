@@ -209,12 +209,21 @@ const clients = clientsData.clients;
     .stealth-clients-fullbleed {
       max-width: 100vw;
       overflow: hidden;
+      padding: 2rem 0 0.5rem 0;
     }
     
     .stealth-clients-content {
       width: 100%;
       max-width: 100vw;
       overflow: hidden;
+      padding: 0;
+    }
+  }
+  
+  /* Extra small mobile adjustments */
+  @media (max-width: 480px) {
+    .stealth-clients-fullbleed {
+      padding: 1.5rem 0 0.5rem 0;
     }
   }
 </style>

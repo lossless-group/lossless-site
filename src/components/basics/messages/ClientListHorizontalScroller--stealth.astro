@@ -82,6 +82,7 @@ const { clients, title = "Current Work" } = Astro.props;
     margin-bottom: 2rem;
     position: relative;
     gap: 2rem;
+    flex-direction: row;
   }
   
   .section-title {
@@ -126,6 +127,8 @@ const { clients, title = "Current Work" } = Astro.props;
   .clients-scroll > :global(*) {
     scroll-snap-align: center;
     flex-shrink: 0;
+    height: 280px; /* Increased height to show all text */
+    overflow: visible; /* Allow text to be fully visible */
   }
   
   /* Custom Scrollbar Styling */
@@ -157,19 +160,79 @@ const { clients, title = "Current Work" } = Astro.props;
   
   /* Mobile Adjustments */
   @media (max-width: 768px) {
+    .section-header {
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-direction: row; /* Ensure horizontal layout */
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+    }
+    
+    .nav-left {
+      position: relative;
+      left: auto;
+    }
+    
+    .nav-right {
+      position: relative;
+      right: auto;
+    }
+    
     .clients-container {
-      margin: 1rem -1rem;
+      margin: 1rem 0;
       max-width: 100vw;
       overflow: hidden;
+      padding: 0;
     }
     
     .clients-scroll {
-      gap: 1rem;
-      padding: 0.5rem 0 1.5rem;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem 1.5rem 1rem;
       max-width: 100vw;
-      /* Adjust padding for mobile to prevent overflow */
+      /* Remove center padding on mobile to use full width */
       padding-left: 1rem;
       padding-right: 1rem;
+      /* Ensure smooth scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    /* Adjust card sizing for mobile */
+    .clients-scroll > :global(*) {
+      min-width: 300px;
+      max-width: 300px;
+      height: 280px; /* Increased height to show all text */
+      flex-shrink: 0;
+      overflow: visible; /* Allow text to be fully visible */
+    }
+  }
+  
+  /* Extra small mobile adjustments */
+  @media (max-width: 480px) {
+    .section-header {
+      flex-direction: row; /* Keep horizontal layout even on small screens */
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      order: 0; /* Remove order change */
+    }
+    
+    .clients-scroll {
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem 1rem 0.75rem;
+    }
+    
+    /* Smaller cards for very small screens */
+    .clients-scroll > :global(*) {
+      min-width: 280px;
+      max-width: 280px;
+      height: 280px; /* Increased height to show all text */
+      overflow: visible; /* Allow text to be fully visible */
     }
   }
 </style>
@@ -194,7 +257,9 @@ const { clients, title = "Current Work" } = Astro.props;
       
       // Setup global navigation functions
       window.scrollStealthClientsLeft = () => {
-        const cardWidth = 320 + 24; // card width + gap
+        // Get the first card to determine current card width
+        const firstCard = scrollContainer.children[0] as HTMLElement;
+        const cardWidth = firstCard ? firstCard.offsetWidth + 24 : 344; // fallback to 320 + 24
         scrollContainer.scrollBy({ 
           left: -cardWidth, 
           behavior: 'smooth' 
@@ -202,7 +267,9 @@ const { clients, title = "Current Work" } = Astro.props;
       };
       
       window.scrollStealthClientsRight = () => {
-        const cardWidth = 320 + 24; // card width + gap
+        // Get the first card to determine current card width
+        const firstCard = scrollContainer.children[0] as HTMLElement;
+        const cardWidth = firstCard ? firstCard.offsetWidth + 24 : 344; // fallback to 320 + 24
         scrollContainer.scrollBy({ 
           left: cardWidth, 
           behavior: 'smooth' 
