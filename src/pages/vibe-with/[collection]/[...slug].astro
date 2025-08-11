@@ -44,7 +44,6 @@ export async function getStaticPaths() {
   // Generate paths for each collection
   const promptsPaths = processedPrompts.map(entry => {
     
-    console.log('promptsPaths', entry.slug);
     return {
       params: { collection: 'prompts', slug: entry.slug },
       props: {

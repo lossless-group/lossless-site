@@ -2,6 +2,8 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import { ImageResponse } from '@vercel/og';
 import { getReferenceSlug } from '@utils/slugify';
 
+export const prerender = false;
+
 interface Props {
   params: { slug: string };
   props: { entry: CollectionEntry<'tooling'> };
