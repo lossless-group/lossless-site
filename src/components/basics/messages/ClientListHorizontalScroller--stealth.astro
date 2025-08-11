@@ -80,6 +80,7 @@ const { clients, title = "Current Work" } = Astro.props;
     align-items: center;
     justify-content: center;
     margin-bottom: 2rem;
+    margin-top: 2rem;
     position: relative;
     gap: 2rem;
     flex-direction: row;
@@ -127,7 +128,7 @@ const { clients, title = "Current Work" } = Astro.props;
   .clients-scroll > :global(*) {
     scroll-snap-align: center;
     flex-shrink: 0;
-    height: 280px; /* Increased height to show all text */
+    height: 300px; /* Increased height to show all text */
     overflow: visible; /* Allow text to be fully visible */
   }
   
@@ -203,7 +204,7 @@ const { clients, title = "Current Work" } = Astro.props;
     .clients-scroll > :global(*) {
       min-width: 300px;
       max-width: 300px;
-      height: 280px; /* Increased height to show all text */
+      height: 300px; /* Increased height to show all text */
       flex-shrink: 0;
       overflow: visible; /* Allow text to be fully visible */
     }
@@ -231,7 +232,7 @@ const { clients, title = "Current Work" } = Astro.props;
     .clients-scroll > :global(*) {
       min-width: 280px;
       max-width: 280px;
-      height: 280px; /* Increased height to show all text */
+      height: 300px; /* Increased height to show all text */
       overflow: visible; /* Allow text to be fully visible */
     }
   }
