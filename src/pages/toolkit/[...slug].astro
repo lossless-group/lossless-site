@@ -16,6 +16,7 @@ import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { getReferenceSlug } from '@utils/slugify';
 import { DEBUG_TOOLING } from '@utils/envUtils';
+import { AppConfig } from '@utils/appConfig';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
@@ -77,11 +78,25 @@ const contentData = {
   contentType: contentType,
   title: entry.data.title,
 };
+
+// Generate the custom OG image URL for this toolkit entry
+const generatedSlug = getReferenceSlug(entry.id);
+// Remove the 'tooling/' prefix from the slug since we're already in the /toolkit/ route
+const cleanSlug = generatedSlug.replace(/^tooling\//, '');
+const customOgImage = `${AppConfig.site}/toolkit/${cleanSlug}/og.png`;
+
+// Debug logging for OG image generation
+if (DEBUG_TOOLING) {
+  console.log(`🔗 Generated OG image URL for ${entry.id}: ${customOgImage}`);
+}
 ---
 
 <Layout 
   title={entry.data.title || entry.id.replace(/\.md$/, '')}
-  frontmatter={entry.data}
+  frontmatter={{
+    ...entry.data,
+    og_image: customOgImage // Override with our custom generated image
+  }}
 >
   <OneArticle
     Component={OneArticleOnPage}

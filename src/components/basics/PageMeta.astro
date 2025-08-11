@@ -15,7 +15,6 @@ interface Props {
   title?: string;
   description?: string;
   imageUrl?: string;
-  pageUrl?: string; // Canonical URL of the page
   siteName?: string;
   ogType?: string; // e.g., 'website', 'article'
   twitterCardType?: string; // e.g., 'summary_large_image'
@@ -28,7 +27,6 @@ const {
   title,
   description,
   imageUrl,
-  pageUrl = "https://www.lossless.group",
   siteName = "Lossless Group",
   ogType = "website",
   twitterCardType = "summary_large_image",
@@ -53,7 +51,6 @@ const finalImageUrl = imageUrl || defaultImageUrl;
 
 {/* Open Graph / Facebook */}
 <meta property="og:type" content={ogType} />
-<meta property="og:url" content={pageUrl} />
 <meta property="og:title" content={finalTitle} />
 <meta property="og:description" content={finalDescription} />
 <meta property="og:image" content={finalImageUrl} />
@@ -61,7 +58,6 @@ const finalImageUrl = imageUrl || defaultImageUrl;
 
 {/* Twitter */}
 <meta name="twitter:card" content={twitterCardType} />
-<meta name="twitter:url" content={pageUrl} />
 <meta name="twitter:title" content={finalTitle} />
 <meta name="twitter:description" content={finalDescription} />
 <meta name="twitter:image" content={finalImageUrl} />

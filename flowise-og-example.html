@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowise OG Image Example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">Flowise OG Image Example</h1>
+        <p class="text-gray-600 mb-8">This shows how the new OG image would look for the Flowise toolkit entry.</p>
+        
+        <!-- OG Image Container (1200x630) -->
+        <div class="w-full max-w-4xl h-[630px] bg-white rounded-lg shadow-xl overflow-hidden relative">
+            <!-- Main content area -->
+            <div class="flex w-full h-full" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); display: flex;">
+                
+                <!-- Left side - Content -->
+                <div class="flex flex-col justify-center flex-1 p-12" style="display: flex;">
+                    <!-- Site name (like GitHub repo name) -->
+                    <div class="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+                        Flowise
+                    </div>
+                    
+                    <!-- Title/Description -->
+                    <div class="text-xl text-gray-600 leading-relaxed max-w-2xl">
+                        Build AI Agents, Visually
+                    </div>
+                    
+                    <!-- Additional description -->
+                    <div class="text-lg text-gray-500 mt-4 leading-relaxed max-w-2xl">
+                        Open source generative AI development platform for building AI agents, LLM orchestration, and more
+                    </div>
+                    
+                    <!-- Bottom stats bar (like GitHub) -->
+                    <div class="flex items-center mt-8 space-x-8" style="display: flex;">
+                        <div class="flex items-center space-x-2" style="display: flex;">
+                            <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                            <div class="text-sm text-gray-600">Toolkit</div>
+                        </div>
+                        <div class="flex items-center space-x-2" style="display: flex;">
+                            <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                            <div class="text-sm text-gray-600">Verified</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right side - Tool's OG image -->
+                <div class="flex items-center justify-center flex-1 p-8" style="display: flex;">
+                    <img 
+                        src="https://remarkable-smakager-ddb2b7.netlify.app/opengraph-image.png?9ccfc0cd89ea0cda" 
+                        alt="Flowise" 
+                        class="w-32 h-32 rounded-xl object-cover shadow-lg"
+                        style="max-width: 128px; max-height: 128px;"
+                    />
+                </div>
+            </div>
+            
+            <!-- Bottom footer with Lossless branding -->
+            <div class="absolute bottom-0 left-0 right-0 h-16 bg-gray-900 flex items-center justify-between px-8" style="display: flex;">
+                <div class="flex items-center space-x-2" style="display: flex;">
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <img src="https://www.lossless.group/visuals/appIcon__Lossless_Record--Rounded-Rectangle.svg" 
+                             alt="Lossless Group" 
+                             class="w-6 h-6" />
+                    </div>
+                    <div class="text-white text-sm font-medium">Lossless Group</div>
+                </div>
+                <div class="text-gray-400 text-sm">lossless.group</div>
+            </div>
+        </div>
+        
+        <!-- Metadata info -->
+        <div class="mt-8 p-6 bg-white rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Flowise Entry Data:</h2>
+            <div class="space-y-2 text-sm">
+                <div><strong>Site Name:</strong> Flowise</div>
+                <div><strong>Title:</strong> Build AI Agents, Visually</div>
+                <div><strong>Description:</strong> Open source generative AI development platform for building AI agents, LLM orchestration, and more</div>
+                <div><strong>OG Image URL:</strong> https://remarkable-smakager-ddb2b7.netlify.app/opengraph-image.png?9ccfc0cd89ea0cda</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
