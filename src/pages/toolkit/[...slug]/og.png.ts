@@ -13,6 +13,13 @@ export async function GET({ props }: Props) {
   // Extract data from the entry
   const siteName = entry.data.site_name || 'Lossless Group';
   const title = entry.data.title || 'Toolkit Entry';
+  const ogImage = entry.data.og_image;
+  const description = (entry.data.og_description || entry.data.description || '') as string;
+
+  // Load the Lossless logo SVG
+  const logoSvg = await fetch('https://www.lossless.group/visuals/appIcon__Lossless_Record--Rounded-Rectangle.svg')
+    .then(res => res.text())
+    .catch(() => null);
 
   // Create the HTML structure for the OG image
   const html = {
@@ -22,38 +29,195 @@ export async function GET({ props }: Props) {
         {
           type: 'div',
           props: {
-            tw: 'flex flex-col items-center justify-center w-full h-full p-16',
+            tw: 'flex w-full h-full',
             style: {
               background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
             },
             children: [
+              // Left side - Content
               {
                 type: 'div',
                 props: {
-                  tw: 'text-5xl font-bold text-gray-900 mb-6 tracking-tight',
-                  children: siteName,
+                  tw: 'flex flex-col justify-center flex-1 p-12',
+                  children: [
+                    // Site name (like GitHub repo name)
+                    {
+                      type: 'div',
+                      props: {
+                        tw: 'text-4xl font-bold text-gray-900 mb-3 tracking-tight',
+                        children: siteName,
+                      },
+                    },
+                    // Title/Description
+                    {
+                      type: 'div',
+                      props: {
+                        tw: 'text-xl text-gray-600 leading-relaxed max-w-2xl',
+                        children: title,
+                      },
+                    },
+                    // Additional description if available
+                    description && {
+                      type: 'div',
+                      props: {
+                        tw: 'text-lg text-gray-500 mt-4 leading-relaxed max-w-2xl',
+                        children: description.length > 100 ? description.substring(0, 100) + '...' : description,
+                      },
+                    },
+                    // Bottom stats bar (like GitHub)
+                    {
+                      type: 'div',
+                      props: {
+                        tw: 'flex items-center mt-8 space-x-8',
+                        children: [
+                          {
+                            type: 'div',
+                            props: {
+                              tw: 'flex items-center space-x-2',
+                              children: [
+                                {
+                                  type: 'div',
+                                  props: {
+                                    tw: 'w-4 h-4 bg-blue-500 rounded-full',
+                                  },
+                                },
+                                {
+                                  type: 'div',
+                                  props: {
+                                    tw: 'text-sm text-gray-600',
+                                    children: 'Toolkit',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            type: 'div',
+                            props: {
+                              tw: 'flex items-center space-x-2',
+                              children: [
+                                {
+                                  type: 'div',
+                                  props: {
+                                    tw: 'w-4 h-4 bg-green-500 rounded-full',
+                                  },
+                                },
+                                {
+                                  type: 'div',
+                                  props: {
+                                    tw: 'text-sm text-gray-600',
+                                    children: 'Verified',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ].filter(Boolean), // Remove falsy values
+                },
+              },
+              // Right side - Image or Logo
+              {
+                type: 'div',
+                props: {
+                  tw: 'flex items-center justify-center flex-1 p-8',
+                  children: ogImage ? [
+                    // Tool's OG image if available
+                    {
+                      type: 'img',
+                      props: {
+                        src: ogImage,
+                        tw: 'w-32 h-32 rounded-xl object-cover shadow-lg',
+                        style: {
+                          maxWidth: '128px',
+                          maxHeight: '128px',
+                        },
+                      },
+                    },
+                  ] : [
+                    // Fallback to Lossless logo
+                    {
+                      type: 'div',
+                      props: {
+                        tw: 'w-32 h-32 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg',
+                        children: [
+                          {
+                            type: 'div',
+                            props: {
+                              tw: 'text-white text-2xl font-bold',
+                              children: 'LG',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Bottom footer with Lossless branding
+        {
+          type: 'div',
+          props: {
+            tw: 'absolute bottom-0 left-0 right-0 h-16 bg-gray-900 flex items-center justify-between px-8',
+            children: [
+              {
+                type: 'div',
+                props: {
+                  tw: 'flex items-center space-x-2',
+                  children: [
+                    logoSvg ? {
+                      type: 'div',
+                      props: {
+                        tw: 'w-6 h-6 flex items-center justify-center',
+                        children: [
+                          {
+                            type: 'div',
+                            props: {
+                              dangerouslySetInnerHTML: {
+                                __html: logoSvg,
+                              },
+                              style: {
+                                width: '24px',
+                                height: '24px',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    } : {
+                      type: 'div',
+                      props: {
+                        tw: 'w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600',
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        tw: 'text-white text-sm font-medium',
+                        children: 'Lossless Group',
+                      },
+                    },
+                  ],
                 },
               },
               {
                 type: 'div',
                 props: {
-                  tw: 'text-3xl text-gray-700 text-center max-w-5xl leading-relaxed',
-                  children: title,
-                },
-              },
-              {
-                type: 'div',
-                props: {
-                  tw: 'absolute bottom-8 right-8 text-lg text-gray-500',
-                  children: 'Lossless Group',
+                  tw: 'text-gray-400 text-sm',
+                  children: 'lossless.group',
                 },
               },
             ],
           },
         },
       ],
-      tw: 'w-full h-full flex items-center justify-center relative',
+      tw: 'w-full h-full relative',
       style: {
         background: 'white',
       },
