@@ -6,11 +6,45 @@ export const prerender = false;
 
 interface Props {
   params: { slug: string };
-  props: { entry: CollectionEntry<'tooling'> };
 }
 
-export async function GET({ props }: Props) {
-  const { entry } = props;
+export async function GET({ params }: Props) {
+  const { slug } = params;
+  
+  // Fetch the tooling entry at runtime
+  const toolingEntries = await getCollection('tooling');
+  
+  // Find the entry that matches the slug
+  const entry = toolingEntries.find(entry => {
+    const generatedSlug = getReferenceSlug(entry.id);
+    const cleanSlug = generatedSlug.replace(/^tooling\//, '');
+    return cleanSlug === slug;
+  });
+
+  if (!entry) {
+    // Return a default OG image if entry not found
+    return new ImageResponse(
+      {
+        type: 'div',
+        props: {
+          tw: 'flex w-full h-full items-center justify-center bg-gray-100',
+          children: [
+            {
+              type: 'div',
+              props: {
+                tw: 'text-2xl text-gray-600',
+                children: 'Toolkit Entry Not Found',
+              },
+            },
+          ],
+        },
+      },
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
+  }
 
   // Extract data from the entry
   const siteName = entry.data.site_name || 'Lossless Group';
@@ -35,7 +69,7 @@ export async function GET({ props }: Props) {
             tw: 'flex w-full h-full',
             style: {
               background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
               display: 'flex',
             },
             children: [
@@ -52,7 +86,12 @@ export async function GET({ props }: Props) {
                     {
                       type: 'div',
                       props: {
-                        tw: 'text-4xl font-bold text-gray-900 mb-3 tracking-tight',
+                        tw: 'text-6xl font-bold text-gray-900 mb-3 tracking-tight',
+                        style: {
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                          fontWeight: '700',
+                          letterSpacing: '-0.025em',
+                        },
                         children: siteName,
                       },
                     },
@@ -60,7 +99,12 @@ export async function GET({ props }: Props) {
                     {
                       type: 'div',
                       props: {
-                        tw: 'text-xl text-gray-600 leading-relaxed max-w-2xl',
+                        tw: 'text-3xl text-gray-600 leading-relaxed max-w-2xl',
+                        style: {
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                          fontWeight: '500',
+                          letterSpacing: '-0.01em',
+                        },
                         children: title,
                       },
                     },
@@ -68,23 +112,28 @@ export async function GET({ props }: Props) {
                     description && {
                       type: 'div',
                       props: {
-                        tw: 'text-lg text-gray-500 mt-4 leading-relaxed max-w-2xl',
+                        tw: 'text-2xl text-gray-500 mt-4 leading-relaxed max-w-2xl',
+                        style: {
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                          fontWeight: '400',
+                          letterSpacing: '0em',
+                        },
                         children: description.length > 100 ? description.substring(0, 100) + '...' : description,
                       },
                     },
                     // Bottom stats bar (like GitHub)
                     {
                       type: 'div',
-                                          props: {
-                      tw: 'flex items-center mt-8 space-x-8',
-                      style: {
-                        display: 'flex',
-                      },
+                      props: {
+                        tw: 'flex items-center mt-8',
+                        style: {
+                          display: 'flex',
+                        },
                         children: [
                           {
                             type: 'div',
                             props: {
-                              tw: 'flex items-center space-x-2',
+                              tw: 'flex items-center',
                               style: {
                                 display: 'flex',
                               },
@@ -98,32 +147,15 @@ export async function GET({ props }: Props) {
                                 {
                                   type: 'div',
                                   props: {
-                                    tw: 'text-sm text-gray-600',
+                                    tw: 'text-lg text-gray-600 ml-3',
+                                    style: {
+                                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                                      fontWeight: '600',
+                                      letterSpacing: '0.025em',
+                                      textTransform: 'uppercase',
+                                      fontSize: '1.125rem',
+                                    },
                                     children: 'Toolkit',
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                          {
-                            type: 'div',
-                            props: {
-                              tw: 'flex items-center space-x-2',
-                              style: {
-                                display: 'flex',
-                              },
-                              children: [
-                                {
-                                  type: 'div',
-                                  props: {
-                                    tw: 'w-4 h-4 bg-green-500 rounded-full',
-                                  },
-                                },
-                                {
-                                  type: 'div',
-                                  props: {
-                                    tw: 'text-sm text-gray-600',
-                                    children: 'Verified',
                                   },
                                 },
                               ],
@@ -149,12 +181,13 @@ export async function GET({ props }: Props) {
                       type: 'img',
                       props: {
                         src: ogImage,
-                        width: 128,
-                        height: 128,
-                        tw: 'w-32 h-32 rounded-xl object-cover shadow-lg',
+                        width: 480,
+                        height: 480,
+                        tw: 'w-[480px] h-[480px] rounded-xl object-contain shadow-lg',
                         style: {
-                          maxWidth: '128px',
-                          maxHeight: '128px',
+                          maxWidth: '480px',
+                          maxHeight: '480px',
+                          objectFit: 'contain',
                         },
                       },
                     },
@@ -163,7 +196,7 @@ export async function GET({ props }: Props) {
                     {
                       type: 'div',
                       props: {
-                        tw: 'w-32 h-32 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg',
+                        tw: 'w-[480px] h-[480px] rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg',
                         style: {
                           display: 'flex',
                         },
@@ -171,7 +204,7 @@ export async function GET({ props }: Props) {
                           {
                             type: 'div',
                             props: {
-                              tw: 'text-white text-2xl font-bold',
+                              tw: 'text-white text-7xl font-bold',
                               children: 'LG',
                             },
                           },
@@ -213,7 +246,12 @@ export async function GET({ props }: Props) {
                     {
                       type: 'div',
                       props: {
-                        tw: 'text-white text-sm font-medium',
+                        tw: 'text-white text-lg font-medium ml-3',
+                        style: {
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                          fontWeight: '600',
+                          letterSpacing: '0.025em',
+                        },
                         children: 'Lossless Group',
                       },
                     },
@@ -223,7 +261,13 @@ export async function GET({ props }: Props) {
               {
                 type: 'div',
                 props: {
-                  tw: 'text-gray-400 text-sm',
+                  tw: 'text-gray-400 text-lg',
+                  style: {
+                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    fontWeight: '500',
+                    letterSpacing: '0.025em',
+                    fontVariantNumeric: 'tabular-nums',
+                  },
                   children: 'lossless.group',
                 },
               },
