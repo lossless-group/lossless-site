@@ -40,7 +40,6 @@ if (!fs.existsSync(contentBasePath)) {
 }
 
 export default defineConfig({
-  site: 'https://lossless.group',
   markdown: {
     syntaxHighlight: false, // Disable Astro's built-in Shiki - use our singleton utility instead
     // Custom syntax highlighting handled by our singleton utility
