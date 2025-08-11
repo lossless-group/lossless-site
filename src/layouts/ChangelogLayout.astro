@@ -15,7 +15,7 @@ import { getCollection } from "astro:content";
 import path from "path";
 import ChangelogEntry from "@components/changelog/ChangelogEntry.astro";
 import Layout from "@layouts/Layout.astro";
-import SearchInput from "@components/reference/SearchInput.astro";
+import TabSearchInput from "@components/reference/TabSearchInput.astro";
 
 // Import Starwind Tabs components
 import Tabs from "@components/starwind/tabs/Tabs.astro";
@@ -103,7 +103,7 @@ const normalizeAuthorData = (entry) => {
       </div>
       <TabsContent value="content" class="changelog-tab-content">
         <div class="search-container">
-          <SearchInput id="content-search" />
+          <TabSearchInput id="content-search" />
         </div>
         {
           sortedContentChanges
@@ -117,7 +117,7 @@ const normalizeAuthorData = (entry) => {
       </TabsContent>
       <TabsContent value="code" class="changelog-tab-content">
         <div class="search-container">
-          <SearchInput id="code-search" />
+          <TabSearchInput id="code-search" />
         </div>
         {
           sortedCodeChanges

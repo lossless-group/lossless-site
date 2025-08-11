@@ -1,5 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
+
+const { id = "search-input" } = Astro.props;
 ---
 
 <div class="relative mb-6">
@@ -8,17 +10,24 @@ import { Icon } from 'astro-icon/components';
   </div>
   <input
     type="text"
-    id="search-input"
+    id={id}
     class="block w-full pl-10 pr-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md leading-5 border-none placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-600 sm:text-sm transition-colors duration-200"
     placeholder="Search terms..."
   />
 </div>
 
-<script>
-  // Function to filter items based on search input
-  function filterItems(searchTerm) {
-    // Select both elements with data-searchable attribute and data-searchable="true"
-    const items = document.querySelectorAll('[data-searchable]:not([data-searchable="false"])');
+<script define:vars={{ id }}>
+  // Function to filter items based on search input within a specific tab
+  function filterItems(searchTerm, searchInputId) {
+    // Find the search input's parent container to scope the search
+    const searchInput = document.getElementById(searchInputId);
+    if (!searchInput) return;
+    
+    const tabContent = searchInput.closest('[data-tabs-content]');
+    if (!tabContent) return;
+    
+    // Select searchable items within this tab content only
+    const items = tabContent.querySelectorAll('[data-searchable]:not([data-searchable="false"])');
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
     items.forEach(item => {
@@ -37,13 +46,13 @@ import { Icon } from 'astro-icon/components';
   }
 
   // Add event listener to search input
-  const searchInput = document.getElementById('search-input');
+  const searchInput = document.getElementById(id);
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       const target = e.target;
       if (target && target.value !== undefined) {
-        filterItems(target.value);
+        filterItems(target.value, id);
       }
     });
   }
-</script> 
+</script>
