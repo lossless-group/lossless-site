@@ -15,6 +15,7 @@ import { getCollection } from "astro:content";
 import path from "path";
 import ChangelogEntry from "@components/changelog/ChangelogEntry.astro";
 import Layout from "@layouts/Layout.astro";
+import SearchInput from "@components/reference/SearchInput.astro";
 
 // Import Starwind Tabs components
 import Tabs from "@components/starwind/tabs/Tabs.astro";
@@ -101,17 +102,31 @@ const normalizeAuthorData = (entry) => {
         </TabsList>
       </div>
       <TabsContent value="content" class="changelog-tab-content">
+        <div class="search-container">
+          <SearchInput id="content-search" />
+        </div>
         {
           sortedContentChanges
             .map((entry) => normalizeAuthorData(entry))
-            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} slug={'content-' + getReferenceSlug(entry.id)} />)
+            ?.map((entry) => (
+              <div data-searchable="true" data-title={entry.title} data-description={entry.body}>
+                <ChangelogEntry {...entry} key={entry.id} slug={'content-' + getReferenceSlug(entry.id)} />
+              </div>
+            ))
         }
       </TabsContent>
       <TabsContent value="code" class="changelog-tab-content">
+        <div class="search-container">
+          <SearchInput id="code-search" />
+        </div>
         {
           sortedCodeChanges
             .map((entry) => normalizeAuthorData(entry))
-            ?.map((entry) => <ChangelogEntry {...entry} key={entry.id} slug={'code-' + getReferenceSlug(entry.id)} />)
+            ?.map((entry) => (
+              <div data-searchable="true" data-title={entry.title} data-description={entry.body}>
+                <ChangelogEntry {...entry} key={entry.id} slug={'code-' + getReferenceSlug(entry.id)} />
+              </div>
+            ))
         }
       </TabsContent>
     </Tabs>
@@ -169,5 +184,12 @@ const normalizeAuthorData = (entry) => {
     background: var(--clr-lossless-attn-action) !important;
     color: var(--clr-lossless-primary-light) !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Search container styling */
+  .search-container {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    padding: 0.25rem 1rem;
   }
 </style>
