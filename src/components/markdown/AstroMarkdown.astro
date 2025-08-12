@@ -92,7 +92,8 @@ const handled_types = [
     "toolingGallery",
     "thematicBreak", 
     "leafDirective", 
-    "containerDirective"
+    "containerDirective",
+    "textDirective"
 ]
 
 const other_type = !handled_types.includes(node.type)
@@ -1264,6 +1265,12 @@ if (DEBUG_AST) {
     <span>{node.value}</span>
 }
 
+{(node.type === "textDirective") && 
+    <span class="text-directive" data-directive={node.name}>
+        {node.children?.map(child => <Astro.self node={child} data={data} />) || node.value || ''}
+    </span>
+}
+
 {/* Handle directive nodes from remark-directive */}
 {(node.type === "leafDirective" || node.type === "containerDirective") && (() => {
   const directiveName = node.name;
@@ -1913,5 +1920,19 @@ if (DEBUG_AST) {
         {JSON.stringify(node)}
     </div>
 }
+
+<style>
+  .text-directive {
+    display: inline;
+    color: inherit;
+    font-style: inherit;
+    font-weight: inherit;
+  }
+  
+  .text-directive[data-directive] {
+    /* Add subtle styling to indicate it's a directive */
+    opacity: 0.9;
+  }
+</style>
 
 

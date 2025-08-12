@@ -45,7 +45,6 @@ const calloutTypes = {
 // Default values
 let calloutType = 'info';
 let calloutTitle = '';
-let customTitle = '';
 let calloutConfig = calloutTypes[calloutType];
 
 let contentNode: Root = { 
@@ -53,34 +52,50 @@ let contentNode: Root = {
   children: node.children || []
 };
 
-// ====== CALLOUT TYPE AND TITLE EXTRACTION LOGIC ======
-// Look for [!Type] or [!Type] Custom Title syntax in blockquotes (Obsidian-style)
+// ====== CALLOUT TYPE DETECTION ======
+// Look for [!Type] or [type] syntax in blockquotes (Obsidian-style)
 // Also support legacy [type] syntax for backward compatibility
 
 let isObsidianCallout = false;
 let useStyledComponent = false;
 
+// Debug logging
+console.log('=== ArticleCallout Debug ===');
+console.log('Original node:', JSON.stringify(node, null, 2));
+console.log('Content node children count:', contentNode.children.length);
+
 if (contentNode.children.length > 0) {
   const firstChild = contentNode.children[0];
 
   if (firstChild.type === 'paragraph' && Array.isArray(firstChild.children)) {
-    const textNode = firstChild.children.find(child => child.type === 'text');
-
-    if (textNode && typeof textNode.value === 'string') {
+    console.log('First child (paragraph):', JSON.stringify(firstChild, null, 2));
+    
+    // Get all text content from the first paragraph to properly extract the callout syntax
+    const paragraphText = firstChild.children
+      .filter(child => child.type === 'text')
+      .map(child => child.value)
+      .join('');
+    
+    console.log('Paragraph text:', paragraphText);
+    
+    if (paragraphText) {
       // First try to match Obsidian-style [!Type] pattern
-      let match = textNode.value.match(/^\[!([^\]]+)\](?:\s+(.+))?/);
+      let match = paragraphText.match(/^\[!([^\]]+)\]/);
       
       if (match) {
         isObsidianCallout = true;
         useStyledComponent = true; // Obsidian callouts use styled components
       } else {
         // Fallback to legacy [type] pattern for backward compatibility
-        match = textNode.value.match(/^\[([^\]]+)\](?:\s+(.+))?/);
+        match = paragraphText.match(/^\[([^\]]+)\]/);
       }
+      
+      console.log('Regex match result:', match);
 
       if (match) {
+        console.log('Callout match found:', match);
         const detectedType = match[1].trim();
-        customTitle = match[2] ? match[2].trim() : '';
+        console.log('Detected type:', detectedType);
 
         // Normalize the type for component lookup (handle case variations)
         const normalizedType = detectedType
@@ -93,27 +108,72 @@ if (contentNode.children.length > 0) {
         if (calloutTypes[normalizedType]) {
           calloutType = normalizedType;
           calloutConfig = calloutTypes[calloutType];
-          calloutTitle = customTitle || calloutConfig.title;
+          calloutTitle = calloutConfig.title; // Use the default title from calloutTypes
+          console.log('Set calloutTitle to default:', calloutTitle);
         } else {
-          // If not a valid type, treat as regular blockquote but keep the title
+          // If not a valid type, treat as regular blockquote
           calloutType = 'info';
           calloutConfig = calloutTypes[calloutType];
-          calloutTitle = detectedType; // Use the original detected type as title
+          calloutTitle = calloutConfig.title; // Use the default title
+          console.log('Set calloutTitle to default info title:', calloutTitle);
         }
 
-        // Remove the [!type] or [type] Title from the paragraph text
-        const pattern = isObsidianCallout ? 
-          /^\[!([^\]]+)\](?:\s+(.+))?\s*/ : 
-          /^\[([^\]]+)\](?:\s+(.+))?\s*/;
-        textNode.value = textNode.value.replace(pattern, '');
-
-        // If the paragraph is now empty after removing, delete it
-        const isParagraphEmpty = firstChild.children.every(child => 
-          child.type === 'text' && child.value.trim() === ''
-        );
-        if (isParagraphEmpty) {
-          contentNode.children.shift(); // Remove the first child
+        // Process the content to ensure proper line breaks
+        // Split any text nodes that contain multiple lines into separate paragraphs
+        const processedChildren = [];
+        
+        for (const child of contentNode.children) {
+          if (child.type === 'paragraph' && child.children) {
+            // Check if any text children contain multiple lines
+            const newParagraphChildren = [];
+            let hasMultiLineText = false;
+            
+            for (const textChild of child.children) {
+              if (textChild.type === 'text' && textChild.value.includes('\n')) {
+                hasMultiLineText = true;
+                const lines = textChild.value.split('\n');
+                
+                for (let i = 0; i < lines.length; i++) {
+                  const line = lines[i].trim();
+                  if (line) {
+                    newParagraphChildren.push({
+                      ...textChild,
+                      value: line
+                    });
+                  }
+                }
+              } else {
+                newParagraphChildren.push(textChild);
+              }
+            }
+            
+            if (hasMultiLineText && newParagraphChildren.length > 1) {
+              // Split into multiple paragraphs
+              for (const textChild of newParagraphChildren) {
+                processedChildren.push({
+                  type: 'paragraph',
+                  children: [textChild]
+                });
+              }
+            } else {
+              processedChildren.push(child);
+            }
+          } else {
+            processedChildren.push(child);
+          }
         }
+        
+        // Replace the content with processed children
+        contentNode.children = processedChildren;
+        
+        // Remove the first paragraph (the title paragraph)
+        contentNode.children.shift();
+        
+        console.log('Modified first paragraph, remaining children count:', contentNode.children.length);
+        console.log('Remaining content children:', contentNode.children.map(child => ({ 
+          type: child.type, 
+          value: 'value' in child ? child.value : 'N/A' 
+        })));
       }
     }
   }
@@ -129,26 +189,8 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
 }
 
 // ====== CONTENT PROCESSING FOR STYLED COMPONENTS ======
-// Process content for styled components that need HTML strings
-
-let processedContent = '';
-if (shouldUseStyledComponent) {
-  // For styled components, we need to render the content to HTML
-  // This is a simplified approach - in a full implementation, you'd use a proper AST to HTML converter
-  processedContent = contentNode.children.map(child => {
-    if (child.type === 'paragraph' && child.children) {
-      return '<p>' + child.children.map(textChild => {
-        if (textChild.type === 'text') {
-          return textChild.value;
-        }
-        return '';
-      }).join('') + '</p>';
-    }
-    return '';
-  }).join('');
-}
-
-// ====== End content processing ======
+// For styled components, we'll use AstroMarkdown to properly render all content types
+// No need for manual HTML conversion since AstroMarkdown handles all markdown elements
 ---
 
 {shouldUseStyledComponent ? (
@@ -161,7 +203,9 @@ if (shouldUseStyledComponent) {
         </div>
       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (calloutType === 'warning' || calloutType === 'alert') ? (
@@ -173,19 +217,29 @@ if (shouldUseStyledComponent) {
         </div>
       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (calloutType === 'info' || calloutType === 'information') ? (
     <div class="callout callout-info">
-      {calloutTitle && (
-        <div class="callout-title">
-          <span class="callout-icon">ℹ️</span>
-          <span class="callout-title-text">{calloutTitle}</span>
-        </div>
-      )}
+             {calloutTitle && (
+         <div class="callout-title">
+           <span class="callout-icon">ℹ️</span>
+           <span class="callout-title-text">
+             {calloutTitle}
+           </span>
+         </div>
+       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {(() => {
+          console.log('Rendering info callout content with', contentNode.children.length, 'children');
+          console.log('Content children types:', contentNode.children.map(child => child.type));
+          return contentNode.children.map((child, index) => (
+            <AstroMarkdown node={child} data={markdownData} />
+          ));
+        })()}
       </div>
     </div>
   ) : calloutType === 'note' ? (
@@ -197,7 +251,9 @@ if (shouldUseStyledComponent) {
         </div>
       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (calloutType === 'success' || calloutType === 'check') ? (
@@ -209,7 +265,9 @@ if (shouldUseStyledComponent) {
         </div>
       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (calloutType === 'error' || calloutType === 'danger') ? (
@@ -221,7 +279,9 @@ if (shouldUseStyledComponent) {
         </div>
       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (calloutType === 'tip' || calloutType === 'hint') ? (
@@ -233,20 +293,26 @@ if (shouldUseStyledComponent) {
         </div>
       )}
       <div class="callout-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (calloutType === 'emphasis' || calloutType === 'em') ? (
     <div class="callout callout-emphasis">
       <div class="emphasis-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
       <div class="emphasis-decoration"></div>
     </div>
   ) : (calloutType === 'quote' || calloutType === 'blockquote') ? (
     <div class="callout callout-quote">
       <div class="quote-content">
-        <Fragment set:html={processedContent} />
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : (
@@ -656,7 +722,8 @@ if (shouldUseStyledComponent) {
   }
 
   .callout .callout-content p {
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
+    line-height: 1.6;
   }
 
   .callout .callout-content p:first-child {
@@ -665,6 +732,22 @@ if (shouldUseStyledComponent) {
 
   .callout .callout-content p:last-child {
     margin-bottom: 0;
+  }
+
+  /* Ensure proper spacing between paragraphs */
+  .callout .callout-content > * + * {
+    margin-top: 0.75rem;
+  }
+
+  /* Ensure list items have proper spacing */
+  .callout .callout-content ul,
+  .callout .callout-content ol {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .callout .callout-content li {
+    margin: 0.25rem 0;
   }
 
   /* Enhanced styling for links within callouts */
