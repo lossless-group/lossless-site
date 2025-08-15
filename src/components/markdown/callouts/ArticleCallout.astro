@@ -59,24 +59,17 @@ let contentNode: Root = {
 let isObsidianCallout = false;
 let useStyledComponent = false;
 
-// Debug logging
-console.log('=== ArticleCallout Debug ===');
-console.log('Original node:', JSON.stringify(node, null, 2));
-console.log('Content node children count:', contentNode.children.length);
+
 
 if (contentNode.children.length > 0) {
   const firstChild = contentNode.children[0];
 
   if (firstChild.type === 'paragraph' && Array.isArray(firstChild.children)) {
-    console.log('First child (paragraph):', JSON.stringify(firstChild, null, 2));
-    
     // Get all text content from the first paragraph to properly extract the callout syntax
     const paragraphText = firstChild.children
       .filter(child => child.type === 'text')
       .map(child => child.value)
       .join('');
-    
-    console.log('Paragraph text:', paragraphText);
     
     if (paragraphText) {
       // First try to match Obsidian-style [!Type] pattern
@@ -89,13 +82,9 @@ if (contentNode.children.length > 0) {
         // Fallback to legacy [type] pattern for backward compatibility
         match = paragraphText.match(/^\[([^\]]+)\]/);
       }
-      
-      console.log('Regex match result:', match);
 
       if (match) {
-        console.log('Callout match found:', match);
         const detectedType = match[1].trim();
-        console.log('Detected type:', detectedType);
 
         // Normalize the type for component lookup (handle case variations)
         const normalizedType = detectedType
@@ -109,13 +98,11 @@ if (contentNode.children.length > 0) {
           calloutType = normalizedType;
           calloutConfig = calloutTypes[calloutType];
           calloutTitle = calloutConfig.title; // Use the default title from calloutTypes
-          console.log('Set calloutTitle to default:', calloutTitle);
         } else {
           // If not a valid type, treat as regular blockquote
           calloutType = 'info';
           calloutConfig = calloutTypes[calloutType];
           calloutTitle = calloutConfig.title; // Use the default title
-          console.log('Set calloutTitle to default info title:', calloutTitle);
         }
 
         // Process the content to ensure proper line breaks
@@ -168,12 +155,6 @@ if (contentNode.children.length > 0) {
         
         // Remove the first paragraph (the title paragraph)
         contentNode.children.shift();
-        
-        console.log('Modified first paragraph, remaining children count:', contentNode.children.length);
-        console.log('Remaining content children:', contentNode.children.map(child => ({ 
-          type: child.type, 
-          value: 'value' in child ? child.value : 'N/A' 
-        })));
       }
     }
   }
@@ -233,13 +214,9 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
          </div>
        )}
       <div class="callout-content">
-        {(() => {
-          console.log('Rendering info callout content with', contentNode.children.length, 'children');
-          console.log('Content children types:', contentNode.children.map(child => child.type));
-          return contentNode.children.map((child, index) => (
-            <AstroMarkdown node={child} data={markdownData} />
-          ));
-        })()}
+        {contentNode.children.map(child => (
+          <AstroMarkdown node={child} data={markdownData} />
+        ))}
       </div>
     </div>
   ) : calloutType === 'note' ? (

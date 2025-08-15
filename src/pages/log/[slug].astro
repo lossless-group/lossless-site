@@ -78,6 +78,7 @@ const contentData = {
 >
   <OneArticle
     Component={OneArticleOnPage}
+    title={entry.data.title || "Changelog Entry"}
     content={entry.body}
     markdownFile={entry.id}
     data={contentData}

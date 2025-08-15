@@ -76,7 +76,7 @@ const normalizedData = normalizeDataWithAuthors(data);
 
 ---
 
-<div class="one-article">
+<div class="one-article collection-reader-pane">
   {/* Render the title if it's provided */}
   
   {markdownFile && <DebugMarkdown content={content} markdownFile={markdownFile} />}
@@ -94,9 +94,103 @@ const normalizedData = normalizeDataWithAuthors(data);
     width: 100%;
     max-width: 100vw;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 2rem;
     overflow-x: hidden;
     box-sizing: border-box;
+    height: calc(100vh - 4rem); /* Fixed height minus header */
+    overflow-y: auto; /* Independent scroll */
+    scroll-behavior: smooth; /* Smooth scrolling */
+  }
+
+  /* Constrain the content width and add proper spacing */
+  .one-article :global(.content-wrapper) {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .one-article :global(.content-inner) {
+    max-width: 900px;
+    padding: 0 2rem;
+  }
+
+  /* Responsive adjustments for OneArticle layout */
+  @media (max-width: 1600px) {
+    .one-article :global(.content-wrapper) {
+      max-width: 1200px;
+      padding: 0 1.5rem;
+    }
+    
+    .one-article :global(.content-inner) {
+      max-width: 800px;
+      padding: 0 1.5rem;
+    }
+  }
+
+  @media (max-width: 1400px) {
+    .one-article :global(.content-wrapper) {
+      max-width: 1000px;
+      padding: 0 1rem;
+    }
+    
+    .one-article :global(.content-inner) {
+      max-width: 700px;
+      padding: 0 1rem;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .one-article :global(.content-wrapper) {
+      max-width: 900px;
+      padding: 0 1rem;
+    }
+    
+    .one-article :global(.content-inner) {
+      max-width: 600px;
+      padding: 0 1rem;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .one-article {
+      padding: 1.5rem;
+      height: auto; /* Allow natural height on mobile */
+      overflow: visible;
+    }
+    
+    .one-article :global(.content-wrapper) {
+      padding: 0 1rem;
+      max-width: 100%;
+    }
+    
+    .one-article :global(.content-inner) {
+      max-width: 100%;
+      padding: 0 1.5rem;
+    }
+    
+    .one-article :global(.main-content) {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .one-article {
+      padding: 1rem;
+    }
+    
+    .one-article :global(.content-wrapper) {
+      padding: 0 0.5rem;
+      max-width: 100%;
+    }
+    
+    .one-article :global(.content-inner) {
+      padding: 0 1rem;
+      max-width: 100%;
+    }
+    
+    .one-article :global(.main-content) {
+      max-width: 100%;
+    }
   }
 
   /* @media (min-width: 768px) {
