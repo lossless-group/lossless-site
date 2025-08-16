@@ -77,6 +77,9 @@ export const DEBUG_TOOLING = toBool(envVars.DEBUG_TOOLING)
 export const DEBUG_TOC = toBool(envVars.DEBUG_TOC)
 export const DEBUG_OG = toBool(envVars.DEBUG_OG)
 
+// API Keys
+export const PLUNK_API_KEY = envVars.PLUNK_API_KEY;
+
 // Log environment info
 console.log('Environment Configuration:', {
   NODE_ENV,
