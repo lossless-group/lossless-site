@@ -8,6 +8,7 @@
  * - useCases?: { title: string; description: string; href?: string; iconUrl?: string }[] (usually 2)
  * Usage: place the project's content section(s) inside the default <slot />; it will render in the expanded area.
  */
+import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 
 interface UseCase { title: string; description: string; href?: string; iconUrl?: string }
 interface Props {
@@ -68,6 +69,14 @@ const {
       </summary>
 
       <div class="expanded">
+        <button
+          type="button"
+          class="mermaid-modal-close-btn"
+          aria-label="Close expanded content"
+          data-action="collapse-details"
+        >
+          <CollapseIcon />
+        </button>
         <slot />
       </div>
     </details>
@@ -106,5 +115,39 @@ const {
   .chev { transition: transform 160ms ease; }
   .cover-expand[open] .chev { transform: rotate(180deg); }
 
-  .expanded { margin-top: 0.8rem; }
+  .expanded { margin-top: 0.8rem; position: relative; }
+  /* Match Mermaid's close button visual exactly */
+  .mermaid-modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+    z-index: 10;
+  }
+  .mermaid-modal-close-btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: block; /* Helps with alignment */
+  }
 </style>
+
+<script>
+  document.addEventListener('click', function (e) {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.matches('[data-action="collapse-details"]')) {
+      const details = target.closest('details');
+      if (details && details.open) {
+        details.open = false;
+        const article = details.closest('article');
+        (article || details).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+  export {};
+</script>
