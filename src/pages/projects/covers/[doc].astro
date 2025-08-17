@@ -4,7 +4,6 @@ import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
 import Section__Project_Container from '@components/projects/Section__Project-Container.astro';
 
-import AugmentItCover from '@components/projects/covers/AugmentItCover.astro';
 import ContentSection_SidebarTreeVariantB from '@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
@@ -104,19 +103,20 @@ const cleanedContent = stripFrontmatter(currentArticle.md);
       />
     </AnimationWrapper>
 
-    <!-- Covers list -->
-    <section class="covers-grid">
-      <AugmentItCover expanded={selected !== 'workflow'}>
-        <ContentSection_SidebarTreeVariantB steps={demoSteps} {currentHref} seriesTitle="Augment-It">
-          <OneArticle
-            Component={OneArticleOnPage}
-            content={cleanedContent}
-            markdownFile={currentArticle.id}
-            data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
-            title={currentArticle.title}
-          />
-        </ContentSection_SidebarTreeVariantB>
-      </AugmentItCover>
+    <!-- Full-page document view (no marketing cover) -->
+    <section class="doc-fullpage">
+      <nav class="doc-nav">
+        <a class="back-link" href="/projects/covers">← Back to covers</a>
+      </nav>
+      <ContentSection_SidebarTreeVariantB steps={demoSteps} {currentHref} seriesTitle="Augment-It">
+        <OneArticle
+          Component={OneArticleOnPage}
+          content={cleanedContent}
+          markdownFile={currentArticle.id}
+          data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
+          title={currentArticle.title}
+        />
+      </ContentSection_SidebarTreeVariantB>
     </section>
 
     <!-- Existing projects container -->
@@ -133,5 +133,8 @@ const cleanedContent = stripFrontmatter(currentArticle.md);
     padding: 0 var(--spacing-4, 1rem);
     width: 100%;
   }
-  .covers-grid { display: grid; gap: 1rem; }
+  .doc-fullpage { display: grid; gap: 0.75rem; }
+  .doc-nav { display: flex; justify-content: flex-start; }
+  .back-link { text-decoration: none; font-size: 0.95rem; color: var(--clr-body); border: 1px solid var(--clr-lossless-ui-btn-border); padding: 0.35rem 0.6rem; border-radius: 8px; background: var(--surface-2); }
+  .back-link:hover { color: var(--clr-heading); background: var(--clr-lossless-primary-glass); }
 </style>

@@ -18,6 +18,7 @@ interface Props {
   ctaLabelCollapsed?: string;
   ctaLabelExpanded?: string;
   expanded?: boolean;
+  openHref?: string;
 }
 
 const {
@@ -52,16 +53,25 @@ const {
     </div>
   )}
 
-  <details class="cover-expand" open={expanded}>
-    <summary class="toggle">
-      <span class="toggle-label" data-collapsed={ctaLabelCollapsed} data-expanded={ctaLabelExpanded}></span>
-      <span class="chev" aria-hidden="true">▾</span>
-    </summary>
-
-    <div class="expanded">
-      <slot />
+  {Astro.props.openHref ? (
+    <div class="cover-expand">
+      <a href={Astro.props.openHref} class="toggle" aria-label={ctaLabelCollapsed}>
+        <span class="toggle-label" data-collapsed={ctaLabelCollapsed} data-expanded={ctaLabelExpanded}></span>
+        <span class="chev" aria-hidden="true">↗</span>
+      </a>
     </div>
-  </details>
+  ) : (
+    <details class="cover-expand" open={expanded}>
+      <summary class="toggle">
+        <span class="toggle-label" data-collapsed={ctaLabelCollapsed} data-expanded={ctaLabelExpanded}></span>
+        <span class="chev" aria-hidden="true">▾</span>
+      </summary>
+
+      <div class="expanded">
+        <slot />
+      </div>
+    </details>
+  )}
 </article>
 
 <style>
