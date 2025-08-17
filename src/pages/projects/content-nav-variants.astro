@@ -1,0 +1,90 @@
+---
+import Layout from "@layouts/Layout.astro";
+import ContentSection_SidebarTree from "@layouts/content-sections/ContentSection_SidebarTree.astro";
+import ContentSection_SidebarTreeVariantB from "@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro";
+import ContentSection_TopStepper from "@layouts/content-sections/ContentSection_TopStepper.astro";
+import ContentSection_InlineCTA from "@layouts/content-sections/ContentSection_InlineCTA.astro";
+import ContentSection_StickyFooterNav from "@layouts/content-sections/ContentSection_StickyFooterNav.astro";
+
+// Shared demo steps
+const demoSteps = [
+  { title: "Load Data", href: "/projects/Augment-It/connect" },
+  { title: "Review & Enrich Records", href: "/projects/Augment-It/review" },
+  { title: "Author Prompt Templates", href: "/projects/Augment-It/templates" },
+  { title: "Choose AI Augmentation Option", href: "/projects/Augment-It/templates" },
+  { title: "Review Request & Response", href: "/projects/Augment-It/insights" },
+  { title: "Generate Insights", href: "/projects/Augment-It/insights" },
+  { title: "Sync Back to Source", href: "/projects/Augment-It/sync" },
+];
+const currentIndex = 1; // matches the 'Review & Enrich Records' step
+---
+
+<Layout title="Content Nav Variants" description="Showcase of content navigation sidebar variants rendered on one page.">
+  <main class="variants-wrap" aria-labelledby="variants-title">
+    <h1 id="variants-title" class="page-title">Content Navigation Variants</h1>
+
+    <section class="variant-section" aria-labelledby="v1-title">
+      <header class="variant-header">
+        <h2 id="v1-title" class="variant-title">Variant A – Base</h2>
+        <p class="variant-desc">Static HTML + scoped CSS. Baseline breadcrumb and tree.</p>
+      </header>
+      <ContentSection_SidebarTree>
+        <article class="prose" style="color: var(--clr-body)">
+          <h1>Variant A Content</h1>
+          <p>This slot shows how the main article area appears next to Variant A.</p>
+        </article>
+      </ContentSection_SidebarTree>
+    </section>
+
+    <section class="variant-section" aria-labelledby="v2-title">
+      <header class="variant-header">
+        <h2 id="v2-title" class="variant-title">Variant B – Bracketed Cluster</h2>
+        <p class="variant-desc">Adds a subtle bracket around the active cluster and tweaks contrast.</p>
+      </header>
+      <ContentSection_SidebarTreeVariantB>
+        <article class="prose" style="color: var(--clr-body)">
+          <h1>Variant B Content</h1>
+          <p>This slot shows how the main article area appears next to Variant B.</p>
+        </article>
+      </ContentSection_SidebarTreeVariantB>
+    </section>
+
+    <section class="variant-section" aria-labelledby="v3-title">
+      <header class="variant-header">
+        <h2 id="v3-title" class="variant-title">Top Stepper</h2>
+        <p class="variant-desc">Horizontal stepper with active indicator.</p>
+      </header>
+      <ContentSection_TopStepper steps={demoSteps} currentIndex={currentIndex} seriesTitle="Journey">
+        <article class="prose" style="color: var(--clr-body)">
+          <h1>Top Stepper Content</h1>
+          <p>Demonstration of the top stepper component with the same step data.</p>
+        </article>
+      </ContentSection_TopStepper>
+    </section>
+
+    <section class="variant-section" aria-labelledby="v4-title">
+      <header class="variant-header">
+        <h2 id="v4-title" class="variant-title">Inline CTA Steps</h2>
+        <p class="variant-desc">Per-step cards with a Continue CTA.</p>
+      </header>
+      <ContentSection_InlineCTA heading="Inline Journey" subheading="Compact vertical sequence" steps={demoSteps.map(s => ({ ...s, excerpt: "Short summary for this step." }))} showIndex={true} />
+    </section>
+
+    <section class="variant-section" aria-labelledby="v5-title">
+      <header class="variant-header">
+        <h2 id="v5-title" class="variant-title">Sticky Footer Nav</h2>
+        <p class="variant-desc">Prev/Next navigation with progress bar.</p>
+      </header>
+      <ContentSection_StickyFooterNav seriesTitle="Journey" currentIndex={currentIndex} steps={demoSteps} />
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .variants-wrap { max-width: 88rem; margin: 0 auto; padding: 1rem; }
+  .page-title { font-size: clamp(1.5rem, 2.5vw, 2rem); margin: 0 0 1rem 0; color: var(--clr-heading); }
+  .variant-section { border: 1px solid var(--clr-lossless-primary-light); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 80%); }
+  .variant-header { margin-bottom: 0.5rem; }
+  .variant-title { margin: 0; font-size: 1.125rem; color: var(--clr-heading); }
+  .variant-desc { margin: 0.25rem 0 0 0; font-size: 0.9rem; color: var(--clr-body); opacity: .85; }
+</style>

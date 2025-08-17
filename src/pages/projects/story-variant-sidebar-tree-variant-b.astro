@@ -1,0 +1,24 @@
+---
+import StorySidebarTreeVariantB from "@components/projects/project-sections/StorySidebarTree__VariantB.astro";
+import Layout from "@layouts/Layout.astro";
+---
+
+<Layout title="Sidebar Tree Variant B" description="Alternate visual styling for the story sidebar tree.">
+  <section class="max-w-5xl mx-auto px-4 py-8" aria-labelledby="page-title-b">
+    <div class="mb-6">
+      <h1 id="page-title-b" class="text-3xl font-semibold" style="color: var(--clr-heading)">Sidebar Tree – Variant B</h1>
+      <p class="text-sm mt-2 opacity-80" style="color: var(--clr-body)">
+        An alternate look with a bracketed active cluster and slightly different breadcrumb contrast.
+      </p>
+    </div>
+  </section>
+
+  <StorySidebarTreeVariantB>
+    <article class="prose" style="color: var(--clr-body)">
+      <h1>Review &amp; Enrich Records</h1>
+      <p>
+        This page demonstrates the Variant B styling of the sidebar tree using only static HTML and scoped CSS.
+      </p>
+    </article>
+  </StorySidebarTreeVariantB>
+</Layout>

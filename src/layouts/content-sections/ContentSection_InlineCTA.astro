@@ -1,0 +1,13 @@
+---
+// Layout wrapper: ContentSection_InlineCTA
+// Renders the inline CTA section and then yields an optional slot below.
+import StoryInlineCTA from "@components/projects/project-sections/StoryInlineCTA.astro";
+const props = Astro.props;
+---
+
+<section>
+  <StoryInlineCTA {...props} />
+  <div class="mt-6">
+    <slot />
+  </div>
+</section>

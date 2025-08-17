@@ -1,0 +1,10 @@
+---
+// Layout wrapper: ContentSection_SidebarTree
+// Passes all props and slot content to the StorySidebarTree component.
+import StorySidebarTree from "@components/projects/project-sections/StorySidebarTree.astro";
+const props = Astro.props;
+---
+
+<StorySidebarTree {...props}>
+  <slot />
+</StorySidebarTree>

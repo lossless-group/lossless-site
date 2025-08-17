@@ -1,0 +1,13 @@
+---
+// Layout wrapper: ContentSection_StickyFooterNav
+// Places content first, with the section-scoped footer nav after.
+import StoryStickyFooterNav from "@components/projects/project-sections/StoryStickyFooterNav.astro";
+const props = Astro.props;
+---
+
+<section>
+  <div>
+    <slot />
+  </div>
+  <StoryStickyFooterNav {...props} />
+</section>
