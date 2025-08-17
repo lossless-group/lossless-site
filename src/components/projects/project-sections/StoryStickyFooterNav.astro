@@ -1,0 +1,80 @@
+---
+// StoryStickyFooterNav.astro
+// Renders a sticky footer with Next/Prev controls and a progress bar.
+// Uses CSS variables for colors and spacing; Tailwind utility classes for layout.
+// No external dependencies.
+
+export interface Step {
+  title: string;
+  href: string;
+  description?: string;
+}
+
+interface Props {
+  seriesTitle?: string;
+  currentIndex: number; // 0-based
+  steps: Step[];
+  logoUrl?: string;
+}
+
+const { seriesTitle = 'Story', currentIndex, steps, logoUrl }: Props = Astro.props;
+const total = steps.length;
+const prev = currentIndex > 0 ? steps[currentIndex - 1] : undefined;
+const next = currentIndex < total - 1 ? steps[currentIndex + 1] : undefined;
+const progressPct = total > 0 ? Math.round(((currentIndex + 1) / total) * 100) : 0;
+---
+
+<section class="w-full" aria-label={seriesTitle}>
+  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center gap-4">
+    {logoUrl && (
+      <img src={logoUrl} alt={seriesTitle + ' logo'} width="40" height="40" class="rounded" style="background: var(--surface-2)" />
+    )}
+    <div>
+      <h2 class="text-xl font-semibold" style="color: var(--text)">{seriesTitle}</h2>
+      <p class="text-sm" style="color: var(--muted-text)">{currentIndex + 1} of {total}</p>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-4 grid gap-4">
+    <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--surface-2)">
+      <div class="h-full" style={`background: var(--accent); width: ${progressPct}%; transition: width 200ms ease-out;`}></div>
+    </div>
+  </div>
+
+  <nav class="fixed inset-x-0 bottom-0 border-t" style="background: var(--surface); border-color: var(--surface-2)">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a
+        href={prev ? prev.href : '#'}
+        aria-disabled={!prev}
+        class="px-4 py-2 rounded border text-sm"
+        style="
+          color: var(--text);
+          background: var(--surface-2);
+          border-color: var(--surface-2);
+          opacity: ${prev ? 1 : 0.5};
+          pointer-events: ${prev ? 'auto' : 'none'};
+        "
+      >
+        ← Prev
+      </a>
+
+      <div class="flex-1 text-center text-sm" style="color: var(--muted-text)">
+        Step {currentIndex + 1} of {total}
+      </div>
+
+      <a
+        href={next ? next.href : '#'}
+        aria-disabled={!next}
+        class="px-4 py-2 rounded text-sm"
+        style="
+          color: var(--accent-contrast);
+          background: var(--accent);
+          opacity: ${next ? 1 : 0.5};
+          pointer-events: ${next ? 'auto' : 'none'};
+        "
+      >
+        Next →
+      </a>
+    </div>
+  </nav>
+</section>

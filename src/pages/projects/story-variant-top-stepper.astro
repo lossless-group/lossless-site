@@ -1,0 +1,32 @@
+---
+import StoryTopStepper from "@components/projects/project-sections/StoryTopStepper.astro";
+
+const steps = [
+  { title: "Connect", href: "/projects/Augment-It/connect" },
+  { title: "Review", href: "/projects/Augment-It/review" },
+  { title: "Templates", href: "/projects/Augment-It/templates" },
+  { title: "Insights", href: "/projects/Augment-It/insights" },
+  { title: "Sync", href: "/projects/Augment-It/sync" },
+];
+
+const currentIndex = 2; // demo: third step active
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story Variant — Top Stepper</title>
+  </head>
+  <body>
+    <StoryTopStepper {steps} {currentIndex} seriesTitle="Augment-It">
+      <article class="prose" style="color: var(--text)">
+        <h1>Design Prompt Templates</h1>
+        <p>
+          Horizontal stepper across the top shows position in the journey and lets users
+          jump between steps.
+        </p>
+      </article>
+    </StoryTopStepper>
+  </body>
+</html>

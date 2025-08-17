@@ -1,0 +1,59 @@
+---
+import StorySidebarTree from "@components/projects/project-sections/StorySidebarTree.astro";
+
+const breadcrumb = [
+  { label: "Projects", href: "/projects" },
+  { label: "Augment-It", href: "/projects/Augment-It" },
+  { label: "Review & Enrich Records" },
+];
+
+const nodes = [
+  {
+    title: "Connect Data Source",
+    href: "/projects/Augment-It/connect",
+    children: [
+      { title: "Supported Data Stores", href: "/projects/Augment-It/connect/supported-stores" },
+    ],
+  },
+  {
+    title: "Review & Enrich Records",
+    href: "/projects/Augment-It/review",
+    children: [
+      { title: "RecordCollector", href: "/projects/Augment-It/review/record-collector" },
+    ],
+  },
+  {
+    title: "Design Prompt Templates",
+    href: "/projects/Augment-It/templates",
+  },
+  {
+    title: "Assemble Insights",
+    href: "/projects/Augment-It/insights",
+  },
+  {
+    title: "Sync Back to Source",
+    href: "/projects/Augment-It/sync",
+  },
+];
+
+const currentHref = "/projects/Augment-It/review";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story Variant — Sidebar Tree</title>
+  </head>
+  <body>
+    <StorySidebarTree {breadcrumb} {nodes} {currentHref}>
+      <article class="prose" style="color: var(--text)">
+        <h1>Review & Enrich Records</h1>
+        <p>
+          This section demonstrates a hierarchical navigation tree with a breadcrumb header.
+          Use it to signal parent/child structure across markdown content.
+        </p>
+      </article>
+    </StorySidebarTree>
+  </body>
+</html>

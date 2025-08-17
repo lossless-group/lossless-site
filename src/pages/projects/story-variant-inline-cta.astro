@@ -1,0 +1,33 @@
+---
+import StoryInlineCTA from "@components/projects/project-sections/StoryInlineCTA.astro";
+
+const steps = [
+  { title: "Connect Data Source", href: "/projects/Augment-It/connect", excerpt: "Link your warehouse or upload CSVs." },
+  { title: "Review & Enrich Records", href: "/projects/Augment-It/review", excerpt: "Compute synthetic fields and validate data." },
+  { title: "Design Prompt Templates", href: "/projects/Augment-It/templates", excerpt: "Create reusable prompts with variables." },
+  { title: "Assemble Insights", href: "/projects/Augment-It/insights", excerpt: "Summarize and package findings." },
+  { title: "Sync Back to Source", href: "/projects/Augment-It/sync", excerpt: "Round-trip results to systems of record." },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story Variant — Inline CTA</title>
+  </head>
+  <body>
+    <main>
+      <section class="max-w-5xl mx-auto px-4 py-8">
+        <header class="mb-6">
+          <h1 class="text-3xl font-semibold" style="color: var(--text)">Inline CTA Journey</h1>
+          <p class="text-sm mt-2" style="color: var(--muted-text)">
+            Each step appears as a card with a clear "Continue" action.
+          </p>
+        </header>
+      </section>
+
+      <StoryInlineCTA heading="Augment-It" subheading="A step-by-step user journey" {steps} />
+    </main>
+  </body>
+</html>
