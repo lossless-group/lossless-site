@@ -17,6 +17,7 @@ interface Props {
   ctaLabelCollapsed?: string;
   ctaLabelExpanded?: string;
   expanded?: boolean;
+  openHref?: string;
 }
 
 const {
@@ -40,6 +41,7 @@ const {
   ctaLabelCollapsed = "Open",
   ctaLabelExpanded = "Close",
   expanded = false,
+  openHref,
 }: Props = Astro.props;
 ---
 
@@ -51,6 +53,7 @@ const {
   ctaLabelCollapsed={ctaLabelCollapsed}
   ctaLabelExpanded={ctaLabelExpanded}
   expanded={expanded}
+  openHref={openHref}
 >
   <slot />
 </ProjectCoverBase>
