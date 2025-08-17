@@ -1,0 +1,44 @@
+---
+/**
+ * StoryTopStepper.astro
+ * Horizontal top stepper with clickable steps and active indicator.
+ * Props:
+ * - steps: { title, href }[]
+ * - currentIndex: number
+ * - seriesTitle?: string
+ */
+
+export interface Step { title: string; href: string }
+interface Props {
+  steps: Step[];
+  currentIndex: number;
+  seriesTitle?: string;
+}
+
+const { steps = [], currentIndex = 0, seriesTitle = 'Story' }: Props = Astro.props;
+---
+
+<section class="w-full" aria-label={seriesTitle}>
+  <div class="border-b" style="border-color: var(--surface-2)">
+    <ol class="max-w-6xl mx-auto px-4 flex flex-wrap items-center gap-2 py-3">
+      {steps.map((s, i) => (
+        <li class="flex items-center gap-2">
+          <a
+            href={s.href}
+            class={['px-3 py-1.5 rounded text-sm', i === currentIndex ? 'font-semibold' : ''].join(' ')}
+            style={`
+              color: ${i === currentIndex ? 'var(--accent-contrast)' : 'var(--text)'};
+              background: ${i === currentIndex ? 'var(--accent)' : 'var(--surface-2)'};
+            `}
+          >
+            {i + 1}. {s.title}
+          </a>
+          {i < steps.length - 1 && <span class="text-xs" style="color: var(--muted-text)">→</span>}
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <slot />
+  </div>
+</section>

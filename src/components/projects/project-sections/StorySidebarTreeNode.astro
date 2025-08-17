@@ -1,0 +1,38 @@
+---
+/**
+ * StorySidebarTreeNode.astro
+ * Renders a single tree node and its children recursively.
+ * Props:
+ * - node: { title, href, children? }
+ * - currentHref?: string
+ */
+
+export interface TreeNode { title: string; href: string; children?: TreeNode[] }
+
+interface Props {
+  node: TreeNode;
+  currentHref?: string;
+}
+
+const { node, currentHref = '' }: Props = Astro.props;
+const isActive = node.href === currentHref;
+---
+
+<li>
+  <a
+    href={node.href}
+    class={['block px-2 py-1 rounded', isActive ? 'font-semibold' : ''].join(' ')}
+    style={`color: var(--text); ${isActive ? 'background: var(--surface-2);' : ''}`}
+  >
+    {node.title}
+  </a>
+  {node.children && node.children.length > 0 && (
+    <ul class="ml-3 border-l pl-3" style="border-color: var(--surface-2)">
+      {node.children.map((child) => (
+        <Fragment>
+          <StorySidebarTreeNode node={child} currentHref={currentHref} />
+        </Fragment>
+      ))}
+    </ul>
+  )}
+</li>

@@ -1,0 +1,40 @@
+---
+import StoryStickyFooterNav from "@components/projects/project-sections/StoryStickyFooterNav.astro";
+
+const steps = [
+  { title: "Connect Data Source", href: "/projects/Augment-It/connect" },
+  { title: "Review & Enrich Records", href: "/projects/Augment-It/review" },
+  { title: "Design Prompt Templates", href: "/projects/Augment-It/templates" },
+  { title: "Assemble Insights", href: "/projects/Augment-It/insights" },
+  { title: "Sync Back to Source", href: "/projects/Augment-It/sync" },
+];
+
+const currentIndex = 1; // demo: second step active
+---
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story Variant — Sticky Footer</title>
+  </head>
+  <body>
+    <main class="max-w-5xl mx-auto px-4 py-8">
+      <h1 class="text-3xl font-semibold mb-4" style="color: var(--text)">Sticky Footer Navigation</h1>
+      <p class="mb-6" style="color: var(--muted-text)">
+        Demo of a linear journey with a sticky footer showing Next/Prev and progress.
+      </p>
+
+      <article class="prose" style="color: var(--text)">
+        <h2>Step Content</h2>
+        <p>
+          This area represents the content of the active step. Use this to render the
+          first heading and paragraph from the target MDX file.
+        </p>
+      </article>
+    </main>
+
+    <StoryStickyFooterNav seriesTitle="Augment-It" {steps} {currentIndex} />
+  </body>
+</html>
