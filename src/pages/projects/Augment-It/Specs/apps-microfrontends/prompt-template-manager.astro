@@ -1,0 +1,16 @@
+---
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import md from '@generated/projects/Augment-It/Specs/apps-microfrontends/PromptTemplateManager.md?raw';
+
+const title = 'Author Prompt Templates — PromptTemplateManager';
+const data = {
+  path: Astro.url.pathname,
+  id: 'Augment-It/Specs/apps-microfrontends/PromptTemplateManager.md'
+};
+---
+
+<Layout title={`Augment-It • ${title}`} description={title}>
+  <OneArticle Component={OneArticleOnPage} content={md} markdownFile={data.id} data={data} title={title} />
+</Layout>

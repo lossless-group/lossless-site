@@ -16,12 +16,19 @@ import mdRequestReviewer from '@generated/projects/Augment-It/Specs/apps-microfr
 import mdHighlightCollector from '@generated/projects/Augment-It/Specs/apps-microfrontends/HighlightCollector.md?raw';
 import mdApiConnectorService from '@generated/projects/Augment-It/Specs/shared-services/apiConnectorService.md?raw';
 
-// Shared demo steps for potential wiring later
-const docParam = Astro.url.searchParams.get('doc');
-if (docParam) {
-  return Astro.redirect(`/projects/covers/${docParam}`);
+export async function getStaticPaths() {
+  // Pre-render known document routes under /projects/covers/
+  const docs = [
+    'record-collector',
+    'prompt-template-manager',
+    'api-connector-service',
+    'request-reviewer',
+    'highlight-collector',
+  ];
+  return docs.map((doc) => ({ params: { doc } }));
 }
-const selected = 'workflow';
+
+const selected = Astro.params.doc || 'workflow';
 
 const demoSteps = [
   { title: 'Data Augmentation Workflow with Microfrontends', href: '/projects/covers' },
@@ -36,7 +43,7 @@ const demoSteps = [
 
 const currentHref = selected === 'workflow'
   ? '/projects/covers'
-  : `/projects/covers?doc=${selected}`;
+  : `/projects/covers/${selected}`;
 
 const articles = {
   'workflow': {
@@ -95,13 +102,6 @@ const currentArticle = articles[selected] ?? articles['workflow'];
     <section class="covers-grid">
       <AugmentItCover expanded={selected !== 'workflow'}>
         <ContentSection_SidebarTreeVariantB steps={demoSteps} {currentHref} seriesTitle="Augment-It">
-          <article class="prose" style="color: var(--clr-body)">
-            <h1>Augment-It</h1>
-            <p>
-              Use the sidebar tree to navigate the Augment-It journey. The demo steps below
-              match the current series flow.
-            </p>
-          </article>
           <OneArticle
             Component={OneArticleOnPage}
             content={currentArticle.md}

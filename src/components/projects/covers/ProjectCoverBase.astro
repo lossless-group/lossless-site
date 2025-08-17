@@ -17,6 +17,7 @@ interface Props {
   useCases?: UseCase[];
   ctaLabelCollapsed?: string;
   ctaLabelExpanded?: string;
+  expanded?: boolean;
 }
 
 const {
@@ -26,6 +27,7 @@ const {
   useCases = [],
   ctaLabelCollapsed = "Open",
   ctaLabelExpanded = "Close",
+  expanded = false,
 }: Props = Astro.props;
 ---
 
@@ -50,7 +52,7 @@ const {
     </div>
   )}
 
-  <details class="cover-expand">
+  <details class="cover-expand" open={expanded}>
     <summary class="toggle">
       <span class="toggle-label" data-collapsed={ctaLabelCollapsed} data-expanded={ctaLabelExpanded}></span>
       <span class="chev" aria-hidden="true">▾</span>

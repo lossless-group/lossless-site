@@ -1,0 +1,16 @@
+---
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import md from '@generated/projects/Augment-It/Specs/shared-services/apiConnectorService.md?raw';
+
+const title = 'Choose AI Augmentation Option — apiConnectorService';
+const data = {
+  path: Astro.url.pathname,
+  id: 'Augment-It/Specs/shared-services/apiConnectorService.md'
+};
+---
+
+<Layout title={`Augment-It • ${title}`} description={title}>
+  <OneArticle Component={OneArticleOnPage} content={md} markdownFile={data.id} data={data} title={title} />
+</Layout>
