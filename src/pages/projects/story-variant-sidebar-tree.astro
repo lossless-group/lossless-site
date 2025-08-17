@@ -1,5 +1,6 @@
 ---
 import StorySidebarTree from "@components/projects/project-sections/StorySidebarTree.astro";
+import Layout from "@layouts/Layout.astro";
 
 const breadcrumb = [
   { label: "Projects", href: "/projects" },
@@ -39,21 +40,24 @@ const nodes = [
 const currentHref = "/projects/Augment-It/review";
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Story Variant — Sidebar Tree</title>
-  </head>
-  <body>
+
+  <Layout title="Sidebar Tree Journey" description="Each step appears as a card with a clear 'Continue' action.">
+    <section class="max-w-5xl mx-auto px-4 py-8" aria-labelledby="page-title">
+      <div class="mb-6">
+        <h1 id="page-title" class="text-3xl font-semibold" style="color: var(--clr-heading)">Sidebar Tree Journey</h1>
+        <p class="text-sm mt-2 opacity-80" style="color: var(--clr-body)">
+          Each step appears as a card with a clear "Continue" action.
+        </p>
+      </div>
+    </section>
+
     <StorySidebarTree {breadcrumb} {nodes} {currentHref}>
-      <article class="prose" style="color: var(--text)">
+      <article class="prose" style="color: var(--clr-body)">
         <h1>Review & Enrich Records</h1>
         <p>
           This section demonstrates a hierarchical navigation tree with a breadcrumb header.
           Use it to signal parent/child structure across markdown content.
-        </p>
-      </article>
-    </StorySidebarTree>
-  </body>
-</html>
+      </p>
+    </article>
+  </StorySidebarTree>
+  </Layout>

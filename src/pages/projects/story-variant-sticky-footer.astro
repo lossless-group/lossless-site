@@ -1,5 +1,6 @@
 ---
 import StoryStickyFooterNav from "@components/projects/project-sections/StoryStickyFooterNav.astro";
+import Layout from "@layouts/Layout.astro";
 
 const steps = [
   { title: "Connect Data Source", href: "/projects/Augment-It/connect" },
@@ -11,30 +12,22 @@ const steps = [
 
 const currentIndex = 1; // demo: second step active
 ---
----
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Story Variant — Sticky Footer</title>
-  </head>
-  <body>
-    <main class="max-w-5xl mx-auto px-4 py-8">
-      <h1 class="text-3xl font-semibold mb-4" style="color: var(--text)">Sticky Footer Navigation</h1>
-      <p class="mb-6" style="color: var(--muted-text)">
-        Demo of a linear journey with a sticky footer showing Next/Prev and progress.
+<Layout title="Story Variant — Sticky Footer" description="Linear journey with sticky footer navigation">
+  <section class="max-w-5xl mx-auto px-4 py-8" aria-labelledby="page-title">
+    <h1 id="page-title" class="text-3xl font-semibold mb-2" style="color: var(--clr-heading)">Sticky Footer Navigation</h1>
+    <p class="opacity-80 mb-6" style="color: var(--clr-body)">
+      Demo of a linear journey with a sticky footer showing Next/Prev and progress.
+    </p>
+
+    <article class="prose" style="color: var(--clr-body)">
+      <h2>Step Content</h2>
+      <p>
+        This area represents the content of the active step. Use this to render the
+        first heading and paragraph from the target MDX file.
       </p>
+    </article>
+  </section>
 
-      <article class="prose" style="color: var(--text)">
-        <h2>Step Content</h2>
-        <p>
-          This area represents the content of the active step. Use this to render the
-          first heading and paragraph from the target MDX file.
-        </p>
-      </article>
-    </main>
-
-    <StoryStickyFooterNav seriesTitle="Augment-It" {steps} {currentIndex} />
-  </body>
-</html>
+  <StoryStickyFooterNav seriesTitle="Augment-It" {steps} {currentIndex} />
+</Layout>

@@ -9,6 +9,8 @@
  * - showIndex?: boolean
  */
 
+import TextCTA from "@components/basics/cta/TextCTA.astro";
+
 export interface Step { title: string; href: string; excerpt?: string }
 interface Props {
   heading?: string;
@@ -22,24 +24,31 @@ const { heading = 'Journey', subheading = '', steps = [], showIndex = true }: Pr
 
 <section class="max-w-5xl mx-auto px-4 py-6">
   <header class="mb-6">
-    <h2 class="text-2xl font-semibold" style="color: var(--text)">{heading}</h2>
-    {subheading && <p class="text-sm mt-1" style="color: var(--muted-text)">{subheading}</p>}
+    <h2 class="text-2xl font-semibold" style="color: var(--clr-heading)">{heading}</h2>
+    {subheading && <p class="text-sm mt-1 opacity-80" style="color: var(--clr-body)">{subheading}</p>}
   </header>
 
   <ol class="grid gap-4">
     {steps.map((s, i) => (
-      <li class="rounded border p-4" style="background: var(--surface); border-color: var(--surface-2)">
+      <li class="card p-4">
         <div class="flex items-start gap-3">
           {showIndex && (
-            <span class="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold" style="background: var(--accent); color: var(--accent-contrast)">
+            <span
+              class="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold"
+              style="
+                background: var(--clr-lossless-primary-glass);
+                color: var(--clr-heading);
+                border: 1px solid var(--clr-lossless-ui-btn-border);
+              "
+            >
               {i + 1}
             </span>
           )}
           <div class="flex-1">
-            <h3 class="text-lg font-medium" style="color: var(--text)">{s.title}</h3>
-            {s.excerpt && <p class="text-sm mt-1" style="color: var(--muted-text)">{s.excerpt}</p>}
+            <h3 class="text-lg font-medium" style="color: var(--clr-heading)">{s.title}</h3>
+            {s.excerpt && <p class="text-sm mt-1 opacity-80" style="color: var(--clr-body)">{s.excerpt}</p>}
             <div class="mt-3">
-              <a href={s.href} class="px-3 py-2 rounded text-sm" style="background: var(--accent); color: var(--accent-contrast)">Continue →</a>
+              <TextCTA href={s.href} text="Continue" />
             </div>
           </div>
         </div>

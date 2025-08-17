@@ -1,0 +1,105 @@
+<section class="story-grid" aria-label="Story Navigation (Variant B)">
+  <aside class="card sidebar">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <span><a class="crumb-link" href="/projects">Projects</a><span class="crumb-sep"> / </span></span>
+      <span><a class="crumb-link" href="/projects/Augment-It">Augment-It</a><span class="crumb-sep"> / </span></span>
+      <span><span class="crumb-current" aria-current="page">Review &amp; Enrich Records</span></span>
+    </nav>
+
+    <ul class="tree-nav">
+      <li>
+        <a href="/projects/Augment-It/connect" class="tree-link">
+          <span class="chip">01</span>
+          <span class="tree-text">Connect Data Source</span>
+        </a>
+        <ul class="tree-nav tree-branch">
+          <li>
+            <a href="/projects/Augment-It/connect/supported-stores" class="tree-link">
+              <span class="chip chip--sm">1.1</span>
+              <span class="tree-text">Supported Data Stores</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="active-cluster">
+        <span class="cluster-bracket" aria-hidden="true"></span>
+        <a href="/projects/Augment-It/review" class="tree-link tree-link--active">
+          <span class="chip">02</span>
+          <span class="tree-text">Review &amp; Enrich Records</span>
+        </a>
+        <ul class="tree-nav tree-branch tree-branch--active">
+          <li>
+            <a href="/projects/Augment-It/review/record-collector" class="tree-link">
+              <span class="chip chip--sm">2.1</span>
+              <span class="tree-text">RecordCollector</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/templates" class="tree-link">
+          <span class="chip">03</span>
+          <span class="tree-text">Design Prompt Templates</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/insights" class="tree-link">
+          <span class="chip">04</span>
+          <span class="tree-text">Assemble Insights</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/sync" class="tree-link">
+          <span class="chip">05</span>
+          <span class="tree-text">Sync Back to Source</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <div class="content-area">
+    <slot />
+  </div>
+</section>
+
+<style>
+  /* Layout */
+  .story-grid { max-width: 72rem; margin: 0 auto; padding: 0 1rem; display: grid; gap: 1.75rem; grid-template-columns: 1fr; }
+  @media (min-width: 768px) { .story-grid { grid-template-columns: 280px 1fr; } }
+  .sidebar { position: sticky; top: 4rem; align-self: start; padding: 0.75rem; }
+  .content-area { min-height: 4rem; }
+
+  /* Breadcrumb (Variant B: stronger focus on current) */
+  .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; margin-bottom: 0.6rem; font-size: 0.9rem; border-bottom: 1px dashed var(--clr-lossless-primary-light); padding-bottom: 0.45rem; }
+  .card .breadcrumb { color: color-mix(in oklab, var(--clr-lossless-primary-light), black 35%); }
+  .card .breadcrumb .crumb-link, .card .breadcrumb .crumb-link:visited { color: inherit; text-decoration: none; }
+  .card .breadcrumb .crumb-link:hover { color: var(--clr-lossless-accent--brightest); }
+  .card .breadcrumb .crumb-current[aria-current="page"] { color: var(--clr-lossless-accent--brightest); font-weight: 700; }
+  .card .breadcrumb .crumb-sep { margin: 0 0.25rem; opacity: 0.7; }
+
+  /* Tree base */
+  .tree-nav { list-style: none; padding-left: 0; margin: 0; }
+  .tree-nav li + li { margin-top: 0.35rem; }
+  .tree-branch { padding-left: 1rem; margin-top: 0.25rem; border-left: 3px solid var(--clr-lossless-primary-light); }
+  .tree-branch.tree-branch--active { border-left-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 10%); }
+
+  /* Links */
+  .card a.tree-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.3rem 0.2rem 0.55rem; border-radius: 0.35rem; color: var(--clr-heading); text-decoration: none; position: relative; transition: color 150ms ease, box-shadow 150ms ease, background 150ms ease; }
+  .card a.tree-link .tree-text { flex: 1 1 auto; min-width: 0; line-height: 1.35; }
+  .card a.tree-link .chip { flex: 0 0 auto; }
+  .card a.tree-link:hover { color: var(--clr-heading); background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 80%); }
+  .card a.tree-link:focus-visible { outline: 2px solid color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 25%); outline-offset: 2px; }
+  .card a.tree-link--active { color: var(--clr-lossless-accent--brightest); font-weight: 700; box-shadow: inset 3px 0 0 var(--clr-lossless-accent--brightest); }
+
+  /* Variant B: bracket accent around active cluster */
+  .active-cluster { position: relative; padding-left: 0.25rem; }
+  .active-cluster .cluster-bracket { position: absolute; left: -0.5rem; top: -0.1rem; bottom: -0.1rem; width: 0.35rem; border-left: 3px solid var(--clr-lossless-accent--brightest); border-top-left-radius: 10px; border-bottom-left-radius: 10px; opacity: 0.95; }
+
+  /* Chips */
+  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; height: 1.25rem; padding: 0 0.3rem; font-size: 0.72rem; line-height: 1; color: var(--clr-heading); background: var(--clr-lossless-primary-glass); border: 1px solid var(--clr-lossless-ui-btn-border); border-radius: 0.6rem; }
+  .chip--sm { min-width: 1.2rem; height: 1.05rem; font-size: 0.68rem; border-radius: 0.5rem; opacity: 0.95; }
+</style>

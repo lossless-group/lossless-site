@@ -1,0 +1,10 @@
+---
+// Layout wrapper: ContentSection_TopStepper
+// Forwards props and slot to StoryTopStepper.
+import StoryTopStepper from "@components/projects/project-sections/StoryTopStepper.astro";
+const props = Astro.props;
+---
+
+<StoryTopStepper {...props}>
+  <slot />
+</StoryTopStepper>

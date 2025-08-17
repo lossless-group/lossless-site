@@ -1,65 +1,114 @@
----
-/**
- * StorySidebarTree.astro
- * Left sidebar hierarchical tree with breadcrumb header.
- * Props:
- * - breadcrumb: { label: string, href?: string }[]
- * - nodes: TreeNode[] where TreeNode = { title, href, children?: TreeNode[] }
- * - currentHref: string (to highlight active)
- */
-
-export interface Crumb { label: string; href?: string }
-export interface TreeNode { title: string; href: string; children?: TreeNode[] }
-
-interface Props {
-  breadcrumb: Crumb[];
-  nodes: TreeNode[];
-  currentHref?: string;
-}
-
-const { breadcrumb = [], nodes = [], currentHref = '' }: Props = Astro.props;
----
-
-<section class="max-w-6xl mx-auto px-4 grid md:grid-cols-[260px_1fr] gap-6" aria-label="Story Navigation">
-  <aside class="md:sticky md:top-16 md:self-start p-3 rounded border" style="background: var(--surface); border-color: var(--surface-2)">
-    <nav aria-label="Breadcrumb" class="mb-3 text-sm flex flex-wrap items-center gap-1">
-      {breadcrumb.map((c, i) => (
-        <span>
-          {c.href ? <a href={c.href} style="color: var(--accent)">{c.label}</a> : <span style="color: var(--muted-text)">{c.label}</span>}
-          {i < breadcrumb.length - 1 && <span style="color: var(--muted-text)"> / </span>}
-        </span>
-      ))}
+<section class="story-grid" aria-label="Story Navigation">
+  <aside class="card sidebar">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <span><a class="crumb-link" href="/projects">Projects</a><span class="crumb-sep"> / </span></span>
+      <span><a class="crumb-link" href="/projects/Augment-It">Augment-It</a><span class="crumb-sep"> / </span></span>
+      <span><span class="crumb-current" aria-current="page">Review &amp; Enrich Records</span></span>
     </nav>
-    <ul class="space-y-1">
-      {nodes.map((n) => (
-        <li>
-          <a
-            href={n.href}
-            class={["block px-2 py-1 rounded", n.href === currentHref ? "font-semibold" : ""].join(" ")}
-            style={`color: var(--text); ${n.href === currentHref ? 'background: var(--surface-2);' : ''}`}
-          >
-            {n.title}
-          </a>
-          {n.children && n.children.length > 0 && (
-            <ul class="ml-3 border-l pl-3 mt-1 space-y-1" style="border-color: var(--surface-2)">
-              {n.children.map((c) => (
-                <li>
-                  <a
-                    href={c.href}
-                    class={["block px-2 py-1 rounded", c.href === currentHref ? "font-semibold" : ""].join(" ")}
-                    style={`color: var(--text); ${c.href === currentHref ? 'background: var(--surface-2);' : ''}`}
-                  >
-                    {c.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
+
+    <ul class="tree-nav">
+      <li>
+        <a href="/projects/Augment-It/connect" class="tree-link">
+          <span class="chip">01</span>
+          <span class="tree-text">Connect Data Source</span>
+        </a>
+        <ul class="tree-nav tree-branch">
+          <li>
+            <a href="/projects/Augment-It/connect/supported-stores" class="tree-link">
+              <span class="chip chip--sm">1.1</span>
+              <span class="tree-text">Supported Data Stores</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/review" class="tree-link tree-link--active">
+          <span class="chip">02</span>
+          <span class="tree-text">Review &amp; Enrich Records</span>
+        </a>
+        <ul class="tree-nav tree-branch tree-branch--active">
+          <li>
+            <a href="/projects/Augment-It/review/record-collector" class="tree-link">
+              <span class="chip chip--sm">2.1</span>
+              <span class="tree-text">RecordCollector</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/templates" class="tree-link">
+          <span class="chip">03</span>
+          <span class="tree-text">Design Prompt Templates</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/insights" class="tree-link">
+          <span class="chip">04</span>
+          <span class="tree-text">Assemble Insights</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/projects/Augment-It/sync" class="tree-link">
+          <span class="chip">05</span>
+          <span class="tree-text">Sync Back to Source</span>
+        </a>
+      </li>
     </ul>
   </aside>
-  <div>
+
+  <div class="content-area">
     <slot />
   </div>
 </section>
+
+<style>
+  /* Layout */
+  .story-grid {
+    max-width: 72rem; /* ~6xl */
+    margin-left: auto; margin-right: auto;
+    padding-left: 1rem; padding-right: 1rem;
+    display: grid; gap: 1.5rem; grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) { .story-grid { grid-template-columns: 260px 1fr; } }
+  .sidebar { position: sticky; top: 4rem; align-self: start; padding: 0.75rem; }
+  .content-area { min-height: 4rem; }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem;
+    margin-bottom: 0.5rem; font-size: 0.875rem;
+    border-bottom: 1px dashed var(--clr-lossless-primary-light);
+    padding-bottom: 0.4rem;
+  }
+  .card .breadcrumb .crumb-link,
+  .card .breadcrumb .crumb-link:visited { color: var(--clr-lossless-accent--brightest) !important; text-decoration: none; transition: color 120ms ease; }
+  .card .breadcrumb .crumb-link:hover { color: color-mix(in oklab, var(--clr-lossless-accent--brightest), white 10%); }
+  .card .breadcrumb .crumb-current[aria-current="page"] { color: var(--clr-heading) !important; opacity: 0.95; }
+  .card .breadcrumb .crumb-sep { margin: 0 0.25rem; color: var(--clr-body); opacity: 0.6; }
+
+  /* Tree links */
+  .card a.tree-link { display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.15rem 0.25rem 0.15rem 0.5rem; border-radius: 0.25rem;
+    color: var(--clr-body); background: transparent !important; border: none; text-decoration: none; position: relative;
+    transition: color 150ms ease, box-shadow 150ms ease; }
+  .card a.tree-link .tree-text { flex: 1 1 auto; min-width: 0; line-height: 1.35; }
+  .card a.tree-link .chip { flex: 0 0 auto; }
+  .card a.tree-link:hover { color: var(--clr-heading); box-shadow: inset 3px 0 0 color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 50%); }
+  .card a.tree-link:focus-visible { outline: 2px solid color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 20%); outline-offset: 2px; border-radius: 0.35rem; }
+  .card a.tree-link--active { color: var(--clr-heading); font-weight: 600; background: transparent !important; box-shadow: inset 4px 0 0 var(--clr-lossless-accent--brightest); }
+  .card a.tree-link--active::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 8px; height: 2px; background: var(--clr-lossless-accent--brightest); }
+
+  /* Rhythm + guides */
+  .tree-nav { list-style: none; padding-left: 0; margin: 0; }
+  .tree-nav li + li { margin-top: 0.15rem; }
+  .tree-branch { padding-left: 0.75rem; margin-top: 0.25rem; border-left: 3px solid var(--clr-lossless-ui-btn-border); }
+  .tree-branch.tree-branch--active { border-left-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 10%); }
+
+  /* Chips */
+  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 1.4rem; height: 1.25rem; padding: 0 0.25rem; margin-right: 0.5rem; font-size: 0.72rem; line-height: 1; color: var(--clr-heading); background: var(--clr-lossless-primary-glass); border: 1px solid var(--clr-lossless-ui-btn-border); border-radius: 0.4rem; }
+  .chip--sm { min-width: 1.1rem; height: 1.05rem; font-size: 0.68rem; border-radius: 0.35rem; opacity: 0.9; }
+</style>

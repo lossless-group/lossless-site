@@ -30,51 +30,71 @@ const progressPct = total > 0 ? Math.round(((currentIndex + 1) / total) * 100) :
       <img src={logoUrl} alt={seriesTitle + ' logo'} width="40" height="40" class="rounded" style="background: var(--surface-2)" />
     )}
     <div>
-      <h2 class="text-xl font-semibold" style="color: var(--text)">{seriesTitle}</h2>
-      <p class="text-sm" style="color: var(--muted-text)">{currentIndex + 1} of {total}</p>
+      <h2 class="text-xl font-semibold" style="color: var(--clr-heading)">{seriesTitle}</h2>
+      <p class="text-sm opacity-80" style="color: var(--clr-body)">{currentIndex + 1} of {total}</p>
     </div>
   </header>
 
   <div class="max-w-5xl mx-auto px-4 grid gap-4">
-    <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--surface-2)">
-      <div class="h-full" style={`background: var(--accent); width: ${progressPct}%; transition: width 200ms ease-out;`}></div>
+    <div class="progress-rail">
+      <div class="progress-fill" style={`width: ${progressPct}%;`}></div>
     </div>
   </div>
 
-  <nav class="fixed inset-x-0 bottom-0 border-t" style="background: var(--surface); border-color: var(--surface-2)">
+  <nav class="sticky-bar">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-      <a
-        href={prev ? prev.href : '#'}
-        aria-disabled={!prev}
-        class="px-4 py-2 rounded border text-sm"
-        style="
-          color: var(--text);
-          background: var(--surface-2);
-          border-color: var(--surface-2);
-          opacity: ${prev ? 1 : 0.5};
-          pointer-events: ${prev ? 'auto' : 'none'};
-        "
-      >
+      <a href={prev ? prev.href : '#'} aria-disabled={!prev} class:list={["nav-btn nav-btn--ghost", { disabled: !prev }]}>
         ← Prev
       </a>
 
-      <div class="flex-1 text-center text-sm" style="color: var(--muted-text)">
+      <div class="flex-1 text-center text-sm step-readout">
         Step {currentIndex + 1} of {total}
       </div>
 
-      <a
-        href={next ? next.href : '#'}
-        aria-disabled={!next}
-        class="px-4 py-2 rounded text-sm"
-        style="
-          color: var(--accent-contrast);
-          background: var(--accent);
-          opacity: ${next ? 1 : 0.5};
-          pointer-events: ${next ? 'auto' : 'none'};
-        "
-      >
+      <a href={next ? next.href : '#'} aria-disabled={!next} class:list={["nav-btn nav-btn--accent", { disabled: !next }]}>
         Next →
       </a>
     </div>
   </nav>
 </section>
+
+<style>
+  .progress-rail {
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--surface-2);
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--clr-lossless-accent), var(--clr-lossless-primary-dark));
+    transition: width 220ms ease-out;
+  }
+
+  .sticky-bar {
+    /* Section-scoped footer (not page-fixed) */
+    position: static;
+    border-top: 1px solid var(--clr-lossless-ui-btn-border);
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 20%);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 -6px 20px color-mix(in oklab, black, transparent 92%);
+    margin-top: 0.5rem;
+  }
+
+  .nav-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.5rem 0.9rem; border-radius: 0.5rem; text-decoration: none;
+    font-size: var(--fs-300);
+    transition: transform 120ms ease, background 160ms ease, color 160ms ease, opacity 120ms ease;
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    user-select: none;
+  }
+  .nav-btn--ghost { color: var(--clr-body); background: var(--surface-2); }
+  .nav-btn--accent { color: var(--clr-heading); background: var(--clr-lossless-primary-glass); }
+  .nav-btn:hover { transform: translateY(-1px); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  .step-readout { color: color-mix(in oklab, var(--clr-body), black 10%); }
+</style>
