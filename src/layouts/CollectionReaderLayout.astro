@@ -203,6 +203,7 @@ if (effectiveEntry) {
     border-right: none;
     border-bottom: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
     padding: 1rem 0;
+    padding-top: 60px; /* Account for mobile TOC header */
     top: auto;
 
     box-sizing: border-box;
@@ -230,6 +231,7 @@ if (effectiveEntry) {
   
   .collection-reader-pane :global(.prose) {
     max-width: 100%;
+    padding-top: 0 !important; /* Remove padding-top when used in CollectionReaderLayout */
   }
 }
 

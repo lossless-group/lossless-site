@@ -171,7 +171,7 @@ if (DEBUG_TOC) {
   
   <div class="toc-scroll-area" id="toc-scroll-area">
     {tocItemsWithHasChildren.length > 0 ? (
-      <Fragment>
+      <div>
         <nav aria-label="Table of Contents">
           <ul class="toc-list">
             {tocItemsWithHasChildren.map((item, index) => {
@@ -225,7 +225,7 @@ if (DEBUG_TOC) {
         <div class="toc-progress-bar">
           <div class="toc-progress-fill" id="toc-progress-fill"></div>
         </div>
-      </Fragment>
+      </div>
     ) : (
       <div class="toc-empty-message">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
