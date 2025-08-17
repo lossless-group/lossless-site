@@ -505,7 +505,7 @@ class MobileTableOfContentsManager {
       console.log('[MobileTOC] Checking headings from bottom to top:');
       for (let i = this.headings.length - 1; i >= 0; i--) {
         const heading = this.headings[i];
-        const threshold = heading.top - 150;
+        const threshold = heading.top - 200; // Increased threshold to account for scroll margin
         console.log(`[MobileTOC] Heading ${i}: "${heading.id}" at position ${heading.top}, threshold: ${threshold}, scrollTop: ${scrollTop}`);
         
         if (scrollTop >= threshold) {
