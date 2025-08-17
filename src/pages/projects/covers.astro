@@ -72,6 +72,12 @@ const articles = {
 } as const;
 
 const currentArticle = articles[selected] ?? articles['workflow'];
+// Remove YAML frontmatter when using ?raw imports so it doesn't render in the page
+function stripFrontmatter(input: string): string {
+  if (!input) return input;
+  return input.replace(/^\uFEFF?\s*---[\s\S]*?\n---\s*/u, '');
+}
+const cleanedContent = stripFrontmatter(currentArticle.md);
 ---
 
 <Layout 
@@ -104,7 +110,7 @@ const currentArticle = articles[selected] ?? articles['workflow'];
           </article>
           <OneArticle
             Component={OneArticleOnPage}
-            content={currentArticle.md}
+            content={cleanedContent}
             markdownFile={currentArticle.id}
             data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
             title={currentArticle.title}

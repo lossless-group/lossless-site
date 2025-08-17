@@ -9,8 +9,14 @@ const data = {
   path: Astro.url.pathname,
   id: 'Augment-It/Specs/apps-microfrontends/RecordCollector.md'
 };
+// Remove YAML frontmatter from ?raw markdown
+function stripFrontmatter(input: string): string {
+  if (!input) return input;
+  return input.replace(/^\uFEFF?\s*---[\s\S]*?\n---\s*/u, '');
+}
+const cleaned = stripFrontmatter(md);
 ---
 
 <Layout title={`Augment-It • ${title}`} description={title}>
-  <OneArticle Component={OneArticleOnPage} content={md} markdownFile={data.id} data={data} title={title} />
+  <OneArticle Component={OneArticleOnPage} content={cleaned} markdownFile={data.id} data={data} title={title} />
 </Layout>
