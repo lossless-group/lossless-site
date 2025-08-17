@@ -13,6 +13,7 @@ import IconHeaderMessageCard from '@components/basics/messages/IconHeaderMessage
 import ToolingGallery from '@components/markdown/ToolingGallery.astro';
 import ClientReferenceSection from '@components/client-portals/ClientReferenceSection.astro';
 import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
+import NewsletterSubscription from '@components/basics/NewsletterSubscription.astro';
 
 // Utility imports
 import { getCollection } from "astro:content";
@@ -374,6 +375,9 @@ try {
           selectedConcepts={typeof selectedConcepts !== 'undefined' ? selectedConcepts : undefined}
         />
       </div>
+
+      <!-- Newsletter Subscription Section -->
+      <NewsletterSubscription />
 
       {toolGalleryTools.length > 0 && (
         <>

@@ -1,0 +1,426 @@
+---
+// Newsletter subscription component with Plunk integration
+import { PLUNK_API_KEY } from '@utils/envUtils';
+
+// Get the API key from environment
+const apiKey = PLUNK_API_KEY;
+---
+
+<section class="newsletter-section">
+  <div class="newsletter-container">
+    <div class="newsletter-content">
+      <h2 class="newsletter-title">Stay Updated</h2>
+      <p class="newsletter-description">
+        Subscribe to our newsletter for the latest AI insights and updates tailored for your organization.
+      </p>
+      
+      <form class="newsletter-form" id="newsletter-form" data-api-key={apiKey}>
+        <div class="form-group">
+          <input 
+            type="email" 
+            id="newsletter-email" 
+            name="email" 
+            placeholder="Enter your email address"
+            required
+            class="email-input"
+          />
+        </div>
+        
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              id="newsletter-subscribe" 
+              name="subscribed" 
+              checked
+              class="checkbox-input"
+            />
+            <span class="checkbox-custom"></span>
+            <span class="checkbox-text">Subscribe to non-critical and marketing emails</span>
+          </label>
+        </div>
+        
+        <button type="submit" class="subscribe-button">
+          <span class="button-text">Subscribe</span>
+          <span class="button-loading" style="display: none;">
+            <svg class="loading-spinner" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+              </circle>
+            </svg>
+          </span>
+        </button>
+      </form>
+      
+      <div class="newsletter-message" id="newsletter-message" style="display: none;"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('newsletter-form') as HTMLFormElement;
+    const emailInput = document.getElementById('newsletter-email') as HTMLInputElement;
+    const subscribeCheckbox = document.getElementById('newsletter-subscribe') as HTMLInputElement;
+    const submitButton = form?.querySelector('.subscribe-button') as HTMLButtonElement;
+    const buttonText = submitButton?.querySelector('.button-text') as HTMLElement;
+    const buttonLoading = submitButton?.querySelector('.button-loading') as HTMLElement;
+    const messageDiv = document.getElementById('newsletter-message') as HTMLElement;
+
+    if (!form) return;
+
+    // Get API key from data attribute
+    const apiKey = form.dataset.apiKey;
+
+    if (!apiKey) {
+      console.error('Plunk API key not found. Please check your environment configuration.');
+      return;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const subscribed = subscribeCheckbox.checked;
+      
+      if (!email) {
+        showMessage('Please enter a valid email address.', 'error');
+        return;
+      }
+
+      // Extract client from URL path if available
+      const pathSegments = window.location.pathname.split('/').filter(segment => segment);
+      const client = pathSegments[0] === 'client' && pathSegments[1] ? pathSegments[1] : null;
+
+      // Show loading state
+      setLoadingState(true);
+      
+        try {
+            const response = await fetch('https://api.useplunk.com/v1/track', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                event: 'newsletter-join',
+                email: email,
+                subscribed: subscribed,
+                data: {
+                  client: client
+                }
+              })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+              showMessage('Thank you for subscribing! You\'ll receive updates soon.', 'success');
+              form.reset();
+            } else {
+              showMessage('Something went wrong. Please try again.', 'error');
+            }
+          } catch (error) {
+              console.error('Newsletter subscription error:', error);
+              if (error.message?.includes('401') || error.message?.includes('403')) {
+                showMessage('Authentication error. Please contact support.', 'error');
+              } else {
+                showMessage('Unable to subscribe at the moment. Please try again later.', 'error');
+              }
+          } finally {
+              setLoadingState(false);
+          }
+    });
+
+    function setLoadingState(loading: boolean) {
+      if (submitButton && buttonText && buttonLoading) {
+        submitButton.disabled = loading;
+        buttonText.style.display = loading ? 'none' : 'inline';
+        buttonLoading.style.display = loading ? 'inline' : 'none';
+      }
+    }
+
+    function showMessage(text: string, type: 'success' | 'error') {
+      if (messageDiv) {
+        messageDiv.textContent = text;
+        messageDiv.className = `newsletter-message ${type}`;
+        messageDiv.style.display = 'block';
+        
+        // Auto-hide success messages after 5 seconds
+        if (type === 'success') {
+          setTimeout(() => {
+            messageDiv.style.display = 'none';
+          }, 5000);
+        }
+      }
+    }
+  });
+</script>
+
+<style>
+  .newsletter-section {
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, var(--clr-lossless-primary) 0%, var(--clr-lossless-accent) 50%, var(--clr-lossless-accent--brightest) 100%);
+    border-radius: 1rem;
+    margin: 3rem auto;
+    max-width: 800px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .newsletter-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    pointer-events: none;
+  }
+
+  .newsletter-container {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .newsletter-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .newsletter-title {
+    font-family: var(--ff-base);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-700);
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, var(--clr-lossless-accent--brightest) 0%, var(--clr-lossless-primary-light) 50%, var(--clr-lossless-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+
+  .newsletter-description {
+    font-family: var(--ff-legible);
+    font-size: var(--fs-450);
+    line-height: 1.6;
+    color: var(--clr-text-secondary, #cccccc);
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+
+  .newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .form-group {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .email-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--clr-text-primary, #ffffff);
+    font-size: var(--fs-400);
+    font-family: var(--ff-legible);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+  }
+
+  .email-input::placeholder {
+    color: var(--clr-text-secondary, #cccccc);
+    opacity: 0.7;
+  }
+
+  .email-input:focus {
+    outline: none;
+    border-color: var(--clr-lossless-accent--brightest, #ffffff);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    color: var(--clr-text-secondary, #cccccc);
+  }
+
+  .checkbox-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkbox-custom {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .checkbox-input:checked ~ .checkbox-custom {
+    background: var(--clr-lossless-accent--brightest, #ffffff);
+    border-color: var(--clr-lossless-accent--brightest, #ffffff);
+  }
+
+  .checkbox-input:checked ~ .checkbox-custom::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid var(--clr-lossless-primary, #1a1a1a);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-text {
+    user-select: none;
+  }
+
+  .subscribe-button {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+    color: #000000;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    font-family: var(--ff-legible);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-400);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 4px 15px rgba(255, 255, 255, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .subscribe-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 50%, #f8f9fa 100%);
+    box-shadow: 
+      0 8px 25px rgba(255, 255, 255, 0.4),
+      0 4px 15px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .subscribe-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .subscribe-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .newsletter-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-family: var(--ff-legible);
+    font-size: var(--fs-400);
+    font-weight: var(--fw-medium);
+  }
+
+  .newsletter-message.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+  }
+
+  .newsletter-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .newsletter-section {
+      padding: 3rem 1.5rem;
+      margin: 2rem 1rem;
+    }
+
+    .newsletter-title {
+      font-size: var(--fs-600);
+    }
+
+    .newsletter-description {
+      font-size: var(--fs-400);
+    }
+
+    .email-input {
+      padding: 0.875rem 1.25rem;
+      font-size: var(--fs-400);
+    }
+
+    .subscribe-button {
+      padding: 0.875rem 1.75rem;
+      font-size: var(--fs-400);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .newsletter-section {
+      padding: 2.5rem 1rem;
+    }
+
+    .newsletter-form {
+      gap: 1.25rem;
+    }
+
+    .checkbox-label {
+      font-size: var(--fs-350);
+    }
+  }
+</style>
