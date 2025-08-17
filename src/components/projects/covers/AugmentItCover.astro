@@ -1,0 +1,53 @@
+---
+/**
+ * AugmentItCover.astro
+ * Marketing cover for the Augment-It project.
+ * Accepts optional overrides for logoUrl, title, subtitle, useCases.
+ * Slot renders expanded project content (e.g., a content-section layout).
+ */
+
+import ProjectCoverBase from "./ProjectCoverBase.astro";
+
+interface UseCase { title: string; description: string; href?: string; iconUrl?: string }
+interface Props {
+  logoUrl?: string;
+  title?: string;
+  subtitle?: string;
+  useCases?: UseCase[];
+  ctaLabelCollapsed?: string;
+  ctaLabelExpanded?: string;
+}
+
+const {
+  logoUrl,
+  title = "Augment-It",
+  subtitle = "Augment any data by importing records or connecting to data sources.",
+  useCases = [
+    {
+      title: "Product Insights for R&D",
+      description:
+        "Generate insights about customers to inform product development decisions.",
+      href: "/projects/Augment-It/insights",
+    },
+    {
+      title: "Sales Intel, Just-in-Time",
+      description:
+        "Equip outside sales teams with richer customer context before meetings.",
+      href: "/projects/Augment-It/templates",
+    },
+  ],
+  ctaLabelCollapsed = "Open",
+  ctaLabelExpanded = "Close",
+}: Props = Astro.props;
+---
+
+<ProjectCoverBase
+  {logoUrl}
+  title={title}
+  subtitle={subtitle}
+  useCases={useCases}
+  ctaLabelCollapsed={ctaLabelCollapsed}
+  ctaLabelExpanded={ctaLabelExpanded}
+>
+  <slot />
+</ProjectCoverBase>

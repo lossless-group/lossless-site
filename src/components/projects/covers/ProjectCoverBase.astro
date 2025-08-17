@@ -1,0 +1,98 @@
+---
+/**
+ * ProjectCoverBase.astro
+ * A reusable marketing "cover" block for a project. Supports:
+ * - logoUrl?: string
+ * - title: string
+ * - subtitle?: string
+ * - useCases?: { title: string; description: string; href?: string; iconUrl?: string }[] (usually 2)
+ * Usage: place the project's content section(s) inside the default <slot />; it will render in the expanded area.
+ */
+
+interface UseCase { title: string; description: string; href?: string; iconUrl?: string }
+interface Props {
+  logoUrl?: string;
+  title: string;
+  subtitle?: string;
+  useCases?: UseCase[];
+  ctaLabelCollapsed?: string;
+  ctaLabelExpanded?: string;
+}
+
+const {
+  logoUrl,
+  title,
+  subtitle = "",
+  useCases = [],
+  ctaLabelCollapsed = "Open",
+  ctaLabelExpanded = "Close",
+}: Props = Astro.props;
+---
+
+<article class="project-cover card">
+  <header class="cover-hero">
+    {logoUrl && <img src={logoUrl} alt={title + ' logo'} width="56" height="56" class="cover-logo" />}
+    <div class="cover-titles">
+      <h2 class="cover-title">{title}</h2>
+      {subtitle && <p class="cover-subtitle">{subtitle}</p>}
+    </div>
+  </header>
+
+  {useCases.length > 0 && (
+    <div class="usecases">
+      {useCases.slice(0, 2).map((u) => (
+        <a href={u.href || '#'} class="usecase-card">
+          {u.iconUrl && <img src={u.iconUrl} alt="" width="28" height="28" class="usecase-icon" />}
+          <h3 class="usecase-title">{u.title}</h3>
+          <p class="usecase-desc">{u.description}</p>
+        </a>
+      ))}
+    </div>
+  )}
+
+  <details class="cover-expand">
+    <summary class="toggle">
+      <span class="toggle-label" data-collapsed={ctaLabelCollapsed} data-expanded={ctaLabelExpanded}></span>
+      <span class="chev" aria-hidden="true">▾</span>
+    </summary>
+
+    <div class="expanded">
+      <slot />
+    </div>
+  </details>
+</article>
+
+<style>
+  .project-cover { padding: 1rem; }
+  .cover-hero { display: flex; align-items: center; gap: 0.9rem; }
+  .cover-logo { border-radius: 8px; background: var(--surface-2); box-shadow: 0 2px 10px color-mix(in oklab, black, transparent 90%); }
+  .cover-titles { display: grid; gap: 0.2rem; }
+  .cover-title { margin: 0; font-size: clamp(1.25rem, 2.5vw, 1.6rem); color: var(--clr-heading); }
+  .cover-subtitle { margin: 0; color: var(--clr-body); opacity: 0.9; font-size: 0.95rem; }
+
+  .usecases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.9rem; }
+  .usecase-card {
+    display: grid; gap: 0.35rem; padding: 0.9rem; text-decoration: none;
+    color: var(--clr-heading);
+    background: var(--clr-lossless-primary-glass);
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 85%);
+    transition: transform 120ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+  .usecase-card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 80%); }
+  .usecase-icon { opacity: 0.9; }
+  .usecase-title { margin: 0; font-size: 1rem; }
+  .usecase-desc { margin: 0; color: var(--clr-body); opacity: 0.9; font-size: 0.9rem; }
+
+  .cover-expand { margin-top: 0.75rem; border-top: 1px dashed var(--clr-lossless-primary-light); padding-top: 0.6rem; }
+  .toggle { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid var(--clr-lossless-ui-btn-border); background: var(--surface-2); color: var(--clr-body); user-select: none; }
+  .toggle::-webkit-details-marker { display: none; }
+  .cover-expand[open] .toggle { color: var(--clr-heading); background: var(--clr-lossless-primary-glass); }
+  .toggle-label::before { content: attr(data-collapsed); }
+  .cover-expand[open] .toggle-label::before { content: attr(data-expanded); }
+  .chev { transition: transform 160ms ease; }
+  .cover-expand[open] .chev { transform: rotate(180deg); }
+
+  .expanded { margin-top: 0.8rem; }
+</style>
