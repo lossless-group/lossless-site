@@ -1,0 +1,16 @@
+---
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import md from '@generated/projects/Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md?raw';
+
+const title = 'Data Augmentation Workflow with Microfrontends';
+const data = {
+  path: Astro.url.pathname,
+  id: 'Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md'
+};
+---
+
+<Layout title={`Augment-It • ${title}`} description={title}>
+  <OneArticle Component={OneArticleOnPage} content={md} markdownFile={data.id} data={data} title={title} />
+</Layout>
