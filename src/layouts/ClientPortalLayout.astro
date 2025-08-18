@@ -13,6 +13,7 @@ import IconHeaderMessageCard from '@components/basics/messages/IconHeaderMessage
 import ToolingGallery from '@components/markdown/ToolingGallery.astro';
 import ClientReferenceSection from '@components/client-portals/ClientReferenceSection.astro';
 import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
+import NewsletterSubscription from '@components/basics/NewsletterSubscription.astro';
 
 // Utility imports
 import { getCollection } from "astro:content";
@@ -375,6 +376,9 @@ try {
         />
       </div>
 
+      <!-- Newsletter Subscription Section -->
+      <NewsletterSubscription />
+
       {toolGalleryTools.length > 0 && (
         <>
           <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
@@ -489,11 +493,15 @@ try {
   .tooling-section {
     padding: 0rem;
   }
+
+
 }
 
 .tooling-section {
   padding: 0rem 2rem;
 }
+
+
 
 .client-portal-cards-section {
   margin-bottom: 0;

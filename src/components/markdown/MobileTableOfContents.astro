@@ -1,0 +1,581 @@
+---
+import { DEBUG_TOC } from '@utils/envUtils';
+import { extractAllText, slugify } from '@utils/slugify';
+
+interface Props {
+  content: {
+    type?: string;
+    children?: any[];
+  };
+  effectiveHeading?: string;
+}
+
+interface HeadingItem {
+  text: string;
+  slug: string;
+  depth: number;
+  children?: HeadingItem[];
+}
+
+const { content, effectiveHeading } = Astro.props;
+
+// Debug logging
+if (DEBUG_TOC) {
+  console.log('[MobileTableOfContents] Raw content:', JSON.stringify(content, null, 2));
+  console.log('[MobileTableOfContents] Effective heading:', effectiveHeading);
+}
+
+// Extract H1 and H2 headings from the content with hierarchy
+function extractHeadings(contentNode): HeadingItem[] {
+  const headings: HeadingItem[] = [];
+  
+  // Add the main page title if it exists
+  if (effectiveHeading && effectiveHeading.trim()) {
+    headings.push({
+      text: effectiveHeading.trim(),
+      slug: slugify(effectiveHeading.trim()),
+      depth: 1
+    });
+  }
+  
+  // Recursively find all H1 and H2 headings in the content
+  function traverse(node: any) {
+    if (!node || typeof node !== 'object') return;
+    
+    // Check if this is an H1 or H2 heading
+    if (node.type === 'heading' && (node.depth === 1 || node.depth === 2)) {
+      const text = extractAllText(node.children || []);
+      if (text.trim()) {
+        const slug = slugify(text.trim());
+        // Avoid duplicates with the main title
+        if (!effectiveHeading || slug !== slugify(effectiveHeading.trim())) {
+          headings.push({
+            text: text.trim(),
+            slug,
+            depth: node.depth
+          });
+        }
+      }
+    }
+    
+    // Recursively traverse children
+    if (Array.isArray(node.children)) {
+      node.children.forEach(traverse);
+    }
+  }
+  
+  traverse(contentNode);
+  
+  if (DEBUG_TOC) {
+    console.log('[MobileTableOfContents] Extracted headings:', headings);
+  }
+  
+  return headings;
+}
+
+const headings = extractHeadings(content);
+
+// Only show the component if we have headings
+const hasHeadings = headings.length > 0;
+---
+
+{hasHeadings && (
+  <div class="mobile-toc-container">
+    <div class="mobile-toc-dropdown">
+      <button class="mobile-toc-toggle" id="mobile-toc-toggle" aria-expanded="false" aria-haspopup="true">
+        <span class="mobile-toc-label">On this page</span>
+        <svg class="mobile-toc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6,9 12,15 18,9"></polyline>
+        </svg>
+      </button>
+      
+      <div class="mobile-toc-menu" id="mobile-toc-menu" role="menu" aria-labelledby="mobile-toc-toggle">
+        <nav aria-label="Mobile Table of Contents">
+          <ul class="mobile-toc-list">
+            {headings.map((heading, index) => (
+              <li class={`mobile-toc-item mobile-toc-depth-${heading.depth}`}>
+                <a 
+                  href={`#${heading.slug}`} 
+                  class="mobile-toc-link"
+                  data-slug={heading.slug}
+                  title={heading.text}
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+/* Mobile Table of Contents Styles */
+.mobile-toc-container {
+  display: none; /* Hidden by default, shown only on mobile */
+  position: fixed;
+  top: 60px; /* Offset to account for site header */
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0 1rem;
+  background: var(--clr-primary-bg);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-toc-dropdown {
+  position: relative;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.mobile-toc-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--clr-primary-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--clr-lossless-primary-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.mobile-toc-toggle:hover {
+  border-color: var(--clr-lossless-accent--brightest);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-toc-toggle[aria-expanded="true"] {
+  border-color: var(--clr-lossless-accent--brightest);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-toc-label {
+  font-weight: 500;
+  color: var(--clr-lossless-accent--brightest);
+}
+
+.mobile-toc-chevron {
+  color: var(--clr-lossless-primary-light);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mobile-toc-toggle[aria-expanded="true"] .mobile-toc-chevron {
+  transform: rotate(180deg);
+}
+
+.mobile-toc-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--clr-primary-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.mobile-toc-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.mobile-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.mobile-toc-item {
+  margin: 0;
+}
+
+.mobile-toc-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--clr-lossless-primary-light);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-left: 3px solid transparent;
+}
+
+.mobile-toc-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: var(--clr-lossless-accent--brightest);
+}
+
+.mobile-toc-link.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border-left-color: var(--clr-lossless-accent--brightest);
+  font-weight: 600;
+}
+
+/* Depth-based styling for H1 and H2 headings */
+.mobile-toc-depth-1 .mobile-toc-link {
+  font-weight: 500;
+  padding-left: 1rem;
+  font-size: 0.9rem;
+}
+
+.mobile-toc-depth-2 .mobile-toc-link {
+  font-size: 0.85rem;
+  padding-left: 2rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* Scrollbar styling for the dropdown menu */
+.mobile-toc-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mobile-toc-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-toc-menu::-webkit-scrollbar-thumb {
+  background: var(--clr-lossless-accent--brightest);
+  border-radius: 2px;
+}
+
+/* Show only on mobile devices (below 1024px) */
+@media (max-width: 1024px) {
+  .mobile-toc-container {
+    display: block;
+  }
+  
+  /* Add padding to the content to account for the fixed mobile TOC */
+  .content-inner {
+    padding-top: 140px; /* 80px for site header + ~60px for mobile TOC */
+  }
+}
+
+/* Focus styles for accessibility */
+.mobile-toc-toggle:focus {
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: 2px;
+}
+
+.mobile-toc-link:focus {
+  outline: 2px solid var(--clr-lossless-accent--brightest);
+  outline-offset: -2px;
+}
+</style>
+
+<script>
+class MobileTableOfContentsManager {
+  private toggle: HTMLElement | null;
+  private menu: HTMLElement | null;
+  private links: NodeListOf<Element> | null;
+  private headings: Array<{element: Element, id: string, top: number}>;
+  private currentActiveLink: HTMLElement | null;
+  private isOpen: boolean = false;
+
+  constructor() {
+    this.toggle = document.getElementById('mobile-toc-toggle');
+    this.menu = document.getElementById('mobile-toc-menu');
+    this.links = this.menu?.querySelectorAll('.mobile-toc-link') || null;
+    this.headings = [];
+    this.currentActiveLink = null;
+    
+    if (this.toggle && this.menu) {
+      this.init();
+    }
+  }
+
+  init() {
+    console.log('[MobileTOC] Initializing MobileTableOfContentsManager');
+    this.collectHeadings();
+    this.setupEventListeners();
+    this.updateActiveLink();
+  }
+
+  collectHeadings() {
+    console.log('[MobileTOC] collectHeadings() called');
+    
+    // Collect all H1 and H2 headings that have IDs
+    const headingElements = document.querySelectorAll('h1[id], h2[id]');
+    console.log('[MobileTOC] Found heading elements:', headingElements.length);
+    
+    this.headings = Array.from(headingElements)
+      .map(heading => ({
+        element: heading,
+        id: heading.id,
+        top: 0
+      }));
+    
+    console.log('[MobileTOC] Collected headings:', this.headings.map(h => h.id));
+    
+    this.updateHeadingPositions();
+  }
+
+  updateHeadingPositions() {
+    console.log('[MobileTOC] updateHeadingPositions() called');
+    
+    // Always use window-based calculation since collection-reader-pane is not scrollable
+    this.headings.forEach((heading, index) => {
+      heading.top = heading.element.getBoundingClientRect().top + window.scrollY;
+      console.log(`[MobileTOC] Heading ${index} "${heading.id}": top=${heading.top} (window-based)`);
+    });
+  }
+
+  setupEventListeners() {
+    // Toggle dropdown functionality
+    this.toggle?.addEventListener('click', () => {
+      this.toggleDropdown();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (this.toggle && !this.toggle.contains(e.target as Node) && 
+          this.menu && !this.menu.contains(e.target as Node)) {
+        this.closeDropdown();
+      }
+    });
+
+    // Smooth scrolling for mobile TOC links
+    this.links?.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        
+        if (href && href.startsWith('#')) {
+          const id = href.substring(1);
+          const element = document.getElementById(id);
+          
+          if (element) {
+            // Add scroll margin for mobile fixed header
+            element.style.scrollMarginTop = '160px'; /* 80px site header + 80px mobile TOC */
+            
+            // Smooth scroll to element
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.history.replaceState(null, null, href);
+            
+            // Close dropdown after clicking
+            this.closeDropdown();
+          }
+        }
+      });
+    });
+
+    // Scroll tracking with requestAnimationFrame for smooth updates
+    let scrollTimeout: ReturnType<typeof requestAnimationFrame>;
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    
+    console.log('[MobileTOC] Setting up scroll listeners...');
+    console.log('[MobileTOC] Collection reader pane found:', !!collectionReaderPane);
+    
+    if (collectionReaderPane) {
+      console.log('[MobileTOC] Adding scroll listener to collection-reader-pane');
+      console.log('[MobileTOC] Collection reader pane scrollHeight:', collectionReaderPane.scrollHeight);
+      console.log('[MobileTOC] Collection reader pane clientHeight:', collectionReaderPane.clientHeight);
+      console.log('[MobileTOC] Collection reader pane is scrollable:', collectionReaderPane.scrollHeight > collectionReaderPane.clientHeight);
+      
+      collectionReaderPane.addEventListener('scroll', () => {
+        console.log('[MobileTOC] Collection reader pane scroll event fired');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          console.log('[MobileTOC] Scroll animation frame triggered, calling updateActiveLink');
+          this.updateActiveLink();
+        });
+      }, { passive: true });
+      
+      // Also add a window scroll listener as backup
+      console.log('[MobileTOC] Adding backup window scroll listener');
+      window.addEventListener('scroll', () => {
+        console.log('[MobileTOC] Window scroll event fired (backup)');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          console.log('[MobileTOC] Scroll animation frame triggered, calling updateActiveLink');
+          this.updateActiveLink();
+        });
+      }, { passive: true });
+    } else {
+      // Fallback to window scroll
+      console.log('[MobileTOC] Adding scroll listener to window (fallback)');
+      window.addEventListener('scroll', () => {
+        console.log('[MobileTOC] Window scroll event fired');
+        if (scrollTimeout) {
+          cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(() => {
+          console.log('[MobileTOC] Scroll animation frame triggered, calling updateActiveLink');
+          this.updateActiveLink();
+        });
+      }, { passive: true });
+    }
+    
+
+
+    // Update positions on resize
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        this.updateHeadingPositions();
+        this.updateActiveLink();
+      }, 100);
+    });
+  }
+
+  toggleDropdown() {
+    if (this.isOpen) {
+      this.closeDropdown();
+    } else {
+      this.openDropdown();
+    }
+  }
+
+  openDropdown() {
+    if (this.toggle && this.menu) {
+      this.toggle.setAttribute('aria-expanded', 'true');
+      this.menu.classList.add('open');
+      this.isOpen = true;
+    }
+  }
+
+  closeDropdown() {
+    if (this.toggle && this.menu) {
+      this.toggle.setAttribute('aria-expanded', 'false');
+      this.menu.classList.remove('open');
+      this.isOpen = false;
+    }
+  }
+
+  updateActiveLink() {
+    console.log('[MobileTOC] updateActiveLink() called');
+    console.log('[MobileTOC] Headings count:', this.headings.length);
+    console.log('[MobileTOC] Links count:', this.links?.length || 0);
+    
+    if (!this.headings.length || !this.links) {
+      console.log('[MobileTOC] No headings or links found, returning early');
+      return;
+    }
+
+    // Get the scroll container - use window since collection-reader-pane is not scrollable
+    const collectionReaderPane = document.querySelector('.collection-reader-pane');
+    const scrollContainer = window; // Always use window for scroll position
+    
+    const scrollTop = window.scrollY;
+    const viewportHeight = window.innerHeight;
+    
+    console.log('[MobileTOC] Using window scroll container');
+    console.log('[MobileTOC] Scroll top:', scrollTop);
+    console.log('[MobileTOC] Viewport height:', viewportHeight);
+    
+    // Find the currently visible heading
+    let activeHeading = null;
+    
+    // Check if we're at the bottom of the page
+    const scrollHeight = document.documentElement.scrollHeight;
+    console.log('[MobileTOC] Scroll height:', scrollHeight);
+    console.log('[MobileTOC] Scroll top + viewport height:', scrollTop + viewportHeight);
+    
+    if (scrollTop + viewportHeight >= scrollHeight - 10) {
+      activeHeading = this.headings[this.headings.length - 1];
+      console.log('[MobileTOC] At bottom of page, using last heading:', activeHeading?.id);
+    } else {
+      // Find the heading that's currently in view or just passed
+      console.log('[MobileTOC] Checking headings from bottom to top:');
+      for (let i = this.headings.length - 1; i >= 0; i--) {
+        const heading = this.headings[i];
+        const threshold = heading.top - 200; // Increased threshold to account for scroll margin
+        console.log(`[MobileTOC] Heading ${i}: "${heading.id}" at position ${heading.top}, threshold: ${threshold}, scrollTop: ${scrollTop}`);
+        
+        if (scrollTop >= threshold) {
+          activeHeading = heading;
+          console.log('[MobileTOC] Found active heading:', activeHeading.id);
+          break;
+        }
+      }
+    }
+
+    console.log('[MobileTOC] Active heading found:', activeHeading?.id || 'none');
+
+    // Update active link and label
+    if (activeHeading) {
+      const activeLink = this.menu?.querySelector(`[data-slug="${activeHeading.id}"]`) as HTMLElement | null;
+      console.log('[MobileTOC] Active link found:', !!activeLink, 'for slug:', activeHeading.id);
+      
+      if (activeLink !== this.currentActiveLink) {
+        console.log('[MobileTOC] Active link changed, updating...');
+        
+        // Remove previous active state
+        if (this.currentActiveLink) {
+          console.log('[MobileTOC] Removing active class from:', this.currentActiveLink.textContent);
+          this.currentActiveLink.classList.remove('active');
+        }
+        
+        // Add new active state
+        if (activeLink) {
+          console.log('[MobileTOC] Adding active class to:', activeLink.textContent);
+          activeLink.classList.add('active');
+        }
+        
+        this.currentActiveLink = activeLink;
+        
+        // Update the mobile TOC label to show the active heading
+        const mobileTocLabel = this.toggle?.querySelector('.mobile-toc-label');
+        if (mobileTocLabel && activeLink) {
+          const headingText = activeLink.textContent?.trim();
+          if (headingText) {
+            console.log('[MobileTOC] Updating label to:', headingText);
+            mobileTocLabel.textContent = headingText;
+          }
+        }
+      } else {
+        console.log('[MobileTOC] Active link unchanged');
+      }
+    } else {
+      console.log('[MobileTOC] No active heading found, clearing active state');
+      if (this.currentActiveLink) {
+        console.log('[MobileTOC] Removing active class from current link');
+        this.currentActiveLink.classList.remove('active');
+        this.currentActiveLink = null;
+      }
+      
+      // Reset the label to default
+      const mobileTocLabel = this.toggle?.querySelector('.mobile-toc-label');
+      if (mobileTocLabel) {
+        console.log('[MobileTOC] Resetting label to default');
+        mobileTocLabel.textContent = 'On this page';
+      }
+    }
+  }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    new MobileTableOfContentsManager();
+  });
+} else {
+  new MobileTableOfContentsManager();
+}
+</script>

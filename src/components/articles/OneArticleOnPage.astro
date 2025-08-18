@@ -1,11 +1,12 @@
 ---
 import AstroMarkdown from '@components/markdown/AstroMarkdown.astro';
 import TableOfContents from '@components/markdown/TableOfContents.astro';
+import MobileTableOfContents from '@components/markdown/MobileTableOfContents.astro';
 import type { Root } from 'mdast';
 import { slugify } from '@utils/slugify'; // Corrected import path
 import CopyLinkButton from '@components/markdown/CopyLinkButton.astro';
 import InfoSidebar from '@components/markdown/InfoSidebar.astro';
-import { formatDate } from '../../utils/formatDate.ts';
+import { formatDate } from '../../utils/formatDate';
 import { DEBUG_ARTICLE } from '@utils/envUtils';
 
 const shareIconPath = '/src/assets/Icons/share.svg';
@@ -208,6 +209,9 @@ const hasArticleInfo =
       />
     )}
   <div class="content-inner">
+    {/* Mobile Table of Contents - only visible below 1024px */}
+    <MobileTableOfContents content={safeContent} effectiveHeading={effectiveHeading} />
+    
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
       {/* Render the main page title with share icon if effectiveHeading is provided */}
@@ -561,6 +565,7 @@ const hasArticleInfo =
     
     .prose {
       max-width: 100%;
+      padding-top: 100px; /* Account for mobile TOC header */
     }
   }
 

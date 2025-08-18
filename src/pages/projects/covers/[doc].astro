@@ -18,11 +18,14 @@ import mdApiConnectorService from '@generated/projects/Augment-It/Specs/shared-s
 export async function getStaticPaths() {
   // Pre-render known document routes under /projects/covers/
   const docs = [
+    'workflow',
     'record-collector',
+    'review-enrich-records',
     'prompt-template-manager',
     'api-connector-service',
     'request-reviewer',
     'highlight-collector',
+    'sync',
   ];
   return docs.map((doc) => ({ params: { doc } }));
 }
@@ -30,14 +33,14 @@ export async function getStaticPaths() {
 const selected = Astro.params.doc || 'workflow';
 
 const demoSteps = [
-  { title: 'Data Augmentation Workflow with Microfrontends', href: '/projects/covers' },
+  { title: 'Data Augmentation Workflow with Microfrontends', href: '/projects/covers/workflow' },
   { title: 'Load Data', href: '/projects/covers/record-collector' },
-  { title: 'Review & Enrich Records', href: '/projects/covers/record-collector' },
+  { title: 'Review & Enrich Records', href: '/projects/covers/review-enrich-records' },
   { title: 'Author Prompt Templates', href: '/projects/covers/prompt-template-manager' },
   { title: 'Choose AI Augmentation Option', href: '/projects/covers/api-connector-service' },
   { title: 'Review Request & Response', href: '/projects/covers/request-reviewer' },
   { title: 'Generate Insights', href: '/projects/covers/highlight-collector' },
-  { title: 'Sync Back to Source', href: '/projects/Augment-It/sync' },
+  { title: 'Sync Back to Source', href: '/projects/covers/sync' },
 ];
 
 const currentHref = selected === 'workflow'
@@ -54,6 +57,11 @@ const articles = {
     md: mdRecordCollector,
     id: 'Augment-It/Specs/apps-microfrontends/RecordCollector.md',
     title: 'Load Data — RecordCollector',
+  },
+  'review-enrich-records': {
+    md: mdRecordCollector, // Using same content for now
+    id: 'Augment-It/Specs/apps-microfrontends/RecordCollector.md',
+    title: 'Review & Enrich Records',
   },
   'prompt-template-manager': {
     md: mdPromptTemplateManager,
@@ -75,6 +83,11 @@ const articles = {
     id: 'Augment-It/Specs/shared-services/apiConnectorService.md',
     title: 'Choose AI Augmentation Option — apiConnectorService',
   },
+  'sync': {
+    md: mdWorkflow, // Using workflow content for now
+    id: 'Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md',
+    title: 'Sync Back to Source',
+  },
 } as const;
 
 const currentArticle = articles[selected] ?? articles['workflow'];
@@ -90,51 +103,92 @@ const cleanedContent = stripFrontmatter(currentArticle.md);
   title="Our Lossless Projects" 
   description="Explore our innovative projects and interactive visualizations"
 >
-  <div class="projects-page-container">
-    <AnimationWrapper>
-      <Hero
-        title="Our Lossless Projects"
-        subtitle="Innovation in Action"
-        description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
-        alignment="center"
-        fullBleed={false}
-        animate={true}
-        style="margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+  <!-- Full-page document view that takes over entire layout -->
+  <div class="doc-fullpage-takeover">
+    <nav class="doc-nav">
+      <a class="back-link" href="/projects/covers">← Back to covers</a>
+      <button 
+        type="button" 
+        class="collapse-btn" 
+        aria-label="Close expanded content"
+        onclick="window.location.href='/projects/covers'"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </nav>
+    <ContentSection_SidebarTreeVariantB steps={demoSteps} {currentHref} seriesTitle="Augment-It">
+      <OneArticle
+        Component={OneArticleOnPage}
+        content={cleanedContent}
+        markdownFile={currentArticle.id}
+        data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
+        title={currentArticle.title}
       />
-    </AnimationWrapper>
-
-    <!-- Full-page document view (no marketing cover) -->
-    <section class="doc-fullpage">
-      <nav class="doc-nav">
-        <a class="back-link" href="/projects/covers">← Back to covers</a>
-      </nav>
-      <ContentSection_SidebarTreeVariantB steps={demoSteps} {currentHref} seriesTitle="Augment-It">
-        <OneArticle
-          Component={OneArticleOnPage}
-          content={cleanedContent}
-          markdownFile={currentArticle.id}
-          data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
-          title={currentArticle.title}
-        />
-      </ContentSection_SidebarTreeVariantB>
-    </section>
-
-    <!-- Existing projects container -->
-    <Section__Project_Container title="Projects" />
+    </ContentSection_SidebarTreeVariantB>
   </div>
 </Layout>
 
 <style>
-  .projects-page-container {
+  .doc-fullpage-takeover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--surface-1, #1a1a1a);
+    z-index: 1000;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-6, 1.5rem);
-    margin: 2rem auto;
-    padding: 0 var(--spacing-4, 1rem);
-    width: 100%;
   }
-  .doc-fullpage { display: grid; gap: 0.75rem; }
-  .doc-nav { display: flex; justify-content: flex-start; }
-  .back-link { text-decoration: none; font-size: 0.95rem; color: var(--clr-body); border: 1px solid var(--clr-lossless-ui-btn-border); padding: 0.35rem 0.6rem; border-radius: 8px; background: var(--surface-2); }
-  .back-link:hover { color: var(--clr-heading); background: var(--clr-lossless-primary-glass); }
+  
+  .doc-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border);
+    background: var(--surface-2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .back-link {
+    text-decoration: none;
+    font-size: 0.95rem;
+    color: var(--clr-body);
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+    background: var(--surface-2);
+  }
+  
+  .back-link:hover {
+    color: var(--clr-heading);
+    background: var(--clr-lossless-primary-glass);
+  }
+  
+  .collapse-btn {
+    background: none;
+    border: none;
+    color: var(--clr-body);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: color 160ms ease, background 160ms ease;
+  }
+  
+  .collapse-btn:hover {
+    color: var(--clr-heading);
+    background: var(--clr-lossless-primary-glass);
+  }
+  
+  .collapse-btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: block;
+  }
 </style>

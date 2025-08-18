@@ -4,8 +4,7 @@ import markdownDebugger from './markdownDebugger';
 import { transformContentPathToRoute } from '../routing/routeManager';
 import { DEBUG_BACKLINKS } from '../envUtils';
 import { slugify } from '../slugify';
-// Match [[...]] but skip if it's a visual path
-const backlinkRegex = /\[\[((?!.*?visuals).*?)(?:\|(.*?))?\]\]/gi;
+import { backlinkRegex } from './backlinkUtils';
 
 /**
  * Transform wiki-style backlinks [[Page]] into markdown links

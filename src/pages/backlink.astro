@@ -1,0 +1,140 @@
+---
+// This page needs to be SSR to access query parameters
+export const prerender = false;
+
+import { transformContentPathToRoute } from '../utils/routing/routeManager';
+import { slugify } from '../utils/slugify';
+import { DEBUG_BACKLINKS } from '../utils/envUtils';
+import { extractBacklinkPath, isBacklink } from '../utils/markdown/backlinkUtils';
+
+// Get the query parameter from the URL
+const query = Astro.url.searchParams.get('query');
+
+let redirectUrl = '/404';
+let errorMessage = '';
+
+if (query) {
+  if (DEBUG_BACKLINKS) {
+    console.log('[backlink.astro] Processing query:', query);
+  }
+
+  // Check if the query is already in backlink format
+  if (isBacklink(query)) {
+    // Extract the path from the backlink
+    const path = extractBacklinkPath(query);
+    
+    if (DEBUG_BACKLINKS) {
+      console.log('[backlink.astro] Extracted path from backlink:', path);
+    }
+
+    // Use the route manager to transform the path
+    const transformedPath = transformContentPathToRoute(path);
+    
+    // Slugify the URL path segments to ensure proper kebab-case URLs
+    const slugifiedUrl = transformedPath.split('/').map((segment, index) => {
+      // Don't slugify the first empty segment (from leading slash)
+      if (index === 0 || !segment) return segment;
+      return slugify(segment);
+    }).join('/');
+    
+    redirectUrl = slugifiedUrl;
+    
+    if (DEBUG_BACKLINKS) {
+      console.log('[backlink.astro] Redirecting to:', redirectUrl);
+    }
+  } else {
+    // If not in backlink format, treat the query as a direct path
+    if (DEBUG_BACKLINKS) {
+      console.log('[backlink.astro] Query not in backlink format, treating as direct path:', query);
+    }
+    
+    const transformedPath = transformContentPathToRoute(query);
+    
+    const slugifiedUrl = transformedPath.split('/').map((segment, index) => {
+      if (index === 0 || !segment) return segment;
+      return slugify(segment);
+    }).join('/');
+    
+    redirectUrl = slugifiedUrl;
+    
+    if (DEBUG_BACKLINKS) {
+      console.log('[backlink.astro] Redirecting to:', redirectUrl);
+    }
+  }
+} else {
+  errorMessage = 'No query parameter provided. Use ?query=[[Page Name]] or ?query=path/to/page';
+}
+
+// If we have a valid redirect URL, perform the redirect
+if (redirectUrl && redirectUrl !== '/404') {
+  return Astro.redirect(redirectUrl);
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backlink Redirect - Lossless</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .error {
+      background: #fee;
+      border: 1px solid #fcc;
+      padding: 20px;
+      border-radius: 8px;
+      color: #c33;
+    }
+    .info {
+      background: #eef;
+      border: 1px solid #ccf;
+      padding: 20px;
+      border-radius: 8px;
+      color: #33c;
+    }
+    .example {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: monospace;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Backlink Redirect</h1>
+  
+    {errorMessage ? (
+    <div class="error">
+      <h2>Error</h2>
+      <p>{errorMessage}</p>
+    </div>
+  ) : (
+    <div class="info">
+      <h2>Redirecting...</h2>
+      <p>If you're not automatically redirected, <a href={redirectUrl}>click here</a>.</p>
+    </div>
+  )}
+  
+  <div class="info">
+    <h3>Usage Examples:</h3>
+    <div class="example">
+      /backlink?query=[[Agentic AI]]
+    </div>
+    <div class="example">
+      /backlink?query=[[tooling/Explainers For AI/AI Hallucinations]]
+    </div>
+    <div class="example">
+      /backlink?query=[[vocabulary/Software Development]]
+    </div>
+  </div>
+</body>
+</html>
