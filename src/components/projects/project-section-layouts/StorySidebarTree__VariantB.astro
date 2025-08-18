@@ -100,6 +100,8 @@ const { steps = null, currentHref = '', seriesTitle = 'Augment-It' } = Astro.pro
 
   /* Tree base */
   .tree-nav { list-style: none; padding-left: 0; margin: 0; }
+  .tree-nav li { list-style: none; }
+  .tree-nav li::marker { display: none; }
   .tree-nav li + li { margin-top: 0.35rem; }
   .tree-branch { padding-left: 1rem; margin-top: 0.25rem; border-left: 3px solid var(--clr-lossless-primary-light); }
   .tree-branch.tree-branch--active { border-left-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 10%); }

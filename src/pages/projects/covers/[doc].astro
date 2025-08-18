@@ -18,11 +18,14 @@ import mdApiConnectorService from '@generated/projects/Augment-It/Specs/shared-s
 export async function getStaticPaths() {
   // Pre-render known document routes under /projects/covers/
   const docs = [
+    'workflow',
     'record-collector',
+    'review-enrich-records',
     'prompt-template-manager',
     'api-connector-service',
     'request-reviewer',
     'highlight-collector',
+    'sync',
   ];
   return docs.map((doc) => ({ params: { doc } }));
 }
@@ -30,14 +33,14 @@ export async function getStaticPaths() {
 const selected = Astro.params.doc || 'workflow';
 
 const demoSteps = [
-  { title: 'Data Augmentation Workflow with Microfrontends', href: '/projects/covers' },
+  { title: 'Data Augmentation Workflow with Microfrontends', href: '/projects/covers/workflow' },
   { title: 'Load Data', href: '/projects/covers/record-collector' },
-  { title: 'Review & Enrich Records', href: '/projects/covers/record-collector' },
+  { title: 'Review & Enrich Records', href: '/projects/covers/review-enrich-records' },
   { title: 'Author Prompt Templates', href: '/projects/covers/prompt-template-manager' },
   { title: 'Choose AI Augmentation Option', href: '/projects/covers/api-connector-service' },
   { title: 'Review Request & Response', href: '/projects/covers/request-reviewer' },
   { title: 'Generate Insights', href: '/projects/covers/highlight-collector' },
-  { title: 'Sync Back to Source', href: '/projects/Augment-It/sync' },
+  { title: 'Sync Back to Source', href: '/projects/covers/sync' },
 ];
 
 const currentHref = selected === 'workflow'
@@ -54,6 +57,11 @@ const articles = {
     md: mdRecordCollector,
     id: 'Augment-It/Specs/apps-microfrontends/RecordCollector.md',
     title: 'Load Data — RecordCollector',
+  },
+  'review-enrich-records': {
+    md: mdRecordCollector, // Using same content for now
+    id: 'Augment-It/Specs/apps-microfrontends/RecordCollector.md',
+    title: 'Review & Enrich Records',
   },
   'prompt-template-manager': {
     md: mdPromptTemplateManager,
@@ -74,6 +82,11 @@ const articles = {
     md: mdApiConnectorService,
     id: 'Augment-It/Specs/shared-services/apiConnectorService.md',
     title: 'Choose AI Augmentation Option — apiConnectorService',
+  },
+  'sync': {
+    md: mdWorkflow, // Using workflow content for now
+    id: 'Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md',
+    title: 'Sync Back to Source',
   },
 } as const;
 
