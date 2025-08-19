@@ -1,6 +1,10 @@
+
 <script lang="ts">
   import { onMount } from 'svelte';
-  import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
+  
+  // SVG icons as strings for Svelte
+  const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/></svg>`;
+  const collapseIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="m3 3 5 5"/><path d="M8 21v-3a2 2 0 0 1 2-2h3"/><path d="m16 16 5 5"/><path d="M16 3v3a2 2 0 0 0 2 2h3"/><path d="m21 3-5 5"/><path d="M8 21v-3a2 2 0 0 0-2-2H3"/><path d="m3 21 5-5"/></svg>`;
   
   interface UseCase {
     title: string;
@@ -21,6 +25,10 @@
   let expandedProject: string | null = null;
   let isFullPageView = false;
   let isClosing = false;
+
+  // Track the currently expanded project
+  let currentProject: Project | null = null;
+  $: currentProject = projects.find(p => p.id === expandedProject) ?? null;
   
   function toggleProject(projectId: string) {
     if (expandedProject === projectId) {
@@ -51,6 +59,12 @@
     expandedProject = null;
     isFullPageView = false;
     document.body.style.overflow = 'auto';
+  }
+  
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      closeProject();
+    }
   }
   
   onMount(() => {
@@ -92,34 +106,40 @@
             {expandedProject === project.id ? 'Close' : 'Open'}
           </span>
           <span class="chev" aria-hidden="true">
-            {expandedProject === project.id ? '✕' : '↗'}
+            {#if expandedProject === project.id}
+              {@html collapseIcon}
+            {:else}
+              {@html expandIcon}
+            {/if}
           </span>
         </button>
       </div>
     </article>
   {/each}
 </section>
-
 <!-- Full Page Project Overlay -->
 {#if isFullPageView && expandedProject}
-  {@const currentProject = projects.find(p => p.id === expandedProject)}
-  <div class="project-overlay" role="dialog" aria-modal="true" tabindex="-1" on:click={closeProject} on:keydown={(e) => e.key === 'Escape' && closeProject()}>
-    <div class="project-content" role="document" on:click|stopPropagation on:keydown|stopPropagation>
+  <div class="project-overlay" role="dialog" aria-modal="true">
+    <button 
+      class="overlay-backdrop" 
+      aria-label="Close project overlay"
+      on:click={closeProject}
+      on:keydown={handleKeydown}
+    ></button>
+    <div class="project-content" role="document">
       <button 
         type="button"
         class="mermaid-modal-close-btn"
         aria-label="Close expanded content"
         on:click={closeProject}
       >
-        <CollapseIcon />
+        {@html collapseIcon}
       </button>
-      
       <div class="project-full-content">
         {#if currentProject}
           <div id="augment-it-content" style="display: {expandedProject === 'augment-it' ? 'block' : 'none'}">
             <!-- Augment-It specific content will be injected here -->
           </div>
-          
           {#if expandedProject !== 'augment-it'}
             <div class="placeholder-content">
               <h1>{currentProject.title}</h1>
@@ -177,21 +197,6 @@
     margin-bottom: 0.5rem;
   }
   
-  .cover-logo { 
-    border-radius: 12px; 
-    background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%);
-    box-shadow: 
-      0 4px 16px color-mix(in oklab, black, transparent 85%),
-      inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
-    transition: transform 200ms ease, box-shadow 200ms ease;
-  }
-  
-  .cover-logo:hover {
-    transform: scale(1.05);
-    box-shadow: 
-      0 6px 24px color-mix(in oklab, black, transparent 80%),
-      inset 0 1px 0 color-mix(in oklab, white, transparent 85%);
-  }
   
   .cover-titles { display: grid; gap: 0.4rem; }
   
@@ -348,13 +353,24 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
     animation: fadeIn 0.3s ease-out;
+  }
+  
+  .overlay-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    border: none;
+    cursor: pointer;
+    z-index: 1;
   }
   
   @keyframes fadeIn {
@@ -385,6 +401,7 @@
     overflow: hidden;
     position: relative;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 2;
   }
   
   .mermaid-modal-close-btn {
