@@ -1,0 +1,174 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/basics/Hero.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import Section__Project_Container from '@components/projects/Section__Project-Container.astro';
+
+import AugmentItCover from '@components/projects/covers/AugmentItCover.astro';
+import ContentSection_SidebarTreeVariantB from '@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+
+import mdWorkflow from '@generated/projects/Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md?raw';
+import mdRecordCollector from '@generated/projects/Augment-It/Specs/apps-microfrontends/RecordCollector.md?raw';
+import mdPromptTemplateManager from '@generated/projects/Augment-It/Specs/apps-microfrontends/PromptTemplateManager.md?raw';
+import mdRequestReviewer from '@generated/projects/Augment-It/Specs/apps-microfrontends/RequestReviewer.md?raw';
+import mdHighlightCollector from '@generated/projects/Augment-It/Specs/apps-microfrontends/HighlightCollector.md?raw';
+import mdApiConnectorService from '@generated/projects/Augment-It/Specs/shared-services/apiConnectorService.md?raw';
+
+// Shared demo steps for potential wiring later
+const docParam = Astro.url.searchParams.get('doc');
+if (docParam) {
+  return Astro.redirect(`/projects/augment-it/${docParam}`);
+}
+const selected = 'workflow';
+
+const demoSteps = [
+  { 
+    title: 'Data Augmentation Workflow with Microfrontends', 
+    href: '/projects/augment-it',
+    type: 'orientation',
+    description: 'Overview and introduction to the complete workflow'
+  },
+  { 
+    title: 'Load Data', 
+    href: '/projects/augment-it/record-collector',
+    type: 'sequential',
+    step: 1
+  },
+  { 
+    title: 'Review & Enrich Records', 
+    href: '/projects/augment-it/review-enrich-records',
+    type: 'sequential',
+    step: 2
+  },
+  { 
+    title: 'Author Prompt Templates', 
+    href: '/projects/augment-it/prompt-template-manager',
+    type: 'sequential',
+    step: 3
+  },
+  { 
+    title: 'Choose AI Augmentation Option', 
+    href: '/projects/augment-it/api-connector-service',
+    type: 'sequential',
+    step: 4
+  },
+  { 
+    title: 'Review Request & Response', 
+    href: '/projects/augment-it/request-reviewer',
+    type: 'sequential',
+    step: 5
+  },
+  { 
+    title: 'Generate Insights', 
+    href: '/projects/augment-it/highlight-collector',
+    type: 'sequential',
+    step: 6
+  },
+  { 
+    title: 'Sync Back to Source', 
+    href: '/projects/augment-it/sync',
+    type: 'sequential',
+    step: 7
+  },
+];
+
+const currentHref = selected === 'workflow'
+  ? '/projects/augment-it'
+  : `/projects/augment-it?doc=${selected}`;
+
+const articles = {
+  'workflow': {
+    md: mdWorkflow,
+    id: 'Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md',
+    title: 'Data Augmentation Workflow with Microfrontends',
+  },
+  'record-collector': {
+    md: mdRecordCollector,
+    id: 'Augment-It/Specs/apps-microfrontends/RecordCollector.md',
+    title: 'Load Data — RecordCollector',
+  },
+  'prompt-template-manager': {
+    md: mdPromptTemplateManager,
+    id: 'Augment-It/Specs/apps-microfrontends/PromptTemplateManager.md',
+    title: 'Author Prompt Templates — PromptTemplateManager',
+  },
+  'request-reviewer': {
+    md: mdRequestReviewer,
+    id: 'Augment-It/Specs/apps-microfrontends/RequestReviewer.md',
+    title: 'Review Request & Response — RequestReviewer',
+  },
+  'highlight-collector': {
+    md: mdHighlightCollector,
+    id: 'Augment-It/Specs/apps-microfrontends/HighlightCollector.md',
+    title: 'Generate Insights — HighlightCollector',
+  },
+  'api-connector-service': {
+    md: mdApiConnectorService,
+    id: 'Augment-It/Specs/shared-services/apiConnectorService.md',
+    title: 'Choose AI Augmentation Option — apiConnectorService',
+  },
+} as const;
+
+const currentArticle = articles[selected] ?? articles['workflow'];
+// Remove YAML frontmatter when using ?raw imports so it doesn't render in the page
+function stripFrontmatter(input: string): string {
+  if (!input) return input;
+  return input.replace(/^\uFEFF?\s*---[\s\S]*?\n---\s*/u, '');
+}
+const cleanedContent = stripFrontmatter(currentArticle.md);
+---
+
+<Layout 
+  title="Augment-It Project" 
+  description="Data augmentation workflow with microfrontends"
+>
+  <div class="projects-page-container">
+    <AnimationWrapper>
+      <Hero
+        title="Augment-It"
+        subtitle="Data Augmentation Platform"
+        description="Augment any data by importing records or connecting to data sources with our comprehensive workflow system."
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+        style="margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+      />
+    </AnimationWrapper>
+
+    <!-- Project Detail -->
+    <section class="covers-grid">
+      <AugmentItCover openHref="/projects/augment-it/prompt-template-manager" expanded={false}>
+        <ContentSection_SidebarTreeVariantB steps={demoSteps} {currentHref} seriesTitle="Augment-It">
+          <article class="prose" style="color: var(--clr-body)">
+            <h1>Augment-It</h1>
+            <p>
+              Use the sidebar tree to navigate the Augment-It journey. The demo steps below
+              match the current series flow.
+            </p>
+          </article>
+          <OneArticle
+            Component={OneArticleOnPage}
+            content={cleanedContent}
+            markdownFile={currentArticle.id}
+            data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
+            title={currentArticle.title}
+          />
+        </ContentSection_SidebarTreeVariantB>
+      </AugmentItCover>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .projects-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem);
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+    width: 100%;
+  }
+  .covers-grid { display: grid; gap: 1rem; }
+</style>

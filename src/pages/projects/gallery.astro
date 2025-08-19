@@ -2,9 +2,79 @@
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
-import AugmentItCover from '@components/projects/covers/AugmentItCover.astro';
+import ProjectGallery from '@components/projects/ProjectGallery.svelte';
+import ContentSection_SidebarTreeVariantB from '@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 
-// Define project covers for the gallery
+import mdWorkflow from '@generated/projects/Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md?raw';
+
+// Demo steps for Augment-It project
+const demoSteps = [
+  { 
+    title: 'Data Augmentation Workflow with Microfrontends', 
+    href: '/projects/augment-it',
+    type: 'orientation',
+    description: 'Overview and introduction to the complete workflow'
+  },
+  { 
+    title: 'Load Data', 
+    href: '/projects/augment-it/record-collector',
+    type: 'sequential',
+    step: 1
+  },
+  { 
+    title: 'Review & Enrich Records', 
+    href: '/projects/augment-it/review-enrich-records',
+    type: 'sequential',
+    step: 2
+  },
+  { 
+    title: 'Author Prompt Templates', 
+    href: '/projects/augment-it/prompt-template-manager',
+    type: 'sequential',
+    step: 3
+  },
+  { 
+    title: 'Choose AI Augmentation Option', 
+    href: '/projects/augment-it/api-connector-service',
+    type: 'sequential',
+    step: 4
+  },
+  { 
+    title: 'Review Request & Response', 
+    href: '/projects/augment-it/request-reviewer',
+    type: 'sequential',
+    step: 5
+  },
+  { 
+    title: 'Generate Insights', 
+    href: '/projects/augment-it/highlight-collector',
+    type: 'sequential',
+    step: 6
+  },
+  { 
+    title: 'Sync Back to Source', 
+    href: '/projects/augment-it/sync',
+    type: 'sequential',
+    step: 7
+  },
+];
+
+const currentArticle = {
+  md: mdWorkflow,
+  id: 'Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md',
+  title: 'Data Augmentation Workflow with Microfrontends',
+};
+
+// Remove YAML frontmatter when using ?raw imports so it doesn't render in the page
+function stripFrontmatter(input: string): string {
+  if (!input) return input;
+  return input.replace(/^\uFEFF?\s*---[\s\S]*?\n---\s*/u, '');
+}
+const cleanedContent = stripFrontmatter(currentArticle.md);
+
+// Define project covers for the gallery - each project individually configured
 const projectCovers = [
   {
     id: 'augment-it',
@@ -24,7 +94,96 @@ const projectCovers = [
       }
     ]
   },
-  // Add more project covers here as needed
+  {
+    id: 'ace-it',
+    title: 'ACE-It',
+    subtitle: 'AI-Augmented Product Development Workflow playbook and toolkit.',
+    href: '/projects/ace-it',
+    useCases: [
+      {
+        title: 'AI Co-Development',
+        description: 'Practical playbook for building real products with AI as a co-developer.',
+        href: '/projects/ace-it/philosophy'
+      },
+      {
+        title: 'Battle-Tested Process',
+        description: 'Accelerated Context Engineering (ACE) for seamless AI integration.',
+        href: '/projects/ace-it/docs-kit'
+      }
+    ]
+  },
+  {
+    id: 'astro-turf',
+    title: 'Astro-Turf',
+    subtitle: 'Advanced Astro framework components and patterns.',
+    href: '/projects/astro-turf',
+    useCases: [
+      {
+        title: 'Component Library',
+        description: 'Reusable Astro components for modern web development.',
+        href: '/projects/astro-turf/specs'
+      },
+      {
+        title: 'Framework Patterns',
+        description: 'Best practices and architectural patterns for Astro projects.',
+        href: '/projects/astro-turf/patterns'
+      }
+    ]
+  },
+  {
+    id: 'content-farm',
+    title: 'Content-Farm',
+    subtitle: 'Automated content generation and management system.',
+    href: '/projects/content-farm',
+    useCases: [
+      {
+        title: 'Content Automation',
+        description: 'Streamlined workflows for content creation and publishing.',
+        href: '/projects/content-farm/specs'
+      },
+      {
+        title: 'Publishing Pipeline',
+        description: 'Automated content distribution and management tools.',
+        href: '/projects/content-farm/pipeline'
+      }
+    ]
+  },
+  {
+    id: 'emergent-innovation',
+    title: 'Emergent-Innovation',
+    subtitle: 'Open source innovation projects and collaborative initiatives.',
+    href: '/projects/emergent-innovation',
+    useCases: [
+      {
+        title: 'Open Source Projects',
+        description: 'Community-driven innovation in healthcare and technology.',
+        href: '/projects/emergent-innovation/examples'
+      },
+      {
+        title: 'Standards Development',
+        description: 'Contributing to industry standards and best practices.',
+        href: '/projects/emergent-innovation/standards'
+      }
+    ]
+  },
+  {
+    id: 'water-template-ce',
+    title: 'Water-Template-CE',
+    subtitle: 'Community Edition water management and template system.',
+    href: '/projects/water-template-ce',
+    useCases: [
+      {
+        title: 'Template Engine',
+        description: 'Flexible templating system for water management applications.',
+        href: '/projects/water-template-ce/specs'
+      },
+      {
+        title: 'Community Tools',
+        description: 'Open source tools for water resource management.',
+        href: '/projects/water-template-ce/community'
+      }
+    ]
+  }
 ];
 ---
 
@@ -45,18 +204,28 @@ const projectCovers = [
       />
     </AnimationWrapper>
 
-    <!-- Project Covers Gallery -->
-    <section class="covers-grid">
-      {projectCovers.map((project) => (
-        <AugmentItCover 
-          title={project.title}
-          subtitle={project.subtitle}
-          useCases={project.useCases}
-          openHref={project.href}
-          expanded={false}
+    <!-- Project Gallery with Svelte -->
+    <ProjectGallery projects={projectCovers} client:load />
+    
+    <!-- Hidden Augment-It Content for Injection -->
+    <div id="augment-it-full-content" style="display: none;">
+      <ContentSection_SidebarTreeVariantB steps={demoSteps} currentHref="/projects/gallery" seriesTitle="Augment-It">
+        <article class="prose" style="color: var(--clr-body)">
+          <h1>Augment-It</h1>
+          <p>
+            Use the sidebar tree to navigate the Augment-It journey. The demo steps below
+            match the current series flow.
+          </p>
+        </article>
+        <OneArticle
+          Component={OneArticleOnPage}
+          content={cleanedContent}
+          markdownFile={currentArticle.id}
+          data={{ path: Astro.url.pathname, id: currentArticle.id, title: currentArticle.title }}
+          title={currentArticle.title}
         />
-      ))}
-    </section>
+      </ContentSection_SidebarTreeVariantB>
+    </div>
   </div>
 </Layout>
 

@@ -1,0 +1,43 @@
+---
+/**
+ * ProjectCover.astro
+ * 
+ * Generic project cover component that can display any project with customizable content.
+ * This is a more flexible version that replaces project-specific cover components.
+ */
+
+import ProjectCoverBase from './ProjectCoverBase.astro';
+
+interface Props {
+  title: string;
+  subtitle: string;
+  useCases: Array<{
+    title: string;
+    description: string;
+    href: string;
+  }>;
+  openHref?: string;
+  expanded?: boolean;
+  logoUrl?: string;
+}
+
+const {
+  title,
+  subtitle,
+  useCases,
+  openHref,
+  expanded = false,
+  logoUrl
+} = Astro.props;
+---
+
+<ProjectCoverBase
+  title={title}
+  subtitle={subtitle}
+  useCases={useCases}
+  openHref={openHref}
+  expanded={expanded}
+  logoUrl={logoUrl}
+>
+  <slot />
+</ProjectCoverBase>
