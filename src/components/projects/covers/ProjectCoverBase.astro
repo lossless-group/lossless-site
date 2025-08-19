@@ -84,55 +84,273 @@ const {
 </article>
 
 <style>
-  .project-cover { padding: 1rem; }
-  .cover-hero { display: flex; align-items: center; gap: 0.9rem; }
-  .cover-logo { border-radius: 8px; background: var(--surface-2); box-shadow: 0 2px 10px color-mix(in oklab, black, transparent 90%); }
-  .cover-titles { display: grid; gap: 0.2rem; }
-  .cover-title { margin: 0; font-size: clamp(1.25rem, 2.5vw, 1.6rem); color: var(--clr-heading); }
-  .cover-subtitle { margin: 0; color: var(--clr-body); opacity: 0.9; font-size: 0.95rem; }
-
-  .usecases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.9rem; }
-  .usecase-card {
-    display: grid; gap: 0.35rem; padding: 0.9rem; text-decoration: none;
-    color: var(--clr-heading);
-    background: var(--clr-lossless-primary-glass);
-    border: 1px solid var(--clr-lossless-ui-btn-border);
-    border-radius: 12px;
-    box-shadow: 0 2px 10px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 85%);
-    transition: transform 120ms ease, box-shadow 160ms ease, background 160ms ease;
+  .project-cover { 
+    padding: 1.5rem; 
+    background: linear-gradient(135deg, 
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 95%) 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 98%) 100%
+    );
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 80%);
+    border-radius: 16px;
+    box-shadow: 
+      0 4px 20px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 90%),
+      0 1px 3px color-mix(in oklab, black, transparent 95%);
+    transition: all 200ms ease;
+    position: relative;
+    overflow: hidden;
   }
-  .usecase-card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 80%); }
-  .usecase-icon { opacity: 0.9; }
-  .usecase-title { margin: 0; font-size: 1rem; }
-  .usecase-desc { margin: 0; color: var(--clr-body); opacity: 0.9; font-size: 0.9rem; }
+  
+  .project-cover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      var(--clr-lossless-primary-light) 0%,
+      var(--clr-lossless-primary) 50%,
+      var(--clr-lossless-primary-light) 100%
+    );
+    opacity: 0.6;
+  }
 
-  .cover-expand { margin-top: 0.75rem; border-top: 1px dashed var(--clr-lossless-primary-light); padding-top: 0.6rem; }
-  .toggle { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid var(--clr-lossless-ui-btn-border); background: var(--surface-2); color: var(--clr-body); user-select: none; }
+  .cover-hero { 
+    display: flex; 
+    align-items: center; 
+    gap: 1.25rem; 
+    margin-bottom: 0.5rem;
+  }
+  
+  .cover-logo { 
+    border-radius: 12px; 
+    background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%);
+    box-shadow: 
+      0 4px 16px color-mix(in oklab, black, transparent 85%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  
+  .cover-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 6px 24px color-mix(in oklab, black, transparent 80%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 85%);
+  }
+  
+  .cover-titles { display: grid; gap: 0.4rem; }
+  
+  .cover-title { 
+    margin: 0; 
+    font-size: clamp(1.4rem, 2.8vw, 1.8rem); 
+    font-weight: 600;
+    color: var(--clr-heading);
+    text-shadow: 0 1px 2px color-mix(in oklab, black, transparent 95%);
+  }
+  
+  .cover-subtitle { 
+    margin: 0; 
+    color: var(--clr-body); 
+    opacity: 0.85; 
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  .usecases { 
+    display: grid; 
+    grid-template-columns: repeat(2, minmax(0, 1fr)); 
+    gap: 1rem; 
+    margin-top: 1.25rem; 
+  }
+  
+  .usecase-card {
+    display: grid; 
+    gap: 0.5rem; 
+    padding: 1.25rem; 
+    text-decoration: none;
+    color: var(--clr-heading);
+    background: linear-gradient(135deg,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 85%) 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 90%) 100%
+    );
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border), transparent 70%);
+    border-radius: 14px;
+    box-shadow: 
+      0 3px 12px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 88%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .usecase-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%) 50%,
+      transparent 100%
+    );
+  }
+  
+  .usecase-card:hover { 
+    transform: translateY(-2px) scale(1.02); 
+    box-shadow: 
+      0 8px 24px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 82%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
+    border-color: color-mix(in oklab, var(--clr-lossless-primary), transparent 60%);
+  }
+  
+  .usecase-icon { 
+    opacity: 0.9; 
+    transition: opacity 200ms ease;
+  }
+  
+  .usecase-card:hover .usecase-icon {
+    opacity: 1;
+  }
+  
+  .usecase-title { 
+    margin: 0; 
+    font-size: 1.1rem; 
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  .usecase-desc { 
+    margin: 0; 
+    color: var(--clr-body); 
+    opacity: 0.85; 
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .cover-expand { 
+    margin-top: 1rem; 
+    border-top: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%); 
+    padding-top: 1rem; 
+    position: relative;
+  }
+  
+  .cover-expand::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%,
+      var(--clr-lossless-primary-light) 50%,
+      transparent 100%
+    );
+  }
+  
+  .toggle { 
+    list-style: none; 
+    cursor: pointer; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    padding: 0.6rem 1rem; 
+    border-radius: 10px; 
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border), transparent 60%); 
+    background: linear-gradient(135deg,
+      var(--surface-2) 0%,
+      color-mix(in oklab, var(--surface-2), var(--surface-3) 30%) 100%
+    );
+    color: var(--clr-body); 
+    user-select: none;
+    font-weight: 500;
+    transition: all 200ms ease;
+    box-shadow: 
+      0 2px 8px color-mix(in oklab, black, transparent 92%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
+  }
+  
+  .toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 12px color-mix(in oklab, black, transparent 88%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
+    border-color: color-mix(in oklab, var(--clr-lossless-primary), transparent 70%);
+  }
+  
   .toggle::-webkit-details-marker { display: none; }
-  .cover-expand[open] .toggle { color: var(--clr-heading); background: var(--clr-lossless-primary-glass); }
+  
+  .cover-expand[open] .toggle { 
+    color: var(--clr-heading); 
+    background: linear-gradient(135deg,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 80%) 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 85%) 100%
+    );
+    border-color: color-mix(in oklab, var(--clr-lossless-primary), transparent 60%);
+  }
+  
   .toggle-label::before { content: attr(data-collapsed); }
   .cover-expand[open] .toggle-label::before { content: attr(data-expanded); }
-  .chev { transition: transform 160ms ease; }
+  
+  .chev { 
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1.1em;
+  }
   .cover-expand[open] .chev { transform: rotate(180deg); }
 
-  .expanded { margin-top: 0.8rem; position: relative; }
-  /* Match Mermaid's close button visual exactly */
+  .expanded { 
+    margin-top: 1.25rem; 
+    position: relative;
+    animation: expandIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes expandIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
   .mermaid-modal-close-btn {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: none;
-    border: none;
+    background: color-mix(in oklab, black, transparent 80%);
+    border: 1px solid color-mix(in oklab, white, transparent 85%);
+    border-radius: 8px;
     color: #fff;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.6rem;
     line-height: 1;
     z-index: 10;
+    transition: all 200ms ease;
+    backdrop-filter: blur(8px);
   }
+  
+  .mermaid-modal-close-btn:hover {
+    background: color-mix(in oklab, black, transparent 70%);
+    transform: scale(1.05);
+  }
+  
   .mermaid-modal-close-btn svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    display: block; /* Helps with alignment */
+    width: 1.4rem;
+    height: 1.4rem;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .project-cover { padding: 1.25rem; }
+    .cover-hero { gap: 1rem; }
+    .usecases { grid-template-columns: 1fr; gap: 0.75rem; }
+    .usecase-card { padding: 1rem; }
   }
 </style>
 
