@@ -24,14 +24,54 @@ if (docParam) {
 const selected = 'workflow';
 
 const demoSteps = [
-  { title: 'Data Augmentation Workflow with Microfrontends', href: '/projects/covers' },
-  { title: 'Load Data', href: '/projects/covers/record-collector' },
-  { title: 'Review & Enrich Records', href: '/projects/covers/review-enrich-records' },
-  { title: 'Author Prompt Templates', href: '/projects/covers/prompt-template-manager' },
-  { title: 'Choose AI Augmentation Option', href: '/projects/covers/api-connector-service' },
-  { title: 'Review Request & Response', href: '/projects/covers/request-reviewer' },
-  { title: 'Generate Insights', href: '/projects/covers/highlight-collector' },
-  { title: 'Sync Back to Source', href: '/projects/covers/sync' },
+  { 
+    title: 'Data Augmentation Workflow with Microfrontends', 
+    href: '/projects/covers',
+    type: 'orientation',
+    description: 'Overview and introduction to the complete workflow'
+  },
+  { 
+    title: 'Load Data', 
+    href: '/projects/covers/record-collector',
+    type: 'sequential',
+    step: 1
+  },
+  { 
+    title: 'Review & Enrich Records', 
+    href: '/projects/covers/review-enrich-records',
+    type: 'sequential',
+    step: 2
+  },
+  { 
+    title: 'Author Prompt Templates', 
+    href: '/projects/covers/prompt-template-manager',
+    type: 'sequential',
+    step: 3
+  },
+  { 
+    title: 'Choose AI Augmentation Option', 
+    href: '/projects/covers/api-connector-service',
+    type: 'sequential',
+    step: 4
+  },
+  { 
+    title: 'Review Request & Response', 
+    href: '/projects/covers/request-reviewer',
+    type: 'sequential',
+    step: 5
+  },
+  { 
+    title: 'Generate Insights', 
+    href: '/projects/covers/highlight-collector',
+    type: 'sequential',
+    step: 6
+  },
+  { 
+    title: 'Sync Back to Source', 
+    href: '/projects/covers/sync',
+    type: 'sequential',
+    step: 7
+  },
 ];
 
 const currentHref = selected === 'workflow'

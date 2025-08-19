@@ -1,0 +1,87 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/basics/Hero.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import AugmentItCover from '@components/projects/covers/AugmentItCover.astro';
+
+// Define project covers for the gallery
+const projectCovers = [
+  {
+    id: 'augment-it',
+    title: 'Augment-It',
+    subtitle: 'Augment any data by importing records or connecting to data sources.',
+    href: '/projects/augment-it',
+    useCases: [
+      {
+        title: 'Product Insights for R&D',
+        description: 'Generate insights about customers to inform product development decisions.',
+        href: '/projects/augment-it/insights'
+      },
+      {
+        title: 'Sales Intel, Just-in-Time',
+        description: 'Equip outside sales teams with richer customer context before meetings.',
+        href: '/projects/augment-it/templates'
+      }
+    ]
+  },
+  // Add more project covers here as needed
+];
+---
+
+<Layout 
+  title="Project Gallery" 
+  description="Explore our innovative projects and interactive visualizations"
+>
+  <div class="projects-page-container">
+    <AnimationWrapper>
+      <Hero
+        title="Project Gallery"
+        subtitle="Innovation in Action"
+        description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+        style="margin-top: 6rem;"
+      />
+    </AnimationWrapper>
+
+    <!-- Project Covers Gallery -->
+    <section class="covers-grid">
+      {projectCovers.map((project) => (
+        <AugmentItCover 
+          title={project.title}
+          subtitle={project.subtitle}
+          useCases={project.useCases}
+          openHref={project.href}
+          expanded={false}
+        />
+      ))}
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .projects-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem);
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+    width: 100%;
+  }
+  
+  .covers-grid { 
+    display: grid; 
+    gap: 2rem; 
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  @media (max-width: 768px) {
+    .covers-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>
