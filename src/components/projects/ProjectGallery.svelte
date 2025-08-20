@@ -21,6 +21,7 @@
   }
   
   export let projects: Project[] = [];
+
   
   let expandedProject: string | null = null;
   let isFullPageView = false;
@@ -46,9 +47,23 @@
         setTimeout(() => {
           const sourceContent = document.getElementById('augment-it-full-content');
           const targetContent = document.getElementById('augment-it-content');
+          const navigationTarget = document.getElementById('augment-it-navigation');
+          
           if (sourceContent && targetContent) {
-            targetContent.innerHTML = sourceContent.innerHTML;
-            targetContent.style.display = 'block';
+            // Clone the source content
+            const clonedContent = sourceContent.cloneNode(true) as Element;
+            
+            // Extract the entire sidebar from StorySidebarTree__VariantB
+            const sidebar = clonedContent.querySelector('.sidebar');
+            if (sidebar && navigationTarget) {
+              navigationTarget.innerHTML = sidebar.innerHTML;
+            }
+            
+            // Extract the content area from StorySidebarTree__VariantB
+            const contentArea = clonedContent.querySelector('.content-area');
+            if (contentArea && targetContent) {
+              targetContent.innerHTML = contentArea.innerHTML;
+            }
           }
         }, 100);
       }
@@ -137,10 +152,26 @@
       </button>
       <div class="project-full-content">
         {#if currentProject}
-          <div id="augment-it-content" style="display: {expandedProject === 'augment-it' ? 'block' : 'none'}">
-            <!-- Augment-It specific content will be injected here -->
-          </div>
-          {#if expandedProject !== 'augment-it'}
+{#if expandedProject === 'augment-it'}
+            <div class="augment-it-content">
+              <div class="project-layout">
+                <aside class="project-sidebar">
+                  <div id="augment-it-navigation">
+                    <!-- Navigation will be injected here from ContentSection_SidebarTreeVariantB -->
+                  </div>
+                </aside>
+                <main class="project-main">
+                  <header class="project-header">
+                    <h1>Augment-It</h1>
+                    <p class="project-subtitle">Data Augmentation Workflow with Microfrontends</p>
+                  </header>
+                  <div id="augment-it-content" class="project-content">
+                    <!-- Additional content will be injected here -->
+                  </div>
+                </main>
+              </div>
+            </div>
+          {:else}
             <div class="placeholder-content">
               <h1>{currentProject.title}</h1>
               <p>Full project content for {currentProject.title} coming soon.</p>
@@ -355,9 +386,9 @@
     bottom: 0;
     z-index: 1000;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
     animation: fadeIn 0.3s ease-out;
   }
   
@@ -367,7 +398,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgb(0, 0, 0);
     border: none;
     cursor: pointer;
     z-index: 1;
@@ -393,21 +424,21 @@
   
   .project-content {
     background: var(--surface-1);
-    border-radius: 16px;
+    border-radius: 0;
     width: 100%;
     height: 100%;
-    max-width: 1200px;
-    max-height: 90vh;
+    max-width: none;
+    max-height: none;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
     z-index: 2;
   }
   
   .mermaid-modal-close-btn {
     position: absolute;
     top: 1rem;
-    left: 1rem;
+    right: 1rem;
     background: color-mix(in oklab, black, transparent 80%);
     border: 1px solid color-mix(in oklab, white, transparent 85%);
     border-radius: 8px;
@@ -422,8 +453,111 @@
   
   .mermaid-modal-close-btn:hover {
     background: color-mix(in oklab, black, transparent 70%);
-    transform: scale(1.05);
   }
+
+  /* Fix bullet points in injected Augment-It content */
+  :global(.project-content .sequential-section),
+  :global(.project-content .orientation-section) {
+    position: relative;
+  }
+
+  :global(.project-content .tree-nav) { 
+    list-style: none; 
+    padding-left: 0; 
+    margin: 0; 
+  }
+  
+  :global(.project-content .tree-nav li) { 
+    list-style: none;
+    position: relative;
+  }
+  
+  :global(.project-content .tree-nav li + li),
+  :global(.project-content .tree-nav div + div) { 
+    margin-top: 0.35rem; 
+  }
+
+  /* Override global a styles for injected content */
+  :global(.project-content .sequential-section a.tree-link),
+  :global(.project-content .orientation-section a.tree-link),
+  :global(.project-content a.tree-link) { 
+    display: flex !important; 
+    align-items: center !important; 
+    gap: 0.6rem !important; 
+    padding: 0.2rem 0.3rem 0.2rem 0.55rem !important; 
+    border-radius: 0.35rem !important; 
+    color: var(--clr-heading) !important; 
+    text-decoration: none !important; 
+    position: relative !important; 
+    transition: color 150ms ease, box-shadow 150ms ease, background 150ms ease !important;
+    list-style: none !important;
+    list-style-type: none !important;
+  }
+
+  :global(.project-content a.tree-link:hover) { 
+    color: var(--clr-heading) !important; 
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 80%) !important; 
+  }
+  
+  :global(.project-content a.tree-link--active) { 
+    color: var(--clr-lossless-accent--brightest) !important; 
+    font-weight: 700 !important; 
+    box-shadow: inset 3px 0 0 var(--clr-lossless-accent--brightest) !important; 
+  }
+
+  /* Project layout structure */
+  .augment-it-content {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .project-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100%;
+    gap: 0;
+  }
+
+  .project-sidebar {
+    background: color-mix(in oklab, var(--surface-1), black 3%);
+    border-right: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%);
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+
+  .project-main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .project-header {
+    padding: 2rem 2rem 1rem 2rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 90%);
+    flex-shrink: 0;
+  }
+
+  .project-header h1 {
+    color: var(--clr-lossless-accent--brightest);
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .project-subtitle {
+    color: var(--clr-lossless-primary-light);
+    font-size: 1.1rem;
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  .project-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    color: var(--clr-body);
+  }
+
   
   .mermaid-modal-close-btn :global(svg) {
     width: 1.4rem;

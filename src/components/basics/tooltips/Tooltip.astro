@@ -1,0 +1,221 @@
+---
+export interface Props {
+  text: string;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  trigger?: 'hover' | 'click';
+  class?: string;
+}
+
+const { text, position = 'top', trigger = 'hover', class: className = '' } = Astro.props;
+const tooltipId = `tooltip-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class={`tooltip-wrapper ${className}`} data-tooltip-trigger={trigger}>
+  <slot />
+  <div 
+    id={tooltipId}
+    class={`tooltip tooltip--${position}`}
+    role="tooltip"
+    aria-hidden="true"
+  >
+    {text}
+    <div class="tooltip-arrow"></div>
+  </div>
+</div>
+
+<style>
+  .tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip {
+    position: absolute;
+    z-index: 1000;
+    padding: 0.75rem 1rem;
+    background: color-mix(in oklab, var(--surface-1), transparent 5%);
+    color: var(--clr-body);
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    min-width: 280px;
+    max-width: 400px;
+    box-shadow: 
+      0 8px 32px color-mix(in oklab, black, transparent 88%),
+      0 2px 8px color-mix(in oklab, black, transparent 92%);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+
+  .tooltip--top {
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+  }
+
+  .tooltip--bottom {
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  .tooltip--left {
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%) translateX(4px);
+  }
+
+  .tooltip--right {
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+  }
+
+  .tooltip-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .tooltip--top .tooltip-arrow {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid color-mix(in oklab, var(--surface-1), transparent 5%);
+  }
+
+  .tooltip--top .tooltip-arrow::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: -8px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
+  }
+
+  .tooltip--bottom .tooltip-arrow {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid color-mix(in oklab, var(--surface-1), transparent 5%);
+  }
+
+  .tooltip--bottom .tooltip-arrow::before {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: -8px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
+  }
+
+  .tooltip--left .tooltip-arrow {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid color-mix(in oklab, var(--surface-1), transparent 5%);
+  }
+
+  .tooltip--left .tooltip-arrow::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: -8px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
+  }
+
+  .tooltip--right .tooltip-arrow {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid color-mix(in oklab, var(--surface-1), transparent 5%);
+  }
+
+  .tooltip--right .tooltip-arrow::before {
+    content: '';
+    position: absolute;
+    right: -9px;
+    top: -8px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
+  }
+
+  /* Hover trigger */
+  .tooltip-wrapper[data-tooltip-trigger="hover"]:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .tooltip-wrapper[data-tooltip-trigger="hover"]:hover .tooltip--bottom {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .tooltip-wrapper[data-tooltip-trigger="hover"]:hover .tooltip--left {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .tooltip-wrapper[data-tooltip-trigger="hover"]:hover .tooltip--right {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* Click trigger */
+  .tooltip-wrapper[data-tooltip-trigger="click"] .tooltip.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .tooltip-wrapper[data-tooltip-trigger="click"] .tooltip--bottom.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .tooltip-wrapper[data-tooltip-trigger="click"] .tooltip--left.show {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .tooltip-wrapper[data-tooltip-trigger="click"] .tooltip--right.show {
+    transform: translateY(-50%) translateX(0);
+  }
+</style>
+
+<script>
+  // Handle click triggers
+  document.addEventListener('DOMContentLoaded', () => {
+    const clickTooltips = document.querySelectorAll('[data-tooltip-trigger="click"]');
+    
+    clickTooltips.forEach(wrapper => {
+      const tooltip = wrapper.querySelector('.tooltip');
+      
+      wrapper.addEventListener('click', (e) => {
+        e.stopPropagation();
+        tooltip?.classList.toggle('show');
+      });
+    });
+
+    // Close tooltips when clicking outside
+    document.addEventListener('click', () => {
+      clickTooltips.forEach(wrapper => {
+        const tooltip = wrapper.querySelector('.tooltip');
+        tooltip?.classList.remove('show');
+      });
+    });
+  });
+</script>

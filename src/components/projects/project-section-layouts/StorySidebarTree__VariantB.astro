@@ -1,4 +1,5 @@
 ---
+import Tooltip from '@components/basics/tooltips/Tooltip.astro';
 const { steps = null, currentHref = '', seriesTitle = 'Augment-It' } = Astro.props;
 
 // Debug: Log the steps to see what we're getting
@@ -16,6 +17,18 @@ if (steps && steps.length > 0) {
       <span><a class="crumb-link" href="/projects/Augment-It">{seriesTitle}</a><span class="crumb-sep"> / </span></span>
       <span><span class="crumb-current" aria-current="page">{steps && currentHref ? (steps.find(s => s.href === currentHref)?.title ?? '') : 'Review & Enrich Records'}</span></span>
     </nav>
+    
+    <!-- Navigation Help Tooltip -->
+    <div class="navigation-help">
+      <Tooltip 
+        text="Use the sidebar tree to navigate the Augment-It journey. The demo steps below match the current series flow."
+        position="right"
+        trigger="hover"
+      >
+        <span class="help-icon">ℹ️ Navigation Help</span>
+      </Tooltip>
+    </div>
+    
     {steps ? (
       <div class="tree-sections">
         {/* Debug: Show all steps first */}
@@ -29,13 +42,13 @@ if (steps && steps.length > 0) {
               {steps.filter(step => step.type === 'orientation').map((step) => (
                 <li class={currentHref === step.href ? 'active-cluster' : ''}>
                   {currentHref === step.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
+                  {step.description && (
+                    <p class="orientation-desc">{step.description}</p>
+                  )}
                   <a href={step.href} class={"tree-link tree-link--orientation" + (currentHref === step.href ? ' tree-link--active' : '')}>
                     <span class="chip chip--orientation">📋</span>
                     <span class="tree-text">{step.title}</span>
                   </a>
-                  {step.description && (
-                    <p class="orientation-desc">{step.description}</p>
-                  )}
                 </li>
               ))}
             </ul>
@@ -46,17 +59,17 @@ if (steps && steps.length > 0) {
         {steps.filter(step => step.type === 'sequential').length > 0 && (
           <div class="sequential-section">
             <h3 class="section-header">Workflow Steps</h3>
-            <ul class="tree-nav">
+            <div class="tree-nav">
               {steps.filter(step => step.type === 'sequential').map((step) => (
-                <li class={currentHref === step.href ? 'active-cluster' : ''}>
+                <div class={currentHref === step.href ? 'active-cluster' : ''}>
                   {currentHref === step.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
                   <a href={step.href} class={"tree-link tree-link--sequential" + (currentHref === step.href ? ' tree-link--active' : '')}>
                     <span class="chip">{step.step ? String(step.step).padStart(2, '0') : '??'}</span>
                     <span class="tree-text">{step.title}</span>
                   </a>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
         
@@ -83,17 +96,17 @@ if (steps && steps.length > 0) {
             {steps.length > 1 && (
               <div class="sequential-section">
                 <h3 class="section-header">Workflow Steps</h3>
-                <ul class="tree-nav">
+                <div class="tree-nav">
                   {steps.slice(1).map((step, i) => (
-                    <li class={currentHref === step.href ? 'active-cluster' : ''}>
+                    <div class={currentHref === step.href ? 'active-cluster' : ''}>
                       {currentHref === step.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
                       <a href={step.href} class={"tree-link tree-link--sequential" + (currentHref === step.href ? ' tree-link--active' : '')}>
                         <span class="chip">{String(i + 1).padStart(2, '0')}</span>
                         <span class="tree-text">{step.title}</span>
                       </a>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
@@ -176,16 +189,41 @@ if (steps && steps.length > 0) {
   .card .breadcrumb .crumb-current[aria-current="page"] { color: var(--clr-lossless-accent--brightest); font-weight: 700; }
   .card .breadcrumb .crumb-sep { margin: 0 0.25rem; opacity: 0.7; }
 
-  /* Tree base */
-  .tree-nav { list-style: none; padding-left: 0; margin: 0; }
-  .tree-nav li { list-style: none; }
-  .tree-nav li::marker { display: none; }
-  .tree-nav li + li { margin-top: 0.35rem; }
+  /* Tree navigation base styles */
+  .tree-nav { 
+    list-style: none; 
+    padding-left: 0; 
+    margin: 0; 
+  }
+  
+  .tree-nav li { 
+    list-style: none;
+    position: relative;
+  }
+  
+  .tree-nav li + li,
+  .tree-nav div + div { 
+    margin-top: 0.35rem; 
+  }
   .tree-branch { padding-left: 1rem; margin-top: 0.25rem; border-left: 3px solid var(--clr-lossless-primary-light); }
   .tree-branch.tree-branch--active { border-left-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 10%); }
 
-  /* Links */
-  .card a.tree-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.3rem 0.2rem 0.55rem; border-radius: 0.35rem; color: var(--clr-heading); text-decoration: none; position: relative; transition: color 150ms ease, box-shadow 150ms ease, background 150ms ease; }
+  /* Links - override global a styles with high specificity */
+  .sidebar .card .sequential-section a.tree-link,
+  .sidebar .card .orientation-section a.tree-link,
+  .sidebar .card a.tree-link { 
+    display: flex !important; 
+    align-items: center !important; 
+    gap: 0.6rem !important; 
+    padding: 0.2rem 0.3rem 0.2rem 0.55rem !important; 
+    border-radius: 0.35rem !important; 
+    color: var(--clr-heading) !important; 
+    text-decoration: none !important; 
+    position: relative !important; 
+    transition: color 150ms ease, box-shadow 150ms ease, background 150ms ease !important;
+    list-style: none !important;
+    list-style-type: none !important;
+  }
   .card a.tree-link .tree-text { flex: 1 1 auto; min-width: 0; line-height: 1.35; }
   .card a.tree-link .chip { flex: 0 0 auto; }
   .card a.tree-link:hover { color: var(--clr-heading); background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 80%); }
@@ -209,7 +247,7 @@ if (steps && steps.length > 0) {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--clr-lossless-primary);
+    color: var(--clr-heading);
     border-bottom: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
     padding-bottom: 0.4rem;
   }
@@ -234,7 +272,7 @@ if (steps && steps.length > 0) {
   }
   
   .orientation-desc {
-    margin: 0.5rem 0 0 0;
+    margin: 0 0 0.5rem 0;
     padding-left: 2.1rem;
     font-size: 0.8rem;
     color: var(--clr-body);
@@ -294,5 +332,28 @@ if (steps && steps.length > 0) {
     );
     border-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 70%);
     font-size: 0.9rem;
+  }
+
+  /* Navigation Help */
+  .navigation-help {
+    margin: 0.75rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%);
+  }
+
+  .help-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--clr-body);
+    cursor: help;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+  }
+
+  .help-icon:hover {
+    color: var(--clr-lossless-accent--brightest);
   }
 </style>

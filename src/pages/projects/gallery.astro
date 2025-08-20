@@ -6,6 +6,7 @@ import ProjectGallery from '@components/projects/ProjectGallery.svelte';
 import ContentSection_SidebarTreeVariantB from '@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import Tooltip from '@components/basics/tooltips/Tooltip.astro';
 import ExpandIcon from '@assets/Icons/arrows-maximize.svg';
 import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 
@@ -214,10 +215,6 @@ const projectCovers = [
       <ContentSection_SidebarTreeVariantB steps={demoSteps} currentHref="/projects/gallery" seriesTitle="Augment-It">
         <article class="prose" style="color: var(--clr-body)">
           <h1>Augment-It</h1>
-          <p>
-            Use the sidebar tree to navigate the Augment-It journey. The demo steps below
-            match the current series flow.
-          </p>
         </article>
         <OneArticle
           Component={OneArticleOnPage}
