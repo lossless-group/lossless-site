@@ -249,7 +249,7 @@ const frontmatter = {
       subtitle="Strategic insights and recommendations"
       description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
       ctaText="Back to Portal"
-      ctaUrl={`/client/${client}`}
+      ctaUrl={`/client/${client.toLowerCase()}`}
       image={{
         src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
         alt: `${toProperCase(client)} Logo`
