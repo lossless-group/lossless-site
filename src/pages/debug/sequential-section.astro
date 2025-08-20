@@ -1,0 +1,52 @@
+---
+import SequentialSectionDebug from '@components/projects/debug/SequentialSectionDebug.astro';
+---
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="generator" content={Astro.generator} />
+  <title>Sequential Section Debug</title>
+  <style>
+    :root {
+      --clr-lossless-accent--brightest: #04e5e5;
+      --clr-lossless-primary-light: #e0f2f1;
+      --clr-primary-bg: #0d1117;
+      --clr-heading: #04e5e5;
+      --clr-body: #e0f2f1;
+      --clr-lossless-primary-glass: rgba(224, 242, 241, 0.4);
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--clr-primary-bg);
+      color: var(--clr-body);
+    }
+    
+    h1 {
+      color: var(--clr-lossless-accent--brightest);
+      margin: 2rem;
+    }
+    
+    p {
+      color: var(--clr-lossless-primary-light);
+      margin: 2rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sequential Section Debug Page</h1>
+  <p>This page isolates the sequential section component to debug bullet icon issues.</p>
+  
+  <!-- Test with no currentHref (no active state) -->
+  <SequentialSectionDebug />
+  
+  <!-- Test with active state -->
+  <SequentialSectionDebug currentHref="/projects/augment-it/review-enrich-records" />
+</body>
+</html>
