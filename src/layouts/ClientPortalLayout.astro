@@ -18,8 +18,7 @@ import NewsletterSubscription from '@components/basics/NewsletterSubscription.as
 // Utility imports
 import { getCollection } from "astro:content";
 import { toProperCase, slugify, getReferenceSlug } from '@utils/slugify';
-import { resolveToolId, resolvePortfolioId } from '@utils/toolUtils';
-import { extractFrontmatter } from '@utils/yamlFrontmatter';
+import { resolveToolId, resolvePortfolioId, loadToolsFromMocToolingGallery } from '@utils/toolUtils';
 
 // Type imports
 import type { ClientPortalProps, OpenGraphData } from '../types/client-data.d';
@@ -55,78 +54,7 @@ try {
 }
 
 
-// Process tool gallery
-let toolGalleryTools = [];
-
-try {
-  // IMPORTANT: Clients must have proper cased names (Laerdal). "laerdal" will fail
-  const yamlPath = path.resolve(contentBasePath, `client-content/${toProperCase(client)}/tool-gallery.yaml`);
-  const rawYaml = await fs.readFile(yamlPath, 'utf-8');
-  const config = extractFrontmatter(`---\n${rawYaml}\n---`);
-
-  if (!config) {
-    console.warn(`No valid tool gallery config found for ${client}`);
-  } else {
-
-  const tagFilters = [];
-  const rawToolIds = [];
-  const items = Array.isArray(config) ? config : [config];
-
-  for (const item of items) {
-      if (item.tag) {
-        const raw = String(item.tag).trim();
-        const match = raw.match(/^\[\[(.*?)\]\]$/);
-        const tag = match ? match[1].trim() : raw;
-        tagFilters.push(tag);
-      } else if (typeof item === 'string') {
-        const raw = item.trim();
-        const match = raw.match(/^\[\[(.*?)\]\]$/);
-        const toolId = match ? match[1].trim() : raw;
-        rawToolIds.push(toolId);
-      }
-  }
-
-
-  const allTools = await getCollection('tooling');
-  const toolMap = new Map(allTools.map(entry => [entry.id, {
-    ...entry.data,
-    id: entry.id,
-    filePath: entry.id,
-  }]));
-
-  const tools: Array<{ id: string; filePath: string; [key: string]: any }> = [];
-  const normalizeTag = (tag: string): string => slugify(tag).toLowerCase();
-
-  for (const input of rawToolIds) {
-    let id = input;
-    const match = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
-    if (match) id = match[1].trim();
-
-    const resolvedId = await resolveToolId(id, allTools);
-    if (resolvedId && toolMap.has(resolvedId)) tools.push(toolMap.get(resolvedId));
-  }
-
-  if (tagFilters.length > 0) {
-    const tagFiltered = allTools
-      .filter(tool => tool.data.tags?.some(tag =>
-        tagFilters.some(filter => normalizeTag(filter) === normalizeTag(tag))
-      ))
-      .map(entry => ({
-        ...entry.data,
-        id: entry.id,
-        filePath: entry.id,
-      }));
-
-    for (const tool of tagFiltered) {
-      if (!tools.some(t => t.id === tool.id)) tools.push(tool);
-    }
-  }
-
-  toolGalleryTools = tools;
-  }
-} catch (err) {
-  console.warn(`No tool-gallery.yaml for ${client}`);
-}
+// Tool gallery support now uses toolingGallery directive from MOC files
 
 // Load and process client portal cards
 let clientPortalCards = [];
@@ -254,6 +182,7 @@ try {
 // Reference terms: :::vocabulary and :::concepts blocks in content/moc/<Client>.md
 let selectedVocabulary: string[] = [];
 let selectedConcepts: string[] = [];
+let mocToolingGalleryTools: any[] = [];
 try {
   const clientMdPath = path.resolve(contentBasePath, 'moc', `${toProperCase(client)}.md`);
   const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
@@ -272,6 +201,14 @@ try {
 
   if (selectedVocabulary.length > 0 || selectedConcepts.length > 0) {
     console.log(`Loaded reference term selections for ${toProperCase(client)}:`, { selectedVocabulary, selectedConcepts });
+  }
+
+  // Load tools from :::toolingGallery directive in MOC file
+  const allTools = await getCollection('tooling');
+  mocToolingGalleryTools = await loadToolsFromMocToolingGallery(rawClientMd, allTools);
+  
+  if (mocToolingGalleryTools.length > 0) {
+    console.log(`Loaded ${mocToolingGalleryTools.length} tools from toolingGallery directive for ${toProperCase(client)}`);
   }
 } catch (err) {
   // Optional; silently continue
@@ -379,12 +316,12 @@ try {
       <!-- Newsletter Subscription Section -->
       <NewsletterSubscription />
 
-      {toolGalleryTools.length > 0 && (
+      {mocToolingGalleryTools.length > 0 && (
         <>
           <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
           <section class="mb-12 tooling-section">
-            <h2 class="text-2xl font-bold mb-4">Related Tools</h2>
-            <ToolingGallery tools={toolGalleryTools} takeUpWholeWidth={true} />
+            <h2 class="text-2xl font-bold mb-4">Recommended Tools</h2>
+            <ToolingGallery tools={mocToolingGalleryTools} takeUpWholeWidth={true} />
           </section>
         </>
       )}
@@ -500,6 +437,8 @@ try {
 .tooling-section {
   padding: 0rem 2rem;
 }
+
+
 
 
 
@@ -672,6 +611,23 @@ try {
   gap: 1.5rem;
   margin: 2rem auto;
   grid-template-columns: repeat(4, 1fr);
+  justify-content: center;
+}
+
+/* Center cards for different counts */
+.icon-header-message-card-grid:has(.card-container:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 600px;
+}
+
+.icon-header-message-card-grid:has(.card-container:nth-child(3):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 900px;
+}
+
+.icon-header-message-card-grid:has(.card-container:nth-child(4):last-child) {
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 1200px;
 }
 
 /* Featured Portfolio Grid */
@@ -755,7 +711,21 @@ try {
 @media (max-width: 1024px) {
   .icon-header-message-card-grid {
     grid-template-columns: repeat(2, 1fr);
+    justify-content: center;
+    max-width: 600px;
   }
+  
+  /* Override the count-based rules for smaller screens */
+  .icon-header-message-card-grid:has(.card-container:nth-child(3):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 600px;
+  }
+  
+  .icon-header-message-card-grid:has(.card-container:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 600px;
+  }
+  
   .featured-portfolio-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -782,7 +752,18 @@ try {
 @media (max-width: 640px) {
   .icon-header-message-card-grid {
     grid-template-columns: 1fr;
+    justify-content: center;
+    max-width: 340px;
   }
+  
+  /* Override all count-based rules for mobile */
+  .icon-header-message-card-grid:has(.card-container:nth-child(2):last-child),
+  .icon-header-message-card-grid:has(.card-container:nth-child(3):last-child),
+  .icon-header-message-card-grid:has(.card-container:nth-child(4):last-child) {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+  }
+  
   .featured-portfolio-grid {
     grid-template-columns: 1fr;
   }

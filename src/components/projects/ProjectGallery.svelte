@@ -9,7 +9,6 @@
   interface UseCase {
     title: string;
     description: string;
-    href: string;
   }
   
   interface Project {
@@ -17,7 +16,9 @@
     title: string;
     subtitle: string;
     useCases: UseCase[];
-    content?: string;
+    hasSidebar?: boolean;
+    demoSteps?: any[] | null;
+    content?: any;
   }
   
   export let projects: Project[] = [];
@@ -42,27 +43,139 @@
       isClosing = false;
       document.body.style.overflow = 'hidden';
       
-      // Inject Augment-It content if needed
-      if (projectId === 'augment-it') {
+      // Inject project content if it exists
+      const project = projects.find(p => p.id === projectId);
+      if (project && project.content) {
         setTimeout(() => {
-          const sourceContent = document.getElementById('augment-it-full-content');
-          const targetContent = document.getElementById('augment-it-content');
-          const navigationTarget = document.getElementById('augment-it-navigation');
+          const sourceContent = document.getElementById(`${projectId}-full-content`);
+          const targetContent = document.getElementById(`${projectId}-content`);
+          const navigationTarget = document.getElementById(`${projectId}-navigation`);
           
           if (sourceContent && targetContent) {
             // Clone the source content
             const clonedContent = sourceContent.cloneNode(true) as Element;
             
-            // Extract the entire sidebar from StorySidebarTree__VariantB
-            const sidebar = clonedContent.querySelector('.sidebar');
-            if (sidebar && navigationTarget) {
-              navigationTarget.innerHTML = sidebar.innerHTML;
+            if (project.hasSidebar && navigationTarget) {
+              // Extract the entire sidebar from StorySidebarTree__VariantB
+              const sidebar = clonedContent.querySelector('.sidebar');
+              if (sidebar) {
+                navigationTarget.innerHTML = sidebar.innerHTML;
+              }
             }
             
-            // Extract the content area from StorySidebarTree__VariantB
-            const contentArea = clonedContent.querySelector('.content-area');
+            // Extract the content area
+            let contentArea;
+            if (project.hasSidebar) {
+              contentArea = clonedContent.querySelector('.content-area');
+            } else {
+              // For simple content, the entire cloned content is the content area
+              contentArea = clonedContent.querySelector('.project-content-simple');
+            }
+            
             if (contentArea && targetContent) {
               targetContent.innerHTML = contentArea.innerHTML;
+              
+              // Check for mermaid charts in the injected content
+              const mermaidCharts = targetContent.querySelectorAll('.mermaid');
+              
+              // Wait for Mermaid library to be loaded before rendering
+              if (mermaidCharts.length > 0) {
+                const waitForMermaid = () => {
+                  if ((window as any).mermaid && (window as any).renderMermaidCharts) {
+                    // Clear the processed state and re-render each chart
+                    mermaidCharts.forEach((chart) => {
+                      // Get the original mermaid code from the expand button
+                      const expandBtn = chart.parentElement?.querySelector('.mermaid-expand-btn');
+                      const originalCode = expandBtn?.getAttribute('data-mermaid-code');
+                      
+                      if (originalCode) {
+                        // Clear the chart and remove processed attribute
+                        chart.innerHTML = '';
+                        chart.removeAttribute('data-processed');
+                        
+                        // Set the original mermaid code
+                        chart.textContent = originalCode;
+                      }
+                    });
+                    
+                    // Now render all charts
+                    (window as any).mermaid.run();
+                    
+                    // Re-initialize modal functionality for the newly rendered charts
+                    setTimeout(() => {
+                      const expandButtons = targetContent.querySelectorAll('.mermaid-expand-btn');
+                      
+                      expandButtons.forEach(expandBtn => {
+                        const chartId = expandBtn.getAttribute('data-chart-id');
+                        const modal = document.getElementById(`modal-${chartId}`);
+                        
+                        if (modal) {
+                          const closeBtn = modal.querySelector('.mermaid-modal-close-btn');
+                          let previouslyFocusedElement;
+                          
+                          const openModal = () => {
+                            previouslyFocusedElement = document.activeElement;
+                            const rawMermaidCode = expandBtn.getAttribute('data-mermaid-code');
+                            const modalMermaidDiv = modal.querySelector('.mermaid');
+                            
+                            if (modalMermaidDiv && rawMermaidCode && (window as any).mermaid) {
+                              // Restore raw code and prepare for re-render
+                              modalMermaidDiv.innerHTML = ''; // Clear current content
+                              modalMermaidDiv.removeAttribute('data-processed'); // Allow mermaid to reprocess
+                              modalMermaidDiv.textContent = rawMermaidCode; // Set the raw mermaid code
+
+                              // Ensure modal is visible BEFORE rendering
+                              modal.hidden = false;
+                              setTimeout(() => {
+                                modal.setAttribute('data-visible', 'true');
+
+                                // Now render the chart in the modal
+                                try {
+                                  (window as any).mermaid.run({ nodes: [modalMermaidDiv] });
+                                } catch (e) {
+                                  console.error('Error rendering Mermaid chart in modal:', e);
+                                  modalMermaidDiv.textContent = 'Error rendering chart.';
+                                }
+
+                                document.body.style.overflow = 'hidden';
+                                expandBtn.setAttribute('aria-expanded', 'true');
+                                if (closeBtn) (closeBtn as HTMLElement).focus();
+                              }, 10);
+                            }
+                          };
+                          
+                          const closeModal = () => {
+                            modal.setAttribute('data-visible', 'false');
+                            setTimeout(() => {
+                              modal.hidden = true;
+                            }, 300);
+                            document.body.style.overflow = '';
+                            expandBtn.setAttribute('aria-expanded', 'false');
+                            if (previouslyFocusedElement) {
+                              (previouslyFocusedElement as HTMLElement).focus();
+                            }
+                          };
+                          
+                          expandBtn.addEventListener('click', openModal);
+                          if (closeBtn) {
+                            closeBtn.addEventListener('click', closeModal);
+                          }
+                          
+                          modal.addEventListener('keydown', (event) => {
+                            if (event.key === 'Escape') {
+                              closeModal();
+                            }
+                          });
+                        }
+                      });
+                    }, 500);
+                    
+                  } else {
+                    setTimeout(waitForMermaid, 100);
+                  }
+                };
+                waitForMermaid();
+              }
             }
           }
         }, 100);
@@ -83,8 +196,59 @@
   }
   
   onMount(() => {
+    // Ensure tooltips can break out of container constraints
+    const tooltipWrappers = document.querySelectorAll('.tooltip-wrapper');
+    tooltipWrappers.forEach(wrapper => {
+      (wrapper as HTMLElement).style.overflow = 'visible';
+      (wrapper as HTMLElement).style.position = 'relative';
+    });
+    
+    // Handle tooltip positioning for project overlay
+    const handleTooltipPositioning = () => {
+      const projectOverlay = document.querySelector('.project-overlay');
+      if (projectOverlay) {
+        const tooltips = projectOverlay.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+          const wrapper = tooltip.closest('.tooltip-wrapper');
+          if (wrapper) {
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            if (tooltip.classList.contains('tooltip--right')) {
+              (tooltip as HTMLElement).style.left = (wrapperRect.right + 8) + 'px';
+              (tooltip as HTMLElement).style.top = (wrapperRect.top + wrapperRect.height / 2 - tooltipRect.height / 2) + 'px';
+            } else if (tooltip.classList.contains('tooltip--left')) {
+              (tooltip as HTMLElement).style.left = (wrapperRect.left - tooltipRect.width - 8) + 'px';
+              (tooltip as HTMLElement).style.top = (wrapperRect.top + wrapperRect.height / 2 - tooltipRect.height / 2) + 'px';
+            } else if (tooltip.classList.contains('tooltip--top')) {
+              (tooltip as HTMLElement).style.left = (wrapperRect.left + wrapperRect.width / 2 - tooltipRect.width / 2) + 'px';
+              (tooltip as HTMLElement).style.top = (wrapperRect.top - tooltipRect.height - 8) + 'px';
+            } else if (tooltip.classList.contains('tooltip--bottom')) {
+              (tooltip as HTMLElement).style.left = (wrapperRect.left + wrapperRect.width / 2 - tooltipRect.width / 2) + 'px';
+              (tooltip as HTMLElement).style.top = (wrapperRect.bottom + 8) + 'px';
+            }
+          }
+        });
+      }
+    };
+    
+    // Set up tooltip positioning observers
+    const observer = new MutationObserver(handleTooltipPositioning);
+    const projectOverlay = document.querySelector('.project-overlay');
+    if (projectOverlay) {
+      observer.observe(projectOverlay, { childList: true, subtree: true });
+    }
+    
+    // Also handle on hover
+    document.addEventListener('mouseover', (e) => {
+      if ((e.target as Element).closest('.tooltip-wrapper')) {
+        setTimeout(handleTooltipPositioning, 10);
+      }
+    });
+    
     return () => {
       document.body.style.overflow = 'auto';
+      observer.disconnect();
     };
   });
 </script>
@@ -103,10 +267,10 @@
       {#if project.useCases && project.useCases.length > 0}
         <div class="usecases">
           {#each project.useCases as useCase}
-            <a href={useCase.href} class="usecase-card">
+            <div class="usecase-card">
               <h3 class="usecase-title">{useCase.title}</h3>
               <p class="usecase-desc">{useCase.description}</p>
-            </a>
+            </div>
           {/each}
         </div>
       {/if}
@@ -152,24 +316,36 @@
       </button>
       <div class="project-full-content">
         {#if currentProject}
-{#if expandedProject === 'augment-it'}
-            <div class="augment-it-content">
-              <div class="project-layout">
-                <aside class="project-sidebar">
-                  <div id="augment-it-navigation">
-                    <!-- Navigation will be injected here from ContentSection_SidebarTreeVariantB -->
-                  </div>
-                </aside>
-                <main class="project-main">
+          {#if currentProject.content}
+            <div class="project-content-wrapper">
+              {#if currentProject.hasSidebar}
+                <div class="project-layout">
+                  <aside class="project-sidebar">
+                    <div id="{currentProject.id}-navigation">
+                      <!-- Navigation will be injected here from ContentSection_SidebarTreeVariantB -->
+                    </div>
+                  </aside>
+                  <main class="project-main">
+                    <header class="project-header">
+                      <h1>{currentProject.title}</h1>
+                      <p class="project-subtitle">{currentProject.subtitle}</p>
+                    </header>
+                    <div id="{currentProject.id}-content" class="project-content">
+                      <!-- Additional content will be injected here -->
+                    </div>
+                  </main>
+                </div>
+              {:else}
+                <div class="project-content-simple-layout">
                   <header class="project-header">
-                    <h1>Augment-It</h1>
-                    <p class="project-subtitle">Data Augmentation Workflow with Microfrontends</p>
+                    <h1>{currentProject.title}</h1>
+                    <p class="project-subtitle">{currentProject.subtitle}</p>
                   </header>
-                  <div id="augment-it-content" class="project-content">
-                    <!-- Additional content will be injected here -->
+                  <div id="{currentProject.id}-content" class="project-content">
+                    <!-- Content will be injected here -->
                   </div>
-                </main>
-              </div>
+                </div>
+              {/if}
             </div>
           {:else}
             <div class="placeholder-content">
@@ -259,7 +435,6 @@
     display: grid; 
     gap: 0.5rem; 
     padding: 1.25rem; 
-    text-decoration: none;
     color: var(--clr-heading);
     background: linear-gradient(135deg,
       color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 85%) 0%,
@@ -270,7 +445,6 @@
     box-shadow: 
       0 3px 12px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 88%),
       inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
   }
@@ -289,21 +463,8 @@
     );
   }
   
-  .usecase-card:hover { 
-    transform: translateY(-2px) scale(1.02); 
-    box-shadow: 
-      0 8px 24px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 82%),
-      inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
-    border-color: color-mix(in oklab, var(--clr-lossless-primary), transparent 60%);
-  }
-  
   .usecase-icon { 
     opacity: 0.9; 
-    transition: opacity 200ms ease;
-  }
-  
-  .usecase-card:hover .usecase-icon {
-    opacity: 1;
   }
   
   .usecase-title { 
@@ -455,7 +616,7 @@
     background: color-mix(in oklab, black, transparent 70%);
   }
 
-  /* Fix bullet points in injected Augment-It content */
+  /* Fix bullet points in injected project content */
   :global(.project-content .sequential-section),
   :global(.project-content .orientation-section) {
     position: relative;
@@ -506,7 +667,7 @@
   }
 
   /* Project layout structure */
-  .augment-it-content {
+  .project-content-wrapper {
     height: 100%;
     overflow: hidden;
   }
@@ -523,6 +684,7 @@
     border-right: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%);
     padding: 1.5rem;
     overflow-y: auto;
+    overflow-x: visible; /* Allow tooltips to extend beyond sidebar boundaries */
   }
 
   .project-main {
@@ -530,6 +692,15 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+    overflow-x: visible; /* Allow tooltips to extend beyond main container boundaries */
+  }
+
+  .project-content-simple-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    overflow-x: visible;
   }
 
   .project-header {
@@ -554,10 +725,84 @@
   .project-content {
     flex: 1;
     overflow-y: auto;
+    overflow-x: visible; /* Allow mermaid charts to break out */
     padding: 2rem;
     color: var(--clr-body);
   }
 
+  /* Minimal CSS to ensure mermaid charts work properly in project overlay */
+  :global(.project-content .mermaid-breakout) {
+    overflow: visible;
+  }
+
+  :global(.project-content .mermaid-chart-shell) {
+    overflow: visible;
+  }
+
+  /* Remove custom mermaid styling - let them use the original MermaidChart.astro styles */
+  
+  /* Comprehensive tooltip overrides to escape container constraints */
+  :global(.project-overlay .tooltip-wrapper) {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  
+  :global(.project-overlay .tooltip) {
+    position: fixed !important;
+    z-index: 10000 !important;
+    max-width: 400px !important;
+    width: auto !important;
+  }
+  
+  /* Ensure all project overlay containers allow tooltips to break out */
+  :global(.project-overlay),
+  :global(.project-content),
+  :global(.project-full-content),
+  :global(.project-content-wrapper),
+  :global(.project-layout),
+  :global(.project-main),
+  :global(.project-sidebar),
+  :global(.project-content-simple-layout) {
+    overflow-x: visible !important;
+  }
+  
+  /* Force tooltips to use fixed positioning to escape all containers */
+  :global(.project-overlay .tooltip--right) {
+    position: fixed !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  :global(.project-overlay .tooltip--top) {
+    position: fixed !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  :global(.project-overlay .tooltip--bottom) {
+    position: fixed !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  :global(.project-overlay .tooltip--left) {
+    position: fixed !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  /* Ensure tooltip can extend beyond any container boundaries */
+  :global(.project-overlay *) {
+    overflow-x: visible !important;
+  }
   
   .mermaid-modal-close-btn :global(svg) {
     width: 1.4rem;

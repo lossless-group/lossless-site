@@ -5,62 +5,120 @@ import Layout from '@layouts/Layout.astro';
 import CollectionReaderLayout from '@layouts/CollectionReaderLayout.astro';
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from 'astro:content';
-import { toProperCase } from '@utils/slugify';
+import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
 import { processEntries } from '@utils/slugify';
+import { extractBacklinkPaths } from '@utils/backlink-parser';
+import { contentBasePath } from '@utils/envUtils';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 export async function getStaticPaths() {
-  const allClientEssays = await getCollection('client-content');
+  const allEssays = await getCollection('essays');
   const paths = [];
 
-  // Group essays by client
-  const essaysByClient = new Map();
-  
-  for (const essay of allClientEssays) {
-    const parts = essay.id.split('/');
-    if (parts.length >= 3 && parts[1] === 'essays') {
-      const client = parts[0];
-      if (!essaysByClient.has(client)) {
-        essaysByClient.set(client, []);
-      }
-      essaysByClient.get(client).push(essay);
-    }
-  }
+  // Get all client MOC files to find which essays each client should have access to
+  try {
+    const mocFiles = await fs.readdir(path.resolve(contentBasePath, 'moc'));
+    
+    for (const mocFile of mocFiles) {
+      if (!mocFile.endsWith('.md')) continue;
+      
+      const client = mocFile.replace('.md', '');
+      const clientLower = client.toLowerCase();
+      
+      try {
+        const clientMdPath = path.resolve(contentBasePath, 'moc', `${client}.md`);
+        const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+        
+        // Extract essays from :::reader directive
+        const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
+        if (readerBlockMatch) {
+          const block = readerBlockMatch[1] || '';
+          const essayPaths = extractBacklinkPaths(block);
+          
+          if (essayPaths.length > 0) {
+            // Add the main reader page for each client (no slug)
+            paths.push({
+              params: { 
+                client: clientLower,
+                slug: undefined
+              },
+              props: { 
+                client, 
+                actualClientName: client,
+                essaySlug: undefined,
+                essay: undefined
+              }
+            });
 
-  // Generate paths for each client
-  for (const [originalClient, essays] of essaysByClient) {
-    const client = originalClient.toLowerCase();
-    // Add the main reader page for each client (no slug)
-    paths.push({
-      params: { 
-        client,
-        slug: undefined
-      },
-      props: { 
-        client: originalClient, 
-        actualClientName: originalClient,
-        essaySlug: undefined,
-        essay: undefined
-      }
-    });
-
-    // Add individual essay pages for each client
-    for (const essay of essays) {
-      const processedEssay = processEntries([essay])[0];
-      const essaySlug = processedEssay.slug.split('/').slice(1).join('/');
-
-      paths.push({
-        params: { 
-          client,
-          slug: essaySlug
-        },
-        props: { 
-          client: originalClient, 
-          actualClientName: originalClient,
-          essaySlug,
-          essay
+                         // Add individual essay pages for each client
+             for (const essayPath of essayPaths) {
+               let transformedPath: string;
+               let essaySlug: string;
+               
+               // Handle non-path backlinks (e.g., [[Essay Title]]) by assuming they're essays
+               if (!essayPath.includes('/')) {
+                 // For non-path backlinks, construct the path manually
+                 const slugifiedTitle = slugify(essayPath);
+                 transformedPath = `/read/essays/${slugifiedTitle}`;
+                 essaySlug = `essays/${slugifiedTitle}`;
+               } else {
+                 // Use route manager to transform the path and find the essay
+                 transformedPath = transformContentPathToRoute(essayPath);
+                 
+                 // Extract the essay slug from the transformed path
+                 // e.g., "/read/essays/a-new-standard-for-chaining-ai-operations" -> "essays/a-new-standard-for-chaining-ai-operations"
+                 const pathSegments = transformedPath.split('/');
+                 // Remove the leading empty string and "read" part, keep "essays" and the slug
+                 essaySlug = pathSegments.slice(2).join('/');
+               }
+               
+               console.log(`Processing essay path: ${essayPath} -> ${transformedPath} -> ${essaySlug}`);
+               
+               // Find the essay by matching the slug
+               const matchingEssay = allEssays.find(essay => {
+                 // Use getReferenceSlug to create the same slug format as the route manager
+                 const essaySlugified = getReferenceSlug(essay.id);
+                 // Extract just the filename part for matching and slugify it
+                 const essayFilename = essaySlugified.split('/').pop();
+                 const slugFilename = essaySlug.split('/').pop();
+                 // Slugify the slug filename to match the essay filename format
+                 const slugifiedSlugFilename = slugify(slugFilename || '');
+                 const matches = essayFilename === slugifiedSlugFilename;
+                 if (matches) {
+                   console.log(`Found matching essay: ${essay.id} -> ${essaySlugified}`);
+                 }
+                 return matches;
+               });
+              
+              if (matchingEssay) {
+                paths.push({
+                  params: { 
+                    client: clientLower,
+                    slug: essaySlug
+                  },
+                  props: { 
+                    client, 
+                    actualClientName: client,
+                    essaySlug,
+                    essay: matchingEssay
+                  }
+                });
+              } else {
+                console.warn(`Could not find essay for path: ${essayPath} -> ${transformedPath} -> ${essaySlug}`);
+                // Log all available essay slugs for debugging
+                console.log('Available essay slugs:', allEssays.map(e => `${e.id} -> ${getReferenceSlug(e.id)}`));
+              }
+            }
+          }
         }
-      });
+      } catch (err) {
+        console.warn(`Error processing MOC file for client ${client}:`, err);
+      }
     }
+  } catch (err) {
+    console.warn('Error reading MOC directory:', err);
   }
 
   return paths;
@@ -69,22 +127,90 @@ export async function getStaticPaths() {
 interface Props {
   client: string;
   essaySlug?: string;
-  essay?: CollectionEntry<'client-content'>;
+  essay?: CollectionEntry<'essays'>;
 }
 
 const { client, essaySlug, essay } = Astro.props;
 
-const allClientEssays = await getCollection('client-content');
-const rawEssays = allClientEssays.filter(e => e.id.startsWith(`${client.toLowerCase()}/essays/`));
-const essays = processEntries(rawEssays);
+// Load essays for this client from the MOC file
+let clientEssays: CollectionEntry<'essays'>[] = [];
+try {
+  const clientMdPath = path.resolve(contentBasePath, 'moc', `${client}.md`);
+  const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+  
+  // Extract essays from :::reader directive
+  const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
+  if (readerBlockMatch) {
+    const block = readerBlockMatch[1] || '';
+    const essayPaths = extractBacklinkPaths(block);
+    
+    if (essayPaths.length > 0) {
+      const allEssays = await getCollection('essays');
+      
+             // Match essays by using route manager to transform paths
+       for (const essayPath of essayPaths) {
+         let transformedPath: string;
+         let essaySlug: string;
+         
+         // Handle non-path backlinks (e.g., [[Essay Title]]) by assuming they're essays
+         if (!essayPath.includes('/')) {
+           // For non-path backlinks, construct the path manually
+           const slugifiedTitle = slugify(essayPath);
+           transformedPath = `/read/essays/${slugifiedTitle}`;
+           essaySlug = `essays/${slugifiedTitle}`;
+         } else {
+           // Use route manager to transform the path and find the essay
+           transformedPath = transformContentPathToRoute(essayPath);
+           
+           // Extract the essay slug from the transformed path
+           const pathSegments = transformedPath.split('/');
+           // Remove the leading empty string and "read" part, keep "essays" and the slug
+           essaySlug = pathSegments.slice(2).join('/');
+         }
+         
+         console.log(`Loading essay for client: ${essayPath} -> ${transformedPath} -> ${essaySlug}`);
+         
+         // Find the essay by matching the slug
+         const matchingEssay = allEssays.find(essay => {
+           // Use getReferenceSlug to create the same slug format as the route manager
+           const essaySlugified = getReferenceSlug(essay.id);
+           // Extract just the filename part for matching and slugify it
+           const essayFilename = essaySlugified.split('/').pop();
+           const slugFilename = essaySlug.split('/').pop();
+           // Slugify the slug filename to match the essay filename format
+           const slugifiedSlugFilename = slugify(slugFilename || '');
+           const matches = essayFilename === slugifiedSlugFilename;
+           if (matches) {
+             console.log(`Found matching essay for client: ${essay.id} -> ${essaySlugified}`);
+           }
+           return matches;
+         });
+         
+         if (matchingEssay) {
+           clientEssays.push(matchingEssay);
+         } else {
+           console.warn(`Could not find essay for path: ${essayPath} -> ${transformedPath} -> ${essaySlug}`);
+         }
+       }
+    }
+  }
+} catch (err) {
+  console.warn(`Error loading essays for client ${client}:`, err);
+}
+
+// Process essays for display - cast to BaseCollectionEntry type
+const essays = processEntries(clientEssays as any);
 
 // Find the current essay
 let currentEssay = essays[0]; // Default to first essay
 if (essaySlug) {
+  // Extract just the filename part for matching
+  const slugFilename = essaySlug.split('/').pop();
+  // Slugify the slug filename to match the essay filename format
+  const slugifiedSlugFilename = slugify(slugFilename || '');
   currentEssay = essays.find(e => {
-    const parts = e.slug.split('/');
-    const slugWithoutClient = parts.slice(1).join('/'); // Remove first element (client name)
-    return slugWithoutClient === essaySlug;
+    const essayFilename = e.slug.split('/').pop();
+    return essayFilename === slugifiedSlugFilename;
   }) || essays[0];
 }
 
@@ -93,7 +219,7 @@ const frontmatter = {
   title: `${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`,
   description: `Strategic insights and recommendations for ${toProperCase(client)}`,
   lede: `Strategic insights and recommendations for ${toProperCase(client)}`,
-  banner_image: currentEssay?.data?.banner_image || currentEssay?.data?.portrait_image
+  banner_image: (currentEssay?.data?.banner_image || currentEssay?.data?.portrait_image) as string | undefined
 };
 
 ---
@@ -104,7 +230,7 @@ const frontmatter = {
   <div class="reader-wrapper">
     {currentEssay ? (
       <CollectionReaderLayout 
-        collection={`client-content/${client}`} 
+        collection="essays" 
         entry={currentEssay} 
         essays={essays} 
         mode="client"
@@ -123,7 +249,7 @@ const frontmatter = {
       subtitle="Strategic insights and recommendations"
       description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
       ctaText="Back to Portal"
-      ctaUrl={`/client/${toProperCase(client)}`}
+      ctaUrl={`/client/${client}`}
       image={{
         src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
         alt: `${toProperCase(client)} Logo`
@@ -131,7 +257,7 @@ const frontmatter = {
       alignment="left"
       fullBleed={true}
       animate={true}
-      class="mb-0"
+      classes="mb-0"
       style="margin-bottom: 0;"
       innerStyle="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
   />
@@ -140,9 +266,8 @@ const frontmatter = {
 
 <script>
   // Scroll to reader-wrapper if viewing a specific essay (slug is provided)
-  const urlParams = new URLSearchParams(window.location.search);
   const pathSegments = window.location.pathname.split('/');
-  const hasEssaySlug = pathSegments.includes('essays');
+  const hasEssaySlug = pathSegments.length > 4; // /client/[client]/read/[essay-slug]
   
   if (hasEssaySlug) {
     document.addEventListener('DOMContentLoaded', () => {

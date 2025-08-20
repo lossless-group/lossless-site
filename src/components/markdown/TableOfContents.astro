@@ -668,28 +668,21 @@ if (DEBUG_TOC) {
 
 </style>
 
-<script>
+<script define:vars={{ DEBUG_TOC }}>
 class TableOfContentsManager {
-  private tocSidebar: HTMLElement | null;
-  private tocScrollArea: HTMLElement | null;
-  private tocProgressFill: HTMLElement | null;
-  private collapseBtn: HTMLElement | null;
-  private tocLinks: NodeListOf<Element> | null;
-  private headings: Array<{element: Element, id: string, top: number}>;
-  private currentActiveLink: HTMLElement | null;
-  private scrollTimeout: ReturnType<typeof setTimeout> | null;
-
   constructor() {
     this.tocSidebar = document.getElementById('toc-sidebar');
     this.tocScrollArea = document.getElementById('toc-scroll-area');
     this.tocProgressFill = document.getElementById('toc-progress-fill');
-    this.collapseBtn = this.tocSidebar?.querySelector('.toc-collapse-btn') as HTMLElement | null;
+    this.collapseBtn = this.tocSidebar?.querySelector('.toc-collapse-btn');
     this.tocLinks = this.tocSidebar?.querySelectorAll('.toc-link') || null;
     this.headings = [];
     this.currentActiveLink = null;
     this.scrollTimeout = null;
     
-    console.log('[TOC] Progress fill element found:', !!this.tocProgressFill);
+    if (DEBUG_TOC) {
+      console.log('[TOC] Progress fill element found:', !!this.tocProgressFill);
+    }
     
     if (this.tocSidebar) {
       this.init();
@@ -697,13 +690,17 @@ class TableOfContentsManager {
   }
 
   init() {
-    console.log('[TOC] Initializing TableOfContentsManager');
+    if (DEBUG_TOC) {
+      console.log('[TOC] Initializing TableOfContentsManager');
+    }
     this.collectHeadings();
     this.setupEventListeners();
     this.updateActiveLink();
     this.updateScrollProgress();
-    console.log('[TOC] Found', this.tocLinks?.length || 0, 'TOC links');
-    console.log('[TOC] Found', this.headings.length, 'headings on page');
+    if (DEBUG_TOC) {
+      console.log('[TOC] Found', this.tocLinks?.length || 0, 'TOC links');
+      console.log('[TOC] Found', this.headings.length, 'headings on page');
+    }
   }
 
   collectHeadings() {
@@ -746,7 +743,7 @@ class TableOfContentsManager {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.toggleSection(button as HTMLElement);
+        this.toggleSection(button);
       });
     });
 
@@ -755,14 +752,18 @@ class TableOfContentsManager {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const href = link.getAttribute('href');
-        console.log('[TOC] Click event fired for:', href);
+        if (DEBUG_TOC) {
+          console.log('[TOC] Click event fired for:', href);
+        }
         
         // Direct, simple approach
         if (href && href.startsWith('#')) {
           const id = href.substring(1);
           const element = document.getElementById(id);
-          console.log('[TOC] Looking for element with id:', id, 'Found:', !!element);
-          console.log('[TOC] Element:', element);
+          if (DEBUG_TOC) {
+            console.log('[TOC] Looking for element with id:', id, 'Found:', !!element);
+            console.log('[TOC] Element:', element);
+          }
           if (element) {
             // Add scroll margin
             element.style.scrollMarginTop = '150px';
@@ -780,7 +781,9 @@ class TableOfContentsManager {
     const collectionReaderPane = document.querySelector('.collection-reader-pane');
     if (collectionReaderPane) {
       collectionReaderPane.addEventListener('scroll', () => {
-        console.log('[TOC] Collection reader pane scroll event fired');
+        if (DEBUG_TOC) {
+          console.log('[TOC] Collection reader pane scroll event fired');
+        }
         if (scrollTimeout) {
           cancelAnimationFrame(scrollTimeout);
         }
@@ -792,7 +795,9 @@ class TableOfContentsManager {
     } else {
       // Fallback to window scroll if collection-reader-pane not found
       window.addEventListener('scroll', () => {
-        console.log('[TOC] Window scroll event fired (fallback)');
+        if (DEBUG_TOC) {
+          console.log('[TOC] Window scroll event fired (fallback)');
+        }
         if (scrollTimeout) {
           cancelAnimationFrame(scrollTimeout);
         }
@@ -825,12 +830,14 @@ class TableOfContentsManager {
     }
   }
 
-    toggleSection(button: HTMLElement) {
+  toggleSection(button) {
     const isExpanded = button.getAttribute('data-expanded') === 'true';
     const parentSlug = button.getAttribute('data-parent-slug');
     const chevron = button.querySelector('.toc-chevron');
     
-    console.log('[TOC] Toggling section:', parentSlug, 'Currently expanded:', isExpanded);
+    if (DEBUG_TOC) {
+      console.log('[TOC] Toggling section:', parentSlug, 'Currently expanded:', isExpanded);
+    }
     
     // Find the parent item
     const parentItem = this.tocSidebar?.querySelector(`[data-slug="${parentSlug}"]`);
@@ -840,7 +847,9 @@ class TableOfContentsManager {
     const sublist = parentItem.querySelector('.toc-sublist');
     if (!sublist) return;
     
-    console.log('[TOC] Found sublist for', parentSlug);
+    if (DEBUG_TOC) {
+      console.log('[TOC] Found sublist for', parentSlug);
+    }
     
     if (isExpanded) {
       // Collapse: hide sublist
@@ -856,8 +865,6 @@ class TableOfContentsManager {
       chevron?.classList.add('expanded');
     }
   }
-
-
 
   updateActiveLink() {
     if (!this.headings.length || !this.tocLinks) return;
@@ -888,9 +895,11 @@ class TableOfContentsManager {
 
     // Update active link
     if (activeHeading) {
-      const activeLink = this.tocSidebar?.querySelector(`[data-slug="${activeHeading.id}"]`) as HTMLElement | null;
+      const activeLink = this.tocSidebar?.querySelector(`[data-slug="${activeHeading.id}"]`);
       
-      console.log('[TOC] Active heading:', activeHeading.id, 'Found link:', !!activeLink);
+      if (DEBUG_TOC) {
+        console.log('[TOC] Active heading:', activeHeading.id, 'Found link:', !!activeLink);
+      }
       
       if (activeLink !== this.currentActiveLink) {
         // Remove previous active state
@@ -900,7 +909,9 @@ class TableOfContentsManager {
           this.currentActiveLink.style.background = '';
           this.currentActiveLink.style.boxShadow = '';
           this.currentActiveLink.style.fontWeight = '';
-          console.log('[TOC] Removed active styles from:', this.currentActiveLink.textContent);
+          if (DEBUG_TOC) {
+            console.log('[TOC] Removed active styles from:', this.currentActiveLink.textContent);
+          }
         }
         
         // Add new active state with direct style manipulation
@@ -910,7 +921,9 @@ class TableOfContentsManager {
           activeLink.style.background = 'rgba(255, 255, 255, 0.1)';
           activeLink.style.boxShadow = 'inset 0 0 0 1px var(--clr-lossless-accent--brightest)';
           activeLink.style.fontWeight = '600';
-          console.log('[TOC] Added active styles to:', activeLink.textContent);
+          if (DEBUG_TOC) {
+            console.log('[TOC] Added active styles to:', activeLink.textContent);
+          }
         }
         
         this.currentActiveLink = activeLink;
@@ -921,7 +934,7 @@ class TableOfContentsManager {
     }
   }
 
-  scrollTocToActiveItem(activeLink: HTMLElement) {
+  scrollTocToActiveItem(activeLink) {
     if (!activeLink || !this.tocScrollArea) return;
 
     const containerRect = this.tocScrollArea.getBoundingClientRect();
@@ -931,7 +944,9 @@ class TableOfContentsManager {
       const scrollTop = this.tocScrollArea.scrollTop;
       const linkOffsetTop = activeLink.offsetTop;
       const containerHeight = this.tocScrollArea.clientHeight;
-      console.log('[TOC] Scrolling to active item:', linkOffsetTop - containerHeight / 2);
+      if (DEBUG_TOC) {
+        console.log('[TOC] Scrolling to active item:', linkOffsetTop - containerHeight / 2);
+      }
       
       this.tocScrollArea.scrollTo({
         top: linkOffsetTop - containerHeight / 4,
@@ -942,7 +957,9 @@ class TableOfContentsManager {
 
   updateScrollProgress() {
     if (!this.tocProgressFill) {
-      console.log('[TOC] Progress fill element not found');
+      if (DEBUG_TOC) {
+        console.log('[TOC] Progress fill element not found');
+      }
       return;
     }
 

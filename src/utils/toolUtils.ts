@@ -360,6 +360,157 @@ export function parseMocContent(content: string): { rawToolIds: string[], tagFil
 }
 
 /**
+ * Parse MOC content and extract tool IDs and tag filters from toolingGallery directives
+ * This function extracts content from :::toolingGallery ... ::: blocks in MOC files
+ * 
+ * @param content The markdown content from the MOC file
+ * @returns Object containing rawToolIds and tagFilters arrays
+ */
+export function parseToolingGalleryFromMoc(content: string): { rawToolIds: string[], tagFilters: string[] } {
+  const rawToolIds: string[] = [];
+  const tagFilters: string[] = [];
+  
+  // Extract the toolingGallery directive block
+  const toolingGalleryMatch = content.match(/:::toolingGallery([\s\S]*?):::/i);
+  if (!toolingGalleryMatch) {
+    console.log('[parseToolingGalleryFromMoc] No toolingGallery directive found');
+    return { rawToolIds, tagFilters };
+  }
+  
+  const blockContent = toolingGalleryMatch[1] || '';
+  console.log('[parseToolingGalleryFromMoc] Found toolingGallery block:', blockContent);
+  
+  // Split content into lines and handle different line endings
+  const lines = blockContent.split(/\r?\n/);
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    // Skip empty lines
+    if (!trimmedLine) continue;
+    
+    console.log('[parseToolingGalleryFromMoc] Processing line:', trimmedLine);
+    
+    // Check if this is a tag filter line
+    const tagMatch = trimmedLine.match(/^-\s*tag:\s*(?:\[\[(.*?)\]\]|(.*))/i);
+    if (tagMatch) {
+      const tagName = (tagMatch[1] ?? tagMatch[2]).trim();
+      if (tagName) {
+        tagFilters.push(tagName);
+        console.log('[parseToolingGalleryFromMoc] Added tag filter:', tagName);
+      }
+      continue;
+    }
+    
+    // Check if this is a tool link (backlink format)
+    const backlinkMatch = trimmedLine.match(/^-\s*\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      const toolId = backlinkMatch[1].trim();
+      rawToolIds.push(toolId);
+      console.log('[parseToolingGalleryFromMoc] Added tool ID:', toolId);
+      continue;
+    }
+    
+    // Check if this is a regular list item with a link
+    const linkMatch = trimmedLine.match(/^-\s*\[.*?\]\((.*?)\)/);
+    if (linkMatch) {
+      const url = linkMatch[1];
+      // Remove leading slash and .md extension if present
+      const toolPath = url.replace(/^\//, '').replace(/\.md$/, '');
+      rawToolIds.push(toolPath);
+      console.log('[parseToolingGalleryFromMoc] Added tool path:', toolPath);
+    }
+  }
+  
+  console.log('[parseToolingGalleryFromMoc] Final result:', { rawToolIds, tagFilters });
+  return { rawToolIds, tagFilters };
+}
+
+/**
+ * Load tools from a MOC file's toolingGallery directive using the same logic as AstroMarkdown
+ * 
+ * @param mocContent The raw content of the MOC file
+ * @param allTools Array of all available tools
+ * @returns Array of resolved tools
+ */
+export async function loadToolsFromMocToolingGallery(mocContent: string, allTools: any[]): Promise<any[]> {
+  const { rawToolIds, tagFilters } = parseToolingGalleryFromMoc(mocContent);
+  
+  const toolMap = new Map(allTools.map(entry => [entry.id, {
+    ...entry.data,
+    id: entry.id,
+    filePath: entry.id,
+  }]));
+
+  const tools: any[] = [];
+  const toolErrors: string[] = [];
+
+  // Resolve toolIds
+  for (const input of rawToolIds) {
+    let id = input;
+
+    const backlinkMatch = input.match(/^\[\[(?!.*?visuals)(.*?)(?:\|.*?)?\]\]$/);
+    if (backlinkMatch) {
+      id = backlinkMatch[1].trim();
+    }
+
+    const resolvedId = await resolveToolId(id, allTools);
+    if (resolvedId && toolMap.has(resolvedId)) {
+      tools.push(toolMap.get(resolvedId));
+    } else {
+      toolErrors.push(input);
+    }
+  }
+
+  // Add tools matching tagFilters
+  const normalizeTag = (tag: string) => slugify(tag).toLowerCase();
+
+  if (tagFilters.length > 0) {
+    console.log('[loadToolsFromMocToolingGallery] Searching for tools with tags:', tagFilters);
+    
+    const tagFilteredTools = allTools
+      .filter(tool => {
+        if (!tool.data.tags) return false;
+        
+        const hasMatchingTag = tool.data.tags.some(tag => {
+          const normalizedToolTag = normalizeTag(tag);
+          const hasMatch = tagFilters.some(filterTag => {
+            const normalizedFilterTag = normalizeTag(filterTag);
+            const matches = normalizedFilterTag === normalizedToolTag;
+            if (matches) {
+              console.log(`[loadToolsFromMocToolingGallery] Tag match found: "${filterTag}" (${normalizedFilterTag}) matches "${tag}" (${normalizedToolTag}) in tool "${tool.id}"`);
+            }
+            return matches;
+          });
+          return hasMatch;
+        });
+        
+        return hasMatchingTag;
+      })
+      .map(entry => ({
+        ...entry.data,
+        id: entry.id,
+        filePath: entry.id,
+      }));
+    
+    console.log('[loadToolsFromMocToolingGallery] Found', tagFilteredTools.length, 'tools matching tags');
+    
+    // Add tag-matched tools if not already added
+    for (const tool of tagFilteredTools) {
+      if (!tools.some(t => t.id === tool.id)) {
+        tools.push(tool);
+      }
+    }
+  }
+
+  if (toolErrors.length > 0) {
+    console.warn('[loadToolsFromMocToolingGallery] Missing tools for IDs:', toolErrors);
+  }
+
+  return tools;
+}
+
+/**
  * Load tools from a MOC entry using the same logic as AstroMarkdown
  * 
  * @param mocEntry The MOC collection entry

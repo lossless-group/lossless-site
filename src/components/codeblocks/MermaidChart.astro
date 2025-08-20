@@ -51,18 +51,18 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
 <style>
 .mermaid-breakout {
   position: relative;
-  z-index: 10; /* Reduced z-index */
-  left: 50%;
-  right: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-  max-width: 100vw;
+  z-index: 10;
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background: transparent;
   box-sizing: border-box;
+  margin: 2rem 0;
+  /* Debug: Add a subtle border to see the container */
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .mermaid-chart-shell {
   position: relative;
@@ -71,13 +71,15 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   max-width: 900px; /* Slightly larger than min-width for wider diagrams */
   margin: 1.25rem 0;
   overflow-x: auto;
-  background: var(--bastille);
+  background: var(--bastille, #19141D);
   box-shadow: 0 4px 48px rgba(0,0,0,0.25);
   border-radius: 10px;
-  border: 2px solid var(--lossless-accent--brightest);
+  border: 2px solid var(--lossless-accent--brightest, #04e5e5);
   margin: 0 auto;
   display: block;
   padding: 1rem;
+  /* Debug: Ensure visibility */
+  min-height: 200px;
 }
 .mermaid {
   background: transparent !important;
@@ -85,6 +87,18 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
+  /* Debug: Ensure SVG is visible */
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Debug: Ensure Mermaid SVG elements are visible */
+.mermaid svg {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
 }
 .mermaid-expand-btn { /* Styles for the new expand button */
   position: absolute;
@@ -257,18 +271,57 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
     }
   };
 
+  console.log('[MermaidChart] Initializing Mermaid chart');
+
   if (!window.__MERMAID_LOADED__) {
+    console.log('[MermaidChart] Loading Mermaid library...');
     import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
       .then((mermaid) => {
+        console.log('[MermaidChart] Mermaid library loaded successfully');
         mermaid.default.initialize(mermaidConfig);
+        console.log('[MermaidChart] Mermaid initialized with config:', mermaidConfig);
+        
+        // Run mermaid on all charts including this one
         mermaid.default.run();
+        console.log('[MermaidChart] Mermaid.run() completed');
+        
         window.mermaid = mermaid.default;
         window.__MERMAID_LOADED__ = true;
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error('[MermaidChart] Failed to load Mermaid library:', error);
+      });
   } else {
+    console.log('[MermaidChart] Mermaid library already loaded, re-initializing...');
     window.mermaid?.initialize(mermaidConfig);
     window.mermaid?.run();
+    console.log('[MermaidChart] Mermaid re-initialization completed');
+  }
+
+  // Function to re-render mermaid charts (for dynamically injected content)
+  window.renderMermaidCharts = function() {
+    console.log('[MermaidChart] renderMermaidCharts called');
+    if (window.mermaid) {
+      console.log('[MermaidChart] Re-rendering all mermaid charts...');
+      window.mermaid.run();
+      console.log('[MermaidChart] Re-render completed');
+    } else {
+      console.warn('[MermaidChart] Mermaid library not available for re-render');
+    }
+  };
+
+  // Initialize renderMermaidCharts function immediately
+  if (!window.renderMermaidCharts) {
+    window.renderMermaidCharts = function() {
+      console.log('[MermaidChart] renderMermaidCharts called (fallback)');
+      if (window.mermaid) {
+        console.log('[MermaidChart] Re-rendering all mermaid charts...');
+        window.mermaid.run();
+        console.log('[MermaidChart] Re-render completed');
+      } else {
+        console.warn('[MermaidChart] Mermaid library not available for re-render');
+      }
+    };
   }
 
 

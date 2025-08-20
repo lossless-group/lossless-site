@@ -50,21 +50,6 @@ const slidesCollection = defineCollection({
     }).passthrough(),
 });
 
-const clientEssaysCollection = defineCollection({
-  loader: glob({
-    pattern: "**/essays/**/*.md", // lowercase "essays"
-    base: resolveContentPath("client-content")
-  }),
-  schema: z.object({
-    aliases: z.union([
-      z.string().transform(str => [str]),
-      z.array(z.string()),
-      z.null(),
-      z.undefined()
-    ]).transform(val => val ?? []).default([]),
-  }).passthrough()
-});
-
 const clientRecommendationsCollection = defineCollection({
   loader: glob({
     pattern: "**/Recommendations/**/*.{md,mdx}", // Include both .md and .mdx files
@@ -479,7 +464,6 @@ export const collections = {
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,
   'to-hero': toHeroCollection,
-  'client-content': clientEssaysCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,

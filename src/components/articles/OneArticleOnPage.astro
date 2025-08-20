@@ -78,15 +78,6 @@ if (originalData?.tags && Array.isArray(originalData.tags)) {
   tags = originalData.tags;
 }
 
-if (DEBUG_ARTICLE) {
-  console.log('\n\n🚀🚀🚀 SERVER LOG FROM OneArticleOnPage.astro 🚀🚀🚀');
-  console.log('Page Path:', Astro.url.pathname);
-  console.log('Raw data prop:', originalData);
-  console.log('Extracted tags:', tags);
-  console.log('Stringified data prop:', JSON.stringify(originalData, null, 2));
-  console.log('🚀🚀🚀 END SERVER LOG 🚀🚀🚀\n\n');
-}
-
 
 let formattedDateModified: string | null = null;
 if (originalData?.date_modified) {
