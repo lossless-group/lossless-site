@@ -8,6 +8,14 @@
      "to_path": "/thread/reminders"
    },
    {
+    "title": "Blueprints",
+    "description": "Blueprints are recyclable sets of instructions that codify project patterns.",
+    "badge": "Routine",
+    "verified": true,
+    "icon": "/visuals/repVector__Reminder.svg",
+    "to_path": "/thread/blueprints"
+  },
+   {
      "title": "Prompts",
      "description": "Prompts are instructions for a task at hand. Some come up often, some are one-and-done. Most are massively useful.",
      "badge": "As Needed",
