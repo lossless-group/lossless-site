@@ -317,34 +317,72 @@ const prompts = cardMap.get('prompts');
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .oval-process-container {
-    height: 600px;
-    transform: scale(0.8);
+    height: auto;
+    min-height: 600px;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 1rem;
+  }
+  
+  .process-node {
+    position: relative;
+    transform: none;
+  }
+  
+  .specs-node {
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+  
+  .reminders-node {
+    left: auto;
+    top: auto;
+    transform: none;
+  }
+  
+  .blueprints-node {
+    right: auto;
+    top: auto;
+    transform: none;
+  }
+  
+  .prompts-node {
+    bottom: auto;
+    left: auto;
+    transform: none;
   }
   
   .process-card {
-    width: 200px;
-    padding: 1.2rem;
+    width: 100%;
+    max-width: 500px;
+    padding: 1.5rem;
+    margin: 0 auto;
   }
   
   .process-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
   .process-description {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .process-arrows {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
   .oval-process-container {
-    transform: scale(0.7);
-    height: 650px;
+    padding: 1rem 0.5rem;
+    gap: 1.5rem;
   }
   
   .process-card {
-    width: 180px;
+    max-width: 350px;
     padding: 1rem;
   }
 }
