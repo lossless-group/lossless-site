@@ -130,10 +130,46 @@ const processedSteps = steps;
 
 <style>
   /* Layout */
-  .story-grid { max-width: 72rem; margin: 0; padding: 0 1rem 0 0; display: grid; gap: 1.75rem; grid-template-columns: 1fr; }
-  @media (min-width: 768px) { .story-grid { grid-template-columns: 280px 1fr; } }
-  .sidebar { position: sticky; top: 4rem; align-self: start; padding: 0.75rem; }
-  .content-area { min-height: 4rem; }
+  .story-grid { 
+    max-width: 72rem; 
+    margin: 0 auto; 
+    padding: 0 1rem; 
+    display: grid; 
+    gap: 1.75rem; 
+    grid-template-columns: 1fr; 
+  }
+  @media (min-width: 768px) { 
+    .story-grid { 
+      grid-template-columns: 280px 1fr; 
+    } 
+  }
+  .sidebar { padding: 0.75rem; }
+  @media (min-width: 768px) { 
+    .sidebar { 
+      position: sticky; 
+      top: 4rem; 
+      align-self: start; 
+    } 
+  }
+  .content-area { 
+    min-height: 4rem; 
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .story-grid {
+      max-width: 100%;
+      padding: 0 0.5rem;
+    }
+    
+    .content-area {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+  }
 
   /* Breadcrumb (Variant B: stronger focus on current) */
   .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; margin-bottom: 0.6rem; font-size: 0.9rem; border-bottom: 1px dashed var(--clr-lossless-primary-light); padding-bottom: 0.45rem; }
