@@ -58,8 +58,7 @@ const blueprints = cardMap.get('blueprints');
 const prompts = cardMap.get('prompts');
 ---
 
-<div class={"oval-process-container " + classes} style={style}>
-  <!-- Specifications at top -->
+<div class="oval-process-container" style="margin-top: 0; margin-bottom: 0;">
   {specs && (
     <div class="process-node specs-node" data-position="top">
       <a href={specs.to_path} class="process-card">
@@ -257,7 +256,8 @@ const prompts = cardMap.get('prompts');
   border-radius: 1rem;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   padding: 1.5rem;
-  width: 240px;
+  width: 100%;
+  max-width: 300px;
   text-align: center;
   text-decoration: none;
   color: inherit;
@@ -314,18 +314,6 @@ const prompts = cardMap.get('prompts');
   padding: 0.2em 0.6em;
   border-radius: 1em;
   letter-spacing: 0.04em;
-}
-
-.process-arrows {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  /* Ensure arrows are behind cards */
-  transform: translateZ(0);
 }
 
 /* Responsive adjustments */

@@ -1,6 +1,5 @@
 ---
 import TextCTA from "@basics/cta/TextCTA.astro";
-import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
 import IconHeaderMessageOvalProcess from "./IconHeaderMessageOvalProcess.astro";
 ---
 
@@ -19,15 +18,13 @@ import IconHeaderMessageOvalProcess from "./IconHeaderMessageOvalProcess.astro";
        />
      </div>
    </div>
-   <section class="vibe-with-us-section" style="--vibe-section-top-margin: 0.5rem;">
-      <IconHeaderMessageCardGrid 
-      jsonPath="messages/vibeCodingIconHeaderMessages.json"
-      style="margin-top: 0; margin-bottom: 0;"
-      />
-      <IconHeaderMessageOvalProcess 
-      jsonPath="messages/vibeCodingIconHeaderMessages.json"
-      style="margin-top: 0; margin-bottom: 0;"
-      />
+   <section class="vibe-with-us-section" style="--vibe-section-top-margin: 2.5rem;">
+      <div class="vibe-container">
+         <IconHeaderMessageOvalProcess 
+            jsonPath="messages/vibeCodingIconHeaderMessages.json"
+            style="margin: 0 auto;"
+         />
+      </div>
    </section>
 
 </section>
@@ -35,13 +32,16 @@ import IconHeaderMessageOvalProcess from "./IconHeaderMessageOvalProcess.astro";
 
 <style>
    .vibe-with-us-section {
-     padding: 2rem 0 3rem 0;
-     display: flex;
-     flex-direction: column;
-     place-content: center;
-     align-items: center;
-     width: 100%;
-     margin-top: var(--vibe-section-top-margin, 2.5rem);
+      padding: 3rem 1.5rem;
+      width: 100%;
+      background: var(--clr-bg-secondary, #1a1e26);
+      margin-top: var(--vibe-section-top-margin, 2.5rem);
+   }
+   
+   .vibe-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
    }
    
    /* Page-local Hero styles for /vibe-with/us.astro */
