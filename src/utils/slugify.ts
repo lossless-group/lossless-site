@@ -29,7 +29,7 @@ export function processEntries<T extends BaseCollectionEntry>(entries: T[]): (T 
   return entries
     .map(entry => {
       // Always generate title from filename, preserving original case
-      const filename = entry.filePath.replace(/\.md$/, '');
+      const filename = entry.filePath ? entry.filePath.replace(/\.(md|mdx)$/, '') : entry.id;
       const filenameParts = filename.split('/');
       const baseFilename = filenameParts[filenameParts.length - 1];
       

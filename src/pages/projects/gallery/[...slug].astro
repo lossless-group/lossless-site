@@ -81,7 +81,7 @@ async function loadContentFromSlug(slugPath: string) {
     // Convert contentPath to reference slug using slugify utilities
     const referenceSlug = getReferenceSlug(step.contentPath);
     
-    // Find the entry using the processed slug
+    // Find the entry using the processed slug - this is the robust matching
     const entry = processedEntries.find(entry => entry.slug === referenceSlug);
     
     if (entry) {
@@ -90,6 +90,17 @@ async function loadContentFromSlug(slugPath: string) {
         entry.id,
         entry.data.title || step.title
       );
+    } else {
+      // Fallback: try to find by ID as well (for backward compatibility)
+      const entryById = processedEntries.find(entry => entry.id === referenceSlug);
+      
+      if (entryById) {
+        return await processMarkdown(
+          entryById.body,
+          entryById.id,
+          entryById.data.title || step.title
+        );
+      }
     }
   }
 
