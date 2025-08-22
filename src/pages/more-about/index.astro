@@ -20,8 +20,14 @@ const processedConceptsEntries = processEntries(conceptsEntries);
 
     <div class="flex gap-4 mb-8">
       <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
-      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Vocabulary</a>
-      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Concepts</a>
+      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
+        Vocabulary
+        <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{vocabularyEntries.length}</span>
+      </a>
+      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
+        Concepts
+        <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{conceptsEntries.length}</span>
+      </a>
     </div>
 
     <SearchInput />
