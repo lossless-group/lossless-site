@@ -60,7 +60,7 @@ try {
 // Process markdown content
 let renderedMarkdown = { html: '', plainText: '' };
 if (fileContent && !error) {
-  renderedMarkdown = renderSimpleMarkdown(fileContent);
+  renderedMarkdown = await renderSimpleMarkdown(fileContent);
 }
 
 // Create frontmatter for the layout

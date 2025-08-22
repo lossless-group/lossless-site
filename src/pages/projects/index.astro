@@ -2,27 +2,80 @@
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
-import Section__Project_Container from '@components/projects/Section__Project-Container.astro';
+
+// Import utilities
+import { loadGalleryConfig } from '@utils/projectGalleryUtils';
+import { getReferenceSlug } from '@utils/slugify';
+
+// Load project gallery configuration
+const galleryConfig = loadGalleryConfig();
+const projectCovers = Object.values(galleryConfig.projects);
 ---
 
 <Layout 
-  title="Our Lossless Projects" 
+  title="Project Gallery" 
   description="Explore our innovative projects and interactive visualizations"
 >
   <div class="projects-page-container">
     <AnimationWrapper>
       <Hero
-        title="Our Lossless Projects"
+        title="Project Gallery"
         subtitle="Innovation in Action"
         description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
         alignment="center"
         fullBleed={false}
         animate={true}
-        style="margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+        style="margin-top: 6rem;"
       />
     </AnimationWrapper>
 
-    <Section__Project_Container title="Projects" />
+    <!-- Project Gallery Grid -->
+    <section class="covers-grid">
+      {projectCovers.map(project => (
+        <article class="project-cover card">
+          <header class="cover-hero">
+            <div class="cover-titles">
+              <h2 class="cover-title">{project.title}</h2>
+              <p class="cover-subtitle">{project.subtitle}</p>
+            </div>
+          </header>
+          
+          {project.useCases && project.useCases.length > 0 && (
+            <div class="usecases">
+              {project.useCases.map(useCase => (
+                <div class="usecase-card">
+                  <h3 class="usecase-title">{useCase.title}</h3>
+                  <p class="usecase-desc">{useCase.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div class="cover-expand">
+            <a 
+              href={project.demoSteps && project.demoSteps.length > 0 
+                ? (project.demoSteps.find(step => step.type === 'orientation')?.href 
+                    ? getReferenceSlug(project.demoSteps.find(step => step.type === 'orientation')?.href)
+                    : getReferenceSlug(project.href))
+                : getReferenceSlug(project.href)
+              }
+              class="toggle"
+              aria-label="View Project"
+            >
+              <span class="toggle-label">View Project</span>
+              <span class="chev" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/>
+                  <path d="M3 16.2V21m0 0h4.8M3 21l6-6"/>
+                  <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/>
+                  <path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
+                </svg>
+              </span>
+            </a>
+          </div>
+        </article>
+      ))}
+    </section>
   </div>
 </Layout>
 
@@ -35,4 +88,297 @@ import Section__Project_Container from '@components/projects/Section__Project-Co
     padding: 0 var(--spacing-4, 1rem);
     width: 100%;
   }
+  
+  .covers-grid { 
+    display: grid; 
+    gap: 2rem; 
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  @media (max-width: 768px) {
+    .covers-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  /* Styles for project content containers to work with TableOfContents */
+  .collection-reader-pane {
+    flex: 1 1 auto;
+    display: block;
+    padding: 3rem 2rem;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 100%;
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  /* When the content is displayed (not hidden), ensure proper scrolling */
+  .collection-reader-pane:not([style*="display: none"]) {
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  .project-content-simple {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* Project Gallery Grid Styles */
+  .covers-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .project-cover { 
+    padding: 1.5rem; 
+    background: linear-gradient(135deg, 
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 95%) 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 98%) 100%
+    );
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 80%);
+    border-radius: 16px;
+    box-shadow: 
+      0 4px 20px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 90%),
+      0 1px 3px color-mix(in oklab, black, transparent 95%);
+    transition: all 200ms ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .project-cover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      var(--clr-lossless-primary-light) 0%,
+      var(--clr-lossless-primary) 50%,
+      var(--clr-lossless-primary-light) 100%
+    );
+    opacity: 0.6;
+  }
+  
+  .cover-hero { 
+    display: flex; 
+    align-items: center; 
+    gap: 1.25rem; 
+    margin-bottom: 0.5rem;
+  }
+  
+  .cover-titles { display: grid; gap: 0.4rem; }
+  
+  .cover-title { 
+    margin: 0; 
+    font-size: clamp(1.4rem, 2.8vw, 1.8rem); 
+    font-weight: 600;
+    color: var(--clr-heading);
+    text-shadow: 0 1px 2px color-mix(in oklab, black, transparent 95%);
+  }
+  
+  .cover-subtitle { 
+    margin: 0; 
+    color: var(--clr-body); 
+    opacity: 0.85; 
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  
+  .usecases { 
+    display: grid; 
+    grid-template-columns: repeat(2, minmax(0, 1fr)); 
+    gap: 1rem; 
+    margin-top: 1.25rem; 
+  }
+  
+  .usecase-card {
+    display: grid; 
+    gap: 0.5rem; 
+    padding: 1.25rem; 
+    color: var(--clr-heading);
+    background: linear-gradient(135deg,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 85%) 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 90%) 100%
+    );
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border), transparent 70%);
+    border-radius: 14px;
+    box-shadow: 
+      0 3px 12px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 88%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .usecase-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%) 50%,
+      transparent 100%
+    );
+  }
+  
+  .usecase-title { 
+    margin: 0; 
+    font-size: 1.1rem; 
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  .usecase-desc { 
+    margin: 0; 
+    color: var(--clr-body); 
+    opacity: 0.85; 
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  
+  .cover-expand { 
+    margin-top: 1rem; 
+    border-top: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%); 
+    padding-top: 1rem; 
+    position: relative;
+  }
+  
+  .cover-expand::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%,
+      var(--clr-lossless-primary-light) 50%,
+      transparent 100%
+    );
+  }
+  
+  .toggle { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    padding: 0.6rem 1rem; 
+    border-radius: 10px; 
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border), transparent 60%); 
+    background: linear-gradient(135deg,
+      var(--surface-2) 0%,
+      color-mix(in oklab, var(--surface-2), var(--surface-3) 30%) 100%
+    );
+    color: var(--clr-body); 
+    user-select: none;
+    font-weight: 500;
+    transition: all 200ms ease;
+    box-shadow: 
+      0 2px 8px color-mix(in oklab, black, transparent 92%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
+    text-decoration: none;
+  }
+  
+  .toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 12px color-mix(in oklab, black, transparent 88%),
+      inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
+    border-color: color-mix(in oklab, var(--clr-lossless-primary), transparent 70%);
+    color: var(--clr-body);
+  }
+  
+  .chev { 
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1.1em;
+  }
+  
+  @media (max-width: 768px) {
+    .project-cover { padding: 1.25rem; }
+    .cover-hero { gap: 1rem; }
+    .usecases { grid-template-columns: 1fr; gap: 0.75rem; }
+    .usecase-card { padding: 1rem; }
+    .covers-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
+
+<script>
+  // Global type declaration for Mermaid functions
+  declare global {
+    interface Window {
+      renderMermaidCharts?: () => void;
+      initializeMermaid?: () => Promise<void>;
+      mermaid?: any;
+      __MERMAID_LOADED__?: boolean;
+    }
+  }
+  
+  // Initialize Mermaid library globally
+  window.initializeMermaid = async function() {
+    if (!window.__MERMAID_LOADED__) {
+      try {
+        // Load mermaid from CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+        script.onload = function() {
+          // Configure Mermaid
+          const mermaidConfig = {
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+              darkMode: true,
+              background: 'transparent',
+              primaryColor: '#181818',
+              primaryBorderColor: '#6fffd6',
+              primaryTextColor: '#e0e0e0',
+              secondaryColor: '#BF23F7',
+              secondaryTextColor: '#50a3b3',
+              clusterBkg: '#283139',
+              lineColor: '#69e2e3',
+              fontFamily: 'Open Sans, sans-serif',
+            }
+          };
+          
+          (window as any).mermaid.initialize(mermaidConfig);
+          window.mermaid = (window as any).mermaid;
+          window.__MERMAID_LOADED__ = true;
+          
+          // Initialize renderMermaidCharts function
+          window.renderMermaidCharts = function() {
+            if (window.mermaid) {
+              window.mermaid.run();
+            }
+          };
+          
+          // Render any existing mermaid charts
+          setTimeout(() => {
+            window.renderMermaidCharts();
+          }, 100);
+        };
+        document.head.appendChild(script);
+      } catch (error) {
+        // Mermaid library failed to load
+      }
+    }
+  };
+
+  // Initialize Mermaid after page load
+  document.addEventListener('DOMContentLoaded', () => {
+    window.initializeMermaid();
+  });
+</script>

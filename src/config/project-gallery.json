@@ -1,0 +1,164 @@
+{
+  "projects": {
+    "augment-it": {
+      "id": "augment-it",
+      "title": "Augment-It",
+      "subtitle": "Augment any data by importing records or connecting to data sources.",
+      "href": "/projects/gallery",
+      "hasSidebar": true,
+      "canvas": "/projects/gallery/augment-it/specs/Augment-It.canvas",
+      "useCases": [
+        {
+          "title": "Product Insights for R&D",
+          "description": "Generate insights about customers to inform product development decisions."
+        },
+        {
+          "title": "Sales Intel, Just-in-Time",
+          "description": "Equip outside sales teams with richer customer context before meetings."
+        }
+      ],
+      "demoSteps": [
+        {
+          "title": "Data Augmentation Workflow with Microfrontends",
+          "href": "/projects/gallery/augment-it/specs/data-augmentation-workflow-with-microfrontends",
+          "type": "orientation",
+          "description": "Overview and introduction to the complete workflow",
+          "contentPath": "Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md"
+        },
+        {
+          "title": "Load Data, Review, & Enrich Records",
+          "href": "/projects/gallery/augment-it/specs/apps-microfrontends/recordcollector",
+          "type": "sequential",
+          "step": 1,
+          "contentPath": "Augment-It/Specs/apps-microfrontends/RecordCollector.md"
+        },
+        {
+          "title": "Author Prompt Templates",
+          "href": "/projects/gallery/augment-it/specs/apps-microfrontends/prompttemplatemanager",
+          "type": "sequential",
+          "step": 2,
+          "contentPath": "Augment-It/Specs/apps-microfrontends/PromptTemplateManager.md"
+        },
+        {
+          "title": "Choose AI Augmentation Option",
+          "href": "/projects/gallery/augment-it/specs/shared-services/apiconnectorservice",
+          "type": "sequential",
+          "step": 3,
+          "contentPath": "Augment-It/Specs/shared-services/apiConnectorService.md"
+        },
+        {
+          "title": "Review Request & Fetch Response",
+          "href": "/projects/gallery/augment-it/specs/apps-microfrontends/requestreviewer",
+          "type": "sequential",
+          "step": 4,
+          "contentPath": "Augment-It/Specs/apps-microfrontends/RequestReviewer.md"
+        },
+        {
+          "title": "Generate Insights",
+          "href": "/projects/gallery/augment-it/specs/apps-microfrontends/highlightcollector",
+          "type": "sequential",
+          "step": 5,
+          "contentPath": "Augment-It/Specs/apps-microfrontends/HighlightCollector.md"
+        }
+      ]
+    },
+    "ace-it": {
+      "id": "ace-it",
+      "title": "ACE-It",
+      "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
+      "href": "/projects/ace-it",
+      "hasSidebar": false,
+      "useCases": [
+        {
+          "title": "AI Co-Development",
+          "description": "Practical playbook for building real products with AI as a co-developer."
+        },
+        {
+          "title": "Battle-Tested Process",
+          "description": "Accelerated Context Engineering (ACE) for seamless AI integration."
+        }
+      ],
+      "demoSteps": [
+        {
+          "title": "Our Approach",
+          "href": "/projects/ACE-It/Philosophy/Our-Approach",
+          "type": "orientation",
+          "description": "AI-Human Collaboration Principles",
+          "contentPath": "ACE-It/Philosophy/Our-Approach.md"
+        }
+      ]
+    },
+    "astro-turf": {
+      "id": "astro-turf",
+      "title": "Astro-Turf",
+      "subtitle": "Advanced Astro framework components and patterns.",
+      "href": "/projects/astro-turf",
+      "hasSidebar": false,
+      "useCases": [
+        {
+          "title": "Component Library",
+          "description": "Reusable Astro components for modern web development."
+        },
+        {
+          "title": "Framework Patterns",
+          "description": "Best practices and architectural patterns for Astro projects."
+        }
+      ],
+      "demoSteps": []
+    },
+    "content-farm": {
+      "id": "content-farm",
+      "title": "Content-Farm",
+      "subtitle": "Automated content generation and management system.",
+      "href": "/projects/content-farm",
+      "hasSidebar": false,
+      "useCases": [
+        {
+          "title": "Content Automation",
+          "description": "Streamlined workflows for content creation and publishing."
+        },
+        {
+          "title": "Publishing Pipeline",
+          "description": "Automated content distribution and management tools."
+        }
+      ],
+      "demoSteps": []
+    },
+    "emergent-innovation": {
+      "id": "emergent-innovation",
+      "title": "Emergent-Innovation",
+      "subtitle": "Open source innovation projects and collaborative initiatives.",
+      "href": "/projects/emergent-innovation",
+      "hasSidebar": false,
+      "useCases": [
+        {
+          "title": "Open Source Projects",
+          "description": "Community-driven innovation in healthcare and technology."
+        },
+        {
+          "title": "Standards Development",
+          "description": "Contributing to industry standards and best practices."
+        }
+      ],
+      "demoSteps": []
+    },
+    "water-template-ce": {
+      "id": "water-template-ce",
+      "title": "Water-Template-CE",
+      "subtitle": "Community Edition water management and template system.",
+      "href": "/projects/water-template-ce",
+      "hasSidebar": false,
+      "useCases": [
+        {
+          "title": "Template Engine",
+          "description": "Flexible templating system for water management applications."
+        },
+        {
+          "title": "Community Tools",
+          "description": "Open source tools for water resource management."
+        }
+      ],
+      "demoSteps": []
+    }
+  }
+}

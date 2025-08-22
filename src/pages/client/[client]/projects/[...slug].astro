@@ -1,0 +1,84 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { processEntries, getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const allProjects = await getCollection('projects', ({ data }) => {
+    return data.publish === true;
+  });
+
+  console.log(`Total projects found: ${allProjects.length}`);
+
+  const processedProjects = processEntries(allProjects as any);
+
+  console.log('\n=== ALL PROJECTS AND THEIR SLUGS ===');
+  processedProjects.forEach(entry => {
+    console.log(`Entry ID: ${entry.id}`);
+    console.log(`  Slug: ${entry.slug}`);
+    console.log(`  Title: ${entry.data.title}`);
+    console.log('---');
+  });
+
+  const allPaths = processedProjects.map(entry => {
+    // Extract client name from the project path
+    // Projects are organized like: "Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md"
+    const pathParts = entry.id.split('/');
+    const projectClientName = pathParts[0]?.toLowerCase();
+    
+    if (!projectClientName) {
+      console.warn(`No client name found for project: ${entry.id}`);
+      return null;
+    }
+    
+    // Use the slug that processEntries() already generated, but remove the client prefix
+    const slugParts = entry.slug.split('/');
+    const projectSlug = slugParts.slice(1).join('/'); // Remove client name from slug
+    
+    // For now, we'll generate paths for all projects under their respective client names
+    // Later we can filter by specific clients if needed
+    const path = {
+      params: { 
+        client: projectClientName,
+        slug: projectSlug 
+      },
+      props: {
+        entry,
+        client: projectClientName
+      }
+    };
+
+    console.log(`Generated path: /client/${projectClientName}/projects/${projectSlug} -> ${entry.id}`);
+    
+    return path;
+  }).filter(Boolean); // Remove null entries
+
+  console.log(`\nGenerated ${allPaths.length} client project paths`);
+  return allPaths;
+}
+
+const { entry, client } = Astro.props;
+const { slug } = Astro.params;
+
+const contentData = {
+  ...entry.data,
+  path: Astro.url.pathname,
+  id: entry.id,
+  slug: slug,
+  client: client
+};
+---
+
+<Layout frontmatter={entry.data}>
+  <OneArticle 
+    Component={OneArticleOnPage}
+    title={entry.data.title}
+    data={contentData}
+    content={entry.body}
+    markdownFile={entry.id}
+  />
+</Layout>

@@ -54,8 +54,8 @@ export function slugify(input: string): string {
     .toLowerCase()                           // Convert to lowercase
     .replace(/\.[a-z0-9]+$/, '')            // Remove file extension like .md (only if it's just letters/numbers)
     .replace(/[^a-z0-9\s\-_]/g, '')         // Remove all non-alphanumeric except space, dash, underscore (REMOVE dots)
-    .replace(/[\s_]+/g, '-')                // Replace spaces and underscores with dashes
-    .replace(/-+/g, '-')                    // Collapse multiple dashes
+    .replace(/\s+/g, '-')                   // Replace spaces with dashes (but KEEP underscores)
+    .replace(/-{3,}/g, '--')                // Collapse 3+ dashes to double dashes (preserve intentional double dashes)
     .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
 }
 
@@ -98,4 +98,34 @@ export function toProperCase(str: string): string {
     .filter(word => word.length > 0) // remove empty strings
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // capitalize
     .join(' ');            // join back into a sentence
+}
+
+/**
+ * Converts a file path to a proper URL path with base URL.
+ * Example: "/projects/Augment-It/Specs/apps-microfrontends/PromptTemplateManager.md" 
+ *       -> "http://localhost:4321/projects/augment-it/specs/apps-microfrontends/prompttemplatemanager"
+ * 
+ * @param filePath - The file path to convert
+ * @param baseUrl - The base URL (defaults to "http://localhost:4321")
+ * @returns The full URL path
+ */
+export function pathToUrl(filePath: string, baseUrl: string = "http://localhost:4321"): string {
+  // Remove leading slash if present
+  const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+  
+  // Split path into segments, process each segment, then rejoin
+  const segments = cleanPath.split('/');
+  const processedSegments = segments.map(segment => {
+    return segment
+      .toLowerCase()                    // Convert to lowercase
+      .replace(/\.[a-z0-9]+$/, '')     // Remove file extension like .md
+      .replace(/[^a-z0-9\-_]/g, '')    // Remove non-alphanumeric except dash and underscore
+      .replace(/_+/g, '-')             // Replace underscores with dashes
+      .replace(/-{3,}/g, '--')         // Collapse 3+ dashes to double dashes (preserve intentional double dashes)
+      .replace(/^-+|-+$/g, '');        // Trim leading/trailing dashes
+  });
+  
+  // Join segments back with slashes and add base URL
+  const processedPath = processedSegments.join('/');
+  return `${baseUrl}/${processedPath}`;
 }

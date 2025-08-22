@@ -7,8 +7,8 @@
  * 
  * Example MOC structure:
  * :::projects
- * - [[Augment-It]]
- * - [[Another Project]]
+ * - "augment-it"
+ * - "ace-it"
  * :::
  */
 
@@ -17,147 +17,15 @@ import path from 'node:path';
 import { getCollection } from 'astro:content';
 import { toProperCase } from '@utils/slugify';
 import { contentBasePath } from '@utils/envUtils';
+import { loadGalleryConfig } from '@utils/projectGalleryUtils';
+import { getReferenceSlug } from '@utils/slugify';
 
 // Layout and component imports
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
-import ProjectGallery from '@components/projects/ProjectGallery.svelte';
-import ContentSection_SidebarTreeVariantB from '@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro';
-import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-
-// Markdown processing imports
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
-import remarkDirective from 'remark-directive';
-import remarkImages from '@utils/markdown/remark-images'; 
-import remarkBacklinks from '@utils/markdown/remark-backlinks';
-import remarkCitations from '@utils/markdown/remark-citations';
-import remarkTableOfContents from '@utils/markdown/remark-toc';
-import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
-import type { Root } from 'mdast';
-
-// Import markdown content for different projects
-import mdWorkflow from '@generated/projects/Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md?raw';
-import mdOurApproach from '@generated/projects/ACE-It/Philosophy/Our-Approach.md?raw';
 
 export const prerender = true;
-
-// Remove YAML frontmatter when using ?raw imports so it doesn't render in the page
-function stripFrontmatter(input: string): string {
-  if (!input) return input;
-  return input.replace(/^\uFEFF?\s*---[\s\S]*?\n---\s*/u, '');
-}
-
-// Process markdown content with unified processor
-async function processMarkdown(mdContent: string, id: string, title: string) {
-  if (!mdContent) return { mdastNode: null, contentData: null };
-  
-  const cleanedContent = stripFrontmatter(mdContent);
-  
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkDirective)
-    .use(remarkDirectiveToComponent)
-    .use(remarkImages) 
-    .use(remarkBacklinks)
-    .use(remarkCitations)
-    .use(remarkTableOfContents);
-
-  const mdast = processor.parse(cleanedContent);
-  const mdastNode = await processor.run(mdast);
-
-  const contentData = {
-    path: Astro.url.pathname,
-    id: id,
-    title: title
-  };
-
-  return { mdastNode, contentData };
-}
-
-// Demo steps for Augment-It project
-const augmentItDemoSteps = [
-  { 
-    title: 'Data Augmentation Workflow with Microfrontends', 
-    href: '/projects/augment-it',
-    type: 'orientation',
-    description: 'Overview and introduction to the complete workflow'
-  },
-  { 
-    title: 'Load Data', 
-    href: '/projects/augment-it/record-collector',
-    type: 'sequential',
-    step: 1
-  },
-  { 
-    title: 'Review & Enrich Records', 
-    href: '/projects/augment-it/review-enrich-records',
-    type: 'sequential',
-    step: 2
-  },
-  { 
-    title: 'Author Prompt Templates', 
-    href: '/projects/augment-it/prompt-template-manager',
-    type: 'sequential',
-    step: 3
-  },
-  { 
-    title: 'Choose AI Augmentation Option', 
-    href: '/projects/augment-it/api-connector-service',
-    type: 'sequential',
-    step: 4
-  },
-  { 
-    title: 'Review Request & Response', 
-    href: '/projects/augment-it/request-reviewer',
-    type: 'sequential',
-    step: 5
-  },
-  { 
-    title: 'Generate Insights', 
-    href: '/projects/augment-it/highlight-collector',
-    type: 'sequential',
-    step: 6
-  },
-  { 
-    title: 'Sync Back to Source', 
-    href: '/projects/augment-it/sync',
-    type: 'sequential',
-    step: 7
-  },
-];
-
-// Process content for each project
-const augmentItContent = await processMarkdown(
-  mdWorkflow, 
-  'Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md',
-  'Data Augmentation Workflow with Microfrontends'
-);
-
-const aceItContent = await processMarkdown(
-  mdOurApproach,
-  'ACE-It/Philosophy/Our-Approach.md',
-  'Our Approach: AI-Human Collaboration Principles'
-);
-
-// Function to dynamically load markdown content based on path
-async function loadMarkdownContent(path: string): Promise<string | null> {
-  try {
-    // Convert path to import path format
-    const importPath = path.replace(/^projects\//, '').replace(/\.md$/, '');
-    const fullImportPath = `@generated/projects/${importPath}.md?raw`;
-    
-    // Dynamic import based on path
-    const module = await import(fullImportPath);
-    return module.default;
-  } catch (error) {
-    console.warn(`[CLIENT PROJECTS INDEX] Could not load markdown for path: ${path}`, error);
-    return null;
-  }
-}
 
 export async function getStaticPaths() {
   // Get all available clients from the moc directory
@@ -175,16 +43,17 @@ export async function getStaticPaths() {
       };
     });
     
-    console.log(`[CLIENT PROJECTS INDEX] Generated paths for clients:`, paths.map(p => p.params.client));
     return paths;
   } catch (error) {
-    console.error('[CLIENT PROJECTS INDEX] Error reading MOC directory:', error);
     return [];
   }
 }
 
 const { client } = Astro.props;
 const properClient = toProperCase(client);
+
+// Load project gallery configuration
+const galleryConfig = loadGalleryConfig();
 
 // Load projects from the client's MOC file and transform to gallery format
 let projectCovers: any[] = [];
@@ -204,7 +73,6 @@ let debugInfo = {
 try {
   const clientMocPath = path.resolve(contentBasePath, 'moc', `${properClient}.md`);
   debugInfo.mocPath = clientMocPath;
-  console.log(`[CLIENT PROJECTS INDEX] Loading MOC file from: ${clientMocPath}`);
   
   const rawClientMoc = await fs.readFile(clientMocPath, 'utf-8');
   debugInfo.mocExists = true;
@@ -224,10 +92,22 @@ try {
     
     const mocProjectEntries = projectLines
       .map(line => {
+        // Handle quoted project IDs: - "project-id"
+        const quotedMatch = line.match(/^[-*]\s*"([^"]+)"$/);
+        if (quotedMatch) {
+          return {
+            id: quotedMatch[1].trim(),
+            name: null,
+            path: null,
+            canvasPath: null
+          };
+        }
+        
         // Handle new directive format: { path: [[path]], title: "Title" }
         const directiveMatch = line.match(/^[-*]\s*\{\s*path:\s*\[\[([^\]]+)\]\]\s*,\s*title:\s*"([^"]+)"\s*\}/);
         if (directiveMatch) {
           return {
+            id: null,
             name: directiveMatch[2].trim(),
             path: directiveMatch[1].trim(),
             canvasPath: null
@@ -238,6 +118,7 @@ try {
         const linkMatch = line.match(/^[-*]\s*\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
         if (linkMatch) {
           return {
+            id: null,
             name: linkMatch[2] ? linkMatch[2].trim() : linkMatch[1].trim(),
             path: linkMatch[1].trim(),
             canvasPath: linkMatch[2] ? linkMatch[1].trim() : null
@@ -246,164 +127,79 @@ try {
         
         // Handle plain list items
         const plainText = line.replace(/^[-*]\s*/, '').trim();
-        return plainText ? { name: plainText, path: null, canvasPath: null } : null;
+        return plainText ? { id: null, name: plainText, path: null, canvasPath: null } : null;
       })
       .filter(Boolean);
     
     debugInfo.parsedProjects = mocProjectEntries;
-    console.log(`[CLIENT PROJECTS INDEX] Found ${mocProjectEntries.length} project entries in MOC for ${properClient}:`, mocProjectEntries);
     
     if (mocProjectEntries.length > 0) {
-      // Get all projects from the collection
-      const allProjects = await getCollection('projects');
-      debugInfo.allProjects = allProjects.map(p => ({
-        id: p.id,
-        title: p.data?.title || 'No title',
-        dataSlug: p.data?.slug || 'No data slug'
-      }));
-      
-      console.log(`[CLIENT PROJECTS INDEX] Found ${allProjects.length} projects in collection:`, debugInfo.allProjects);
-      
-      // Match MOC project names to actual project entries and transform to gallery format
+      // Match MOC project entries to gallery configuration
       for (const entry of mocProjectEntries) {
-        // Try to find a matching project by title or slug with exact matching
         const matchingAttempt = {
+          entryId: entry.id,
           entryName: entry.name,
-          normalizedEntryName: entry.name.toLowerCase().replace(/[-\s]/g, '-'),
           attempts: []
         };
         
-        const matchingProject = allProjects.find(project => {
-          const title = project.data.title || '';
-          const slug = project.id || '';
-          
-          // First try exact matches
-          const exactTitleMatch = title.toLowerCase() === entry.name.toLowerCase();
-          const exactSlugMatch = slug.toLowerCase() === entry.name.toLowerCase();
+        let matchingProject = null;
+        
+        // Try to find project by ID first (for quoted project IDs)
+        if (entry.id) {
+          matchingProject = galleryConfig.projects[entry.id];
+          matchingAttempt.attempts.push({
+            method: 'id_match',
+            projectId: entry.id,
+            match: !!matchingProject
+          });
+        }
+        
+        // If no match by ID, try by name
+        if (!matchingProject && entry.name) {
+          const projectByName = Object.values(galleryConfig.projects).find(project => 
+            project.title.toLowerCase() === entry.name.toLowerCase()
+          );
           
           matchingAttempt.attempts.push({
-            method: 'exact_title',
-            projectTitle: title,
-            projectSlug: slug,
-            match: exactTitleMatch
+            method: 'name_match',
+            projectName: entry.name,
+            foundProject: projectByName?.title,
+            match: !!projectByName
           });
           
-          matchingAttempt.attempts.push({
-            method: 'exact_slug',
-            projectTitle: title,
-            projectSlug: slug,
-            match: exactSlugMatch
-          });
-          
-          if (exactTitleMatch || exactSlugMatch) {
-            return true;
+          if (projectByName) {
+            matchingProject = projectByName;
           }
-          
-          // Try matching by path from directive if available
-          if (entry.path) {
-            const pathMatch = slug.toLowerCase().includes(entry.path.toLowerCase()) || 
-                             entry.path.toLowerCase().includes(slug.toLowerCase());
-            
-            matchingAttempt.attempts.push({
-              method: 'path_match',
-              projectTitle: title,
-              projectSlug: slug,
-              entryPath: entry.path,
-              match: pathMatch
-            });
-            
-            if (pathMatch) {
-              return true;
-            }
-          }
-          
-          // Then try if the slug starts with the project name (for nested projects)
-          const normalizedEntryName = entry.name.toLowerCase().replace(/[-\s]/g, '-');
-          const slugParts = slug.toLowerCase().split('/');
-          const slugStartMatch = slugParts[0] === normalizedEntryName;
-          
-          matchingAttempt.attempts.push({
-            method: 'slug_start',
-            projectTitle: title,
-            projectSlug: slug,
-            normalizedEntryName,
-            slugParts,
-            match: slugStartMatch
-          });
-          
-          return slugStartMatch;
-        });
+        }
         
         debugInfo.matchingAttempts.push(matchingAttempt);
         
         if (matchingProject) {
-          // Check if this is Augment-It or ACE-It to add special content
-          const projectId = matchingProject.id.toLowerCase();
-          let projectContent = null;
-          let projectDemoSteps = null;
-          let projectHasSidebar = false;
-          
-          // Try to load content based on path from directive first
-          if (entry.path) {
-            const markdownContent = await loadMarkdownContent(entry.path);
-            if (markdownContent) {
-              projectContent = await processMarkdown(
-                markdownContent,
-                entry.path,
-                entry.name
-              );
-            }
-          }
-          
-          // Fallback to hardcoded content for known projects
-          if (!projectContent) {
-            if (projectId.includes('augment-it')) {
-              projectContent = augmentItContent;
-              projectDemoSteps = augmentItDemoSteps;
-              projectHasSidebar = true;
-            } else if (projectId.includes('ace-it')) {
-              projectContent = aceItContent;
-              projectDemoSteps = null;
-              projectHasSidebar = false;
-            }
-          }
-          
           // Transform to gallery format
           const projectCover = {
-            id: matchingProject.id.toLowerCase().replace(/[-\s]/g, '-'),
-            title: entry.name, // Use the title from the directive
-            subtitle: matchingProject.data.description || `Project for ${properClient}`,
-            href: `/projects/${matchingProject.id}`,
-            hasSidebar: projectHasSidebar,
-            demoSteps: projectDemoSteps,
-            content: projectContent,
-            useCases: [
-              {
-                title: 'Client Project',
-                description: `Custom project for ${properClient}`
-              }
-            ],
+            id: matchingProject.id,
+            title: matchingProject.title,
+            subtitle: matchingProject.subtitle,
+            href: matchingProject.href,
+            hasSidebar: matchingProject.hasSidebar,
+            demoSteps: matchingProject.demoSteps,
+            useCases: matchingProject.useCases,
             canvasPath: entry.canvasPath || `content/projects/${matchingProject.id}.canvas`
           };
           
           projectCovers.push(projectCover);
           debugInfo.matchingProjects.push({
+            entryId: entry.id,
             entryName: entry.name,
             projectId: matchingProject.id,
             path: entry.path,
             canvasPath: entry.canvasPath
           });
-          console.log(`[CLIENT PROJECTS INDEX] Matched "${entry.name}" to project: ${matchingProject.id}${entry.canvasPath ? ` with canvas: ${entry.canvasPath}` : ''}`);
-        } else {
-          console.warn(`[CLIENT PROJECTS INDEX] Could not find project matching "${entry.name}" for ${properClient}`);
         }
       }
     }
-  } else {
-    console.warn(`[CLIENT PROJECTS INDEX] No :::projects directive found in moc/${properClient}.md`);
   }
 } catch (error) {
-  console.error(`[CLIENT PROJECTS INDEX] Error loading MOC file for ${properClient}:`, error);
   debugInfo.error = error.message;
 }
 
@@ -429,41 +225,53 @@ const pageDescription = hasProjects
     <AnimationWrapper>
       {hasProjects ? (
         <div class="projects-page-container">
-          <!-- Project Gallery with Svelte -->
-          <ProjectGallery projects={projectCovers} client:load />
-          
-          <!-- Hidden Project Content for Injection -->
-          {projectCovers.filter(p => p.content).map(project => (
-            <div id={`${project.id}-full-content`} class="collection-reader-pane" style="display: none;">
-              {project.hasSidebar && project.demoSteps ? (
-                <ContentSection_SidebarTreeVariantB 
-                  steps={project.demoSteps} 
-                  currentHref={`/client/${client}/projects`} 
-                  seriesTitle={project.title}
-                >
-                  {project.content?.mdastNode && project.content?.contentData ? (
-                    <OneArticleOnPage 
-                      content={project.content.mdastNode} 
-                      data={project.content.contentData} 
-                    />
-                  ) : (
-                    <p>Content not available</p>
-                  )}
-                </ContentSection_SidebarTreeVariantB>
-              ) : (
-                <div class="project-content-simple">
-                  {project.content?.mdastNode && project.content?.contentData ? (
-                    <OneArticleOnPage 
-                      content={project.content.mdastNode} 
-                      data={project.content.contentData} 
-                    />
-                  ) : (
-                    <p>Content not available</p>
-                  )}
+          <!-- Project Gallery Grid -->
+          <section class="covers-grid">
+            {projectCovers.map(project => (
+              <article class="project-cover card">
+                <header class="cover-hero">
+                  <div class="cover-titles">
+                    <h2 class="cover-title">{project.title}</h2>
+                    <p class="cover-subtitle">{project.subtitle}</p>
+                  </div>
+                </header>
+                
+                {project.useCases && project.useCases.length > 0 && (
+                  <div class="usecases">
+                    {project.useCases.map(useCase => (
+                      <div class="usecase-card">
+                        <h3 class="usecase-title">{useCase.title}</h3>
+                        <p class="usecase-desc">{useCase.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div class="cover-expand">
+                  <a 
+                    href={project.demoSteps && project.demoSteps.length > 0 
+                      ? (project.demoSteps.find(step => step.type === 'orientation')?.href 
+                          ? getReferenceSlug(project.demoSteps.find(step => step.type === 'orientation')?.href)
+                          : getReferenceSlug(project.href))
+                      : getReferenceSlug(project.href)
+                    }
+                    class="toggle"
+                    aria-label="View Project"
+                  >
+                    <span class="toggle-label">View Project</span>
+                    <span class="chev" aria-hidden="true">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/>
+                        <path d="M3 16.2V21m0 0h4.8M3 21l6-6"/>
+                        <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/>
+                        <path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
+                      </svg>
+                    </span>
+                  </a>
                 </div>
-              )}
-            </div>
-          ))}
+              </article>
+            ))}
+          </section>
         </div>
       ) : (
         <section class="projects-section">
@@ -504,8 +312,8 @@ const pageDescription = hasProjects
                 <h4>Parsed Projects ({debugInfo.parsedProjects.length}):</h4>
                 <pre><code>{JSON.stringify(debugInfo.parsedProjects, null, 2)}</code></pre>
                 
-                <h4>All Available Projects ({debugInfo.allProjects.length}):</h4>
-                <pre><code>{JSON.stringify(debugInfo.allProjects, null, 2)}</code></pre>
+                <h4>Available Projects in Gallery Config ({Object.keys(galleryConfig.projects).length}):</h4>
+                <pre><code>{JSON.stringify(Object.keys(galleryConfig.projects), null, 2)}</code></pre>
                 
                 <h4>Matching Attempts:</h4>
                 <pre><code>{JSON.stringify(debugInfo.matchingAttempts, null, 2)}</code></pre>
@@ -523,19 +331,18 @@ const pageDescription = hasProjects
               <div class="moc-example">
                 <h4>Add this to <code>{contentBasePath}/moc/{properClient}.md</code>:</h4>
                 <pre><code>:::projects
-- {'{'} path: [[projects/Augment-It/Specs/Data Augmentation Workflow with Microfrontends]], title: "Augment-It" {'}'}
-- {'{'} path: [[projects/ACE-It/Philosophy/Our-Approach]], title: "ACE-It" {'}'}
+- "augment-it"
+- "ace-it"
 :::</code></pre>
                 <p>
-                  The <code>path</code> should match the project path in the 
-                  <code>content/projects/</code> directory, and <code>title</code> will be used as the display name.
+                  The project IDs should match the keys in <code>src/config/project-gallery.json</code>.
                 </p>
                 <p>
-                  Legacy format is also supported:
+                  Legacy formats are also supported:
                 </p>
                 <pre><code>:::projects
+- {'{'} path: [[projects/Augment-It/Specs/Data Augmentation Workflow with Microfrontends]], title: "Augment-It" {'}'}
 - [[Project Name]]
-- [[Another Project]]
 :::</code></pre>
               </div>
             </details>
@@ -562,11 +369,180 @@ const pageDescription = hasProjects
   padding: 2rem 1.5rem;
 }
 
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+.covers-grid { 
+  display: grid; 
+  gap: 2rem; 
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.project-cover { 
+  padding: 1.5rem; 
+  background: linear-gradient(135deg, 
+    color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 95%) 0%,
+    color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 98%) 100%
+  );
+  border: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 80%);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 20px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 90%),
+    0 1px 3px color-mix(in oklab, black, transparent 95%);
+  transition: all 200ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-cover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    var(--clr-lossless-primary-light) 0%,
+    var(--clr-lossless-primary) 50%,
+    var(--clr-lossless-primary-light) 100%
+  );
+  opacity: 0.6;
+}
+
+.cover-hero { 
+  display: flex; 
+  align-items: center; 
+  gap: 1.25rem; 
+  margin-bottom: 0.5rem;
+}
+
+.cover-titles { display: grid; gap: 0.4rem; }
+
+.cover-title { 
+  margin: 0; 
+  font-size: clamp(1.4rem, 2.8vw, 1.8rem); 
+  font-weight: 600;
+  color: var(--clr-heading);
+  text-shadow: 0 1px 2px color-mix(in oklab, black, transparent 95%);
+}
+
+.cover-subtitle { 
+  margin: 0; 
+  color: var(--clr-body); 
+  opacity: 0.85; 
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.usecases { 
+  display: grid; 
+  grid-template-columns: repeat(2, minmax(0, 1fr)); 
+  gap: 1rem; 
+  margin-top: 1.25rem; 
+}
+
+.usecase-card {
+  display: grid; 
+  gap: 0.5rem; 
+  padding: 1.25rem; 
+  color: var(--clr-heading);
+  background: linear-gradient(135deg,
+    color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 85%) 0%,
+    color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 90%) 100%
+  );
+  border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border), transparent 70%);
+  border-radius: 14px;
+  box-shadow: 
+    0 3px 12px color-mix(in oklab, var(--clr-lossless-primary-dark), transparent 88%),
+    inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
+  position: relative;
+  overflow: hidden;
+}
+
+.usecase-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%) 50%,
+    transparent 100%
+  );
+}
+
+.usecase-title { 
+  margin: 0; 
+  font-size: 1.1rem; 
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.usecase-desc { 
+  margin: 0; 
+  color: var(--clr-body); 
+  opacity: 0.85; 
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.cover-expand { 
+  margin-top: 1rem; 
+  border-top: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%); 
+  padding-top: 1rem; 
+  position: relative;
+}
+
+.cover-expand::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    var(--clr-lossless-primary-light) 50%,
+    transparent 100%
+  );
+}
+
+.toggle { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  padding: 0.6rem 1rem; 
+  border-radius: 10px; 
+  border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border), transparent 60%); 
+  background: linear-gradient(135deg,
+    var(--surface-2) 0%,
+    color-mix(in oklab, var(--surface-2), var(--surface-3) 30%) 100%
+  );
+  color: var(--clr-body); 
+  user-select: none;
+  font-weight: 500;
+  transition: all 200ms ease;
+  box-shadow: 
+    0 2px 8px color-mix(in oklab, black, transparent 92%),
+    inset 0 1px 0 color-mix(in oklab, white, transparent 95%);
+  text-decoration: none;
+}
+
+.toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px color-mix(in oklab, black, transparent 88%),
+    inset 0 1px 0 color-mix(in oklab, white, transparent 90%);
+  border-color: color-mix(in oklab, var(--clr-lossless-primary), transparent 70%);
+  color: var(--clr-body);
+}
+
+.chev { 
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.1em;
 }
 
 .no-projects-message {
@@ -714,35 +690,13 @@ const pageDescription = hasProjects
   font-size: 0.9em;
 }
 
-/* Styles for project content containers to work with TableOfContents */
-.collection-reader-pane {
-  flex: 1 1 auto;
-  display: block;
-  padding: 3rem 2rem;
-  min-width: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-width: 100%;
-  height: 100%;
-  scroll-behavior: smooth;
-}
-
-/* When the content is displayed (not hidden), ensure proper scrolling */
-.collection-reader-pane:not([style*="display: none"]) {
-  height: calc(100vh - 4rem);
-  overflow-y: auto;
-}
-
-.project-content-simple {
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
 @media (max-width: 768px) {
-  .projects-grid {
+  .project-cover { padding: 1.25rem; }
+  .cover-hero { gap: 1rem; }
+  .usecases { grid-template-columns: 1fr; gap: 0.75rem; }
+  .usecase-card { padding: 1rem; }
+  .covers-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
   
   .projects-section {
@@ -755,55 +709,3 @@ const pageDescription = hasProjects
   }
 }
 </style>
-
-<script>
-  // Initialize Mermaid library globally
-  window.initializeMermaid = async function() {
-    if (!window.__MERMAID_LOADED__) {
-      try {
-        const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
-        
-        // Configure Mermaid
-        const mermaidConfig = {
-          startOnLoad: false,
-          theme: 'base',
-          themeVariables: {
-            darkMode: true,
-            background: 'transparent',
-            primaryColor: '#181818',
-            primaryBorderColor: '#6fffd6',
-            primaryTextColor: '#e0e0e0',
-            secondaryColor: '#BF23F7',
-            secondaryTextColor: '#50a3b3',
-            clusterBkg: '#283139',
-            lineColor: '#69e2e3',
-            fontFamily: 'Open Sans, sans-serif',
-          }
-        };
-        
-        mermaid.default.initialize(mermaidConfig);
-        window.mermaid = mermaid.default;
-        window.__MERMAID_LOADED__ = true;
-        
-        // Initialize renderMermaidCharts function
-        window.renderMermaidCharts = function() {
-          if (window.mermaid) {
-            window.mermaid.run();
-          }
-        };
-        
-        // Render any existing mermaid charts
-        setTimeout(() => {
-          window.renderMermaidCharts();
-        }, 100);
-      } catch (error) {
-        console.error('[Client Projects Index] Failed to load Mermaid library:', error);
-      }
-    }
-  };
-
-  // Initialize Mermaid after page load
-  document.addEventListener('DOMContentLoaded', () => {
-    window.initializeMermaid();
-  });
-</script>

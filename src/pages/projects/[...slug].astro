@@ -14,10 +14,12 @@ export async function getStaticPaths() {
 
   console.log(`Total projects found: ${allProjects.length}`);
 
-  const allPaths = allProjects.map(entry => {
-    // The entry.id is now our generated slug from generateId
-    const finalSlug = entry.id;
-    console.log(`[PROJECTS ROUTE] Entry ID: ${entry.id}, using as slug: ${finalSlug}`);
+  const processedProjects = processEntries(allProjects);
+
+  const allPaths = processedProjects.map(entry => {
+    // Use the processed slug from processEntries
+    const finalSlug = entry.slug;
+    // console.log(`[PROJECTS ROUTE] Entry ID: ${entry.id}, using slug: ${finalSlug}`);
     
     return {
       params: { slug: finalSlug },

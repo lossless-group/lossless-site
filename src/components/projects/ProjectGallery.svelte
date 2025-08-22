@@ -1,6 +1,8 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
+  import JSONCanvasRenderer from '../jsoncanvas/JSONCanvasRenderer.svelte';
+  import type { JSONCanvas } from '../../types/json-canvas';
   
   // SVG icons as strings for Svelte
   const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/></svg>`;
@@ -19,10 +21,19 @@
     hasSidebar?: boolean;
     demoSteps?: any[] | null;
     content?: any;
+    canvas?: JSONCanvas | null;
   }
   
   export let projects: Project[] = [];
 
+  // Debug logging for projects prop
+  $: console.log('[PROJECT GALLERY] Projects prop updated:', projects.map(p => ({
+    id: p.id,
+    title: p.title,
+    hasContent: !!p.content,
+    hasSidebar: p.hasSidebar,
+    hasDemoSteps: !!p.demoSteps
+  })));
   
   let expandedProject: string | null = null;
   let isFullPageView = false;
@@ -33,23 +44,57 @@
   $: currentProject = projects.find(p => p.id === expandedProject) ?? null;
   
   function toggleProject(projectId: string) {
+    console.log('[PROJECT GALLERY] Toggle project called with ID:', projectId);
+    console.log('[PROJECT GALLERY] Current expanded project:', expandedProject);
+    console.log('[PROJECT GALLERY] Available projects:', projects.map(p => ({ id: p.id, title: p.title, hasContent: !!p.content })));
+    
+    // Find the project
+    const project = projects.find(p => p.id === projectId);
+    console.log('[PROJECT GALLERY] Found project:', {
+      found: !!project,
+      id: project?.id,
+      title: project?.title,
+      hasContent: !!project?.content,
+      hasSidebar: project?.hasSidebar,
+      hasDemoSteps: !!project?.demoSteps
+    });
+    
+    // If project has demo steps, navigate to the orientation page (step 0)
+    if (project && project.demoSteps && project.demoSteps.length > 0) {
+      const orientationStep = project.demoSteps.find(step => step.type === 'orientation');
+      if (orientationStep) {
+        console.log('[PROJECT GALLERY] Navigating to orientation step:', orientationStep.href);
+        window.location.href = orientationStep.href;
+        return;
+      }
+    }
+    
+    // Fallback to overlay behavior for projects without demo steps
     if (expandedProject === projectId) {
       // Close current project with animation
+      console.log('[PROJECT GALLERY] Closing project:', projectId);
       closeProject();
     } else {
       // Open new project
+      console.log('[PROJECT GALLERY] Opening project:', projectId);
       expandedProject = projectId;
       isFullPageView = true;
       isClosing = false;
       document.body.style.overflow = 'hidden';
       
       // Inject project content if it exists
-      const project = projects.find(p => p.id === projectId);
       if (project && project.content) {
         setTimeout(() => {
+          console.log('[PROJECT GALLERY] Looking for DOM elements for project:', projectId);
           const sourceContent = document.getElementById(`${projectId}-full-content`);
           const targetContent = document.getElementById(`${projectId}-content`);
           const navigationTarget = document.getElementById(`${projectId}-navigation`);
+          
+          console.log('[PROJECT GALLERY] DOM elements found:', {
+            sourceContent: !!sourceContent,
+            targetContent: !!targetContent,
+            navigationTarget: !!navigationTarget
+          });
           
           if (sourceContent && targetContent) {
             // Clone the source content
@@ -279,10 +324,10 @@
         <button 
           class="toggle" 
           on:click={() => toggleProject(project.id)}
-          aria-label={expandedProject === project.id ? 'Close' : 'Open'}
+          aria-label={expandedProject === project.id ? 'Close' : 'View Project'}
         >
           <span class="toggle-label">
-            {expandedProject === project.id ? 'Close' : 'Open'}
+            {expandedProject === project.id ? 'Close' : 'View Project'}
           </span>
           <span class="chev" aria-hidden="true">
             {#if expandedProject === project.id}
@@ -326,10 +371,16 @@
                     </div>
                   </aside>
                   <main class="project-main">
-                    <header class="project-header">
-                      <h1>{currentProject.title}</h1>
-                      <p class="project-subtitle">{currentProject.subtitle}</p>
-                    </header>
+                    <div class="project-canvas-header">
+                      {#if currentProject.canvas}
+                        <JSONCanvasRenderer canvas={currentProject.canvas} />
+                      {:else}
+                        <header class="project-header">
+                          <h1>{currentProject.title}</h1>
+                          <p class="project-subtitle">{currentProject.subtitle}</p>
+                        </header>
+                      {/if}
+                    </div>
                     <div id="{currentProject.id}-content" class="project-content">
                       <!-- Additional content will be injected here -->
                     </div>
@@ -337,10 +388,16 @@
                 </div>
               {:else}
                 <div class="project-content-simple-layout">
-                  <header class="project-header">
-                    <h1>{currentProject.title}</h1>
-                    <p class="project-subtitle">{currentProject.subtitle}</p>
-                  </header>
+                  <div class="project-canvas-header">
+                    {#if currentProject.canvas}
+                      <JSONCanvasRenderer canvas={currentProject.canvas} />
+                    {:else}
+                      <header class="project-header">
+                        <h1>{currentProject.title}</h1>
+                        <p class="project-subtitle">{currentProject.subtitle}</p>
+                      </header>
+                    {/if}
+                  </div>
                   <div id="{currentProject.id}-content" class="project-content">
                     <!-- Content will be injected here -->
                   </div>
@@ -701,6 +758,25 @@
     height: 100%;
     overflow: hidden;
     overflow-x: visible;
+  }
+
+  .project-canvas-header {
+    flex-shrink: 0;
+  }
+
+  /* JSONCanvasRenderer styling within project overlay */
+  :global(.project-canvas-header .json-canvas-container) {
+    height: 60vh;
+    min-height: 400px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 90%);
+  }
+
+  :global(.project-canvas-header .canvas-controls) {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.5rem;
+    border-radius: 8px;
   }
 
   .project-header {

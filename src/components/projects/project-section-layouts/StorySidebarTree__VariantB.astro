@@ -1,27 +1,29 @@
 ---
 import Tooltip from '@components/basics/tooltips/Tooltip.astro';
+import { pathToUrl, processEntries } from '@utils/slugify.ts';
 const { steps = null, currentHref = '', seriesTitle = 'Augment-It' } = Astro.props;
 
-// Debug: Log the steps to see what we're getting
-console.log('Steps received:', steps);
-if (steps && steps.length > 0) {
-  console.log('First step:', steps[0]);
-  console.log('Step types:', steps.map(s => s.type));
-}
+// Use steps directly since they already contain proper URLs
+const processedSteps = steps;
+
 ---
 
 <section class="story-grid" aria-label="Story Navigation (Variant B)">
   <aside class="card sidebar">
     <nav aria-label="Breadcrumb" class="breadcrumb">
       <span><a class="crumb-link" href="/projects">Projects</a><span class="crumb-sep"> / </span></span>
-      <span><a class="crumb-link" href="/projects/Augment-It">{seriesTitle}</a><span class="crumb-sep"> / </span></span>
-      <span><span class="crumb-current" aria-current="page">{steps && currentHref ? (steps.find(s => s.href === currentHref)?.title ?? '') : 'Review & Enrich Records'}</span></span>
+      <span><a class="crumb-link" href={(() => {
+        // Find the orientation step for this project
+        const orientationStep = processedSteps?.find(step => step.type === 'orientation');
+        return orientationStep?.href || `/projects/${seriesTitle.toLowerCase()}`;
+      })()}>{seriesTitle}</a><span class="crumb-sep"> / </span></span>
+      <span><span class="crumb-current" aria-current="page">{processedSteps && currentHref ? (processedSteps.find(s => s.href === currentHref)?.title ?? '') : ''}</span></span>
     </nav>
     
     <!-- Navigation Help Tooltip -->
     <div class="navigation-help">
       <Tooltip 
-        text="Use the sidebar tree to navigate the Augment-It journey. The demo steps below match the current series flow."
+        text={`Use the sidebar tree to navigate the ${seriesTitle} journey. The demo steps below match the current series flow.`}
         position="right"
         trigger="hover"
       >
@@ -29,17 +31,17 @@ if (steps && steps.length > 0) {
       </Tooltip>
     </div>
     
-    {steps ? (
+    {processedSteps ? (
       <div class="tree-sections">
         {/* Debug: Show all steps first */}
-        {steps.length === 0 && <p>No steps found</p>}
+        {processedSteps.length === 0 && <p>No steps found</p>}
         
         {/* Orientation Section */}
-        {steps.filter(step => step.type === 'orientation').length > 0 && (
+        {processedSteps.filter(step => step.type === 'orientation').length > 0 && (
           <div class="orientation-section">
             <h3 class="section-header">Overview</h3>
             <ul class="tree-nav">
-              {steps.filter(step => step.type === 'orientation').map((step) => (
+              {processedSteps.filter(step => step.type === 'orientation').map((step) => (
                 <li class={currentHref === step.href ? 'active-cluster' : ''}>
                   {currentHref === step.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
                   {step.description && (
@@ -56,11 +58,11 @@ if (steps && steps.length > 0) {
         )}
         
         {/* Sequential Flow Section */}
-        {steps.filter(step => step.type === 'sequential').length > 0 && (
+        {processedSteps.filter(step => step.type === 'sequential').length > 0 && (
           <div class="sequential-section">
             <h3 class="section-header">Workflow Steps</h3>
             <div class="tree-nav">
-              {steps.filter(step => step.type === 'sequential').map((step) => (
+              {processedSteps.filter(step => step.type === 'sequential').map((step) => (
                 <div class={currentHref === step.href ? 'active-cluster' : ''}>
                   {currentHref === step.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
                   <a href={step.href} class={"tree-link tree-link--sequential" + (currentHref === step.href ? ' tree-link--active' : '')}>
@@ -74,18 +76,18 @@ if (steps && steps.length > 0) {
         )}
         
         {/* Fallback: Show hierarchical structure even without type property */}
-        {steps.filter(step => step.type === 'orientation').length === 0 && 
-         steps.filter(step => step.type === 'sequential').length === 0 && (
+        {processedSteps.filter(step => step.type === 'orientation').length === 0 && 
+         processedSteps.filter(step => step.type === 'sequential').length === 0 && (
           <div class="hierarchical-fallback">
             {/* First item as orientation */}
             <div class="orientation-section">
               <h3 class="section-header">Overview</h3>
               <ul class="tree-nav">
-                <li class={currentHref === steps[0]?.href ? 'active-cluster' : ''}>
-                  {currentHref === steps[0]?.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
-                  <a href={steps[0]?.href} class={"tree-link tree-link--orientation" + (currentHref === steps[0]?.href ? ' tree-link--active' : '')}>
+                <li class={currentHref === processedSteps[0]?.href ? 'active-cluster' : ''}>
+                  {currentHref === processedSteps[0]?.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
+                  <a href={processedSteps[0]?.href} class={"tree-link tree-link--orientation" + (currentHref === processedSteps[0]?.href ? ' tree-link--active' : '')}>
                     <span class="chip chip--orientation">📋</span>
-                    <span class="tree-text">{steps[0]?.title}</span>
+                    <span class="tree-text">{processedSteps[0]?.title}</span>
                   </a>
                   <p class="orientation-desc">Overview and introduction to the complete workflow</p>
                 </li>
@@ -93,11 +95,11 @@ if (steps && steps.length > 0) {
             </div>
             
             {/* Remaining items as sequential */}
-            {steps.length > 1 && (
+            {processedSteps.length > 1 && (
               <div class="sequential-section">
                 <h3 class="section-header">Workflow Steps</h3>
                 <div class="tree-nav">
-                  {steps.slice(1).map((step, i) => (
+                  {processedSteps.slice(1).map((step, i) => (
                     <div class={currentHref === step.href ? 'active-cluster' : ''}>
                       {currentHref === step.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
                       <a href={step.href} class={"tree-link tree-link--sequential" + (currentHref === step.href ? ' tree-link--active' : '')}>
@@ -115,55 +117,7 @@ if (steps && steps.length > 0) {
     ) : (
       <ul class="tree-nav">
         <li>
-          <a href="/projects/Augment-It/connect" class="tree-link">
-            <span class="chip">01</span>
-            <span class="tree-text">Connect Data Source</span>
-          </a>
-          <ul class="tree-nav tree-branch">
-            <li>
-              <a href="/projects/Augment-It/connect/supported-stores" class="tree-link">
-                <span class="chip chip--sm">1.1</span>
-                <span class="tree-text">Supported Data Stores</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="active-cluster">
-          <span class="cluster-bracket" aria-hidden="true"></span>
-          <a href="/projects/Augment-It/review" class="tree-link tree-link--active">
-            <span class="chip">02</span>
-            <span class="tree-text">Review &amp; Enrich Records</span>
-          </a>
-          <ul class="tree-nav tree-branch tree-branch--active">
-            <li>
-              <a href="/projects/Augment-It/review/record-collector" class="tree-link">
-                <span class="chip chip--sm">2.1</span>
-                <span class="tree-text">RecordCollector</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="/projects/Augment-It/templates" class="tree-link">
-            <span class="chip">03</span>
-            <span class="tree-text">Design Prompt Templates</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="/projects/Augment-It/insights" class="tree-link">
-            <span class="chip">04</span>
-            <span class="tree-text">Assemble Insights</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="/projects/Augment-It/sync" class="tree-link">
-            <span class="chip">05</span>
-            <span class="tree-text">Sync Back to Source</span>
-          </a>
+          <p class="no-steps-message">No navigation steps defined for this project.</p>
         </li>
       </ul>
     )}
@@ -282,44 +236,13 @@ if (steps && steps.length > 0) {
   }
   
   /* Sequential flow styling */
-  .sequential-section::before {
-    content: '';
-    position: absolute;
-    left: 1.1rem;
-    top: 2rem;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg,
-      var(--clr-lossless-primary-light) 0%,
-      color-mix(in oklab, var(--clr-lossless-primary-light), transparent 50%) 100%
-    );
-    opacity: 0.6;
-  }
   
   .tree-link--sequential {
     position: relative;
     z-index: 1;
   }
   
-  .tree-link--sequential::before {
-    content: '';
-    position: absolute;
-    left: -0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background: var(--clr-lossless-primary-light);
-    border: 2px solid var(--surface-1);
-    border-radius: 50%;
-    opacity: 0.7;
-  }
-  
-  .tree-link--sequential:hover::before,
-  .tree-link--sequential.tree-link--active::before {
-    background: var(--clr-lossless-accent--brightest);
-    opacity: 1;
-  }
+
 
   /* Chips */
   .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; height: 1.25rem; padding: 0 0.3rem; font-size: 0.72rem; line-height: 1; color: var(--clr-heading); background: var(--clr-lossless-primary-glass); border: 1px solid var(--clr-lossless-ui-btn-border); border-radius: 0.6rem; }
@@ -355,5 +278,18 @@ if (steps && steps.length > 0) {
 
   .help-icon:hover {
     color: var(--clr-lossless-accent--brightest);
+  }
+
+  /* No steps message */
+  .no-steps-message {
+    margin: 0;
+    padding: 1rem;
+    color: var(--clr-body);
+    opacity: 0.7;
+    font-style: italic;
+    text-align: center;
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 95%);
+    border-radius: 8px;
+    border: 1px dashed color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
   }
 </style>

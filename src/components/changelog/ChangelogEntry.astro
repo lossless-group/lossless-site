@@ -79,8 +79,8 @@ const restContent = restParagraphs.join('\n\n');
 const hasMoreContent = restParagraphs.length > 0;
 
 // Process markdown content using renderSimpleMarkdown utility
-const previewRendered = renderSimpleMarkdown(previewContent);
-const restRendered = hasMoreContent ? renderSimpleMarkdown(restContent) : { html: '', plainText: '' };
+const previewRendered = await renderSimpleMarkdown(previewContent);
+const restRendered = hasMoreContent ? await renderSimpleMarkdown(restContent) : { html: '', plainText: '' };
 ---
 
 <div class:list={["changelog-entry", className]}>

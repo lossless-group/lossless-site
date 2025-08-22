@@ -191,10 +191,10 @@ if (DEBUG_TOC) {
                         <button 
                           class="toc-toggle" 
                           data-parent-slug={tocItem.slug}
-                          data-expanded="true"
+                          data-expanded={tocItem.depth < 1 ? "true" : "false"}
                           aria-label={`Toggle ${tocItem.text} section`}
                         >
-                          <svg class="toc-chevron expanded" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <svg class={`toc-chevron ${tocItem.depth < 1 ? "expanded" : "collapsed"}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="6,9 12,15 18,9"></polyline>
                           </svg>
                         </button>
@@ -208,11 +208,11 @@ if (DEBUG_TOC) {
                       )}
                       <span class="toc-text">{tocItem.text}</span>
                     </a>
-                    {hasChildren && (
-                      <ul class="toc-sublist">
-                        {tocItem.children?.map((child: any, childIndex: number) => renderTocItem(child))}
-                      </ul>
-                    )}
+                                          {hasChildren && (
+                        <ul class={`toc-sublist ${tocItem.depth >= 1 ? "hidden" : ""}`}>
+                          {tocItem.children?.map((child: any, childIndex: number) => renderTocItem(child))}
+                        </ul>
+                      )}
                   </li>
                 );
               }
@@ -268,8 +268,6 @@ if (DEBUG_TOC) {
 .toc-sidebar:hover:not(.collapsed) {
   border-color: var(--clr-lossless-accent--brightest);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-  width: 800px;
-  max-width: 800px;
 }
 
 .toc-header {
@@ -577,11 +575,6 @@ if (DEBUG_TOC) {
     max-width: 260px;
     width: 260px;
   }
-  
-  .toc-sidebar:hover:not(.collapsed) {
-    width: 400px;
-    max-width: 400px;
-  }
 }
 
 @media (max-width: 1400px) {
@@ -590,11 +583,6 @@ if (DEBUG_TOC) {
     max-width: 240px;
     width: 240px;
   }
-  
-  .toc-sidebar:hover:not(.collapsed) {
-    width: 350px;
-    max-width: 350px;
-  }
 }
 
 @media (max-width: 1200px) {
@@ -602,11 +590,6 @@ if (DEBUG_TOC) {
     min-width: 200px;
     max-width: 220px;
     width: 220px;
-  }
-  
-  .toc-sidebar:hover:not(.collapsed) {
-    width: 300px;
-    max-width: 300px;
   }
 }
 

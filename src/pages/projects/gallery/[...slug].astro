@@ -1,0 +1,344 @@
+---
+import Layout from '@layouts/Layout.astro';
+import ContentSection_SidebarTreeVariantB from '@layouts/content-sections/ContentSection_SidebarTreeVariantB.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import JSONCanvasRenderer from '@components/jsoncanvas/JSONCanvasRenderer.svelte';
+import { getCollection } from 'astro:content';
+
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
+import remarkImages from '@utils/markdown/remark-images'; 
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
+import type { Root } from 'mdast';
+
+// Import canvas data
+import augmentItCanvasRaw from '@generated/projects/Augment-It/Specs/Augment-It.canvas?raw';
+
+// Import utilities
+import { generateStaticPaths, findProjectBySlug, processCanvasData, getReferenceSlug } from '@utils/projectGalleryUtils';
+import { processEntries } from '@utils/slugify';
+
+export const prerender = true;
+
+export { generateStaticPaths as getStaticPaths };
+
+// Remove YAML frontmatter when using ?raw imports so it doesn't render in the page
+function stripFrontmatter(input: string): string {
+  if (!input) return input;
+  return input.replace(/^\uFEFF?\s*---[\s\S]*?\n---\s*/u, '');
+}
+
+// Process markdown content with unified processor
+async function processMarkdown(mdContent: string, id: string, title: string) {
+  if (!mdContent) return { mdastNode: null, contentData: null };
+  
+  const cleanedContent = stripFrontmatter(mdContent);
+  
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkDirective)
+    .use(remarkDirectiveToComponent)
+    .use(remarkImages) 
+    .use(remarkBacklinks)
+    .use(remarkCitations)
+    .use(remarkTableOfContents);
+
+  const mdast = processor.parse(cleanedContent);
+  const mdastNode = await processor.run(mdast);
+
+  const contentData = {
+    path: Astro.url.pathname,
+    id: id,
+    title: title
+  };
+
+  return { mdastNode, contentData };
+}
+
+// Load content based on slug path
+async function loadContentFromSlug(slugPath: string) {
+  // Find project and step for this slug
+  const projectInfo = findProjectBySlug(slugPath);
+  if (!projectInfo) {
+    return { mdastNode: null, contentData: null };
+  }
+
+  const { project, step } = projectInfo;
+
+  // Load content from projects collection based on contentPath
+  if (step.contentPath) {
+    const projectsCollection = await getCollection('projects');
+    
+    // Use processEntries to get consistent slug matching
+    const processedEntries = processEntries(projectsCollection);
+    
+    // Convert contentPath to reference slug using slugify utilities
+    const referenceSlug = getReferenceSlug(step.contentPath);
+    
+    // Find the entry using the processed slug
+    const entry = processedEntries.find(entry => entry.slug === referenceSlug);
+    
+    if (entry) {
+      return await processMarkdown(
+        entry.body,
+        entry.id,
+        entry.data.title || step.title
+      );
+    }
+  }
+
+  return { mdastNode: null, contentData: null };
+}
+
+
+
+const { step, demoSteps, projectTitle } = Astro.props;
+const { slug } = Astro.params;
+
+// Load content based on the current slug
+let content;
+try {
+  content = await loadContentFromSlug(slug || 'index');
+} catch (error) {
+  content = { mdastNode: null, contentData: null };
+}
+
+
+
+// Process canvas data
+const augmentItCanvas = await processCanvasData(augmentItCanvasRaw);
+
+// Get current project based on slug
+const projectInfo = slug && slug !== 'index' ? findProjectBySlug(slug) : null;
+const currentProject = projectInfo ? {
+  id: projectInfo.project.id,
+  title: projectInfo.project.title,
+  hasSidebar: projectInfo.project.hasSidebar,
+  demoSteps: projectInfo.project.demoSteps
+} : null;
+const currentHref = slug && slug !== 'index' ? `/projects/gallery/${slug}` : '/projects/gallery';
+
+
+---
+
+<Layout 
+  title={content?.contentData?.title || "Project Gallery"} 
+  description="Explore our innovative projects and interactive visualizations"
+>
+  <div class="projects-page-container">
+    {(() => {
+      // Check if this is the orientation step for Augment-It
+      const isOrientationStep = slug === 'augment-it/specs/data-augmentation-workflow-with-microfrontends';
+      
+      if (isOrientationStep && augmentItCanvas) {
+        return (
+          <div class="canvas-section">
+            <JSONCanvasRenderer canvas={augmentItCanvas} client:load />
+          </div>
+        );
+      }
+      // No hero/animation wrapper for other steps - content will be displayed directly
+      return null;
+    })()}
+
+    <!-- Show content directly for specific slugs -->
+    {slug !== 'index' && slug ? (
+      <div class="project-content-container">
+        {(() => {
+          if (currentProject && currentProject.hasSidebar && currentProject.demoSteps) {
+            return (
+              <ContentSection_SidebarTreeVariantB 
+                steps={currentProject.demoSteps} 
+                currentHref={currentHref} 
+                seriesTitle={currentProject.title}
+              >
+                {content?.mdastNode && content?.contentData ? (
+                  <OneArticleOnPage 
+                    content={content.mdastNode} 
+                    data={content.contentData} 
+                  />
+                ) : (
+                  <div class="no-content-message">
+                    <p>Content not available for this path.</p>
+                    <p>Current path: {currentHref}</p>
+                    <p>Slug: {slug}</p>
+                    <p>Content debug: {JSON.stringify({ hasMdastNode: !!content?.mdastNode, hasContentData: !!content?.contentData })}</p>
+                  </div>
+                )}
+              </ContentSection_SidebarTreeVariantB>
+            );
+          } else {
+            return (
+              <div class="project-content-simple">
+                {content?.mdastNode && content?.contentData ? (
+                  <OneArticleOnPage 
+                    content={content.mdastNode} 
+                    data={content.contentData} 
+                  />
+                ) : (
+                  <div class="no-content-message">
+                    <p>Content not available for this path.</p>
+                    <p>Current path: {currentHref}</p>
+                    <p>Slug: {slug}</p>
+                    <p>Content debug: {JSON.stringify({ hasMdastNode: !!content?.mdastNode, hasContentData: !!content?.contentData })}</p>
+                  </div>
+                )}
+              </div>
+            );
+          }
+        })()}
+      </div>
+    ) : null}
+  </div>
+</Layout>
+
+<style>
+  .projects-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem);
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+    width: 100%;
+  }
+  
+  .covers-grid { 
+    display: grid; 
+    gap: 2rem; 
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  @media (max-width: 768px) {
+    .covers-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  /* Styles for project content containers to work with TableOfContents */
+  .collection-reader-pane {
+    flex: 1 1 auto;
+    display: block;
+    padding: 3rem 2rem;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 100%;
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  /* When the content is displayed (not hidden), ensure proper scrolling */
+  .collection-reader-pane:not([style*="display: none"]) {
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  .project-content-simple {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .no-content-message {
+    padding: 2rem;
+    text-align: center;
+    color: var(--clr-body);
+    opacity: 0.7;
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 95%);
+    border-radius: 8px;
+    border: 1px dashed color-mix(in oklab, var(--clr-lossless-primary-light), transparent 70%);
+  }
+  
+  .project-content-container {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .project-content-simple {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .canvas-section {
+    margin: 2rem auto;
+    padding: 0 1rem;
+    max-width: 100%;
+  }
+</style>
+
+<script>
+  // Global type declaration for Mermaid functions
+  declare global {
+    interface Window {
+      renderMermaidCharts?: () => void;
+      initializeMermaid?: () => Promise<void>;
+      mermaid?: any;
+      __MERMAID_LOADED__?: boolean;
+    }
+  }
+  
+  // Initialize Mermaid library globally
+  window.initializeMermaid = async function() {
+    if (!window.__MERMAID_LOADED__) {
+      try {
+        // Load mermaid from CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+        script.onload = function() {
+          // Configure Mermaid
+          const mermaidConfig = {
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+              darkMode: true,
+              background: 'transparent',
+              primaryColor: '#181818',
+              primaryBorderColor: '#6fffd6',
+              primaryTextColor: '#e0e0e0',
+              secondaryColor: '#BF23F7',
+              secondaryTextColor: '#50a3b3',
+              clusterBkg: '#283139',
+              lineColor: '#69e2e3',
+              fontFamily: 'Open Sans, sans-serif',
+            }
+          };
+          
+          (window as any).mermaid.initialize(mermaidConfig);
+          window.mermaid = (window as any).mermaid;
+          window.__MERMAID_LOADED__ = true;
+          
+          // Initialize renderMermaidCharts function
+          window.renderMermaidCharts = function() {
+            if (window.mermaid) {
+              window.mermaid.run();
+            }
+          };
+          
+          // Render any existing mermaid charts
+          setTimeout(() => {
+            window.renderMermaidCharts();
+          }, 100);
+        };
+        document.head.appendChild(script);
+      } catch (error) {
+        // Mermaid library failed to load
+      }
+    }
+  };
+
+  // Initialize Mermaid after page load
+  document.addEventListener('DOMContentLoaded', () => {
+    window.initializeMermaid();
+  });
+</script>

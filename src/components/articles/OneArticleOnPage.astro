@@ -37,6 +37,17 @@ interface Props {
 const { articleHeading, content, data: originalData = { path: Astro.url.pathname } } = Astro.props; // compiledContent removed
 const effectiveHeading = articleHeading?.trim() || originalData.title?.trim() || '';
 
+// Debug logging
+// console.log('[ONE ARTICLE ON PAGE] Props received:', {
+//   hasContent: !!content,
+//   contentType: typeof content,
+//   hasData: !!originalData,
+//   dataKeys: originalData ? Object.keys(originalData) : [],
+//   effectiveHeading,
+//   articleHeading,
+//   originalDataTitle: originalData?.title
+// });
+
 // Determine the author prop to pass to AuthorHandle
 // Prefers data.authors (array) if available, otherwise falls back to data.author (string)
 let authorForHandle: string | string[] | undefined = undefined;

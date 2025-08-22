@@ -1,0 +1,38 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/basics/Hero.astro';
+import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import Section__Project_Container from '@components/projects/Section__Project-Container.astro';
+---
+
+<Layout 
+  title="Our Lossless Projects" 
+  description="Explore our innovative projects and interactive visualizations"
+>
+  <div class="projects-page-container">
+    <AnimationWrapper>
+      <Hero
+        title="Our Lossless Projects"
+        subtitle="Innovation in Action"
+        description="Discover our cutting-edge projects and interactive visualizations that showcase the power of modern web technologies and thoughtful design."
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+        style="margin: 0 auto; padding: 0 1.5rem; margin-top: 5rem;"
+      />
+    </AnimationWrapper>
+
+    <Section__Project_Container title="Projects" />
+  </div>
+</Layout>
+
+<style>
+  .projects-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6, 1.5rem);
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+    width: 100%;
+  }
+</style>

@@ -1,152 +1,56 @@
-/**
- * Remark-based Markdown Renderer for JSON Canvas File Previews
- * 
- * Uses remark for proper AST parsing and rendering, ensuring accurate
- * header hierarchy and markdown processing.
- */
-
-import { remark } from 'remark';
-import remarkHtml from 'remark-html';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
-import remarkJsonCanvasCodeblocks from './markdown/remark-jsoncanvas-codeblocks.js';
-import { sanitizeMermaidCode, getShikiHighlighter, getLanguageRoutingStrategy } from './shikiHighlighter.js';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
+import remarkDirective from 'remark-directive';
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkImages from '@utils/markdown/remark-images';
+import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 
-export interface RenderedMarkdown {
+interface RenderResult {
   html: string;
   plainText: string;
 }
 
 /**
- * Simple remark plugin to sanitize Mermaid code blocks
+ * Simple markdown renderer utility that processes markdown content
+ * through the unified ecosystem with all necessary remark plugins
+ * 
+ * @param markdown - The markdown content to render
+ * @returns Object containing HTML and plain text versions
  */
-function remarkSanitizeMermaid() {
-  return (tree: any) => {
-    // Find all code blocks with lang="mermaid"
-    function visit(node: any) {
-      if (node.type === 'code' && node.lang === 'mermaid') {
-        // Apply sanitization to the code value
-        node.value = sanitizeMermaidCode(node.value);
-      }
-      if (node.children) {
-        node.children.forEach(visit);
-      }
-    }
-    visit(tree);
-  };
-}
-
-/**
- * Simple remark plugin for basic syntax highlighting using Shiki
- */
-function remarkBasicShiki() {
-  return async (tree: any) => {
-    const highlighter = await getShikiHighlighter();
-    
-    // Find all code blocks and apply syntax highlighting
-    async function visit(node: any) {
-      if (node.type === 'code' && node.lang) {
-        const lang = node.lang;
-        const code = node.value;
-        const routingStrategy = getLanguageRoutingStrategy(lang);
-        
-        if (routingStrategy === 'shiki') {
-          try {
-            // Apply Shiki highlighting
-            const highlighted = highlighter.codeToHtml(code, {
-              lang: lang,
-              theme: 'github-dark'
-            });
-            
-            // Convert to HTML node for remark-html
-            node.type = 'html';
-            node.value = highlighted;
-            delete node.lang;
-          } catch (error) {
-            // Fallback to plain code block if highlighting fails
-            console.warn(`Failed to highlight ${lang} code:`, error);
-          }
-        }
-      }
-      if (node.children) {
-        for (const child of node.children) {
-          await visit(child);
-        }
-      }
-    }
-    await visit(tree);
-  };
-}
-
-/**
- * Renders markdown content to HTML for display in JSON Canvas file nodes
- */
-export function renderSimpleMarkdown(content: string): RenderedMarkdown {
-  if (!content) {
+export async function renderSimpleMarkdown(markdown: string): Promise<RenderResult> {
+  if (!markdown || markdown.trim() === '') {
     return { html: '', plainText: '' };
   }
 
   try {
-    // Process markdown with remark (no syntax highlighting to avoid Shiki conflicts)
-    const processor = remark()
+    // Create processor with all necessary plugins
+    const processor = unified()
+      .use(remarkParse)
       .use(remarkGfm)
-      .use(remarkSanitizeMermaid) // Sanitize Mermaid before other processing
-      .use(remarkJsonCanvasCodeblocks)
-      .use(remarkHtml, { sanitize: false });
+      .use(remarkBacklinks)
+      .use(remarkImages)
+      .use(remarkDirective)
+      .use(remarkDirectiveToComponent)
+      .use(remarkCitations)
+      .use(remarkTableOfContents)
+      .use(remarkRehype)
+      .use(rehypeStringify);
 
-    let html = String(processor.processSync(content));
-    
-    // Extract plain text for fallback
-    const plainText = content
-      .replace(/\[\[([^\]|]+)(\|[^\]]+)?\]\]/g, '$1') // Remove backlinks
-      .replace(/#{1,6}\s+/g, '') // Remove headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic
-      .replace(/`([^`]+)`/g, '$1') // Remove inline code
-      .trim();
+    // Process the markdown
+    const result = await processor.process(markdown);
+    const html = String(result);
 
-    // Add CSS classes to elements for styling
-    html = html
-      .replace(/<h1>/g, '<h1 class="markdown-h1">')
-      .replace(/<h2>/g, '<h2 class="markdown-h2">')
-      .replace(/<h3>/g, '<h3 class="markdown-h3">')
-      .replace(/<h4>/g, '<h4 class="markdown-h4">')
-      .replace(/<h5>/g, '<h5 class="markdown-h5">')
-      .replace(/<h6>/g, '<h6 class="markdown-h6">')
-      .replace(/<p>/g, '<p class="markdown-p">')
-      .replace(/<code>/g, '<code class="inline-code">');
-
-    // Handle backlinks [[path|display]] or [[path]]
-    html = html.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (match, path, _, display) => {
-      const linkText = display || path.split('/').pop()?.replace(/\.md$/, '') || path;
-      return `<span class="backlink" title="${path}">${linkText}</span>`;
-    });
+    // Extract plain text by removing HTML tags
+    const plainText = html.replace(/<[^>]*>/g, '').trim();
 
     return { html, plainText };
   } catch (error) {
-    console.error('Error processing markdown:', error);
-    // Fallback to plain text if remark fails
-    return { html: `<p class="markdown-p">${content}</p>`, plainText: content };
+    console.error('Error rendering markdown:', error);
+    return { html: markdown, plainText: markdown };
   }
-}
-
-/**
- * Truncates rendered markdown to a specific character limit while preserving HTML structure
- */
-export function truncateRenderedMarkdown(rendered: RenderedMarkdown, maxLength: number): RenderedMarkdown {
-  if (rendered.plainText.length <= maxLength) {
-    return rendered;
-  }
-
-  const truncatedPlainText = rendered.plainText.substring(0, maxLength) + '...';
-  
-  // Simple truncation of HTML - could be improved with proper HTML parsing
-  let truncatedHtml = rendered.html;
-  if (rendered.html.length > maxLength * 1.5) { // Account for HTML tags
-    truncatedHtml = rendered.html.substring(0, maxLength * 1.5) + '...</p>';
-  }
-
-  return {
-    html: truncatedHtml,
-    plainText: truncatedPlainText
-  };
 }

@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { FileNode } from '../../types/json-canvas';
-  import { renderSimpleMarkdown } from '../../utils/simpleMarkdownRenderer';
+  import { slugify, getReferenceSlug } from '../../utils/slugify';
   import FrontmatterSVG from '../../assets/Icons/frontmatter-indicator.svg?raw';
+  import SvelteMarkdown from '../markdown/SvelteMarkdown.svelte';
 
 
   export let node: FileNode;
@@ -111,15 +112,7 @@
         const clientName = pathParts[1].toLowerCase(); // "Laerdal" → "laerdal"
         const projectPathParts = pathParts.slice(3); // Skip client-content, Client, Projects
         
-        // Slugify function matching server-side utils/slugify.ts exactly
-        const slugify = (str: string) => str
-          .toLowerCase()                           // Convert to lowercase
-          .replace(/\.[a-z0-9]+$/, '')            // Remove file extension like .md (only if it's just letters/numbers)
-          .replace(/[^a-z0-9\s\-_]/g, '')         // Remove all non-alphanumeric except space, dash, underscore (REMOVE dots)
-          .replace(/[\s_]+/g, '-')                // Replace spaces and underscores with dashes
-          .replace(/-+/g, '-')                    // Collapse multiple dashes
-          .replace(/^-+|-+$/g, '');               // Trim leading/trailing dashes
-        
+        // Use the site-wide slugify utility function
         const projectSlug = projectPathParts
           .map(part => slugify(part))
           .join('/');
@@ -134,14 +127,8 @@
       // For now, use the same logic as the collection until we can read frontmatter
       const projectPath = contentPath.replace(/\.md$/, '');
       
-      // Convert to lowercase and replace non-alphanumeric with dashes, preserving directory structure
-      const slugifiedPath = projectPath
-        .toLowerCase()
-        .replace(/[^a-z0-9\/]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .replace(/\/-+/g, '/')
-        .replace(/-+\//g, '/');
+      // Use the site-wide getReferenceSlug utility function
+      const slugifiedPath = getReferenceSlug(projectPath);
       
       siteUrl = `/${slugifiedPath}`;
     } else {
@@ -180,16 +167,9 @@
     }
   }
 
-  // Render markdown content
-  $: renderedContent = (() => {
-    const fileContent = (node as any).fileContent;
-    if (!fileContent || fileContent.includes('File not found') || fileContent.includes('Error reading')) {
-      return { html: fileContent || 'Loading file content...', plainText: fileContent || 'Loading file content...' };
-    }
-    
-    const rendered = renderSimpleMarkdown(fileContent);
-    return rendered;
-  })();
+  // Get file content for markdown rendering
+  $: fileContent = (node as any).fileContent;
+  $: hasValidContent = fileContent && !fileContent.includes('File not found') && !fileContent.includes('Error reading');
 </script>
 
 <!-- File node with proper ARIA attributes -->
@@ -377,9 +357,13 @@
     height={height - 72}
   >
     <div class="file-content">
-      <div class="content-text">
-        {@html renderedContent.html}
-      </div>
+      {#if hasValidContent}
+        <SvelteMarkdown content={fileContent} className="content-text" />
+      {:else}
+        <div class="content-text">
+          {fileContent || 'Loading file content...'}
+        </div>
+      {/if}
     </div>
   </foreignObject>
 
@@ -504,196 +488,7 @@
     opacity: 1;
   }
 
-  /* Markdown element styles using theme variables - multiple selectors for maximum compatibility */
-  .file-content .content-text :global(.markdown-h1),
-  .file-content .content-text :global(.markdown-h2),
-  .file-content .content-text :global(.markdown-h3),
-  .file-content .content-text :global(.markdown-h4),
-  .file-content .content-text :global(.markdown-h5),
-  .file-content .content-text :global(.markdown-h6),
-  .content-text :global(h1),
-  .content-text :global(h2),
-  .content-text :global(h3),
-  .content-text :global(h4),
-  .content-text :global(h5),
-  .content-text :global(h6) {
-    font-family: var(--ff-base) !important;
-    font-weight: var(--fw-semi-bold) !important;
-    color: var(--clr-heading) !important;
-    margin: 0.5em 0 0.3em 0 !important;
-    line-height: 1.2 !important;
-  }
 
-  .file-content .content-text :global(.markdown-h1),
-  .content-text :global(h1) { font-size: 19px !important; } /* 1.6em of 12px base */
-  
-  .file-content .content-text :global(.markdown-h2),
-  .content-text :global(h2) { font-size: 18px !important; } /* 1.5em of 12px base */
-  
-  .file-content .content-text :global(.markdown-h3),
-  .content-text :global(h3) { font-size: 17px !important; } /* 1.4em of 12px base */
-  
-  .file-content .content-text :global(.markdown-h4),
-  .content-text :global(h4) { font-size: 16px !important; } /* 1.3em of 12px base */
-  
-  .file-content .content-text :global(.markdown-h5),
-  .content-text :global(h5) { font-size: 14px !important; } /* 1.2em of 12px base */
-  
-  .file-content .content-text :global(.markdown-h6),
-  .content-text :global(h6) { font-size: 13px !important; } /* 1.1em of 12px base */
-
-  .content-text :global(.markdown-p) {
-    margin: 0.4em 0;
-    line-height: 1.4;
-    color: var(--clr-body);
-    font-size: 12px !important; /* Match base font size */
-  }
-
-  .content-text :global(.backlink) {
-    color: var(--clr-link);
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
-  /* Mermaid chart styling for JSON Canvas - matches MermaidChart.astro structure */
-  .content-text :global(.mermaid-breakout) {
-    position: relative;
-    margin: 1rem 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    box-sizing: border-box;
-  }
-
-  .content-text :global(.mermaid-chart-shell) {
-    position: relative;
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    overflow-x: auto;
-    background: var(--clr-primary-bg);
-    border: 1px solid var(--clr-lossless-accent--brightest);
-    border-radius: 6px;
-    padding: 0.5rem;
-    display: block;
-  }
-
-  .content-text :global(.mermaid) {
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    font-size: 10px !important;
-    max-width: 100%;
-  }
-
-  .content-text :global(.mermaid svg) {
-    max-width: 100%;
-    height: auto;
-  }
-
-  .content-text :global(.backlink:hover) {
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .content-text :global(.inline-code) {
-    background: var(--clr-lossless-primary-glass--lighter);
-    padding: 0.1em 0.3em;
-    border-radius: 3px;
-    font-family: monospace;
-    font-size: var(--fs-150);
-    color: var(--clr-body);
-  }
-
-  /* Code block styling for JSON Canvas - matches BaseCodeblock.astro structure */
-  .content-text :global(.codeblock-container) {
-    position: relative;
-    margin: 1.5rem 0;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    background: var(--clr-code-bg, #1e1e1e);
-  }
-  
-  .content-text :global(.codeblock-header) {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-    font-family: var(--ff-monospace, monospace);
-    font-size: 0.8rem;
-  }
-  
-  .content-text :global(.codeblock-language) {
-    text-transform: uppercase;
-    font-weight: bold;
-    color: var(--clr-code-lang, #8a8a8a);
-    letter-spacing: 0.05em;
-  }
-  
-  .content-text :global(.copy-button) {
-    background: transparent;
-    border: none;
-    color: var(--clr-code-lang, #8a8a8a);
-    cursor: pointer;
-    padding: 0.25rem;
-    border-radius: 0.25rem;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .content-text :global(.copy-button:hover) {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-  }
-  
-  .content-text :global(.copy-button.copied) {
-    color: var(--clr-lossless-accent--brightest, #4a9eff);
-  }
-  
-  .content-text :global(.codeblock-content) {
-    margin: 0;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    padding: 0;
-    overflow-x: auto;
-    background-color: var(--clr-code-bg, #1e1e1e);
-    max-height: 400px;
-    overflow-y: auto;
-  }
-
-  .content-text :global(.codeblock-content pre) {
-    margin: 0;
-    padding: 1em;
-    background: transparent;
-    border-radius: 0;
-    font-size: 0.85rem;
-    line-height: 1.5;
-  }
-
-  .content-text :global(.codeblock-content code) {
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    font-family: var(--ff-monospace, 'Fira Code', 'Consolas', monospace);
-  }
-
-  .content-text :global(strong) {
-    font-weight: var(--fw-bold);
-    color: var(--clr-heading);
-  }
-
-  .content-text :global(em) {
-    font-style: italic;
-  }
 
   @keyframes dash {
     to {
