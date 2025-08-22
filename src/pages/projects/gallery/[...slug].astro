@@ -271,6 +271,7 @@ const currentHref = slug && slug !== 'index' ? `/projects/gallery/${slug}` : '/p
   .canvas-section {
     margin: 2rem auto;
     padding: 0 1rem;
+    max-width: 100%;
   }
 
   /* Mobile responsive adjustments */
@@ -281,6 +282,19 @@ const currentHref = slug && slug !== 'index' ? `/projects/gallery/${slug}` : '/p
     
     .project-content-simple {
       padding: 1rem 0.5rem;
+    }
+    
+    .canvas-section {
+      padding: 0 0.5rem;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    
+    /* Ensure JSON canvas renderer doesn't overflow on mobile */
+    .canvas-section :global(.json-canvas-renderer) {
+      max-width: 100% !important;
+      width: 100% !important;
+      overflow-x: auto;
     }
   }
 </style>
