@@ -370,12 +370,17 @@ const mapOfContentsCollection = defineCollection({
   }).passthrough()
 });
 
-const pathId = (entry: string) =>
-  entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
+const pathId = (entry: string) => {
+  // Remove file extension and convert to lowercase
+  // This should match the slugify function behavior for consistency
+  return entry
+    .replace(/\.(md|mdx)$/i, '')  // Remove .md or .mdx extension
+    .toLowerCase();               // Convert to lowercase
+};
 
 const projectsCollection = defineCollection({
   loader: glob({
-    pattern: "**/*.md",
+    pattern: "**/*.{md,mdx}",
     base: resolveContentPath("projects"),
     generateId: ({ entry }) => {
       return pathId(entry);
