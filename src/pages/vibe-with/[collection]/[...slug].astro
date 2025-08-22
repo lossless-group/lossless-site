@@ -8,7 +8,7 @@
  * Follows comprehensive, parallel commenting rules as outlined in:
  *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
  *
- * - Fetches content from 'prompts', 'specs', and 'reminders' collections (see content.config.ts for exact keys).
+ * - Fetches content from 'prompts', 'specs', 'reminders', and 'blueprints' collections (see content.config.ts for exact keys).
  * - Generates static paths for all entries, supporting dynamic tag navigation.
  * - Renders content using Layout, OneArticle, and OneArticleOnPage components.
  * - All logic is thoroughly commented and DRY.
@@ -25,7 +25,7 @@ export const prerender = true;
 /**
  * getStaticPaths — Generates all static paths for the /vibe-with/[collection]/[slug] dynamic route.
  *
- * - Fetches all entries from the 'prompts', 'specs', and 'reminders' collections.
+ * - Fetches all entries from the 'prompts', 'specs', 'reminders', and 'blueprints' collections.
  * - For each entry, generates a path with collection and slug params.
  * - Uses processEntries utility for consistent entry processing.
  * - Returns array of { params, props } objects for Astro static generation.
@@ -35,11 +35,13 @@ export async function getStaticPaths() {
   const promptsEntries = await getCollection('prompts');
   const specsEntries = await getCollection('specs');
   const remindersEntries = await getCollection('reminders');
+  const blueprintsEntries = await getCollection('blueprints');
 
   // Process entries using the same pipeline as client recommendations
-  const processedPrompts = processEntries(promptsEntries);
-  const processedSpecs = processEntries(specsEntries);
-  const processedReminders = processEntries(remindersEntries);
+  const processedPrompts = processEntries(promptsEntries as any);
+  const processedSpecs = processEntries(specsEntries as any);
+  const processedReminders = processEntries(remindersEntries as any);
+  const processedBlueprints = processEntries(blueprintsEntries as any);
 
   // Generate paths for each collection
   const promptsPaths = processedPrompts.map(entry => {
@@ -79,18 +81,31 @@ export async function getStaticPaths() {
     };
   });
 
+  const blueprintsPaths = processedBlueprints.map(entry => {
+    const slugParts = entry.slug.split('/');
+    const filenameSlug = slugParts[slugParts.length - 1];
+    
+    return {
+      params: { collection: 'blueprints', slug: filenameSlug },
+      props: {
+        entry,
+        collection: 'blueprints'
+      }
+    };
+  });
+
   // Combine all path arrays
-  return [...promptsPaths, ...specsPaths, ...remindersPaths];
+  return [...promptsPaths, ...specsPaths, ...remindersPaths, ...blueprintsPaths];
 }
 
 /**
  * Props interface for page rendering.
  * Mirrors /more-about/[...slug].astro for consistency.
- * Supports all three collections: 'prompts', 'specs', and 'reminders'.
+ * Supports all four collections: 'prompts', 'specs', 'reminders', and 'blueprints'.
  */
 interface Props {
   entry: any;
-  collection: 'prompts' | 'specs' | 'reminders';
+  collection: 'prompts' | 'specs' | 'reminders' | 'blueprints';
 }
 
 const { entry, collection } = Astro.props;

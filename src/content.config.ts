@@ -213,6 +213,28 @@ const remindersCollection = defineCollection({
   schema: z.object({}).passthrough()
 });
 
+const blueprintsCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/blueprints")}),
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    lede: z.string().optional(),
+    slug: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+    tags: z.union([z.string(), z.array(z.string())]).optional(),
+    status: z.string().optional(),
+    publish: z.boolean().default(true).optional(),
+    difficulty: z.string().optional(),
+    estimated_time: z.string().optional(),
+    prerequisites: z.array(z.string()).optional(),
+    tools_required: z.array(z.string()).optional(),
+    category: z.string().optional(),
+    version: z.string().optional(),
+  }).passthrough()
+});
+
 const changelogContentCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--content")}),
   schema: z.object({}).passthrough()
@@ -428,6 +450,7 @@ export const paths = {
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
   'reminders': resolveContentPath('lost-in-public/reminders'),
+  'blueprints': resolveContentPath('lost-in-public/blueprints'),
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'specs': resolveContentPath('specs'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
@@ -459,6 +482,7 @@ export const collections = {
   'slides': slidesCollection,
   'prompts': promptsCollection,
   'reminders': remindersCollection,
+  'blueprints': blueprintsCollection,
   'specs': specsCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,

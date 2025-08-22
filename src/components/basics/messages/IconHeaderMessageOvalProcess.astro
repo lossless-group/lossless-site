@@ -1,0 +1,351 @@
+---
+/**
+ * IconHeaderMessageOvalProcess.astro
+ *
+ * Renders content types in an oval process flow with directional arrows.
+ * Shows the workflow: Specifications → Reminders & Blueprints → Prompts
+ * Includes dashed back-propagation connectors for cyclical process.
+ *
+ * PROPS:
+ * - jsonPath (string, required): Path to the JSON file, relative to src/content
+ *   Example: "messages/vibeCodingIconHeaderMessages.json"
+ * - classes (string, optional): Additional CSS classes for the container
+ * - style (string, optional): Optional inline style to apply to the container
+ *
+ * PROCESS FLOW:
+ * - Specifications (top) feeds into Reminders and Blueprints
+ * - Reminders and Blueprints (sides) feed into Prompts (bottom)
+ * - Dashed lines show back-propagation cycle
+ */
+import fs from "node:fs";
+import path from "node:path";
+
+interface CardData {
+  title: string;
+  description: string;
+  badge?: string;
+  verified?: boolean;
+  icon: string;
+  to_path?: string;
+}
+
+interface Props {
+  jsonPath: string;
+  classes?: string;
+  style?: string;
+}
+
+const { jsonPath, classes = "", style = "" } = Astro.props;
+
+// Load the JSON data file
+const fullPath = path.join(process.cwd(), "src/content", jsonPath);
+let cards: CardData[] = [];
+
+try {
+  const fileContent = fs.readFileSync(fullPath, "utf-8");
+  cards = JSON.parse(fileContent);
+} catch (error) {
+  console.error(`Error loading cards from ${fullPath}:`, error);
+}
+
+// Map cards by title for positioning
+const cardMap = new Map<string, CardData>();
+cards.forEach(card => cardMap.set(card.title.toLowerCase(), card));
+
+const specs = cardMap.get('specifications');
+const reminders = cardMap.get('reminders');
+const blueprints = cardMap.get('blueprints');
+const prompts = cardMap.get('prompts');
+---
+
+<div class="oval-process-container" style="margin-top: 0; margin-bottom: 0;">
+  {specs && (
+    <div class="process-node specs-node" data-position="top">
+      <a href={specs.to_path} class="process-card">
+        <div class="process-icon">
+          {specs.icon && specs.icon.trim().endsWith('.svg') ? (
+            <img src={specs.icon} alt={specs.title} width="48" height="48" loading="lazy" />
+          ) : (
+            <span set:html={specs.icon} />
+          )}
+        </div>
+        <h3 class="process-title">{specs.title}</h3>
+        <p class="process-description">{specs.description}</p>
+        {specs.badge && <span class="process-badge">{specs.badge}</span>}
+      </a>
+    </div>
+  )}
+
+  <!-- Reminders on left -->
+  {reminders && (
+    <div class="process-node reminders-node" data-position="left">
+      <a href={reminders.to_path} class="process-card">
+        <div class="process-icon">
+          {reminders.icon && reminders.icon.trim().endsWith('.svg') ? (
+            <img src={reminders.icon} alt={reminders.title} width="48" height="48" loading="lazy" />
+          ) : (
+            <span set:html={reminders.icon} />
+          )}
+        </div>
+        <h3 class="process-title">{reminders.title}</h3>
+        <p class="process-description">{reminders.description}</p>
+        {reminders.badge && <span class="process-badge">{reminders.badge}</span>}
+      </a>
+    </div>
+  )}
+
+  <!-- Blueprints on right -->
+  {blueprints && (
+    <div class="process-node blueprints-node" data-position="right">
+      <a href={blueprints.to_path} class="process-card">
+        <div class="process-icon">
+          {blueprints.icon && blueprints.icon.trim().endsWith('.svg') ? (
+            <img src={blueprints.icon} alt={blueprints.title} width="48" height="48" loading="lazy" />
+          ) : (
+            <span set:html={blueprints.icon} />
+          )}
+        </div>
+        <h3 class="process-title">{blueprints.title}</h3>
+        <p class="process-description">{blueprints.description}</p>
+        {blueprints.badge && <span class="process-badge">{blueprints.badge}</span>}
+      </a>
+    </div>
+  )}
+
+  <!-- Prompts at bottom -->
+  {prompts && (
+    <div class="process-node prompts-node" data-position="bottom">
+      <a href={prompts.to_path} class="process-card">
+        <div class="process-icon">
+          {prompts.icon && prompts.icon.trim().endsWith('.svg') ? (
+            <img src={prompts.icon} alt={prompts.title} width="48" height="48" loading="lazy" />
+          ) : (
+            <span set:html={prompts.icon} />
+          )}
+        </div>
+        <h3 class="process-title">{prompts.title}</h3>
+        <p class="process-description">{prompts.description}</p>
+        {prompts.badge && <span class="process-badge">{prompts.badge}</span>}
+      </a>
+    </div>
+  )}
+
+  <!-- Forward flow arrows -->
+  <svg class="process-arrows" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Specs to Reminders -->
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+              refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="var(--clr-arrow, #4aa96c)" />
+      </marker>
+      <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" 
+              refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="var(--clr-arrow-dashed, #666)" />
+      </marker>
+    </defs>
+    
+    <!-- Specs to Reminders -->
+    <path d="M 200 80 Q 120 120 100 150" 
+          stroke="var(--clr-arrow, #4aa96c)" 
+          stroke-width="2" 
+          fill="none" 
+          marker-end="url(#arrowhead)" />
+    
+    <!-- Specs to Blueprints -->
+    <path d="M 200 80 Q 280 120 300 150" 
+          stroke="var(--clr-arrow, #4aa96c)" 
+          stroke-width="2" 
+          fill="none" 
+          marker-end="url(#arrowhead)" />
+    
+    <!-- Reminders to Prompts -->
+    <path d="M 100 180 Q 120 220 200 240" 
+          stroke="var(--clr-arrow, #4aa96c)" 
+          stroke-width="2" 
+          fill="none" 
+          marker-end="url(#arrowhead)" />
+    
+    <!-- Blueprints to Prompts -->
+    <path d="M 300 180 Q 280 220 200 240" 
+          stroke="var(--clr-arrow, #4aa96c)" 
+          stroke-width="2" 
+          fill="none" 
+          marker-end="url(#arrowhead)" />
+
+    <!-- Back-propagation dashed arrows -->
+    <!-- Prompts back to Reminders -->
+    <path d="M 180 220 Q 140 200 120 170" 
+          stroke="var(--clr-arrow-dashed, #666)" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,4"
+          fill="none" 
+          marker-end="url(#arrowhead-dashed)" />
+    
+    <!-- Prompts back to Blueprints -->
+    <path d="M 220 220 Q 260 200 280 170" 
+          stroke="var(--clr-arrow-dashed, #666)" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,4"
+          fill="none" 
+          marker-end="url(#arrowhead-dashed)" />
+    
+    <!-- Reminders back to Specs -->
+    <path d="M 120 140 Q 140 100 180 90" 
+          stroke="var(--clr-arrow-dashed, #666)" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,4"
+          fill="none" 
+          marker-end="url(#arrowhead-dashed)" />
+    
+    <!-- Blueprints back to Specs -->
+    <path d="M 280 140 Q 260 100 220 90" 
+          stroke="var(--clr-arrow-dashed, #666)" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,4"
+          fill="none" 
+          marker-end="url(#arrowhead-dashed)" />
+  </svg>
+</div>
+
+<style>
+.oval-process-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  height: 550px;
+  margin: 2rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.process-node {
+  position: absolute;
+  z-index: 20;
+  transform-origin: center;
+}
+
+.specs-node {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.reminders-node {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.blueprints-node {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.prompts-node {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.process-card {
+  display: block;
+  background: var(--clr-card-bg, #181a20);
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255,255,255,0.08);
+  position: relative;
+  transform: translateZ(0);
+}
+
+.process-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border-color: var(--clr-arrow, #4aa96c);
+}
+
+.process-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.process-icon svg,
+.process-icon img {
+  width: 48px;
+  height: 48px;
+}
+
+.process-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--clr-title, #eaf2fb);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.process-description {
+  font-size: 0.75rem;
+  color: var(--clr-desc, #b3c0d1);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.process-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--clr-badge-bg, #22242a);
+  color: var(--clr-badge-text, #b3c0d1);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2em 0.6em;
+  border-radius: 1em;
+  letter-spacing: 0.04em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .oval-process-container {
+    height: 600px;
+    transform: scale(0.8);
+  }
+  
+  .process-card {
+    width: 200px;
+    padding: 1.2rem;
+  }
+  
+  .process-title {
+    font-size: 1rem;
+  }
+  
+  .process-description {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .oval-process-container {
+    transform: scale(0.7);
+    height: 650px;
+  }
+  
+  .process-card {
+    width: 180px;
+    padding: 1rem;
+  }
+}
+</style>
