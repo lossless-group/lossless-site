@@ -5,12 +5,30 @@ import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradie
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import SearchInput from '@components/reference/SearchInput.astro';
 import { processEntries } from '@utils/slugify';
+import { getWordCounts } from '@utils/collectionWordCount';
 
-const vocabularyEntries = await getCollection('vocabulary');
-const conceptsEntries = await getCollection('concepts');
+// Get collections
+const [vocabularyEntries, conceptsEntries] = await Promise.all([
+  getCollection('vocabulary'),
+  getCollection('concepts')
+]);
 
+// Process entries for display
 const processedVocabularyEntries = processEntries(vocabularyEntries);
 const processedConceptsEntries = processEntries(conceptsEntries);
+
+// Get word counts for each collection
+const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
+
+// Format word counts for display
+const formatWordCount = (count: number): string => {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M+`;
+  } else if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K+`;
+  }
+  return count.toString();
+};
 ---
 
 <Layout title="Reference - Vocabulary & Concepts">
@@ -33,7 +51,12 @@ const processedConceptsEntries = processEntries(conceptsEntries);
     <SearchInput />
 
     <section class="mb-12">
-      <h2 class="text-2xl font-bold mb-4">Vocabulary</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Vocabulary</h2>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          {vocabularyEntries.length} terms • {formatWordCount(wordCounts.vocabulary)} words
+        </span>
+      </div>
       <p class="mb-6">Terms and definitions used throughout our work.</p>
 
       <div data-searchable="true">
@@ -44,7 +67,12 @@ const processedConceptsEntries = processEntries(conceptsEntries);
     <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
 
     <section>
-      <h2 class="text-2xl font-bold mb-4">Concepts</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Concepts</h2>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          {conceptsEntries.length} concepts • {formatWordCount(wordCounts.concepts)} words
+        </span>
+      </div>
       <p class="mb-6">Important ideas and frameworks we use in our work.</p>
 
       <div data-searchable="true">
