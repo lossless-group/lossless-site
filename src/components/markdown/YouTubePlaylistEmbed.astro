@@ -1,0 +1,157 @@
+---
+interface Props {
+  url: string;
+  caption?: string;
+}
+
+const { url, caption } = Astro.props;
+
+// Function to extract YouTube playlist ID from playlist URL
+const extractYouTubePlaylistId = (url: string): string | null => {
+  // youtube.com/playlist format
+  const playlistMatch = url.match(/youtube\.com\/playlist\?.*list=([a-zA-Z0-9_-]+)/);
+  if (playlistMatch) return playlistMatch[1];
+  
+  return null;
+};
+
+const playlistId = extractYouTubePlaylistId(url);
+
+if (!playlistId) {
+  throw new Error(`Invalid YouTube playlist URL: ${url}`);
+}
+
+// Build embed URL for playlist
+let embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}`;
+
+// Extract si parameter if present
+const siMatch = url.match(/[?&]si=([^&]+)/);
+if (siMatch) {
+  embedUrl += `&si=${siMatch[1]}`;
+}
+---
+
+<div class="youtube-playlist-container">
+  <div class="youtube-playlist-wrapper">
+    <iframe 
+      src={embedUrl}
+      title="YouTube playlist player" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+      referrerpolicy="strict-origin-when-cross-origin" 
+      allowfullscreen
+      loading="lazy"
+    />
+  </div>
+  {caption && (
+    <div class="youtube-playlist-caption">
+      <div class="caption-content">
+        {caption}
+      </div>
+      <button 
+        class="copy-url-btn" 
+        onclick={`navigator.clipboard.writeText('${url}').then(() => {
+          const btn = event.target.closest('.copy-url-btn');
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.classList.remove('copied');
+          }, 2000);
+        }).catch(err => console.error('Failed to copy: ', err))`}
+        title="Copy playlist URL to clipboard"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3H4V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 7H20V20H8V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  )}
+</div>
+
+<style>
+  .youtube-playlist-container {
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .youtube-playlist-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+  }
+  
+  .youtube-playlist-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  
+  .youtube-playlist-caption {
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #e2e8f0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  
+  .caption-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .copy-url-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #e2e8f0;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .copy-url-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .copy-url-btn:active {
+    transform: translateY(0);
+  }
+  
+  .copy-url-btn.copied {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+  }
+  
+  .copy-url-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: all 0.2s ease;
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .youtube-playlist-container {
+      margin: 1rem 0;
+    }
+  }
+</style>
