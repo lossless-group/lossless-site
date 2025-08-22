@@ -1,6 +1,7 @@
 ---
 import TextCTA from "@basics/cta/TextCTA.astro";
 import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
+import IconHeaderMessageOvalProcess from "./IconHeaderMessageOvalProcess.astro";
 ---
 
   <!-- Inline, page-specific Hero for /vibe-with/us.astro -->
@@ -20,6 +21,10 @@ import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMes
    </div>
    <section class="vibe-with-us-section" style="--vibe-section-top-margin: 0.5rem;">
       <IconHeaderMessageCardGrid 
+      jsonPath="messages/vibeCodingIconHeaderMessages.json"
+      style="margin-top: 0; margin-bottom: 0;"
+      />
+      <IconHeaderMessageOvalProcess 
       jsonPath="messages/vibeCodingIconHeaderMessages.json"
       style="margin-top: 0; margin-bottom: 0;"
       />
