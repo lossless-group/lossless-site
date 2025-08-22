@@ -66,8 +66,9 @@
       "id": "ace-it",
       "title": "ACE-It",
       "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
-      "href": "/projects/ace-it",
-      "hasSidebar": false,
+      "href": "/projects/gallery/ace-it/orientation",
+      "hasSidebar": true,
+      "canvas": "/projects/gallery/ace-it/ACE-It-Canvas.canvas",
       "useCases": [
         {
           "title": "AI Co-Development",
@@ -80,11 +81,39 @@
       ],
       "demoSteps": [
         {
-          "title": "Our Approach",
-          "href": "/projects/ACE-It/Philosophy/Our-Approach",
+          "title": "ACE-It: AI-Augmented Development",
+          "href": "/projects/gallery/ace-it/orientation",
           "type": "orientation",
-          "description": "AI-Human Collaboration Principles",
-          "contentPath": "ACE-It/Philosophy/Our-Approach.md"
+          "description": "Overview and introduction to the ACE-It workflow",
+          "contentPath": "projects/ACE-It/Index.mdx"
+        },
+        {
+          "title": "Philosophy & Approach",
+          "href": "/projects/gallery/ace-it/philosophy/our-approach",
+          "type": "sequential",
+          "step": 1,
+          "contentPath": "projects/ACE-It/Philosophy/Our-Approach.md"
+        },
+        {
+          "title": "Documentation Kit",
+          "href": "/projects/gallery/ace-it/docs-kit/living-specifications",
+          "type": "sequential",
+          "step": 2,
+          "contentPath": "projects/ACE-It/Docs-Kit/Living-Specifications.md"
+        },
+        {
+          "title": "Models & AI Integration",
+          "href": "/projects/gallery/ace-it/models/thinking-models",
+          "type": "sequential",
+          "step": 3,
+          "contentPath": "projects/ACE-It/Models/Thinking-Models.md"
+        },
+        {
+          "title": "Safety & Best Practices",
+          "href": "/projects/gallery/ace-it/safety/security-foundations",
+          "type": "sequential",
+          "step": 4,
+          "contentPath": "projects/ACE-It/Safety/Security-Foundations.md"
         }
       ]
     },
