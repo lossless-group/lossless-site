@@ -1,0 +1,171 @@
+---
+interface Item {
+  href: string;
+  title: string;
+  description: string;
+}
+
+interface Props {
+  label: string;
+  items: Record<string, Item>;
+}
+
+const { label, items } = Astro.props;
+
+// Extract items by their keys for easier access in the template
+const vibeWithUs = items['vibe'];
+const upAndRunning = items['upAndRunning'];
+const issueResolution = items['issueResolution'];
+const marketMaps = items['marketMaps'];
+const talks = items['talks'];
+---
+
+<div class="dropdown-wrapper">
+  <button class="dropdown-trigger">{label}</button>
+  <div class="get-lost-dropdown">
+    <div class="dropdown-header">Lost in Public</div>
+    <div class="dropdown-grid">
+      <!-- First column - Vibe with Us (2 rows) -->
+      <a href={vibeWithUs.href} class="dropdown-item large-item">
+        <div class="item-title">{vibeWithUs.title}</div>
+        <div class="item-description">{vibeWithUs.description}</div>
+      </a>
+      
+      <!-- Second column - Up and Running -->
+      <a href={upAndRunning.href} class="dropdown-item">
+        <div class="item-title">{upAndRunning.title}</div>
+        <div class="item-description">{upAndRunning.description}</div>
+      </a>
+      
+      <!-- Third column - Market Maps -->
+      <a href={marketMaps.href} class="dropdown-item">
+        <div class="item-title">{marketMaps.title}</div>
+        <div class="item-description">{marketMaps.description}</div>
+      </a>
+      
+      <!-- Second column - Issue Resolution -->
+      <a href={issueResolution.href} class="dropdown-item">
+        <div class="item-title">{issueResolution.title}</div>
+        <div class="item-description">{issueResolution.description}</div>
+      </a>
+      
+      <!-- Third column - Talks -->
+      <a href={talks.href} class="dropdown-item">
+        <div class="item-title">{talks.title}</div>
+        <div class="item-description">{talks.description}</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.dropdown-wrapper {
+  position: relative;
+  font-family: "Poppins", sans-serif;
+  display: inline-block;
+}
+
+.dropdown-trigger {
+  all: unset;
+  display: inline-block;
+  color: var(--clr-lossless-primary-light);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.9em, 1.1vw, 1.25em);
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+  text-decoration: none;
+  font-weight: normal;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.dropdown-trigger:hover {
+  color: var(--clr-link);
+}
+
+.get-lost-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--clr-primary-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  min-width: 800px;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translate(-50%, 10px);
+}
+
+.dropdown-wrapper:hover .get-lost-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.dropdown-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--clr-lossless-accent--brightest);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 1.25rem;
+}
+
+.dropdown-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: var(--clr-lossless-primary-light);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--clr-lossless-accent--brightest);
+  transform: translateY(-2px);
+}
+
+.large-item {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--clr-lossless-accent--brightest);
+}
+
+.item-description {
+  font-size: 0.9rem;
+  color: var(--clr-lossless-primary-light-alt, #ccc);
+  line-height: 1.5;
+}
+
+.large-item .item-title {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.large-item .item-description {
+  font-size: 1rem;
+}
+</style>

@@ -18,8 +18,8 @@ const filteredTools = filterTag
     )
   : tools;
 
-const toolsWithImages = filteredTools.filter(tool => tool.image);
-const toolsWithoutImages = filteredTools.filter(tool => !tool.image);
+const toolsWithImages = filteredTools.filter(tool => tool.image || tool.og_image || tool.og_image_url || tool.og_screenshot_url);
+const toolsWithoutImages = filteredTools.filter(tool => !(tool.image || tool.og_image || tool.og_image_url || tool.og_screenshot_url));
 
 toolsWithImages.forEach(tool => {
   if (!tool.id) throw new Error("Missing tool.id in CardGrid");

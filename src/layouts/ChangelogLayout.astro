@@ -23,20 +23,39 @@ import TabsList from "@components/starwind/tabs/TabsList.astro";
 import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
 import TabsContent from "@components/starwind/tabs/TabsContent.astro";
 import { getReferenceSlug } from "@utils/slugify";
-import ChangelogStats from "@components/changelog/ChangelogStats.astro";
+import { countWordsInMarkdown } from "@utils/countWords";
 
-
-interface Props extends HTMLAttributes<"div"> {
+interface Props {
   title?: string;
   description?: string;
   defaultValue?: string;
   syncKey?: string;
+  [key: string]: any; // Allow any additional props
 }
 
 
 // Get both content and code changes
-const contentChanges = await getCollection("changelog--content");
-const codeChanges = await getCollection("changelog--code");
+const contentChanges = await getCollection("changelog--content") as Array<{ body?: string }>;
+const codeChanges = await getCollection("changelog--code") as Array<{ body?: string }>;
+
+// Debug: Check first entry's word count
+if (contentChanges.length > 0 && contentChanges[0].body) {
+  const sampleText = contentChanges[0].body;
+  const wordCount = countWordsInMarkdown(sampleText);
+  console.log('Sample text:', sampleText.substring(0, 100) + '...');
+  console.log('Word count:', wordCount);
+}
+
+// Format number to be more readable (e.g., 1.2k, 3.4M)
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k';
+  }
+  return num.toString();
+};
 
 // Sort changes by date in descending order, and for same date, by index in descending order
 const sortByDateAndIndex = (a, b) => {
@@ -95,19 +114,30 @@ const normalizeAuthorData = (entry) => {
       <div class="changelog-tabs_container">
         <TabsList class="changelog-tabs-list">
           <TabsTrigger value="content" class="changelog-tab">
-            <span class="tab-title">
-              Content Changes
-              <span class="entry-badge">{contentChanges.length}</span>
-            </span>
+            <div class="flex flex-col items-center">
+              <span class="tab-title">
+                Content Changes
+                <span class="entry-badge">{contentChanges.length}</span>
+              </span>
+              <span class="text-xs text-muted-foreground group-data-[state=active]:text-[var(--white--pure)] mt-0.5">
+                {contentChanges.length} entries • {formatNumber(contentChanges.reduce((count, entry) => count + (entry.body ? countWordsInMarkdown(entry.body) : 0), 0))} words
+              </span>
+            </div>
           </TabsTrigger>
           <TabsTrigger value="code" class="changelog-tab">
-            <span class="tab-title">
-              Code Changes
-              <span class="entry-badge">{codeChanges.length}</span>
-            </span>
+            <div class="flex flex-col items-center">
+              <span class="tab-title">
+                Code Changes
+                <span class="entry-badge">{codeChanges.length}</span>
+              </span>
+              <span class="text-xs text-muted-foreground group-data-[state=active]:text-[var(--white--pure)] mt-0.5">
+                {codeChanges.length} entries • {formatNumber(codeChanges.reduce((count, entry) => count + (entry.body ? countWordsInMarkdown(entry.body) : 0), 0))} words
+              </span>
+            </div>
           </TabsTrigger>
         </TabsList>
       </div>
+      
       <TabsContent value="content" class="changelog-tab-content">
         <div class="search-container">
           <TabSearchInput id="content-search" />
@@ -172,8 +202,12 @@ const normalizeAuthorData = (entry) => {
   
   :global([data-state='active']) {
     background: var(--clr-lossless-surface-4);
-    color: var(--clr-lossless-text);
+    color: var(--white--pure) !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  :global([data-state='active']) .text-muted-foreground {
+    color: var(--white--pure) !important;
   }
   
   .tab-title {

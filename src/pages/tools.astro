@@ -3,6 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import ToolCard from "@components/tool-components/ToolCard.astro";
 import TrademarkColumn from "@basics/TrademarkColumn.astro";
 import SimplestRibbon from "@basics/SimplestRibbon.astro";
+import CardGrid from "@components/basics/CardGrid.astro";
 import { getCollection } from "astro:content";
 
 interface Tool {
@@ -13,6 +14,7 @@ interface Tool {
   favicon?: string;
   description?: string;
   description_site_cp?: string;
+  og_description?: string;
   zinger?: string;
   tags?: string[];
   og_screenshot_url?: string;
@@ -30,14 +32,26 @@ const processedTools = toolEntries.map((entry) => {
     title: frontmatter.title,
     url: frontmatter.url,
     image: frontmatter.image,
+    og_image: frontmatter.og_image,
     favicon: frontmatter.favicon,
     description: frontmatter.description || frontmatter.zinger || "",
     description_site_cp: frontmatter.description_site_cp,
+    og_description: frontmatter.og_description,
     tags: frontmatter.tags || [],
     filename: entry.id,
     og_screenshot_url: frontmatter.og_screenshot_url,
     og_last_fetch: frontmatter.og_last_fetch,
   };
+
+  // Debug log for ChromaDB
+  if (entry.id.includes('ChromaDB')) {
+    console.log('ChromaDB tool data:', {
+      id: entry.id,
+      image: tool.image,
+      og_image: tool.og_image,
+      og_screenshot_url: tool.og_screenshot_url
+    });
+  }
 
   return tool;
 });
@@ -73,12 +87,10 @@ const frontmatter = {
       />
     </section>
 
-    <!--     <section class="tools-section">
+    <section class="tools-section">
       <h1>Tools</h1>
-      <div class="tools-grid">
-        {processedTools.map((tool: Tool) => <ToolCard tool={tool} />)}
-      </div>
-    </section> -->
+      <CardGrid tools={processedTools} />
+    </section>
   </main>
 </Layout>
 

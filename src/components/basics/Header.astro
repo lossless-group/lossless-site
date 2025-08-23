@@ -2,11 +2,44 @@
 import "@styles/global.css";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 import JumboDropdown from "./JumboDropdown.astro";
+import GetLostDropdown from "./GetLostDropdown.astro";
+
 // Define navigation links (nested items become dropdowns)
 const navLinks = [
   { href: "/read/through", label: "Reader" },
   { href: "/toolkit", label: "Toolkit" },
   { href: "/more-about", label: "Reference" },
+  {
+    label: "Get Lost",
+    isCustomDropdown: true,
+    items: {
+      vibe: {
+        href: "/vibe-with/us",
+        title: "Vibe with Us",
+        description: "Dive into our vibe coding context engineering playbook"
+      },
+      upAndRunning: {
+        href: "/lost-in-public/up-and-running",
+        title: "Up and Running",
+        description: "Get started with Lossless and explore our platform."
+      },
+      issueResolution: {
+        href: "/lost-in-public/issue-resolution",
+        title: "Issue Resolution",
+        description: "Find solutions to common problems and issues."
+      },
+      talks: {
+        href: "/lost-in-public/talks",
+        title: "Talks",
+        description: "Watch and learn from our collection of talks and presentations."
+      },
+      marketMaps: {
+        href: "/lost-in-public/market-maps",
+        title: "Market Maps",
+        description: "Explore the landscape with our comprehensive market maps."
+      }
+    }
+  },
   {
     label: "Changelog",
     items: [
@@ -46,13 +79,19 @@ const socialIcons = [
 
     <!-- Desktop Nav -->
     <nav class="site-navigation desktop-only">
-      {navLinks.map(link =>
-        link.items ? (
-          <JumboDropdown label={link.label} items={link.items} />
-        ) : (
-          <a href={link.href}>{link.label}</a>
-        )
-      )}
+      {navLinks.map(link => {
+        if (link.isCustomDropdown) {
+          return <GetLostDropdown label={link.label} items={link.items} />;
+        } else if (link.items) {
+          // Convert items to array for JumboDropdown if needed
+          const itemsArray = Array.isArray(link.items) 
+            ? link.items 
+            : Object.values(link.items);
+          return <JumboDropdown label={link.label} items={itemsArray} />;
+        } else {
+          return <a href={link.href}>{link.label}</a>;
+        }
+      })}
     </nav>
 
     <!-- Desktop Social -->
@@ -73,18 +112,30 @@ const socialIcons = [
   <!-- Mobile Nav -->
   <div class="mobile-menu" id="mobile-menu">
     <nav class="mobile-navigation">
-      {navLinks.map(link =>
-        link.items ? (
-          <>
-            <div class="mobile-nav-header">{link.label}</div>
-            {link.items.map(sub => (
-              <a href={sub.href}>{sub.title}</a>
-            ))}
-          </>
-        ) : (
-          <a href={link.href}>{link.label}</a>
-        )
-      )}
+      {navLinks.map(link => {
+        if (link.items) {
+          // For both custom and regular dropdowns, we'll show the same mobile UI
+          const itemsArray = Array.isArray(link.items) 
+            ? link.items 
+            : Object.values(link.items);
+            
+          return (
+            <>
+              <div class="mobile-nav-header">{link.label}</div>
+              {itemsArray.map(item => (
+                <a href={item.href} class="mobile-nav-item">
+                  <div class="mobile-nav-item-title">{item.title}</div>
+                  {item.description && (
+                    <div class="mobile-nav-item-description">{item.description}</div>
+                  )}
+                </a>
+              ))}
+            </>
+          );
+        } else {
+          return <a href={link.href} class="mobile-nav-item">{link.label}</a>;
+        }
+      })}
     </nav>
     <div class="mobile-social-icons">
       {socialIcons.map(icon => (
@@ -279,20 +330,40 @@ const socialIcons = [
     gap: 1rem;
     margin-bottom: 1.5rem;
     font-family: "Poppins", sans-serif;
+  }
 
-    & a,
-    & .mobile-nav-header {
-      text-decoration: none;
-      color: var(--clr-lossless-primary-light);
-      font-size: 1.2rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  .mobile-navigation a,
+  .mobile-navigation .mobile-nav-header {
+    font-weight: bold;
+    margin: 1rem 0 0.5rem;
+    padding: 0.5rem 1.5rem;
+    color: var(--clr-primary);
+    font-size: 1.1rem;
+    border-left: 3px solid var(--clr-accent);
+  }
 
-      &:hover,
-      &:focus-visible {
-        color: var(--clr-link);
-      }
-    }
+  .mobile-nav-item {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    color: var(--clr-text);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .mobile-nav-item:hover {
+    background-color: var(--clr-bg-hover);
+  }
+
+  .mobile-nav-item-title {
+    font-weight: 500;
+    color: var(--clr-text);
+    margin-bottom: 0.2rem;
+  }
+
+  .mobile-nav-item-description {
+    font-size: 0.85rem;
+    color: var(--clr-text-muted);
+    line-height: 1.4;
   }
   
   /* Mobile social icons styling */

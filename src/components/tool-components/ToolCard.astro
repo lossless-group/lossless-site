@@ -10,6 +10,7 @@ interface Tool {
   title?: string;
   zinger?: string;
   og_title?: string;
+  og_description?: string;
   url: string;
   image?: string;
   og_image?: string;
@@ -37,6 +38,7 @@ interface Props {
   favicon?: string;
   description?: string;
   description_site_cp?: string;
+  og_description?: string;
   tags?: string[];
   filename?: string;
   og_screenshot_url?: string;
@@ -51,6 +53,7 @@ const {
   title,
   zinger,
   og_title,
+  og_description,
   url,
   image,
   og_image,
@@ -66,6 +69,18 @@ const {
   // Allow all other HTML attributes like class, data-*, aria-*
   ...rest
 } = Astro.props;
+
+// Debug logging for ChromaDB
+if (filename && filename.includes('ChromaDB')) {
+  console.log('ToolCard props for ChromaDB:', {
+    image,
+    og_image,
+    og_image_url,
+    og_screenshot_url,
+    site_name,
+    title
+  });
+}
 
 if (!id) {
   throw new Error(`Missing tooling ID in ToolCard.astro.\n\nProps: ${JSON.stringify(Astro.props, null, 2)}`);
@@ -105,11 +120,16 @@ const hasDescription =
   description_value: description,
 }); */
 
+// Check if we have any description available
+const hasOgDescription = og_description && og_description.trim() !== '';
+
 const effectiveDescription = hasDescriptionSiteCp
   ? description_site_cp
   : hasDescription
     ? description
-    : "";
+    : hasOgDescription
+      ? og_description
+      : '';
 
 // Log the final effective description
 /* console.log("Effective description:", {
