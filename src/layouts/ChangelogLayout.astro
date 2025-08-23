@@ -23,6 +23,7 @@ import TabsList from "@components/starwind/tabs/TabsList.astro";
 import TabsTrigger from "@components/starwind/tabs/TabsTrigger.astro";
 import TabsContent from "@components/starwind/tabs/TabsContent.astro";
 import { getReferenceSlug } from "@utils/slugify";
+import ChangelogStats from "@components/changelog/ChangelogStats.astro";
 
 
 interface Props extends HTMLAttributes<"div"> {
@@ -93,12 +94,18 @@ const normalizeAuthorData = (entry) => {
     <Tabs defaultValue="content" class="changelog-tabs">
       <div class="changelog-tabs_container">
         <TabsList class="changelog-tabs-list">
-          <TabsTrigger value="content" class="changelog-tab"
-            >Content Changes</TabsTrigger
-          >
-          <TabsTrigger value="code" class="changelog-tab"
-            >Code Changes</TabsTrigger
-          >
+          <TabsTrigger value="content" class="changelog-tab">
+            <span class="tab-title">
+              Content Changes
+              <span class="entry-badge">{contentChanges.length}</span>
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="code" class="changelog-tab">
+            <span class="tab-title">
+              Code Changes
+              <span class="entry-badge">{codeChanges.length}</span>
+            </span>
+          </TabsTrigger>
         </TabsList>
       </div>
       <TabsContent value="content" class="changelog-tab-content">
@@ -141,18 +148,83 @@ const normalizeAuthorData = (entry) => {
     max-width: 100%;
   }
 
-  /* Style the tabs with our brand colors */
+  /* Tab styling */
   :global(.changelog-tabs-list) {
     background: var(--clr-lossless-primary-dark);
     border: 1px solid var(--clr-lossless-primary-light);
     border-radius: 0.5rem;
+    padding: 0.25rem;
+    display: inline-flex;
   }
 
-  :global(.changelog-tab) {
-    color: var(--clr-body);
-    font-family: var(--ff-legible);
-    font-weight: var(--fw-semi-bold);
+  .changelog-tab {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    color: var(--clr-lossless-text-muted);
     transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .changelog-tab:hover {
+    background: var(--clr-lossless-surface-3);
+    color: var(--clr-lossless-text);
+  }
+  
+  :global([data-state='active']) {
+    background: var(--clr-lossless-surface-4);
+    color: var(--clr-lossless-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tab-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .entry-badge {
+    background: var(--clr-lossless-primary-light);
+    color: var(--clr-lossless-text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border-radius: 1rem;
+    line-height: 1.2;
+    margin-left: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  
+  
+  :global([data-state='active']) .entry-badge {
+    background: var(--clr-lossless-accent);
+    color: var(--clr-lossless-text-on-accent);
+  }
+  
+  .changelog-tab:hover .entry-badge {
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  @media (max-width: 480px) {
+    :global(.changelog-tabs-list) {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .changelog-tab {
+      padding: 0.5rem 0.75rem;
+      flex: 1;
+      text-align: center;
+      justify-content: center;
+    }
+    
+    .entry-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      margin-left: 0.4rem;
+    }
   }
 
   :global(.changelog-tab:hover) {

@@ -1,0 +1,140 @@
+---
+/**
+ * ChangelogStats.astro
+ * 
+ * Displays statistics about changelog entries including
+ * total entries and word counts for both content and code changes.
+ * 
+ * @component
+ */
+
+import { countWordsInMarkdown } from '@utils/countWords';
+
+interface Props {
+  contentChanges: any[];
+  codeChanges: any[];
+}
+
+const { contentChanges = [], codeChanges = [] } = Astro.props;
+
+// Count total entries
+const totalContentEntries = contentChanges.length;
+const totalCodeEntries = codeChanges.length;
+const totalEntries = totalContentEntries + totalCodeEntries;
+
+// Count total words
+let contentWords = 0;
+let codeWords = 0;
+
+contentChanges.forEach(entry => {
+  if (entry.body) {
+    contentWords += countWordsInMarkdown(entry.body);
+  }
+  // Count words in frontmatter strings
+  Object.values(entry.data).forEach(value => {
+    if (typeof value === 'string') {
+      contentWords += value.split(/\s+/).filter(word => word.length > 0).length;
+    }
+  });
+});
+
+codeChanges.forEach(entry => {
+  if (entry.body) {
+    codeWords += countWordsInMarkdown(entry.body);
+  }
+  // Count words in frontmatter strings
+  Object.values(entry.data).forEach(value => {
+    if (typeof value === 'string') {
+      codeWords += value.split(/\s+/).filter(word => word.length > 0).length;
+    }
+  });
+});
+
+const totalWords = contentWords + codeWords;
+---
+
+<div class="changelog-stats">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <span class="stat-label">Total Entries:</span>
+      <span class="stat-value">{totalEntries.toLocaleString()}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Content Entries:</span>
+      <span class="stat-value">{totalContentEntries.toLocaleString()}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Code Entries:</span>
+      <span class="stat-value">{totalCodeEntries.toLocaleString()}</span>
+    </div>
+    <div class="stat-item total">
+      <span class="stat-label">Total Words:</span>
+      <span class="stat-value">{totalWords.toLocaleString()}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Content Words:</span>
+      <span class="stat-value">{contentWords.toLocaleString()}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Code Words:</span>
+      <span class="stat-value">{codeWords.toLocaleString()}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .changelog-stats {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--clr-lossless-surface-2);
+    border-radius: 0.5rem;
+    border: 1px solid var(--clr-lossless-border);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 0.75rem;
+    background: var(--clr-lossless-surface-1);
+    border-radius: 0.375rem;
+    border-left: 4px solid var(--clr-lossless-primary);
+  }
+
+  .stat-item.total {
+    border-left-color: var(--clr-lossless-accent);
+    background: var(--clr-lossless-surface-3);
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--clr-lossless-text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--clr-lossless-text);
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .changelog-stats {
+      padding: 1rem;
+    }
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+import Layout from '@layouts/Layout.astro';
+import WordCountStats from '@components/WordCountStats.astro';
+
+const pageTitle = 'Content Statistics';
+const description = 'Word count statistics for content collections';
+---
+
+<Layout title={pageTitle} description={description}>
+  <div class="container">
+    <h1>{pageTitle}</h1>
+    <p class="lead">Word count statistics for content collections</p>
+    
+    <div class="stats-container">
+      <WordCountStats collections={['vocabulary', 'concepts']} />
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .lead {
+    font-size: 1.25rem;
+    color: var(--text-2);
+    margin-bottom: 2rem;
+  }
+  
+  .stats-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+</style>

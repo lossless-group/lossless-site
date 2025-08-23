@@ -1,0 +1,65 @@
+---
+import { getWordCounts } from '../utils/collectionWordCount';
+
+interface Props {
+  collections?: Array<'vocabulary' | 'concepts'>;
+}
+
+const { collections = ['vocabulary', 'concepts'] } = Astro.props;
+const counts = await getWordCounts(collections);
+const totalWords = Object.values(counts).reduce((sum, count) => sum + count, 0);
+---
+
+<div class="word-count-stats">
+  <h3>Content Statistics</h3>
+  <div class="stats-grid">
+    {Object.entries(counts).map(([collection, count]) => (
+      <div class="stat-item">
+        <span class="stat-label">{collection}:</span>
+        <span class="stat-value">{count.toLocaleString()}</span>
+      </div>
+    ))}
+    <div class="stat-item total">
+      <span class="stat-label">Total Words:</span>
+      <span class="stat-value">{totalWords.toLocaleString()}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .word-count-stats {
+    background: var(--surface-1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .stats-grid {
+    display: grid;
+    gap: 0.75rem;
+  }
+  
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .stat-item.total {
+    font-weight: bold;
+    border-top: 2px solid var(--border-color);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+  }
+  
+  .stat-label {
+    color: var(--text-2);
+    text-transform: capitalize;
+  }
+  
+  .stat-value {
+    font-family: monospace;
+    color: var(--text-1);
+  }
+</style>

@@ -1,5 +1,6 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import type { ReferenceItem } from '@components/reference/ReferenceGrid.astro';
 import Layout from '@layouts/Layout.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
@@ -7,15 +8,28 @@ import SearchInput from '@components/reference/SearchInput.astro';
 import { processEntries } from '@utils/slugify';
 import { getWordCounts } from '@utils/collectionWordCount';
 
-// Get collections
+// Get collections with proper typing
 const [vocabularyEntries, conceptsEntries] = await Promise.all([
-  getCollection('vocabulary'),
-  getCollection('concepts')
+  getCollection('vocabulary') as Promise<CollectionEntry<'vocabulary'>[]>,
+  getCollection('concepts') as Promise<CollectionEntry<'concepts'>[]>
 ]);
 
 // Process entries for display
 const processedVocabularyEntries = processEntries(vocabularyEntries);
 const processedConceptsEntries = processEntries(conceptsEntries);
+
+// Create properly typed reference items
+const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => ({
+  ...entry,
+  collection: 'vocabulary' as const,
+  originalFilename: entry.id
+}));
+
+const conceptsItems: ReferenceItem[] = processedConceptsEntries.map(entry => ({
+  ...entry,
+  collection: 'concepts' as const,
+  originalFilename: entry.id
+}));
 
 // Get word counts for each collection
 const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
@@ -36,16 +50,21 @@ const formatWordCount = (count: number): string => {
     <h1 class="text-3xl font-bold mb-6">Reference Library</h1>
     <p class="text-lg mb-8">Browse our collection of vocabulary terms and conceptual frameworks.</p>
 
-    <div class="flex gap-4 mb-8">
-      <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
-      <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
-        Vocabulary
-        <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{vocabularyEntries.length}</span>
-      </a>
-      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
-        Concepts
-        <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{conceptsEntries.length}</span>
-      </a>
+    <div class="flex flex-wrap items-center gap-4 mb-8">
+      <div class="flex gap-4">
+        <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
+        <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
+          Vocabulary
+          <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{vocabularyEntries.length}</span>
+        </a>
+        <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
+          Concepts
+          <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{conceptsEntries.length}</span>
+        </a>
+      </div>
+      <div class="text-sm text-gray-400 ml-2">
+        Total: {formatWordCount(wordCounts.vocabulary + wordCounts.concepts)} words
+      </div>
     </div>
 
     <SearchInput />
