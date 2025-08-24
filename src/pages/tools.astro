@@ -28,6 +28,7 @@ const processedTools = toolEntries.map((entry) => {
 
   // Create the tool object with all properties
   const tool = {
+    id: entry.id, // Add the entry id as the tool id
     site_name: frontmatter.site_name,
     title: frontmatter.title,
     url: frontmatter.url,
