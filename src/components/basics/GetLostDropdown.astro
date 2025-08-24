@@ -18,6 +18,8 @@ const upAndRunning = items['upAndRunning'];
 const issueResolution = items['issueResolution'];
 const marketMaps = items['marketMaps'];
 const talks = items['talks'];
+const explorations = items['explorations'];
+const toHero = items['toHero'];
 ---
 
 <div class="dropdown-wrapper">
@@ -25,34 +27,46 @@ const talks = items['talks'];
   <div class="get-lost-dropdown">
     <div class="dropdown-header">Lost in Public</div>
     <div class="dropdown-grid">
-      <!-- First column - Vibe with Us (2 rows) -->
+      <!-- First column - Vibe with Us (spans 2 rows) -->
       <a href={vibeWithUs.href} class="dropdown-item large-item">
         <div class="item-title">{vibeWithUs.title}</div>
         <div class="item-description">{vibeWithUs.description}</div>
       </a>
       
-      <!-- Second column - Up and Running -->
+      <!-- First row, second column - Up and Running -->
       <a href={upAndRunning.href} class="dropdown-item">
         <div class="item-title">{upAndRunning.title}</div>
         <div class="item-description">{upAndRunning.description}</div>
       </a>
       
-      <!-- Third column - Market Maps -->
-      <a href={marketMaps.href} class="dropdown-item">
-        <div class="item-title">{marketMaps.title}</div>
-        <div class="item-description">{marketMaps.description}</div>
-      </a>
-      
-      <!-- Second column - Issue Resolution -->
+      <!-- First row, third column - Issue Resolution -->
       <a href={issueResolution.href} class="dropdown-item">
         <div class="item-title">{issueResolution.title}</div>
         <div class="item-description">{issueResolution.description}</div>
       </a>
       
-      <!-- Third column - Talks -->
+      <!-- First row, fourth column - Talks -->
       <a href={talks.href} class="dropdown-item">
         <div class="item-title">{talks.title}</div>
         <div class="item-description">{talks.description}</div>
+      </a>
+      
+      <!-- Second row, second column - Market Maps -->
+      <a href={marketMaps.href} class="dropdown-item">
+        <div class="item-title">{marketMaps.title}</div>
+        <div class="item-description">{marketMaps.description}</div>
+      </a>
+      
+      <!-- Second row, third column - Explorations -->
+      <a href={explorations.href} class="dropdown-item">
+        <div class="item-title">{explorations.title}</div>
+        <div class="item-description">{explorations.description}</div>
+      </a>
+      
+      <!-- Second row, fourth column - Zero to Hero -->
+      <a href={toHero.href} class="dropdown-item">
+        <div class="item-title">{toHero.title}</div>
+        <div class="item-description">{toHero.description}</div>
       </a>
     </div>
   </div>
@@ -119,9 +133,21 @@ const talks = items['talks'];
 
 .dropdown-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
   grid-template-rows: auto auto;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.large-item {
+  grid-row: span 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .dropdown-item {

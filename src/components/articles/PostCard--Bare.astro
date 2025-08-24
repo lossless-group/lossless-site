@@ -16,11 +16,13 @@
  * - imgWidth?: number | string - Optional width for the image.
  * - imgHeight?: number | string - Optional height for the image.
  * - class?: string - Optional additional CSS classes for the root <a> element.
+ * - basePath?: string - Optional base path for the article URL.
  * - All other attributes are passed to the root <a> element.
  */
 
 import type { HTMLAttributes } from 'astro/types';
 import { formatDate } from "@utils/formatDate";
+import { getImage } from 'astro:assets';
 
 interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
   slug: string;
@@ -33,6 +35,7 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
   imgHeight?: number | string;
   class?: string;
   collection?: string;
+  basePath?: string;
   [key: string]: any;
 }
 
@@ -47,13 +50,18 @@ const {
   imgHeight,
   class: customClasses = '', 
   collection = 'issue-resolution', 
+  basePath,
   ...attrs 
 } = Astro.props as Props;
 
 import { ROUTE_PATHS } from '@utils/routing/routeManager';
 
-// Use the slug as-is since it should already contain the full path
-const href = slugProp.startsWith('/') ? slugProp : `/${slugProp}`;
+// If basePath is provided, prepend it to the slug
+const href = basePath 
+  ? `${basePath.replace(/\/+$/, '')}/${slugProp.replace(/^\/+/, '')}`
+  : slugProp.startsWith('/') 
+    ? slugProp 
+    : `/${slugProp}`;
 
 // Format the date consistently if it exists
 // Ensure date is treated as Date object for formatting
@@ -87,13 +95,14 @@ if (date) {
   <div class="dark:border-base-600/60 border rounded-md border-base-300 justify-center overflow-hidden shrink-0 sm:justify-normal">
     <figure>
       <img
-        src={imageSrc}
-        alt={imageAlt}
+        src={imageSrc || '/images/placeholders/default-banner.jpg'}
+        alt={imageAlt || `Cover image for ${title}`}
         class="w-full transition-all duration-500 group-hover:scale-[1.02] h-auto max-h-96 object-cover"
         decoding="async"
         loading="lazy"
-        width={imgWidth}
-        height={imgHeight}
+        width={imgWidth || 400}
+        height={imgHeight || 225}
+        onerror="this.onerror=null;this.src='/images/placeholders/default-banner.jpg'"
       />
     </figure>
   </div>

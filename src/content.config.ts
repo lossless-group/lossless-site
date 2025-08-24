@@ -378,6 +378,31 @@ const pathId = (entry: string) => {
     .toLowerCase();               // Convert to lowercase
 };
 
+const explorationsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: resolveContentPath("lost-in-public/explorations")
+  }),
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    lede: z.string().optional(),
+    slug: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+    tags: z.union([z.string(), z.array(z.string())]).optional(),
+    status: z.string().optional(),
+    publish: z.boolean().default(true).optional(),
+    difficulty: z.string().optional(),
+    estimated_time: z.string().optional(),
+    prerequisites: z.array(z.string()).optional(),
+    tools_required: z.array(z.string()).optional(),
+    category: z.string().optional(),
+    version: z.string().optional(),
+  }).passthrough()
+});
+
 const projectsCollection = defineCollection({
   loader: glob({
     pattern: "**/*.{md,mdx}",
@@ -472,6 +497,7 @@ export const paths = {
 // Export the collections
 export const collections = {
   'cards': cardCollection,
+  'explorations': explorationsCollection,
   'projects': projectsCollection,
   'concepts': conceptsCollection,
   'market-maps': marketMapsCollection,

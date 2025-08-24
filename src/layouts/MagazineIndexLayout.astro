@@ -41,7 +41,12 @@ const {
     )} -->
 
     {articles.length > 0 ? (
-      <ArticleGrid articles={articles} basePath={basePath} />
+      <ArticleGrid 
+        articles={articles.map(article => ({
+          ...article,
+          basePath: basePath // Ensure basePath is passed to each article
+        }))} 
+      />
     ) : (
       <div class="magazine-empty">No articles found in this collection.</div>
     )}

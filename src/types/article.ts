@@ -16,5 +16,6 @@ export interface ArticleData {
   imgWidth?: number | string;
   imgHeight?: number | string;
   class?: string; // Optional class for the PostCardBare component itself
+  basePath?: string; // Base path for article URLs
   [key: string]: any; // Allows for other passthrough attributes not explicitly defined
 }

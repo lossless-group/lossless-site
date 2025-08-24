@@ -1,0 +1,187 @@
+---
+// Explorations collection page
+// Defines how exploration entries should be transformed and rendered
+
+import { getCollection } from 'astro:content';
+import MagazineIndexLayout from '../../../layouts/MagazineIndexLayout.astro'; 
+import { slugify } from '../../../utils/slugify'; 
+import { collectionPublishingDefaults } from '../../../content.config'; 
+import Hero from '../../../components/basics/Hero.astro';
+import AnimationWrapper from '../../../components/basics/AnimationWrapper.astro';
+
+// Collection-specific configuration
+const collectionName = 'explorations';
+const collectionConfig = {
+  title: 'Explorations',
+  subtitle: 'Discover & Learn',
+  description: 'Dive into our curated collection of explorations, experiments, and deep dives into various topics.'
+};
+
+// Fetch and process exploration entries
+const allEntriesUnfiltered = await getCollection(collectionName);
+
+// Apply publishing filter logic
+const defaultPublishBehavior = collectionPublishingDefaults[collectionName]?.publishByDefault ?? true;
+
+const allEntries = allEntriesUnfiltered.filter((entry) => {
+  const itemPublishFlag = (entry.data as any).publish; 
+  
+  if (defaultPublishBehavior === true) {
+    return itemPublishFlag !== false;
+  }
+  return itemPublishFlag === true;
+});
+
+// Transform entries with exploration-specific logic
+const articles = allEntries.map((entry) => {
+  const data = entry.data as any;
+  
+  function normalizeToArray(singularKey: string, pluralKey: string): string[] {
+    const singularValue = data?.[singularKey];
+    const pluralValue = data?.[pluralKey];
+    
+    const combined = [singularValue, pluralValue].filter(Boolean).flat();
+    return combined.length > 0 ? combined : [];
+  }
+  
+  const customSlug = data?.slug || slugify(data?.title || entry.id);
+  
+  // Ensure the slug includes the full path for proper routing
+  const fullSlug = `/learn-with/explorations/${customSlug}`;
+  
+  // Process image URLs - ensure they're absolute URLs
+  const processImageUrl = (url: string | undefined) => {
+    if (!url) return undefined;
+    // If it's already an absolute URL, return as is
+    if (url.startsWith('http')) return url;
+    // If it's a relative path, make it absolute from the site root
+    return url.startsWith('/') ? url : `/${url}`;
+  };
+  
+  const bannerImage = processImageUrl(data?.banner_image);
+  const portraitImage = processImageUrl(data?.portrait_image);
+  
+  // Log the image URLs for debugging
+  console.log('Processing images for:', data?.title || 'Untitled Exploration');
+  if (bannerImage) console.log('  Banner image:', bannerImage);
+  if (portraitImage) console.log('  Portrait image:', portraitImage);
+  
+  // Create and return the article data
+  return {
+    id: entry.id,
+    title: data?.title || 'Untitled Exploration',
+    slug: customSlug,
+    banner_image: bannerImage,
+    portrait_image: portraitImage,
+    imageAlt: data?.imageAlt || `Cover image for ${data?.title || 'exploration'}`,
+    date: data?.date_created || data?.date_modified || new Date(),
+    lede: data?.description || data?.lede || '',
+    tags: normalizeToArray('tag', 'tags'),
+    authors: normalizeToArray('author', 'authors'),
+    categories: data?.category ? [data.category] : [],
+    basePath: '/learn-with/explorations',
+    difficulty: data?.difficulty,
+    estimated_time: data?.estimated_time,
+    metadata: {
+      ...data,
+      slug: fullSlug
+    }
+  };
+}).sort((a, b) => {
+  // Sort by date, newest first
+  return new Date(b.date).getTime() - new Date(a.date).getTime();
+});
+
+// Generate static paths for all entries
+export async function getStaticPaths() {
+  return articles.map(article => ({
+    params: { 
+      slug: article.slug // Use the slug property we set earlier
+    },
+    props: { article }
+  }));
+}
+
+// Get the current article if we're on a detail page
+const { article: currentArticle } = Astro.props;
+
+// If we're on a detail page, render the article
+if (currentArticle) {
+  // This will be handled by the dynamic route
+  return null;
+}
+---
+
+<!-- Pass basePath to ensure proper routing for article links -->
+<MagazineIndexLayout 
+  title={collectionConfig.title}
+  description={collectionConfig.description}
+  articles={articles}
+  collectionDisplayName={collectionConfig.title}
+  basePath="/learn-with/explorations"
+>
+  <AnimationWrapper slot="hero-content">
+    <Hero 
+      title={collectionConfig.title}
+      subtitle={collectionConfig.subtitle}
+      description={collectionConfig.description}
+      classes="mb-12"
+    />
+  </AnimationWrapper>
+</MagazineIndexLayout>
+
+<style>
+  .magazine-index-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .collection-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .collection-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .collection-subtitle {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+  }
+  
+  .collection-description {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    color: var(--color-text);
+    line-height: 1.6;
+  }
+  
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .magazine-index-container {
+      padding: 1rem;
+    }
+    
+    .collection-title {
+      font-size: 2rem;
+    }
+    
+    .article-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
