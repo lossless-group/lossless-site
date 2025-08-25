@@ -66,6 +66,15 @@ export function extractAllText(children) {
     for (const child of children) {
       if (child.type === 'text') {
         text += child.value;
+      } else if (child.type === 'inlineCode') {
+        // Handle inline code nodes which have a value property
+        text += child.value;
+      } else if (child.type === 'html') {
+        // Handle HTML nodes which have a value property
+        text += child.value;
+      } else if (child.type === 'textDirective') {
+        // Handle text directive nodes which have a value property
+        text += child.value;
       } else if (child.children && Array.isArray(child.children)) {
         // Check if child.children is indeed an array before recursing
         text += extractAllText(child.children);

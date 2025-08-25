@@ -22,7 +22,6 @@
 
 import type { HTMLAttributes } from 'astro/types';
 import { formatDate } from "@utils/formatDate";
-import { getImage } from 'astro:assets';
 
 interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
   slug: string;
@@ -82,18 +81,21 @@ if (date) {
 
 <a
   class:list={[
-    'group relative block h-full w-full overflow-hidden rounded-lg',
+    'group relative block w-full overflow-hidden rounded-lg',
     'transition-all duration-300 ease-in-out',
     'hover:shadow-xl hover:ring-2 hover:ring-primary-500/20',
     'focus:outline-none focus:ring-2 focus:ring-primary-500/50',
     'p-2', // Add padding to prevent ring from overlaying content
+    'flex flex-col', // Use flexbox for better mobile layout control
+    'min-h-0', // Prevent flex items from growing beyond container
+    'h-full', // Ensure full height for grid alignment
     customClasses,
   ]}
   href={href}
   {...attrs}
 >
-  <div class="dark:border-base-600/60 border rounded-md border-base-300 justify-center overflow-hidden shrink-0 sm:justify-normal">
-    <figure>
+  <div class="dark:border-base-600/60 border rounded-md border-base-300 justify-center overflow-hidden shrink-0 sm:justify-normal flex-shrink-0">
+    <figure class="m-0">
       <img
         src={imageSrc || '/images/placeholders/default-banner.jpg'}
         alt={imageAlt || `Cover image for ${title}`}
@@ -106,14 +108,34 @@ if (date) {
       />
     </figure>
   </div>
-  <div class="w-full pt-1"> 
-    <h2 class="mt-1 font-semibold text-lg md:text-xl">{title}</h2>
-    {description && <p class="mt-1 text-sm opacity-80 line-clamp-2">{description}</p>}
-    <p class="mt-1 opacity-70 text-sm whitespace-nowrap">{displayDate}</p> 
+  <div class="w-full pt-1 flex-1 flex flex-col min-h-0"> 
+    <h2 class="mt-1 font-semibold text-lg md:text-xl flex-shrink-0">{title}</h2>
+    {description && <p class="mt-1 text-sm opacity-80 line-clamp-2 flex-shrink-0">{description}</p>}
+    <p class="mt-1 opacity-70 text-sm whitespace-nowrap flex-shrink-0">{displayDate}</p> 
   </div>
 </a>
 <style>
   h2 {
     font-size: 1.6em;
+  }
+  
+  /* Ensure proper grid item behavior on iOS */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS-specific fixes */
+    a {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      contain: layout style;
+    }
+  }
+  
+  /* Mobile-specific height management */
+  @media (max-width: 768px) {
+    a {
+      min-height: auto;
+      height: auto;
+    }
   }
 </style>

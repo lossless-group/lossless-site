@@ -171,61 +171,55 @@ if (DEBUG_TOC) {
   
   <div class="toc-scroll-area" id="toc-scroll-area">
     {tocItemsWithHasChildren.length > 0 ? (
-      <div>
-        <nav aria-label="Table of Contents">
-          <ul class="toc-list">
-            {tocItemsWithHasChildren.map((item, index) => {
-              function renderTocItem(tocItem: any) {
-                const depthClass = `toc-item toc-depth-${tocItem.depth}`;
-                const hasChildren = tocItem.children && tocItem.children.length > 0;
-                
-                return (
-                  <li class={depthClass} data-depth={tocItem.depth} data-slug={tocItem.slug}>
-                    <a 
-                      href={`#${tocItem.slug}`} 
-                      class="toc-link"
-                      data-slug={tocItem.slug}
-                      title={tocItem.text}
-                    >
-                      {hasChildren ? (
-                        <button 
-                          class="toc-toggle" 
-                          data-parent-slug={tocItem.slug}
-                          data-expanded={tocItem.depth < 1 ? "true" : "false"}
-                          aria-label={`Toggle ${tocItem.text} section`}
-                        >
-                          <svg class={`toc-chevron ${tocItem.depth < 1 ? "expanded" : "collapsed"}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6,9 12,15 18,9"></polyline>
-                          </svg>
-                        </button>
-                      ) : (
-                        // Only show bullet if header is not numbered
-                        /^\d+\./.test(tocItem.text) ? (
-                          <span class="toc-spacer"></span>
-                        ) : (
-                          <span class="toc-bullet"></span>
-                        )
-                      )}
-                      <span class="toc-text">{tocItem.text}</span>
-                    </a>
-                                          {hasChildren && (
-                        <ul class={`toc-sublist ${tocItem.depth >= 1 ? "hidden" : ""}`}>
-                          {tocItem.children?.map((child: any, childIndex: number) => renderTocItem(child))}
-                        </ul>
-                      )}
-                  </li>
-                );
-              }
+      <nav aria-label="Table of Contents">
+        <ul class="toc-list">
+          {tocItemsWithHasChildren.map((item, index) => {
+            function renderTocItem(tocItem: any) {
+              const depthClass = `toc-item toc-depth-${tocItem.depth}`;
+              const hasChildren = tocItem.children && tocItem.children.length > 0;
               
-              return renderTocItem(item);
-            })}
-          </ul>
-        </nav>
-        
-        <div class="toc-progress-bar">
-          <div class="toc-progress-fill" id="toc-progress-fill"></div>
-        </div>
-      </div>
+              return (
+                <li class={depthClass} data-depth={tocItem.depth} data-slug={tocItem.slug}>
+                  <a 
+                    href={`#${tocItem.slug}`} 
+                    class="toc-link"
+                    data-slug={tocItem.slug}
+                    title={tocItem.text}
+                  >
+                    {hasChildren ? (
+                      <button 
+                        class="toc-toggle" 
+                        data-parent-slug={tocItem.slug}
+                        data-expanded={tocItem.depth < 1 ? "true" : "false"}
+                        aria-label={`Toggle ${tocItem.text} section`}
+                      >
+                        <svg class={`toc-chevron ${tocItem.depth < 1 ? "expanded" : "collapsed"}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6,9 12,15 18,9"></polyline>
+                        </svg>
+                      </button>
+                    ) : (
+                      // Only show bullet if header is not numbered
+                      /^\d+\./.test(tocItem.text) ? (
+                        <span class="toc-spacer"></span>
+                      ) : (
+                        <span class="toc-bullet"></span>
+                      )
+                    )}
+                    <span class="toc-text">{tocItem.text}</span>
+                  </a>
+                                        {hasChildren && (
+                      <ul class={`toc-sublist ${tocItem.depth >= 1 ? "hidden" : ""}`}>
+                        {tocItem.children?.map((child: any, childIndex: number) => renderTocItem(child))}
+                      </ul>
+                    )}
+                </li>
+              );
+            }
+            
+            return renderTocItem(item);
+          })}
+        </ul>
+      </nav>
     ) : (
       <div class="toc-empty-message">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -239,6 +233,12 @@ if (DEBUG_TOC) {
       </div>
     )}
   </div>
+  
+  {tocItemsWithHasChildren.length > 0 && (
+    <div class="toc-progress-bar">
+      <div class="toc-progress-fill" id="toc-progress-fill"></div>
+    </div>
+  )}
 </aside>
 
 
@@ -313,6 +313,9 @@ if (DEBUG_TOC) {
   padding: 0.75rem 0;
   scrollbar-width: thin;
   scrollbar-color: var(--clr-lossless-accent--brightest) transparent;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  max-height: calc(100vh - 20rem); /* Reserve space for header and progress bar */
 }
 
 .toc-scroll-area::-webkit-scrollbar {
@@ -337,6 +340,19 @@ if (DEBUG_TOC) {
 
 .toc-sublist {
   margin-top: 0.25rem;
+  transition: opacity 0.2s ease, max-height 0.3s ease;
+}
+
+.toc-sublist.hidden {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.toc-sublist:not(.hidden) {
+  opacity: 1;
+  max-height: 1000px; /* Large enough to accommodate most content */
 }
 
 .toc-item {
@@ -637,6 +653,25 @@ if (DEBUG_TOC) {
   transform: rotate(180deg);
 }
 
+/* Visual indicator when TOC is actively scrolling to follow user */
+.toc-sidebar.scrolling {
+  border-color: var(--clr-lossless-accent--brightest);
+  box-shadow: 0 0 20px rgba(4, 229, 229, 0.3);
+}
+
+.toc-sidebar.scrolling .toc-progress-fill {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 /* Focus styles for accessibility */
 .toc-link:focus {
   outline: 2px solid var(--clr-lossless-accent--brightest);
@@ -911,10 +946,78 @@ class TableOfContentsManager {
         
         this.currentActiveLink = activeLink;
         
-        // Scroll the TOC to show the active item
-        this.scrollTocToActiveItem(activeLink);
+        // Add a small delay before scrolling to prevent excessive scrolling during rapid scroll events
+        if (this.scrollTimeout) {
+          clearTimeout(this.scrollTimeout);
+        }
+        this.scrollTimeout = setTimeout(() => {
+          // Ensure parent sections are expanded before scrolling
+          this.ensureParentSectionsExpanded(activeLink);
+          // Add a small delay to allow DOM updates from expansion
+          setTimeout(() => {
+            this.scrollTocToActiveItem(activeLink);
+          }, 50);
+        }, 100); // 100ms delay
       }
     }
+  }
+
+  ensureParentSectionsExpanded(activeLink) {
+    if (!activeLink) return;
+    
+    // Find all parent sections that need to be expanded
+    let currentItem = activeLink.closest('.toc-item');
+    const parentsToExpand = [];
+    
+    if (DEBUG_TOC) {
+      console.log('[TOC] Ensuring parent sections expanded for:', activeLink.textContent?.trim());
+    }
+    
+    // Walk up the DOM tree to find all parent sections
+    while (currentItem) {
+      const parentItem = currentItem.parentElement?.closest('.toc-item');
+      if (parentItem) {
+        const parentSlug = parentItem.getAttribute('data-slug');
+        const parentToggle = parentItem.querySelector('.toc-toggle');
+        const parentSublist = parentItem.querySelector('.toc-sublist');
+        
+        if (parentToggle && parentSublist && parentToggle.getAttribute('data-expanded') !== 'true') {
+          parentsToExpand.push({
+            toggle: parentToggle,
+            sublist: parentSublist,
+            slug: parentSlug,
+            text: parentItem.querySelector('.toc-text')?.textContent?.trim()
+          });
+        }
+      }
+      currentItem = parentItem;
+    }
+    
+    if (DEBUG_TOC && parentsToExpand.length > 0) {
+      console.log('[TOC] Found', parentsToExpand.length, 'parent sections to expand:', 
+        parentsToExpand.map(p => p.text || p.slug));
+    }
+    
+    // Expand all parent sections
+    parentsToExpand.forEach(({ toggle, sublist, slug, text }) => {
+      if (DEBUG_TOC) {
+        console.log('[TOC] Expanding parent section:', text || slug);
+      }
+      
+      // Update toggle state
+      toggle.setAttribute('data-expanded', 'true');
+      const chevron = toggle.querySelector('.toc-chevron');
+      if (chevron) {
+        chevron.classList.remove('collapsed');
+        chevron.classList.add('expanded');
+      }
+      
+      // Show sublist
+      sublist.classList.remove('hidden');
+    });
+    
+    // Return whether any sections were expanded
+    return parentsToExpand.length > 0;
   }
 
   scrollTocToActiveItem(activeLink) {
@@ -922,19 +1025,80 @@ class TableOfContentsManager {
 
     const containerRect = this.tocScrollArea.getBoundingClientRect();
     const linkRect = activeLink.getBoundingClientRect();
+    const containerHeight = this.tocScrollArea.clientHeight;
     
-    if (linkRect.top < containerRect.top || linkRect.bottom > containerRect.bottom) {
-      const scrollTop = this.tocScrollArea.scrollTop;
-      const linkOffsetTop = activeLink.offsetTop;
-      const containerHeight = this.tocScrollArea.clientHeight;
+    // Calculate if the active link is outside the visible area
+    const isAboveViewport = linkRect.top < containerRect.top;
+    const isBelowViewport = linkRect.bottom > containerRect.bottom;
+    
+    if (isAboveViewport || isBelowViewport) {
+      // Calculate the correct offset for nested items
+      // Use getBoundingClientRect() to get the actual position relative to the viewport
+      const linkTop = linkRect.top;
+      const containerTop = containerRect.top;
+      const currentScrollTop = this.tocScrollArea.scrollTop;
+      
+      // Calculate the actual offset of the link relative to the scroll container
+      const linkOffsetTop = currentScrollTop + (linkTop - containerTop);
+      const linkHeight = activeLink.offsetHeight;
+      
       if (DEBUG_TOC) {
-        console.log('[TOC] Scrolling to active item:', linkOffsetTop - containerHeight / 2);
+        console.log('[TOC] Position calculation:', {
+          linkTop,
+          containerTop,
+          currentScrollTop,
+          linkOffsetTop,
+          linkHeight,
+          isAboveViewport,
+          isBelowViewport
+        });
       }
       
+      // Calculate optimal scroll position
+      let targetScrollTop;
+      
+      if (isAboveViewport) {
+        // If link is above viewport, scroll it to the top with some padding
+        targetScrollTop = linkOffsetTop - 500; // 40px padding from top for better UI
+      } else {
+        // If link is below viewport, scroll it to be visible with some padding
+        targetScrollTop = linkOffsetTop - containerHeight + linkHeight + 500; // 40px padding from bottom for better UI
+      }
+      
+      // Ensure we don't scroll beyond the container bounds
+      const maxScrollTop = this.tocScrollArea.scrollHeight - containerHeight;
+      targetScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+      
+      if (DEBUG_TOC) {
+        console.log('[TOC] Scrolling to active item:', {
+          linkOffsetTop,
+          linkHeight,
+          containerHeight,
+          targetScrollTop,
+          currentScrollTop: this.tocScrollArea.scrollTop,
+          isAboveViewport,
+          isBelowViewport,
+          linkText: activeLink.textContent?.trim()
+        });
+      }
+      
+      // Add visual indicator that TOC is actively scrolling
+      this.tocSidebar?.classList.add('scrolling');
+      
+      // Use smooth scrolling with a reasonable duration
       this.tocScrollArea.scrollTo({
-        top: linkOffsetTop - containerHeight / 4,
+        top: targetScrollTop,
         behavior: 'smooth'
       });
+      
+      // Remove visual indicator after scroll completes
+      setTimeout(() => {
+        this.tocSidebar?.classList.remove('scrolling');
+      }, 800); // Slightly longer than the scroll duration
+    } else {
+      if (DEBUG_TOC) {
+        console.log('[TOC] Active item already in view:', activeLink.textContent?.trim());
+      }
     }
   }
 

@@ -1114,8 +1114,8 @@ if (DEBUG_AST) {
 
 <!-- footnoteReference and footnoteDefinition are from standard Markdown library -->
 {node.type === 'footnoteReference' && (
-  <sup class="footnote-ref">
-    <a href={`#${node.label}`} id={`ref-${node.label}`}>
+  <sup class="footnote-ref" id={`ref-${node.label}`}>
+    <a href={`#${node.label}`}>
       [{node.label}]
     </a>
   </sup>
@@ -1124,7 +1124,20 @@ if (DEBUG_AST) {
     font-size: 0.6em;
     vertical-align: super;
     top: 0px;
+    scroll-margin-top: 150px; /* Account for fixed header when scrolling back to reference */
+    display: inline-block; /* Ensure proper scroll positioning */
+    position: relative; /* Ensure proper scroll positioning */
+    transition: all 0.3s ease;
   }
+
+  .footnote-ref.highlighted {
+  background: rgba(4, 229, 229, 0.6);
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 0 20px rgba(4, 229, 229, 0.8), 0 0 40px rgba(4, 229, 229, 0.4);
+  animation: footnote-highlight 1s ease-out;
+  transform: scale(1.1);
+}
 
   .footnote-definition {
     font-size: 0.9em;
@@ -1132,14 +1145,155 @@ if (DEBUG_AST) {
     border-top: 1px solid #666;
     padding-top: 0.5em;
     scroll-margin-top: 10vh;
+    transition: all 0.3s ease;
   }
 
+  .footnote-definition.highlighted {
+  background: rgba(4, 229, 229, 0.3);
+  box-shadow: 0 0 20px rgba(4, 229, 229, 0.6);
+  animation: footnote-highlight-definition 1s ease-out;
+}
+
+  @keyframes footnote-highlight {
+  0% {
+    background: rgba(4, 229, 229, 0.8);
+    box-shadow: 0 0 30px rgba(4, 229, 229, 1), 0 0 60px rgba(4, 229, 229, 0.6);
+    transform: scale(1.2);
+  }
+  25% {
+    background: rgba(4, 229, 229, 0.6);
+    box-shadow: 0 0 20px rgba(4, 229, 229, 0.8), 0 0 40px rgba(4, 229, 229, 0.4);
+    transform: scale(1.1);
+  }
+  50% {
+    background: rgba(4, 229, 229, 0.4);
+    box-shadow: 0 0 15px rgba(4, 229, 229, 0.6);
+    transform: scale(1.05);
+  }
+  75% {
+    background: rgba(4, 229, 229, 0.2);
+    box-shadow: 0 0 8px rgba(4, 229, 229, 0.4);
+    transform: scale(1.02);
+  }
+  100% {
+    background: transparent;
+    box-shadow: none;
+    transform: scale(1);
+  }
+}
+
+@keyframes footnote-highlight-definition {
+  0% {
+    background: rgba(4, 229, 229, 0.8);
+    box-shadow: 0 0 30px rgba(4, 229, 229, 1), 0 0 60px rgba(4, 229, 229, 0.6);
+  }
+  25% {
+    background: rgba(4, 229, 229, 0.6);
+    box-shadow: 0 0 20px rgba(4, 229, 229, 0.8), 0 0 40px rgba(4, 229, 229, 0.4);
+  }
+  50% {
+    background: rgba(4, 229, 229, 0.4);
+    box-shadow: 0 0 15px rgba(4, 229, 229, 0.6);
+  }
+  75% {
+    background: rgba(4, 229, 229, 0.2);
+    box-shadow: 0 0 8px rgba(4, 229, 229, 0.4);
+  }
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
 </style>
+
+<script is:inline>
+  // Highlight footnote references and definitions when scrolled to
+  function highlightFootnotes() {
+    // Check if we're on a footnote reference or definition
+    const hash = window.location.hash;
+    console.log('[Footnote Highlight] Checking hash:', hash);
+    
+    // Check for footnote references (#ref-*) or footnote definitions (any alphanumeric ID)
+    if (hash.startsWith('#ref-') || /^#[a-zA-Z0-9]+$/.test(hash)) {
+      console.log('[Footnote Highlight] Hash matches footnote pattern');
+      
+      let targetElement = null;
+      
+      if (hash.startsWith('#ref-')) {
+        // For footnote references, use querySelector (safe for #ref-*)
+        targetElement = document.querySelector(hash);
+        console.log('[Footnote Highlight] Found footnote reference element:', targetElement);
+      } else {
+        // For footnote definitions (#1, #2, etc.), use getElementById to avoid CSS selector issues
+        const id = hash.substring(1); // Remove the # to get just the ID
+        targetElement = document.getElementById(id);
+        console.log('[Footnote Highlight] Found footnote definition element by ID:', id, targetElement);
+      }
+      
+      if (targetElement) {
+        console.log('[Footnote Highlight] Adding highlight class to:', targetElement);
+        console.log('[Footnote Highlight] Element classes before:', targetElement.className);
+        console.log('[Footnote Highlight] Element tag name:', targetElement.tagName);
+        
+        // Add highlight class
+        targetElement.classList.add('highlighted');
+        console.log('[Footnote Highlight] Element classes after:', targetElement.className);
+        
+        // Listen for animation end to remove the class
+        const handleAnimationEnd = () => {
+          targetElement.classList.remove('highlighted');
+          targetElement.removeEventListener('animationend', handleAnimationEnd);
+          console.log('[Footnote Highlight] Animation ended, removed highlight class');
+        };
+        
+        targetElement.addEventListener('animationend', handleAnimationEnd);
+      } else {
+        console.log('[Footnote Highlight] Element not found for hash:', hash);
+        // Debug: let's see what elements with similar IDs exist
+        const allElements = document.querySelectorAll('[id]');
+        console.log('[Footnote Highlight] All elements with IDs:', Array.from(allElements).map(el => ({ id: el.id, tagName: el.tagName, className: el.className })));
+        
+        // Also check for footnote definitions specifically
+        const footnoteDefs = document.querySelectorAll('.footnote-definition');
+        console.log('[Footnote Highlight] Footnote definitions found:', Array.from(footnoteDefs).map(el => ({ id: el.id, dataLabel: el.getAttribute('data-debug-label') })));
+      }
+    } else {
+      console.log('[Footnote Highlight] Hash does not match footnote pattern');
+    }
+  }
+
+  // Run on page load with a small delay to ensure DOM is ready
+  function initHighlight() {
+    setTimeout(highlightFootnotes, 100);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHighlight);
+  } else {
+    initHighlight();
+  }
+
+  // Also run when hash changes (for navigation)
+  window.addEventListener('hashchange', () => {
+    setTimeout(highlightFootnotes, 100);
+  });
+
+  // Debug: Log all footnote definitions on page load
+  setTimeout(() => {
+    const footnoteDefs = document.querySelectorAll('.footnote-definition');
+    console.log('[Footnote Debug] All footnote definitions:', Array.from(footnoteDefs).map(el => ({
+      id: el.id,
+      dataLabel: el.getAttribute('data-debug-label'),
+      text: el.textContent?.substring(0, 50) + '...'
+    })));
+  }, 500);
+</script>
 
 )}
 
 {node.type === 'footnoteDefinition' && (
-  <div id={node.label} class="footnote-definition">
+  <div id={node.label} class="footnote-definition" data-debug-label={node.label}>
     {node.children.length === 1 && node.children[0].type === 'paragraph' ? (
       <p>
         <strong><a href={`#ref-${node.label}`}>[{node.label}]</a></strong>{' '}

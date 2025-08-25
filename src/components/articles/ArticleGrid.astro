@@ -41,7 +41,7 @@ interface Props extends Omit<HTMLAttributes<'div'>, 'class'> {
 
 const { articles, gridClass, class: customRootClass, basePath, ...attrs } = Astro.props as Props;
 
-const defaultGridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+const defaultGridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr';
 
 const processedArticles = articles.map(article => {
   const passthroughAttrs: { [key: string]: any } = {};
@@ -88,3 +88,48 @@ const processedArticles = articles.map(article => {
     );
   })}
 </div>
+
+<style>
+  /* Ensure proper grid behavior on mobile devices */
+  .grid {
+    grid-template-rows: auto;
+    align-items: start;
+    contain: layout style;
+  }
+  
+  /* iOS-specific grid fixes */
+  @supports (-webkit-touch-callout: none) {
+    .grid {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      -webkit-perspective: 1000px;
+      perspective: 1000px;
+    }
+    
+    .grid > * {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      contain: layout style;
+    }
+  }
+  
+  /* Ensure grid items don't overlap on mobile */
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      grid-auto-rows: min-content;
+    }
+  }
+  
+  /* Additional mobile fixes for very small screens */
+  @media (max-width: 480px) {
+    .grid {
+      gap: 1rem;
+    }
+  }
+</style>

@@ -61,6 +61,8 @@ const {
     margin: 2rem auto; /* Centering and top/bottom margin */
     padding: 0 var(--spacing-4, 1rem); /* Horizontal padding */
     max-width: var(--max-width-container, 1200px); /* Consistent max width */
+    min-height: 0; /* Prevent flex container from growing beyond viewport */
+    overflow-x: hidden; /* Prevent horizontal overflow */
   }
 
   .magazine-index-header {
@@ -93,5 +95,24 @@ const {
     text-align: center;
     font-size: var(--font-size-lg, 1.25rem);
     margin-top: var(--spacing-8, 2rem);
+  }
+  
+  /* Mobile-specific fixes */
+  @media (max-width: 768px) {
+    .magazine-index-container {
+      margin: 1rem auto;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+  }
+  
+  /* iOS-specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    .magazine-index-container {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
   }
 </style>

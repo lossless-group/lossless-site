@@ -102,6 +102,16 @@ const normalizedData = normalizeDataWithAuthors(data);
     scroll-behavior: smooth; /* Smooth scrolling */
   }
 
+  /* Scroll margin for headings in OneArticle layout */
+  .one-article :global(h1),
+  .one-article :global(h2),
+  .one-article :global(h3),
+  .one-article :global(h4),
+  .one-article :global(h5),
+  .one-article :global(h6) {
+    scroll-margin-top: 150px; /* Account for fixed header */
+  }
+
   /* Constrain the content width and add proper spacing */
   .one-article :global(.content-wrapper) {
     max-width: 1400px;
