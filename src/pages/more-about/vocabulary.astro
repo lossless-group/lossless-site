@@ -4,16 +4,67 @@ import { processEntries } from '@utils/slugify';
 import Layout from '@layouts/Layout.astro';
 import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
 import SearchInput from '@components/reference/SearchInput.astro';
+import { getWordCounts } from '@utils/collectionWordCount';
+
+// Type definition for vocabulary entry with required properties
+interface VocabularyEntry {
+  id: string;
+  slug: string;
+  data: {
+    title?: string;
+    aliases?: string[];
+    [key: string]: unknown;
+  };
+  body?: string;
+  collection: string;
+  filePath?: string;
+  rendered?: any;
+}
 
 // Get entries from vocabulary collection
-const vocabularyEntries = await getCollection('vocabulary');
-const processedEntires = processEntries(vocabularyEntries)
+const vocabularyEntries = await getCollection('vocabulary') as unknown as VocabularyEntry[];
+
+// Process entries with proper typing
+const processedEntries = vocabularyEntries.map(entry => {
+  const processed = {
+    ...entry,
+    data: {
+      ...entry.data,
+      title: entry.data?.title || entry.id,
+    },
+    originalFilename: entry.id,
+    slug: entry.slug || entry.id,
+  };
+  
+  return processed;
+});
+
+// Get word count for vocabulary
+const wordCounts = await getWordCounts(['vocabulary'] as const);
+const vocabularyWordCount = wordCounts.vocabulary;
+
+// Format word count for display
+const formatWordCount = (count: number): string => {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M+`;
+  } else if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K+`;
+  }
+  return count.toString();
+};
 ---
 
 <Layout title="Vocabulary">
   <div class="container mx-auto py-8 px-4">
-    <h1 class="text-3xl font-bold mb-6">Vocabulary</h1>
-    <p class="mb-6">Terms and definitions used throughout our work.</p>
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold">Vocabulary</h1>
+        <p class="text-gray-300">Terms and definitions used throughout our work.</p>
+      </div>
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {vocabularyEntries.length} terms • {formatWordCount(vocabularyWordCount)} words
+      </span>
+    </div>
     
     <!-- Navigation tabs -->
     <div class="flex gap-4 mb-8">
@@ -25,7 +76,7 @@ const processedEntires = processEntries(vocabularyEntries)
     <SearchInput />
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {processedEntires.map(entry => (
+      {processedEntries.map(entry => (
         <div data-searchable="true">
           <VocabularyPreviewCard entry={entry} />
         </div>

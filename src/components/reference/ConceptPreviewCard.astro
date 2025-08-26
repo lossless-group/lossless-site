@@ -1,13 +1,17 @@
 ---
+import WordCountDisplay from '@components/basics/WordCountDisplay.astro';
+import { countWordsInMarkdown } from '@utils/fileWordCount';
+
 /**
  * ConceptPreviewCard.astro
  * 
  * This component renders a preview card for a concept from the concepts collection.
- * It displays the concept title and description (if any) in a consistent card format.
+ * It displays the concept title, description (if any), and word count in a consistent card format.
  * 
  * @component
  * @param {Object} entry - The concept entry object from the content collection
  * @param {string} entry.id - The ID of the concept entry (filename)
+ * @param {string} entry.body - The markdown content of the concept
  * @param {Object} entry.data - The frontmatter data of the concept entry
  * @param {string} entry.data.title - The title of the concept
  * @param {string} entry.data.description - Optional description of the concept
@@ -19,10 +23,12 @@ interface Props {
   entry: {
     id: string;
     slug: string; // Add slug for canonical routing
+    body?: string;
     data: {
       title: string;
       description?: string;
       slug?: string;
+      at_semantic_version?: string; // Semantic version for the content
     };
     originalFilename: string; // For consistency and future use
   };
@@ -30,6 +36,9 @@ interface Props {
 
 // Destructure the entry from props
 const { entry } = Astro.props;
+
+// Calculate word count for this concept
+const wordCount = entry.body ? countWordsInMarkdown(entry.body) : 0;
 // ---
 // Always use entry.slug for the URL, as provided by ReferenceGrid and index.astro
 // This ensures correct casing and matches the routing logic in [...slug].astro
@@ -38,12 +47,33 @@ const url = `/more-about/${entry.slug}`;
 // ---
 ---
 
-<div class="concept-card">
-  <h3 class="concept-card__title">
-    <a href={url} class="concept-card__link">
-      { entry.data.title }
-    </a>
-  </h3>
+<div class="concept-card group">
+  <div class="flex justify-between items-start">
+    <h3 class="concept-card__title">
+      <a href={url} class="concept-card__link">
+        {entry.data.title}
+      </a>
+    </h3>
+    <div class="flex flex-col items-end">
+      {entry.data.at_semantic_version && (
+        <div class="text-xs text-gray-500">
+          v{entry.data.at_semantic_version}
+        </div>
+      )}
+      {wordCount > 400 && (
+        <WordCountDisplay 
+          count={wordCount} 
+          className="text-gray-500"
+          showIcon={false}
+        />
+      )}
+    </div>
+  </div>
+  {entry.data.description && (
+    <p class="mt-2 text-gray-300 text-sm">
+      {entry.data.description}
+    </p>
+  )}
 </div>
 
 <style>

@@ -1,46 +1,114 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
-import type { ReferenceItem } from '@components/reference/ReferenceGrid.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
-import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
 import SearchInput from '@components/reference/SearchInput.astro';
-import { processEntries } from '@utils/slugify';
+import ReferenceNavRow from '@components/reference/ReferenceNavRow.astro';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import { processEntries, toProperCase, getReferenceSlug } from '@utils/slugify';
 import { getWordCounts } from '@utils/collectionWordCount';
 
-// Get collections with proper typing
-const [vocabularyEntries, conceptsEntries] = await Promise.all([
-  getCollection('vocabulary') as Promise<CollectionEntry<'vocabulary'>[]>,
-  getCollection('concepts') as Promise<CollectionEntry<'concepts'>[]>
-]);
+// Define the expected shape of our entries
+interface VocabularyEntry extends CollectionEntry<'vocabulary'> {
+  data: {
+    title?: string;
+    aliases?: string[];
+    [key: string]: unknown;
+  };
+}
 
-// Process entries for display
-const processedVocabularyEntries = processEntries(vocabularyEntries);
-const processedConceptsEntries = processEntries(conceptsEntries);
+interface ConceptEntry extends CollectionEntry<'concepts'> {
+  data: {
+    title?: string;
+    aliases?: string[];
+    [key: string]: unknown;
+  };
+}
 
-// Create properly typed reference items
-const vocabularyItems: ReferenceItem[] = processedVocabularyEntries.map(entry => ({
-  ...entry,
-  collection: 'vocabulary' as const,
-  originalFilename: entry.id
-}));
+// Helper function to convert filename to title case
+function filenameToTitle(filename: string): string {
+  return filename
+    .replace(/[-_]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
 
-const conceptsItems: ReferenceItem[] = processedConceptsEntries.map(entry => ({
-  ...entry,
-  collection: 'concepts' as const,
-  originalFilename: entry.id
-}));
+// Get collections and transform to match expected structure
+const vocabularyEntries = (await getCollection('vocabulary') as unknown as VocabularyEntry[]).map(entry => {
+  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
+  const baseFilename = filename.split('/').pop() || '';
+  const title = (entry.data.title as string | undefined) || filenameToTitle(baseFilename);
+  
+  return {
+    ...entry,
+    filePath: entry.id,
+    originalFilename: baseFilename,
+    collection: 'vocabulary' as const,
+    data: {
+      ...entry.data,
+      title
+    }
+  };
+});
+
+const conceptsEntries = (await getCollection('concepts') as unknown as ConceptEntry[]).map(entry => {
+  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
+  const baseFilename = filename.split('/').pop() || '';
+  const title = (entry.data.title as string | undefined) || filenameToTitle(baseFilename);
+  
+  return {
+    ...entry,
+    filePath: entry.id,
+    originalFilename: baseFilename,
+    collection: 'concepts' as const,
+    data: {
+      ...entry.data,
+      title
+    }
+  };
+});
+
+// Process entries and ensure they match ReferenceItem type
+const processedVocab = processEntries(vocabularyEntries).map(entry => {
+  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
+  const baseFilename = filename.split('/').pop() || '';
+  
+  return {
+    ...entry,
+    slug: entry.slug || getReferenceSlug(entry.id),
+    collection: 'vocabulary' as const,
+    originalFilename: baseFilename,
+    data: {
+      ...entry.data,
+      title: entry.data.title || filenameToTitle(baseFilename)
+    }
+  };
+});
+
+const processedConcepts = processEntries(conceptsEntries).map(entry => {
+  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
+  const baseFilename = filename.split('/').pop() || '';
+  
+  return {
+    ...entry,
+    slug: entry.slug || getReferenceSlug(entry.id),
+    collection: 'concepts' as const,
+    originalFilename: baseFilename,
+    data: {
+      ...entry.data,
+      title: entry.data.title || filenameToTitle(baseFilename)
+    }
+  };
+});
 
 // Get word counts for each collection
 const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
 
 // Format word counts for display
 const formatWordCount = (count: number): string => {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M+`;
-  } else if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K+`;
-  }
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M+`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K+`;
   return count.toString();
 };
 ---
@@ -50,22 +118,11 @@ const formatWordCount = (count: number): string => {
     <h1 class="text-3xl font-bold mb-6">Reference Library</h1>
     <p class="text-lg mb-8">Browse our collection of vocabulary terms and conceptual frameworks.</p>
 
-    <div class="flex flex-wrap items-center gap-4 mb-8">
-      <div class="flex gap-4">
-        <a href="/more-about" class="px-4 py-2 bg-blue-600 text-white rounded-md">All Reference</a>
-        <a href="/more-about/vocabulary" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
-          Vocabulary
-          <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{vocabularyEntries.length}</span>
-        </a>
-        <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2">
-          Concepts
-          <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{conceptsEntries.length}</span>
-        </a>
-      </div>
-      <div class="text-sm text-gray-400 ml-2">
-        Total: {formatWordCount(wordCounts.vocabulary + wordCounts.concepts)} words
-      </div>
-    </div>
+    <ReferenceNavRow 
+      vocabularyCount={processedVocab.length}
+      conceptsCount={processedConcepts.length}
+      totalWords={wordCounts.vocabulary + wordCounts.concepts}
+    />
 
     <SearchInput />
 
@@ -73,29 +130,29 @@ const formatWordCount = (count: number): string => {
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold">Vocabulary</h2>
         <span class="text-sm text-gray-500 dark:text-gray-400">
-          {vocabularyEntries.length} terms • {formatWordCount(wordCounts.vocabulary)} words
+          {processedVocab.length} terms • {formatWordCount(wordCounts.vocabulary)} words
         </span>
       </div>
       <p class="mb-6">Terms and definitions used throughout our work.</p>
 
       <div data-searchable="true">
-        <ReferenceGrid items={processedVocabularyEntries} />
+        <ReferenceGrid items={processedVocab} />
       </div>
     </section>
 
-    <ThinGradientBleedSeparator height="2px" marginTop="2rem" marginBottom="2rem" />
+    <div class="border-t border-gray-200 dark:border-gray-700 my-8"></div>
 
     <section>
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold">Concepts</h2>
         <span class="text-sm text-gray-500 dark:text-gray-400">
-          {conceptsEntries.length} concepts • {formatWordCount(wordCounts.concepts)} words
+          {processedConcepts.length} concepts • {formatWordCount(wordCounts.concepts)} words
         </span>
       </div>
       <p class="mb-6">Important ideas and frameworks we use in our work.</p>
 
       <div data-searchable="true">
-        <ReferenceGrid items={processedConceptsEntries} />
+        <ReferenceGrid items={processedConcepts} />
       </div>
     </section>
 

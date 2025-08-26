@@ -1,0 +1,63 @@
+---
+/**
+ * ReferenceNavRow.astro
+ * 
+ * Navigation row for the reference section, showing links to different reference types
+ * and the total word count.
+ * 
+ * @component
+ * @param {number} vocabularyCount - Number of vocabulary items
+ * @param {number} conceptsCount - Number of concept items
+ * @param {number} totalWords - Total word count across all reference items
+ */
+
+interface Props {
+  vocabularyCount: number;
+  conceptsCount: number;
+  totalWords: number;
+}
+
+const { vocabularyCount, conceptsCount, totalWords } = Astro.props;
+
+// Format large numbers with K/M suffixes
+const formatCount = (count: number): string => {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M+`;
+  } else if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K+`;
+  }
+  return count.toString();
+};
+---
+
+<div class="flex flex-wrap items-center gap-4 mb-8">
+  <div class="flex gap-4">
+    <a 
+      href="/more-about" 
+      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+    >
+      All Reference
+    </a>
+    <a 
+      href="/more-about/vocabulary" 
+      class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2 transition-colors"
+    >
+      Vocabulary
+      <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+        {vocabularyCount}
+      </span>
+    </a>
+    <a 
+      href="/more-about/concepts" 
+      class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2 transition-colors"
+    >
+      Concepts
+      <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+        {conceptsCount}
+      </span>
+    </a>
+  </div>
+  <div class="text-sm text-gray-400 ml-2">
+    Total: {formatCount(totalWords)} words
+  </div>
+</div>
