@@ -611,27 +611,23 @@ const hasArticleInfo =
 /* === Global Mermaid Chart Breakout === */
 .mermaid-breakout {
   position: relative;
-  left: 50%;
-  right: 50%;
-  width: 100vw;
-  min-width: 760px;
-  max-width: 100vw;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  width: 100%;
+  max-width: 85ch; /* Match article prose max-width */
+  margin: 2rem auto;
   z-index: 20;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  box-sizing: border-box;
 }
 
 @media (max-width: 1024px) {
   .mermaid-breakout {
-    left: auto;
-    right: auto;
     width: 100%;
-    min-width: 0;
     max-width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+    margin: 2rem 0;
   }
 }
 

@@ -1459,26 +1459,22 @@ if (DEBUG_AST) {
           .figma-breakout {
             position: relative;
             z-index: 10;
-            left: 50%;
-            right: 50%;
-            width: 100vw;
-            margin-left: -50vw;
-            max-width: 100vw;
+            width: 100%;
+            max-width: 85ch;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background: transparent;
             box-sizing: border-box;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
+            margin: 2rem auto;
           }
           
           .figma-embed-shell {
             position: relative;
-            min-width: 760px;
-            width: auto;
-            max-width: 1200px;
+            min-width: 0;
+            width: 100%;
+            max-width: 85ch;
             margin: 1.25rem 0;
             overflow-x: auto;
             background: var(--bastille, #19141D);
@@ -1633,16 +1629,14 @@ if (DEBUG_AST) {
           
           @media (max-width: 768px) {
             .figma-breakout {
-              left: auto;
-              right: auto;
               width: 100%;
-              margin-left: 0;
               max-width: 100%;
+              margin: 2rem 0;
               padding: 0 0.5rem;
             }
             
             .figma-embed-shell {
-              min-width: auto;
+              min-width: 0;
               max-width: 100%;
               width: 100%;
               padding: 0.5rem;

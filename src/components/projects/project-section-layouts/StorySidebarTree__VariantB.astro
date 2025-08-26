@@ -17,7 +17,23 @@ const processedSteps = steps;
         const orientationStep = processedSteps?.find(step => step.type === 'orientation');
         return orientationStep?.href || `/projects/${seriesTitle.toLowerCase()}`;
       })()}>{seriesTitle}</a><span class="crumb-sep"> / </span></span>
-      <span><span class="crumb-current" aria-current="page">{processedSteps && currentHref ? (processedSteps.find(s => s.href === currentHref)?.title ?? '') : ''}</span></span>
+      <span><span class="crumb-current" aria-current="page">{(() => {
+        if (!processedSteps || !currentHref) return '';
+        
+        // First try to find a direct match
+        const directMatch = processedSteps.find(s => s.href === currentHref);
+        if (directMatch) return directMatch.title;
+        
+        // If no direct match, check if it's a child step
+        for (const step of processedSteps) {
+          if (step.children) {
+            const childMatch = step.children.find(child => child.href === currentHref);
+            if (childMatch) return childMatch.title;
+          }
+        }
+        
+        return '';
+      })()}</span></span>
     </nav>
     
     <!-- Navigation Help Tooltip -->
@@ -33,9 +49,6 @@ const processedSteps = steps;
     
     {processedSteps ? (
       <div class="tree-sections">
-        {/* Debug: Show all steps first */}
-        {processedSteps.length === 0 && <p>No steps found</p>}
-        
         {/* Orientation Section */}
         {processedSteps.filter(step => step.type === 'orientation').length > 0 && (
           <div class="orientation-section">
@@ -57,7 +70,7 @@ const processedSteps = steps;
           </div>
         )}
         
-        {/* Sequential Flow Section */}
+        {/* Sequential Flow Section with Children Support */}
         {processedSteps.filter(step => step.type === 'sequential').length > 0 && (
           <div class="sequential-section">
             <h3 class="section-header">Workflow Steps</h3>
@@ -69,6 +82,21 @@ const processedSteps = steps;
                     <span class="chip">{step.step ? String(step.step).padStart(2, '0') : '??'}</span>
                     <span class="tree-text">{step.title}</span>
                   </a>
+                  
+                  {/* Render children if they exist */}
+                  {step.children && step.children.length > 0 && (
+                    <div class="tree-branch tree-branch--children">
+                      {step.children.map((child) => (
+                        <div class={currentHref === child.href ? 'active-cluster' : ''}>
+                          {currentHref === child.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
+                          <a href={child.href} class={"tree-link tree-link--child" + (currentHref === child.href ? ' tree-link--active' : '')}>
+                            <span class="chip chip--child">{step.step && child.step ? `${step.step}.${child.step}` : '•'}</span>
+                            <span class="tree-text">{child.title}</span>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -106,6 +134,21 @@ const processedSteps = steps;
                         <span class="chip">{String(i + 1).padStart(2, '0')}</span>
                         <span class="tree-text">{step.title}</span>
                       </a>
+                      
+                      {/* Render children if they exist in fallback mode */}
+                      {step.children && step.children.length > 0 && (
+                        <div class="tree-branch tree-branch--children">
+                          {step.children.map((child) => (
+                            <div class={currentHref === child.href ? 'active-cluster' : ''}>
+                              {currentHref === child.href && (<span class="cluster-bracket" aria-hidden="true"></span>)}
+                              <a href={child.href} class={"tree-link tree-link--child" + (currentHref === child.href ? ' tree-link--active' : '')}>
+                                <span class="chip chip--child">{child.step ? `${i + 1}.${child.step}` : '•'}</span>
+                                <span class="tree-text">{child.title}</span>
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -197,28 +240,65 @@ const processedSteps = steps;
   }
   .tree-branch { padding-left: 1rem; margin-top: 0.25rem; border-left: 3px solid var(--clr-lossless-primary-light); }
   .tree-branch.tree-branch--active { border-left-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 10%); }
-
-  /* Links - override global a styles with high specificity */
-  .sidebar .card .sequential-section a.tree-link,
-  .sidebar .card .orientation-section a.tree-link,
-  .sidebar .card a.tree-link { 
-    display: flex !important; 
-    align-items: center !important; 
-    gap: 0.6rem !important; 
-    padding: 0.2rem 0.3rem 0.2rem 0.55rem !important; 
-    border-radius: 0.35rem !important; 
-    color: var(--clr-heading) !important; 
-    text-decoration: none !important; 
-    position: relative !important; 
-    transition: color 150ms ease, box-shadow 150ms ease, background 150ms ease !important;
-    list-style: none !important;
-    list-style-type: none !important;
+  
+  /* Enhanced tree branch for children */
+  .tree-branch--children { 
+    padding-left: 1.5rem; 
+    margin-top: 0.4rem; 
+    margin-bottom: 0.4rem;
+    border-left: 2px solid color-mix(in oklab, var(--clr-lossless-primary-light), transparent 60%); 
+    border-radius: 0 0 0 8px;
   }
+
+/* Links - override global a styles with high specificity */
+.sidebar.card .sequential-section a.tree-link,
+.sidebar.card .orientation-section a.tree-link,
+.sidebar.card a.tree-link,
+.card a.tree-link,            /* fallback for any other card sidebars */
+a.tree-link {                 /* ultimate guard if used elsewhere */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  padding: 0.2rem 0.3rem 0.2rem 0.55rem !important; 
+  border-radius: 0.35rem !important; 
+  color: var(--clr-heading) !important; 
+  text-decoration: none !important; 
+  position: relative !important; 
+  transition: color 150ms ease, box-shadow 150ms ease, background 150ms ease !important;
+  list-style: none !important;
+  min-height: 1.5rem;
+}
+
+/* Keep these as-is — they’ll now take effect since the parent is flex */
+.card a.tree-link .tree-text { 
+  flex: 1 1 auto; 
+  min-width: 0; 
+  line-height: 1.35; 
+}
+.card a.tree-link .chip { 
+  flex: 0 0 auto; 
+}
+
   .card a.tree-link .tree-text { flex: 1 1 auto; min-width: 0; line-height: 1.35; }
   .card a.tree-link .chip { flex: 0 0 auto; }
   .card a.tree-link:hover { color: var(--clr-heading); background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 80%); }
   .card a.tree-link:focus-visible { outline: 2px solid color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 25%); outline-offset: 2px; }
   .card a.tree-link--active { color: var(--clr-lossless-accent--brightest); font-weight: 700; }
+
+  /* Child link specific styling */
+  .tree-link--child {
+    font-size: 0.9rem;
+    padding: 0.15rem 0.25rem 0.15rem 0.45rem !important;
+    margin-left: 0.5rem;
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 95%);
+    border: none !important;
+    align-items: center !important;
+  }
+  
+  .tree-link--child:hover {
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), transparent 90%);
+  }
 
   /* Variant B: bracket accent around active cluster */
   .active-cluster { position: relative; padding-left: 0.25rem; }
@@ -281,7 +361,21 @@ const processedSteps = steps;
 
 
   /* Chips */
-  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; height: 1.25rem; padding: 0 0.3rem; font-size: 0.72rem; line-height: 1; color: var(--clr-heading); background: var(--clr-lossless-primary-glass); border: 1px solid var(--clr-lossless-ui-btn-border); border-radius: 0.6rem; }
+  .chip { 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    min-width: 1.5rem; 
+    height: 1.25rem; 
+    padding: 0 0.3rem; 
+    font-size: 0.72rem; 
+    line-height: 1; 
+    color: var(--clr-heading); 
+    background: var(--clr-lossless-primary-glass); 
+    border: 1px solid var(--clr-lossless-ui-btn-border); 
+    border-radius: 0.6rem; 
+    flex-shrink: 0;
+  }
   .chip--sm { min-width: 1.2rem; height: 1.05rem; font-size: 0.68rem; border-radius: 0.5rem; opacity: 0.95; }
   
   .chip--orientation {
@@ -291,6 +385,20 @@ const processedSteps = steps;
     );
     border-color: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 70%);
     font-size: 0.9rem;
+  }
+  
+  .chip--child {
+    min-width: 1.2rem;
+    height: 1.1rem;
+    font-size: 0.65rem;
+    background: color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%);
+    border: none;
+    color: var(--clr-body);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
   }
 
   /* Navigation Help */

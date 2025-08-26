@@ -3,6 +3,10 @@ import { sanitizeMermaidCode } from '../../utils/shikiHighlighter.js';
 import ExpandIcon from '@assets/Icons/arrows-maximize.svg';
 import CollapseIcon from '@assets/Icons/arrows-minimize.svg';
 
+interface Props {
+  code: string;
+}
+
 const { code } = Astro.props;
 const sanitizedCode = sanitizeMermaidCode(code);
 const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
@@ -61,14 +65,12 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   background: transparent;
   box-sizing: border-box;
   margin: 2rem 0;
-  /* Debug: Add a subtle border to see the container */
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .mermaid-chart-shell {
   position: relative;
-  min-width: 760px; /* Approx 6% wider than typical prose */
-  width: auto;
-  max-width: 900px; /* Slightly larger than min-width for wider diagrams */
+  min-width: 0; /* Allow shrinking to fit container */
+  width: 100%;
+  max-width: 85ch; /* Match article prose max-width */
   margin: 1.25rem 0;
   overflow-x: auto;
   background: var(--bastille, #19141D);
@@ -78,7 +80,6 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   margin: 0 auto;
   display: block;
   padding: 1rem;
-  /* Debug: Ensure visibility */
   min-height: 200px;
 }
 .mermaid {
@@ -87,13 +88,11 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
-  /* Debug: Ensure SVG is visible */
   display: block !important;
   width: 100% !important;
   height: auto !important;
 }
 
-/* Debug: Ensure Mermaid SVG elements are visible */
 .mermaid svg {
   display: block !important;
   width: 100% !important;
@@ -169,13 +168,31 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   flex-grow: 1;
   overflow: auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Start from top instead of center */
   justify-content: center;
+  padding: 1.5rem; /* Slightly more padding for breathing room */
+  padding-top: 0.5rem; /* Small top padding */
+  min-height: 0; /* Allow container to shrink */
+  position: relative; /* Ensure proper positioning */
 }
 
 .mermaid-modal-chart-container .mermaid {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: flex;
+  align-items: flex-start; /* Start from top */
+  justify-content: center;
+  min-height: 0; /* Allow container to shrink */
+}
+
+.mermaid-modal-chart-container .mermaid svg {
+  max-width: 100%; /* Leave some margin on sides */
+  max-height: 200vh; /* Leave some margin top/bottom */
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  position: relative; /* Ensure proper positioning */
 }
 
 .mermaid-modal-close-btn {
@@ -220,7 +237,7 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   }
 
   .mermaid-chart-shell {
-    min-width: auto;
+    min-width: 0;
     max-width: 100%;
     width: 100%;
     padding: 0.5rem;
@@ -229,6 +246,24 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
   .mermaid {
     width: 100% !important;
     overflow-x: auto;
+  }
+
+  .mermaid-modal-content {
+    width: 95vw;
+    height: 95vh;
+    padding: 3rem 1rem 1rem 1rem;
+  }
+
+  .mermaid-modal-chart-container {
+    padding: 1rem;
+    padding-top: 0.25rem; /* Small top padding on mobile */
+  }
+}
+
+/* Ensure charts don't get too wide on large screens */
+@media (min-width: 1200px) {
+  .mermaid-chart-shell {
+    max-width: 85ch; /* Keep consistent with article prose width */
   }
 }
 
@@ -267,6 +302,13 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
       clusterBkg: clusterBkg,
       lineColor: lineClr,
       fontFamily: fontFmly,
+      // Custom class colors that match our theme
+      decisionBkgColor: '#BF23F7', // Purple for decision nodes
+      decisionBorderColor: '#6fffd6',
+      processBkgColor: primaryNodeBg, // Dark background for process nodes
+      processBorderColor: '#6fffd6',
+      roleBkgColor: getCssVar('--clr-aquamarine', '#64d4a4'), // Aquamarine for role nodes
+      roleBorderColor: '#6fffd6',
       // Add more custom variables here as needed
     }
   };
@@ -309,6 +351,28 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
       console.warn('[MermaidChart] Mermaid library not available for re-render');
     }
   };
+
+  // Function to center SVG in modal
+  function centerModalSvg(modal) {
+    const svg = modal.querySelector('.mermaid svg');
+    if (svg) {
+      svg.style.maxWidth = '100%'; // Leave some margin on sides
+      svg.style.maxHeight = '200vh'; // Leave some margin top/bottom
+      svg.style.width = 'auto';
+      svg.style.height = 'auto';
+      svg.style.display = 'block';
+      svg.style.margin = '0 auto';
+      svg.style.position = 'relative';
+    }
+  }
+
+  // Handle window resize for modal centering
+  window.addEventListener('resize', () => {
+    const visibleModal = document.querySelector('.mermaid-modal[data-visible="true"]');
+    if (visibleModal) {
+      centerModalSvg(visibleModal);
+    }
+  });
 
   // Initialize renderMermaidCharts function immediately
   if (!window.renderMermaidCharts) {
@@ -358,6 +422,30 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
               // Now that modal is visible and raw code is in place, render the chart
               try {
                 window.mermaid.run({ nodes: [modalMermaidDiv] });
+                
+                // Ensure proper centering after rendering
+                setTimeout(() => {
+                  centerModalSvg(modal);
+                  
+                  // Scroll chart container to top to ensure chart is visible
+                  const chartContainer = modal.querySelector('.mermaid-modal-chart-container');
+                  if (chartContainer) {
+                    chartContainer.scrollTop = 0;
+                    // Force scroll to top after a brief delay to ensure content is rendered
+                    setTimeout(() => {
+                      chartContainer.scrollTop = 0;
+                    }, 100);
+                  }
+                  
+                  // Set up resize observer to keep chart centered
+                  const resizeObserver = new ResizeObserver(() => {
+                    centerModalSvg(modal);
+                  });
+                  resizeObserver.observe(modal);
+                  
+                  // Store observer for cleanup
+                  modal._resizeObserver = resizeObserver;
+                }, 50); // Small delay to ensure rendering is complete
               } catch (e) {
                 console.error('Error rendering Mermaid chart in modal:', e);
                 // Optionally, display a user-friendly error in modalMermaidDiv
@@ -389,6 +477,13 @@ const chartId = `mermaid-chart-${Math.random().toString(36).slice(2, 10)}`;
           setTimeout(() => {
             modal.hidden = true;
           }, 300); // Match CSS transition duration
+          
+          // Clean up resize observer
+          if (modal._resizeObserver) {
+            modal._resizeObserver.disconnect();
+            modal._resizeObserver = null;
+          }
+          
           document.body.style.overflow = ''; // Restore background scroll
           expandBtn.setAttribute('aria-expanded', 'false');
           if (previouslyFocusedElement) {

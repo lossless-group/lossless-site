@@ -97,7 +97,30 @@
           "href": "/projects/gallery/ace-it/docs-kit/living-specifications",
           "type": "sequential",
           "step": 2,
-          "contentPath": "ACE-It/Docs-Kit/Living-Specifications.md"
+          "contentPath": "ACE-It/Docs-Kit/Living-Specifications.md",
+          "children": [
+            {
+              "title": "Blueprints",
+              "href": "/projects/gallery/ace-it/docs-kit/blueprints",
+              "type": "child",
+              "step": 1,
+              "contentPath": "ACE-It/Docs-Kit/Blueprints.md"
+            },
+            {
+              "title": "Prompts",
+              "href": "/projects/gallery/ace-it/docs-kit/prompts",
+              "type": "child",
+              "step": 2,
+              "contentPath": "ACE-It/Docs-Kit/Prompts.md"
+            },
+            {
+              "title": "Reminders",
+              "href": "/projects/gallery/ace-it/docs-kit/reminders",
+              "type": "child",
+              "step": 3,
+              "contentPath": "ACE-It/Docs-Kit/Reminders.md"
+            }
+          ]
         },
         {
           "title": "Models & AI Integration",

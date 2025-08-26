@@ -25,6 +25,13 @@ export interface ProjectConfig {
     description?: string;
     step?: number;
     contentPath?: string;
+    children?: Array<{
+      title: string;
+      href: string;
+      type: 'child';
+      step?: number;
+      contentPath?: string;
+    }>;
   }>;
 }
 
@@ -77,6 +84,31 @@ export function generateStaticPaths() {
           projectId: project.id
         }
       });
+      
+      // Generate paths for child steps if they exist
+      if (step.children) {
+        step.children.forEach(child => {
+          let childSlugPath: string;
+          
+          if (child.href.startsWith('/projects/gallery/')) {
+            childSlugPath = child.href.replace('/projects/gallery/', '');
+          } else if (child.href.startsWith('/projects/')) {
+            childSlugPath = child.href.replace('/projects/', '');
+          } else {
+            childSlugPath = child.href;
+          }
+          
+          paths.push({
+            params: { slug: childSlugPath },
+            props: {
+              step: child,
+              demoSteps: project.demoSteps,
+              projectTitle: project.title,
+              projectId: project.id
+            }
+          });
+        });
+      }
     });
   });
 
@@ -107,6 +139,25 @@ export function findProjectBySlug(slug: string): { project: ProjectConfig; step:
       
       if (stepSlug === slug) {
         return { project, step };
+      }
+      
+      // Check child steps if they exist
+      if (step.children) {
+        for (const child of step.children) {
+          let childSlug: string;
+          
+          if (child.href.startsWith('/projects/gallery/')) {
+            childSlug = child.href.replace('/projects/gallery/', '');
+          } else if (child.href.startsWith('/projects/')) {
+            childSlug = child.href.replace('/projects/', '');
+          } else {
+            childSlug = child.href;
+          }
+          
+          if (childSlug === slug) {
+            return { project, step: child };
+          }
+        }
       }
     }
   }
