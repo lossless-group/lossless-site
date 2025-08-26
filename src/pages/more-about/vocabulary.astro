@@ -1,15 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
-import { processEntries } from '@utils/slugify';
+import { processEntries, getReferenceSlug, toProperCase } from '@utils/slugify';
 import Layout from '@layouts/Layout.astro';
 import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
 import SearchInput from '@components/reference/SearchInput.astro';
+import ReferenceNavRow from '@components/reference/ReferenceNavRow.astro';
 import { getWordCounts } from '@utils/collectionWordCount';
 
-// Type definition for vocabulary entry with required properties
-interface VocabularyEntry {
+// Type for the raw collection entry from getCollection
+interface RawVocabularyEntry {
   id: string;
-  slug: string;
   data: {
     title?: string;
     aliases?: string[];
@@ -17,66 +17,99 @@ interface VocabularyEntry {
   };
   body?: string;
   collection: string;
-  filePath?: string;
-  rendered?: any;
 }
 
-// Get entries from vocabulary collection
-const vocabularyEntries = await getCollection('vocabulary') as unknown as VocabularyEntry[];
+// Type for our processed vocabulary entries
+interface ProcessedVocabularyEntry {
+  id: string;
+  slug: string;
+  data: {
+    title: string;
+    aliases?: string[];
+    [key: string]: unknown;
+  };
+  collection: 'vocabulary';
+  originalFilename: string;
+  filePath: string;
+  body?: string;
+}
 
-// Process entries with proper typing
-const processedEntries = vocabularyEntries.map(entry => {
-  const processed = {
-    ...entry,
+// Helper function to convert filename to title case
+function filenameToTitle(filename: string): string {
+  return filename
+    .replace(/[-_]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+// Get entries from vocabulary collection and transform them
+const rawEntries = await getCollection('vocabulary') as RawVocabularyEntry[];
+
+// Process entries to ensure they have proper titles and slugs
+const processedEntries: ProcessedVocabularyEntry[] = rawEntries.map(entry => {
+  // Extract the base filename without extension
+  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
+  const baseFilename = filename.split('/').pop() || '';
+  
+  // Get the title from frontmatter or generate from filename
+  const title = entry.data.title || filenameToTitle(baseFilename);
+  
+  // Ensure aliases is always an array
+  const aliases = Array.isArray(entry.data.aliases) ? entry.data.aliases : [];
+  
+  return {
+    id: entry.id,
+    filePath: entry.id,
+    originalFilename: baseFilename,
+    slug: getReferenceSlug(entry.id),
+    collection: 'vocabulary',
     data: {
       ...entry.data,
-      title: entry.data?.title || entry.id,
+      title,
+      aliases
     },
-    originalFilename: entry.id,
-    slug: entry.slug || entry.id,
+    body: entry.body
   };
-  
-  return processed;
 });
 
-// Get word count for vocabulary
-const wordCounts = await getWordCounts(['vocabulary'] as const);
-const vocabularyWordCount = wordCounts.vocabulary;
+// Sort entries alphabetically by title
+const sortedEntries = [...processedEntries].sort((a, b) => 
+  a.data.title.localeCompare(b.data.title)
+);
 
-// Format word count for display
-const formatWordCount = (count: number): string => {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M+`;
-  } else if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K+`;
-  }
-  return count.toString();
-};
+// Filter out any entries without a title
+const validEntries = sortedEntries.filter(entry => entry.data.title);
+
+// Get word count for vocabulary and concepts
+const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
+const vocabularyWordCount = wordCounts.vocabulary;
+const conceptsWordCount = wordCounts.concepts;
+const totalWords = vocabularyWordCount + conceptsWordCount;
+
+// Use the valid entries for rendering
+const entriesToRender = validEntries;
 ---
 
 <Layout title="Vocabulary">
   <div class="container mx-auto py-8 px-4">
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-3xl font-bold">Vocabulary</h1>
-        <p class="text-gray-300">Terms and definitions used throughout our work.</p>
-      </div>
-      <span class="text-sm text-gray-500 dark:text-gray-400">
-        {vocabularyEntries.length} terms • {formatWordCount(vocabularyWordCount)} words
-      </span>
-    </div>
-    
-    <!-- Navigation tabs -->
-    <div class="flex gap-4 mb-8">
-      <a href="/more-about" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">All Reference</a>
-      <a href="/more-about/vocabulary" class="px-4 py-2 bg-blue-600 text-white rounded-md">Vocabulary</a>
-      <a href="/more-about/concepts" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md">Concepts</a>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2">Vocabulary</h1>
+      <p class="text-gray-300 mb-6">Terms and definitions used throughout our work.</p>
+      
+      <ReferenceNavRow 
+        vocabularyCount={entriesToRender.length} 
+        conceptsCount={0}
+        vocabularyWordCount={vocabularyWordCount}
+        conceptsWordCount={0}
+        currentPage="vocabulary"
+      />
     </div>
 
     <SearchInput />
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {processedEntries.map(entry => (
+      {entriesToRender.map(entry => (
         <div data-searchable="true">
           <VocabularyPreviewCard entry={entry} />
         </div>

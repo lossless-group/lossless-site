@@ -121,7 +121,9 @@ const formatWordCount = (count: number): string => {
     <ReferenceNavRow 
       vocabularyCount={processedVocab.length}
       conceptsCount={processedConcepts.length}
-      totalWords={wordCounts.vocabulary + wordCounts.concepts}
+      vocabularyWordCount={wordCounts.vocabulary}
+      conceptsWordCount={wordCounts.concepts}
+      currentPage="all"
     />
 
     <SearchInput />

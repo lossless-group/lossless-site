@@ -14,10 +14,33 @@
 interface Props {
   vocabularyCount: number;
   conceptsCount: number;
-  totalWords: number;
+  vocabularyWordCount: number;
+  conceptsWordCount: number;
+  currentPage?: 'all' | 'vocabulary' | 'concepts';
 }
 
-const { vocabularyCount, conceptsCount, totalWords } = Astro.props;
+const { 
+  vocabularyCount, 
+  conceptsCount, 
+  vocabularyWordCount,
+  conceptsWordCount,
+  currentPage = 'all'
+} = Astro.props;
+
+// Calculate total words for the current page
+const currentPageWordCount = currentPage === 'all' 
+  ? vocabularyWordCount + conceptsWordCount 
+  : currentPage === 'vocabulary' 
+    ? vocabularyWordCount 
+    : conceptsWordCount;
+
+const getButtonClass = (page: string) => {
+  const baseClass = 'px-4 py-2 rounded-md flex items-center gap-2 transition-colors';
+  const activeClass = 'bg-blue-600 text-white hover:bg-blue-700';
+  const inactiveClass = 'bg-gray-700 text-white hover:bg-gray-600';
+  
+  return `${baseClass} ${currentPage === page ? activeClass : inactiveClass}`;
+};
 
 // Format large numbers with K/M suffixes
 const formatCount = (count: number): string => {
@@ -34,30 +57,30 @@ const formatCount = (count: number): string => {
   <div class="flex gap-4">
     <a 
       href="/more-about" 
-      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+      class={getButtonClass('all')}
     >
       All Reference
     </a>
     <a 
       href="/more-about/vocabulary" 
-      class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2 transition-colors"
+      class={getButtonClass('vocabulary')}
     >
       Vocabulary
-      <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-opacity-80">
         {vocabularyCount}
       </span>
     </a>
     <a 
       href="/more-about/concepts" 
-      class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center gap-2 transition-colors"
+      class={getButtonClass('concepts')}
     >
       Concepts
-      <span class="bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-opacity-80">
         {conceptsCount}
       </span>
     </a>
   </div>
   <div class="text-sm text-gray-400 ml-2">
-    Total: {formatCount(totalWords)} words
+    Words: {formatCount(currentPageWordCount)}
   </div>
 </div>
