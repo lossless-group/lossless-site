@@ -27,7 +27,7 @@ const projects = Object.entries((projectGallery as unknown as GalleryData).proje
   id: project.id || id,
   title: project.title,
   subtitle: project.subtitle,
-  href: project.href || `/projects/gallery/${project.id || id}`,
+  href: project.href || `/projects/${project.id || id}`,
   hasSidebar: project.hasSidebar || false,
   ...(project.canvas && { canvas: project.canvas }),
   useCases: project.useCases || [],
@@ -47,7 +47,7 @@ const sortedProjects = [...projects].sort((a, b) =>
     <div class="dropdown-grid">
       {sortedProjects.map((project, index) => (
         <a 
-          href={project.href || `/projects/gallery/${project.id}`} 
+          href={project.href || `/404`} 
           class="dropdown-item"
           data-project={project.id}
         >

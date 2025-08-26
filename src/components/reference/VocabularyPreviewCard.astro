@@ -1,13 +1,17 @@
 ---
+import WordCountDisplay from '@components/basics/WordCountDisplay.astro';
+import { countWordsInMarkdown } from '@utils/fileWordCount';
+
 /**
  * VocabularyPreviewCard.astro
  * 
  * This component renders a preview card for a vocabulary term from the vocabulary collection.
- * It displays the term title and aliases (if any) in a consistent card format.
+ * It displays the term title, aliases (if any), and word count in a consistent card format.
  * 
  * @component
  * @param {Object} entry - The vocabulary entry object from the content collection
  * @param {string} entry.id - The ID of the vocabulary entry (filename)
+ * @param {string} entry.body - The markdown content of the vocabulary term
  * @param {Object} entry.data - The frontmatter data of the vocabulary entry
  * @param {string} entry.data.title - The title of the vocabulary term
  * @param {string[]} entry.data.aliases - Optional array of alternative names for the term
@@ -20,10 +24,12 @@ interface Props {
   entry: {
     id: string;
     slug: string; // Add slug as required property for correct routing
+    body?: string;
     data: {
       title: string;
       aliases?: string[];
       slug?: string;
+      at_semantic_version?: string; // Semantic version for the content
     };
     originalFilename: string; // Single source of truth for original casing
   };
@@ -31,6 +37,9 @@ interface Props {
 
 // Destructure the entry from props
 const { entry } = Astro.props;
+
+// Calculate word count for this vocabulary term
+const wordCount = entry.body ? countWordsInMarkdown(entry.body) : 0;
 
 // ---
 // Always use entry.slug for the URL, as provided by ReferenceGrid and index.astro
@@ -40,26 +49,33 @@ const url = `/more-about/${entry.slug}`;
 // ---
 ---
 
-<div class="vocabulary-card">
-  <!--
-    Fallback logic for title:
-      1. entry.data.title (frontmatter title)
-      2. entry.originalFilename (original file casing, single source of truth)
-      3. entry.data.aliases[0] (first alias if available)
-      4. entry.slug (as absolute last resort)
-    This guarantees no blank cards, ever.
-  -->
-  <h3 class="vocabulary-card__title">
-    <a href={url} class="vocabulary-card__link">
-      { entry.data.title }
-    </a>
-  </h3>
+<div class="vocabulary-card group">
+  <div class="flex justify-between items-start">
+    <h3 class="vocabulary-card__title">
+      <a href={url} class="vocabulary-card__link">
+        { entry.data.title }
+      </a>
+    </h3>
+    <div class="flex flex-col items-end">
+      {entry.data.at_semantic_version && (
+        <div class="text-xs text-gray-500">
+          v{entry.data.at_semantic_version}
+        </div>
+      )}
+      {wordCount > 400 && (
+        <WordCountDisplay 
+          count={wordCount} 
+          className="text-gray-500"
+          showIcon={false}
+        />
+      )}
+    </div>
+  </div>
   {entry.data.aliases && entry.data.aliases.length > 0 && (
     <p class="vocabulary-card__aliases">
       Also known as: {entry.data.aliases.join(', ')}
     </p>
   )}
-
 </div>
 
 <style>

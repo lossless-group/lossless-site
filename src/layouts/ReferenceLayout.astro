@@ -1,0 +1,87 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import SearchInput from '@components/reference/SearchInput.astro';
+import ReferenceNavRow from '@components/reference/ReferenceNavRow.astro';
+import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
+import { processEntries } from '@utils/slugify';
+import { getWordCounts } from '@utils/collectionWordCount';
+
+// Props interface for the layout
+interface Props {
+  title: string;
+  description: string;
+  currentPage: 'all' | 'vocabulary' | 'concepts';
+  showSearch?: boolean;
+  showGrid?: boolean;
+  items?: any[];
+  sectionTitle?: string;
+  sectionDescription?: string;
+}
+
+const { 
+  title, 
+  description, 
+  currentPage, 
+  showSearch = true,
+  showGrid = false,
+  items = [],
+  sectionTitle,
+  sectionDescription
+} = Astro.props;
+
+// Get all collections and process them using the centralized function
+const vocabularyEntries = await getCollection('vocabulary');
+const conceptsEntries = await getCollection('concepts');
+
+// Process entries using the centralized processEntries function
+const processedVocab = processEntries(vocabularyEntries);
+const processedConcepts = processEntries(conceptsEntries);
+
+// Get word counts for each collection
+const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
+
+// Format word counts for display
+const formatWordCount = (count: number): string => {
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M+`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K+`;
+  return count.toString();
+};
+---
+
+<Layout title={title}>
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-6">{title}</h1>
+    <p class="text-lg mb-8">{description}</p>
+
+    <ReferenceNavRow 
+      vocabularyCount={processedVocab.length}
+      conceptsCount={processedConcepts.length}
+      vocabularyWordCount={wordCounts.vocabulary}
+      conceptsWordCount={wordCounts.concepts}
+      currentPage={currentPage}
+    />
+
+    {showSearch && <SearchInput />}
+
+    {showGrid && items.length > 0 && (
+      <section>
+        {sectionTitle && (
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">{sectionTitle}</h2>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              {items.length} items • {formatWordCount(items.reduce((total, item) => total + (item.wordCount || 0), 0))} words
+            </span>
+          </div>
+        )}
+        {sectionDescription && <p class="mb-6">{sectionDescription}</p>}
+        
+        <div data-searchable="true">
+          <ReferenceGrid items={items} />
+        </div>
+      </section>
+    )}
+
+    <slot />
+  </div>
+</Layout>

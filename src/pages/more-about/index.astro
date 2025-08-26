@@ -1,106 +1,16 @@
 ---
+import ReferenceLayout from '@layouts/ReferenceLayout.astro';
 import { getCollection } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
-import Layout from '@layouts/Layout.astro';
-import SearchInput from '@components/reference/SearchInput.astro';
-import ReferenceNavRow from '@components/reference/ReferenceNavRow.astro';
-import ReferenceGrid from '@components/reference/ReferenceGrid.astro';
-import { processEntries, toProperCase, getReferenceSlug } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
 import { getWordCounts } from '@utils/collectionWordCount';
 
-// Define the expected shape of our entries
-interface VocabularyEntry extends CollectionEntry<'vocabulary'> {
-  data: {
-    title?: string;
-    aliases?: string[];
-    [key: string]: unknown;
-  };
-}
+// Get collections and process them using the centralized function
+const vocabularyEntries = await getCollection('vocabulary');
+const conceptsEntries = await getCollection('concepts');
 
-interface ConceptEntry extends CollectionEntry<'concepts'> {
-  data: {
-    title?: string;
-    aliases?: string[];
-    [key: string]: unknown;
-  };
-}
-
-// Helper function to convert filename to title case
-function filenameToTitle(filename: string): string {
-  return filename
-    .replace(/[-_]/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
-// Get collections and transform to match expected structure
-const vocabularyEntries = (await getCollection('vocabulary') as unknown as VocabularyEntry[]).map(entry => {
-  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
-  const baseFilename = filename.split('/').pop() || '';
-  const title = (entry.data.title as string | undefined) || filenameToTitle(baseFilename);
-  
-  return {
-    ...entry,
-    filePath: entry.id,
-    originalFilename: baseFilename,
-    collection: 'vocabulary' as const,
-    data: {
-      ...entry.data,
-      title
-    }
-  };
-});
-
-const conceptsEntries = (await getCollection('concepts') as unknown as ConceptEntry[]).map(entry => {
-  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
-  const baseFilename = filename.split('/').pop() || '';
-  const title = (entry.data.title as string | undefined) || filenameToTitle(baseFilename);
-  
-  return {
-    ...entry,
-    filePath: entry.id,
-    originalFilename: baseFilename,
-    collection: 'concepts' as const,
-    data: {
-      ...entry.data,
-      title
-    }
-  };
-});
-
-// Process entries and ensure they match ReferenceItem type
-const processedVocab = processEntries(vocabularyEntries).map(entry => {
-  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
-  const baseFilename = filename.split('/').pop() || '';
-  
-  return {
-    ...entry,
-    slug: entry.slug || getReferenceSlug(entry.id),
-    collection: 'vocabulary' as const,
-    originalFilename: baseFilename,
-    data: {
-      ...entry.data,
-      title: entry.data.title || filenameToTitle(baseFilename)
-    }
-  };
-});
-
-const processedConcepts = processEntries(conceptsEntries).map(entry => {
-  const filename = entry.id.replace(/\.(mdx?|astro)$/, '');
-  const baseFilename = filename.split('/').pop() || '';
-  
-  return {
-    ...entry,
-    slug: entry.slug || getReferenceSlug(entry.id),
-    collection: 'concepts' as const,
-    originalFilename: baseFilename,
-    data: {
-      ...entry.data,
-      title: entry.data.title || filenameToTitle(baseFilename)
-    }
-  };
-});
+// Process entries using the centralized processEntries function
+const processedVocab = processEntries(vocabularyEntries);
+const processedConcepts = processEntries(conceptsEntries);
 
 // Get word counts for each collection
 const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
@@ -113,50 +23,141 @@ const formatWordCount = (count: number): string => {
 };
 ---
 
-<Layout title="Reference - Vocabulary & Concepts">
-  <div class="container mx-auto py-8 px-4">
-    <h1 class="text-3xl font-bold mb-6">Reference Library</h1>
-    <p class="text-lg mb-8">Browse our collection of vocabulary terms and conceptual frameworks.</p>
+<ReferenceLayout 
+  title="Reference Library"
+  description="Browse our collection of vocabulary terms and conceptual frameworks."
+  currentPage="all"
+  showSearch={true}
+  showGrid={false}
+>
+  <section class="mb-12">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Vocabulary</h2>
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {processedVocab.length} terms • {formatWordCount(wordCounts.vocabulary)} words
+      </span>
+    </div>
+    <p class="mb-6">Terms and definitions used throughout our work.</p>
 
-    <ReferenceNavRow 
-      vocabularyCount={processedVocab.length}
-      conceptsCount={processedConcepts.length}
-      vocabularyWordCount={wordCounts.vocabulary}
-      conceptsWordCount={wordCounts.concepts}
-      currentPage="all"
-    />
-
-    <SearchInput />
-
-    <section class="mb-12">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold">Vocabulary</h2>
-        <span class="text-sm text-gray-500 dark:text-gray-400">
-          {processedVocab.length} terms • {formatWordCount(wordCounts.vocabulary)} words
-        </span>
+    <div data-searchable="true">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {processedVocab.map(entry => (
+          <div data-searchable="true">
+            <a href={`/more-about/${entry.slug}`} class="block">
+              <div class="vocabulary-card group">
+                <h3 class="vocabulary-card__title">
+                  <span class="vocabulary-card__link">{entry.data.title}</span>
+                </h3>
+                {entry.data.aliases && entry.data.aliases.length > 0 && (
+                  <p class="vocabulary-card__aliases">
+                    Also known as: {entry.data.aliases.join(', ')}
+                  </p>
+                )}
+              </div>
+            </a>
+          </div>
+        ))}
       </div>
-      <p class="mb-6">Terms and definitions used throughout our work.</p>
+    </div>
+  </section>
 
-      <div data-searchable="true">
-        <ReferenceGrid items={processedVocab} />
+  <div class="border-t border-gray-200 dark:border-gray-700 my-8"></div>
+
+  <section>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Concepts</h2>
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {processedConcepts.length} concepts • {formatWordCount(wordCounts.concepts)} words
+      </span>
+    </div>
+    <p class="mb-6">Important ideas and frameworks we use in our work.</p>
+
+    <div data-searchable="true">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {processedConcepts.map(entry => (
+          <div data-searchable="true">
+            <a href={`/more-about/${entry.slug}`} class="block">
+              <div class="concept-card group">
+                <h3 class="concept-card__title">
+                  <span class="concept-card__link">{entry.data.title}</span>
+                </h3>
+                {entry.data.description && (
+                  <p class="mt-2 text-gray-300 text-sm">
+                    {entry.data.description}
+                  </p>
+                )}
+              </div>
+            </a>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
+  </section>
+</ReferenceLayout>
 
-    <div class="border-t border-gray-200 dark:border-gray-700 my-8"></div>
+<style>
+  /* Vocabulary card styles */
+  .vocabulary-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease-in-out, 
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                transform 0.2s ease-in-out;
+  }
 
-    <section>
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold">Concepts</h2>
-        <span class="text-sm text-gray-500 dark:text-gray-400">
-          {processedConcepts.length} concepts • {formatWordCount(wordCounts.concepts)} words
-        </span>
-      </div>
-      <p class="mb-6">Important ideas and frameworks we use in our work.</p>
+  .vocabulary-card__title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
 
-      <div data-searchable="true">
-        <ReferenceGrid items={processedConcepts} />
-      </div>
-    </section>
+  .vocabulary-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
 
-  </div>
-</Layout>
+  .vocabulary-card:hover {
+    background-color: #3a3a45;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .vocabulary-card__aliases {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--white--pure--40p, hsla(0, 0%, 100%, .4));
+    margin-bottom: 0.5rem;
+  }
+
+  /* Concept card styles */
+  .concept-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease-in-out, 
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                transform 0.2s ease-in-out;
+  }
+
+  .concept-card__title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+
+  .concept-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .concept-card:hover {
+    background-color: #2d2730;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-2px) scale(1.05);
+  }
+</style>
