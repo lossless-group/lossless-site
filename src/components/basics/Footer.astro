@@ -17,16 +17,13 @@
  *           → Final HTML output
  */
 
-import { readFileSync } from 'fs';
-import path from 'path';
 import ThinGradientBleedSeparator from './separators/ThinGradientBleedSeparator.astro';
 import { getImageForPath } from '../../utils/imageMapping';
 
-// Helper to resolve JSON file paths
-const siteRoot = import.meta.env.SITE ? new URL(import.meta.env.SITE).pathname : '';
-const footerLinksPath = path.resolve(siteRoot, 'src/content/basics/footerLinks.json');
-const socialIconsPath = path.resolve(siteRoot, 'src/content/basics/socialIcons.json');
-const orgLocationsPath = path.resolve(siteRoot, 'src/content/basics/orgLocations.json');
+// Import JSON files directly using ES6 imports
+import footerLinksData from '../../content/basics/footerLinks.json';
+import socialIconsData from '../../content/basics/socialIcons.json';
+import orgLocationsData from '../../content/basics/orgLocations.json';
 
 // ===============================
 // TypeScript interface for Footer Links JSON
@@ -49,17 +46,10 @@ interface FooterLinks {
   [header: string]: Array<{ [label: string]: string }>;
 }
 
-// Load and parse JSON data
-let footerLinks: FooterLinks = {};
-let socialIcons = [];
-let orgLocations = { company_name: '', locations: [] };
-try {
-  footerLinks = JSON.parse(readFileSync(footerLinksPath, 'utf-8'));
-  socialIcons = JSON.parse(readFileSync(socialIconsPath, 'utf-8'));
-  orgLocations = JSON.parse(readFileSync(orgLocationsPath, 'utf-8'));
-} catch (err) {
-  console.error('Error loading footer data:', err);
-}
+// Use imported JSON data directly
+const footerLinks: FooterLinks = footerLinksData;
+const socialIcons = socialIconsData;
+const orgLocations = orgLocationsData;
 
 // ===============================
 // No grouping needed: orgLocations.locations will be rendered flat in grid
