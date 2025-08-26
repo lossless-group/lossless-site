@@ -62,6 +62,9 @@
       ],
       "@generated/*": [
         "./src/generated-content/*"
+      ],
+      "@config/*": [
+        "./config/*"
       ]
     },
     "types": ["astro/client"],

@@ -28,46 +28,60 @@ const toHero = items['toHero'];
     <div class="dropdown-header">Lost in Public</div>
     <div class="dropdown-grid">
       <!-- First column - Vibe with Us (spans 2 rows) -->
-      <a href={vibeWithUs.href} class="dropdown-item large-item">
-        <div class="item-title">{vibeWithUs.title}</div>
-        <div class="item-description">{vibeWithUs.description}</div>
-      </a>
+      {vibeWithUs && (
+        <a href={vibeWithUs.href} class="dropdown-item large-item">
+          <div class="item-title">{vibeWithUs.title}</div>
+          <div class="item-description">{vibeWithUs.description}</div>
+        </a>
+      )}
       
       <!-- First row, second column - Up and Running -->
-      <a href={upAndRunning.href} class="dropdown-item">
-        <div class="item-title">{upAndRunning.title}</div>
-        <div class="item-description">{upAndRunning.description}</div>
-      </a>
+      {upAndRunning && (
+        <a href={upAndRunning.href} class="dropdown-item">
+          <div class="item-title">{upAndRunning.title}</div>
+          <div class="item-description">{upAndRunning.description}</div>
+        </a>
+      )}
       
       <!-- First row, third column - Issue Resolution -->
-      <a href={issueResolution.href} class="dropdown-item">
-        <div class="item-title">{issueResolution.title}</div>
-        <div class="item-description">{issueResolution.description}</div>
-      </a>
+      {issueResolution && (
+        <a href={issueResolution.href} class="dropdown-item">
+          <div class="item-title">{issueResolution.title}</div>
+          <div class="item-description">{issueResolution.description}</div>
+        </a>
+      )}
       
       <!-- First row, fourth column - Talks -->
-      <a href={talks.href} class="dropdown-item">
-        <div class="item-title">{talks.title}</div>
-        <div class="item-description">{talks.description}</div>
-      </a>
+      {talks && (
+        <a href={talks.href} class="dropdown-item">
+          <div class="item-title">{talks.title}</div>
+          <div class="item-description">{talks.description}</div>
+        </a>
+      )}
       
       <!-- Second row, second column - Market Maps -->
-      <a href={marketMaps.href} class="dropdown-item">
-        <div class="item-title">{marketMaps.title}</div>
-        <div class="item-description">{marketMaps.description}</div>
-      </a>
+      {marketMaps && (
+        <a href={marketMaps.href} class="dropdown-item">
+          <div class="item-title">{marketMaps.title}</div>
+          <div class="item-description">{marketMaps.description}</div>
+        </a>
+      )}
       
       <!-- Second row, third column - Explorations -->
-      <a href={explorations.href} class="dropdown-item">
-        <div class="item-title">{explorations.title}</div>
-        <div class="item-description">{explorations.description}</div>
-      </a>
+      {explorations && (
+        <a href={explorations.href} class="dropdown-item">
+          <div class="item-title">{explorations.title}</div>
+          <div class="item-description">{explorations.description}</div>
+        </a>
+      )}
       
       <!-- Second row, fourth column - Zero to Hero -->
-      <a href={toHero.href} class="dropdown-item">
-        <div class="item-title">{toHero.title}</div>
-        <div class="item-description">{toHero.description}</div>
-      </a>
+      {toHero && (
+        <a href={toHero.href} class="dropdown-item">
+          <div class="item-title">{toHero.title}</div>
+          <div class="item-description">{toHero.description}</div>
+        </a>
+      )}
     </div>
   </div>
 </div>

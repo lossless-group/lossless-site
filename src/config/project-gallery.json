@@ -2,8 +2,8 @@
   "projects": {
     "augment-it": {
       "id": "augment-it",
-      "title": "Augment-It",
-      "subtitle": "Augment any data by importing records or connecting to data sources.",
+      "title": "Augment It",
+      "subtitle": "Augment any data with AI by importing records or connecting to data sources.",
       "hasSidebar": true,
       "canvas": "/projects/gallery/augment-it/specs/Augment-It.canvas",
       "useCases": [
@@ -63,18 +63,18 @@
     },
     "ace-it": {
       "id": "ace-it",
-      "title": "ACE-It",
+      "title": "ACE It",
       "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
       "hasSidebar": true,
       "canvas": "/projects/gallery/ace-it/ACE-It-Canvas.canvas",
       "useCases": [
         {
-          "title": "AI Co-Development",
+          "title": "AI Co-Development Playbook",
           "description": "Practical playbook for building real products with AI as a co-developer."
         },
         {
-          "title": "Battle-Tested Process",
-          "description": "Accelerated Context Engineering (ACE) for seamless AI integration."
+          "title": "Battle-Tested Kit",
+          "description": "Accelerate Context Engineering (ACE) for seamless AI workflow success."
         }
       ],
       "demoSteps": [
@@ -117,14 +117,14 @@
     },
     "astro-turf": {
       "id": "astro-turf",
-      "title": "Astro-Turf",
-      "subtitle": "Advanced Astro framework components and patterns.",
+      "title": "Astro Knots",
+      "subtitle": "Advanced Astro, TailwindCSS, and theme framework setup, basic components and patterns.",
       "href": "/projects/astro-turf",
       "hasSidebar": false,
       "useCases": [
         {
-          "title": "Component Library",
-          "description": "Reusable Astro components for modern web development."
+          "title": "Killer Setup",
+          "description": "Well architected theme setup and starter kit. Reusable Astro components for modern web development."
         },
         {
           "title": "Framework Patterns",
@@ -135,14 +135,14 @@
     },
     "content-farm": {
       "id": "content-farm",
-      "title": "Content-Farm",
+      "title": "Content Farm",
       "subtitle": "Automated content generation and management system.",
       "href": "/projects/content-farm",
       "hasSidebar": false,
       "useCases": [
         {
           "title": "Content Automation",
-          "description": "Streamlined workflows for content creation and publishing."
+          "description": "Streamlined workflows for content creation and publishing with Extended Markdown as a first-class citizen."
         },
         {
           "title": "Publishing Pipeline",
@@ -153,36 +153,36 @@
     },
     "emergent-innovation": {
       "id": "emergent-innovation",
-      "title": "Emergent-Innovation",
+      "title": "Emergent Innovation",
       "subtitle": "Open source innovation projects and collaborative initiatives.",
       "href": "/projects/emergent-innovation",
       "hasSidebar": false,
       "useCases": [
         {
-          "title": "Open Source Projects",
+          "title": "Examples and Case Studies",
           "description": "Community-driven innovation in healthcare and technology."
         },
         {
-          "title": "Standards Development",
-          "description": "Contributing to industry standards and best practices."
+          "title": "Best Practices & Playbooks",
+          "description": "Contribute to or get inspired by our best practices."
         }
       ],
       "demoSteps": []
     },
     "water-template-ce": {
       "id": "water-template-ce",
-      "title": "Water-Template-CE",
-      "subtitle": "Community Edition water management and template system.",
+      "title": "Water Themed Site",
+      "subtitle": "A beautiful, modern, and responsive water-themed website.",
       "href": "/projects/water-template-ce",
       "hasSidebar": false,
       "useCases": [
         {
-          "title": "Template Engine",
-          "description": "Flexible templating system for water management applications."
+          "title": "Storytelling with Data",
+          "description": "A website that puts data and content to work for fundraising and business development."
         },
         {
-          "title": "Community Tools",
-          "description": "Open source tools for water resource management."
+          "title": "Built-in Design System Management",
+          "description": "Iteratively developmed Design System within the website itself."
         }
       ],
       "demoSteps": []

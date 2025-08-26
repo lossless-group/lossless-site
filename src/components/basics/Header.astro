@@ -3,6 +3,9 @@ import "@styles/global.css";
 import ThinGradientBleedSeparator from "@basics/separators/ThinGradientBleedSeparator.astro";
 import JumboDropdown from "./JumboDropdown.astro";
 import GetLostDropdown from "./GetLostDropdown.astro";
+import ProjectsDropdown from "./ProjectsDropdown.astro";
+import type { ProjectConfig } from '../../utils/projectGalleryUtils';
+import projectGallery from '../../config/project-gallery.json';
 
 // Define navigation links (nested items become dropdowns)
 const navLinks = [
@@ -21,7 +24,7 @@ const navLinks = [
       upAndRunning: {
         href: "/learn-with/up-and-running",
         title: "Up and Running",
-        description: "Get started with Lossless and explore our platform."
+        description: "Step by step instructions to get up and running with Lossless toolkit libraries."
       },
       issueResolution: {
         href: "/learn-with/issue-resolution",
@@ -49,6 +52,10 @@ const navLinks = [
         description: "Explore the landscape with our comprehensive market maps."
       }
     }
+  },
+  {
+    label: "Projects",
+    isProjectsDropdown: true
   },
   {
     label: "Changelog",
@@ -90,8 +97,14 @@ const socialIcons = [
     <!-- Desktop Nav -->
     <nav class="site-navigation desktop-only">
       {navLinks.map(link => {
-        if (link.isCustomDropdown) {
-          return <GetLostDropdown label={link.label} items={link.items} />;
+        if (link.isProjectsDropdown) {
+          return <ProjectsDropdown label={link.label} />;
+        } else if (link.isCustomDropdown) {
+          // Ensure we're passing an object to GetLostDropdown
+          const dropdownItems = link.items && !Array.isArray(link.items) 
+            ? link.items 
+            : {};
+          return <GetLostDropdown label={link.label} items={dropdownItems} />;
         } else if (link.items) {
           // Convert items to array for JumboDropdown if needed
           const itemsArray = Array.isArray(link.items) 
@@ -123,7 +136,31 @@ const socialIcons = [
   <div class="mobile-menu" id="mobile-menu">
     <nav class="mobile-navigation">
       {navLinks.map((link, index) => {
-        if (link.items) {
+        if (link.isProjectsDropdown) {
+          // For mobile, we'll show a simple dropdown with project names
+          const projects = (Object.values(projectGallery.projects) as ProjectConfig[]).sort((a, b) => 
+            a.title.localeCompare(b.title)
+          );
+          
+          return (
+            <div class="mobile-nav-section">
+              <div class="mobile-nav-header">{link.label}</div>
+              {projects.map((project, projectIndex) => {
+                const projectHref = project.href || `/projects/gallery/${project.id}`;
+                return (
+                  <a 
+                    href={projectHref}
+                    class="mobile-nav-item"
+                    data-key={`project-${projectIndex}`}
+                  >
+                    <div class="mobile-nav-item-title">{project.title}</div>
+                    <div class="mobile-nav-item-description">{project.subtitle}</div>
+                  </a>
+                );
+              })}
+            </div>
+          );
+        } else if (link.items) {
           // Convert items to array for mobile menu
           const itemsArray = Array.isArray(link.items) 
             ? link.items 
