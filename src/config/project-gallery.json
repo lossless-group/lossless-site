@@ -63,7 +63,7 @@
     },
     "ace-it": {
       "id": "ace-it",
-      "title": "ACE It",
+      "title": "Context Vigilance",
       "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
       "hasSidebar": true,
       "canvas": "/projects/gallery/ace-it/ACE-It-Canvas.canvas",
@@ -74,15 +74,15 @@
         },
         {
           "title": "Battle-Tested Kit",
-          "description": "Accelerate Context Engineering (ACE) for seamless AI workflow success."
+          "description": "Accelerate Context Engineering with our Context Vigilance kit for seamless AI workflow success."
         }
       ],
       "demoSteps": [
         {
-          "title": "ACE-It: AI-Augmented Development",
+          "title": "Context Vigilance: AI-Augmented Development",
           "href": "/projects/gallery/ace-it/index",
           "type": "orientation",
-          "description": "Overview and introduction to the ACE-It workflow",
+          "description": "Overview and introduction to the Context Vigilance workflow",
           "contentPath": "ACE-It/Index.mdx"
         },
         {
