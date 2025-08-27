@@ -55,8 +55,8 @@
     rx="12"
     ry="12"
     fill="var(--clr-canvas-group-bg, #1a1a1a)"
-    stroke="var(--clr-canvas-group-border, #333333)"
-    stroke-width="2"
+    stroke="var(--clr-canvas-group-border, #666666)"
+    stroke-width="2.5"
     opacity="0.2"
   />
   
@@ -68,7 +68,7 @@
       y="24"
       fill="var(--clr-canvas-group-text, #e2e8f0)"
       font-family="var(--font-family-primary, system-ui)"
-      font-size="14"
+      font-size="24"
       font-weight="600"
       text-anchor="start"
     >
@@ -100,13 +100,19 @@
   }
 
   .canvas-group:hover:not(.child-selected) .group-background {
-    stroke: var(--clr-lossless-accent--brightest);
-    stroke-width: 2;
+    stroke: var(--clr-lossless-accent--brightest, #00d4ff);
+    stroke-width: 3;
+    opacity: 0.25;
   }
 
   /* Disable hover when a child is selected */
   .canvas-group.child-selected {
     pointer-events: none;
+  }
+  
+  /* Brighter selection indicator */
+  .selection-indicator {
+    filter: drop-shadow(0 0 2px var(--clr-primary, #00d4ff));
   }
 
   /* Re-enable pointer events for child elements when group has child-selected */
