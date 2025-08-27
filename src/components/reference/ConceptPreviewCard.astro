@@ -16,6 +16,8 @@ import { countWordsInMarkdown } from '@utils/fileWordCount';
  * @param {string} entry.data.title - The title of the concept
  * @param {string} entry.data.description - Optional description of the concept
  * @param {string} entry.data.slug - Optional custom slug for the URL
+ * @param {string} entry.data.at_semantic_version - Optional semantic version for the content
+ * @param {string} entry.data.version - Optional alternative version field
  */
 
 // Define the props interface for type safety
@@ -29,6 +31,7 @@ interface Props {
       description?: string;
       slug?: string;
       at_semantic_version?: string; // Semantic version for the content
+      [key: string]: unknown; // Allow any other properties
     };
     originalFilename: string; // For consistency and future use
   };
@@ -39,6 +42,14 @@ const { entry } = Astro.props;
 
 // Calculate word count for this concept
 const wordCount = entry.body ? countWordsInMarkdown(entry.body) : 0;
+
+// Get version if it exists
+const version = entry.data.at_semantic_version;
+console.log('Version debug:', {
+  id: entry.id,
+  version: entry.data.at_semantic_version,
+  allData: entry.data
+});
 // ---
 // Always use entry.slug for the URL, as provided by ReferenceGrid and index.astro
 // This ensures correct casing and matches the routing logic in [...slug].astro
@@ -54,26 +65,23 @@ const url = `/more-about/${entry.slug}`;
         {entry.data.title}
       </a>
     </h3>
-    <div class="flex flex-col items-end">
-      {entry.data.at_semantic_version && (
-        <div class="text-xs text-gray-500">
-          v{entry.data.at_semantic_version}
+    <div class="flex flex-col items-end space-y-0.5">
+      {wordCount > 400 && (
+        <div class="text-xs text-gray-400">
+          <WordCountDisplay 
+            count={wordCount} 
+            className="text-gray-400"
+            showIcon={false}
+          />
         </div>
       )}
-      {wordCount > 400 && (
-        <WordCountDisplay 
-          count={wordCount} 
-          className="text-gray-500"
-          showIcon={false}
-        />
+      {version && (
+        <div class="text-[0.7rem] text-gray-500 opacity-80">
+          {version}
+        </div>
       )}
     </div>
   </div>
-  {entry.data.description && (
-    <p class="mt-2 text-gray-300 text-sm">
-      {entry.data.description}
-    </p>
-  )}
 </div>
 
 <style>

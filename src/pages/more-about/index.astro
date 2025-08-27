@@ -3,14 +3,39 @@ import ReferenceLayout from '@layouts/ReferenceLayout.astro';
 import { getCollection } from 'astro:content';
 import { processEntries } from '@utils/slugify';
 import { getWordCounts } from '@utils/collectionWordCount';
+import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
+import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
+// Import the type directly from the source file
+import type { ReferenceItem } from '../../types/reference';
 
 // Get collections and process them using the centralized function
 const vocabularyEntries = await getCollection('vocabulary');
 const conceptsEntries = await getCollection('concepts');
 
 // Process entries using the centralized processEntries function
-const processedVocab = processEntries(vocabularyEntries);
-const processedConcepts = processEntries(conceptsEntries);
+const processedVocab = processEntries(vocabularyEntries).map(entry => ({
+  ...entry,
+  collection: 'vocabulary' as const,
+  body: entry.body || '',
+  data: {
+    ...entry.data,
+    aliases: Array.isArray(entry.data.aliases) ? entry.data.aliases : [],
+    description: typeof entry.data.description === 'string' ? entry.data.description : '',
+    at_semantic_version: typeof entry.data.at_semantic_version === 'string' ? entry.data.at_semantic_version : undefined
+  }
+}));
+
+const processedConcepts = processEntries(conceptsEntries).map(entry => ({
+  ...entry,
+  collection: 'concepts' as const,
+  body: entry.body || '',
+  data: {
+    ...entry.data,
+    aliases: Array.isArray(entry.data.aliases) ? entry.data.aliases : [],
+    description: typeof entry.data.description === 'string' ? entry.data.description : '',
+    at_semantic_version: typeof entry.data.at_semantic_version === 'string' ? entry.data.at_semantic_version : undefined
+  }
+}));
 
 // Get word counts for each collection
 const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
@@ -43,18 +68,18 @@ const formatWordCount = (count: number): string => {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {processedVocab.map(entry => (
           <div data-searchable="true">
-            <a href={`/more-about/${entry.slug}`} class="block">
-              <div class="vocabulary-card group">
-                <h3 class="vocabulary-card__title">
-                  <span class="vocabulary-card__link">{entry.data.title}</span>
-                </h3>
-                {entry.data.aliases && entry.data.aliases.length > 0 && (
-                  <p class="vocabulary-card__aliases">
-                    Also known as: {entry.data.aliases.join(', ')}
-                  </p>
-                )}
-              </div>
-            </a>
+            <VocabularyPreviewCard entry={{
+              id: entry.id,
+              slug: entry.slug,
+              collection: entry.collection,
+              body: entry.body,
+              originalFilename: entry.originalFilename,
+              data: {
+                ...entry.data,
+                slug: entry.slug,
+                at_semantic_version: entry.data.at_semantic_version
+              }
+            }} />
           </div>
         ))}
       </div>
@@ -76,18 +101,17 @@ const formatWordCount = (count: number): string => {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {processedConcepts.map(entry => (
           <div data-searchable="true">
-            <a href={`/more-about/${entry.slug}`} class="block">
-              <div class="concept-card group">
-                <h3 class="concept-card__title">
-                  <span class="concept-card__link">{entry.data.title}</span>
-                </h3>
-                {entry.data.description && (
-                  <p class="mt-2 text-gray-300 text-sm">
-                    {entry.data.description}
-                  </p>
-                )}
-              </div>
-            </a>
+            <ConceptPreviewCard entry={{
+              id: entry.id,
+              slug: entry.slug,
+              collection: entry.collection,
+              body: entry.body,
+              originalFilename: entry.originalFilename,
+              data: {
+                ...entry.data,
+                slug: entry.slug
+              }
+            }} />
           </div>
         ))}
       </div>

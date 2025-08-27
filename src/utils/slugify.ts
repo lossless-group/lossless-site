@@ -16,16 +16,26 @@
 // Generic type that represents a collection entry with basic properties
 type BaseCollectionEntry = {
   id: string;
-  filePath: string;
+  collection: string;
+  body?: string;
   data: {
     title?: string;
     [key: string]: unknown;
   };
+  filePath?: string;
+  rendered?: unknown;
   [key: string]: unknown;
 };
 
 // Process entries to ensure they have required fields and proper formatting
-export function processEntries<T extends BaseCollectionEntry>(entries: T[]): (T & { slug: string; data: { title: string } })[] {
+export function processEntries<T extends BaseCollectionEntry>(entries: T[]): (T & { 
+  slug: string; 
+  originalFilename: string;
+  data: { 
+    title: string;
+    [key: string]: unknown; // Allow additional properties in data
+  } 
+})[] {
   return entries
     .map(entry => {
       // Always generate title from filename, preserving original case
@@ -37,13 +47,21 @@ export function processEntries<T extends BaseCollectionEntry>(entries: T[]): (T 
       const processedEntry = {
         ...entry,
         slug: getReferenceSlug(entry.id),
+        originalFilename: entry.filePath?.split('/').pop() || entry.id,
         data: {
-          ...entry.data,
-          title: entry.data.title || baseFilename,
+          ...entry.data, // Spread all original data properties first
+          title: entry.data.title || baseFilename, // Then ensure title is set
         },
       };
 
-      return processedEntry as T & { slug: string; data: { title: string } };
+      return processedEntry as T & { 
+        slug: string; 
+        originalFilename: string;
+        data: { 
+          title: string;
+          [key: string]: unknown; // Allow additional properties in data
+        } 
+      };
     })
     .sort((a, b) => a.data.title.localeCompare(b.data.title));
 }

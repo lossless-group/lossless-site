@@ -9,7 +9,7 @@
  */
 import { Image } from "astro:assets";
 import Layout from "@layouts/Layout.astro";
-import IconHeaderMessageCardGrid from "@components/basics/messages/IconHeaderMessageCardGrid.astro";
+import IconHeaderMessageOvalProcess from "@components/basics/messages/IconHeaderMessageOvalProcess.astro";
 import Einstein from "@assets/visuals/imageOf/imageOf__Albert-Einstein.png";
 
 // Define frontmatter data for the vibe with us page
@@ -55,12 +55,14 @@ const frontmatter = {
     </div>
   </section>
 
-  <section class="vibe-with-us-section" style="--vibe-section-top-margin: 0.5rem;">
-    <IconHeaderMessageCardGrid 
-      jsonPath="messages/vibeCodingIconHeaderMessages.json"
-      style="margin-top: 0; margin-bottom: 0;"
-    />
-  </section>
+  <section class="vibe-with-us-section" style="--vibe-section-top-margin: 2.5rem;">
+    <div class="vibe-container">
+       <IconHeaderMessageOvalProcess 
+          jsonPath="messages/vibeCodingIconHeaderMessages.json"
+          style="margin: 0 auto;"
+       />
+    </div>
+ </section>
 </Layout>
 
 <style>
@@ -120,13 +122,11 @@ const frontmatter = {
   }
 }
 .vibe-with-us-section {
-  padding: 0 0 3rem 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: var(--vibe-section-top-margin, 2.5rem);
-}
+      padding: 3rem 1.5rem;
+      width: 100%;
+      background: var(--clr-bg-secondary, #1a1e26);
+      margin-top: var(--vibe-section-top-margin, 2.5rem);
+   }
 
 /* Page-local Hero styles for /vibe-with/us.astro */
 .hero.vibe-hero--local {
