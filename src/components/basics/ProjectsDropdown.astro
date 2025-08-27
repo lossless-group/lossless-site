@@ -1,6 +1,7 @@
 ---
 import type { ProjectConfig } from '../../utils/projectGalleryUtils';
 import projectGallery from '../../config/project-gallery.json';
+import TextCTA from './cta/TextCTA.astro';
 
 interface Props {
   label: string;
@@ -43,7 +44,10 @@ const sortedProjects = [...projects].sort((a, b) =>
 <div class="dropdown-wrapper">
   <button class="dropdown-trigger">{label}</button>
   <div class="projects-dropdown">
-    <div class="dropdown-header">Our Projects</div>
+    <div class="dropdown-header">
+      <span>Our Projects</span>
+      <TextCTA href="/projects" text="See All" class="see-all-link" />
+    </div>
     <div class="dropdown-grid">
       {sortedProjects.map((project, index) => (
         <a 
@@ -120,12 +124,20 @@ const sortedProjects = [...projects].sort((a, b) =>
   }
 
   .dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--clr-lossless-accent--brightest);
     margin-bottom: 1.5rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .see-all-link {
+    font-size: 0.9rem;
+    font-weight: 500;
   }
 
   .dropdown-grid {

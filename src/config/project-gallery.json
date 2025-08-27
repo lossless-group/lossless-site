@@ -90,28 +90,48 @@
           "href": "/projects/gallery/ace-it/philosophy/our-approach",
           "type": "sequential",
           "step": 1,
-          "contentPath": "ACE-It/Philosophy/Our-Approach.md"
-        },
-        {
-          "title": "Documentation Kit",
-          "href": "/projects/gallery/ace-it/docs-kit/living-specifications",
-          "type": "sequential",
-          "step": 2,
+          "contentPath": "ACE-It/Philosophy/Our-Approach.md",
+          "children": [
+            {
+              "title": "Best Practices",
+              "href": "/projects/gallery/ace-it/philosophy/best-practices",
+              "type": "child",
+              "contentPath": "ACE-It/Philosophy/Best-Practices.md"
+            },
+            {
+              "title": "Context Vigilance",
+              "href": "/projects/gallery/ace-it/philosophy/context-vigilance",
+              "type": "child",
+              "contentPath": "ACE-It/Philosophy/Context-Vigilance.md"
+            },
+            {
+              "title": "Iterative Approach",
+              "href": "/projects/gallery/ace-it/philosophy/iterative-approach",
+              "type": "child",
+              "contentPath": "ACE-It/Philosophy/Iterative-Approach.md"
+            }
+        ]
+      },
+      {
+        "title": "Documentation Kit",
+        "href": "/projects/gallery/ace-it/docs-kit/living-specifications",
+        "type": "sequential",
+        "step": 2,
           "contentPath": "ACE-It/Docs-Kit/Living-Specifications.md",
           "children": [
             {
-              "title": "Blueprints",
+              "title": "Living Specifications",
               "href": "/projects/gallery/ace-it/docs-kit/blueprints",
               "type": "child",
               "step": 1,
               "contentPath": "ACE-It/Docs-Kit/Blueprints.md"
             },
             {
-              "title": "Prompts",
-              "href": "/projects/gallery/ace-it/docs-kit/prompts",
+              "title": "Blueprints",
+              "href": "/projects/gallery/ace-it/docs-kit/blueprints",
               "type": "child",
               "step": 2,
-              "contentPath": "ACE-It/Docs-Kit/Prompts.md"
+              "contentPath": "ACE-It/Docs-Kit/Blueprints.md"
             },
             {
               "title": "Reminders",
@@ -119,6 +139,13 @@
               "type": "child",
               "step": 3,
               "contentPath": "ACE-It/Docs-Kit/Reminders.md"
+            },
+            {
+              "title": "Prompts",
+              "href": "/projects/gallery/ace-it/docs-kit/prompts",
+              "type": "child",
+              "step": 4,
+              "contentPath": "ACE-It/Docs-Kit/Prompts.md"
             }
           ]
         },
@@ -127,14 +154,48 @@
           "href": "/projects/gallery/ace-it/models/thinking-models",
           "type": "sequential",
           "step": 3,
-          "contentPath": "ACE-It/Models/Thinking-Models.md"
+          "contentPath": "ACE-It/Models/Thinking-Models.md",
+            "children": [
+              {
+                "title": "Modalities",
+                "href": "/projects/gallery/ace-it/models/modalities",
+                "type": "child",
+                "contentPath": "ACE-It/Models/Modalities.md"
+              },
+              {
+                "title": "Function Calling",
+                "href": "/projects/gallery/ace-it/models/function-calling",
+                "type": "child",
+                "contentPath": "ACE-It/Models/Function-Calling.md"
+              },
+              {
+                "title": "Tokens",
+                "href": "/projects/gallery/ace-it/models/tokens",
+                "type": "child",
+                "contentPath": "ACE-It/Models/Tokens.md"
+              }
+            ]
         },
         {
           "title": "Safety & Best Practices",
           "href": "/projects/gallery/ace-it/safety/security-foundations",
           "type": "sequential",
           "step": 4,
-          "contentPath": "ACE-It/Safety/Security-Foundations.md"
+          "contentPath": "ACE-It/Safety/Security-Foundations.md",
+          "children": [
+            {
+              "title": "Test-Driven Development",
+              "href": "/projects/gallery/ace-it/safety/tdd",
+              "type": "child",
+              "contentPath": "ACE-It/Safety/TDD.md"
+            },
+            {
+              "title": "Audits",
+              "href": "/projects/gallery/ace-it/safety/audits",
+              "type": "child",
+              "contentPath": "ACE-It/Safety/Audits.md"
+            }
+          ]
         }
       ]
     },
