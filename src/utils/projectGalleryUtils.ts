@@ -5,13 +5,12 @@ import { readFile as readFileAsync } from 'fs/promises';
 import { resolve as pathResolve } from 'path';
 import { contentBasePath } from './envUtils.js';
 import galleryConfig from '../config/project-gallery.json';
-import { getReferenceSlug } from './slugify';
 
 export interface ProjectConfig {
   id: string;
   title: string;
   subtitle: string;
-  href: string;
+  href?: string;
   hasSidebar: boolean;
   canvas?: string;
   useCases: Array<{
@@ -41,7 +40,7 @@ export interface GalleryConfig {
 
 // Load project gallery configuration
 export function loadGalleryConfig(): GalleryConfig {
-  return galleryConfig;
+  return galleryConfig as GalleryConfig;
 }
 
 // Generate static paths for all projects
@@ -166,8 +165,28 @@ export function findProjectBySlug(slug: string): { project: ProjectConfig; step:
   return null;
 }
 
-// Export getReferenceSlug for use in other files
-export { getReferenceSlug };
+/**
+ * Resolves the correct URL for a project
+ * @param project - The project configuration
+ * @returns The resolved URL for the project
+ */
+export function resolveProjectUrl(project: ProjectConfig): string {
+  // If project has a direct href, use it
+  if (project.href) {
+    return project.href;
+  }
+  
+  // If project has demoSteps, find the orientation step and use its href
+  if (project.demoSteps && project.demoSteps.length > 0) {
+    const orientationStep = project.demoSteps.find(step => step.type === 'orientation');
+    if (orientationStep) {
+      return orientationStep.href;
+    }
+  }
+  
+  // Fallback to the development page if no specific URL is found
+  return `/projects/development`;
+}
 
 // Process canvas data with file content loading
 export async function processCanvasData(canvasRaw: string): Promise<JSONCanvas | null> {

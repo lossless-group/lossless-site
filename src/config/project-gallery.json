@@ -196,7 +196,6 @@
       "id": "astro-turf",
       "title": "Astro Knots",
       "subtitle": "Advanced Astro, TailwindCSS, and theme framework setup, basic components and patterns.",
-      "href": "/projects/astro-turf",
       "hasSidebar": false,
       "useCases": [
         {
@@ -214,7 +213,6 @@
       "id": "content-farm",
       "title": "Content Farm",
       "subtitle": "Automated content generation and management system.",
-      "href": "/projects/content-farm",
       "hasSidebar": false,
       "useCases": [
         {
@@ -232,7 +230,6 @@
       "id": "emergent-innovation",
       "title": "Emergent Innovation",
       "subtitle": "Open source innovation projects and collaborative initiatives.",
-      "href": "/projects/emergent-innovation",
       "hasSidebar": false,
       "useCases": [
         {
@@ -250,7 +247,6 @@
       "id": "water-template-ce",
       "title": "Water Themed Site",
       "subtitle": "A beautiful, modern, and responsive water-themed website.",
-      "href": "/projects/water-template-ce",
       "hasSidebar": false,
       "useCases": [
         {

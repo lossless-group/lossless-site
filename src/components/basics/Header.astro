@@ -5,6 +5,7 @@ import JumboDropdown from "./JumboDropdown.astro";
 import GetLostDropdown from "./GetLostDropdown.astro";
 import ProjectsDropdown from "./ProjectsDropdown.astro";
 import type { ProjectConfig } from '../../utils/projectGalleryUtils';
+import { resolveProjectUrl } from '../../utils/projectGalleryUtils';
 import projectGallery from '../../config/project-gallery.json';
 
 // Define navigation links (nested items become dropdowns)
@@ -146,7 +147,7 @@ const socialIcons = [
             <div class="mobile-nav-section">
               <div class="mobile-nav-header">{link.label}</div>
               {projects.map((project, projectIndex) => {
-                const projectHref = project.href || `/projects/gallery/${project.id}`;
+                const projectHref = resolveProjectUrl(project);
                 return (
                   <a 
                     href={projectHref}

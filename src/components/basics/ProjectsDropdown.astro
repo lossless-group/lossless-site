@@ -1,5 +1,6 @@
 ---
 import type { ProjectConfig } from '../../utils/projectGalleryUtils';
+import { resolveProjectUrl } from '../../utils/projectGalleryUtils';
 import projectGallery from '../../config/project-gallery.json';
 import TextCTA from './cta/TextCTA.astro';
 
@@ -28,7 +29,7 @@ const projects = Object.entries((projectGallery as unknown as GalleryData).proje
   id: project.id || id,
   title: project.title,
   subtitle: project.subtitle,
-  href: project.href || `/projects/${project.id || id}`,
+  href: project.href,
   hasSidebar: project.hasSidebar || false,
   ...(project.canvas && { canvas: project.canvas }),
   useCases: project.useCases || [],
@@ -51,7 +52,7 @@ const sortedProjects = [...projects].sort((a, b) =>
     <div class="dropdown-grid">
       {sortedProjects.map((project, index) => (
         <a 
-          href={project.href || `/404`} 
+          href={resolveProjectUrl(project)} 
           class="dropdown-item"
           data-project={project.id}
         >
@@ -217,8 +218,8 @@ const sortedProjects = [...projects].sort((a, b) =>
   }
 
   @media (max-width: 768px) {
-    .dropdown-grid {
-      grid-template-columns: 1fr;
+    .dropdown-wrapper {
+      display: none; /* Hide the dropdown on mobile - let Header.astro handle it */
     }
   }
 </style>

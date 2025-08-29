@@ -1,0 +1,247 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/basics/Header.astro';
+import Footer from '../../components/basics/Footer.astro';
+import ThinGradientBleedSeparator from '../../components/basics/separators/ThinGradientBleedSeparator.astro';
+
+export const prerender = true;
+---
+
+<Layout title="Project in Development - The Lossless Group">
+  <Header />
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="development-content">
+        <div class="development-header">
+          <h1 class="development-title">🚧 Project in Development</h1>
+          <p class="development-subtitle">This project is currently being developed and will be available soon.</p>
+        </div>
+        
+        <div class="development-body">
+          <div class="development-info">
+            <h2>What's happening?</h2>
+            <p>Our team is actively working on this project. We're building something amazing and can't wait to share it with you.</p>
+            
+            <div class="development-features">
+              <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-content">
+                  <h3>Fast Development</h3>
+                  <p>We're working quickly to bring this project to life.</p>
+                </div>
+              </div>
+              
+              <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-content">
+                  <h3>Quality Focus</h3>
+                  <p>We're ensuring everything meets our high standards.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="development-cta">
+            <h2>Stay Updated</h2>
+            <p>Check back soon or explore our other projects while you wait.</p>
+            <div class="cta-buttons">
+              <a href="/projects" class="btn btn-primary">View All Projects</a>
+              <a href="/" class="btn btn-secondary">Back to Home</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <ThinGradientBleedSeparator height="2px" color="var(--grd__primary-bg)" />
+  <Footer />
+</Layout>
+
+<style>
+  .main-content {
+    padding-top: 120px;
+    min-height: calc(100vh - 200px);
+    background: var(--clr-primary-bg);
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .development-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .development-header {
+    margin-bottom: 4rem;
+  }
+  
+  .development-title {
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: bold;
+    color: var(--clr-lossless-accent--brightest);
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .development-subtitle {
+    font-size: 1.4rem;
+    color: var(--clr-lossless-primary-light);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+  
+  .development-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  
+  .development-info h2 {
+    font-size: 2.5rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 1rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .development-info p {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  
+  .development-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .feature:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .feature-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  
+  .feature-content h3 {
+    font-size: 1.25rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .feature-content p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light);
+    line-height: 1.5;
+  }
+  
+  .development-cta {
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .development-cta h2 {
+    font-size: 2rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 1rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .development-cta p {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .btn-primary {
+    background-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-primary-bg);
+  }
+  
+  .btn-secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--clr-lossless-primary-light);
+  }
+  
+  .btn-primary:hover, .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 600px) {
+    .development-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+    }
+    
+    .development-features {
+      grid-template-columns: 1fr;
+    }
+    
+    .cta-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .btn {
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+    }
+  }
+</style>

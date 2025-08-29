@@ -1,40 +1,24 @@
 ---
-import { Astro } from 'astro';
-import galleryConfig from '../../config/project-gallery.json';
+import { loadGalleryConfig, resolveProjectUrl } from '../../utils/projectGalleryUtils';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
   const paths: Array<{ params: { project: string }; props: any }> = [];
+  const galleryConfig = loadGalleryConfig();
   
   // Generate paths for each project in the gallery config
   Object.entries(galleryConfig.projects).forEach(([projectId, project]) => {
-    let redirectUrl: string;
-    let isValidRedirect = false;
+    const resolvedUrl = resolveProjectUrl(project);
     
-    // Find the orientation step (first step with type "orientation")
-    const orientationStep = project.demoSteps.find(step => step.type === 'orientation');
-    
-    if (orientationStep) {
-      // If there's an orientation step, redirect to it
-      redirectUrl = orientationStep.href;
-      isValidRedirect = true;
-    } else if (project.href && project.href !== `/projects/${projectId}`) {
-      // If no orientation step but project has an href that's different from the current path, redirect to that (this prevents infinite loops)
-      redirectUrl = project.href;
-      isValidRedirect = true;
-    }
-    
-    // Only add paths for projects with valid redirect targets
-    if (isValidRedirect) {
-      paths.push({
-        params: { project: projectId },
-        props: {
-          redirectUrl: redirectUrl,
-          projectTitle: project.title
-        }
-      });
-    }
+    // Add paths for all projects - they will redirect to their specific URL or development page
+    paths.push({
+      params: { project: projectId },
+      props: {
+        redirectUrl: resolvedUrl,
+        projectTitle: project.title
+      }
+    });
   });
   
   return paths;

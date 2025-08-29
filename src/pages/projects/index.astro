@@ -4,7 +4,7 @@ import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
 
 // Import utilities
-import { loadGalleryConfig } from '@utils/projectGalleryUtils';
+import { loadGalleryConfig, resolveProjectUrl } from '@utils/projectGalleryUtils';
 import { getReferenceSlug } from '@utils/slugify';
 
 // Load project gallery configuration
@@ -53,12 +53,7 @@ const projectCovers = Object.values(galleryConfig.projects);
           
           <div class="cover-expand">
             <a 
-              href={project.demoSteps && project.demoSteps.length > 0 
-                ? (project.demoSteps.find(step => step.type === 'orientation')?.href 
-                    ? getReferenceSlug(project.demoSteps.find(step => step.type === 'orientation')?.href)
-                    : getReferenceSlug(project.href))
-                : getReferenceSlug(project.href)
-              }
+              href={getReferenceSlug(resolveProjectUrl(project))}
               class="toggle"
               aria-label="View Project"
             >
