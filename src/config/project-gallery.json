@@ -120,31 +120,24 @@
           "contentPath": "ACE-It/Docs-Kit/Living-Specifications.md",
           "children": [
             {
-              "title": "Living Specifications",
+              "title": "Blueprints",
               "href": "/projects/gallery/ace-it/docs-kit/blueprints",
               "type": "child",
               "step": 1,
               "contentPath": "ACE-It/Docs-Kit/Blueprints.md"
             },
             {
-              "title": "Blueprints",
-              "href": "/projects/gallery/ace-it/docs-kit/blueprints",
-              "type": "child",
-              "step": 2,
-              "contentPath": "ACE-It/Docs-Kit/Blueprints.md"
-            },
-            {
               "title": "Reminders",
               "href": "/projects/gallery/ace-it/docs-kit/reminders",
               "type": "child",
-              "step": 3,
+              "step": 2,
               "contentPath": "ACE-It/Docs-Kit/Reminders.md"
             },
             {
               "title": "Prompts",
               "href": "/projects/gallery/ace-it/docs-kit/prompts",
               "type": "child",
-              "step": 4,
+              "step": 3,
               "contentPath": "ACE-It/Docs-Kit/Prompts.md"
             }
           ]
