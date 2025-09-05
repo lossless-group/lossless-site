@@ -39,7 +39,7 @@ const calloutTypes = {
   'note': { icon: '📝', title: 'Note', color: '#9ca3af', bgColor: 'rgba(107, 114, 128, 0.08)', borderColor: 'rgba(107, 114, 128, 0.3)', hasStyledComponent: true },
   'quote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true, hasStyledComponent: true },
   'blockquote': { icon: '❝', title: 'Quote', color: '#cbd5e1', bgColor: 'rgba(255, 255, 255, 0.05)', borderColor: '#64748b', isQuote: true, hasStyledComponent: true },
-  'llm-response': { icon: '🤖', title: 'LLM Response', color: '#a855f7', bgColor: 'rgba(168, 85, 247, 0.08)', borderColor: 'rgba(168, 85, 247, 0.3)', hasStyledComponent: true }
+  'llm-response': { icon: '🤖', title: 'LLM Response', color: '#cbd5e1', bgColor: 'var(--bastille)', borderColor: 'var(--color-border)', hasStyledComponent: true }
 };
 
 // Default values
@@ -93,11 +93,17 @@ if (contentNode.children.length > 0) {
           .toLowerCase() // Lowercase everything
           .replace(/-+/g, '-'); // Clean up double hyphens
 
+        // Get the full text after the callout type
+        const afterCallout = paragraphText.substring(match[0].length);
+        // Only treat the first line after the callout as title if it's on the same line
+        const titleMatch = afterCallout.split('\n')[0].trim();
+        
         // Check if the detected type is a valid callout type
         if (calloutTypes[normalizedType]) {
           calloutType = normalizedType;
           calloutConfig = calloutTypes[calloutType];
-          calloutTitle = calloutConfig.title; // Use the default title from calloutTypes
+          // Only use the first line as title if there's text on the same line as the callout
+          calloutTitle = titleMatch || '';
         } else {
           // If not a valid type, treat as regular blockquote
           calloutType = 'info';
@@ -153,8 +159,13 @@ if (contentNode.children.length > 0) {
         // Replace the content with processed children
         contentNode.children = processedChildren;
         
-        // Remove the first paragraph (the title paragraph)
+        // Remove the first paragraph (the title paragraph with callout syntax)
         contentNode.children.shift();
+        
+        // If we have a title, ensure it doesn't contain the callout syntax
+        if (calloutTitle) {
+          calloutTitle = calloutTitle.replace(/^\[!?[^\]]+\]\s*/, '').trim();
+        }
       }
     }
   }
@@ -263,13 +274,9 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
     </div>
   ) : (calloutType === 'tip' || calloutType === 'hint') ? (
     <div class="callout callout-tip">
-      {calloutTitle && (
-        <div class="callout-title">
-          <span class="callout-icon">💡</span>
-          <span class="callout-title-text">{calloutTitle}</span>
-        </div>
-      )}
+      <span class="callout-icon">💡</span>
       <div class="callout-content">
+        {calloutTitle && <div class="callout-title">{calloutTitle}</div>}
         {contentNode.children.map(child => (
           <AstroMarkdown node={child} data={markdownData} />
         ))}
@@ -345,7 +352,7 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
     border-radius: 0.5rem;
     padding: 1rem;
     margin: 1rem 0;
-    background-color: #f8fafc;
+    background-color: var(--bastille);
   }
 
   .callout-llm-response .callout-title {
@@ -354,6 +361,11 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
     gap: 0.5rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
+  }
+  
+  .callout-llm-response .callout-title-text {
+    text-transform: none !important;
+    letter-spacing: normal;
   }
 
   .callout-llm-response .callout-icon {
@@ -567,15 +579,14 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
 
   /* Tip Callout */
   .callout-tip {
-    border: 2px solid rgba(168, 85, 247, 0.4);
-    border-left: 6px solid #a855f7;
-    border-radius: 0.75rem;
-    padding: 1.25rem;
-    margin: 1.5rem 0;
-    background: linear-gradient(135deg, 
-      rgba(168, 85, 247, 0.1) 0%, 
-      rgba(168, 85, 247, 0.05) 100%);
-    box-shadow: 0 4px 6px -1px rgba(168, 85, 247, 0.1);
+    border-left: 6px solid #d455f7;
+    background-color: rgba(171, 81, 255, 0.1); /* Lighter background */
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.375rem;
+    display: flex;
+    gap: 0.75rem;
+    color: #edceff; /* Darker text for better contrast */
   }
 
   .callout-tip .callout-title {
@@ -584,13 +595,14 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
     gap: 0.75rem;
     margin-bottom: 0.75rem;
     font-weight: 700;
-    color: #9333ea;
+    color: #cc96ff;
     font-size: 1.1rem;
   }
 
   .callout-tip .callout-icon {
-    font-size: 1.5rem;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    font-size: 1.25rem;
+    color: #f9f5ff; /* Slightly darker purple for better visibility */
+    margin-top: 0.25rem;
   }
 
   .callout-tip .callout-title-text {
@@ -599,10 +611,8 @@ if (useStyledComponent && isObsidianCallout && calloutConfig.hasStyledComponent)
   }
 
   .callout-tip .callout-content {
-    margin-top: 0.75rem;
-    line-height: 1.7;
-    color: #7c3aed;
-    font-weight: 500;
+    flex: 1;
+    color: #cb78ff; /* Darker text for better contrast */
   }
 
   /* Emphasis Callout */
