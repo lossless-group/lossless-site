@@ -148,8 +148,9 @@ const currentHref = slug && slug !== 'index' ? `/projects/gallery/${slug}` : '/p
     {(() => {
       // Check if this is the orientation step for Augment-It
       const isAugmentItOrientationStep = slug === 'augment-it/specs/data-augmentation-workflow-with-microfrontends';
+      const isAugmentItCanvas = slug === 'augment-it/specs/Augment-It.canvas';
       
-      if (isAugmentItOrientationStep && augmentItCanvas) {
+      if ((isAugmentItOrientationStep || isAugmentItCanvas) && augmentItCanvas) {
         return (
           <div class="canvas-section">
             <JSONCanvasRenderer canvas={augmentItCanvas} client:load />

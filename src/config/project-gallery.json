@@ -25,6 +25,13 @@
           "contentPath": "Augment-It/Specs/Data Augmentation Workflow with Microfrontends.md"
         },
         {
+          "title": "Augment-It Specifications Canvas",
+          "href": "/projects/gallery/augment-it/specs/Augment-It.canvas",
+          "type": "orientation",
+          "description": "A spatial canvas of the Augment-It architecture and system specifications.",
+          "contentPath": "Augment-It/Specs/Augment-It.canvas"
+        },
+        {
           "title": "Load Data, Review, & Enrich Records",
           "href": "/projects/gallery/augment-it/specs/apps-microfrontends/recordcollector",
           "type": "sequential",
