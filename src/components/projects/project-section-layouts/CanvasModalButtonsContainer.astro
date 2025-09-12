@@ -1,0 +1,23 @@
+---
+import augmentItCanvasRaw from "@generated/projects/Augment-It/Specs/Augment-It.canvas?raw";
+import aceItCanvasRaw from "@generated/projects/ACE-It/ACE-It-Canvas.canvas?raw";
+import CanvasModalButtons from "./CanvasModalButtons.svelte";
+import { processCanvasData } from "../../../utils/projectGalleryUtils";
+
+const augmentItCanvas = await processCanvasData(augmentItCanvasRaw);
+const aceItCanvas = await processCanvasData(aceItCanvasRaw);
+
+const canvasKey: Record<string, string> = {
+  augmentItCanvas,
+  aceItCanvas,
+} as unknown as Record<string, string>;
+
+const { buttons } = Astro.props;
+
+const mappedButtons = buttons.map((button) => ({
+  ...button,
+  canvas: canvasKey[button.contentPath],
+}));
+---
+
+<CanvasModalButtons client:load buttons={mappedButtons} />
