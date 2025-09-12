@@ -26,10 +26,9 @@
         },
         {
           "title": "Augment-It Specifications Canvas",
-          "href": "/projects/gallery/augment-it/specs/Augment-It.canvas",
-          "type": "orientation",
-          "description": "A spatial canvas of the Augment-It architecture and system specifications.",
-          "contentPath": "Augment-It/Specs/Augment-It.canvas"
+          "type": "canvas-modal",
+          "href": "",
+          "contentPath": "augmentItCanvas"
         },
         {
           "title": "Load Data, Review, & Enrich Records",
