@@ -1,79 +1,105 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  // Svelte 5 runes API
+  let { open = $bindable(), onClose = () => {}, title = 'Modal', children } = $props();
 
-  export let open: boolean;
-  export let onClose: () => void = () => {};
-  export let title: string = 'Modal';
+  let dialog: HTMLDialogElement;
 
-  let previousBodyOverflow: string | null = null;
-
-  $: if (typeof document !== 'undefined') {
+  $effect(() => {
+    if (!dialog) return;
     if (open) {
-      if (previousBodyOverflow === null) {
-        previousBodyOverflow = document.body.style.overflow || '';
-      }
-      document.body.style.overflow = 'hidden';
+      if (!dialog.open) dialog.showModal();
     } else {
-      if (previousBodyOverflow !== null) {
-        document.body.style.overflow = previousBodyOverflow;
-        previousBodyOverflow = null;
-      }
-    }
-  }
-
-  function handleKeydown(e: KeyboardEvent) {
-    if (!open) return;
-    if (e.key === 'Escape') onClose();
-  }
-
-  function handleOverlayClick(e: MouseEvent) {
-    if (e.target === e.currentTarget) onClose();
-  }
-
-  function handleOverlayKeydown(e: KeyboardEvent) {
-    if (e.target !== e.currentTarget) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClose();
-    }
-  }
-
-  onDestroy(() => {
-    if (previousBodyOverflow !== null) {
-      document.body.style.overflow = previousBodyOverflow;
-      previousBodyOverflow = null;
+      if (dialog.open) dialog.close();
     }
   });
+
+  function handleDialogClose() {
+    // Keep bound state in sync when user closes via ESC or backdrop
+    if (open) open = false;
+    onClose();
+  }
+
+  function handleDialogClick(e: MouseEvent) {
+    if (e.target === dialog) dialog.close();
+  }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
-
-{#if open}
-  <div
-    class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50"
-    role="button"
-    tabindex="0"
-    aria-label="Close modal"
-    on:click={handleOverlayClick}
-    on:keydown={handleOverlayKeydown}
-  >
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      class="relative w-[min(90vw,560px)] rounded-xl bg-white p-6 shadow-xl"
-    >
-      <button
-        on:click={onClose}
-        class="absolute right-3 top-3 rounded-md px-2 py-1 text-gray-600 hover:bg-gray-100"
-        aria-label="Close"
-      >
-        ✕
-      </button>
-      <h2 id="modal-title" class="mb-3 text-xl font-semibold">{title}</h2>
-      <slot />
-    </div>
+<dialog
+  bind:this={dialog}
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  onclose={handleDialogClose}
+  onclick={handleDialogClick}
+>
+  <div class="clr-primary-bg">
+    <button class="close-btn" aria-label="Close" onclick={() => dialog.close()}>×</button>    
+    <h2 id="modal-title">{title}</h2>
+    <hr />
+    {@render children?.()}
   </div>
-{/if}
+</dialog>
 
-
+<style>
+  dialog {
+    width: calc(100vw - 10rem);
+    height: calc(100vh - 10rem);
+    background-color: var(--clr-stolen--github--dark);
+    max-width: none;    
+    max-height: none;
+    margin: 5rem;
+    border-radius: 0.2em;
+    border: none;
+    padding: 0;
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  dialog > div {
+    padding: 1em;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
+  }
+  dialog[open] {
+    animation: zoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes zoom {
+    from {
+      transform: scale(0.95);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  dialog[open]::backdrop {
+    animation: fade 0.2s ease-out;
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  button {
+    display: block;
+  }
+  .close-btn {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    border: none;
+    background: transparent;
+    font-size: 1.25em;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    color: white;
+  }
+  .close-btn:hover {
+    opacity: 1;
+  }
+</style>

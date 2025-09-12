@@ -20,7 +20,6 @@
   let currentCanvas: JSONCanvas | null = null;
 
   function openModalFor(index: number) {
-    console.log('adhashda')
     openIndex = index;
     currentCanvas = null;
 
@@ -42,7 +41,7 @@
     <li>
       <button
         type="button"
-        class="tree-link tree-link--orientation"
+        class="tree-link tree-link--orientation border p-4 rounded"
         on:click={() => openModalFor(i)}
         aria-haspopup="dialog"
         aria-expanded={openIndex === i}
