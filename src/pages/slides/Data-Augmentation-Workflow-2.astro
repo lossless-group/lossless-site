@@ -1,0 +1,573 @@
+---
+/**
+ * Data Augmentation Workflow with Microfrontends Presentation
+ * A comprehensive specification presentation using RevealJS and Astro
+ */
+import Layout from '@layouts/Layout.astro';
+import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+
+const title = "Data Augmentation Workflow with Microfrontends";
+const description = "A comprehensive specification for implementing a data augmentation workflow using microfrontend architecture with module federation";
+---
+
+<Layout title={title} description={description}>
+  <OneSlideDeck>
+    <!-- Title Slide -->
+    <section class="title-slide">
+      <h1>Data Augmentation Workflow</h1>
+      <h2>with Microfrontends</h2>
+      <p><em>A comprehensive specification for implementing distributed, scalable data processing</em></p>
+      <p><small>Michael Staton • Technical Specification v0.0.0.1</small></p>
+    </section>
+
+    <!-- Executive Summary -->
+    <section>
+      <h2>Executive Summary</h2>
+      <p>This specification defines a <strong>data augmentation workflow</strong> implemented through a <strong>microfrontend architecture</strong> using module federation.</p>
+      <ul>
+        <li class="fragment">Distributed processing of content</li>
+        <li class="fragment">Specialized applications for each stage</li>
+        <li class="fragment">AI-assisted content enhancement</li>
+        <li class="fragment">Independent development & deployment</li>
+      </ul>
+    </section>
+
+    <!-- The Problem -->
+    <section>
+      <h2>The Problem</h2>
+      <h3>Traditional Monolithic Workflows</h3>
+      <ul>
+        <li class="fragment">🔗 <strong>Tight coupling</strong> between processing stages</li>
+        <li class="fragment">📈 <strong>Difficult to scale</strong> individual components</li>
+        <li class="fragment">🚀 <strong>Complex deployment</strong> processes</li>
+        <li class="fragment">👥 <strong>Team collaboration</strong> challenges</li>
+      </ul>
+    </section>
+
+    <!-- Current Limitations -->
+    <section>
+      <h3>Current Limitations</h3>
+      <ul>
+        <li class="fragment">Difficulty in independent deployment</li>
+        <li class="fragment">Challenges in team collaboration</li>
+        <li class="fragment">Limited extensibility for new capabilities</li>
+        <li class="fragment">Single points of failure</li>
+      </ul>
+      <aside class="notes">
+        These limitations drive the need for a more modular approach that can adapt to different data types and processing requirements.
+      </aside>
+    </section>
+
+    <!-- Our Solution -->
+    <section>
+      <h2>Our Solution: Microfrontends</h2>
+      <h3>Why Microfrontends?</h3>
+      <ul>
+        <li class="fragment">🧩 <strong>Modular architecture</strong></li>
+        <li class="fragment">🔄 <strong>Independent deployment</strong></li>
+        <li class="fragment">📊 <strong>Scalable components</strong></li>
+        <li class="fragment">🤝 <strong>Seamless integration</strong></li>
+      </ul>
+    </section>
+
+    <!-- Key Benefits -->
+    <section>
+      <h3>Key Benefits</h3>
+      <div class="two-column">
+        <div>
+          <ul>
+            <li class="fragment"><strong>Independent Development</strong><br/>Teams work autonomously</li>
+            <li class="fragment"><strong>Technology Flexibility</strong><br/>Choose the right tool for each job</li>
+          </ul>
+        </div>
+        <div>
+          <ul>
+            <li class="fragment"><strong>Fault Isolation</strong><br/>Failures don't cascade</li>
+            <li class="fragment"><strong>Scalable Teams</strong><br/>Organize around business capabilities</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Overview -->
+    <section>
+      <h2>Architecture Overview</h2>
+      <h3>Seven Specialized Applications</h3>
+      <ol>
+        <li class="fragment"><strong>RecordCollector</strong> - Data collection & ingestion</li>
+        <li class="fragment"><strong>PromptTemplateManager</strong> - AI prompt templates</li>
+        <li class="fragment"><strong>RequestReviewer</strong> - Request validation</li>
+        <li class="fragment"><strong>ResponseReviewer</strong> - Quality assurance</li>
+        <li class="fragment"><strong>HighlightCollector</strong> - Key insights extraction</li>
+        <li class="fragment"><strong>InsightAssembler</strong> - Final synthesis</li>
+        <li class="fragment"><strong>Additional Component</strong> - <em>To be defined</em></li>
+      </ol>
+    </section>
+
+    <!-- Data Flow -->
+    <section>
+      <h2>Data Flow Architecture</h2>
+      <div class="flow-diagram">
+        <div class="flow-step">RecordCollector</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step">PromptTemplateManager</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step">RequestReviewer</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step">AI Processing</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step">ResponseReviewer</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step">HighlightCollector</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step">InsightAssembler</div>
+        <div class="arrow">↓</div>
+        <div class="flow-step final">RecordUpserter</div>
+      </div>
+      <aside class="notes">
+        This flow shows the sequential processing stages, with each component having a specific responsibility in the data augmentation pipeline.
+      </aside>
+    </section>
+
+    <!-- Component Deep Dive -->
+    <section>
+      <section>
+        <h2>Component Deep Dive</h2>
+        <p>Let's explore each component in detail</p>
+        <p><small>Use ↓ to navigate through components</small></p>
+      </section>
+
+      <section>
+        <h3>RecordCollector</h3>
+        <ul>
+          <li><strong>Purpose</strong>: Initial data collection and ingestion</li>
+          <li><strong>Responsibilities</strong>: Data validation, format standardization</li>
+          <li><strong>Integration</strong>: Feeds into PromptTemplateManager</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>PromptTemplateManager</h3>
+        <ul>
+          <li><strong>Purpose</strong>: Template management for AI prompts</li>
+          <li><strong>Responsibilities</strong>: Template versioning, prompt optimization</li>
+          <li><strong>Integration</strong>: Provides templates to RequestReviewer</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>RequestReviewer</h3>
+        <ul>
+          <li><strong>Purpose</strong>: Review and validation of processing requests</li>
+          <li><strong>Responsibilities</strong>: Quality gates, approval workflows</li>
+          <li><strong>Integration</strong>: Gates AI processing pipeline</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>ResponseReviewer</h3>
+        <ul>
+          <li><strong>Purpose</strong>: Quality assurance for AI-generated responses</li>
+          <li><strong>Responsibilities</strong>: Content validation, quality scoring</li>
+          <li><strong>Integration</strong>: Feeds validated content to HighlightCollector</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>HighlightCollector</h3>
+        <ul>
+          <li><strong>Purpose</strong>: Extraction and collection of key insights</li>
+          <li><strong>Responsibilities</strong>: Pattern recognition, insight extraction</li>
+          <li><strong>Integration</strong>: Provides insights to InsightAssembler</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>InsightAssembler</h3>
+        <ul>
+          <li><strong>Purpose</strong>: Final assembly and synthesis of processed data</li>
+          <li><strong>Responsibilities</strong>: Content synthesis, final formatting</li>
+          <li><strong>Integration</strong>: Produces final output</li>
+        </ul>
+      </section>
+    </section>
+
+    <!-- Technical Implementation -->
+    <section>
+      <h2>Technical Implementation</h2>
+      <h3>Module Federation Architecture</h3>
+      <ul>
+        <li class="fragment"><strong>Independent Deployment</strong> - Each app deploys separately</li>
+        <li class="fragment"><strong>Shared Dependencies</strong> - Managed through module federation</li>
+        <li class="fragment"><strong>Common Components</strong> - Shared UI library</li>
+        <li class="fragment"><strong>Event-Driven Communication</strong> - Loose coupling between apps</li>
+      </ul>
+    </section>
+
+    <!-- Docker Integration -->
+    <section>
+      <h3>Docker & Monorepo Integration</h3>
+      <div class="two-column">
+        <div>
+          <ul>
+            <li class="fragment"><strong>Containerized Development</strong><br/>Consistent environments</li>
+            <li class="fragment"><strong>Monorepo Structure</strong><br/>Unified codebase management</li>
+          </ul>
+        </div>
+        <div>
+          <ul>
+            <li class="fragment"><strong>Unified Build Process</strong><br/>Single Dockerfile</li>
+            <li class="fragment"><strong>Environment Isolation</strong><br/>Independent testing</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Specifications -->
+    <section>
+      <h2>API Specifications</h2>
+      <h3>Communication Patterns</h3>
+      <ul>
+        <li class="fragment"><strong>RESTful APIs</strong> - Inter-service communication</li>
+        <li class="fragment"><strong>GraphQL Endpoints</strong> - Complex data queries</li>
+        <li class="fragment"><strong>WebSocket Connections</strong> - Real-time status updates</li>
+        <li class="fragment"><strong>Standardized Schemas</strong> - Consistent data formats</li>
+      </ul>
+    </section>
+
+    <!-- Error Handling -->
+    <section>
+      <h3>Error Handling Strategy</h3>
+      <ul>
+        <li class="fragment"><strong>Graceful Degradation</strong> - Service unavailability handling</li>
+        <li class="fragment"><strong>Retry Mechanisms</strong> - Failed processing recovery</li>
+        <li class="fragment"><strong>Comprehensive Logging</strong> - Error tracking & debugging</li>
+        <li class="fragment"><strong>Rollback Capabilities</strong> - Failed augmentation recovery</li>
+      </ul>
+    </section>
+
+    <!-- Implementation Roadmap -->
+    <section>
+      <section>
+        <h2>Implementation Roadmap</h2>
+        <p>Three-phase approach to delivery</p>
+        <p><small>Use ↓ to navigate through phases</small></p>
+      </section>
+
+      <section>
+        <h3>Phase 1: Core Infrastructure</h3>
+        <ul>
+          <li class="fragment">Docker development environment setup</li>
+          <li class="fragment">Module federation framework configuration</li>
+          <li class="fragment">Base microfrontend shell implementation</li>
+          <li class="fragment">Shared component library creation</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Phase 2: Individual Applications</h3>
+        <ul>
+          <li class="fragment">Develop each microfrontend application</li>
+          <li class="fragment">Implement data processing logic</li>
+          <li class="fragment">Create user interfaces</li>
+          <li class="fragment">Establish testing frameworks</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Phase 3: Integration & Optimization</h3>
+        <ul>
+          <li class="fragment">End-to-end workflow testing</li>
+          <li class="fragment">Performance optimization</li>
+          <li class="fragment">User experience refinement</li>
+          <li class="fragment">Documentation and training</li>
+        </ul>
+      </section>
+    </section>
+
+    <!-- Dependencies -->
+    <section>
+      <h2>Dependencies & Requirements</h2>
+      <h3>Technical Stack</h3>
+      <ul>
+        <li class="fragment"><strong>Module Federation</strong> - Webpack 5+</li>
+        <li class="fragment"><strong>Containerization</strong> - Docker platform</li>
+        <li class="fragment"><strong>Package Management</strong> - pnpm workspace</li>
+        <li class="fragment"><strong>Version Control</strong> - Git submodule support</li>
+        <li class="fragment"><strong>UI Components</strong> - Shared component library</li>
+      </ul>
+    </section>
+
+    <!-- Testing Strategy -->
+    <section>
+      <h3>Testing Strategy</h3>
+      <div class="two-column">
+        <div>
+          <ul>
+            <li class="fragment"><strong>Unit Tests</strong><br/>Individual microfrontend logic</li>
+            <li class="fragment"><strong>Integration Tests</strong><br/>Inter-service communication</li>
+          </ul>
+        </div>
+        <div>
+          <ul>
+            <li class="fragment"><strong>End-to-End Tests</strong><br/>Complete workflow validation</li>
+            <li class="fragment"><strong>Performance Tests</strong><br/>Load and stress testing</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alternatives -->
+    <section>
+      <section>
+        <h2>Alternatives Considered</h2>
+        <p>We evaluated multiple architectural approaches</p>
+        <p><small>Use ↓ to see alternatives</small></p>
+      </section>
+
+      <section>
+        <h3>Monolithic Architecture</h3>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>✅ Pros</h4>
+            <ul>
+              <li>Simpler deployment</li>
+              <li>Easier debugging</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Cons</h4>
+            <ul>
+              <li>Difficult to scale</li>
+              <li>Tight coupling</li>
+            </ul>
+          </div>
+        </div>
+        <p><strong>🚫 Decision</strong>: Rejected due to scalability concerns</p>
+      </section>
+
+      <section>
+        <h3>Microservices with Traditional Frontend</h3>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>✅ Pros</h4>
+            <ul>
+              <li>Backend scalability</li>
+              <li>Clear boundaries</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Cons</h4>
+            <ul>
+              <li>Frontend remains monolithic</li>
+              <li>Limited UI modularity</li>
+            </ul>
+          </div>
+        </div>
+        <p><strong>🚫 Decision</strong>: Rejected for full microfrontend approach</p>
+      </section>
+    </section>
+
+    <!-- Open Questions -->
+    <section>
+      <section>
+        <h2>Open Questions</h2>
+        <p>Areas requiring further investigation</p>
+        <p><small>Use ↓ to explore questions</small></p>
+      </section>
+
+      <section>
+        <h3>Technical Considerations</h3>
+        <ul>
+          <li class="fragment">Specific AI service integration patterns</li>
+          <li class="fragment">Data persistence strategy across microfrontends</li>
+          <li class="fragment">User authentication and authorization</li>
+          <li class="fragment">Performance monitoring implementation</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Operational Considerations</h3>
+        <ul>
+          <li class="fragment">Deployment orchestration design</li>
+          <li class="fragment">CI/CD pipeline architecture</li>
+          <li class="fragment">Container registry strategy</li>
+          <li class="fragment">Orchestration approach (Docker Compose vs Kubernetes)</li>
+        </ul>
+      </section>
+    </section>
+
+    <!-- Key Takeaways -->
+    <section>
+      <h2>Key Takeaways</h2>
+      <h3>Success Factors</h3>
+      <ul>
+        <li class="fragment"><strong>Modular Design</strong> - Independent, focused components</li>
+        <li class="fragment"><strong>Clear Boundaries</strong> - Well-defined interfaces</li>
+        <li class="fragment"><strong>Shared Standards</strong> - Common data schemas</li>
+        <li class="fragment"><strong>Robust Testing</strong> - Comprehensive validation</li>
+      </ul>
+    </section>
+
+    <!-- Next Steps -->
+    <section>
+      <h3>Next Steps</h3>
+      <ol>
+        <li class="fragment">Begin Phase 1 infrastructure setup</li>
+        <li class="fragment">Define detailed API specifications</li>
+        <li class="fragment">Establish development team structure</li>
+        <li class="fragment">Create proof-of-concept implementation</li>
+      </ol>
+    </section>
+
+    <!-- Questions & Discussion -->
+    <section>
+      <h2>Questions & Discussion</h2>
+      <h3>Let's Discuss</h3>
+      <ul>
+        <li class="fragment">Implementation priorities</li>
+        <li class="fragment">Technical challenges</li>
+        <li class="fragment">Team organization</li>
+        <li class="fragment">Timeline considerations</li>
+      </ul>
+      <br/>
+      <p class="fragment"><strong>Thank you for your attention!</strong></p>
+    </section>
+
+    <!-- Appendix -->
+    <section>
+      <section>
+        <h2>Appendix</h2>
+        <p>Additional resources and references</p>
+        <p><small>Use ↓ to explore appendix</small></p>
+      </section>
+
+      <section>
+        <h3>Glossary</h3>
+        <dl>
+          <dt><strong>Microfrontend</strong></dt>
+          <dd>Independently deployable frontend application</dd>
+          <dt><strong>Module Federation</strong></dt>
+          <dd>Webpack feature for code sharing</dd>
+          <dt><strong>Data Augmentation</strong></dt>
+          <dd>Process of enhancing existing data</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h3>References</h3>
+        <ul>
+          <li><a href="https://micro-frontends.org/">Micro Frontends Architecture</a></li>
+          <li><a href="https://webpack.js.org/concepts/module-federation/">Webpack Module Federation Documentation</a></li>
+          <li>Individual application specifications</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Revision History</h3>
+        <ul>
+          <li>v0.0.0.1 (2025-07-24): Initial draft</li>
+          <li>v0.0.0.1 (2025-08-09): Applied specification template</li>
+          <li>Current: Presentation format adaptation</li>
+        </ul>
+      </section>
+    </section>
+  </OneSlideDeck>
+</Layout>
+
+<style>
+  .two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 1rem 0;
+  }
+
+  .pros, .cons {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .pros {
+    background-color: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .cons {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .title-slide {
+    text-align: center;
+  }
+
+  .title-slide h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .title-slide h2 {
+    font-size: 2rem;
+    color: #666;
+    font-weight: 300;
+  }
+
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+
+  .flow-step {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 150px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+  }
+
+  .flow-step:hover {
+    transform: translateY(-2px);
+  }
+
+  .flow-step.final {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .arrow {
+    font-size: 1.5rem;
+    color: #667eea;
+    font-weight: bold;
+  }
+
+  dl {
+    text-align: left;
+  }
+
+  dt {
+    margin-top: 1rem;
+  }
+
+  dd {
+    margin-left: 1rem;
+    color: #666;
+  }
+</style>
