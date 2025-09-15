@@ -1,0 +1,254 @@
+---
+/**
+ * Data Augmentation Workflow with Microfrontends Presentation - Embed Version
+ * A comprehensive specification presentation using RevealJS and Astro (without layout)
+ */
+import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+
+const title = "Data Augmentation Workflow with Microfrontends";
+const description = "A comprehensive specification for implementing a data augmentation workflow using microfrontend architecture with module federation";
+---
+
+<OneSlideDeck>
+  <!-- Title Slide -->
+  <section class="title-slide">
+    <h1>Data Augmentation Workflow</h1>
+    <h2>with Microfrontends</h2>
+    <p><em>A comprehensive specification for implementing distributed, scalable data processing</em></p>
+    <p><small>Michael Staton • Technical Specification v0.0.0.1</small></p>
+  </section>
+
+  <!-- Executive Summary -->
+  <section>
+    <h2>Executive Summary</h2>
+    <div class="two-column">
+      <div>
+        <h3>Overview</h3>
+        <ul>
+          <li>Distributed data processing architecture</li>
+          <li>Microfrontend-based user interfaces</li>
+          <li>Scalable workflow orchestration</li>
+          <li>Real-time monitoring and analytics</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Key Benefits</h3>
+        <ul>
+          <li>Horizontal scalability</li>
+          <li>Technology diversity</li>
+          <li>Independent deployments</li>
+          <li>Fault isolation</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Statement -->
+  <section>
+    <h2>Problem Statement</h2>
+    <div class="problem-section">
+      <h3>Current Challenges</h3>
+      <ul>
+        <li><strong>Monolithic Limitations:</strong> Single points of failure, difficult scaling</li>
+        <li><strong>Data Silos:</strong> Isolated datasets preventing comprehensive analysis</li>
+        <li><strong>Processing Bottlenecks:</strong> Sequential processing limiting throughput</li>
+        <li><strong>UI Complexity:</strong> Monolithic frontends difficult to maintain</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Current Limitations -->
+  <section>
+    <h2>Current System Limitations</h2>
+    <div class="limitations-grid">
+      <div class="limitation-item">
+        <h3>🏗️ Architecture</h3>
+        <ul>
+          <li>Tightly coupled components</li>
+          <li>Single technology stack</li>
+          <li>Difficult to scale individual services</li>
+        </ul>
+      </div>
+      <div class="limitation-item">
+        <h3>📊 Data Processing</h3>
+        <ul>
+          <li>Batch processing only</li>
+          <li>Limited parallel execution</li>
+          <li>Manual intervention required</li>
+        </ul>
+      </div>
+      <div class="limitation-item">
+        <h3>🖥️ User Interface</h3>
+        <ul>
+          <li>Monolithic frontend</li>
+          <li>Single deployment unit</li>
+          <li>Technology lock-in</li>
+        </ul>
+      </div>
+      <div class="limitation-item">
+        <h3>🔧 Operations</h3>
+        <ul>
+          <li>All-or-nothing deployments</li>
+          <li>Difficult rollbacks</li>
+          <li>Limited monitoring granularity</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Proposed Solution -->
+  <section>
+    <h2>Proposed Solution: Microfrontend Architecture</h2>
+    <div class="solution-overview">
+      <h3>Core Components</h3>
+      <div class="component-grid">
+        <div class="component">
+          <h4>🔄 Workflow Engine</h4>
+          <p>Orchestrates data processing pipelines</p>
+        </div>
+        <div class="component">
+          <h4>📱 Microfrontends</h4>
+          <p>Independent UI components</p>
+        </div>
+        <div class="component">
+          <h4>🚀 Module Federation</h4>
+          <p>Runtime composition of applications</p>
+        </div>
+        <div class="component">
+          <h4>📡 Event Bus</h4>
+          <p>Inter-service communication</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions & Discussion -->
+  <section>
+    <h2>Questions & Discussion</h2>
+    <div class="discussion-section">
+      <h3>Key Discussion Points</h3>
+      <ul>
+        <li>Resource allocation and timeline feasibility</li>
+        <li>Technology choices and alternatives</li>
+        <li>Integration with existing systems</li>
+        <li>Training and change management strategy</li>
+        <li>Success criteria and measurement approach</li>
+      </ul>
+      
+      <div class="contact-info">
+        <h3>Contact Information</h3>
+        <p><strong>Technical Lead:</strong> Michael Staton</p>
+        <p><strong>Email:</strong> michael.staton@company.com</p>
+        <p><strong>Project Repository:</strong> github.com/company/data-augmentation-workflow</p>
+      </div>
+    </div>
+  </section>
+</OneSlideDeck>
+
+<style>
+  .two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .problem-section {
+    text-align: left;
+  }
+
+  .limitations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .limitation-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ff6b6b;
+  }
+
+  .limitation-item h3 {
+    margin-bottom: 0.5rem;
+    color: #ff6b6b;
+  }
+
+  .component-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .component {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid #4ecdc4;
+  }
+
+  .component h4 {
+    color: #4ecdc4;
+    margin-bottom: 0.5rem;
+  }
+
+  .discussion-section {
+    text-align: left;
+  }
+
+  .contact-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .contact-info h3 {
+    color: #74b9ff;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .two-column,
+    .limitations-grid,
+    .component-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Typography improvements */
+  h1, h2, h3, h4 {
+    font-weight: 600;
+  }
+
+  ul {
+    text-align: left;
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.3rem;
+  }
+
+  p {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Animation for better presentation */
+  .component,
+  .limitation-item {
+    transition: transform 0.2s ease;
+  }
+
+  .component:hover,
+  .limitation-item:hover {
+    transform: translateY(-2px);
+  }
+</style>

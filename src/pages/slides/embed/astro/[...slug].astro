@@ -1,0 +1,51 @@
+---
+/**
+ * Astro Slide Embed Route
+ * Renders Astro presentations without the site layout for embedding
+ */
+import fs from 'fs';
+import path from 'path';
+
+// Get the slug from the URL
+const { slug } = Astro.params;
+const slugArray = Array.isArray(slug) ? slug : [slug];
+const slidePath = slugArray.join('/');
+
+// Get configuration from query parameters
+const searchParams = new URLSearchParams(Astro.url.search);
+const config = {
+  theme: searchParams.get('theme') || 'default',
+  transition: searchParams.get('transition') || 'slide',
+  controls: searchParams.get('controls') !== 'false',
+  progress: searchParams.get('progress') !== 'false'
+};
+
+// Check if the slide file exists
+const slideFilePath = path.join(process.cwd(), 'src', 'pages', 'slides', `${slidePath}.astro`);
+
+if (!fs.existsSync(slideFilePath)) {
+  return Astro.redirect('/404');
+}
+
+// For specific slides that have embed versions, redirect to those
+if (slidePath === 'Data-Augmentation-Workflow-2') {
+  const configParams = {
+    theme: config.theme,
+    transition: config.transition,
+    controls: config.controls.toString(),
+    progress: config.progress.toString()
+  };
+  const embedUrl = `/slides/Data-Augmentation-Workflow-2-embed?${new URLSearchParams(configParams).toString()}`;
+  return Astro.redirect(embedUrl);
+}
+
+// For other slides, redirect to the actual slide with embed parameter
+const configParams = {
+  theme: config.theme,
+  transition: config.transition,
+  controls: config.controls.toString(),
+  progress: config.progress.toString()
+};
+const embedUrl = `/slides/${slidePath}?embed=true&${new URLSearchParams(configParams).toString()}`;
+return Astro.redirect(embedUrl);
+---

@@ -1,13 +1,14 @@
 ---
 /**
  * Embedded slide deck renderer
- * Creates an embedded presentation view from multiple markdown content files
+ * Creates an embedded presentation view from markdown content files
  * Reuses the MarkdownSlideDeck component for consistency
  */
 export const prerender = false;
 
 import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
 import { readFile } from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
 
 // Get slug from path parameters
@@ -33,35 +34,43 @@ const config = {
 // Convert slug array to path
 const slidePath = Array.isArray(slug) ? slug.join('/') : slug;
 
-// Load slide content directly from filesystem like the working markdown route
+// Check if this is an Astro presentation request
+const isAstroRequest = searchParams.get('type') === 'astro';
+
+// Load slide content directly from filesystem
 let combinedMarkdown = '';
 let title = 'Embedded Presentation';
 
 try {
-  // Read markdown file directly from filesystem
-  const slidesDir = path.join(process.cwd(), 'src', 'generated-content', 'slides');
-  const fullPath = path.join(slidesDir, `${slidePath}.md`);
-  
-  console.log(`Reading slide from: ${fullPath}`);
-  
-  const fileContent = await readFile(fullPath, 'utf-8');
-  
-  // Parse frontmatter and content (simple approach)
-  const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  
-  if (frontmatterMatch) {
-    const frontmatterText = frontmatterMatch[1];
-    combinedMarkdown = frontmatterMatch[2];
-    
-    // Extract title from frontmatter
-    const titleMatch = frontmatterText.match(/title:\s*(.+)/);
-    if (titleMatch) {
-      title = titleMatch[1].trim().replace(/['"]/g, '');
-    }
-    
-    console.log(`Loaded slide: ${title}`);
+  if (isAstroRequest) {
+    // Redirect to dedicated Astro embed route
+    return Astro.redirect(`/slides/embed/astro/${slidePath}?${searchParams.toString()}`);
   } else {
-    combinedMarkdown = fileContent;
+    // Handle markdown presentation (existing logic)
+    const slidesDir = path.join(process.cwd(), 'src', 'generated-content', 'slides');
+    const fullPath = path.join(slidesDir, `${slidePath}.md`);
+    
+    console.log(`Reading slide from: ${fullPath}`);
+    
+    const fileContent = await readFile(fullPath, 'utf-8');
+    
+    // Parse frontmatter and content (simple approach)
+    const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    
+    if (frontmatterMatch) {
+      const frontmatterText = frontmatterMatch[1];
+      combinedMarkdown = frontmatterMatch[2];
+      
+      // Extract title from frontmatter
+      const titleMatch = frontmatterText.match(/title:\s*(.+)/);
+      if (titleMatch) {
+        title = titleMatch[1].trim().replace(/['"]/g, '');
+      }
+      
+      console.log(`Loaded slide: ${title}`);
+    } else {
+      combinedMarkdown = fileContent;
+    }
   }
 } catch (error) {
   console.error(`Failed to load slide: ${slidePath}`, error);

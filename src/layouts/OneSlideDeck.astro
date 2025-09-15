@@ -10,23 +10,36 @@ interface Props {
   // No title/description needed as they'll be handled by the Layout
 }
 
+// Get query parameters for embed configuration
+const url = new URL(Astro.request.url);
+const isEmbedded = url.searchParams.has('embedded') || url.searchParams.has('theme');
+const theme = url.searchParams.get('theme') || 'black';
+const transition = url.searchParams.get('transition') || 'slide';
+const controls = url.searchParams.get('controls') !== 'false';
+const progress = url.searchParams.get('progress') !== 'false';
+const autoSlide = parseInt(url.searchParams.get('autoSlide') || '0', 10);
+const loop = url.searchParams.get('loop') === 'true';
+
 // RevealJS configuration options
 const revealOptions = {
-  controls: true,
-  progress: true,
-  slideNumber: true,
-  history: true,
+  controls,
+  progress,
+  slideNumber: !isEmbedded,
+  history: !isEmbedded,
   center: true,
   touch: true,
   hideInactiveCursor: true,
-  transition: 'slide',
+  transition,
   backgroundTransition: 'fade',
+  autoSlide,
+  loop,
+  embedded: isEmbedded,
 };
 ---
 
 <!-- RevealJS styles -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.min.css" id="theme">
+<link rel="stylesheet" href={`https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/${theme}.min.css`} id="theme">
 
 <!-- Syntax highlighting for code blocks -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.min.css">
@@ -52,7 +65,7 @@ const revealOptions = {
 <!-- RevealJS container -->
 <div class="reveal-container">
   <!-- Control buttons positioned in the container -->
-  <div class="control-buttons">
+  <div class="control-buttons" style={isEmbedded ? 'display: none;' : ''}>
     <!-- Exit button -->
     <a href="/slides/" class="control-button exit-button" title="Back to Presentations">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -89,20 +102,12 @@ const revealOptions = {
 <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.min.js"></script>
 <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.min.js"></script>
 
-<script is:inline>
+<script is:inline define:vars={{ revealOptions }}>
   // Initialize RevealJS with configuration options
   document.addEventListener('DOMContentLoaded', function() {
     // Initialize RevealJS
     Reveal.initialize({
-      controls: true,
-      progress: true,
-      slideNumber: true,
-      history: true,
-      center: true,
-      touch: true,
-      hideInactiveCursor: true,
-      transition: 'slide',
-      backgroundTransition: 'fade',
+      ...revealOptions,
       
       // Set 16:9 aspect ratio
       width: 1600,
@@ -127,6 +132,24 @@ const revealOptions = {
         RevealZoom
       ]
     });
+    
+    // Add postMessage communication for embedded presentations
+    if (revealOptions.embedded) {
+      Reveal.on('slidechanged', function(event) {
+        window.parent.postMessage({
+          type: 'slideChanged',
+          slideIndex: event.indexh,
+          verticalIndex: event.indexv
+        }, '*');
+      });
+      
+      // Listen for navigation commands from parent
+      window.addEventListener('message', function(event) {
+        if (event.data.type === 'navigate') {
+          Reveal.slide(event.data.h, event.data.v);
+        }
+      });
+    }
   });
 </script>
 

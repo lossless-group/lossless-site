@@ -1,0 +1,66 @@
+---
+title: "Embedded Slides Demo"
+description: "Demonstration of embedding Astro presentations within Markdown content"
+publishDate: 2025-01-16
+---
+
+import EmbedAstroSlides from '@components/markdown/EmbedAstroSlides.astro';
+
+# Embedded Slides Demo
+
+This page demonstrates how to embed Astro presentations directly within Markdown content using the `EmbedAstroSlides` component.
+
+## Basic Embedding
+
+Here's how you can embed an Astro presentation with default settings:
+
+<EmbedAstroSlides slides="Data-Augmentation-Workflow-2" />
+
+## Custom Configuration
+
+You can also customize the appearance and behavior:
+
+<EmbedAstroSlides 
+  slides="Data-Augmentation-Workflow-2" 
+  theme="white" 
+  transition="fade" 
+  height="500px" 
+  controls={false} 
+  progress={false} 
+/>
+
+## Usage Instructions
+
+To embed an Astro presentation in your Markdown files:
+
+1. Import the component at the top of your MDX file:
+   ```jsx
+   import EmbedAstroSlides from '@components/markdown/EmbedAstroSlides.astro';
+   ```
+
+2. Use the component with the presentation name:
+   ```jsx
+   <EmbedAstroSlides slides="Your-Presentation-Name" />
+   ```
+
+### Available Props
+
+- `slides` (required): The name of the Astro presentation file (without .astro extension)
+- `theme`: RevealJS theme (default: "black")
+- `transition`: Slide transition effect (default: "slide")
+- `controls`: Show navigation controls (default: true)
+- `progress`: Show progress bar (default: true)
+- `autoSlide`: Auto-advance slides in milliseconds (default: 0 - disabled)
+- `loop`: Loop presentation (default: false)
+- `width`: Iframe width (default: "100%")
+- `height`: Iframe height (default: "600px")
+
+## Benefits
+
+- **Seamless Integration**: Presentations appear inline with your content
+- **Responsive Design**: Automatically adapts to different screen sizes
+- **Customizable**: Full control over appearance and behavior
+- **Accessible**: Maintains proper focus and keyboard navigation
+- **Performance**: Lazy loading for better page performance
+
+This approach allows you to create rich, interactive documentation that combines traditional markdown content with embedded presentations.

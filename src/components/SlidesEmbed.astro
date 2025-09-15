@@ -62,9 +62,14 @@ if (!firstSlide) {
   throw new Error('No slides provided');
 }
 
-// Extract slug from path (remove slides/ prefix and .md extension)
-const slug = sanitizePath(firstSlide.path).replace(/^slides\//, '').replace(/\.md$/, '');
-const embedUrl = new URL(`/slides/embed/${slug}`, Astro.url.origin);
+// Extract slug from path (remove slides/ prefix and file extension)
+const sanitizedPath = sanitizePath(firstSlide.path).replace(/^slides\//, '');
+const isAstroPresentation = sanitizedPath.endsWith('.astro');
+const slug = sanitizedPath.replace(/\.(md|astro)$/, '');
+
+// Use different embed routes for Astro vs Markdown presentations
+const embedPath = isAstroPresentation ? `/slides/${slug}` : `/slides/embed/${slug}`;
+const embedUrl = new URL(embedPath, Astro.url.origin);
 
 // Add config parameters as query params
 Object.entries(finalConfig).forEach(([key, value]) => {

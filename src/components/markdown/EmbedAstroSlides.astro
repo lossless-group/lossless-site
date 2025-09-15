@@ -1,0 +1,65 @@
+---
+/**
+ * EmbedAstroSlides.astro
+ * A component for embedding Astro presentations within Markdown files
+ * Usage in MDX: <EmbedAstroSlides slides="Data-Augmentation-Workflow-2" theme="black" height="600px" />
+ */
+
+import SlidesEmbed from '@components/SlidesEmbed.astro';
+
+export interface Props {
+  slides: string; // The name of the Astro presentation file (without .astro extension)
+  theme?: string;
+  transition?: string;
+  controls?: boolean;
+  progress?: boolean;
+  autoSlide?: number;
+  loop?: boolean;
+  width?: string;
+  height?: string;
+}
+
+const {
+  slides,
+  theme = 'black',
+  transition = 'slide',
+  controls = true,
+  progress = true,
+  autoSlide = 0,
+  loop = false,
+  width = '100%',
+  height = '600px'
+} = Astro.props;
+
+// Convert the slides prop to the format expected by SlidesEmbed
+const slidesData = [{
+  path: `slides/${slides}.astro`,
+  title: slides.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}];
+
+const config = {
+  theme,
+  transition,
+  controls,
+  progress,
+  autoSlide,
+  loop,
+  width,
+  height
+};
+---
+
+<div class="embedded-astro-slides">
+  <SlidesEmbed slides={slidesData} config={config} />
+</div>
+
+<style>
+  .embedded-astro-slides {
+    margin: 2rem 0;
+  }
+  
+  /* Ensure proper spacing in markdown context */
+  .embedded-astro-slides :global(.presentation-embed) {
+    margin: 1rem 0;
+  }
+</style>

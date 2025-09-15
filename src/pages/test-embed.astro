@@ -1,0 +1,61 @@
+---
+/**
+ * Test page for embedding Astro presentations
+ */
+import Layout from '@layouts/Layout.astro';
+import SlidesEmbed from '@components/SlidesEmbed.astro';
+
+const title = "Test Embed Page";
+const description = "Testing the embedding functionality for Astro presentations";
+
+// Test slides data
+const testSlides = [
+  {
+    path: "slides/Data-Augmentation-Workflow-2.astro",
+    title: "Data Augmentation Workflow with Microfrontends"
+  }
+];
+
+// Test configuration
+const embedConfig = {
+  theme: 'black',
+  transition: 'slide',
+  controls: true,
+  progress: true,
+  width: '100%',
+  height: '600px'
+};
+---
+
+<Layout title={title} description={description}>
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Test Embed Page</h1>
+    
+    <p class="mb-6 text-gray-600">
+      This page tests the embedding functionality for Astro presentations.
+      Below should be an embedded version of the Data Augmentation Workflow presentation.
+    </p>
+    
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Embedded Astro Presentation:</h2>
+      <SlidesEmbed slides={testSlides} config={embedConfig} />
+    </div>
+    
+    <div class="mt-8 p-4 bg-gray-100 rounded">
+      <h3 class="font-semibold mb-2">Test Details:</h3>
+      <ul class="list-disc list-inside space-y-1 text-sm">
+        <li>Presentation: Data-Augmentation-Workflow-2.astro</li>
+        <li>Theme: {embedConfig.theme}</li>
+        <li>Transition: {embedConfig.transition}</li>
+        <li>Controls: {embedConfig.controls ? 'Enabled' : 'Disabled'}</li>
+        <li>Progress: {embedConfig.progress ? 'Enabled' : 'Disabled'}</li>
+      </ul>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+  }
+</style>

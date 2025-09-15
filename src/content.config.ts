@@ -258,8 +258,8 @@ const reportCollection = defineCollection({
 
 // Pages collection for individual MDX files
 const pagesCollection = defineCollection({
-  type: 'content',
-  schema: z.any() // Allow any frontmatter structure to avoid validation errors
+  loader: glob({pattern: "**/*.{md,mdx}", base: resolveContentPath("mdx-pages")}),
+  schema: z.object({}).passthrough()
 });
 
 // Individual markdown/mdx files with minimal validation - only ensure tags is an array
