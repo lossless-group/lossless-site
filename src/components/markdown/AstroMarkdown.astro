@@ -1848,14 +1848,6 @@ if (DEBUG_AST) {
                 if (link && link.url) {
                   // Extract slide path and title from backlink
                   const path = link.url.replace(/^\//, '').replace(/\.md$/, '');
-                  const title = link.children?.[0]?.value || path.split('/').pop() || path;
-                  
-                  slides.push({ path, title });
-                }
-              }
-            }
-          }
-        }
       }
     }
     
