@@ -63,7 +63,7 @@ const revealOptions = {
 </script>
 
 <!-- RevealJS container -->
-<div class="reveal-container">
+<div class={`reveal-container ${isEmbedded ? 'embedded' : ''}`}>
   <!-- Control buttons positioned in the container -->
   <div class="control-buttons" style={isEmbedded ? 'display: none;' : ''}>
     <!-- Exit button -->
@@ -161,9 +161,19 @@ const revealOptions = {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -4.5rem; /* Offset the header margin */
-    padding-top: 4.5rem;
     position: relative;
+  }
+  
+  /* When not embedded, offset the header margin */
+  .reveal-container:not(.embedded) {
+    margin-top: -4.5rem;
+    padding-top: 4.5rem;
+  }
+  
+  /* When embedded, use full viewport */
+  .reveal-container.embedded {
+    margin: 0;
+    padding: 0;
   }
   
   /* Set default size for RevealJS */

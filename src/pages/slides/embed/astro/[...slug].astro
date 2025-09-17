@@ -7,47 +7,181 @@ export const prerender = false;
 
 import fs from 'fs';
 import path from 'path';
+import OneSlideDeck from '@layouts/OneSlideDeck.astro';
 
 // Get the slug from the URL
 const { slug } = Astro.params;
 const slugArray = Array.isArray(slug) ? slug : [slug];
 const slidePath = slugArray.join('/');
 
+// Debug logging for route processing
+console.log('🚀 Astro Embed Route Debug:', {
+  originalSlug: slug,
+  slugArray,
+  slidePath,
+  url: Astro.url.href,
+  searchParams: Astro.url.search
+});
+
 // Get configuration from query parameters
 const searchParams = new URLSearchParams(Astro.url.search);
 const config = {
-  theme: searchParams.get('theme') || 'default',
+  theme: searchParams.get('theme') || 'black',
   transition: searchParams.get('transition') || 'slide',
   controls: searchParams.get('controls') !== 'false',
   progress: searchParams.get('progress') !== 'false'
 };
 
+console.log('⚙️ Embed Config:', config);
+
 // Check if the slide file exists
-const slideFilePath = path.join(process.cwd(), 'src', 'pages', 'slides', `${slidePath}.astro`);
+const slideFilePath = path.join(process.cwd(), 'src', 'generated-content', 'slides', `${slidePath}.astro`);
+const fileExists = fs.existsSync(slideFilePath);
 
-if (!fs.existsSync(slideFilePath)) {
-  return Astro.redirect('/404');
+console.log('📁 File Check:', {
+  slideFilePath,
+  fileExists,
+  cwd: process.cwd()
+});
+
+if (!fileExists) {
+  console.log('❌ Slide file not found, returning 404');
+  return new Response('Slide not found', { status: 404 });
 }
 
-// For specific slides that have embed versions, redirect to those
-if (slidePath === 'Data-Augmentation-Workflow-2') {
-  const configParams = {
-    theme: config.theme,
-    transition: config.transition,
-    controls: config.controls.toString(),
-    progress: config.progress.toString()
-  };
-  const embedUrl = `/slides/Data-Augmentation-Workflow-2-embed?${new URLSearchParams(configParams).toString()}`;
-  return Astro.redirect(embedUrl);
-}
+// For embed, we need to render the slide content without the Layout wrapper
+// We'll read the slide file and extract just the OneSlideDeck content
+import { readFile } from 'fs/promises';
 
-// For other slides, redirect to the actual slide with embed parameter
-const configParams = {
-  theme: config.theme,
-  transition: config.transition,
-  controls: config.controls.toString(),
-  progress: config.progress.toString()
-};
-const embedUrl = `/slides/${slidePath}?embed=true&${new URLSearchParams(configParams).toString()}`;
-return Astro.redirect(embedUrl);
+let slideContent = '';
+try {
+  const slideFileContent = await readFile(slideFilePath, 'utf-8');
+  
+  // Extract content between <OneSlideDeck> tags
+  const oneSlideDeckMatch = slideFileContent.match(/<OneSlideDeck[^>]*>([\s\S]*?)<\/OneSlideDeck>/);
+  if (oneSlideDeckMatch) {
+    slideContent = oneSlideDeckMatch[1];
+  } else {
+    throw new Error('OneSlideDeck content not found in slide file');
+  }
+} catch (error) {
+  console.error('Failed to extract slide content:', error);
+  return new Response('Failed to load slide content', { status: 500 });
+}
 ---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Embedded Presentation: {slidePath}</title>
+  
+  <!-- RevealJS styles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.css">
+  <link rel="stylesheet" href={`https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/${config.theme}.min.css`} id="theme">
+  
+  <!-- Syntax highlighting for code blocks -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.min.css">
+  
+  <style>
+    /* Embedded presentation styles */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      overflow: hidden;
+    }
+    
+    .reveal-container {
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    .reveal {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Hide control buttons in embedded mode */
+    .control-buttons {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal-container embedded">
+    <div class="reveal">
+      <div class="slides" set:html={slideContent}>
+      </div>
+    </div>
+  </div>
+
+  <!-- RevealJS scripts -->
+  <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.min.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.min.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.min.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.min.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.min.js"></script>
+
+  <script is:inline>
+    // Initialize RevealJS with embedded configuration
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for Reveal and plugins to be available
+      if (typeof Reveal !== 'undefined' && 
+          typeof RevealMarkdown !== 'undefined' && 
+          typeof RevealHighlight !== 'undefined' && 
+          typeof RevealNotes !== 'undefined' && 
+          typeof RevealZoom !== 'undefined') {
+        
+        Reveal.initialize({
+          controls: false,
+          progress: false,
+          slideNumber: false,
+          history: false,
+          center: true,
+          touch: true,
+          hideInactiveCursor: true,
+          transition: '{config.transition}',
+          backgroundTransition: 'fade',
+          embedded: true,
+          
+          // Set 16:9 aspect ratio
+          width: 1600,
+          height: 900,
+          
+          // Make it responsive
+          disableLayout: false,
+          margin: 0.04,
+          
+          // Initialize plugins
+          plugins: [
+            RevealMarkdown,
+            RevealHighlight,
+            RevealNotes,
+            RevealZoom
+          ]
+        });
+        
+        // Add postMessage communication for embedded presentations
+        Reveal.on('slidechanged', function(event) {
+          window.parent.postMessage({
+            type: 'slideChanged',
+            slideIndex: event.indexh,
+            verticalIndex: event.indexv
+          }, '*');
+        });
+        
+        // Listen for navigation commands from parent
+        window.addEventListener('message', function(event) {
+          if (event.data.type === 'navigate') {
+            Reveal.slide(event.data.h, event.data.v);
+          }
+        });
+      } else {
+        console.error('RevealJS or plugins not loaded properly');
+      }
+    });
+  </script>
+</body>
+</html>

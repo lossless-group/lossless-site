@@ -20,6 +20,7 @@ export const directiveComponentMap: Record<string, string> = {
   'tool-showcase': 'toolkit/ToolShowcaseIsland.astro',
   'slides': 'direct', // Handled directly in AstroMarkdown.astro
   'slideshow': 'direct', // Alternative name to avoid conflict with slides codeblock
+  'slides-astro': 'direct', // Astro presentation slides, handled directly in AstroMarkdown.astro
   // MOC (Map of Content) directives for client portal configuration
   'features': 'direct', // Handled directly in ClientPortalLayout.astro
   'portfolio': 'direct', // Handled directly in ClientPortalLayout.astro

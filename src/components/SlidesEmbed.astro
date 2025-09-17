@@ -1,5 +1,5 @@
 ---
-export interface Props {
+interface Props {
   slides: Array<{
     path: string;
     title: string;
@@ -9,85 +9,105 @@ export interface Props {
     transition?: string;
     controls?: string | boolean;
     progress?: string | boolean;
-    autoSlide?: string | number;
-    loop?: string | boolean;
+    hash?: string | boolean;
+    center?: string | boolean;
     width?: string;
     height?: string;
   };
+  isAstroPresentation?: boolean;
 }
 
-const { slides, config = {} } = Astro.props;
+const { slides, config = {}, isAstroPresentation } = Astro.props;
 
-// Convert string booleans to actual booleans
-const normalizeConfig = (config: Props['config']) => {
-  const normalized: any = { ...config };
+// Validate that slides array exists and has at least one slide
+if (!slides || !Array.isArray(slides) || slides.length === 0) {
+  throw new Error('SlidesEmbed: slides prop is required and must be a non-empty array');
+}
+
+// Get the first slide path for the embed
+const firstSlide = slides[0];
+if (!firstSlide || !firstSlide.path) {
+  throw new Error('SlidesEmbed: first slide must have a valid path');
+}
+
+const slidesPath = firstSlide.path;
+
+// Normalize config values (convert string booleans to actual booleans and set defaults)
+function normalizeConfig(config: Props['config']) {
+  const normalized: Record<string, string> = {};
   
-  ['controls', 'progress', 'loop'].forEach(key => {
-    if (typeof normalized[key] === 'string') {
-      normalized[key] = normalized[key] === 'true';
+  if (config) {
+    for (const [key, value] of Object.entries(config)) {
+      if (value !== undefined) {
+        // Convert all values to strings for URL params
+        if (typeof value === 'boolean') {
+          normalized[key] = value.toString();
+        } else if (typeof value === 'string') {
+          normalized[key] = value;
+        }
+      }
     }
-  });
-  
-  if (typeof normalized.autoSlide === 'string') {
-    normalized.autoSlide = parseInt(normalized.autoSlide, 10);
   }
+  
+  // Set defaults
+  if (!normalized.controls) normalized.controls = 'true';
+  if (!normalized.progress) normalized.progress = 'true';
+  if (!normalized.hash) normalized.hash = 'true';
+  if (!normalized.center) normalized.center = 'true';
+  if (!normalized.transition) normalized.transition = 'slide';
+  if (!normalized.theme) normalized.theme = 'black';
   
   return normalized;
-};
-
-const normalizedConfig = normalizeConfig(config);
-
-// Set defaults
-const finalConfig = {
-  theme: 'black',
-  transition: 'slide',
-  controls: true,
-  progress: true,
-  autoSlide: 0,
-  loop: false,
-  width: '100%',
-  height: '600px',
-  ...normalizedConfig
-};
-
-// Sanitize paths to prevent directory traversal
-const sanitizePath = (path: string) => {
-  // Remove any .. or absolute paths
-  return path.replace(/\.\./g, '').replace(/^\//, '');
-};
-
-// Build URL for the embed - use first slide as the main slug
-const firstSlide = slides[0];
-if (!firstSlide) {
-  throw new Error('No slides provided');
 }
 
-// Extract slug from path (remove slides/ prefix and file extension)
-const sanitizedPath = sanitizePath(firstSlide.path).replace(/^slides\//, '');
-const isAstroPresentation = sanitizedPath.endsWith('.astro');
-const slug = sanitizedPath.replace(/\.(md|astro)$/, '');
-
-// Use different embed routes for Astro vs Markdown presentations
-const embedPath = isAstroPresentation ? `/slides/${slug}` : `/slides/embed/${slug}`;
-const embedUrl = new URL(embedPath, Astro.url.origin);
-
-// Add config parameters as query params
-Object.entries(finalConfig).forEach(([key, value]) => {
-  if (key !== 'width' && key !== 'height') {
-    embedUrl.searchParams.set(key, String(value));
+// Sanitize the path to prevent directory traversal
+function sanitizePath(path: string): string {
+  if (!path || typeof path !== 'string') {
+    throw new Error('sanitizePath: path must be a non-empty string');
   }
+  return path.replace(/\.\./g, '').replace(/^\/+/, '');
+}
+
+const normalizedConfig = normalizeConfig(config);
+const sanitizedPath = sanitizePath(slidesPath);
+
+// Extract the slug from the path (remove file extension and directory)
+const slug = sanitizedPath.replace(/\.(md|astro)$/, '').replace(/^.*\//, '');
+
+// Use the isAstroPresentation prop passed from the parent component
+// This indicates whether the markdown file containing the directive is an .astro file
+
+// Construct the embed path based on the file type
+const embedPath = isAstroPresentation ? `/slides/embed/astro/${slug}` : `/slides/embed/${slug}`;
+
+// Convert config to query string
+const queryParams = new URLSearchParams(normalizedConfig).toString();
+const embedUrl = `${embedPath}?${queryParams}`;
+
+// Debug logging
+console.log('🎯 SlidesEmbed Debug Info:', {
+  slides: slides.map(s => ({ path: s.path, title: s.title })),
+  firstSlidePath: slidesPath,
+  sanitizedPath,
+  slug,
+  isAstroPresentation,
+  embedPath,
+  embedUrl,
+  originalConfig: config,
+  normalizedConfig
 });
 ---
 
-<div class="presentation-embed" data-slides={JSON.stringify(slides)}>
+<div class="presentation-embed" data-slides={JSON.stringify(slides)} data-slide-path={slidesPath}>
   <iframe
-    src={embedUrl.toString()}
-    width={finalConfig.width}
-    height={finalConfig.height}
+    src={embedUrl}
+    width={normalizedConfig.width || "100%"}
+    height={normalizedConfig.height || "600px"}
     frameborder="0"
     allowfullscreen
     loading="lazy"
-    title="Embedded Presentation"
+    title={`Embedded Presentation: ${slug}`}
+    id={`slides-${slug}`}
   />
 </div>
 
@@ -122,21 +142,80 @@ Object.entries(finalConfig).forEach(([key, value]) => {
 </style>
 
 <script>
-  // Optional: Add error handling for iframe loading
-  document.querySelectorAll('.presentation-embed iframe').forEach(iframe => {
+  // Enhanced debugging and error handling for iframe loading
+  document.querySelectorAll('.presentation-embed iframe').forEach(element => {
+    const iframe = element as HTMLIFrameElement;
+    const slidePath = iframe.closest('.presentation-embed')?.getAttribute('data-slide-path');
+    const iframeId = iframe.id;
+    const src = iframe.src;
+    
+    console.log(`🎬 Loading iframe for slide: ${slidePath}`, {
+      iframeId,
+      src,
+      element: iframe
+    });
+    
+    // Track load success
+    iframe.addEventListener('load', () => {
+      console.log(`✅ Successfully loaded iframe: ${iframeId}`, {
+        slidePath,
+        src,
+        contentWindow: iframe.contentWindow
+      });
+      
+      // Try to access iframe content for additional debugging
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (iframeDoc) {
+          console.log(`📄 Iframe document loaded for ${iframeId}:`, {
+            title: iframeDoc.title,
+            url: iframeDoc.URL,
+            readyState: iframeDoc.readyState
+          });
+        }
+      } catch (e) {
+        console.log(`🔒 Cross-origin iframe content not accessible for ${iframeId} (this is normal):`, e.message);
+      }
+    });
+    
+    // Track load errors
     iframe.addEventListener('error', (e) => {
-      console.error('Failed to load presentation embed:', e);
+      console.error(`❌ Failed to load presentation embed: ${iframeId}`, {
+        slidePath,
+        src,
+        error: e,
+        iframe
+      });
+      
       const container = iframe.closest('.presentation-embed');
       if (container) {
         container.innerHTML = `
-          <div style="padding: 2rem; text-align: center; color: #ef4444;">
-            <p>⚠️ Failed to load presentation</p>
-            <p style="font-size: 0.875rem; color: #9ca3af; margin-top: 0.5rem;">
-              Please check that the presentation route is available.
+          <div style="padding: 2rem; text-align: center; color: #ef4444; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;">
+            <p style="font-weight: bold; margin-bottom: 1rem;">⚠️ Failed to load presentation</p>
+            <p style="font-size: 0.875rem; color: #7f1d1d; margin-bottom: 0.5rem;">
+              <strong>Slide Path:</strong> ${slidePath}
+            </p>
+            <p style="font-size: 0.875rem; color: #7f1d1d; margin-bottom: 0.5rem;">
+              <strong>Attempted URL:</strong> ${src}
+            </p>
+            <p style="font-size: 0.875rem; color: #9ca3af;">
+              Check the browser console for more details.
             </p>
           </div>
         `;
       }
     });
+    
+    // Add a timeout to detect hanging loads
+    const loadTimeout = setTimeout(() => {
+      console.warn(`⏰ Iframe load timeout for ${iframeId} after 10 seconds`, {
+        slidePath,
+        src,
+        iframe
+      });
+    }, 10000);
+    
+    iframe.addEventListener('load', () => clearTimeout(loadTimeout));
+    iframe.addEventListener('error', () => clearTimeout(loadTimeout));
   });
 </script>

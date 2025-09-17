@@ -65,6 +65,9 @@
       ],
       "@config/*": [
         "./config/*"
+      ],
+      "@slides/*": [
+        "./src/pages/slides/*"
       ]
     },
     "types": ["astro/client"],

@@ -1827,11 +1827,13 @@ if (DEBUG_AST) {
     );
   }
 
-  if (directiveName === 'slides' || directiveName === 'slideshow') {
+  if (directiveName === 'slides' || directiveName === 'slideshow' || directiveName === 'slides-astro') {
     // Parse the container content for markdown list items with slide backlinks
     const slides = [];
     const config = node.attributes || {};
     
+    // Determine if this is an Astro presentation based on directive name
+    const isAstroPresentation = directiveName === 'slides-astro';
     
     if (node.type === "containerDirective" && node.children) {
       // Find list nodes in the container
@@ -1847,7 +1849,7 @@ if (DEBUG_AST) {
                 const link = paragraph.children.find(child => child.type === 'link');
                 if (link && link.url) {
                   // Extract slide path and title from backlink
-                  const path = link.url.replace(/^\//, '').replace(/\.md$/, '');
+                  const path = link.url.replace(/^\//, '').replace(/\.(md|astro)$/, '');
                   const title = link.children?.[0]?.value || path.split('/').pop() || 'Untitled Slide';
                   slides.push({
                     path,
@@ -1862,7 +1864,7 @@ if (DEBUG_AST) {
     }
     
     if (slides.length > 0) {
-      return <SlidesEmbed slides={slides} config={config} />;
+      return <SlidesEmbed slides={slides} config={config} isAstroPresentation={isAstroPresentation} />;
     }
     
     return (
