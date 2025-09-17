@@ -1746,7 +1746,10 @@ if (DEBUG_AST) {
         <p>No tools found in showcase directive</p>
         <details>
           <summary>Debug Info</summary>
-          <pre>{JSON.stringify({ name: directiveName, toolPaths, nodeChildren: node.children }, null, 2)}</pre>
+          <BaseCodeblock 
+            code={JSON.stringify({ name: directiveName, toolPaths, nodeChildren: node.children }, null, 2)}
+            lang="json"
+          />
         </details>
         <style>
           .tool-showcase-empty {
@@ -1810,7 +1813,10 @@ if (DEBUG_AST) {
         <p>No portfolios found in portfolio-gallery directive</p>
         <details>
           <summary>Debug Info</summary>
-          <pre>{JSON.stringify({ name: directiveName, config: portfolioGalleryConfig, nodeChildren: node.children }, null, 2)}</pre>
+          <BaseCodeblock 
+            code={JSON.stringify({ name: directiveName, config: portfolioGalleryConfig, nodeChildren: node.children }, null, 2)}
+            lang="json"
+          />
         </details>
         <style>
           .portfolio-gallery-empty {
@@ -1872,7 +1878,10 @@ if (DEBUG_AST) {
         <p>No slides found in slides directive</p>
         <details>
           <summary>Debug Info</summary>
-          <pre>{JSON.stringify({ name: directiveName, slides, config, nodeChildren: node.children }, null, 2)}</pre>
+          <BaseCodeblock 
+            code={JSON.stringify({ name: directiveName, slides, config, nodeChildren: node.children }, null, 2)}
+            lang="json"
+          />
         </details>
         <style>
           .slides-directive-empty {
@@ -1913,7 +1922,10 @@ if (DEBUG_AST) {
         <p>No tools found in tooling-gallery directive</p>
         <details>
           <summary>Debug Info</summary>
-          <pre>{JSON.stringify({ name: directiveName, config: toolingGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}</pre>
+          <BaseCodeblock 
+            code={JSON.stringify({ name: directiveName, config: toolingGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}
+            lang="json"
+          />
         </details>
         <style>
           .tooling-gallery-empty {
@@ -1949,7 +1961,10 @@ if (DEBUG_AST) {
         <p>No content found in image-gallery directive</p>
         <details>
           <summary>Debug Info</summary>
-          <pre>{JSON.stringify({ name: directiveName, config: imageGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}</pre>
+          <BaseCodeblock 
+            code={JSON.stringify({ name: directiveName, config: imageGalleryDirectiveConfig, nodeChildren: node.children }, null, 2)}
+            lang="json"
+          />
         </details>
         <style>
           .image-gallery-empty {
@@ -1972,7 +1987,10 @@ if (DEBUG_AST) {
       <p>Unknown directive: <code>{directiveName}</code></p>
       <details>
         <summary>Debug Info</summary>
-        <pre>{JSON.stringify({ name: directiveName, attributes: props }, null, 2)}</pre>
+        <BaseCodeblock 
+          code={JSON.stringify({ name: directiveName, attributes: props }, null, 2)}
+          lang="json"
+        />
       </details>
     </div>
   );
@@ -1980,7 +1998,10 @@ if (DEBUG_AST) {
 
 {other_type && 
     <div class={`unhandled-${node.type}`}>
-        {JSON.stringify(node)}
+        <BaseCodeblock 
+          code={JSON.stringify(node, null, 2)}
+          lang="json"
+        />
     </div>
 }
 

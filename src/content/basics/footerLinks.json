@@ -1,12 +1,9 @@
 {
   "Learn With Us": [
     {"About": "/about"},
-    {"Issue Resolutions": "/learn-with/issue-resolution"},
-    {"Our Talks": "/learn-with/our-talks"},
-    {"Up and Running": "/learn-with/up-and-running"},
+    {"Lost in Public": "/lost-in-public"},
     {"Reference": "/more-about"},
     {"Projects": "/projects"}
-
   ],
   "Vibe Coding Resources": [
     {"Reminders": "/thread/reminders"},
