@@ -53,20 +53,20 @@ const formatCount = (count: number): string => {
 };
 ---
 
-<div class="flex flex-wrap items-center gap-4 mb-8">
-  <div class="flex gap-4">
+<div class="reference-nav-container">
+  <div class="reference-nav-buttons">
     <a 
       href="/more-about" 
       class={getButtonClass('all')}
     >
-      All Reference
+      <span class="button-text">All Reference</span>
     </a>
     <a 
       href="/more-about/vocabulary" 
       class={getButtonClass('vocabulary')}
     >
-      Vocabulary
-      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-opacity-80">
+      <span class="button-text">Vocabulary</span>
+      <span class="count-badge">
         {vocabularyCount}
       </span>
     </a>
@@ -74,13 +74,122 @@ const formatCount = (count: number): string => {
       href="/more-about/concepts" 
       class={getButtonClass('concepts')}
     >
-      Concepts
-      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-opacity-80">
+      <span class="button-text">Concepts</span>
+      <span class="count-badge">
         {conceptsCount}
       </span>
     </a>
   </div>
-  <div class="text-sm text-gray-400 ml-2">
+  <div class="word-count">
     Words: {formatCount(currentPageWordCount)}
   </div>
 </div>
+
+<style>
+  .reference-nav-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .reference-nav-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .word-count {
+    font-size: 0.875rem;
+    color: rgb(156, 163, 175);
+    font-weight: 500;
+  }
+
+  .button-text {
+    white-space: nowrap;
+  }
+
+  .count-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-left: 0.5rem;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .reference-nav-container {
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .reference-nav-buttons {
+      gap: 0.375rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .word-count {
+      font-size: 0.8rem;
+      order: -1; /* Move word count above buttons on mobile */
+    }
+
+    .count-badge {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      margin-left: 0.375rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .reference-nav-container {
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .reference-nav-buttons {
+      gap: 0.25rem;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .reference-nav-buttons a {
+      justify-content: center;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .word-count {
+      font-size: 0.75rem;
+      text-align: center;
+      order: -1;
+    }
+
+    .count-badge {
+      font-size: 0.65rem;
+      padding: 0.1rem 0.35rem;
+      margin-left: 0.25rem;
+    }
+  }
+
+  /* Very small screens - stack vertically with full width buttons */
+  @media (max-width: 360px) {
+    .reference-nav-buttons {
+      gap: 0.5rem;
+    }
+
+    .reference-nav-buttons a {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    .word-count {
+      font-size: 0.7rem;
+    }
+  }
+</style>

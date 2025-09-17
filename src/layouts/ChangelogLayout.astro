@@ -227,6 +227,7 @@ const normalizeAuthorData = (entry) => {
     border-radius: 1rem;
     line-height: 1.2;
     margin-left: 0.5rem;
+    margin-bottom: 0.5rem;
     transition: all 0.2s ease;
   }
   
@@ -241,10 +242,19 @@ const normalizeAuthorData = (entry) => {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   }
   
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     :global(.changelog-tabs-list) {
       width: 100%;
       justify-content: space-between;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    
+    :global(.changelog-tabs-list)::-webkit-scrollbar {
+      display: none;
     }
     
     .changelog-tab {
@@ -252,12 +262,47 @@ const normalizeAuthorData = (entry) => {
       flex: 1;
       text-align: center;
       justify-content: center;
+      min-width: 0;
+      white-space: nowrap;
+    }
+    
+    .tab-title {
+      flex-direction: column;
+      gap: 0.25rem;
+      align-items: center;
     }
     
     .entry-badge {
       font-size: 0.65rem;
       padding: 0.15rem 0.5rem;
-      margin-left: 0.4rem;
+      margin-left: 0;
+      margin-top: 0.25rem;
+    }
+    
+    .text-xs {
+      font-size: 0.6rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .changelog-tab {
+      padding: 0.4rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .entry-badge {
+      font-size: 0.6rem;
+      padding: 0.1rem 0.4rem;
+    }
+    
+    .text-xs {
+      font-size: 0.55rem;
+    }
+    
+    .tab-title {
+      gap: 0.2rem;
     }
   }
 
@@ -275,8 +320,22 @@ const normalizeAuthorData = (entry) => {
   .changelog-tabs_container {
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto ;
+    margin: 0 auto;
     padding: 1rem;
+    overflow-x: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .changelog-tabs_container {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .changelog-tabs_container {
+      padding: 0.5rem;
+    }
   }
 
   /*

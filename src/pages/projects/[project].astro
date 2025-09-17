@@ -12,6 +12,7 @@ export async function getStaticPaths() {
     const resolvedUrl = resolveProjectUrl(project);
     
     // Add paths for all projects - they will redirect to their specific URL or development page
+    
     paths.push({
       params: { project: projectId },
       props: {
