@@ -53,8 +53,8 @@ const transformedMdast = await processor.run(mdast);
 // markdownDebugger.verbose('MDAST structure:', transformedMdast);
 
 // Helper function to normalize author data, adapted from ChangelogLayout.astro
-const normalizeDataWithAuthors = (pageData) => {
-  if (!pageData) return { authors: [] }; // Return a default if pageData is null/undefined
+const normalizeDataWithAuthors = (pageData, filePath) => {
+  if (!pageData) return { authors: [], path: filePath }; // Return a default if pageData is null/undefined
 
   let authorList = [];
   if (pageData.authors) {
@@ -67,6 +67,7 @@ const normalizeDataWithAuthors = (pageData) => {
 
   return {
     ...pageData, // Preserve ALL original fields including participants
+    path: filePath, // Add the path property that AstroMarkdown expects
     // id: pageData.id, // Assuming id is already part of pageData if needed elsewhere
     // body: pageData.body, // body is handled separately as 'content' prop
     // slug: pageData.slug || (pageData.id ? path.basename(pageData.id, ".md") : undefined),
@@ -74,7 +75,7 @@ const normalizeDataWithAuthors = (pageData) => {
   };
 };
 
-const normalizedData = normalizeDataWithAuthors(data);
+const normalizedData = normalizeDataWithAuthors(data, markdownFile);
 
 ---
 

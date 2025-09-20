@@ -12,7 +12,7 @@
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import OneArticle from '@layouts/OneArticle.astro';
+import OneToolArticle from '@layouts/OneToolArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { getReferenceSlug } from '@utils/slugify';
 import { DEBUG_TOOLING } from '@utils/envUtils';
@@ -98,11 +98,11 @@ if (DEBUG_TOOLING) {
     og_image: customOgImage // Override with our custom generated image
   }}
 >
-  <OneArticle
+  <OneToolArticle
     Component={OneArticleOnPage}
     title={entry.data.title || entry.id.replace(/\.md$/, '')}
     content={entry.body}
     markdownFile={entry.id}
-    data={contentData}
+    data={entry.data}
   />
 </Layout>

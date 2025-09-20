@@ -92,6 +92,12 @@
           "contentPath": "ACE-It/Index.mdx"
         },
         {
+          "title": "Context Vigilance Canvas",
+          "type": "canvas-modal",
+          "href": "",
+          "contentPath": "aceItCanvas"
+        },
+        {
           "title": "Philosophy & Approach",
           "href": "/projects/gallery/ace-it/philosophy/our-approach",
           "type": "sequential",
