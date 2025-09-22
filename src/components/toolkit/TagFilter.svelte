@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { writable, derived } from 'svelte/store';
   import { onMount } from 'svelte';
+  import { writable, derived } from 'svelte/store';
   import TagChip from './TagChip.svelte';
   import ToolCard from './ToolCard.svelte';
+  import ShareToolkitLink from './ShareToolkitLink.svelte';
+  import { AppConfig } from '../../utils/appConfig';
 
   // TypeScript interface for Tool data structure
   interface Tool {
@@ -269,6 +271,20 @@
 
     <!-- Tool Grid -->
     <main class="tool-grid-container">
+      <!-- Share Toolkit Link Header -->
+      <div class="share-header">
+        <ShareToolkitLink 
+          selectedTags={Array.from($selectedTags)}
+          baseUrl={AppConfig.site}
+          on:copied={(event) => {
+            console.log('Share URL copied:', event.detail.url);
+          }}
+          on:shared={(event) => {
+            console.log('Share URL shared:', event.detail.url);
+          }}
+        />
+      </div>
+
       {#if $filteredTools.length > 0}
         <div class="tool-grid">
           {#each $filteredTools as tool}
@@ -463,6 +479,12 @@
 
   .tool-grid-container {
     min-height: 400px;
+  }
+
+  .share-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
   }
 
   .tool-grid {

@@ -8,6 +8,18 @@ import type { ProjectConfig } from '../../utils/projectGalleryUtils';
 import { resolveProjectUrl } from '../../utils/projectGalleryUtils';
 import projectGallery from '../../config/project-gallery.json';
 
+// Props for page context
+interface Props {
+  currentPath?: string;
+  pageType?: string;
+  clientName?: string;
+}
+
+// Extract context from props
+const { currentPath = "", pageType = "", clientName = "" } = Astro.props;
+
+
+
 // Define navigation links (nested items become dropdowns)
 const navLinks = [
   { href: "/read/through", label: "Reader" },
@@ -213,6 +225,8 @@ const socialIcons = [
       ))}
     </div>
   </div>
+
+
 
   <div class="header-separator">
     <ThinGradientBleedSeparator height="2px" color="var(--grd__primary-bg)" />
@@ -507,6 +521,8 @@ const socialIcons = [
       padding: 0.75em 1.5em;
     }
   }
+
+
 </style>
 
 <script is:inline>

@@ -60,6 +60,29 @@ if (isToolkitPage && fm.og_image) {
   console.log(`🔗 Toolkit page ${Astro.url.pathname} using og_image: ${fm.og_image}`);
 }
 
+// Extract page context for dynamic header
+const currentPath = Astro.url.pathname;
+let pageType = "";
+let clientName = "";
+
+// Determine page type based on URL
+if (currentPath === '/toolkit' || currentPath.startsWith('/toolkit/')) {
+  pageType = "toolkit";
+} else if (currentPath.startsWith('/client/')) {
+  pageType = "client";
+  // Extract client name from URL like /client/hypernova/...
+  const pathParts = currentPath.split('/');
+  if (pathParts.length > 2) {
+    clientName = pathParts[2];
+  }
+} else if (currentPath.startsWith('/read/')) {
+  pageType = "read";
+} else if (currentPath.startsWith('/projects/')) {
+  pageType = "projects";
+} else if (currentPath.startsWith('/learn-with/') || currentPath.startsWith('/vibe-with/')) {
+  pageType = "learning";
+}
+
 // PageMeta.astro will handle all defaults if these are undefined
 ---
 
@@ -89,7 +112,11 @@ if (isToolkitPage && fm.og_image) {
     <link rel="stylesheet" href="/src/styles/avatars.css" />
   </head>
   <body>
-    <Header />
+    <Header 
+      currentPath={currentPath}
+      pageType={pageType}
+      clientName={clientName}
+    />
     <main>
       <slot />
     </main>

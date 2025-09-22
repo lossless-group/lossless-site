@@ -190,6 +190,11 @@ const toolkitPath = generateToolkitPath();
         <a href={url} target="_blank" rel="noopener noreferrer">
           <h2><span class="text-wrapper">{effectiveSiteName}</span></h2>
         </a>
+        <button class="share-button" data-url={url} data-title={effectiveSiteName} title="Share this tool">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12C9 11.76 8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5C21 3.34 19.66 2 18 2C16.34 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12C3 13.66 4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.34C15.11 18.55 15.08 18.77 15.08 19C15.08 20.61 16.39 21.92 18 21.92C19.61 21.92 20.92 20.61 20.92 19C20.92 17.39 19.61 16.08 18 16.08Z" fill="currentColor"/>
+          </svg>
+        </button>
       </div>
       <h4><span class="text-wrapper">{displayTitle}</span></h4>
     </div>
@@ -267,6 +272,52 @@ const toolkitPath = generateToolkitPath();
         },
         { once: true }
       );
+    });
+
+    // Handle share button clicks
+    document.querySelectorAll(".share-button").forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const shareButton = e.currentTarget as HTMLButtonElement;
+        const url = shareButton.getAttribute("data-url");
+        const title = shareButton.getAttribute("data-title");
+        
+        if (!url) return;
+        
+        const shareData = {
+          title: title || "Check out this tool",
+          url: url,
+          text: `Check out ${title || "this tool"} - a useful AI tool`
+        };
+        
+        try {
+          // Try to use the Web Share API if available
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            // Fallback to copying to clipboard
+            await navigator.clipboard.writeText(url);
+            
+            // Show a temporary feedback
+            const originalContent = shareButton.innerHTML;
+            shareButton.innerHTML = `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
+              </svg>
+            `;
+            shareButton.style.color = "#4ade80";
+            
+            setTimeout(() => {
+              shareButton.innerHTML = originalContent;
+              shareButton.style.color = "";
+            }, 2000);
+          }
+        } catch (error) {
+          console.error("Error sharing:", error);
+        }
+      });
     });
   });
 </script>
@@ -357,8 +408,39 @@ const toolkitPath = generateToolkitPath();
   .tool-card__site-name {
     display: inline-flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5em;
     width: 100%; /* Ensure it takes full width */
+  }
+
+  .share-button {
+    background: none;
+    border: none;
+    color: var(--clr-body);
+    cursor: pointer;
+    padding: 0.25em;
+    border-radius: 0.25em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .share-button:hover {
+    color: var(--clr-heading);
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+  }
+
+  .share-button:active {
+    transform: scale(0.95);
+  }
+
+  .share-button svg {
+    width: 16px;
+    height: 16px;
   }
 
   .tool-card__site-name h2 {
