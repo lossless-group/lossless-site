@@ -1,0 +1,233 @@
+---
+/**
+ * /toolkit/tag/[tag].astro — Toolkit Tag Filter Page (Static Generation)
+ * 
+ * This creates static pages for each tag in the tooling collection.
+ * Examples: /toolkit/tag/ai-toolkit, /toolkit/tag/web-development
+ */
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import TagChip from '@components/tool-components/TagChip.astro';
+import ToolCard from '@components/tool-components/ToolCard.astro';
+import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
+import { getReferenceSlug } from '@utils/slugify';
+import { getActualFilename } from '@utils/toolUtils';
+
+export async function getStaticPaths() {
+  // Get all tooling entries
+  const toolingCollection = await getCollection('tooling');
+  
+  const tagMap = new Map<string, any[]>();
+
+  // Process each tool and collect tags
+  for (const entry of toolingCollection) {
+    let tags = entry.data.tags;
+    if (typeof tags === 'string') {
+      tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+    }
+    if (!Array.isArray(tags)) tags = [];
+
+    // Add each tag to the map with associated tools
+    for (const tag of tags as string[]) {
+      const key = tag.toLowerCase();
+      if (!tagMap.has(key)) tagMap.set(key, []);
+      tagMap.get(key)?.push(entry);
+    }
+  }
+
+  // Generate static paths for each tag
+  return Array.from(tagMap.entries()).map(([tag, entries]) => ({
+    params: { tag },
+    props: { tag, entries, allTags: Array.from(tagMap.keys()).sort() },
+  }));
+}
+
+/**
+ * Props from getStaticPaths
+ */
+const { tag, entries, allTags } = Astro.props;
+
+// Process entries for display
+const tools = entries.map((entry) => {
+  if (!entry.id) {
+    throw new Error(`Entry is missing ID in toolkit/tag/[tag].astro. Entry: ${JSON.stringify(entry)}`)
+  }
+  
+  const slug = getReferenceSlug(entry.id);
+  let tags = entry.data.tags;
+  if (typeof tags === 'string') {
+    tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+  }
+  if (!Array.isArray(tags)) tags = [];
+
+  return {
+    // ToolCard expected fields
+    id: entry.id,
+    title: entry.data.title ?? '',
+    site_name: entry.data.site_name ?? entry.data.company ?? '',
+    url: entry.data.url ?? '',
+    description: entry.data.description ?? entry.data.lede ?? '',
+    description_site_cp: entry.data.description_site_cp ?? '',
+    og_title: entry.data.og_title ?? entry.data.title ?? '',
+    og_description: entry.data.og_description ?? entry.data.description ?? entry.data.lede ?? '',
+    image: entry.data.image ?? '',
+    og_image: entry.data.og_image ?? '',
+    og_image_url: entry.data.og_image_url ?? '',
+    og_screenshot_url: entry.data.og_screenshot_url ?? '',
+    favicon: entry.data.favicon ?? '',
+    zinger: entry.data.zinger ?? '',
+    tags,
+    filename: getActualFilename(entry),
+    // Additional fields for compatibility
+    slug,
+    collection: 'tooling',
+    company: entry.data.company ?? '',
+    pricing: entry.data.pricing ?? '',
+    category: entry.data.category ?? '',
+  };
+}).sort((a, b) => String(a.title).localeCompare(String(b.title)));
+
+// Calculate tag counts for the tag cloud
+const tagCounts = {};
+for (const tool of tools) {
+  for (const toolTag of tool.tags) {
+    const key = toolTag.toLowerCase();
+    tagCounts[key] = (tagCounts[key] || 0) + 1;
+  }
+}
+
+// Format tag name for display
+function formatTagName(tagString: string): string {
+  return tagString
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Define frontmatter data for the tag page
+const frontmatter = {
+  title: `${formatTagName(tag)} Tools`,
+  description: `Discover tools and resources tagged with '${formatTagName(tag)}'`,
+  lede: `Tools and resources for ${formatTagName(tag)}`
+};
+---
+
+<Layout frontmatter={frontmatter}>
+  <div class="toolkit-tag-page">
+    <!-- Header -->
+    <header class="tag-page-header">
+      <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-4">
+          {formatTagName(tag)} Tools
+        </h1>
+        <p class="text-lg text-gray-600 mb-6">
+          {tools.length} tools found for {formatTagName(tag)}
+        </p>
+        
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb mb-6">
+          <a href="/toolkit" class="text-blue-600 hover:underline">All Tools</a>
+          <span class="mx-2">→</span>
+          <span class="text-gray-500">{formatTagName(tag)}</span>
+        </nav>
+      </div>
+    </header>
+    
+    <ThinGradientBleedSeparator />
+
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <!-- Sidebar: Related Tags -->
+        <aside class="lg:col-span-1 mt-8 lg:mt-0">
+          <div class="sticky top-8">
+            <div class="tag-cloud space-y-2">
+              {allTags
+                .filter(t => t !== tag.toLowerCase())
+                .slice(0, 20)
+                .map(relatedTag => (
+                  <TagChip 
+                    tagString={relatedTag}
+                    count={tagCounts[relatedTag] || 0}
+                    includeCount={true}
+                    route={`/toolkit/tag/${relatedTag}`}
+                  />
+                ))
+              }
+            </div>
+            
+            <!-- Back to all tools -->
+            <div class="mt-8">
+              <a 
+                href="/toolkit" 
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                ← View All Tools
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Content: Tool Grid -->
+        <main class="lg:col-span-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {tools.map(tool => (
+              <ToolCard 
+                tool={tool}
+                showTags={true}
+                highlightTag={tag}
+              />
+            ))}
+          </div>
+          
+          <!-- Empty state -->
+          {tools.length === 0 && (
+            <div class="text-center py-12">
+              <h3 class="text-xl font-semibold text-gray-600 mb-4">
+                No tools found for "{formatTagName(tag)}"
+              </h3>
+              <p class="text-gray-500 mb-6">
+                Try browsing other tags or view all tools.
+              </p>
+              <a 
+                href="/toolkit" 
+                class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Browse All Tools
+              </a>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .toolkit-tag-page {
+    min-height: 100vh;
+  }
+  
+  .tag-page-header {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  .breadcrumb {
+    font-size: 0.875rem;
+  }
+  
+  .tag-cloud {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  @media (max-width: 1024px) {
+    .tag-cloud {
+      max-height: 200px;
+    }
+  }
+</style>

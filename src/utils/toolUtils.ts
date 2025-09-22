@@ -143,17 +143,55 @@ export function getEffectiveSiteName(
   filename?: string,
   url?: string
 ): string {
-  if (site_name) return site_name;
-  if (filename) return filename.replace(/\.md$/, '');
-  if (url) {
+  // Priority: site_name > filename > url hostname
+  if (site_name && site_name.trim()) {
+    return site_name.trim();
+  }
+  
+  if (filename && filename.trim()) {
+    // Remove .md extension if present and preserve original casing
+    return filename.replace(/\.md$/, '');
+  }
+  
+  if (url && url.trim()) {
     try {
       const urlObj = new URL(url);
-      return urlObj.hostname.replace(/^www\./, '');
+      let hostname = urlObj.hostname;
+      
+      // Remove www. prefix if present
+      if (hostname.startsWith('www.')) {
+        hostname = hostname.substring(4);
+      }
+      
+      // Remove common TLD extensions for cleaner display
+      const cleanHostname = hostname
+        .replace(/\.(com|org|net|io|co|ai|app|dev)$/, '')
+        .replace(/\.(co\.uk|com\.au|co\.jp)$/, '');
+      
+      // Capitalize first letter for better display
+      return cleanHostname.charAt(0).toUpperCase() + cleanHostname.slice(1);
     } catch {
       return url;
     }
   }
+  
   return '';
+}
+
+// Helper function to extract actual filename from Astro entry
+export function getActualFilename(entry: any): string {
+  if (entry.filePath) {
+    // Extract just the filename from the full path
+    const pathParts = entry.filePath.split('/');
+    return pathParts[pathParts.length - 1];
+  }
+  
+  if (entry.originalFilename) {
+    return entry.originalFilename;
+  }
+  
+  // Fallback to ID if no file path available
+  return entry.id || '';
 }
 
 /**

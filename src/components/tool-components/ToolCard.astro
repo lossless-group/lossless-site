@@ -6,6 +6,7 @@ import TextCTA from "@components/basics/cta/TextCTA.astro";
 import { getReferenceSlug } from "@utils/slugify";
 
 interface Tool {
+  id?: string;
   site_name?: string;
   title?: string;
   zinger?: string;
@@ -25,8 +26,9 @@ interface Tool {
 
 interface Props {
   [key: string]: any; // Allow arbitrary HTML attributes (class, data-*, aria-*, etc.)
-  tool?: Tool;
-  // Support for direct properties
+  tool?: Tool; // Nested tool object structure
+  // Support for direct properties (for backward compatibility)
+  id?: string;
   site_name?: string;
   title?: string;
   zinger?: string;
@@ -48,27 +50,46 @@ interface Props {
 
 
 const {
-  id,
-  site_name,
-  title,
-  zinger,
-  og_title,
-  og_description,
-  url,
-  image,
-  og_image,
-  og_image_url,
-  favicon,
-  description,
-  description_site_cp,
-  tags = [],
-  filename,
-  og_screenshot_url,
+  tool,
+  id: directId,
+  site_name: directSiteName,
+  title: directTitle,
+  zinger: directZinger,
+  og_title: directOgTitle,
+  og_description: directOgDescription,
+  url: directUrl,
+  image: directImage,
+  og_image: directOgImage,
+  og_image_url: directOgImageUrl,
+  favicon: directFavicon,
+  description: directDescription,
+  description_site_cp: directDescriptionSiteCp,
+  tags: directTags = [],
+  filename: directFilename,
+  og_screenshot_url: directOgScreenshotUrl,
   filePath,
   small = false,
   // Allow all other HTML attributes like class, data-*, aria-*
   ...rest
 } = Astro.props;
+
+// Handle both direct props and nested tool object structure
+const id = directId || tool?.id;
+const site_name = directSiteName || tool?.site_name;
+const title = directTitle || tool?.title;
+const zinger = directZinger || tool?.zinger;
+const og_title = directOgTitle || tool?.og_title;
+const og_description = directOgDescription || tool?.og_description;
+const url = directUrl || tool?.url;
+const image = directImage || tool?.image;
+const og_image = directOgImage || tool?.og_image;
+const og_image_url = directOgImageUrl || tool?.og_image_url;
+const favicon = directFavicon || tool?.favicon;
+const description = directDescription || tool?.description;
+const description_site_cp = directDescriptionSiteCp || tool?.description_site_cp;
+const tags = directTags.length > 0 ? directTags : (tool?.tags || []);
+const filename = directFilename || tool?.filename;
+const og_screenshot_url = directOgScreenshotUrl || tool?.og_screenshot_url;
 
 // Debug logging for ChromaDB
 if (filename && filename.includes('ChromaDB')) {

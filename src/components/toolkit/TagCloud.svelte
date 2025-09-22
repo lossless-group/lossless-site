@@ -1,0 +1,89 @@
+<script lang="ts">
+  import TagChip from './TagChip.svelte';
+
+  export let tags: string[] = [];
+  export let tagFrequencies: Record<string, number> = {};
+  export let visibleTagRowLimit: number = 4;
+  export let maxWidth: string = "100%";
+  export let tagRoute: string = "vibe-with";
+  export let highlightTags: string[] = [];
+
+  // Ensure tags is always an array
+  $: safeTags = tags ?? [];
+
+  // Use the provided tagRoute, or fallback to "vibe-with" if not set or not a string
+  $: routeForTags = typeof tagRoute === "string" && tagRoute.trim() !== "" ? tagRoute : "vibe-with";
+
+  // Calculate approximate row height based on tag chip height + gap
+  const rowHeight = 26; // Tag height (22px) + gap (6px)
+  $: maxHeight = visibleTagRowLimit * rowHeight;
+
+  function handleTagClick(event: CustomEvent) {
+    // For now, just log the tag click - this can be extended for navigation
+    console.log('Tag clicked:', event.detail.tag);
+  }
+</script>
+
+<div class="tool-cloud">
+  <div
+    class="tool-tags"
+    style={`max-height: ${maxHeight}px; max-width: ${maxWidth};`}
+  >
+    {#each safeTags as tag}
+      <TagChip
+        tagString={tag}
+        count={tagFrequencies && tagFrequencies[tag] > 0 ? tagFrequencies[tag] : undefined}
+        showCount={!!tagFrequencies}
+        isSelected={highlightTags.includes(tag.toLowerCase())}
+        on:click={handleTagClick}
+      />
+    {/each}
+  </div>
+</div>
+
+<style>
+  .tool-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2em;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .tool-tags {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.2em;
+    width: 100%;
+    overflow-y: hidden;
+    padding: 0.4em 0.6em;
+    justify-content: space-between; /* Add space for potential scrollbar */
+  }
+  
+  /* Show scrollbar on hover if content overflows */
+  .tool-tags:hover {
+    background: var(--clr-lossless-primary-dark-80);
+    border: 0.1em solid var(--clr-lossless-primary-glass);
+    border-radius: 1em;
+    overflow-y: auto; /* Change from hidden to auto on hover */
+    z-index: 5; /* Lower z-index to ensure tag chips appear above */
+  }
+  
+  /* Customize scrollbar */
+  .tool-tags::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .tool-tags::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .tool-tags::-webkit-scrollbar-thumb {
+    background: var(--clr-lossless-primary-dark);
+    border-radius: 3px;
+  }
+  
+  .tool-tags::-webkit-scrollbar-thumb:hover {
+    background: var(--clr-lossless-primary-glass);
+  }
+</style>

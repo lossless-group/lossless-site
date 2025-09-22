@@ -1,0 +1,157 @@
+---
+/**
+ * TagFilterIsland.astro
+ * Server island component that fetches tool data and renders Svelte tag filter
+ * Follows the Island Wrapper Pattern from ToolShowcaseIsland.astro
+ */
+
+import { getCollection } from 'astro:content';
+import TagFilter from './TagFilter.svelte';
+
+interface Props {
+  initialSelectedTags?: string[];
+  showSearch?: boolean;
+  showSortControls?: boolean;
+}
+
+const { 
+  initialSelectedTags = [], 
+  showSearch = true, 
+  showSortControls = true 
+} = Astro.props;
+
+// Fetch from all available collections that might contain tools
+const [verticalToolkits, tooling] = await Promise.all([
+  getCollection('vertical-toolkits').catch(() => []),
+  getCollection('tooling').catch(() => [])
+]);
+
+// Combine all tools from different collections
+const allTools = [...verticalToolkits, ...tooling];
+
+// Extract and process all tags
+const tagMap = new Map<string, number>();
+const processedTools = allTools.map(tool => {
+  let tags = tool.data.tags;
+  if (typeof tags === 'string') {
+    tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+  }
+  if (!Array.isArray(tags)) tags = [];
+
+  // Count tag occurrences
+  for (const tag of tags) {
+    const key = tag.toLowerCase();
+    tagMap.set(key, (tagMap.get(key) || 0) + 1);
+  }
+
+  // Transform tool data for the Svelte component
+  return {
+    id: tool.id,
+    slug: tool.slug,
+    title: tool.data.title || '',
+    lede: tool.data.lede || '',
+    description: tool.data.description_site_cp || tool.data.og_description || '',
+    banner_image: tool.data.banner_image || tool.data.og_image || tool.data.image || '',
+    url: tool.data.url || '',
+    company: tool.data.company || '',
+    pricing: tool.data.pricing || '',
+    category: tool.data.category || '',
+    tags: tags,
+    collection: tool.collection,
+  };
+});
+
+// Create sorted tag list with counts
+const allTags = Array.from(tagMap.entries())
+  .map(([tag, count]) => ({ tag, count }))
+  .sort((a, b) => b.count - a.count); // Sort by count descending
+
+// Get URL parameters for initial state
+const url = new URL(Astro.request.url);
+const urlTags = url.searchParams.get('tags');
+const urlSelectedTags = urlTags ? urlTags.split(',').map(t => t.trim()).filter(Boolean) : initialSelectedTags;
+const urlSearch = url.searchParams.get('search') || '';
+const urlSort = url.searchParams.get('sort') || 'title';
+
+// Prepare data for Svelte component
+const filterData = {
+  tools: processedTools,
+  allTags: allTags,
+  initialSelectedTags: urlSelectedTags,
+  initialSearch: urlSearch,
+  initialSort: urlSort,
+  showSearch,
+  showSortControls,
+};
+---
+
+{allTools.length > 0 ? (
+  <TagFilter 
+    {...filterData}
+    client:load 
+  />
+) : (
+  <div class="tag-filter-error">
+    <h4>Tag Filter Error</h4>
+    <p>No tools found in collections.</p>
+    <details>
+      <summary>Debug Information</summary>
+      <div class="debug-info">
+        <p><strong>Available collections:</strong></p>
+        <ul>
+          <li>vertical-toolkits: {verticalToolkits.length} items</li>
+          <li>tooling: {tooling.length} items</li>
+        </ul>
+        <p><strong>Total tools:</strong> {allTools.length}</p>
+      </div>
+    </details>
+  </div>
+)}
+
+<style>
+  .tag-filter-error {
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background-color: #fef2f2;
+    color: #991b1b;
+    margin: 1rem 0;
+  }
+
+  .tag-filter-error h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .tag-filter-error p {
+    margin: 0.5rem 0;
+  }
+
+  .tag-filter-error details {
+    margin-top: 1rem;
+  }
+
+  .tag-filter-error summary {
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0.25rem 0;
+  }
+
+  .debug-info {
+    padding: 0.5rem;
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .debug-info ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .debug-info li {
+    margin: 0.25rem 0;
+  }
+</style>
