@@ -1,5 +1,17 @@
 ---
 import ToolkitLayout from "@layouts/ToolkitLayout.astro";
+
+// Extract URL parameters
+const url = Astro.url;
+const tagParam = url.searchParams.get('tag');
+
+// Convert plus-separated tags to comma-separated format for TagColumn
+let tagsForUrl = '';
+if (tagParam) {
+  // Split by + and convert to comma-separated
+  const tags = tagParam.split('+').map(tag => tag.trim()).filter(tag => tag.length > 0);
+  tagsForUrl = tags.join(',');
+}
 ---
 
 <ToolkitLayout

@@ -173,6 +173,8 @@ function filterCards() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🔍 TagColumn DEBUG - DOMContentLoaded fired at:', new Date().toISOString());
+  
   const tagSelectEl = document.getElementById('tag-select');
   const clearBtn = document.getElementById('clear-tags');
   let currentSort = 'alpha-asc';
@@ -236,16 +238,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle URL parameters for pre-selected tags
   function handleUrlParameters() {
+    console.log('🔍 TagColumn DEBUG - handleUrlParameters called at:', new Date().toISOString());
+    console.log('🔍 TagColumn DEBUG - Document readyState:', document.readyState);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const tagsParam = urlParams.get('tags');
+    const tagParam = urlParams.get('tag'); // Handle singular 'tag' parameter
+    
+    console.log('🔍 TagColumn DEBUG - URL search:', window.location.search);
+    console.log('🔍 TagColumn DEBUG - tagsParam:', tagsParam);
+    console.log('🔍 TagColumn DEBUG - tagParam (raw):', tagParam);
+    
+    let selectedTags = [];
     
     if (tagsParam) {
       // Split by comma and trim whitespace
-      const selectedTags = tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      selectedTags = tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    } else if (tagParam) {
+      // Handle singular 'tag' parameter with plus-separated values
+      // Note: URLSearchParams automatically converts + to spaces, so we need to split by spaces
+      console.log('🔍 TagColumn DEBUG - tagParam (decoded):', tagParam);
+      
+      // Split by spaces since + gets converted to spaces by URLSearchParams
+      selectedTags = tagParam.split(' ').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      console.log('🔍 TagColumn DEBUG - selectedTags after split:', selectedTags);
+    }
+    
+    console.log('🔍 TagColumn DEBUG - selectedTags:', selectedTags);
+    
+    if (selectedTags.length > 0) {
+      // Debug: Check available choices
+      const availableChoices = choices._store.state.choices.map(choice => choice.value);
+      console.log('🔍 TagColumn DEBUG - Available choices:', availableChoices);
       
       // Set the selected tags in Choices.js
       selectedTags.forEach(tag => {
-        choices.setChoiceByValue(tag);
+        console.log('🔍 TagColumn DEBUG - Setting tag:', tag);
+        
+        // First try exact match
+        let matchFound = availableChoices.includes(tag);
+        console.log('🔍 TagColumn DEBUG - Exact match found:', matchFound);
+        
+        if (matchFound) {
+          choices.setChoiceByValue(tag);
+        } else {
+          // Try converting hyphens to spaces (URL format to display format)
+          const tagWithSpaces = tag.replace(/-/g, ' ');
+          console.log('🔍 TagColumn DEBUG - Trying tag with spaces:', tagWithSpaces);
+          
+          const spaceMatchFound = availableChoices.includes(tagWithSpaces);
+          console.log('🔍 TagColumn DEBUG - Space match found:', spaceMatchFound);
+          
+          if (spaceMatchFound) {
+            choices.setChoiceByValue(tagWithSpaces);
+          } else {
+            // Try converting spaces to hyphens (display format to URL format)
+            const tagWithHyphens = tag.replace(/\s+/g, '-');
+            console.log('🔍 TagColumn DEBUG - Trying tag with hyphens:', tagWithHyphens);
+            
+            const hyphenMatchFound = availableChoices.includes(tagWithHyphens);
+            console.log('🔍 TagColumn DEBUG - Hyphen match found:', hyphenMatchFound);
+            
+            if (hyphenMatchFound) {
+              choices.setChoiceByValue(tagWithHyphens);
+            } else {
+              console.log('🔍 TagColumn DEBUG - No match found for tag:', tag);
+            }
+          }
+        }
       });
       
       // Trigger filtering to show only matching cards
@@ -321,6 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   tagSelectEl.addEventListener('change', () => {
+    console.log('🔍 TagColumn DEBUG - Tag selection changed at:', new Date().toISOString());
+    console.log('🔍 TagColumn DEBUG - Selected tags:', getSelectedTags());
     currentPage = 1; // Reset page when changing tags
     filterCards();
   });
@@ -388,6 +450,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial reveal: show first N matching cards
   filterCards();
+});
+
+// Debug page reload events
+window.addEventListener('beforeunload', () => {
+  console.log('🔍 TagColumn DEBUG - Page about to unload at:', new Date().toISOString());
+});
+
+window.addEventListener('unload', () => {
+  console.log('🔍 TagColumn DEBUG - Page unloaded at:', new Date().toISOString());
 });
 
 </script>

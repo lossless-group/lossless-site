@@ -10,7 +10,8 @@ export const prerender = true;
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import TagChip from '@components/tool-components/TagChip.astro';
-import TagCloud from '@components/tool-components/TagCloud.astro';
+import TagCloud from "@components/tool-components/TagCloud.astro";
+import TagShareHeader from "@components/toolkit/TagShareHeader.astro";
 import ToolCard from '@components/tool-components/ToolCard.astro';
 import ThinGradientBleedSeparator from '@components/basics/separators/ThinGradientBleedSeparator.astro';
 import { getReferenceSlug } from '@utils/slugify';
@@ -162,6 +163,12 @@ const frontmatter = {
           <span class="mx-2">→</span>
           <span class="text-gray-500">{formatTagName(tag)}</span>
         </nav>
+
+        <!-- Share Header -->
+        <TagShareHeader 
+          filterTag={tag}
+          totalCount={tools.length}
+        />
       </div>
     </header>
     
