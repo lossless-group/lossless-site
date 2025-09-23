@@ -91,6 +91,19 @@
       "stealth-description": "AI-powered personalized learning experiences for students.",
       "stealth-passcode": "colearn-2025"
     },
+        {
+      "id": "the-water-foundation",
+      "name": "The Water Foundation",
+      "logo": "/visuals/appIcon__The-Water-Foundation.svg",
+      "description": "AI-powered personalized learning platform",
+      "industry": "Finance Platform for the Blue Economy",
+      "engagement": "2025-Present",
+      "website": "https://the-water-foundation.com",
+      "stealth-name": "Blue Economy Finance",
+      "stealth-logo": "/visuals/appIcon__The-Water-Foundation.svg",
+      "stealth-description": "Pattern-Breaking Financial Innovation for the Blue Economy",
+      "stealth-passcode": "the-water-foundation-2025"
+    },
     {
       "id": "obsidian-plugin-community",
       "name": "Obsidian Plugin Community",

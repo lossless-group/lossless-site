@@ -1,0 +1,68 @@
+---
+/**
+ * ClientIcon.astro
+ * 
+ * Small client icon component for displaying client logos in compact spaces
+ * like project dropdowns or lists
+ * 
+ * PROPS:
+ * - logo (string, required): Path to client logo image
+ * - name (string, required): Client name for alt text and tooltip
+ * - size (string, optional): Size variant - 'sm', 'md', 'lg' (defaults to 'sm')
+ * - showTooltip (boolean, optional): Whether to show name on hover (defaults to true)
+ */
+
+interface Props {
+  logo: string;
+  name: string;
+  size?: 'sm' | 'md' | 'lg';
+  showTooltip?: boolean;
+}
+
+const { logo, name, size = 'sm', showTooltip = true } = Astro.props;
+---
+
+<div class={`client-icon client-icon--${size}`} title={showTooltip ? name : undefined}>
+  <img src={logo} alt={`${name} logo`} />
+</div>
+
+<style>
+  .client-icon {
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .client-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+  }
+  
+  .client-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: inherit;
+  }
+  
+  /* Size variants */
+  .client-icon--sm {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .client-icon--md {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .client-icon--lg {
+    width: 48px;
+    height: 48px;
+  }
+</style>

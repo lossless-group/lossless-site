@@ -2,14 +2,23 @@
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import ClientIcon from '@components/basics/ClientIcon.astro';
 
 // Import utilities
 import { loadGalleryConfig, resolveProjectUrl } from '@utils/projectGalleryUtils';
 import { getReferenceSlug } from '@utils/slugify';
 
+// Import client data
+import clientsData from '../../content/people/clients.json';
+
 // Load project gallery configuration
 const galleryConfig = loadGalleryConfig();
 const projectCovers = Object.values(galleryConfig.projects);
+
+// Helper function to get client data by ID
+function getClientById(clientId: string) {
+  return clientsData.clients.find(client => client.id === clientId);
+}
 ---
 
 <Layout 
@@ -35,7 +44,24 @@ const projectCovers = Object.values(galleryConfig.projects);
         <article class="project-cover card">
           <header class="cover-hero">
             <div class="cover-titles">
-              <h2 class="cover-title">{project.title}</h2>
+              <div class="title-row">
+                <h2 class="cover-title">{project.title}</h2>
+                {project.clients && project.clients.length > 0 && (
+                  <div class="client-icons">
+                    {project.clients.map(clientId => {
+                      const client = getClientById(clientId);
+                      return client && client.logo ? (
+                        <ClientIcon 
+                          logo={client.logo}
+                          name={client.name}
+                          size="sm"
+                          showTooltip={true}
+                        />
+                      ) : null;
+                    })}
+                  </div>
+                )}
+              </div>
               <p class="cover-subtitle">{project.subtitle}</p>
             </div>
           </header>
@@ -171,7 +197,18 @@ const projectCovers = Object.values(galleryConfig.projects);
     margin-bottom: 0.5rem;
   }
   
-  .cover-titles { display: grid; gap: 0.4rem; }
+  .cover-titles { 
+    display: grid; 
+    gap: 0.4rem; 
+    flex: 1;
+  }
+  
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
   
   .cover-title { 
     margin: 0; 
@@ -179,6 +216,7 @@ const projectCovers = Object.values(galleryConfig.projects);
     font-weight: 600;
     color: var(--clr-heading);
     text-shadow: 0 1px 2px color-mix(in oklab, black, transparent 95%);
+    flex: 1;
   }
   
   .cover-subtitle { 
@@ -188,6 +226,14 @@ const projectCovers = Object.values(galleryConfig.projects);
     font-size: 1rem;
     line-height: 1.4;
     font-weight: 400;
+  }
+  
+  .client-icons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-shrink: 0;
   }
   
   .usecases { 

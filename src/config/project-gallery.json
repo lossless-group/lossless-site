@@ -7,6 +7,7 @@
       "hasSidebar": true,
       "hasLandingPage": true,
       "canvas": "/projects/gallery/augment-it/specs/Augment-It.canvas",
+      "clients": ["laerdal"],
       "useCases": [
         {
           "title": "Product Insights for R&D",
@@ -74,6 +75,7 @@
       "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
       "hasSidebar": true,
       "canvas": "/projects/gallery/ace-it/ACE-It-Canvas.canvas",
+      "clients": ["laerdal", "tonguc", "param"],
       "useCases": [
         {
           "title": "AI Co-Development Playbook",
@@ -210,6 +212,7 @@
       "title": "Astro Knots",
       "subtitle": "Advanced Astro, TailwindCSS, and theme framework setup, basic components and patterns.",
       "hasSidebar": false,
+      "clients": ["laerdal", "the-water-foundation"],
       "useCases": [
         {
           "title": "Killer Setup",
@@ -228,6 +231,7 @@
       "subtitle": "Automated content generation and management system.",
       "href": "/projects/gallery/content-farm",
       "hasSidebar": false,
+      "clients": ["laerdal", "avalanche", "hypernova"],
       "useCases": [
         {
           "title": "Content Automation",
@@ -245,6 +249,7 @@
       "title": "Emergent Innovation",
       "subtitle": "Open source innovation projects and collaborative initiatives.",
       "hasSidebar": false,
+      "clients": ["laerdal", "tonguc"],
       "useCases": [
         {
           "title": "Examples and Case Studies",
@@ -262,6 +267,7 @@
       "title": "Water Themed Site",
       "subtitle": "A beautiful, modern, and responsive water-themed website.",
       "hasSidebar": false,
+      "clients": ["the-water-foundation"],
       "useCases": [
         {
           "title": "Storytelling with Data",

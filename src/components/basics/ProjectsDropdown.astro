@@ -2,7 +2,9 @@
 import type { ProjectConfig } from '../../utils/projectGalleryUtils';
 import { resolveProjectUrl } from '../../utils/projectGalleryUtils';
 import projectGallery from '../../config/project-gallery.json';
+import clientsData from '../../content/people/clients.json';
 import TextCTA from './cta/TextCTA.astro';
+import ClientIcon from './ClientIcon.astro';
 
 interface Props {
   label: string;
@@ -19,6 +21,7 @@ interface GalleryData {
     href?: string;
     hasSidebar?: boolean;
     canvas?: string;
+    clients?: string[];
     useCases?: Array<{ title: string; description: string }>;
     demoSteps?: Array<{ title: string; href: string; type: string; description?: string; contentPath?: string; step?: number }>;
   }>;
@@ -32,9 +35,15 @@ const projects = Object.entries((projectGallery as unknown as GalleryData).proje
   href: project.href,
   hasSidebar: project.hasSidebar || false,
   ...(project.canvas && { canvas: project.canvas }),
+  clients: project.clients || [],
   useCases: project.useCases || [],
   demoSteps: project.demoSteps || []
 } as ProjectConfig));
+
+// Helper function to get client data by ID
+const getClientById = (clientId: string) => {
+  return clientsData.clients.find(client => client.id === clientId);
+};
 
 // Sort projects by title for consistent ordering
 const sortedProjects = [...projects].sort((a, b) => 
@@ -56,7 +65,23 @@ const sortedProjects = [...projects].sort((a, b) =>
           class="dropdown-item"
           data-project={project.id}
         >
-          <div class="item-title">{project.title}</div>
+          <div class="item-header">
+            <div class="item-title">{project.title}</div>
+            {project.clients && project.clients.length > 0 && (
+              <div class="client-icons">
+                {project.clients.map(clientId => {
+                  const client = getClientById(clientId);
+                  return client && client.logo ? (
+                    <ClientIcon 
+                      logo={client.logo} 
+                      name={client.name} 
+                      size="sm" 
+                    />
+                  ) : null;
+                })}
+              </div>
+            )}
+          </div>
           <div class="item-description">{project.subtitle}</div>
           {project.useCases && project.useCases.length > 0 && (
             <div class="use-cases">
@@ -169,11 +194,26 @@ const sortedProjects = [...projects].sort((a, b) =>
     transform: translateY(-2px);
   }
 
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    gap: 0.75rem;
+  }
+
   .item-title {
     font-weight: 600;
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
     color: var(--clr-lossless-accent--brightest);
+    flex: 1;
+  }
+
+  .client-icons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   .item-description {

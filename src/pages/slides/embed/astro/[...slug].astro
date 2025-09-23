@@ -54,19 +54,57 @@ if (!fileExists) {
 import { readFile } from 'fs/promises';
 
 let slideContent = '';
+let extractionError = null;
+
 try {
   const slideFileContent = await readFile(slideFilePath, 'utf-8');
   
-  // Extract content between <OneSlideDeck> tags
-  const oneSlideDeckMatch = slideFileContent.match(/<OneSlideDeck[^>]*>([\s\S]*?)<\/OneSlideDeck>/);
+  console.log('📄 File content length:', slideFileContent.length);
+  console.log('📄 File content preview:', slideFileContent.substring(0, 200));
+  
+  // Extract content between <OneSlideDeck> tags with more flexible regex
+  const oneSlideDeckMatch = slideFileContent.match(/<OneSlideDeck[^>]*?>([\s\S]*?)<\/OneSlideDeck>/);
   if (oneSlideDeckMatch) {
-    slideContent = oneSlideDeckMatch[1];
+    slideContent = oneSlideDeckMatch[1].trim();
+    console.log('✅ Successfully extracted OneSlideDeck content, length:', slideContent.length);
   } else {
-    throw new Error('OneSlideDeck content not found in slide file');
+    // Try alternative extraction methods
+    console.log('⚠️ OneSlideDeck regex failed, trying alternative extraction...');
+    
+    // Check if the file contains OneSlideDeck at all
+    if (slideFileContent.includes('<OneSlideDeck>')) {
+      const startIndex = slideFileContent.indexOf('<OneSlideDeck>') + '<OneSlideDeck>'.length;
+      const endIndex = slideFileContent.lastIndexOf('</OneSlideDeck>');
+      if (endIndex > startIndex) {
+        slideContent = slideFileContent.substring(startIndex, endIndex).trim();
+        console.log('✅ Alternative extraction successful, length:', slideContent.length);
+      } else {
+        throw new Error('OneSlideDeck closing tag not found or malformed');
+      }
+    } else {
+      throw new Error('OneSlideDeck content not found in slide file');
+    }
   }
+  
+  // Validate that we have actual content
+  if (!slideContent || slideContent.length < 10) {
+    throw new Error('Extracted content is empty or too short');
+  }
+  
 } catch (error) {
-  console.error('Failed to extract slide content:', error);
-  return new Response('Failed to load slide content', { status: 500 });
+  console.error('❌ Failed to extract slide content:', error);
+  extractionError = error;
+  
+  // Provide fallback content for debugging
+  slideContent = `
+    <section class="error-slide">
+      <h1>Slide Loading Error</h1>
+      <p>Failed to load slide: ${slidePath}</p>
+      <p>Error: ${error.message}</p>
+      <p>File path: ${slideFilePath}</p>
+      <p>File exists: ${fileExists}</p>
+    </section>
+  `;
 }
 ---
 
@@ -106,6 +144,26 @@ try {
     /* Hide control buttons in embedded mode */
     .control-buttons {
       display: none !important;
+    }
+    
+    /* Error slide styling */
+    .error-slide {
+      background: #dc2626 !important;
+      color: white !important;
+      padding: 2rem !important;
+      text-align: center !important;
+    }
+    
+    .error-slide h1 {
+      color: white !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    .error-slide p {
+      color: #fecaca !important;
+      margin: 0.5rem 0 !important;
+      font-family: monospace !important;
+      font-size: 0.9rem !important;
     }
   </style>
 </head>

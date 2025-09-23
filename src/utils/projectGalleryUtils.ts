@@ -14,6 +14,7 @@ export interface ProjectConfig {
   hasSidebar: boolean;
   hasLandingPage?: boolean; // Optional flag to render Astro content instead of redirecting
   canvas?: string;
+  clients?: string[]; // Array of client IDs associated with this project
   useCases: Array<{
     title: string;
     description: string;
