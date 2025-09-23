@@ -147,31 +147,13 @@ const frontmatter = {
 
 <Layout frontmatter={frontmatter}>
   <div class="toolkit-tag-page">
-    <!-- Header -->
-    <header class="tag-page-header">
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-4">
-          {formatTagName(tag)}
-        </h1>
-        <p class="text-lg text-gray-600 mb-6">
-          {tools.length} tools found for {formatTagName(tag)}
-        </p>
-        
-        <!-- Breadcrumb -->
-        <nav class="breadcrumb mb-6">
-          <a href="/toolkit" class="text-blue-600 hover:underline">All Tools</a>
-          <span class="mx-2">→</span>
-          <span class="text-gray-500">{formatTagName(tag)}</span>
-        </nav>
-
-        <!-- Share Header -->
-        <TagShareHeader 
-          filterTag={tag}
-          totalCount={tools.length}
-        />
-      </div>
-    </header>
+    <!-- Share Header -->
+    <TagShareHeader 
+      filterTag={tag}
+      totalCount={tools.length}
+    />
     
+    <div class="header-spacer"></div>
     <ThinGradientBleedSeparator />
 
     <div class="container mx-auto px-4 pt-8">
@@ -242,14 +224,8 @@ const frontmatter = {
     min-height: 100vh;
   }
   
-  .tag-page-header {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-  }
-  
-  .breadcrumb {
-    font-size: 0.875rem;
+  .header-spacer {
+    height: clamp(60px, 8vw, 100px);
   }
   
   .tag-cloud {

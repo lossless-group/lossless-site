@@ -65,15 +65,18 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
 
 <style>
   .filter-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--clr-primary-bg);
+    z-index: 1000;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--clr-lossless-primary-glass);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: clamp(0.75em, 2vw, 1.25em) clamp(1em, 5vw, 3em);
+    transition: padding 0.3s ease;
   }
 
   .filter-info {
@@ -83,27 +86,32 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
   }
 
   .filter-title {
-    font-size: var(--fs-500);
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
     font-weight: 600;
-    color: var(--clr-text-primary);
+    color: var(--clr-lossless-primary-light);
     margin: 0;
     font-family: var(--ff-primary);
+    transition: font-size 0.3s ease;
   }
 
   .filter-count {
-    font-size: var(--fs-300);
-    color: var(--clr-text-secondary);
+    font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+    color: var(--clr-lossless-primary-light);
+    opacity: 0.7;
     margin: 0;
     font-family: var(--ff-primary);
+    transition: font-size 0.3s ease;
   }
 
   .share-btn {
-    background: var(--clr-lossless-primary-dark);
-    border: none;
-    color: white;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+    padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+    border-radius: 0.5rem;
     cursor: pointer;
+    font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+    font-weight: 500;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -111,23 +119,35 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
     min-width: 2rem;
     min-height: 2rem;
     flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .share-btn:hover {
-    background: var(--clr-lossless-primary);
-    transform: translateY(-1px);
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+  }
+
+  .share-btn:active {
+    transform: scale(0.98);
   }
 
   .share-btn.copied {
-    background: var(--clr-success);
-    color: white;
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #4ade80;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     .filter-header {
       flex-direction: column;
+      gap: 1rem;
       align-items: flex-start;
-      gap: 0.5rem;
+    }
+
+    .share-btn {
+      align-self: stretch;
+      justify-content: center;
     }
   }
 </style>
