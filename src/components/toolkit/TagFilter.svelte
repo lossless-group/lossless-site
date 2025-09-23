@@ -15,9 +15,6 @@
     description: string;
     banner_image: string;
     url: string;
-    company: string;
-    pricing: string;
-    category: string;
     tags: string[];
     collection: string;
   }
@@ -63,7 +60,6 @@
         filtered = filtered.filter(tool =>
           tool.title.includes(query) ||
           tool.description.includes(query) ||
-          tool.company.includes(query) ||
           tool.tags.some(tag => tag.includes(query))
         );
       }
@@ -73,10 +69,6 @@
         switch ($sortBy) {
           case 'title':
             return a.title.localeCompare(b.title);
-          case 'company':
-            return a.company.localeCompare(b.company);
-          case 'category':
-            return a.category.localeCompare(b.category);
           case 'recent':
             return a.id.localeCompare(b.id); // Assuming newer entries have later IDs
           default:
@@ -211,8 +203,6 @@
         <label for="sort-select">Sort by:</label>
         <select id="sort-select" bind:value={$sortBy} class="sort-select">
           <option value="title">Title</option>
-          <option value="company">Company</option>
-          <option value="category">Category</option>
           <option value="recent">Recently Added</option>
         </select>
       </div>

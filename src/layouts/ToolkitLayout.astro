@@ -4,14 +4,17 @@ import Layout from "@layouts/Layout.astro";
 import { getCollection } from "astro:content";
 import CardGrid from "@basics/CardGrid.astro";
 import TagColumn from "@components/tool-components/TagColumn.astro";
+import TagShareHeader from "@components/toolkit/TagShareHeader.astro";
 
 // Props
 export interface Props {
   title?: string;
   description?: string;
+  filterTag?: string;
+  image?: string;
 }
 
-const { title = "Toolkit", description = "A curated collection of tools", image } = Astro.props;
+const { title = "Toolkit", description = "A curated collection of tools", image, filterTag } = Astro.props;
 
 
 const toolEntries = await getCollection("tooling");
@@ -38,7 +41,16 @@ tools.forEach(tool => {
         <TagColumn tools={tools} />
       </aside>
       <section class="main-content">
-        <CardGrid tools={tools} />
+        <TagShareHeader selectedTags={(() => {
+          const selectedTags = filterTag ? [filterTag] : [];
+          console.log('🔍 ToolkitLayout DEBUG - Passing selectedTags to TagShareHeader:', {
+            filterTag,
+            selectedTags,
+            toolsLength: tools.length
+          });
+          return selectedTags;
+        })()} totalCount={tools.length} filterTag={filterTag} />
+        <CardGrid tools={tools} filterTag={filterTag} />
       </section>
     </div>
   </main>

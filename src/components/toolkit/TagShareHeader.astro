@@ -1,0 +1,421 @@
+---
+interface Props {
+  selectedTags?: string[];
+  totalCount?: number;
+  filterTag?: string;
+}
+
+const { selectedTags = [], totalCount = 0, filterTag } = Astro.props;
+
+// DEBUG: Log the props being passed to TagShareHeader
+console.log('🔍 TagShareHeader DEBUG - Props received:', {
+  selectedTags,
+  totalCount,
+  filterTag,
+  propsType: typeof selectedTags,
+  isArray: Array.isArray(selectedTags)
+});
+
+function trainCaseToNormalCase(tag: string): string {
+  if (typeof tag !== 'string') {
+    console.error('[TagShareHeader] trainCaseToNormalCase received non-string tag:', tag);
+    return String(tag);
+  }
+  return tag
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Determine the display title based on context
+let displayTitle = 'All Tools';
+let currentTags = selectedTags;
+  
+  // DEBUG: Log initial currentTags assignment
+  console.log('🔍 TagShareHeader DEBUG - Initial currentTags:', currentTags);
+
+// If we have a filterTag prop (from tag pages), use that
+if (filterTag && filterTag.trim()) {
+  currentTags = [filterTag];
+  displayTitle = trainCaseToNormalCase(filterTag);
+} else if (selectedTags.length === 1) {
+  displayTitle = trainCaseToNormalCase(selectedTags[0]);
+} else if (selectedTags.length > 1) {
+  const firstTag = trainCaseToNormalCase(selectedTags[0]);
+  const remainingCount = selectedTags.length - 1;
+  displayTitle = `${firstTag} + ${remainingCount} more`;
+}
+
+const toolText = totalCount === 1 ? 'tool' : 'tools';
+---
+
+<div class="filter-header" data-filter-tag={filterTag || ''}>
+  <div class="filter-info">
+    <h2 class="filter-title" id="filter-title">{displayTitle}</h2>
+    <p class="filter-count" id="filter-count">{totalCount} {toolText}</p>
+  </div>
+  <button id="share-tags-btn" class="share-btn" title="Share selected tags">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+      <polyline points="16,6 12,2 8,6"/>
+      <line x1="12" y1="2" x2="12" y2="15"/>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--clr-lossless-primary-glass);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .filter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .filter-title {
+    font-size: var(--fs-500);
+    font-weight: 600;
+    color: var(--clr-text-primary);
+    margin: 0;
+    font-family: var(--ff-primary);
+  }
+
+  .filter-count {
+    font-size: var(--fs-300);
+    color: var(--clr-text-secondary);
+    margin: 0;
+    font-family: var(--ff-primary);
+  }
+
+  .share-btn {
+    background: var(--clr-lossless-primary-dark);
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    flex-shrink: 0;
+  }
+
+  .share-btn:hover {
+    background: var(--clr-lossless-primary);
+    transform: translateY(-1px);
+  }
+
+  .share-btn.copied {
+    background: var(--clr-success);
+    color: white;
+  }
+
+  @media (max-width: 600px) {
+    .filter-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+</style>
+
+<script>
+  function trainCaseToNormalCase(tag) {
+    return tag
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  function updateFilterHeader(selectedTags, visibleCount) {
+    // DEBUG: Log updateFilterHeader calls
+    console.log('🔍 TagShareHeader DEBUG - updateFilterHeader called:', {
+      selectedTags,
+      visibleCount,
+      selectedTagsType: typeof selectedTags,
+      isArray: Array.isArray(selectedTags)
+    });
+    
+    const filterTitle = document.getElementById('filter-title');
+    const filterCount = document.getElementById('filter-count');
+    
+    if (!filterTitle || !filterCount) return;
+    
+    if (selectedTags.length === 0) {
+      filterTitle.textContent = 'All Tools';
+    } else if (selectedTags.length === 1) {
+      filterTitle.textContent = trainCaseToNormalCase(selectedTags[0]);
+    } else {
+      const firstTag = trainCaseToNormalCase(selectedTags[0]);
+      const remainingCount = selectedTags.length - 1;
+      filterTitle.textContent = `${firstTag} + ${remainingCount} more`;
+    }
+    
+    const toolText = visibleCount === 1 ? 'tool' : 'tools';
+    filterCount.textContent = `${visibleCount} ${toolText}`;
+  }
+
+  // Track selected tags from TagChip components
+  let currentSelectedTags = new Set<string>();
+  
+  // DEBUG: Log when currentSelectedTags is initialized
+  console.log('🔍 TagShareHeader DEBUG - currentSelectedTags initialized:', {
+    setSize: currentSelectedTags.size,
+    setContents: Array.from(currentSelectedTags)
+  });
+
+  // Listen for tag selection events from TagChip components
+  console.log('🔍 TagShareHeader DEBUG - Setting up tagSelectionChanged listener');
+  document.addEventListener('tagSelectionChanged', (event) => {
+    const customEvent = event as CustomEvent;
+    const { tag, selected } = customEvent.detail;
+    
+    // DEBUG: Log tag selection changes with detailed type information
+    console.log('🔍 TagShareHeader DEBUG - tagSelectionChanged event:', {
+      tag,
+      tagType: typeof tag,
+      tagLength: tag?.length,
+      tagValue: JSON.stringify(tag),
+      selected,
+      currentSelectedTagsBefore: Array.from(currentSelectedTags),
+      eventDetail: customEvent.detail
+    });
+    
+    if (selected) {
+      currentSelectedTags.add(tag);
+      console.log('🔍 TagShareHeader DEBUG - Added tag to set:', {
+        addedTag: tag,
+        setSize: currentSelectedTags.size,
+        setContents: Array.from(currentSelectedTags)
+      });
+    } else {
+      currentSelectedTags.delete(tag);
+      console.log('🔍 TagShareHeader DEBUG - Removed tag from set:', {
+        removedTag: tag,
+        setSize: currentSelectedTags.size,
+        setContents: Array.from(currentSelectedTags)
+      });
+    }
+    
+    // DEBUG: Log tag selection after change with validation
+    const currentArray = Array.from(currentSelectedTags);
+    console.log('🔍 TagShareHeader DEBUG - currentSelectedTags after change:', {
+      array: currentArray,
+      arrayLength: currentArray.length,
+      setSize: currentSelectedTags.size,
+      allTagsValid: currentArray.every(t => typeof t === 'string' && t.length > 0)
+    });
+    
+    // Update header with current selection
+    const selectedTagsArray = Array.from(currentSelectedTags);
+    const allCards = Array.from(document.querySelectorAll('.tool-card'));
+    const visibleCards = allCards.filter(card => {
+      const htmlCard = card as HTMLElement;
+      const tags = JSON.parse(htmlCard.dataset.tags || '[]');
+      return selectedTagsArray.length === 0 || selectedTagsArray.every(tag => tags.includes(tag));
+    });
+    
+    updateFilterHeader(selectedTagsArray, visibleCards.length);
+  });
+
+  // Listen for custom events from TagColumn or other components (legacy support)
+  document.addEventListener('filtersChanged', (event) => {
+    const customEvent = event as CustomEvent;
+    const { selectedTags, visibleCount } = customEvent.detail;
+    
+    // DEBUG: Log filtersChanged event
+    console.log('🔍 TagShareHeader DEBUG - filtersChanged event:', {
+      selectedTags,
+      visibleCount,
+      selectedTagsType: typeof selectedTags,
+      isArray: Array.isArray(selectedTags)
+    });
+    
+    // Update currentSelectedTags from filtersChanged events (from TagColumn)
+    currentSelectedTags.clear();
+    if (Array.isArray(selectedTags)) {
+      selectedTags.forEach(tag => {
+        if (tag && typeof tag === 'string') {
+          currentSelectedTags.add(tag);
+        }
+      });
+    }
+    
+    // DEBUG: Log currentSelectedTags update from filtersChanged
+    console.log('🔍 TagShareHeader DEBUG - Updated currentSelectedTags from filtersChanged:', {
+      currentSelectedTags: Array.from(currentSelectedTags),
+      setSize: currentSelectedTags.size
+    });
+    
+    updateFilterHeader(selectedTags, visibleCount);
+  });
+
+  // Share button functionality
+  console.log('🔍 TagShareHeader DEBUG - Setting up DOMContentLoaded listener for share button');
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔍 TagShareHeader DEBUG - DOMContentLoaded fired, setting up share button');
+    const shareBtn = document.getElementById('share-tags-btn');
+    
+    console.log('🔍 TagShareHeader DEBUG - Share button element:', shareBtn);
+    
+    if (shareBtn) {
+      console.log('🔍 TagShareHeader DEBUG - Adding click listener to share button');
+      shareBtn.addEventListener('click', async () => {
+        // Use aggregated selected tags from TagChip components
+        // If no tags are selected via TagChips, fall back to detecting from context
+        let currentTags = Array.from(currentSelectedTags);
+        
+        // DEBUG: Log share button click
+        console.log('🔍 TagShareHeader DEBUG - Share button clicked:', {
+          currentSelectedTags: Array.from(currentSelectedTags),
+          currentTags
+        });
+        
+        if (currentTags.length === 0) {
+          console.log('🔍 TagShareHeader DEBUG - No selected tags, entering fallback logic');
+          
+          // Fallback: check URL parameters, filterTag prop, or current path
+          const urlParams = new URLSearchParams(window.location.search);
+          const tagsParam = urlParams.get('tags'); // Old format: comma-separated
+          const tagParam = urlParams.get('tag');   // New format: plus-separated
+          
+          console.log('🔍 TagShareHeader DEBUG - URL params check:', {
+            urlParams: urlParams.toString(),
+            tagsParam,
+            tagParam,
+            currentPath: window.location.pathname
+          });
+          
+          if (tagParam) {
+            // New format: plus-separated tags
+            currentTags = tagParam.split('+').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            console.log('🔍 TagShareHeader DEBUG - Using tagParam:', currentTags);
+          } else if (tagsParam) {
+            // Old format: comma-separated tags (for backward compatibility)
+            currentTags = tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            console.log('🔍 TagShareHeader DEBUG - Using tagsParam:', currentTags);
+          } else {
+            // Check if we have a filterTag from the component props
+            const filterHeaderElement = document.querySelector('.filter-header[data-filter-tag]');
+            const filterTag = filterHeaderElement?.getAttribute('data-filter-tag');
+            
+            console.log('🔍 TagShareHeader DEBUG - Checking filterTag:', {
+              filterHeaderElement,
+              filterTag,
+              hasFilterTag: filterTag && filterTag.trim()
+            });
+            
+            if (filterTag && filterTag.trim()) {
+              currentTags = [filterTag.trim()];
+              console.log('🔍 TagShareHeader DEBUG - Using filterTag:', currentTags);
+            } else {
+              const path = window.location.pathname;
+              const tagPageMatch = path.match(/\/toolkit\/tag\/([^\/]+)/);
+              console.log('🔍 TagShareHeader DEBUG - Checking path match:', {
+                path,
+                tagPageMatch
+              });
+              if (tagPageMatch) {
+                currentTags = [tagPageMatch[1]];
+                console.log('🔍 TagShareHeader DEBUG - Using path match:', currentTags);
+              }
+            }
+          }
+        } else {
+          console.log('🔍 TagShareHeader DEBUG - Using selected tags from TagChips:', currentTags);
+        }
+        
+        // DEBUG: Log final currentTags before URL generation
+          console.log('🔍 TagShareHeader DEBUG - Final currentTags for URL generation:', {
+            currentTags,
+            length: currentTags.length
+          });
+          
+          // Filter out empty, null, or undefined tags and validate
+          const validTags = currentTags.filter(tag => 
+            tag && 
+            typeof tag === 'string' && 
+            tag.trim().length > 0 &&
+            !tag.includes('/') &&
+            !tag.includes('?') &&
+            !tag.includes('#')
+          ).map(tag => tag.trim());
+          
+          // DEBUG: Log filtered valid tags
+          console.log('🔍 TagShareHeader DEBUG - Valid tags after filtering:', validTags);
+          
+          // Generate URL based on valid tags
+          let shareUrl;
+          if (validTags.length === 0) {
+            shareUrl = `${window.location.origin}/toolkit`;
+          } else if (validTags.length === 1) {
+            shareUrl = `${window.location.origin}/toolkit/tag/${encodeURIComponent(validTags[0])}`;
+          } else {
+            shareUrl = `${window.location.origin}/toolkit?tag=${validTags.map(tag => encodeURIComponent(tag)).join('+')}`;
+          }
+          
+          // DEBUG: Log generated share URL
+          console.log('🔍 TagShareHeader DEBUG - Generated share URL:', shareUrl);
+          
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            shareBtn.textContent = 'Copied!';
+            shareBtn.classList.add('copied');
+            setTimeout(() => {
+              shareBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                  <polyline points="16,6 12,2 8,6"/>
+                  <line x1="12" y1="2" x2="12" y2="15"/>
+                </svg>
+              `;
+              shareBtn.classList.remove('copied');
+            }, 2000);
+          } catch (err) {
+            console.error('Failed to copy to clipboard:', err);
+          }
+      });
+    }
+  });
+
+  // Initialize header on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check for URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagsParam = urlParams.get('tags'); // Old format: comma-separated
+    const tagParam = urlParams.get('tag');   // New format: plus-separated
+    
+    let selectedTags: string[] = [];
+    
+    if (tagParam) {
+      // New format: plus-separated tags
+      selectedTags = tagParam.split('+').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    } else if (tagsParam) {
+      // Old format: comma-separated tags (for backward compatibility)
+      selectedTags = tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    }
+    
+    if (selectedTags.length > 0) {
+      const allCards = Array.from(document.querySelectorAll('.tool-card'));
+      const visibleCards = allCards.filter(card => {
+        const htmlCard = card as HTMLElement;
+        const tags = JSON.parse(htmlCard.dataset.tags || '[]');
+        return selectedTags.every(tag => tags.includes(tag));
+      });
+      updateFilterHeader(selectedTags, visibleCards.length);
+    }
+  });
+</script>

@@ -47,14 +47,92 @@ const isTagSelected = selected;
 </span>
 
 <script>
+  // DEBUG: Log script loading
+  console.log('🔍 TagChip DEBUG - Script loaded');
+  
   document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.tool-tag').forEach(tagChip => {
+    console.log('🔍 TagChip DEBUG - DOMContentLoaded fired');
+    
+    const tagChips = document.querySelectorAll('.tool-tag');
+    console.log('🔍 TagChip DEBUG - Found tag chips:', {
+      count: tagChips.length,
+      elements: Array.from(tagChips).map(el => ({
+        tag: el.getAttribute('data-tag'),
+        classes: el.className,
+        html: el.outerHTML.substring(0, 100) + '...'
+      }))
+    });
+    
+    tagChips.forEach((tagChip, index) => {
+      console.log(`🔍 TagChip DEBUG - Setting up listener for chip ${index}:`, {
+        tag: tagChip.getAttribute('data-tag'),
+        element: tagChip
+      });
+      
       tagChip.addEventListener('click', (e) => {
+        console.log('🔍 TagChip DEBUG - CLICK EVENT FIRED!', {
+          target: e.target,
+          currentTarget: e.currentTarget
+        });
+        
         e.preventDefault();
         const tag = tagChip.getAttribute('data-tag');
-        if (tag && typeof toggleTagSelection === 'function') {
-          toggleTagSelection(tag);
+        const isCurrentlySelected = tagChip.classList.contains('selected');
+        
+        if (tag) {
+          // Toggle selection state
+          tagChip.classList.toggle('selected');
+          const isNowSelected = tagChip.classList.contains('selected');
+          
+          // DEBUG: Log tag selection change with detailed analysis
+          console.log('🔍 TagChip DEBUG - Tag clicked:', {
+            tag,
+            tagType: typeof tag,
+            tagLength: tag?.length,
+            tagValue: JSON.stringify(tag),
+            dataTagAttribute: tagChip.getAttribute('data-tag'),
+            wasSelected: isCurrentlySelected,
+            isNowSelected,
+            element: tagChip,
+            elementHTML: tagChip.outerHTML.substring(0, 200) + '...'
+          });
+          
+          // Dispatch custom event for TagShareHeader to listen to
+          const tagSelectionEvent = new CustomEvent('tagSelectionChanged', {
+            detail: {
+              tag: tag,
+              selected: isNowSelected,
+              element: tagChip
+            },
+            bubbles: true
+          });
+          
+          // DEBUG: Log event dispatch with validation
+          console.log('🔍 TagChip DEBUG - Dispatching tagSelectionChanged event:', {
+            eventDetail: tagSelectionEvent.detail,
+            tagIsString: typeof tag === 'string',
+            tagIsValid: tag && tag.length > 0,
+            tagContainsHTML: tag && (tag.includes('<') || tag.includes('>')),
+            originalDataTag: tagChip.getAttribute('data-tag')
+          });
+          
+          document.dispatchEvent(tagSelectionEvent);
+          
+          // Legacy support for existing toggleTagSelection function
+          if (typeof (window as any).toggleTagSelection === 'function') {
+            (window as any).toggleTagSelection(tag);
+          }
+        } else {
+          console.error('🔍 TagChip DEBUG - No tag attribute found!', {
+            element: tagChip,
+            attributes: Array.from(tagChip.attributes).map(attr => `${attr.name}="${attr.value}"`)
+          });
         }
+      });
+      
+      // Also add a test click handler to see if ANY events work
+      tagChip.addEventListener('mousedown', () => {
+        console.log('🔍 TagChip DEBUG - MOUSEDOWN event fired for:', tagChip.getAttribute('data-tag'));
       });
     });
   });

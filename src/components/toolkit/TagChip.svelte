@@ -28,7 +28,45 @@
 
   function handleClick(event: MouseEvent) {
     event.preventDefault();
-    dispatch('click', { tag: tagString });
+    
+    // Toggle selection state
+    const wasSelected = isSelected;
+    isSelected = !isSelected;
+    
+    // DEBUG: Log tag selection change with detailed analysis
+    console.log('🔍 TagChip.svelte DEBUG - Tag clicked:', {
+      tag: tagString,
+      tagType: typeof tagString,
+      tagLength: tagString?.length,
+      tagValue: JSON.stringify(tagString),
+      wasSelected,
+      isNowSelected: isSelected,
+      element: event.currentTarget
+    });
+    
+    // Dispatch Svelte component event
+    dispatch('click', { tag: tagString, selected: isSelected });
+    
+    // Also dispatch global custom event for TagShareHeader to listen to
+    const tagSelectionEvent = new CustomEvent('tagSelectionChanged', {
+      detail: {
+        tag: tagString,
+        selected: isSelected,
+        element: event.currentTarget
+      },
+      bubbles: true
+    });
+    
+    // DEBUG: Log event dispatch with validation
+    console.log('🔍 TagChip.svelte DEBUG - Dispatching tagSelectionChanged event:', {
+      eventDetail: tagSelectionEvent.detail,
+      tagIsString: typeof tagString === 'string',
+      tagIsValid: tagString && tagString.length > 0,
+      tagContainsHTML: tagString && (tagString.includes('<') || tagString.includes('>')),
+      originalTagString: tagString
+    });
+    
+    document.dispatchEvent(tagSelectionEvent);
   }
 
   function handleKeydown(event: KeyboardEvent) {

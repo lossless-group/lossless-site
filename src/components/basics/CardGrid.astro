@@ -29,11 +29,7 @@ toolsWithImages.forEach(tool => {
 const itemsPerPage = 50;
 ---
 
-<div class="cards-container" data-items-per-page={itemsPerPage}>
-  <div class="filter-header" id="filter-header">
-    <h2 class="filter-title" id="filter-title">All Tools</h2>
-    <p class="filter-count" id="filter-count">{filteredTools.length} tools</p>
-  </div>
+<div class="cards-container" data-items-per-page={itemsPerPage} data-filter-tag={filterTag || ''}>
   <section class="tools-section">
     <div class="card-grid" id="tool-card-grid">
       <!-- Render ALL ToolCards in DOM -->
@@ -72,29 +68,7 @@ const itemsPerPage = 50;
     gap: 2rem;
   }
 
-  .filter-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--clr-lossless-ui-btn-border);
-    margin-bottom: 1rem;
-  }
 
-  .filter-title {
-    font-size: var(--fs-600);
-    font-weight: var(--fw-bold);
-    color: var(--clr-heading);
-    margin: 0;
-    line-height: 1.2;
-  }
-
-  .filter-count {
-    font-size: var(--fs-300);
-    color: var(--clr-body);
-    margin: 0;
-    opacity: 0.8;
-  }
 
   .card-grid {
     display: grid;
@@ -148,55 +122,6 @@ const itemsPerPage = 50;
 </style>
 
 <script>
-  function trainCaseToNormalCase(tag) {
-    return tag
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-
-  function updateFilterHeader(selectedTags, visibleCount) {
-    const filterTitle = document.getElementById('filter-title');
-    const filterCount = document.getElementById('filter-count');
-    
-    if (!filterTitle || !filterCount) return;
-    
-    if (selectedTags.length === 0) {
-      filterTitle.textContent = 'All Tools';
-    } else if (selectedTags.length === 1) {
-      filterTitle.textContent = trainCaseToNormalCase(selectedTags[0]);
-    } else {
-      const firstTag = trainCaseToNormalCase(selectedTags[0]);
-      const remainingCount = selectedTags.length - 1;
-      filterTitle.textContent = `${firstTag} + ${remainingCount} more`;
-    }
-    
-    const toolText = visibleCount === 1 ? 'tool' : 'tools';
-    filterCount.textContent = `${visibleCount} ${toolText}`;
-  }
-
-  // Listen for custom events from TagColumn
-  document.addEventListener('filtersChanged', (event) => {
-    const customEvent = event as CustomEvent;
-    const { selectedTags, visibleCount } = customEvent.detail;
-    updateFilterHeader(selectedTags, visibleCount);
-  });
-
-  // Initialize header on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    // Check for URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const tagsParam = urlParams.get('tags');
-    
-    if (tagsParam) {
-      const selectedTags = tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-      const allCards = Array.from(document.querySelectorAll('.tool-card'));
-      const visibleCards = allCards.filter(card => {
-        const htmlCard = card as HTMLElement;
-        const tags = JSON.parse(htmlCard.dataset.tags || '[]');
-        return selectedTags.every(tag => tags.includes(tag));
-      });
-      updateFilterHeader(selectedTags, visibleCards.length);
-    }
-  });
+  // CardGrid now focuses only on card display and pagination
+  // Filter header and share functionality moved to TagShareHeader component
 </script>
