@@ -32,7 +32,8 @@ const aiToolKit = toolEntries
   .filter((entry) => {
     const frontmatter = entry.data;
     const hasAiToolkitTag = frontmatter.tags && 
-      frontmatter.tags.some(tag => 
+      Array.isArray(frontmatter.tags) &&
+      frontmatter.tags.some((tag: any) => 
         typeof tag === 'string' && 
         tag === 'AI-Toolkit'
       );
@@ -69,13 +70,7 @@ const pageDescription = `A collection of tools and resources tagged with "${tag}
   description="A curated collection of AI-powered tools and resources"
   filterTag="AI-Toolkit"
 >
-  <div class="tools-header" slot="header">
-    <h2>
-      We're tracking
-      <ToolCount asBadge={true} tag="AI-Toolkit" />
-      AI tools.
-    </h2>
-  </div>
+
 </ToolkitLayout>
 
 <style>

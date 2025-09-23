@@ -24,6 +24,13 @@ tools.forEach(tool => {
   if (!tool.id) throw new Error("Missing tool.id in toolkit layout");
 });
 
+// Calculate filtered tools count for TagShareHeader
+const filteredTools = filterTag
+  ? tools.filter((tool: any) => 
+      tool.tags?.some((tag: string) => tag === filterTag)
+    )
+  : tools;
+
 ---
 
 <Layout 
@@ -36,20 +43,21 @@ tools.forEach(tool => {
   }}>
   <main>
     <slot name="header" />
+    <TagShareHeader selectedTags={(() => {
+      const selectedTags = filterTag ? [filterTag] : [];
+      console.log('🔍 ToolkitLayout DEBUG - Passing selectedTags to TagShareHeader:', {
+        filterTag,
+        selectedTags,
+        toolsLength: tools.length
+      });
+      return selectedTags;
+    })()} totalCount={tools.length} filterTag={filterTag} />
+    <div class="header-spacer"></div>
     <div class="toolkit-layout">
       <aside class="sidebar">
         <TagColumn tools={tools} />
       </aside>
       <section class="main-content">
-        <TagShareHeader selectedTags={(() => {
-          const selectedTags = filterTag ? [filterTag] : [];
-          console.log('🔍 ToolkitLayout DEBUG - Passing selectedTags to TagShareHeader:', {
-            filterTag,
-            selectedTags,
-            toolsLength: tools.length
-          });
-          return selectedTags;
-        })()} totalCount={tools.length} filterTag={filterTag} />
         <CardGrid tools={tools} filterTag={filterTag} />
       </section>
     </div>
@@ -57,11 +65,16 @@ tools.forEach(tool => {
 </Layout>
 
 <style>
+  .header-spacer {
+    height: clamp(60px, 8vw, 100px);
+  }
+
   .toolkit-layout {
     display: flex;
     flex-direction: row;
     gap: 2rem;
     padding: 2rem;
+    padding-top: 0; /* Remove top padding since we now have header-spacer */
     width: 100%;
   }
 

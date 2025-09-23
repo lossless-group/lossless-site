@@ -136,18 +136,7 @@ const clientPortfoliosCollection = defineCollection({
   }).passthrough()
 });
 
-const visualsCollection = defineCollection({
-  loader: glob({pattern: "**/*.{png,jpg,jpeg,gif,webp,svg}", base: resolveContentPath("visuals")}),  // Explicitly list image extensions
-  schema: z.object({
-    // Define base fields that all images should have
-    id: z.string().optional(),
-    title: z.string().optional(),
-    alt: z.string().optional(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-    format: z.enum(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']).optional()
-  }).passthrough()
-});
+
 
 const talksCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/talks")}),
@@ -522,6 +511,5 @@ export const collections = {
   'client-recommendations': clientRecommendationsCollection,
   'client-portfolios': clientPortfoliosCollection,
   'portfolio': portfolioCollection,
-  'visuals': visualsCollection,
   'moc': mapOfContentsCollection,
 };

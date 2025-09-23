@@ -1,5 +1,6 @@
 ---
 import ToolkitLayout from "@layouts/ToolkitLayout.astro";
+import ToolCount from '@components/basics/ToolCount.astro';
 
 // Extract URL parameters
 const url = Astro.url;
@@ -17,7 +18,9 @@ if (tagParam) {
 <ToolkitLayout
   title="Lossless Toolkit"
   description="A curated collection of tools and resources to help you build better software."
-/>
+>
+
+</ToolkitLayout>
 
 
 <style>

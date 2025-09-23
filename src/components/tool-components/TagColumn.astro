@@ -28,11 +28,12 @@ const tagCounts = tools.reduce((acc, tool) => {
 }, {});
 ---
 
+<!-- Preload Choices.js resources for faster loading -->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"></noscript>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" as="script">
+
 <!-- Choices.js CDN -->
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
-/>
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <div class="tag-panel">
@@ -166,7 +167,7 @@ function filterCards() {
   const filtersChangedEvent = new CustomEvent('filtersChanged', {
     detail: {
       selectedTags: selectedTags,
-      visibleCount: visibleCount
+      visibleCount: matchingCards.length  // Use total filtered count, not just visible cards
     }
   });
   document.dispatchEvent(filtersChangedEvent);
@@ -235,6 +236,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   },
   });
+
+  // Show the Choices.js element now that it's initialized (prevents FOUC)
+  setTimeout(() => {
+    const choicesContainer = document.querySelector('.choices');
+    if (choicesContainer) {
+      choicesContainer.style.opacity = '1';
+      choicesContainer.style.visibility = 'visible';
+    }
+  }, 0);
 
   // Handle URL parameters for pre-selected tags
   function handleUrlParameters() {
@@ -547,6 +557,18 @@ window.addEventListener('unload', () => {
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 0.4rem;
+  }
+
+  /* Hide Choices.js container until initialized to prevent FOUC */
+  .choices {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  /* Original select element should be completely hidden */
+  #tag-select {
+    display: none !important;
   }
 
 </style>

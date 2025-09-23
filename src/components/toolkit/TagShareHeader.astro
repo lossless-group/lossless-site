@@ -1,4 +1,6 @@
 ---
+import ThinGradientBleedSeparator from "@components/basics/separators/ThinGradientBleedSeparator.astro";
+
 interface Props {
   selectedTags?: string[];
   totalCount?: number;
@@ -50,33 +52,39 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
 ---
 
 <div class="filter-header" data-filter-tag={filterTag || ''}>
-  <div class="filter-info">
-    <h2 class="filter-title" id="filter-title">{displayTitle}</h2>
-    <p class="filter-count" id="filter-count">{totalCount} {toolText}</p>
+  <div class="header-content">
+    <span>
+      <div class="filter-info">
+        <span class="filter-title" id="filter-title">{displayTitle}</span>
+        <span class="filter-count" id="filter-count">{totalCount} {toolText}</span>
+      </div>
+    </span>
+    <span>
+      <button id="share-tags-btn" class="share-btn" title="Share selected tags">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16,6 12,2 8,6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+      </button>
+    </span>
   </div>
-  <button id="share-tags-btn" class="share-btn" title="Share selected tags">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-      <polyline points="16,6 12,2 8,6"/>
-      <line x1="12" y1="2" x2="12" y2="15"/>
-    </svg>
-  </button>
 </div>
+<ThinGradientBleedSeparator />
 
 <style>
   .filter-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     background-color: var(--clr-primary-bg);
-    z-index: 1000;
     width: 100%;
+    padding: clamp(0.75em, 2vw, 1.25em) clamp(1em, 5vw, 3em);
+    transition: padding 0.3s ease;
+  }
+
+  .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: clamp(0.75em, 2vw, 1.25em) clamp(1em, 5vw, 3em);
-    transition: padding 0.3s ease;
+    width: 100%;
   }
 
   .filter-info {
@@ -139,7 +147,7 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
   }
 
   @media (max-width: 768px) {
-    .filter-header {
+    .header-content {
       flex-direction: column;
       gap: 1rem;
       align-items: flex-start;
@@ -242,13 +250,13 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
     // Update header with current selection
     const selectedTagsArray = Array.from(currentSelectedTags);
     const allCards = Array.from(document.querySelectorAll('.tool-card'));
-    const visibleCards = allCards.filter(card => {
+    const matchingCards = allCards.filter(card => {
       const htmlCard = card as HTMLElement;
       const tags = JSON.parse(htmlCard.dataset.tags || '[]');
       return selectedTagsArray.length === 0 || selectedTagsArray.every(tag => tags.includes(tag));
     });
     
-    updateFilterHeader(selectedTagsArray, visibleCards.length);
+    updateFilterHeader(selectedTagsArray, matchingCards.length);
   });
 
   // Listen for custom events from TagColumn or other components (legacy support)
@@ -430,12 +438,12 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
     
     if (selectedTags.length > 0) {
       const allCards = Array.from(document.querySelectorAll('.tool-card'));
-      const visibleCards = allCards.filter(card => {
+      const matchingCards = allCards.filter(card => {
         const htmlCard = card as HTMLElement;
         const tags = JSON.parse(htmlCard.dataset.tags || '[]');
         return selectedTags.every(tag => tags.includes(tag));
       });
-      updateFilterHeader(selectedTags, visibleCards.length);
+      updateFilterHeader(selectedTags, matchingCards.length);
     }
   });
 </script>
