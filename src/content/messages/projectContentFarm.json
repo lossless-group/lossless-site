@@ -1,0 +1,44 @@
+[
+  {
+    "label": "Manage Citations at Scale.",
+    "title": "Cite Wide: Reimagined Citation Management for Massive Markdown Content",
+    "details": "Extended Markdown enables Footnotes. Certain AI services return footnotes and sources and more are doing Deep Research. But how do you manage all sources and citations across thousands of files?",
+    "imageSide": "right",
+    "ctaText": "Learn More",
+    "ctaUrl": "https://github.com/lossless-group/cite-wide",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Deep Research LLM Access, right from Obsidian.",
+    "title": "Perplexed: An Elegant Interface to Perplexity and Perplexica",
+    "details": "Perplexed is an Obsidian plugin that allows you to access Perplexity and Perplexica right from Obsidian. Generate content in one click, access instant answers to your questions, and set parameters for quality and recency of sources.",
+    "imageSide": "left",
+    "ctaText": "Get Started with a Github Fork",
+    "ctaUrl": "https://github.com/lossless-group/perplexed-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Interface with Image Generators",
+    "title": "Image Gin: Empower Your Obsidian Workflow with AI-Generated Images",
+    "details": "Image Gin is an Obsidian plugin that allows you to interface with various image generators, such as DALL-E, Midjourney, Recraft, and Stable Diffusion. Generate images in one click, access instant results, and set parameters for dimensions, design guidelines, the works.",
+    "imageSide": "right",
+    "ctaText": "Get Started with a Github Fork",
+    "ctaUrl": "https://github.com/lossless-group/image-gin-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
+  },
+    {
+    "label": "Get Open Graph Content, Straight into Frontmatter",
+    "title": "Open Graph Fetcher: Make stunning use of Open Graph Data by fetching from a URL",
+    "details": "Open Graph Fetcher is an Obsidian plugin that allows you to fetch Open Graph data from URLs and insert it into the frontmatter of your Markdown files. This plugin is especially useful for content creators who want to quickly add metadata to their posts, such as titles, descriptions, and images.",
+    "imageSide": "left",
+    "ctaText": "Get Started with a Github Fork",
+    "ctaUrl": "https://github.com/lossless-group/open-graph-fetcher",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
+  }
+]

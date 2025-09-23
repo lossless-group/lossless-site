@@ -1,0 +1,137 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/basics/Header.astro';
+import Footer from '../../../components/basics/Footer.astro';
+import AlternatingSideImage from '../../../components/basics/messages/AlternatingSideImage.astro';
+import ThinGradientBleedSeparator from '../../../components/basics/separators/ThinGradientBleedSeparator.astro';
+
+export const prerender = true;
+---
+
+<Layout title="Content Farm - The Lossless Group">
+  <Header />
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="content-farm-header">
+        <div class="header-content">
+          <div class="header-icon">
+            <img src="/visuals/Tooling-Trademarks/app-icons/appIcon__Obsidian.svg" alt="Obsidian Icon" class="obsidian-icon" />
+          </div>
+          <div class="header-text">
+            <h1 class="page-title">Content Farm: a Suite of Plugins for Obsidian</h1>
+            <p class="page-subtitle">Streamlined content creation and data preparation for AI-powered workflows</p>
+          </div>
+        </div>
+      </div>
+      
+      <ThinGradientBleedSeparator />
+      
+      <div class="content-section">
+        <AlternatingSideImage 
+          jsonPath="messages/projectContentFarm.json"
+          classes="content-farm-features"
+        />
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>
+
+<style>
+  .main-content {
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  .content-farm-header {
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .header-icon {
+    flex-shrink: 0;
+  }
+  
+  .obsidian-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+  }
+  
+  .header-text {
+    flex: 1;
+  }
+  
+  .page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: left;
+  }
+  
+  .page-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    line-height: 1.6;
+    text-align: left;
+    margin: 0;
+  }
+  
+  .content-section {
+    margin: 4rem 0;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    
+    .obsidian-icon {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .page-subtitle {
+      font-size: 1.1rem;
+    }
+    
+    .content-farm-header {
+      margin-bottom: 2rem;
+      padding: 1rem 0;
+    }
+    
+    .content-section {
+      margin: 2rem 0;
+    }
+  }
+  
+  /* Ensure proper spacing for the AlternatingSideImage component */
+  :global(.content-farm-features) {
+    margin-top: 2rem;
+  }
+</style>

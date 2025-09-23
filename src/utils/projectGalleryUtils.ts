@@ -12,6 +12,7 @@ export interface ProjectConfig {
   subtitle: string;
   href?: string;
   hasSidebar: boolean;
+  hasLandingPage?: boolean; // Optional flag to render Astro content instead of redirecting
   canvas?: string;
   useCases: Array<{
     title: string;

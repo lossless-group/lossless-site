@@ -51,13 +51,11 @@ console.log('Vocabulary Version debug:', {
   allData: entry.data
 });
 
-// ---
+
 // Always use entry.slug for the URL, as provided by ReferenceGrid and index.astro
 // This ensures correct casing and matches the routing logic in [...slug].astro
 // Do NOT reconstruct from id or data.slug here; single source of truth is entry.slug
 const url = `/more-about/${entry.slug}`;
-// ---
-
 ---
 
 <div class="vocabulary-card group">
@@ -68,7 +66,7 @@ const url = `/more-about/${entry.slug}`;
       </a>
     </h3>
     <div class="flex flex-col items-end space-y-0.5">
-      {wordCount > 400 && (
+      {wordCount > 90 && (
         <div class="text-xs text-gray-400">
           <WordCountDisplay 
             count={wordCount} 

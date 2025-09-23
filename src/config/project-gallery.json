@@ -5,6 +5,7 @@
       "title": "Augment It",
       "subtitle": "Augment any data with AI by importing records or connecting to data sources.",
       "hasSidebar": true,
+      "hasLandingPage": true,
       "canvas": "/projects/gallery/augment-it/specs/Augment-It.canvas",
       "useCases": [
         {
@@ -225,6 +226,7 @@
       "id": "content-farm",
       "title": "Content Farm",
       "subtitle": "Automated content generation and management system.",
+      "href": "/projects/gallery/content-farm",
       "hasSidebar": false,
       "useCases": [
         {

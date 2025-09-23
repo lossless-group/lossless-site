@@ -1,5 +1,6 @@
 ---
 import { loadGalleryConfig, resolveProjectUrl } from '../../utils/projectGalleryUtils';
+import Layout from '../../layouts/Layout.astro';
 
 export const prerender = true;
 
@@ -11,13 +12,13 @@ export async function getStaticPaths() {
   Object.entries(galleryConfig.projects).forEach(([projectId, project]) => {
     const resolvedUrl = resolveProjectUrl(project);
     
-    // Add paths for all projects - they will redirect to their specific URL or development page
-    
     paths.push({
       params: { project: projectId },
       props: {
+        project: project,
         redirectUrl: resolvedUrl,
-        projectTitle: project.title
+        projectTitle: project.title,
+        hasLandingPage: project.hasLandingPage || false
       }
     });
   });
@@ -25,8 +26,87 @@ export async function getStaticPaths() {
   return paths;
 }
 
-const { redirectUrl, projectTitle } = Astro.props;
+const { project, redirectUrl, projectTitle, hasLandingPage } = Astro.props;
 
-// Perform server-side redirect
-return Astro.redirect(redirectUrl);
+// If project doesn't have a landing page, perform redirect as before
+if (!hasLandingPage) {
+  return Astro.redirect(redirectUrl);
+}
+
+// Otherwise, render the Astro content below
 ---
+
+<Layout title={projectTitle}>
+  <main class="project-landing">
+    <div class="container mx-auto px-4 py-8">
+      <header class="project-header mb-8">
+        <h1 class="text-4xl font-bold mb-4">{project.title}</h1>
+        <p class="text-xl text-gray-600 mb-6">{project.subtitle}</p>
+        
+        {project.href && (
+          <a 
+            href={project.href} 
+            class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Visit Project
+          </a>
+        )}
+      </header>
+
+      {project.useCases && project.useCases.length > 0 && (
+        <section class="use-cases mb-8">
+          <h2 class="text-2xl font-semibold mb-4">Use Cases</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            {project.useCases.map((useCase) => (
+              <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-lg font-medium mb-2">{useCase.title}</h3>
+                <p class="text-gray-700">{useCase.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {project.demoSteps && project.demoSteps.length > 0 && (
+        <section class="demo-steps">
+          <h2 class="text-2xl font-semibold mb-4">Demo Steps</h2>
+          <div class="space-y-4">
+            {project.demoSteps.map((step, index) => (
+              <div class="border border-gray-200 p-4 rounded-lg">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-medium">{step.title}</h3>
+                  {step.type === 'sequential' && step.step && (
+                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                      Step {step.step}
+                    </span>
+                  )}
+                </div>
+                {step.description && (
+                  <p class="text-gray-600 mt-2">{step.description}</p>
+                )}
+                {step.href && (
+                  <a 
+                    href={step.href} 
+                    class="inline-block mt-3 text-blue-600 hover:text-blue-800 underline"
+                  >
+                    View Step →
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .project-landing {
+    min-height: 100vh;
+  }
+  
+  .container {
+    max-width: 1200px;
+  }
+</style>
