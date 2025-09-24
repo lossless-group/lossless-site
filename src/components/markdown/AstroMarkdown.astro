@@ -1870,7 +1870,7 @@ if (DEBUG_AST) {
     }
     
     if (slides.length > 0) {
-      return <SlidesEmbed slides={slides} config={config} isAstroPresentation={isAstroPresentation} />;
+      return <SlidesEmbed slides={slides} config={config} isAstroPresentation={isAstroPresentation} {...({} as any)} />;
     }
     
     return (
