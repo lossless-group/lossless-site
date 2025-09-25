@@ -1,0 +1,251 @@
+---
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+import Layout from '@layouts/Layout.astro';
+import ClientReaderLayout from '@layouts/ClientReaderLayout.astro';
+import { getCollection, getEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
+import { extractBacklinkPaths } from '@utils/backlink-parser';
+import { contentBasePath } from '@utils/envUtils';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Utility function to convert content path to Astro ID
+function contentPathToAstroId(contentPath: string): { collection: 'essays' | 'market-maps', id: string } | null {
+  // contentPath format: "lost-in-public/market-maps/Agentic AI in Fintech"
+  // Need to convert to: collection="market-maps", id="lost-in-public/market-maps/agentic-ai-in-fintech.md"
+  
+  const pathParts = contentPath.split('/');
+  if (pathParts.length < 3) return null;
+  
+  // Determine collection from the path
+  let collection: 'essays' | 'market-maps';
+  if (pathParts.includes('market-maps')) {
+    collection = 'market-maps';
+  } else if (pathParts.includes('essays')) {
+    collection = 'essays';
+  } else {
+    // Default to essays for other paths
+    collection = 'essays';
+  }
+  
+  // Convert the entire path to snake-case and add .md extension
+  const id = contentPath.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9\-\/]/g, '') + '.md';
+  
+  return { collection, id };
+}
+
+async function loadClientContent(clientName: string) {
+  try {
+    const clientMdPath = path.resolve(contentBasePath, 'moc', `${clientName}.md`);
+    const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+    
+    const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
+    if (!readerBlockMatch) return [];
+    
+    const block = readerBlockMatch[1] || '';
+    const contentPaths = extractBacklinkPaths(block);
+    const clientContent = [];
+    
+    for (const contentPath of contentPaths) {
+      const astroInfo = contentPathToAstroId(contentPath);
+      if (!astroInfo) {
+        console.warn(`Could not parse content path: ${contentPath}`);
+        continue;
+      }
+      
+      try {
+        const entry = await getEntry(astroInfo.collection, astroInfo.id);
+        if (entry) {
+          clientContent.push(entry);
+        } else {
+          console.warn(`Could not find entry for ${astroInfo.collection}/${astroInfo.id} from path: ${contentPath}`);
+        }
+      } catch (err) {
+        console.warn(`Error fetching entry for ${astroInfo.collection}/${astroInfo.id}:`, err);
+      }
+    }
+    
+    return clientContent;
+  } catch (err) {
+    console.warn(`Error loading content for client ${clientName}:`, err);
+    return [];
+  }
+}
+
+export async function getStaticPaths() {
+  const paths = [];
+
+  try {
+    const mocFiles = await fs.readdir(path.resolve(contentBasePath, 'moc'));
+    
+    for (const mocFile of mocFiles) {
+      if (!mocFile.endsWith('.md')) continue;
+      
+      const client = mocFile.replace('.md', '');
+      const clientLower = client.toLowerCase();
+      
+      const clientContent = await loadClientContent(client);
+      
+      if (clientContent.length > 0) {
+        // Add the main reader page for each client (no slug)
+        paths.push({
+          params: { 
+            client: clientLower,
+            slug: []
+          },
+          props: { 
+            client, 
+            actualClientName: client,
+            contentSlug: undefined,
+            content: undefined
+          }
+        });
+
+        // Add individual content pages for each client
+        for (const content of clientContent) {
+          const contentId = content.id.replace(/\.md$/, '');
+          
+          paths.push({
+            params: { 
+              client: clientLower,
+              slug: contentId
+            },
+            props: { 
+              client, 
+              actualClientName: client,
+              contentSlug: contentId,
+              content: content
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error reading MOC directory:', err);
+  }
+
+  return paths;
+}
+
+interface Props {
+  client: string;
+  actualClientName: string;
+  contentSlug?: string;
+  content?: CollectionEntry<'essays'> | CollectionEntry<'market-maps'>;
+}
+
+const { client, actualClientName, contentSlug, content } = Astro.props;
+
+// Load content for the component body
+const clientContent = await loadClientContent(actualClientName);
+
+// Process content for display - cast to BaseCollectionEntry type
+const essays = processEntries(clientContent as any);
+
+// Use the content from props or fallback to first available content
+let currentEssay = content || essays[0];
+if (contentSlug) {
+  // Extract just the filename part for matching
+  const slugFilename = contentSlug.split('/').pop();
+  // Slugify the slug filename to match the essay filename format
+  const slugifiedSlugFilename = slugify(slugFilename || '');
+  currentEssay = essays.find(e => {
+    const essayFilename = e.slug.split('/').pop();
+    return essayFilename === slugifiedSlugFilename;
+  }) || essays[0];
+}
+
+// Define frontmatter data for the client reader page
+const frontmatter = {
+  title: `${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`,
+  description: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  lede: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  banner_image: (currentEssay?.data?.banner_image || currentEssay?.data?.portrait_image) as string | undefined
+};
+
+---
+
+<Layout frontmatter={frontmatter}>
+  <AnimationWrapper>
+
+  <div class="reader-wrapper">
+    {currentEssay ? (
+      <ClientReaderLayout 
+        entry={currentEssay} 
+        allContent={essays} 
+        mode="client"
+        client={client}
+        collections={clientContent.map(c => c.collection).filter((v, i, a) => a.indexOf(v) === i)}
+      />
+    ) : (
+      <div class="no-content">
+        <h2>Content not found.</h2>
+        <p>Check back later for updated content.</p>
+      </div>
+    )}
+  </div>
+
+  <Hero
+      title={`${toProperCase(client)} Reader`}
+      subtitle="Strategic insights and recommendations"
+      description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
+      ctaText="Back to Portal"
+      ctaUrl={`/client/${client.toLowerCase()}`}
+      image={{
+        src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
+        alt: `${toProperCase(client)} Logo`
+      }}
+      alignment="left"
+      fullBleed={true}
+      animate={true}
+      classes="mb-0"
+      style="margin-bottom: 0; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+  />
+  </AnimationWrapper>
+</Layout>
+
+<script>
+  // Scroll to reader-wrapper if viewing a specific essay (slug is provided)
+  const pathSegments = window.location.pathname.split('/');
+  const hasContentSlug = pathSegments.length > 4; // /client/[client]/read/[content-slug]
+    
+    if (hasContentSlug) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const readerWrapper = document.querySelector('.reader-wrapper');
+      if (readerWrapper) {
+        readerWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Add a small offset to account for any fixed headers
+      }
+    });
+  }
+</script>
+
+<style>
+.reader-wrapper {
+  padding: 2rem 0rem;
+  margin: 0 auto;
+}
+
+.no-content {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--clr-lossless-primary);
+}
+
+.no-content h2 {
+  font-size: var(--fs-700);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .reader-wrapper {
+    padding: 1rem;
+  }
+}
+</style>

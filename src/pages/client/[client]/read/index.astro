@@ -1,0 +1,181 @@
+---
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+import Layout from '@layouts/Layout.astro';
+import ClientReaderLayout from '@layouts/ClientReaderLayout.astro';
+import { getCollection, getEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
+import { extractBacklinkPaths } from '@utils/backlink-parser';
+import { contentBasePath } from '@utils/envUtils';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Generate static paths for all available clients
+export async function getStaticPaths() {
+  const mocPath = path.resolve(contentBasePath, 'moc');
+  
+  try {
+    const files = await fs.readdir(mocPath);
+    const clientFiles = files.filter(file => 
+      file.endsWith('.md') && 
+      !['Home.md', 'Param.md'].includes(file) // Exclude non-client files
+    );
+    
+    return clientFiles.map(file => {
+      const clientName = path.basename(file, '.md');
+      return {
+        params: { 
+          client: clientName.toLowerCase().replace(/\s+/g, '-') 
+        }
+      };
+    });
+  } catch (error) {
+    console.error('Error reading MOC directory:', error);
+    return [];
+  }
+}
+
+// Get the client parameter from the URL
+const { client } = Astro.params;
+
+if (!client) {
+  return Astro.redirect('/404');
+}
+
+// Function to convert content path to Astro collection ID
+function contentPathToAstroId(contentPath: string): { collection: 'essays' | 'market-maps'; id: string } | null {
+  // Determine collection based on path
+  const collection = contentPath.includes('/market-maps/') ? 'market-maps' : 'essays';
+  
+  // Convert path to snake-case ID with .md extension
+  const fileName = path.basename(contentPath, '.md');
+  const snakeCaseId = fileName
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  
+  return {
+    collection,
+    id: `${snakeCaseId}.md`
+  };
+}
+
+// Load client content based on the client parameter
+async function loadClientContent(clientParam: string) {
+  try {
+    // Convert URL parameter back to actual file name
+    const mocPath = path.resolve(contentBasePath, 'moc');
+    const files = await fs.readdir(mocPath);
+    
+    // Find the matching client file
+    const clientFile = files.find(file => {
+      const fileName = path.basename(file, '.md');
+      const urlParam = fileName.toLowerCase().replace(/\s+/g, '-');
+      return urlParam === clientParam;
+    });
+    
+    if (!clientFile) {
+      console.warn(`No client file found for parameter: ${clientParam}`);
+      return [];
+    }
+    
+    const clientMdPath = path.resolve(mocPath, clientFile);
+    const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+    
+    const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
+    if (!readerBlockMatch) {
+      return [];
+    }
+    
+    const block = readerBlockMatch[1] || '';
+    const contentPaths = extractBacklinkPaths(block);
+    const clientContent = [];
+    
+    for (const contentPath of contentPaths) {
+      const astroInfo = contentPathToAstroId(contentPath);
+      if (!astroInfo) {
+        continue;
+      }
+      
+      try {
+        const entry = await getEntry(astroInfo.collection, astroInfo.id);
+        if (entry) {
+          clientContent.push(entry);
+        }
+      } catch (error) {
+        console.log(`Error loading entry ${astroInfo.collection}/${astroInfo.id}:`, error);
+      }
+    }
+    
+    return clientContent;
+  } catch (err) {
+    console.warn(`Error loading content for client ${clientParam}:`, err);
+    return [];
+  }
+}
+
+// Load the client's content using the URL parameter
+const clientContent = await loadClientContent(client!);
+
+// Process content for display - cast to BaseCollectionEntry type
+const allContent = processEntries(clientContent as any);
+
+// Get the first content item as the default
+const currentContent = allContent[0];
+
+// Get unique collection names for the collections prop
+const collections: string[] = [...new Set(clientContent.map((entry: any) => String(entry.collection)))];
+
+// Define frontmatter data for the client reader page
+const frontmatter = {
+  title: `${toProperCase(client)} - Reader`,
+  description: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  lede: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  banner_image: (currentContent?.data?.banner_image || currentContent?.data?.portrait_image) as string | undefined
+};
+
+---
+
+<Layout frontmatter={frontmatter}>
+  <AnimationWrapper>
+
+  <div class="reader-wrapper">
+    {currentContent ? (
+      <ClientReaderLayout 
+        entry={currentContent} 
+        allContent={allContent}
+        collections={collections}
+        mode="client"
+      />
+    ) : (
+      <div class="no-content">
+        <Hero 
+          title={`${toProperCase(client)} Reader`}
+          subtitle="No content available for this client"
+        />
+      </div>
+    )}
+  </div>
+
+  </AnimationWrapper>
+</Layout>
+
+<style>
+  .reader-wrapper {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .no-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+  }
+</style>

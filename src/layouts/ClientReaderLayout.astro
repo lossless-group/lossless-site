@@ -1,0 +1,344 @@
+---
+// site/src/layouts/ClientReaderLayout.astro
+
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
+import remarkImages from '@utils/markdown/remark-images'; 
+import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkCitations from '@utils/markdown/remark-citations';
+import remarkTableOfContents from '@utils/markdown/remark-toc';
+import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
+import type { Root } from 'mdast';
+
+import CollectionSidebar from '@components/articles/ContentNavSidebar.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { markdownDebugger } from '@utils/markdown/markdownDebugger';
+
+// Props
+interface Props {
+  entry: any;
+  allContent: any[]; // All content from multiple collections
+  mode?: 'client' | 'generic'; // prop to control link behavior
+  client?: string;
+  collections?: string[]; // List of collection names for reference
+}
+
+const { entry, allContent, mode, client, collections } = Astro.props as Props;
+
+let mdastNode = null;
+let tocNode = null;
+let contentData = null;
+
+const effectiveEntry = entry ?? (allContent.length > 0 ? allContent[0] : null);
+
+// Process markdown content
+if (effectiveEntry) {
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkDirective)       // Parse directive syntax
+    .use(remarkDirectiveToComponent) // Preserve directives for AstroMarkdown
+    .use(remarkImages) 
+    .use(remarkBacklinks)
+    .use(remarkCitations)
+    .use(remarkTableOfContents);
+
+  const mdast = processor.parse(effectiveEntry.body || '');
+  mdastNode = await processor.run(mdast);
+
+  markdownDebugger.log('ClientReaderLayout.astro Debug');
+  markdownDebugger.writeDebugFile('client-reader-mdast', mdastNode);
+  markdownDebugger.verbose('MDAST structure:', mdastNode);
+
+  tocNode = mdastNode.children?.find(child => child.type === 'tableOfContents');
+
+  contentData = {
+    path: effectiveEntry.id,
+    id: effectiveEntry.id,
+    collection: effectiveEntry.collection,
+    ...effectiveEntry.data
+  };
+}
+---
+
+<div class="client-reader-layout">
+  <aside class="client-sidebar">
+    <div class="sidebar-inner">
+      <CollectionSidebar essays={allContent} currentSlug={effectiveEntry ? effectiveEntry.id : null} mode={mode} client={client} />
+    </div>
+  </aside>
+
+  <main class="client-reader-pane">
+    {effectiveEntry && mdastNode && contentData ? (
+      <OneArticleOnPage 
+        content={mdastNode} 
+        data={contentData} 
+      />
+    ) : (
+      <div class="no-content">
+        <h2>No content available</h2>
+        <p>Check back later for updated content from collections: {collections?.join(', ') || 'unknown'}.</p>
+      </div>
+    )}
+  </main>
+</div>
+
+<style>
+.client-reader-layout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - 4rem); /* Fixed height minus header */
+  overflow: hidden; /* Prevent overall scroll */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.client-sidebar {
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
+  overflow-y: auto; /* Independent scroll */
+  overflow-x: hidden;
+  position: relative; /* Remove sticky positioning */
+  height: 100%;
+  padding: 1rem;
+  background: var(--clr-sidebar-bg, #111);
+  transition: width 0.3s ease-in-out;
+  scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+.sidebar-inner {
+  width: 100%;
+  min-width: 0;
+}
+
+.client-reader-pane {
+  flex: 1 1 auto;
+  display: block;
+  padding: 3rem 2rem;
+  min-width: 0;
+  overflow-y: auto; /* Independent scroll */
+  overflow-x: hidden;
+  max-width: 100%;
+  height: 100%;
+  scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+.no-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  text-align: center;
+  color: var(--clr-text-secondary, #666);
+}
+
+.no-content h2 {
+  margin-bottom: 1rem;
+  color: var(--clr-text-primary, #333);
+}
+
+/* Constrain OneArticleOnPage sidebars when used in ClientReaderLayout */
+.client-reader-pane :global(.info-sidebar) {
+  min-width: 240px;
+  max-width: 280px;
+  width: 280px;
+}
+
+.client-reader-pane :global(.info-sidebar:hover:not(.collapsed)) {
+  width: 400px;
+  max-width: 400px;
+}
+
+.client-reader-pane :global(.toc-sidebar) {
+  min-width: 240px;
+  max-width: 280px;
+  width: 280px;
+}
+
+.client-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+  width: 400px;
+  max-width: 400px;
+}
+
+.client-reader-pane :global(.content-inner) {
+  max-width: 100%;
+}
+
+.client-reader-pane :global(.main-content) {
+  max-width: 85ch;
+}
+
+.client-reader-pane :global(.content-wrapper) {
+  padding: 1rem 0.5rem;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Custom scrollbar styling for better UX */
+.client-sidebar::-webkit-scrollbar,
+.client-reader-pane::-webkit-scrollbar {
+  width: 8px;
+}
+
+.client-sidebar::-webkit-scrollbar-track,
+.client-reader-pane::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.client-sidebar::-webkit-scrollbar-thumb,
+.client-reader-pane::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.client-sidebar::-webkit-scrollbar-thumb:hover,
+.client-reader-pane::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 1024px) {
+  .client-reader-layout {
+    flex-direction: column;
+    height: auto; /* Allow natural height on mobile */
+    overflow: visible;
+  }
+
+  .client-sidebar {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border, #ccc);
+    padding: 1rem 0;
+    padding-top: 60px; /* Account for mobile TOC header */
+    top: auto;
+
+    box-sizing: border-box;
+    flex-shrink: 0;
+    
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1;
+  }
+
+  .client-reader-pane {
+    padding: 1rem;
+    height: auto; /* Allow natural height on mobile */
+    overflow: visible;
+  }
+  
+  .client-reader-pane :global(.content-inner) {
+    max-width: 100% !important; /* Override all previous constraints */
+  }
+  
+  .client-reader-pane :global(.main-content) {
+    max-width: 100%;
+  }
+  
+  .client-reader-pane :global(.prose) {
+    max-width: 100%;
+    padding-top: 0 !important; /* Remove padding-top when used in ClientReaderLayout */
+  }
+}
+
+/* Responsive adjustments for ClientReaderLayout */
+@media (max-width: 1600px) {
+  .client-reader-pane :global(.info-sidebar),
+  .client-reader-pane :global(.toc-sidebar) {
+    min-width: 220px;
+    max-width: 260px;
+    width: 260px;
+  }
+  
+  .client-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .client-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 350px;
+    max-width: 350px;
+  }
+  
+  .client-reader-pane :global(.content-inner) {
+    max-width: calc(100% - 540px); /* Account for both sidebars + gap */
+  }
+}
+
+@media (max-width: 1400px) {
+  .client-reader-pane :global(.info-sidebar),
+  .client-reader-pane :global(.toc-sidebar) {
+    min-width: 200px;
+    max-width: 240px;
+    width: 240px;
+  }
+  
+  .client-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .client-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 320px;
+    max-width: 320px;
+  }
+  
+  .client-reader-pane :global(.content-inner) {
+    max-width: calc(100% - 500px); /* Account for both sidebars + gap */
+  }
+}
+
+@media (max-width: 1200px) {
+  .client-reader-pane :global(.info-sidebar),
+  .client-reader-pane :global(.toc-sidebar) {
+    min-width: 180px;
+    max-width: 220px;
+    width: 220px;
+  }
+  
+  .client-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .client-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 280px;
+    max-width: 280px;
+  }
+  
+  .client-reader-pane :global(.content-inner) {
+    max-width: calc(100% - 460px); /* Account for both sidebars + gap */
+  }
+}
+
+@media (max-width: 1100px) {
+  .client-reader-pane :global(.info-sidebar),
+  .client-reader-pane :global(.toc-sidebar) {
+    min-width: 160px;
+    max-width: 200px;
+    width: 200px;
+  }
+  
+  .client-reader-pane :global(.info-sidebar:hover:not(.collapsed)),
+  .client-reader-pane :global(.toc-sidebar:hover:not(.collapsed)) {
+    width: 260px;
+    max-width: 260px;
+  }
+  
+  .client-reader-pane :global(.content-inner) {
+    max-width: calc(100% - 420px); /* Account for both sidebars + gap */
+  }
+}
+
+@media (min-width: 1025px) {
+  .client-sidebar {
+    width: 300px;
+    min-width: 300px;
+    max-width: 28vw;
+    transition: width 0.3s ease-in-out, max-width 0.3s ease-in-out;
+  }
+
+  .client-sidebar:hover {
+    width: 28vw;
+  }
+}
+</style>

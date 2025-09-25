@@ -335,12 +335,14 @@ try {
       const readerButton = document.getElementById('toggle-reader');
       const readerSection = document.getElementById('reader-section');
       
-      // Reader toggle functionality
-      readerButton.addEventListener('click', () => {
-        const isCollapsed = readerSection.classList.toggle('collapsed');
-        readerSection.classList.toggle('expanded', !isCollapsed);
-        readerButton.textContent = isCollapsed ? 'Show Reader' : 'Hide Reader';
-      });
+      // Reader toggle functionality - only if elements exist
+      if (readerButton && readerSection) {
+        readerButton.addEventListener('click', () => {
+          const isCollapsed = readerSection.classList.toggle('collapsed');
+          readerSection.classList.toggle('expanded', !isCollapsed);
+          readerButton.textContent = isCollapsed ? 'Show Reader' : 'Hide Reader';
+        });
+      }
     });
   </script>
 </Layout>
