@@ -39,16 +39,50 @@ function filterContentByMOC(
   if (mocPaths.length === 0) return allContent;
   
   return allContent.filter(entry => {
-    // Check if the entry title matches any MOC path
     const entryTitle = entry.data.title as string;
-    if (!entryTitle) return false;
+    const entryId = entry.id;
+    const entryCollection = entry.collection;
     
     return mocPaths.some(mocPath => {
-      // Extract the title from the MOC path (last part after /)
-      const mocTitle = mocPath.split('/').pop() || '';
-      // Compare titles (case-insensitive)
-      return (entryTitle as string).toLowerCase().includes((mocTitle as string).toLowerCase()) || 
-             (mocTitle as string).toLowerCase().includes((entryTitle as string).toLowerCase());
+      // Split the MOC path into collection and filename
+      const pathParts = mocPath.split('/');
+      
+      // Handle paths like "lost-in-public/market-maps/..." or "essays/..."
+      let mocCollection, mocFilename;
+      if (pathParts.length >= 2 && pathParts[1] === 'market-maps') {
+        // Path like "lost-in-public/market-maps/The Future of CPG"
+        mocCollection = 'market-maps';
+        mocFilename = pathParts.slice(2).join('/');
+      } else {
+        // Path like "essays/Partnering with Startups when they Scale Up"
+        mocCollection = pathParts[0];
+        mocFilename = pathParts.slice(1).join('/');
+      }
+      
+      // Check if collections match
+      if (entryCollection !== mocCollection) return false;
+      
+      // Extract key words from MOC filename for fuzzy matching
+      const mocWords = mocFilename.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 2); // Only words longer than 2 chars
+      
+      // Extract key words from entry ID and title
+      const entryWords = [
+        ...entryId.toLowerCase().split(/[-\s]+/),
+        ...(entryTitle || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+      ].filter(word => word.length > 2);
+      
+      // Check if most MOC words are found in entry words
+      const matchingWords = mocWords.filter(mocWord => 
+        entryWords.some(entryWord => 
+          entryWord.includes(mocWord) || mocWord.includes(entryWord)
+        )
+      );
+      
+      const matchRatio = matchingWords.length / mocWords.length;
+      return matchRatio >= 0.6; // At least 60% of words match
     });
   });
 }
@@ -136,6 +170,8 @@ const allContent = [...allEssays, ...allMarketMaps].filter(entry => entry.data.p
 // Get client-specific content paths and filter content
 const clientContentPaths = await getClientContentPaths(actualClientName as string);
 const clientContent = filterContentByMOC(allContent, clientContentPaths);
+
+// Filter content based on MOC paths
 
 // Define frontmatter data for the client reader page
 const frontmatter = {
