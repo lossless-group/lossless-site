@@ -5,6 +5,7 @@ import Layout from '@layouts/Layout.astro';
 import ClientReaderLayout from '@layouts/ClientReaderLayout.astro';
 import { getCollection, getEntry } from "astro:content";
 import type { CollectionEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
 import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
 import { processEntries } from '@utils/slugify';
 import { extractBacklinkPaths } from '@utils/backlink-parser';
@@ -13,34 +14,8 @@ import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-// Utility function to convert content path to Astro ID
-function contentPathToAstroId(contentPath: string): { collection: 'essays' | 'market-maps', id: string } | null {
-  // contentPath format: "lost-in-public/market-maps/Agentic AI in Fintech"
-  // Need to convert to: collection="market-maps", id="lost-in-public/market-maps/agentic-ai-in-fintech.md"
-  
-  const pathParts = contentPath.split('/');
-  if (pathParts.length < 3) return null;
-  
-  // Determine collection from the path
-  let collection: 'essays' | 'market-maps';
-  if (pathParts.includes('market-maps')) {
-    collection = 'market-maps';
-  } else if (pathParts.includes('essays')) {
-    collection = 'essays';
-  } else {
-    // Default to essays for other paths
-    collection = 'essays';
-  }
-  
-  // Convert the entire path to snake-case and add .md extension
-  const id = contentPath.toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\-\/]/g, '') + '.md';
-  
-  return { collection, id };
-}
-
-async function loadClientContent(clientName: string) {
+// Function to get client-specific content paths from Map of Content
+async function getClientContentPaths(clientName: string): Promise<string[]> {
   try {
     const clientMdPath = path.resolve(contentBasePath, 'moc', `${clientName}.md`);
     const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
@@ -49,85 +24,92 @@ async function loadClientContent(clientName: string) {
     if (!readerBlockMatch) return [];
     
     const block = readerBlockMatch[1] || '';
-    const contentPaths = extractBacklinkPaths(block);
-    const clientContent = [];
-    
-    for (const contentPath of contentPaths) {
-      const astroInfo = contentPathToAstroId(contentPath);
-      if (!astroInfo) {
-        console.warn(`Could not parse content path: ${contentPath}`);
-        continue;
-      }
-      
-      try {
-        const entry = await getEntry(astroInfo.collection, astroInfo.id);
-        if (entry) {
-          clientContent.push(entry);
-        } else {
-          console.warn(`Could not find entry for ${astroInfo.collection}/${astroInfo.id} from path: ${contentPath}`);
-        }
-      } catch (err) {
-        console.warn(`Error fetching entry for ${astroInfo.collection}/${astroInfo.id}:`, err);
-      }
-    }
-    
-    return clientContent;
+    return extractBacklinkPaths(block);
   } catch (err) {
-    console.warn(`Error loading content for client ${clientName}:`, err);
+    console.warn(`Error loading Map of Content for client ${clientName}:`, err);
     return [];
   }
 }
 
-export async function getStaticPaths() {
+// Function to filter collections based on Map of Content paths
+function filterContentByMOC(
+  allContent: (CollectionEntry<'essays'> | CollectionEntry<'market-maps'>)[], 
+  mocPaths: string[]
+): (CollectionEntry<'essays'> | CollectionEntry<'market-maps'>)[] {
+  if (mocPaths.length === 0) return allContent;
+  
+  return allContent.filter(entry => {
+    // Check if the entry title matches any MOC path
+    const entryTitle = entry.data.title as string;
+    if (!entryTitle) return false;
+    
+    return mocPaths.some(mocPath => {
+      // Extract the title from the MOC path (last part after /)
+      const mocTitle = mocPath.split('/').pop() || '';
+      // Compare titles (case-insensitive)
+      return (entryTitle as string).toLowerCase().includes((mocTitle as string).toLowerCase()) || 
+             (mocTitle as string).toLowerCase().includes((entryTitle as string).toLowerCase());
+    });
+  });
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
   const paths = [];
 
   try {
-    const mocFiles = await fs.readdir(path.resolve(contentBasePath, 'moc'));
-    
-    for (const mocFile of mocFiles) {
-      if (!mocFile.endsWith('.md')) continue;
-      
-      const client = mocFile.replace('.md', '');
-      const clientLower = client.toLowerCase();
-      
-      const clientContent = await loadClientContent(client);
-      
-      if (clientContent.length > 0) {
-        // Add the main reader page for each client (no slug)
-        paths.push({
-          params: { 
-            client: clientLower,
-            slug: []
-          },
-          props: { 
-            client, 
-            actualClientName: client,
-            contentSlug: undefined,
-            content: undefined
-          }
-        });
+    // Handle essays collection
+    const essaysEntries = await getCollection('essays');
+    const publishedEssays = essaysEntries.filter(
+      entry => entry.data.publish !== false 
+    );
 
-        // Add individual content pages for each client
-        for (const content of clientContent) {
-          const contentId = content.id.replace(/\.md$/, '');
-          
-          paths.push({
-            params: { 
-              client: clientLower,
-              slug: contentId
-            },
-            props: { 
-              client, 
-              actualClientName: client,
-              contentSlug: contentId,
-              content: content
-            }
-          });
+    for (const entry of publishedEssays) {
+      const filename = path.basename(entry.id);
+      const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
+
+      paths.push({
+        params: { 
+          client: 'hypernova', 
+          collection: 'essays', 
+          slug: derivedSlug 
+        },
+        props: { 
+          client: 'hypernova',
+          actualClientName: 'hypernova',
+          entry: entry,
+          essays: publishedEssays,
+          collection: 'essays'
         }
-      }
+      });
+    }
+
+    // Handle market-maps collection
+    const marketMapsEntries = await getCollection('market-maps');
+    const publishedMarketMaps = marketMapsEntries.filter(
+      entry => entry.data.publish !== false 
+    );
+
+    for (const entry of publishedMarketMaps) {
+      const filename = path.basename(entry.id);
+      const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
+
+      paths.push({
+        params: { 
+          client: 'hypernova', 
+          collection: 'market-maps', 
+          slug: derivedSlug 
+        },
+        props: { 
+          client: 'hypernova',
+          actualClientName: 'hypernova',
+          entry: entry,
+          essays: publishedMarketMaps,
+          collection: 'market-maps'
+        }
+      });
     }
   } catch (err) {
-    console.warn('Error reading MOC directory:', err);
+    console.warn('Error loading collections:', err);
   }
 
   return paths;
@@ -136,37 +118,31 @@ export async function getStaticPaths() {
 interface Props {
   client: string;
   actualClientName: string;
-  contentSlug?: string;
-  content?: CollectionEntry<'essays'> | CollectionEntry<'market-maps'>;
+  entry: CollectionEntry<'essays'> | CollectionEntry<'market-maps'>;
+  essays: (CollectionEntry<'essays'> | CollectionEntry<'market-maps'>)[];
+  collection: string;
 }
 
-const { client, actualClientName, contentSlug, content } = Astro.props;
+const { client, actualClientName, entry, essays, collection } = Astro.props;
 
-// Load content for the component body
-const clientContent = await loadClientContent(actualClientName);
+// Use the entry directly from props
+const currentEssay = entry;
 
-// Process content for display - cast to BaseCollectionEntry type
-const essays = processEntries(clientContent as any);
+// Get all content from both collections
+const allEssays = await getCollection('essays');
+const allMarketMaps = await getCollection('market-maps');
+const allContent = [...allEssays, ...allMarketMaps].filter(entry => entry.data.publish !== false);
 
-// Use the content from props or fallback to first available content
-let currentEssay = content || essays[0];
-if (contentSlug) {
-  // Extract just the filename part for matching
-  const slugFilename = contentSlug.split('/').pop();
-  // Slugify the slug filename to match the essay filename format
-  const slugifiedSlugFilename = slugify(slugFilename || '');
-  currentEssay = essays.find(e => {
-    const essayFilename = e.slug.split('/').pop();
-    return essayFilename === slugifiedSlugFilename;
-  }) || essays[0];
-}
+// Get client-specific content paths and filter content
+const clientContentPaths = await getClientContentPaths(actualClientName as string);
+const clientContent = filterContentByMOC(allContent, clientContentPaths);
 
 // Define frontmatter data for the client reader page
 const frontmatter = {
-  title: `${toProperCase(client)} - ${currentEssay?.data?.title || 'Reader'}`,
-  description: `Strategic insights and recommendations for ${toProperCase(client)}`,
-  lede: `Strategic insights and recommendations for ${toProperCase(client)}`,
-  banner_image: (currentEssay?.data?.banner_image || currentEssay?.data?.portrait_image) as string | undefined
+  title: `${toProperCase(client as string)} - ${(currentEssay as any).data.title || 'Reader'}`,
+  description: `Strategic insights and recommendations for ${toProperCase(client as string)}`,
+  lede: `Strategic insights and recommendations for ${toProperCase(client as string)}`,
+  banner_image: ((currentEssay as any).data.banner_image || (currentEssay as any).data.portrait_image) as string | undefined
 };
 
 ---
@@ -175,31 +151,24 @@ const frontmatter = {
   <AnimationWrapper>
 
   <div class="reader-wrapper">
-    {currentEssay ? (
-      <ClientReaderLayout 
-        entry={currentEssay} 
-        allContent={essays} 
-        mode="client"
-        client={client}
-        collections={clientContent.map(c => c.collection).filter((v, i, a) => a.indexOf(v) === i)}
-      />
-    ) : (
-      <div class="no-content">
-        <h2>Content not found.</h2>
-        <p>Check back later for updated content.</p>
-      </div>
-    )}
+    <ClientReaderLayout 
+      entry={currentEssay} 
+      allContent={clientContent} 
+      mode="client"
+      client={client as string}
+      collections={['essays', 'market-maps']}
+    />
   </div>
 
   <Hero
-      title={`${toProperCase(client)} Reader`}
+      title={`${toProperCase(client as string)} Reader`}
       subtitle="Strategic insights and recommendations"
       description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
       ctaText="Back to Portal"
-      ctaUrl={`/client/${client.toLowerCase()}`}
+      ctaUrl={`/client/${(client as string).toLowerCase()}`}
       image={{
         src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
-        alt: `${toProperCase(client)} Logo`
+        alt: `${toProperCase(client as string)} Logo`
       }}
       alignment="left"
       fullBleed={true}

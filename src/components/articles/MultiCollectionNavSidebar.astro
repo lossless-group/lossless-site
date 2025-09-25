@@ -1,0 +1,127 @@
+---
+// site/src/components/articles/MultiCollectionNavSidebar.astro
+import type { CollectionEntry } from 'astro:content';
+import MultiCollectionEntryList from '@components/articles/MultiCollectionEntryList.astro';
+
+// Define the properties that this component accepts
+interface Props {
+  entries: CollectionEntry<any>[]; // Accept entries from any collection
+  currentSlug: string | null; // The slug of the entry currently displayed in the reader
+  mode?: 'client' | 'generic'; // prop to control link behavior
+  client?: string;
+  collections?: string[]; // Optional: list of collection names for context
+}
+
+const { entries, currentSlug, mode, client, collections } = Astro.props;
+
+// This reactive variable will hold the slug of the currently active entry in the sidebar.
+// It's initialized with currentSlug and updated by client-side script.
+let activeSlug = currentSlug;
+---
+
+<div class="multi-collection-nav-sidebar w-full">
+  {collections && collections.length > 1 && (
+    <div class="collection-header mb-4">
+      <h3 class="text-sm font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wide">
+        Collections: {collections.join(', ')}
+      </h3>
+    </div>
+  )}
+  
+  <MultiCollectionEntryList entries={entries} currentSlug={activeSlug} mode={mode} client={client}/>
+</div>
+
+<script define:vars={{ currentSlug }}>
+  // Function to scroll to the active entry in the sidebar
+  function scrollToActiveEntry() {
+    if (!currentSlug) {
+      console.log('No currentSlug provided');
+      return;
+    }
+    
+    // Get the last segment of the current slug (e.g., "quantum-computing-is-confusing")
+    const lastSlugSegment = currentSlug.split('/').pop();
+    console.log('Looking for entry with slug:', lastSlugSegment);
+    
+    // Find the active entry element
+    const activeEntry = document.querySelector(`[data-slug="${lastSlugSegment}"]`);
+    
+    if (activeEntry) {
+      console.log('Found active entry, scrolling to it');
+      
+      // Scroll the sidebar to the active entry
+      activeEntry.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+      
+      // Add a subtle highlight effect
+      activeEntry.classList.add('active-entry-highlight');
+      
+      // Remove the highlight after a delay
+      setTimeout(() => {
+        activeEntry.classList.remove('active-entry-highlight');
+      }, 2000);
+    } else {
+      console.log('Active entry not found in sidebar');
+      // Log all available slugs for debugging
+      const allEntries = document.querySelectorAll('[data-slug]');
+      const availableSlugs = Array.from(allEntries).map(el => el.getAttribute('data-slug'));
+      console.log('Available slugs in sidebar:', availableSlugs);
+    }
+  }
+  
+  // Function to attempt scrolling with retries
+  function attemptScrollWithRetry(maxRetries = 5, delay = 100) {
+    let attempts = 0;
+    
+    function tryScroll() {
+      attempts++;
+      const lastSlugSegment = currentSlug?.split('/').pop();
+      const activeEntry = document.querySelector(`[data-slug="${lastSlugSegment}"]`);
+      
+      if (activeEntry) {
+        scrollToActiveEntry();
+        return; // Success, stop retrying
+      }
+      
+      if (attempts < maxRetries) {
+        console.log(`Attempt ${attempts}: Entry not found, retrying in ${delay}ms...`);
+        setTimeout(tryScroll, delay);
+      } else {
+        console.log('Max retries reached, entry not found');
+      }
+    }
+    
+    tryScroll();
+  }
+  
+  // Run the scroll function when the page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(attemptScrollWithRetry, 50); // Small delay to ensure DOM is ready
+    });
+  } else {
+    setTimeout(attemptScrollWithRetry, 50);
+  }
+  
+</script>
+
+<style>
+  .collection-header {
+    border-bottom: 1px solid var(--clr-lossless-border, rgba(255, 255, 255, 0.1));
+    padding-bottom: 0.75rem;
+  }
+
+  /* Highlight effect for the active entry */
+  .active-entry-highlight {
+    animation: highlightPulse 2s ease-in-out;
+  }
+  
+  @keyframes highlightPulse {
+    0% { background-color: rgba(255, 255, 255, 0.1); }
+    50% { background-color: rgba(255, 255, 255, 0.2); }
+    100% { background-color: transparent; }
+  }
+</style>

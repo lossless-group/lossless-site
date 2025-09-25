@@ -1,0 +1,112 @@
+---
+// site/src/components/articles/MultiCollectionEntryList.astro
+import type { CollectionEntry } from 'astro:content';
+import EntryListItemPreviewBase from '@components/articles/EntryListItemPreview--Base.astro';
+import path from 'node:path';
+import { getReferenceSlug } from '@utils/slugify';
+
+// Define the properties that this component accepts
+interface Props {
+  entries: CollectionEntry<any>[]; // Accept entries from any collection
+  currentSlug: string | null; // The slug of the entry currently active in the reader
+  mode?: 'client' | 'generic'; // prop to control link behavior
+  client?: string
+}
+
+const { entries, currentSlug, mode, client } = Astro.props;
+
+// Ensure entries is an array and filter out invalid entries
+const validEntries = Array.isArray(entries) ? entries : [];
+
+// Group entries by collection for better organization
+const entriesByCollection = validEntries.filter(entry => entry && typeof entry === 'object').reduce((acc, entry) => {
+  const collection = (entry as any).collection;
+  if (!collection) {
+    console.warn('Entry missing collection property:', entry);
+    return acc;
+  }
+  if (!acc[collection]) {
+    acc[collection] = [];
+  }
+  acc[collection].push(entry);
+  return acc;
+}, {} as Record<string, CollectionEntry<any>[]>);
+
+const collectionNames = Object.keys(entriesByCollection);
+const showCollectionHeaders = collectionNames.length > 1;
+
+---
+
+<div class="multi-collection-entry-list w-full space-y-2 md:space-y-3">
+  {collectionNames.map((collectionName) => (
+    <div class="collection-group">
+      {showCollectionHeaders && (
+        <div class="collection-group-header mb-2">
+          <h4 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+            {collectionName}
+          </h4>
+        </div>
+      )}
+      
+      <div class="collection-entries space-y-2">
+        {entriesByCollection[collectionName].map((entry) => {
+          const filename = entry.id.split('/').pop(); // e.g. "foo.md"
+          const itemSlug = getReferenceSlug(filename.replace(/\.(md|mdx)$/, ''));
+          const lastSlugSegment = currentSlug?.split('/').pop();
+
+          const isActive = itemSlug === lastSlugSegment;    
+
+          // Generate appropriate URL based on mode and collection
+          let url: string;
+          if (mode === 'client') {
+            // For client mode, use the client-specific path
+            url = `/client/${client?.toLowerCase()}/read/${entry.collection}/${itemSlug}`;
+          } else {
+            // For generic mode, use the standard collection reader path
+            url = `/read/through/${entry.collection}/${itemSlug}`;
+          }
+
+          return (
+            <div class="preview-item-wrapper" data-slug={itemSlug} data-collection={entry.collection}>
+              <a href={url} class="block">
+                <EntryListItemPreviewBase 
+                  entry={entry} 
+                  isActive={isActive} 
+                  derivedSlug={itemSlug} 
+                  linkHref={url} 
+                />        
+              </a>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  ))}
+
+  {validEntries.length === 0 && (
+    <p class="text-neutral-500 dark:text-neutral-400 italic">
+      No content found in the specified collections.
+    </p>
+  )}
+</div>
+
+<style>
+  .collection-group:not(:last-child) {
+    margin-bottom: 1.5rem;
+  }
+  
+  .collection-group-header {
+    border-bottom: 1px solid var(--clr-lossless-border, rgba(255, 255, 255, 0.05));
+    padding-bottom: 0.25rem;
+  }
+  
+  .collection-entries {
+    padding-left: 0.5rem;
+  }
+  
+  /* Add a subtle left border for collection groups when there are multiple */
+  .multi-collection-entry-list:has(.collection-group:nth-child(2)) .collection-entries {
+    border-left: 2px solid var(--clr-lossless-border, rgba(255, 255, 255, 0.05));
+    padding-left: 0.75rem;
+  }
+</style>

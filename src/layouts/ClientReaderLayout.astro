@@ -12,7 +12,7 @@ import remarkTableOfContents from '@utils/markdown/remark-toc';
 import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 import type { Root } from 'mdast';
 
-import CollectionSidebar from '@components/articles/ContentNavSidebar.astro';
+import MultiCollectionNavSidebar from '@components/articles/MultiCollectionNavSidebar.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
@@ -66,7 +66,7 @@ if (effectiveEntry) {
 <div class="client-reader-layout">
   <aside class="client-sidebar">
     <div class="sidebar-inner">
-      <CollectionSidebar essays={allContent} currentSlug={effectiveEntry ? effectiveEntry.id : null} mode={mode} client={client} />
+      <MultiCollectionNavSidebar entries={allContent} currentSlug={effectiveEntry ? effectiveEntry.id : null} mode={mode} client={client} collections={collections} />
     </div>
   </aside>
 
