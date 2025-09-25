@@ -2,7 +2,7 @@
 import Hero from "@components/basics/Hero.astro";
 import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
 import Layout from '@layouts/Layout.astro';
-import ClientReaderLayout from '@layouts/ClientReaderLayout.astro';
+import DirectClientReaderLayout from '@layouts/DirectClientReaderLayout.astro';
 import { getCollection, getEntry } from "astro:content";
 import type { CollectionEntry } from 'astro:content';
 import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
@@ -45,29 +45,126 @@ if (!client) {
   return Astro.redirect('/404');
 }
 
-// Function to convert content path to Astro collection ID
-function contentPathToAstroId(contentPath: string): { collection: 'essays' | 'market-maps'; id: string } | null {
-  // Determine collection based on path
-  const collection = contentPath.includes('/market-maps/') ? 'market-maps' : 'essays';
+// Function to find entry by searching through collections
+async function findEntryByPath(contentPath: string): Promise<CollectionEntry<'essays'> | CollectionEntry<'market-maps'> | null> {
+  // Remove leading slash if present
+  const cleanPath = contentPath.startsWith('/') ? contentPath.slice(1) : contentPath;
   
-  // Convert path to snake-case ID with .md extension
-  const fileName = path.basename(contentPath, '.md');
-  const snakeCaseId = fileName
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+  // Split the path to get collection and filename
+  const pathParts = cleanPath.split('/');
   
-  return {
-    collection,
-    id: `${snakeCaseId}.md`
-  };
+  if (pathParts.length < 2) {
+    return null;
+  }
+  
+  // Determine collection based on the path
+  let collection: string;
+  let filename: string;
+  
+  if (pathParts[0] === 'lost-in-public' && pathParts[1] === 'market-maps') {
+    collection = 'market-maps';
+    filename = pathParts.slice(2).join('/');
+  } else if (pathParts[0] === 'essays') {
+    collection = 'essays';
+    filename = pathParts.slice(1).join('/');
+  } else {
+    // Handle other collections as needed
+    return null;
+  }
+  
+  // Remove .md extension if present
+  const baseFilename = filename.replace(/\.md$/, '');
+  
+  try {
+    // Get all entries from the collection
+    if (collection === 'essays') {
+      const entries = await getCollection('essays');
+      
+      const matchingEntry = entries.find(entry => {
+        // Try exact slug match first
+        if (entry.data?.slug === baseFilename) {
+          return true;
+        }
+        
+        // Try filename converted to slug format
+        const filenameAsSlug = baseFilename
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        
+        if (entry.id === filenameAsSlug) {
+          return true;
+        }
+        
+        // Try matching the original filename (case-insensitive)
+        if (entry.id.toLowerCase() === baseFilename.toLowerCase()) {
+          return true;
+        }
+        
+        // Try fuzzy matching - check if the entry ID contains key words from filename
+        const filenameWords = baseFilename.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+        const entryWords = entry.id.toLowerCase().split('-');
+        
+        // Look for exact word matches (not just partial)
+        const exactMatches = filenameWords.filter(word => entryWords.includes(word));
+        
+        // For this to be a match, we need at least 2 exact word matches including key identifying words
+        const hasKeyWords = exactMatches.includes('partnering') && exactMatches.includes('startups');
+        
+        if (hasKeyWords && exactMatches.length >= 2) {
+          return true;
+        }
+        
+        return false;
+      });
+      return matchingEntry || null;
+    } else if (collection === 'market-maps') {
+      const entries = await getCollection('market-maps');
+      const matchingEntry = entries.find(entry => {
+        // Try exact slug match first
+        if (entry.data?.slug === baseFilename) return true;
+        
+        // Try filename converted to slug format
+        const filenameAsSlug = baseFilename
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        
+        if (entry.id === filenameAsSlug) return true;
+        
+        // Try matching the original filename (case-insensitive)
+        if (entry.id.toLowerCase() === baseFilename.toLowerCase()) return true;
+        
+        return false;
+      });
+      return matchingEntry || null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error searching for entry in collection ${collection}:`, error);
+    return null;
+  }
 }
 
 // Load client content based on the client parameter
 async function loadClientContent(clientParam: string) {
   try {
+    // Debug: Log available collections and their sample IDs
+    console.log(`🔍 Debug: Loading content for client parameter: ${clientParam}`);
+    
+    // Sample a few entries from each collection to see their ID format
+    try {
+      // Debug: Sample a few entries from each collection to verify they're working
+  const essaysCollection = await getCollection('essays');
+  const marketMapsCollection = await getCollection('market-maps');
+  
+  console.log('📚 Essays collection sample IDs:', essaysCollection.slice(0, 3).map(entry => entry.id));
+  console.log('🗺️ Market-maps collection sample IDs:', marketMapsCollection.slice(0, 3).map(entry => entry.id));
+    } catch (error) {
+      console.error('Error sampling collections:', error);
+    }
+    
     // Convert URL parameter back to actual file name
     const mocPath = path.resolve(contentBasePath, 'moc');
     const files = await fs.readdir(mocPath);
@@ -97,18 +194,18 @@ async function loadClientContent(clientParam: string) {
     const clientContent = [];
     
     for (const contentPath of contentPaths) {
-      const astroInfo = contentPathToAstroId(contentPath);
-      if (!astroInfo) {
-        continue;
-      }
+      console.log(`🔍 Attempting to find entry for path:`, contentPath);
       
       try {
-        const entry = await getEntry(astroInfo.collection, astroInfo.id);
+        const entry = await findEntryByPath(contentPath);
         if (entry) {
+          console.log(`✅ Successfully found entry:`, entry.id);
           clientContent.push(entry);
+        } else {
+          console.log(`❌ Entry not found for path: ${contentPath}`);
         }
       } catch (error) {
-        console.log(`Error loading entry ${astroInfo.collection}/${astroInfo.id}:`, error);
+        console.error(`Error finding entry for ${contentPath}:`, error);
       }
     }
     
@@ -145,12 +242,11 @@ const frontmatter = {
   <AnimationWrapper>
 
   <div class="reader-wrapper">
-    {currentContent ? (
-      <ClientReaderLayout 
-        entry={currentContent} 
+    {allContent.length > 0 ? (
+      <DirectClientReaderLayout 
         allContent={allContent}
+        client={client}
         collections={collections}
-        mode="client"
       />
     ) : (
       <div class="no-content">
