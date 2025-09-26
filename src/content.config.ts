@@ -68,36 +68,7 @@ const clientRecommendationsCollection = defineCollection({
 // const pathId = (entry: string) =>
 //   entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
 
-/**
-const clientProjectsCollection = defineCollection({
-  loader: glob({
-    base: resolveContentPath("client-content"),
-    generateId: ({ entry }) => {
-      return pathId(entry);
-    }
-  }),
-  schema: z.object({
-    aliases: z.union([
-      z.string().transform(str => [str]),
-      z.array(z.string()),
-      z.null(),
-      z.undefined()
-    ]).transform(val => val ?? []).default([]),
-  }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
 
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-
-    return {
-      ...data,
-      title: displayTitle,
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),
-    };
-  })
-});
-*/
 
 const clientPortfoliosCollection = defineCollection({
   loader: glob({
@@ -532,6 +503,7 @@ export const collections = {
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,
   'to-hero': toHeroCollection,
+  'client-content': clientRecommendationsCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-portfolios': clientPortfoliosCollection,
   'client-pages': clientPagesCollection,

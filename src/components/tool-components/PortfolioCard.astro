@@ -86,7 +86,9 @@ const safeTags = tags || [];
 const effectiveFilename = filename || (filePath ? filePath.split('/').pop()?.replace(/\.md$/, '') : undefined);
 
 // Get the effective site name using the utility function
-const effectiveSiteName = toProperCase(getEffectiveSiteName(site_name, effectiveFilename, url));
+const effectiveSiteName = getEffectiveSiteName(site_name, effectiveFilename, url);
+
+// Debug logging removed
 
 // Get the effective title with fallback order: zinger → title → og_title
 const effectiveTitle = zinger || title || og_title || "";

@@ -157,9 +157,34 @@ try {
         const idForCard = getReferenceSlug(filename);
         const data: any = (entry as any).data || {};
 
+        // Debug logging for portfolio data
+        console.log(`=== Portfolio Data Debug ===`);
+        console.log(`Entry ID: ${entry.id}`);
+        console.log(`Filename: ${filename}`);
+        console.log(`Data object:`, data);
+        console.log(`site_name value:`, data.site_name);
+        console.log(`site_name type:`, typeof data.site_name);
+        console.log(`site_name === undefined:`, data.site_name === undefined);
+        console.log(`site_name === "undefined":`, data.site_name === "undefined");
+        console.log(`url in data: "${data.url}"`);
+        console.log(`title in data: "${data.title}"`);
+        console.log(`============================`);
+
         featuredPortfolios.push({
-          ...data,
           id: idForCard,
+          site_name: data.site_name,
+          title: data.title,
+          zinger: data.zinger,
+          og_title: data.og_title,
+          description: data.description,
+          og_description: data.og_description,
+          description_site_cp: data.description_site_cp,
+          image: data.image,
+          og_image: data.og_image,
+          og_image_url: data.og_image_url,
+          favicon: data.favicon,
+          og_favicon: data.og_favicon,
+          og_screenshot_url: data.og_screenshot_url,
           filename,
           filePath: entry.id,
           url: data.url || '#',
@@ -255,9 +280,9 @@ try {
         </div>
         <div class="featured-portfolio-grid">
           {featuredPortfolios.map((p) => (
-            <div class="portfolio-card-container">
-              <PortfolioCard {...p} id={p.id} filePath={p.filePath} />
-            </div>
+              <div class="portfolio-card-container">
+                <PortfolioCard {...p} id={p.id} filePath={p.filePath} />
+              </div>
           ))}
         </div>
       </section>

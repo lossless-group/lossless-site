@@ -3,7 +3,6 @@ import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
-import BarePortfolioCard from '@components/tool-components/BarePortfolioCard.astro';
 
 interface PortfolioData {
   title?: string;
@@ -12,6 +11,7 @@ interface PortfolioData {
   og_description?: string;
   image?: string;
   og_image?: string;
+  og_image_url?: string;
   og_screenshot_url?: string;
   url?: string;
   slug?: string;
@@ -44,18 +44,13 @@ interface Props {
   frontmatter: any;
   listEntry: ListEntry;
   portfolios: Portfolio[];
+  includeToC?: boolean; // Optional parameter to include/exclude Table of Contents (default: true)
+  includeInfoSidebar?: boolean; // Optional parameter to include/exclude Info Sidebar (default: true)
 }
 
-const { title, frontmatter, listEntry, portfolios } = Astro.props;
+const { title, frontmatter, listEntry, portfolios, includeToC = true, includeInfoSidebar = true } = Astro.props;
 
-// Separate portfolios with and without images
-// Check for multiple possible image field names
-const portfoliosWithImages = portfolios.filter((p: Portfolio) => 
-  p.data?.image || p.data?.og_image || p.data?.og_screenshot_url
-);
-const portfoliosWithoutImages = portfolios.filter((p: Portfolio) => 
-  !p.data?.image && !p.data?.og_image && !p.data?.og_screenshot_url
-);
+// Use all portfolios with PortfolioCard since all companies will have images
 
 const contentData = {
   path: Astro.url.pathname,
@@ -68,43 +63,43 @@ const contentData = {
 ---
 
 <Layout title={title} frontmatter={frontmatter}>
-  <div class="portfolio-list-container">
-    <!-- Main content area for List.md -->
-    <div class="main-content">
+  <div class="portfolio-list-layout">
+    <!-- Main content area for List.md (3/4 width) -->
+    <div class="portfolio-narrative">
       <OneArticle
         Component={OneArticleOnPage}
         content={listEntry.body}
         markdownFile={listEntry.id}
         data={contentData}
         title={listEntry.data.title || title}
+        includeToC={includeToC}
+        includeInfoSidebar={includeInfoSidebar}
       />
     </div>
     
-    <!-- Right sidebar with portfolio cards -->
+    <!-- Right sidebar with portfolio cards (1/4 width) -->
     <div class="portfolio-sidebar">
-      <h3 class="sidebar-title">Portfolio Companies</h3>
+      <div class="sidebar-header">
+        <h3>Portfolio Companies</h3>
+      </div>
       
-      <div class="portfolio-cards">
-        {portfoliosWithImages.map((portfolio) => (
-          <PortfolioCard 
-            title={portfolio.data?.og_title || portfolio.data?.title || portfolio.data?.site_name || 'Untitled'}
-            description={portfolio.data?.og_description || portfolio.data?.description || ''}
-            image={portfolio.data?.og_image || portfolio.data?.image || portfolio.data?.og_screenshot_url}
-            url={portfolio.data?.url || portfolio.url || ''}
-            tags={portfolio.data?.tags || []}
-            id={portfolio.id}
-          />
+      <div class="portfolio-companies">
+        {portfolios.map((portfolio) => (
+            <PortfolioCard
+              title={portfolio.og_title || portfolio.title || portfolio.site_name || 'Untitled'}
+              description={portfolio.og_description || portfolio.description || ''}
+              image={portfolio.og_image || portfolio.image || portfolio.og_image_url || portfolio.og_screenshot_url}
+              url={portfolio.url || ''}
+              tags={portfolio.tags || []}
+              id={portfolio.id}
+              site_name={portfolio.site_name}
+              class="sidebar-portfolio-card"
+            />
         ))}
         
-        {portfoliosWithoutImages.map((portfolio) => (
-          <BarePortfolioCard 
-            title={portfolio.data?.og_title || portfolio.data?.title || portfolio.data?.site_name || 'Untitled'}
-            description={portfolio.data?.og_description || portfolio.data?.description || ''}
-            url={portfolio.data?.url || portfolio.url || ''}
-            tags={portfolio.data?.tags || []}
-            id={portfolio.id}
-          />
-        ))}
+        {portfolios.length === 0 && (
+          <p class="no-portfolios">No portfolio companies found.</p>
+        )}
       </div>
     </div>
   </div>
@@ -113,28 +108,24 @@ const contentData = {
 <style>
   .portfolio-list-layout {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 3rem;
-    max-width: 1400px;
+    grid-template-columns: 2fr 1fr;
+    gap: 0;
+    max-width: 96%;
     margin: 0 auto;
     padding: 2rem 1rem;
     min-height: 100vh;
+    align-items: start;
   }
 
   .portfolio-narrative {
-    /* Main content area styling */
-    background: var(--clr-surface);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    box-shadow: var(--shadow-sm);
+    /* Main content area styling - 2/3 width with reduced horizontal padding */
+    padding: 1rem 1rem 2rem 1rem;
     height: fit-content;
+    min-height: 60vh;
   }
 
   .portfolio-sidebar {
-    /* Sidebar styling */
-    background: var(--clr-surface);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
+    padding: 2rem 1.5rem 0 0;
     box-shadow: var(--shadow-sm);
     height: fit-content;
     position: sticky;
@@ -145,7 +136,6 @@ const contentData = {
 
   .sidebar-header {
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
     border-bottom: 1px solid var(--clr-border);
   }
 
@@ -162,7 +152,7 @@ const contentData = {
     margin: 0;
   }
 
-  .portfolio-cards {
+  .portfolio-companies {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -184,24 +174,33 @@ const contentData = {
   /* Responsive design */
   @media (max-width: 1200px) {
     .portfolio-list-layout {
-      grid-template-columns: 1fr 300px;
-      gap: 2rem;
+      grid-template-columns: 2fr 1fr;
+      gap: 0;
+    }
+    
+    .portfolio-narrative {
+      padding: .5rem 1.5rem;
     }
   }
 
   @media (max-width: 968px) {
     .portfolio-list-layout {
       grid-template-columns: 1fr;
-      gap: 2rem;
+      gap: 0;
+    }
+    
+    .portfolio-narrative {
+      padding: .5rem 1.5rem 1.5rem 0;
+      order: 0; /* Ensure narrative content comes first on mobile */
     }
     
     .portfolio-sidebar {
       position: static;
       max-height: none;
-      order: -1; /* Show sidebar above content on mobile */
+      order: 1; /* Show sidebar below content on mobile */
     }
     
-    .portfolio-cards {
+    .portfolio-companies {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1rem;
@@ -209,18 +208,30 @@ const contentData = {
   }
 
   @media (max-width: 768px) {
-    .portfolio-list-layout {
-      padding: 1rem 0.5rem;
-      gap: 1.5rem;
+    .portfolio-list-layout {      padding: 1rem 0.5rem;
+      gap: 0;
     }
     
-    .portfolio-narrative,
+    .portfolio-narrative {
+      padding: 1.5rem 1rem;
+    }
+    
     .portfolio-sidebar {
       padding: 1.5rem;
     }
     
-    .portfolio-cards {
+    .portfolio-companies {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .portfolio-narrative {
+      padding: 1rem 1.5rem;
+    }
+    
+    .portfolio-sidebar {
+      padding: 1rem;
     }
   }
 

@@ -149,8 +149,9 @@ export function getEffectiveSiteName(
   }
   
   if (filename && filename.trim()) {
-    // Remove .md extension if present and preserve original casing
-    return filename.replace(/\.md$/, '');
+    // Remove .md extension if present and apply proper case formatting
+    const cleanFilename = filename.replace(/\.md$/, '');
+    return toProperCase(cleanFilename);
   }
   
   if (url && url.trim()) {
@@ -221,7 +222,7 @@ export function defaultCategoryDir(filePath: string): string {
   return "";
 } 
 
-import { slugify } from '@utils/slugify';
+import { slugify, toProperCase } from '@utils/slugify';
 import { transformContentPathToRoute } from '@utils/routing/routeManager';
 
 export async function resolveToolId(input: string, allTools: any[]): Promise<string | null> {

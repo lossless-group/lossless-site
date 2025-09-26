@@ -37,8 +37,17 @@ const allClientPortfolios = allPortfolios
       id,
       filename,
       filePath: entry.id,
-      ...data,
-      // Ensure all required fields are present
+      // Explicitly set properties to avoid undefined serialization issues
+      site_name: data.site_name,
+      title: data.title,
+      og_title: data.og_title,
+      description: data.description,
+      og_description: data.og_description,
+      image: data.image,
+      og_image: data.og_image,
+      og_image_url: data.og_image_url,
+      og_screenshot_url: data.og_screenshot_url,
+      zinger: data.zinger,
       url: data.url || '#',
       tags: data.tags || [],
       portfolios: data.portfolios || [],
@@ -56,16 +65,37 @@ const portfoliosWithoutImages = allClientPortfolios.filter(portfolio =>
   !portfolio.image && !portfolio.og_image && !portfolio.og_image_url && !portfolio.og_screenshot_url
 );
 
-console.log(`Found ${allClientPortfolios.length} portfolio companies for ${client}:`, allClientPortfolios.map(p => p.filename));
-console.log(`With images: ${portfoliosWithImages.length}, Without images: ${portfoliosWithoutImages.length}`);
+// Debug logging removed
 ---
 
-{listEntry ? (
+{listEntry && listEntry.body ? (
   <PortfolioListLayout 
     title={`${toProperCase(client)} Portfolio`}
     frontmatter={{}}
-    listEntry={listEntry}
-    portfolios={allClientPortfolios}
+    listEntry={listEntry as any}
+    portfolios={allClientPortfolios.map(portfolio => ({
+      data: {
+        title: portfolio.title,
+        og_title: portfolio.og_title,
+        description: portfolio.description,
+        og_description: portfolio.og_description,
+        image: portfolio.image,
+        og_image: portfolio.og_image,
+        og_image_url: portfolio.og_image_url,
+        og_screenshot_url: portfolio.og_screenshot_url,
+        url: portfolio.url,
+        slug: portfolio.filename,
+        zinger: portfolio.zinger,
+        tags: portfolio.tags,
+        site_name: portfolio.site_name,
+      },
+      id: portfolio.id,
+      slug: portfolio.filename,
+      entry: portfolio.entry,
+      ...portfolio
+    }))}
+    includeToC={false}
+    includeInfoSidebar={false}
   />
 ) : (
   <Layout title={`${toProperCase(client)} Portfolio`}>
