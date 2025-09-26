@@ -5,6 +5,7 @@ import path from 'node:path';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import PortfolioListLayout from '@layouts/PortfolioListLayout.astro';
 
 export const getStaticPaths = async () => {
   const allEntries = await getCollection('client-portfolios');
@@ -61,7 +62,7 @@ export const getStaticPaths = async () => {
   return paths;
 };
 
-const { client, entry, slug } = Astro.props;
+const { client, entry, slug, portfolios } = Astro.props;
 
 // Use title from frontmatter as first priority
 const displayTitle = entry.data.title || entry.data.site_name || toProperCase(slug);
@@ -75,17 +76,29 @@ const contentData = {
   date_modified: entry.data.date_modified || new Date().toISOString()
 };
 
+// Check if this is the List.md file (special layout)
+const isListPage = slug === 'list' || entry.id.toLowerCase().includes('list.md');
+
 ---
 
-<Layout 
-  title={displayTitle}
-  frontmatter={entry.data}
->
-  <OneArticle
-    Component={OneArticleOnPage}
-    content={entry.body}
-    markdownFile={entry.id}
-    data={contentData}
+{isListPage ? (
+  <PortfolioListLayout
     title={displayTitle}
+    frontmatter={entry.data}
+    listEntry={entry}
+    portfolios={portfolios || []}
   />
-</Layout>
+) : (
+  <Layout 
+    title={displayTitle}
+    frontmatter={entry.data}
+  >
+    <OneArticle
+      Component={OneArticleOnPage}
+      content={entry.body}
+      markdownFile={entry.id}
+      data={contentData}
+      title={displayTitle}
+    />
+  </Layout>
+)}

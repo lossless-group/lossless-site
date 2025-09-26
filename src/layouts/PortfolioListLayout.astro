@@ -1,0 +1,245 @@
+---
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
+import BarePortfolioCard from '@components/tool-components/BarePortfolioCard.astro';
+
+interface PortfolioData {
+  title?: string;
+  og_title?: string;
+  description?: string;
+  og_description?: string;
+  image?: string;
+  og_image?: string;
+  og_screenshot_url?: string;
+  url?: string;
+  slug?: string;
+  zinger?: string;
+  tags?: string[];
+  site_name?: string;
+  [key: string]: any; // Allow additional properties
+}
+
+interface Portfolio {
+  data: PortfolioData;
+  id: string;
+  slug: string;
+  entry?: any;
+  [key: string]: any; // Allow additional properties
+}
+
+interface ListEntry {
+  id: string;
+  body: any;
+  data: {
+    title?: string;
+    slug?: string;
+    [key: string]: any;
+  };
+}
+
+interface Props {
+  title: string;
+  frontmatter: any;
+  listEntry: ListEntry;
+  portfolios: Portfolio[];
+}
+
+const { title, frontmatter, listEntry, portfolios } = Astro.props;
+
+// Separate portfolios with and without images
+// Check for multiple possible image field names
+const portfoliosWithImages = portfolios.filter((p: Portfolio) => 
+  p.data?.image || p.data?.og_image || p.data?.og_screenshot_url
+);
+const portfoliosWithoutImages = portfolios.filter((p: Portfolio) => 
+  !p.data?.image && !p.data?.og_image && !p.data?.og_screenshot_url
+);
+
+const contentData = {
+  path: Astro.url.pathname,
+  id: listEntry.id.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, ''),
+  title: listEntry.data.title || title,
+  ...listEntry.data,
+  date_created: listEntry.data.date_created || new Date().toISOString(),
+  date_modified: listEntry.data.date_modified || new Date().toISOString()
+};
+---
+
+<Layout title={title} frontmatter={frontmatter}>
+  <div class="portfolio-list-container">
+    <!-- Main content area for List.md -->
+    <div class="main-content">
+      <OneArticle
+        Component={OneArticleOnPage}
+        content={listEntry.body}
+        markdownFile={listEntry.id}
+        data={contentData}
+        title={listEntry.data.title || title}
+      />
+    </div>
+    
+    <!-- Right sidebar with portfolio cards -->
+    <div class="portfolio-sidebar">
+      <h3 class="sidebar-title">Portfolio Companies</h3>
+      
+      <div class="portfolio-cards">
+        {portfoliosWithImages.map((portfolio) => (
+          <PortfolioCard 
+            title={portfolio.data?.og_title || portfolio.data?.title || portfolio.data?.site_name || 'Untitled'}
+            description={portfolio.data?.og_description || portfolio.data?.description || ''}
+            image={portfolio.data?.og_image || portfolio.data?.image || portfolio.data?.og_screenshot_url}
+            url={portfolio.data?.url || portfolio.url || ''}
+            tags={portfolio.data?.tags || []}
+            id={portfolio.id}
+          />
+        ))}
+        
+        {portfoliosWithoutImages.map((portfolio) => (
+          <BarePortfolioCard 
+            title={portfolio.data?.og_title || portfolio.data?.title || portfolio.data?.site_name || 'Untitled'}
+            description={portfolio.data?.og_description || portfolio.data?.description || ''}
+            url={portfolio.data?.url || portfolio.url || ''}
+            tags={portfolio.data?.tags || []}
+            id={portfolio.id}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .portfolio-list-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+  }
+
+  .portfolio-narrative {
+    /* Main content area styling */
+    background: var(--clr-surface);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    height: fit-content;
+  }
+
+  .portfolio-sidebar {
+    /* Sidebar styling */
+    background: var(--clr-surface);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--clr-border);
+  }
+
+  .sidebar-header h3 {
+    font-size: var(--fs-500);
+    font-weight: var(--fw-bold);
+    color: var(--clr-heading);
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-description {
+    font-size: var(--fs-300);
+    color: var(--clr-body-muted);
+    margin: 0;
+  }
+
+  .portfolio-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sidebar-portfolio-card {
+    width: 100%;
+    /* Ensure cards fit in the sidebar */
+    max-width: none;
+  }
+
+  .no-portfolios {
+    text-align: center;
+    color: var(--clr-body-muted);
+    font-style: italic;
+    padding: 2rem 1rem;
+  }
+
+  /* Responsive design */
+  @media (max-width: 1200px) {
+    .portfolio-list-layout {
+      grid-template-columns: 1fr 300px;
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 968px) {
+    .portfolio-list-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    .portfolio-sidebar {
+      position: static;
+      max-height: none;
+      order: -1; /* Show sidebar above content on mobile */
+    }
+    
+    .portfolio-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .portfolio-list-layout {
+      padding: 1rem 0.5rem;
+      gap: 1.5rem;
+    }
+    
+    .portfolio-narrative,
+    .portfolio-sidebar {
+      padding: 1.5rem;
+    }
+    
+    .portfolio-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Custom scrollbar for sidebar */
+  .portfolio-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .portfolio-sidebar::-webkit-scrollbar-track {
+    background: var(--clr-surface-variant);
+    border-radius: 3px;
+  }
+
+  .portfolio-sidebar::-webkit-scrollbar-thumb {
+    background: var(--clr-border);
+    border-radius: 3px;
+  }
+
+  .portfolio-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--clr-primary);
+  }
+</style>

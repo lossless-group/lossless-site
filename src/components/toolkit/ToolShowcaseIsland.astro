@@ -15,30 +15,47 @@ interface Props {
 const { toolPaths } = Astro.props;
 
 // Fetch from all available collections that might contain tools
-const [verticalToolkits, tooling] = await Promise.all([
+const [verticalToolkits, tooling, clientPortfolios, portfolio] = await Promise.all([
   getCollection('vertical-toolkits').catch(() => []),
-  getCollection('tooling').catch(() => [])
+  getCollection('tooling').catch(() => []),
+  getCollection('client-portfolios').catch(() => []),
+  getCollection('portfolio').catch(() => [])
 ]);
 
 // Combine all tools from different collections
-const allTools = [...verticalToolkits, ...tooling];
+const allTools = [...verticalToolkits, ...tooling, ...clientPortfolios, ...portfolio];
 
 // Match the toolPaths to actual collection entries
 const matchedTools = toolPaths.map(toolPath => {
   // Find the tool by matching the path/ID across all collections
   const tool = allTools.find(entry => {
-    // Remove directory separators and convert to lowercase for matching
+    // Normalize paths for comparison
     const entryId = entry.id.toLowerCase().replace(/\\/g, '/');
     const searchPath = toolPath.toLowerCase().replace(/\\/g, '/');
     
-    // Try exact match first, then partial matches
-    return entryId === searchPath || 
-           entryId.endsWith('/' + searchPath) ||
-           entryId.includes(searchPath) ||
-           searchPath.includes(entryId) ||
-           entry.data.title?.toLowerCase().includes(searchPath.split('/').pop() || '') ||
-           // Also try matching the last part of the path (filename)
-           entryId.split('/').pop() === searchPath.split('/').pop();
+    // Try exact match first (most precise)
+    if (entryId === searchPath) {
+      return true;
+    }
+    
+    // Try exact match with entry ending with search path
+    if (entryId.endsWith('/' + searchPath)) {
+      return true;
+    }
+    
+    // Try exact match with search path ending with entry
+    if (searchPath.endsWith('/' + entryId)) {
+      return true;
+    }
+    
+    // Try matching the filename exactly (last part of path)
+    const entryFilename = entryId.split('/').pop() || '';
+    const searchFilename = searchPath.split('/').pop() || '';
+    if (entryFilename === searchFilename && entryFilename.length > 0) {
+      return true;
+    }
+    
+    return false;
   });
   
   return { path: toolPath, tool };
@@ -67,17 +84,17 @@ const toolsData = matchedTools.map(({ tool }) => ({
     <h4>Tool Showcase Error</h4>
     <p>No matching tools found for the specified paths:</p>
     <ul>
-      {toolPaths.map(path => <li key={path}>{path}</li>)}
+      {toolPaths.map(path => <li>{path}</li>)}
     </ul>
     <details>
       <summary>Debug Information</summary>
       <div class="debug-info">
         <p><strong>Searched paths:</strong> {toolPaths.length}</p>
-        <p><strong>Available tools:</strong> {allTools.length} (vertical-toolkits: {verticalToolkits.length}, tooling: {tooling.length})</p>
+        <p><strong>Available tools:</strong> {allTools.length} (vertical-toolkits: {verticalToolkits.length}, tooling: {tooling.length}, client-portfolios: {clientPortfolios.length}, portfolio: {portfolio.length})</p>
         <p><strong>Sample tool IDs:</strong></p>
         <ul>
           {allTools.slice(0, 10).map(tool => (
-            <li key={tool.id}>{tool.id} ({tool.data.title})</li>
+            <li>{tool.id} ({tool.data.title})</li>
           ))}
         </ul>
       </div>

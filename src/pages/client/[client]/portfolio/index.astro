@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
+import PortfolioListLayout from '@layouts/PortfolioListLayout.astro';
 import PortfolioCard from '@components/tool-components/PortfolioCard.astro';
 import BarePortfolioCard from '@components/tool-components/BarePortfolioCard.astro';
 import { getReferenceSlug, toProperCase } from '@utils/slugify';
@@ -15,6 +16,14 @@ if (!client) {
 
 // Get all portfolio entries
 const allPortfolios = await getCollection('client-portfolios');
+
+// Check if List.md exists for this client
+const allClientPages = await getCollection('client-pages');
+const listEntry = allClientPages.find(entry => {
+  const pathParts = entry.id.split('/');
+  return pathParts[0].toLowerCase() === client.toLowerCase() && 
+         (entry.data.slug === 'portfolio-list' || entry.id.toLowerCase().includes('list'));
+});
 
 // Filter for the specific client's portfolio companies and process them for display
 const allClientPortfolios = allPortfolios
@@ -33,6 +42,8 @@ const allClientPortfolios = allPortfolios
       url: data.url || '#',
       tags: data.tags || [],
       portfolios: data.portfolios || [],
+      // Add the full entry for PortfolioListLayout
+      entry: entry,
     };
   })
   .filter(portfolio => portfolio.filename !== 'List'); // Exclude the List.md file
@@ -49,47 +60,56 @@ console.log(`Found ${allClientPortfolios.length} portfolio companies for ${clien
 console.log(`With images: ${portfoliosWithImages.length}, Without images: ${portfoliosWithoutImages.length}`);
 ---
 
-<Layout title={`${toProperCase(client)} Portfolio`}>
-  <main class="portfolio-page">
-    <div class="container">
-      <header class="page-header">
-        <h1>{toProperCase(client)} Portfolio</h1>
-        <p class="page-description">
-          Our portfolio companies are building the future across various industries and technologies.
-        </p>
-      </header>
+{listEntry ? (
+  <PortfolioListLayout 
+    title={`${toProperCase(client)} Portfolio`}
+    frontmatter={{}}
+    listEntry={listEntry}
+    portfolios={allClientPortfolios}
+  />
+) : (
+  <Layout title={`${toProperCase(client)} Portfolio`}>
+    <main class="portfolio-page">
+      <div class="container">
+        <header class="page-header">
+          <h1>{toProperCase(client)} Portfolio</h1>
+          <p class="page-description">
+            Our portfolio companies are building the future across various industries and technologies.
+          </p>
+        </header>
 
-      <section class="portfolio-section">
-        <div class="portfolio-grid">
-          <!-- Render PortfolioCards for companies with images -->
-          {portfoliosWithImages.map(portfolio => (
-            <PortfolioCard 
-              {...portfolio} 
-              id={portfolio.id}
-              filePath={portfolio.filePath} 
-              class="portfolio-card-item" 
-              data-tags={JSON.stringify(portfolio.tags || [])} 
-            />
-          ))}
-          <!-- Render BarePortfolioCards for companies without images -->
-          {portfoliosWithoutImages.map(portfolio => (
-            <BarePortfolioCard 
-              {...portfolio} 
-              id={portfolio.id}
-              filePath={portfolio.filePath} 
-              class="portfolio-card-item" 
-              data-tags={JSON.stringify(portfolio.tags || [])} 
-            />
-          ))}
-        </div>
-        
-        {allClientPortfolios.length === 0 && (
-          <p class="no-portfolios">No portfolio companies found for {toProperCase(client)}</p>
-        )}
-      </section>
-    </div>
-  </main>
-</Layout>
+        <section class="portfolio-section">
+          <div class="portfolio-grid">
+            <!-- Render PortfolioCards for companies with images -->
+            {portfoliosWithImages.map(portfolio => (
+              <PortfolioCard 
+                {...portfolio} 
+                id={portfolio.id}
+                filePath={portfolio.filePath} 
+                class="portfolio-card-item" 
+                data-tags={JSON.stringify(portfolio.tags || [])} 
+              />
+            ))}
+            <!-- Render BarePortfolioCards for companies without images -->
+            {portfoliosWithoutImages.map(portfolio => (
+              <BarePortfolioCard 
+                {...portfolio} 
+                id={portfolio.id}
+                filePath={portfolio.filePath} 
+                class="portfolio-card-item" 
+                data-tags={JSON.stringify(portfolio.tags || [])} 
+              />
+            ))}
+          </div>
+          
+          {allClientPortfolios.length === 0 && (
+            <p class="no-portfolios">No portfolio companies found for {toProperCase(client)}</p>
+          )}
+        </section>
+      </div>
+    </main>
+  </Layout>
+)}
 
 <style>
   .portfolio-page {

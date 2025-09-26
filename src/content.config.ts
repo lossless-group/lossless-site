@@ -136,6 +136,29 @@ const clientPortfoliosCollection = defineCollection({
   }).passthrough()
 });
 
+const clientPagesCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.{md,mdx}", // Include both .md and .mdx files at client level
+    base: resolveContentPath("client-content"),
+    generateId: ({ entry }) => {
+      // Remove the .md/.mdx extension and convert to lowercase
+      return entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+  }).passthrough()
+});
+
 
 
 const talksCollection = defineCollection({
@@ -478,6 +501,7 @@ export const paths = {
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
+  'client-pages': resolveContentPath('client-content'),
   'visuals': resolveContentPath('visuals'),
   'moc': resolveContentPath('moc'),
   'projects': resolveContentPath('projects'),
@@ -510,6 +534,7 @@ export const collections = {
   'to-hero': toHeroCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-portfolios': clientPortfoliosCollection,
+  'client-pages': clientPagesCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,
 };
