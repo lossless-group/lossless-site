@@ -11,12 +11,16 @@ import { backlinkRegex } from './backlinkUtils';
  * Skips any paths containing 'visuals' as those are handled by remark-images
  */
 export default function remarkBacklinks() {
-  return async function transformer(tree: Root) {
+  return async function transformer(tree: Root, file: any) {
     markdownDebugger.startPlugin('Backlinks');
 
     if (DEBUG_BACKLINKS) {
       console.log('=== remarkBacklinks: Starting transformation ===');
     }
+
+    // Derive current file path for context-aware route resolution
+    const currentFilePath: string | undefined =
+      (file && (file.path || (Array.isArray(file.history) ? file.history[0] : undefined) || (file.data && file.data.filePath))) || undefined;
 
     visit(tree, 'text', (node: Text, index, parent) => {
       if (!parent || index === null) return;
@@ -43,8 +47,8 @@ export default function remarkBacklinks() {
             });
           }
 
-          // Use the route manager to transform the path
-          const transformedPath = transformContentPathToRoute(path);
+          // Use the route manager to transform the path with context
+          const transformedPath = transformContentPathToRoute(path, currentFilePath);
           
           // Slugify the URL path segments to ensure proper kebab-case URLs
           const slugifiedUrl = transformedPath.split('/').map((segment, index) => {

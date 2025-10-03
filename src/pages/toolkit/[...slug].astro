@@ -14,7 +14,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneToolArticle from '@layouts/OneToolArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { getReferenceSlug } from '@utils/slugify';
+import { getReferenceSlug, resolveEntrySlug, slugify } from '@utils/slugify';
 import { DEBUG_TOOLING } from '@utils/envUtils';
 import { AppConfig } from '@utils/appConfig';
 
@@ -32,13 +32,33 @@ export async function getStaticPaths() {
   
   // Process tooling entries to create static paths
   return toolingEntries.map(entry => {
-    const generatedSlug = getReferenceSlug(entry.id)
+    // Build a category/tool slug using tags (preferred) or directory fallback
+    const idSlug = getReferenceSlug(entry.id);
+    const dirSegment = idSlug.split('/')[0] || '';
+
+    // Normalize tags to strings safely (schema is passthrough -> unknown)
+    const tagStrings = Array.isArray(entry.data?.tags)
+      ? (entry.data.tags as unknown[]).map((t) => String(t))
+      : [];
+    // Prefer a tag that matches Data-Utilities style, else first tag, else dir
+    const tagCategory = tagStrings.find((t) => /data[- ]utilities/i.test(t)) ?? tagStrings[0];
+    const categorySegment = slugify(tagCategory ?? dirSegment);
+
+    // Normalize frontmatter slug to string if present; otherwise fall back to filename
+    const rawSlug = typeof entry.data?.slug === 'string' ? entry.data.slug : undefined;
+    const filenameSegment = idSlug.split('/').pop() || idSlug;
+    const toolSegment = slugify(rawSlug ?? filenameSegment);
+
+    const pathSlug = `${categorySegment}/${toolSegment}`;
+
+    // Always log computed mapping to diagnose missing paths
+    console.log(`[TOOLKIT] ${entry.id} -> ${pathSlug}`);
     if (DEBUG_TOOLING) {
-      console.log(`Generated path: /toolkit/${generatedSlug}`);
+      console.log(`Generated path: /toolkit/${pathSlug}`);
     }
 
     return {
-      params: { slug: generatedSlug },
+      params: { slug: pathSlug },
       props: {
         entry,
         contentType: 'tooling'
@@ -47,7 +67,8 @@ export async function getStaticPaths() {
   }).filter(path => {
     // Exclude any paths that would conflict with /toolkit/vertical/*
     // This ensures /toolkit/vertical/* routes go to the vertical-specific page
-    return !path.params.slug.startsWith('vertical/');
+    const slugParam = path.params.slug as string;
+    return !(typeof slugParam === 'string' && slugParam.startsWith('vertical/'));
   });
 }
 
@@ -80,6 +101,7 @@ const contentData = {
 };
 
 // Generate the custom OG image URL for this toolkit entry
+// Build OG image URL from full directory-based slug for consistency
 const generatedSlug = getReferenceSlug(entry.id);
 // Remove the 'tooling/' prefix from the slug since we're already in the /toolkit/ route
 const cleanSlug = generatedSlug.replace(/^tooling\//, '');

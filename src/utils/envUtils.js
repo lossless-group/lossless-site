@@ -33,6 +33,21 @@ const getContentBasePath = () => {
   const cwd = process.cwd();
   let contentPath;
 
+  // Prefer explicit override when provided
+  const overrideFromEnv = process.env.CONTENT_BASE_PATH || envVars.CONTENT_BASE_PATH;
+  if (overrideFromEnv) {
+    const candidate = path.isAbsolute(overrideFromEnv)
+      ? overrideFromEnv
+      : path.resolve(cwd, overrideFromEnv);
+
+    if (fs.existsSync(candidate)) {
+      console.log(`Using CONTENT_BASE_PATH override: ${candidate}`);
+      return candidate;
+    } else {
+      console.warn(`WARNING: CONTENT_BASE_PATH override not found at ${candidate}. Falling back to DEPLOY_ENV mapping.`);
+    }
+  }
+
   switch (process.env.DEPLOY_ENV) {
     case 'LocalSiteOnly':
       contentPath = path.resolve(cwd, 'src/generated-content');
