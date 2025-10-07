@@ -1,0 +1,184 @@
+---
+import type { ProjectConfig } from "@utils/projectGalleryUtils";
+import { loadGalleryConfig, resolveProjectUrl } from "@utils/projectGalleryUtils";
+import clientsData from "../../content/people/clients.json";
+import ClientIcon from "@components/basics/ClientIcon.astro";
+import TextCTA from "@components/basics/cta/TextCTA.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Projects", description } = Astro.props as Props;
+
+const galleryConfig = loadGalleryConfig();
+const projects = Object.values(galleryConfig.projects) as ProjectConfig[];
+
+function getClientById(clientId: string) {
+  return clientsData.clients.find((client) => client.id === clientId);
+}
+
+const sortedProjects = [...projects].sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<section class="projects-showcase">
+  <div class="showcase-header">
+    <h2 class="section-title">{title}</h2>
+    <TextCTA href="/projects" text="See All" class="see-all-link" />
+  </div>
+  {description && <p class="section-description">{description}</p>}
+
+  <div class="showcase-grid">
+    {sortedProjects.map((project) => (
+      <a href={resolveProjectUrl(project)} class="showcase-item" data-project={project.id}>
+        <div class="item-header">
+          <div class="item-title">{project.title}</div>
+          {project.clients && project.clients.length > 0 && (
+            <div class="client-icons">
+              {project.clients.map((clientId) => {
+                const client = getClientById(clientId);
+                return client && client.logo ? (
+                  <ClientIcon logo={client.logo} name={client.name} size="sm" />
+                ) : null;
+              })}
+            </div>
+          )}
+        </div>
+        <div class="item-description">{project.subtitle}</div>
+        {project.useCases && project.useCases.length > 0 && (
+          <div class="use-cases">
+            {project.useCases.map((useCase) => (
+              <div class="use-case">
+                <span class="use-case-title">{useCase.title}:</span>
+                <span class="use-case-desc">{useCase.description}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .projects-showcase {
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+    max-width: 1200px;
+  }
+
+  .showcase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: clamp(1.2rem, 2vw, 1.75rem);
+    color: var(--clr-lossless-accent--brightest);
+  }
+
+  .section-description {
+    color: var(--clr-lossless-primary-light-alt);
+    margin-bottom: 1rem;
+  }
+
+  .see-all-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .showcase-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: var(--clr-lossless-primary-light);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .showcase-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-2px);
+  }
+
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    gap: 0.75rem;
+  }
+
+  .item-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-accent--brightest);
+    flex: 1;
+  }
+
+  .client-icons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .item-description {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light-alt, #ccc);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .use-cases {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .use-case {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .use-case:last-child {
+    margin-bottom: 0;
+  }
+
+  .use-case-title {
+    font-weight: 600;
+    color: var(--clr-lossless-accent--bright);
+    margin-right: 0.5rem;
+  }
+
+  .use-case-desc {
+    color: var(--clr-lossless-primary-light-alt);
+  }
+
+  @media (max-width: 1024px) {
+    .projects-showcase {
+      max-width: 90vw;
+    }
+  }
+</style>
