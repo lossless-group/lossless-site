@@ -969,7 +969,7 @@ if (DEBUG_AST) {
   <>
     <code class="inline-code">{node.value}</code>
     <style>
-      .inline-code {
+  .inline-code {
         /* Typography */
         font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Ubuntu Mono', monospace;
         font-size: 0.875em;
@@ -1129,6 +1129,12 @@ if (DEBUG_AST) {
     display: inline-block; /* Ensure proper scroll positioning */
     position: relative; /* Ensure proper scroll positioning */
     transition: all 0.3s ease;
+  }
+
+  /* Block wrapper used when a textDirective contains block-level HTML (e.g., iframe) */
+  .text-directive-block {
+    display: block;
+    margin: 0.75rem 0;
   }
 
   .footnote-ref.highlighted {
@@ -1330,11 +1336,176 @@ if (DEBUG_AST) {
     <span>{node.value}</span>
 }
 
-{(node.type === "textDirective") && 
-    <span class="text-directive" data-directive={node.name}>
+{(node.type === "textDirective") && (() => {
+    // If an author used a single-colon text directive for figma-embed,
+    // render the proper breakout iframe instead of inline text.
+    if (node.name === 'figma-embed') {
+      const props = node.attributes || {};
+      const figmaUrl = props.src || props.url || '';
+      const width = props.width || '800';
+      const height = props.height || '600';
+      const embedId = `figma-embed-${Math.random().toString(36).slice(2, 10)}`;
+
+      const embedUrlObj = new URL('https://www.figma.com/embed');
+      embedUrlObj.searchParams.set('embed_host', 'lossless.group');
+      let sanitizedFigmaUrl = figmaUrl;
+      try {
+        const u = new URL(figmaUrl);
+        u.searchParams.delete('t');
+        if (u.pathname.startsWith('/design/')) {
+          u.pathname = u.pathname.replace('/design/', '/file/');
+        }
+        sanitizedFigmaUrl = u.toString();
+      } catch (_err) {
+        sanitizedFigmaUrl = figmaUrl;
+      }
+      embedUrlObj.searchParams.set('url', sanitizedFigmaUrl);
+
+      const initialView = props['initial-view'] || props.initialView;
+      const hideUiProp = props['hide-ui'] ?? props.hideUi;
+      const scaling = props.scaling;
+      const pageId = props['page-id'] || props.pageId;
+      const nodeId = props['node-id'] || props.nodeId;
+      const hotspotHints = props['hotspot-hints'] ?? props.hotspotHints;
+      const allowFullscreen = props['allow-fullscreen'] ?? props.allowFullscreen;
+      const chrome = props.chrome;
+
+      if (initialView) embedUrlObj.searchParams.set('initial_view', initialView);
+      if (hideUiProp !== undefined) embedUrlObj.searchParams.set('hide_ui', (typeof hideUiProp === 'string' ? hideUiProp === 'true' : !!hideUiProp).toString());
+      if (scaling) embedUrlObj.searchParams.set('scaling', scaling);
+      if (pageId) embedUrlObj.searchParams.set('pageId', pageId);
+      if (nodeId) embedUrlObj.searchParams.set('nodeId', nodeId);
+      if (hotspotHints !== undefined) embedUrlObj.searchParams.set('hotspot-hints', (typeof hotspotHints === 'string' ? hotspotHints : String(hotspotHints)));
+      if (allowFullscreen !== undefined) embedUrlObj.searchParams.set('allow-fullscreen', (typeof allowFullscreen === 'string' ? allowFullscreen === 'true' : !!allowFullscreen).toString());
+      if (chrome) embedUrlObj.searchParams.set('chrome', chrome);
+
+      const embedUrl = embedUrlObj.toString();
+
+      return (
+        <>
+          <div id={embedId} class="figma-breakout" tabindex="0">
+            <div class="figma-embed-shell">
+              <button
+                type="button"
+                class="figma-expand-btn"
+                aria-label="Expand Figma design"
+                aria-expanded="false"
+                data-embed-id={embedId}
+                data-figma-url={figmaUrl}
+                data-width={width}
+                data-height={height}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"></path>
+                  <path d="M3 16.2V21m0 0h4.8M3 21l6-6"></path>
+                  <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"></path>
+                  <path d="M3 7.8V3m0 0h4.8M3 3l6 6"></path>
+                </svg>
+              </button>
+              <div class="figma-embed-container" data-directive="figma-embed">
+                <div class="figma-embed-wrapper">
+                  <iframe
+                    src={embedUrl}
+                    allowfullscreen
+                    loading="lazy"
+                    title="Figma embed"
+                    style={`border: none; width: ${width}px; height: ${height}px; border-radius: 8px; max-width: 100%;`}
+                  ></iframe>
+                </div>
+                <div class="figma-embed-footer">
+                  <a href={figmaUrl} target="_blank" rel="noopener">Open in Figma →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id={`modal-${embedId}`}
+            class="figma-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`modal-title-${embedId}`}
+            hidden
+          >
+            <div class="figma-modal-content">
+              <h2 id={`modal-title-${embedId}`} class="visually-hidden">Expanded Figma Design</h2>
+              <button
+                type="button"
+                class="figma-modal-close-btn"
+                aria-label="Close expanded design"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6 6 18"></path>
+                  <path d="m6 6 12 12"></path>
+                </svg>
+              </button>
+              <div class="figma-modal-embed-container">
+                <iframe
+                  src={embedUrl}
+                  allowfullscreen
+                  title="Figma embed (expanded)"
+                  style="border: none; width: 100%; height: 100%; border-radius: 8px;"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+
+          <script is:inline define:vars={{ embedId, figmaUrl, width, height }}>
+            document.addEventListener('DOMContentLoaded', () => {
+              const expandBtn = document.querySelector(`[data-embed-id="${embedId}"]`);
+              const modal = document.getElementById(`modal-${embedId}`);
+              if (expandBtn && modal) {
+                const closeBtn = modal.querySelector('.figma-modal-close-btn');
+                let previouslyFocusedElement;
+                const openModal = () => {
+                  previouslyFocusedElement = document.activeElement;
+                  modal.hidden = false;
+                  setTimeout(() => {
+                    modal.setAttribute('data-visible', 'true');
+                    document.body.style.overflow = 'hidden';
+                    expandBtn.setAttribute('aria-expanded', 'true');
+                    if (closeBtn) closeBtn.focus();
+                  }, 10);
+                };
+                const closeModal = () => {
+                  modal.setAttribute('data-visible', 'false');
+                  setTimeout(() => { modal.hidden = true; }, 300);
+                  document.body.style.overflow = '';
+                  expandBtn.setAttribute('aria-expanded', 'false');
+                  if (previouslyFocusedElement) previouslyFocusedElement.focus();
+                };
+                expandBtn.addEventListener('click', openModal);
+                if (closeBtn) closeBtn.addEventListener('click', closeModal);
+                modal.addEventListener('keydown', (event) => {
+                  if (event.key === 'Escape') closeModal();
+                });
+              }
+            });
+          </script>
+        </>
+      );
+    }
+
+    // Some authoring patterns may accidentally include block-level HTML (like iframes)
+    // inside text directives. Rendering those within a <span> is invalid HTML and can
+    // break layout. Detect block content and switch to a block wrapper when needed.
+    const hasBlockHtml = Array.isArray(node.children)
+      && node.children.some((child: any) => child.type === 'html' && /<\s*iframe/i.test(child.value));
+
+    if (hasBlockHtml) {
+      return (
+        <div class="text-directive-block" data-directive={node.name}>
+          {node.children?.map(child => <Astro.self node={child} data={data} />) || node.value || ''}
+        </div>
+      );
+    }
+
+    return (
+      <span class="text-directive" data-directive={node.name}>
         {node.children?.map(child => <Astro.self node={child} data={data} />) || node.value || ''}
-    </span>
-}
+      </span>
+    );
+  })()}
 
 {/* Handle directive nodes from remark-directive */}
 {(node.type === "leafDirective" || node.type === "containerDirective") && (() => {
@@ -1372,19 +1543,50 @@ if (DEBUG_AST) {
     const figmaUrl = props.src || props.url || '';
     const width = props.width || '800';
     const height = props.height || '600';
-    const authUser = props['auth-user'] || '';
     const embedId = `figma-embed-${Math.random().toString(36).slice(2, 10)}`;
-    
-    // Enhanced Figma embed URL with proper node focusing
-    let embedUrl = `https://www.figma.com/embed?embed_host=lossless.group&url=${encodeURIComponent(figmaUrl)}`;
-    
-    // Add node-specific parameters for better focusing
-    if (figmaUrl.includes('node-id=')) {
-      embedUrl += '&node-id=' + (figmaUrl.match(/node-id=([^&]+)/)?.[1] || '');
+
+    // Build a safe embed URL using URL API
+    const embedUrlObj = new URL('https://www.figma.com/embed');
+    embedUrlObj.searchParams.set('embed_host', 'lossless.group');
+    // Sanitize the provided Figma URL: remove ephemeral params and normalize path
+    let sanitizedFigmaUrl = figmaUrl;
+    try {
+      const u = new URL(figmaUrl);
+      // Drop ephemeral share tokens that can break embeds
+      u.searchParams.delete('t');
+      // Normalize new "/design/" links to "/file/" which Figma's embed consistently supports
+      if (u.pathname.startsWith('/design/')) {
+        u.pathname = u.pathname.replace('/design/', '/file/');
+      }
+      sanitizedFigmaUrl = u.toString();
+    } catch (_err) {
+      // If parsing fails, fall back to the original string
+      sanitizedFigmaUrl = figmaUrl;
     }
-    
-    embedUrl += '&viewer=1&scaling=min-zoom&page-id=&starting-point-node-id=';
-    
+    // Pass the sanitized Figma URL (may include node/page params)
+    embedUrlObj.searchParams.set('url', sanitizedFigmaUrl);
+
+    // Optional parameters from directive props
+    const initialView = props['initial-view'] || props.initialView;
+    const hideUiProp = props['hide-ui'] ?? props.hideUi;
+    const scaling = props.scaling;
+    const pageId = props['page-id'] || props.pageId;
+    const nodeId = props['node-id'] || props.nodeId;
+    const hotspotHints = props['hotspot-hints'] ?? props.hotspotHints;
+    const allowFullscreen = props['allow-fullscreen'] ?? props.allowFullscreen;
+    const chrome = props.chrome;
+
+    if (initialView) embedUrlObj.searchParams.set('initial_view', initialView);
+    if (hideUiProp !== undefined) embedUrlObj.searchParams.set('hide_ui', (typeof hideUiProp === 'string' ? hideUiProp === 'true' : !!hideUiProp).toString());
+    if (scaling) embedUrlObj.searchParams.set('scaling', scaling);
+    if (pageId) embedUrlObj.searchParams.set('pageId', pageId);
+    if (nodeId) embedUrlObj.searchParams.set('nodeId', nodeId);
+    if (hotspotHints !== undefined) embedUrlObj.searchParams.set('hotspot-hints', (typeof hotspotHints === 'string' ? hotspotHints : String(hotspotHints)));
+    if (allowFullscreen !== undefined) embedUrlObj.searchParams.set('allow-fullscreen', (typeof allowFullscreen === 'string' ? allowFullscreen === 'true' : !!allowFullscreen).toString());
+    if (chrome) embedUrlObj.searchParams.set('chrome', chrome);
+
+    const embedUrl = embedUrlObj.toString();
+
     return (
       <>
         <div id={embedId} class="figma-breakout" tabindex="0">
@@ -1600,7 +1802,7 @@ if (DEBUG_AST) {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(16, 30, 23, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #fff;
             cursor: pointer;

@@ -117,10 +117,10 @@ const revealOptionsJson = JSON.stringify(revealOptions);
   <div class="reveal">
     <div class="slides">
       <!-- Content will be rendered here -->
-      {slideContent && <slideContent />}
+      {presentationContent && <presentationContent />}
       
       <!-- Fallback if no content is available -->
-      {!slideContent && (
+      {!presentationContent && (
         <section>
           <h1>Presentation Not Found</h1>
           <p>The requested presentation could not be loaded.</p>
@@ -139,23 +139,23 @@ const revealOptionsJson = JSON.stringify(revealOptions);
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.min.js"></script>
   
   <script>
-    // Initialize RevealJS with configuration options
+    // Initialize RevealJS with configuration options (UMD global usage)
     document.addEventListener('DOMContentLoaded', () => {
-      // Parse the options from the frontmatter
       const options = JSON.parse('{JSON.stringify(revealOptions)}');
       
-      // Initialize RevealJS
-      const deck = new Reveal(options);
-      
-      // Initialize plugins
-      deck.initialize({
-        plugins: [
-          RevealMarkdown,
-          RevealHighlight,
-          RevealNotes,
-          RevealZoom
-        ]
-      });
+      // Prevent duplicate initialization which can cause recursion errors
+      if (!window.__REVEAL_INITIALIZED__) {
+        window.__REVEAL_INITIALIZED__ = true;
+        Reveal.initialize({
+          ...options,
+          plugins: [
+            RevealMarkdown,
+            RevealHighlight,
+            RevealNotes,
+            RevealZoom
+          ]
+        });
+      }
     });
   </script>
 </body>
