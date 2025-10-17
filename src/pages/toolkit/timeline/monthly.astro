@@ -1,0 +1,375 @@
+---
+/**
+ * /toolkit/timeline/monthly.astro — Monthly Timeline of Tool Additions and Modifications
+ *
+ * Shows a timeline by month of when tools were added (date_created) and modified (date_modified)
+ * Displays all tools from both 'tooling' and 'vertical-toolkits' collections
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+
+export const prerender = true;
+
+// Fetch all tools from both collections
+const toolingEntries = await getCollection('tooling');
+const verticalToolkitsEntries = await getCollection('vertical-toolkits');
+const allTools = [...toolingEntries, ...verticalToolkitsEntries];
+
+// Helper to parse dates
+function parseDate(dateValue: any): Date | null {
+  if (!dateValue) return null;
+  if (dateValue instanceof Date) return dateValue;
+  try {
+    return new Date(dateValue);
+  } catch {
+    return null;
+  }
+}
+
+// Helper to get year-month key
+function getYearMonth(date: Date | null): string | null {
+  if (!date) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Group tools by month (created and modified)
+interface MonthData {
+  yearMonth: string;
+  year: number;
+  month: number;
+  monthName: string;
+  created: Array<{ title: string; id: string; date: Date; url?: string }>;
+  modified: Array<{ title: string; id: string; date: Date; url?: string }>;
+}
+
+const monthMap = new Map<string, MonthData>();
+
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+
+allTools.forEach(tool => {
+  const createdDate = parseDate(tool.data.date_created);
+  const modifiedDate = parseDate(tool.data.date_modified);
+
+  const toolData = {
+    title: tool.data.title || tool.data.og_title || tool.id.split('/').pop()?.replace('.md', '') || 'Untitled',
+    id: tool.id,
+    url: tool.data.url
+  };
+
+  // Track creation month
+  if (createdDate) {
+    const yearMonth = getYearMonth(createdDate)!;
+    if (!monthMap.has(yearMonth)) {
+      monthMap.set(yearMonth, {
+        yearMonth,
+        year: createdDate.getFullYear(),
+        month: createdDate.getMonth(),
+        monthName: monthNames[createdDate.getMonth()],
+        created: [],
+        modified: []
+      });
+    }
+    monthMap.get(yearMonth)!.created.push({ ...toolData, date: createdDate });
+  }
+
+  // Track modification month (if different from creation month)
+  if (modifiedDate) {
+    const modYearMonth = getYearMonth(modifiedDate)!;
+    const createdYearMonth = createdDate ? getYearMonth(createdDate) : null;
+
+    // Only add to modified if it's a different month than created, or if there's no created date
+    if (!createdYearMonth || modYearMonth !== createdYearMonth) {
+      if (!monthMap.has(modYearMonth)) {
+        monthMap.set(modYearMonth, {
+          yearMonth: modYearMonth,
+          year: modifiedDate.getFullYear(),
+          month: modifiedDate.getMonth(),
+          monthName: monthNames[modifiedDate.getMonth()],
+          created: [],
+          modified: []
+        });
+      }
+      monthMap.get(modYearMonth)!.modified.push({ ...toolData, date: modifiedDate });
+    }
+  }
+});
+
+// Sort months descending (most recent first)
+const monthlyData = Array.from(monthMap.values())
+  .sort((a, b) => b.yearMonth.localeCompare(a.yearMonth));
+
+// Sort tools within each month by date (most recent first)
+monthlyData.forEach(monthData => {
+  monthData.created.sort((a, b) => b.date.getTime() - a.date.getTime());
+  monthData.modified.sort((a, b) => b.date.getTime() - a.date.getTime());
+});
+
+const totalTools = allTools.length;
+const earliestDate = allTools
+  .map(t => parseDate(t.data.date_created))
+  .filter(d => d !== null)
+  .sort((a, b) => a!.getTime() - b!.getTime())[0];
+---
+
+<Layout title="Toolkit Timeline - Monthly View">
+  <div class="timeline-page">
+    <header class="timeline-header">
+      <h1>Toolkit Timeline - Monthly View</h1>
+      <div class="stats">
+        <p><strong>{totalTools}</strong> total tools tracked</p>
+        <p>Since <strong>{earliestDate ? earliestDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'unknown'}</strong></p>
+      </div>
+      <nav class="timeline-nav">
+        <a href="/toolkit/timeline/yearly">Yearly</a>
+        <a href="/toolkit/timeline/monthly" class="active">Monthly</a>
+        <a href="/toolkit/timeline/weekly">Weekly</a>
+      </nav>
+    </header>
+
+    <div class="timeline-content">
+      {monthlyData.map(monthData => (
+        <section class="month-section" id={`month-${monthData.yearMonth}`}>
+          <h2 class="month-heading">
+            {monthData.monthName} {monthData.year}
+          </h2>
+
+          {monthData.created.length > 0 && (
+            <div class="activity-group created">
+              <h3>
+                <span class="badge created-badge">Created</span>
+                {monthData.created.length} tools added
+              </h3>
+              <ul class="tool-list">
+                {monthData.created.map(tool => (
+                  <li class="tool-item">
+                    <span class="tool-date">
+                      {tool.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span class="tool-title">
+                      {tool.url ? (
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+                          {tool.title}
+                        </a>
+                      ) : (
+                        <span>{tool.title}</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {monthData.modified.length > 0 && (
+            <div class="activity-group modified">
+              <h3>
+                <span class="badge modified-badge">Modified</span>
+                {monthData.modified.length} tools updated
+              </h3>
+              <ul class="tool-list">
+                {monthData.modified.map(tool => (
+                  <li class="tool-item">
+                    <span class="tool-date">
+                      {tool.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span class="tool-title">
+                      {tool.url ? (
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+                          {tool.title}
+                        </a>
+                      ) : (
+                        <span>{tool.title}</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .timeline-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .timeline-header {
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--clr-lossless-accent--brightest, #04e5e5);
+    padding-bottom: 2rem;
+  }
+
+  .timeline-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .stats {
+    margin: 1rem 0;
+    display: flex;
+    gap: 2rem;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+  }
+
+  .timeline-nav {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .timeline-nav a {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+  }
+
+  .timeline-nav a:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .timeline-nav a.active {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--bastille, #19141D);
+    font-weight: 600;
+  }
+
+  .month-section {
+    margin-bottom: 2.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .month-heading {
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+  }
+
+  .activity-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .activity-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .activity-group h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .created-badge {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+  }
+
+  .modified-badge {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+  }
+
+  .tool-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tool-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tool-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-left-color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .tool-date {
+    flex-shrink: 0;
+    width: 80px;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .tool-title {
+    flex-grow: 1;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .tool-link {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .tool-link:hover {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .timeline-page {
+      padding: 1rem;
+    }
+
+    .timeline-header h1 {
+      font-size: 2rem;
+    }
+
+    .stats {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .month-section {
+      padding: 1rem;
+    }
+
+    .tool-item {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .tool-date {
+      width: auto;
+      font-size: 0.75rem;
+    }
+  }
+</style>

@@ -1351,10 +1351,12 @@ if (DEBUG_AST) {
       let sanitizedFigmaUrl = figmaUrl;
       try {
         const u = new URL(figmaUrl);
+        // Remove ephemeral share token that can break embeds
         u.searchParams.delete('t');
-        if (u.pathname.startsWith('/design/')) {
-          u.pathname = u.pathname.replace('/design/', '/file/');
-        }
+        // NOTE: Keeping /design/ path as-is - Figma now accepts it for embeds
+        // if (u.pathname.startsWith('/design/')) {
+        //   u.pathname = u.pathname.replace('/design/', '/file/');
+        // }
         sanitizedFigmaUrl = u.toString();
       } catch (_err) {
         sanitizedFigmaUrl = figmaUrl;
@@ -1554,10 +1556,11 @@ if (DEBUG_AST) {
       const u = new URL(figmaUrl);
       // Drop ephemeral share tokens that can break embeds
       u.searchParams.delete('t');
+      // NOTE: Keeping /design/ path as-is - Figma now accepts it for embeds
       // Normalize new "/design/" links to "/file/" which Figma's embed consistently supports
-      if (u.pathname.startsWith('/design/')) {
-        u.pathname = u.pathname.replace('/design/', '/file/');
-      }
+      // if (u.pathname.startsWith('/design/')) {
+      //   u.pathname = u.pathname.replace('/design/', '/file/');
+      // }
       sanitizedFigmaUrl = u.toString();
     } catch (_err) {
       // If parsing fails, fall back to the original string

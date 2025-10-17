@@ -1,0 +1,451 @@
+---
+/**
+ * /toolkit/timeline/weekly.astro — Weekly Timeline of Tool Additions and Modifications
+ *
+ * Shows a timeline by week of when tools were added (date_created) and modified (date_modified)
+ * Displays all tools from both 'tooling' and 'vertical-toolkits' collections
+ * Shows most recent weeks first (descending order)
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+
+export const prerender = true;
+
+// Fetch all tools from both collections
+const toolingEntries = await getCollection('tooling');
+const verticalToolkitsEntries = await getCollection('vertical-toolkits');
+const allTools = [...toolingEntries, ...verticalToolkitsEntries];
+
+// Helper to parse dates
+function parseDate(dateValue: any): Date | null {
+  if (!dateValue) return null;
+  if (dateValue instanceof Date) return dateValue;
+  try {
+    return new Date(dateValue);
+  } catch {
+    return null;
+  }
+}
+
+// Helper to get week key (ISO week)
+function getWeekKey(date: Date): string {
+  const startOfWeek = getStartOfWeek(date);
+  return `${startOfWeek.getFullYear()}-W${String(getWeekNumber(startOfWeek)).padStart(2, '0')}`;
+}
+
+// Get start of week (Sunday)
+function getStartOfWeek(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
+}
+
+// Get week number of year
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
+// Format week range
+function formatWeekRange(weekStart: Date): string {
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  const startMonth = weekStart.toLocaleDateString('en-US', { month: 'short' });
+  const endMonth = weekEnd.toLocaleDateString('en-US', { month: 'short' });
+  const startDay = weekStart.getDate();
+  const endDay = weekEnd.getDate();
+  const year = weekStart.getFullYear();
+
+  if (startMonth === endMonth) {
+    return `${startMonth} ${startDay}-${endDay}, ${year}`;
+  } else {
+    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+  }
+}
+
+// Group tools by week (created and modified)
+interface WeekData {
+  weekKey: string;
+  weekStart: Date;
+  weekRange: string;
+  created: Array<{ title: string; id: string; date: Date; url?: string }>;
+  modified: Array<{ title: string; id: string; date: Date; url?: string }>;
+}
+
+const weekMap = new Map<string, WeekData>();
+
+allTools.forEach(tool => {
+  const createdDate = parseDate(tool.data.date_created);
+  const modifiedDate = parseDate(tool.data.date_modified);
+
+  const toolData = {
+    title: tool.data.title || tool.data.og_title || tool.id.split('/').pop()?.replace('.md', '') || 'Untitled',
+    id: tool.id,
+    url: tool.data.url
+  };
+
+  // Track creation week
+  if (createdDate) {
+    const weekKey = getWeekKey(createdDate);
+    if (!weekMap.has(weekKey)) {
+      const weekStart = getStartOfWeek(createdDate);
+      weekMap.set(weekKey, {
+        weekKey,
+        weekStart,
+        weekRange: formatWeekRange(weekStart),
+        created: [],
+        modified: []
+      });
+    }
+    weekMap.get(weekKey)!.created.push({ ...toolData, date: createdDate });
+  }
+
+  // Track modification week (if different from creation week)
+  if (modifiedDate) {
+    const modWeekKey = getWeekKey(modifiedDate);
+    const createdWeekKey = createdDate ? getWeekKey(createdDate) : null;
+
+    // Only add to modified if it's a different week than created, or if there's no created date
+    if (!createdWeekKey || modWeekKey !== createdWeekKey) {
+      if (!weekMap.has(modWeekKey)) {
+        const weekStart = getStartOfWeek(modifiedDate);
+        weekMap.set(modWeekKey, {
+          weekKey: modWeekKey,
+          weekStart,
+          weekRange: formatWeekRange(weekStart),
+          created: [],
+          modified: []
+        });
+      }
+      weekMap.get(modWeekKey)!.modified.push({ ...toolData, date: modifiedDate });
+    }
+  }
+});
+
+// Sort weeks descending (most recent first)
+const weeklyData = Array.from(weekMap.values())
+  .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
+
+// Sort tools within each week by date (most recent first)
+weeklyData.forEach(weekData => {
+  weekData.created.sort((a, b) => b.date.getTime() - a.date.getTime());
+  weekData.modified.sort((a, b) => b.date.getTime() - a.date.getTime());
+});
+
+const totalTools = allTools.length;
+const earliestDate = allTools
+  .map(t => parseDate(t.data.date_created))
+  .filter(d => d !== null)
+  .sort((a, b) => a!.getTime() - b!.getTime())[0];
+
+// Pagination: show 20 weeks per page
+const WEEKS_PER_PAGE = 20;
+const currentPage = 1; // For now, just show first page (can add pagination later)
+const startIndex = (currentPage - 1) * WEEKS_PER_PAGE;
+const endIndex = startIndex + WEEKS_PER_PAGE;
+const paginatedWeeks = weeklyData.slice(startIndex, endIndex);
+const totalPages = Math.ceil(weeklyData.length / WEEKS_PER_PAGE);
+---
+
+<Layout title="Toolkit Timeline - Weekly View">
+  <div class="timeline-page">
+    <header class="timeline-header">
+      <h1>Toolkit Timeline - Weekly View</h1>
+      <div class="stats">
+        <p><strong>{totalTools}</strong> total tools tracked</p>
+        <p>Showing <strong>{weeklyData.length}</strong> weeks since <strong>{earliestDate ? earliestDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'unknown'}</strong></p>
+      </div>
+      <nav class="timeline-nav">
+        <a href="/toolkit/timeline/yearly">Yearly</a>
+        <a href="/toolkit/timeline/monthly">Monthly</a>
+        <a href="/toolkit/timeline/weekly" class="active">Weekly</a>
+      </nav>
+    </header>
+
+    {totalPages > 1 && (
+      <div class="pagination-info">
+        Showing most recent {WEEKS_PER_PAGE} weeks (Page 1 of {totalPages})
+      </div>
+    )}
+
+    <div class="timeline-content">
+      {paginatedWeeks.map(weekData => (
+        <section class="week-section" id={`week-${weekData.weekKey}`}>
+          <h2 class="week-heading">
+            {weekData.weekRange}
+          </h2>
+
+          {weekData.created.length > 0 && (
+            <div class="activity-group created">
+              <h3>
+                <span class="badge created-badge">Created</span>
+                {weekData.created.length} tools added
+              </h3>
+              <ul class="tool-list">
+                {weekData.created.map(tool => (
+                  <li class="tool-item">
+                    <span class="tool-date">
+                      {tool.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </span>
+                    <span class="tool-title">
+                      {tool.url ? (
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+                          {tool.title}
+                        </a>
+                      ) : (
+                        <span>{tool.title}</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {weekData.modified.length > 0 && (
+            <div class="activity-group modified">
+              <h3>
+                <span class="badge modified-badge">Modified</span>
+                {weekData.modified.length} tools updated
+              </h3>
+              <ul class="tool-list">
+                {weekData.modified.map(tool => (
+                  <li class="tool-item">
+                    <span class="tool-date">
+                      {tool.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </span>
+                    <span class="tool-title">
+                      {tool.url ? (
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+                          {tool.title}
+                        </a>
+                      ) : (
+                        <span>{tool.title}</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+
+    {totalPages > 1 && (
+      <div class="pagination-note">
+        <p>Note: This page shows the {WEEKS_PER_PAGE} most recent weeks.</p>
+        <p>Pagination can be added in the future to show all {weeklyData.length} weeks.</p>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .timeline-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .timeline-header {
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--clr-lossless-accent--brightest, #04e5e5);
+    padding-bottom: 2rem;
+  }
+
+  .timeline-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .stats {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+  }
+
+  .timeline-nav {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .timeline-nav a {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+  }
+
+  .timeline-nav a:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .timeline-nav a.active {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--bastille, #19141D);
+    font-weight: 600;
+  }
+
+  .pagination-info {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(4, 229, 229, 0.1);
+    border-left: 4px solid var(--clr-lossless-accent--brightest, #04e5e5);
+    border-radius: 6px;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+  }
+
+  .pagination-note {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-size: 0.95rem;
+  }
+
+  .pagination-note p {
+    margin: 0.5rem 0;
+  }
+
+  .week-section {
+    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .week-heading {
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+  }
+
+  .activity-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .activity-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .activity-group h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .created-badge {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+  }
+
+  .modified-badge {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+  }
+
+  .tool-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tool-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tool-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-left-color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .tool-date {
+    flex-shrink: 0;
+    width: 120px;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .tool-title {
+    flex-grow: 1;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .tool-link {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .tool-link:hover {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .timeline-page {
+      padding: 1rem;
+    }
+
+    .timeline-header h1 {
+      font-size: 2rem;
+    }
+
+    .stats {
+      font-size: 1rem;
+    }
+
+    .week-section {
+      padding: 1rem;
+    }
+
+    .tool-item {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .tool-date {
+      width: auto;
+      font-size: 0.75rem;
+    }
+  }
+</style>

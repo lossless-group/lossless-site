@@ -1,0 +1,5835 @@
+{
+  "type": "root",
+  "children": [
+    {
+      "type": "heading",
+      "depth": 1,
+      "children": [
+        {
+          "type": "text",
+          "value": "Maintain Components that Embed Figma Objects using Embed Kit",
+          "position": {
+            "start": {
+              "line": 1,
+              "column": 3,
+              "offset": 2
+            },
+            "end": {
+              "line": 1,
+              "column": 63,
+              "offset": 62
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 1,
+          "column": 1,
+          "offset": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 63,
+          "offset": 62
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Overview",
+          "position": {
+            "start": {
+              "line": 3,
+              "column": 4,
+              "offset": 67
+            },
+            "end": {
+              "line": 3,
+              "column": 12,
+              "offset": 75
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 3,
+          "column": 1,
+          "offset": 64
+        },
+        "end": {
+          "line": 3,
+          "column": 12,
+          "offset": 75
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "This guide explains how to embed Figma objects in custom components using the Figma Embed Kit. The Figma Embed Kit allows you to display Figma files, frames, and prototypes directly in your application, offering an interactive experience.",
+          "position": {
+            "start": {
+              "line": 5,
+              "column": 1,
+              "offset": 77
+            },
+            "end": {
+              "line": 5,
+              "column": 239,
+              "offset": 315
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 5,
+          "column": 1,
+          "offset": 77
+        },
+        "end": {
+          "line": 5,
+          "column": 239,
+          "offset": 315
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 1,
+      "children": [
+        {
+          "type": "text",
+          "value": "Example",
+          "position": {
+            "start": {
+              "line": 7,
+              "column": 3,
+              "offset": 319
+            },
+            "end": {
+              "line": 7,
+              "column": 10,
+              "offset": 326
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 7,
+          "column": 1,
+          "offset": 317
+        },
+        "end": {
+          "line": 7,
+          "column": 10,
+          "offset": 326
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "value": "Option 1: Text Directive - CURRENTLY WORKING ✅",
+              "position": {
+                "start": {
+                  "line": 9,
+                  "column": 3,
+                  "offset": 330
+                },
+                "end": {
+                  "line": 9,
+                  "column": 49,
+                  "offset": 376
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 9,
+              "column": 1,
+              "offset": 328
+            },
+            "end": {
+              "line": 9,
+              "column": 51,
+              "offset": 378
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 9,
+          "column": 1,
+          "offset": 328
+        },
+        "end": {
+          "line": 9,
+          "column": 51,
+          "offset": 378
+        }
+      }
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "meta": null,
+      "value": ":figma-embed{src=\"https://www.figma.com/design/splN6L6DgSf61khdyfpybl/Go-Lossless?node-id=2459-9610\" auth-user=\"mpstaton\" width=\"800\" height=\"600\"}",
+      "position": {
+        "start": {
+          "line": 10,
+          "column": 1,
+          "offset": 379
+        },
+        "end": {
+          "line": 12,
+          "column": 4,
+          "offset": 542
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "value": "Option 2: Leaf Directive (Single-line)",
+              "position": {
+                "start": {
+                  "line": 14,
+                  "column": 3,
+                  "offset": 546
+                },
+                "end": {
+                  "line": 14,
+                  "column": 41,
+                  "offset": 584
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 14,
+              "column": 1,
+              "offset": 544
+            },
+            "end": {
+              "line": 14,
+              "column": 43,
+              "offset": 586
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 14,
+          "column": 1,
+          "offset": 544
+        },
+        "end": {
+          "line": 14,
+          "column": 43,
+          "offset": 586
+        }
+      }
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "meta": null,
+      "value": "::figma-embed{src=\"https://www.figma.com/design/splN6L6DgSf61khdyfpybl/Go-Lossless?node-id=2459-9610\" auth-user=\"mpstaton\" width=\"800\" height=\"600\"}",
+      "position": {
+        "start": {
+          "line": 15,
+          "column": 1,
+          "offset": 587
+        },
+        "end": {
+          "line": 17,
+          "column": 4,
+          "offset": 751
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "value": "Option 3: Container Directive (Multi-line)",
+              "position": {
+                "start": {
+                  "line": 19,
+                  "column": 3,
+                  "offset": 755
+                },
+                "end": {
+                  "line": 19,
+                  "column": 45,
+                  "offset": 797
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 19,
+              "column": 1,
+              "offset": 753
+            },
+            "end": {
+              "line": 19,
+              "column": 47,
+              "offset": 799
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 19,
+          "column": 1,
+          "offset": 753
+        },
+        "end": {
+          "line": 19,
+          "column": 47,
+          "offset": 799
+        }
+      }
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "meta": null,
+      "value": ":::figma-embed\nsrc=\"https://www.figma.com/design/splN6L6DgSf61khdyfpybl/Go-Lossless?node-id=2459-9610\"\nauth-user=\"mpstaton\"\nwidth=\"800\"\nheight=\"600\"\n:::",
+      "position": {
+        "start": {
+          "line": 20,
+          "column": 1,
+          "offset": 800
+        },
+        "end": {
+          "line": 27,
+          "column": 4,
+          "offset": 968
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 1,
+      "children": [
+        {
+          "type": "text",
+          "value": "Figma API",
+          "position": {
+            "start": {
+              "line": 28,
+              "column": 3,
+              "offset": 971
+            },
+            "end": {
+              "line": 28,
+              "column": 12,
+              "offset": 980
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 28,
+          "column": 1,
+          "offset": 969
+        },
+        "end": {
+          "line": 28,
+          "column": 12,
+          "offset": 980
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "value": "Base URL:",
+              "position": {
+                "start": {
+                  "line": 30,
+                  "column": 3,
+                  "offset": 984
+                },
+                "end": {
+                  "line": 30,
+                  "column": 12,
+                  "offset": 993
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 30,
+              "column": 1,
+              "offset": 982
+            },
+            "end": {
+              "line": 30,
+              "column": 14,
+              "offset": 995
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": ": https://api.figma.com",
+          "position": {
+            "start": {
+              "line": 30,
+              "column": 14,
+              "offset": 995
+            },
+            "end": {
+              "line": 30,
+              "column": 37,
+              "offset": 1018
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 30,
+          "column": 1,
+          "offset": 982
+        },
+        "end": {
+          "line": 30,
+          "column": 37,
+          "offset": 1018
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Getting a Figma API Key",
+          "position": {
+            "start": {
+              "line": 31,
+              "column": 4,
+              "offset": 1022
+            },
+            "end": {
+              "line": 31,
+              "column": 27,
+              "offset": 1045
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 31,
+          "column": 1,
+          "offset": 1019
+        },
+        "end": {
+          "line": 31,
+          "column": 27,
+          "offset": 1045
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "To embed Figma content, construct your URL with the following base format:",
+          "position": {
+            "start": {
+              "line": 33,
+              "column": 1,
+              "offset": 1047
+            },
+            "end": {
+              "line": 33,
+              "column": 75,
+              "offset": 1121
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 33,
+          "column": 1,
+          "offset": 1047
+        },
+        "end": {
+          "line": 33,
+          "column": 75,
+          "offset": 1121
+        }
+      }
+    },
+    {
+      "type": "code",
+      "lang": "zsh",
+      "meta": null,
+      "value": "$ curl -sH 'X-Figma-Token: 29-206...'\n    'https://api.figma.com/v1/files/...'\n    | python -m json.tool\n{\n  \"components\": {},\n  \"document\": {\n    \"children\": [\n      {\n        \"backgroundColor\": {\n          \"a\": 1,\n          \"b\": 0.8980392156862745,\n          \"g\": 0.8980392156862745,\n          \"r\": 0.8980392156862745\n        },\n        \"children\": [],\n        \"exportSettings\": [],\n        \"id\": \"0:1\",\n        \"name\": \"Page 1\",\n        \"type\": \"CANVAS\",\n      }\n    ],\n    \"id\": \"0:0\",\n    \"name\": \"Document\",\n    \"type\": \"DOCUMENT\",\n  },\n  \"schemaVersion\": 0\n}",
+      "position": {
+        "start": {
+          "line": 36,
+          "column": 1,
+          "offset": 1124
+        },
+        "end": {
+          "line": 64,
+          "column": 4,
+          "offset": 1700
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Embed URL Format",
+          "position": {
+            "start": {
+              "line": 67,
+              "column": 4,
+              "offset": 1706
+            },
+            "end": {
+              "line": 67,
+              "column": 20,
+              "offset": 1722
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 67,
+          "column": 1,
+          "offset": 1703
+        },
+        "end": {
+          "line": 67,
+          "column": 20,
+          "offset": 1722
+        }
+      }
+    },
+    {
+      "type": "code",
+      "lang": null,
+      "meta": null,
+      "value": "https://www.figma.com/embed?embed_host={host}&url={figma-url}",
+      "position": {
+        "start": {
+          "line": 69,
+          "column": 1,
+          "offset": 1724
+        },
+        "end": {
+          "line": 71,
+          "column": 4,
+          "offset": 1793
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 3,
+      "children": [
+        {
+          "type": "text",
+          "value": "Required Parameters",
+          "position": {
+            "start": {
+              "line": 73,
+              "column": 5,
+              "offset": 1799
+            },
+            "end": {
+              "line": 73,
+              "column": 24,
+              "offset": 1818
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 73,
+          "column": 1,
+          "offset": 1795
+        },
+        "end": {
+          "line": 73,
+          "column": 24,
+          "offset": 1818
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "start": null,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "embed_host",
+                      "position": {
+                        "start": {
+                          "line": 75,
+                          "column": 5,
+                          "offset": 1824
+                        },
+                        "end": {
+                          "line": 75,
+                          "column": 17,
+                          "offset": 1836
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 75,
+                      "column": 3,
+                      "offset": 1822
+                    },
+                    "end": {
+                      "line": 75,
+                      "column": 19,
+                      "offset": 1838
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Specifies the host application. Use your domain or app name to identify the host.",
+                  "position": {
+                    "start": {
+                      "line": 75,
+                      "column": 19,
+                      "offset": 1838
+                    },
+                    "end": {
+                      "line": 75,
+                      "column": 102,
+                      "offset": 1921
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 75,
+                  "column": 3,
+                  "offset": 1822
+                },
+                "end": {
+                  "line": 75,
+                  "column": 102,
+                  "offset": 1921
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 75,
+              "column": 1,
+              "offset": 1820
+            },
+            "end": {
+              "line": 75,
+              "column": 102,
+              "offset": 1921
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "url",
+                      "position": {
+                        "start": {
+                          "line": 76,
+                          "column": 5,
+                          "offset": 1926
+                        },
+                        "end": {
+                          "line": 76,
+                          "column": 10,
+                          "offset": 1931
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 76,
+                      "column": 3,
+                      "offset": 1924
+                    },
+                    "end": {
+                      "line": 76,
+                      "column": 12,
+                      "offset": 1933
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": The URL of the Figma file, frame, or node you want to embed.",
+                  "position": {
+                    "start": {
+                      "line": 76,
+                      "column": 12,
+                      "offset": 1933
+                    },
+                    "end": {
+                      "line": 76,
+                      "column": 74,
+                      "offset": 1995
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 76,
+                  "column": 3,
+                  "offset": 1924
+                },
+                "end": {
+                  "line": 76,
+                  "column": 74,
+                  "offset": 1995
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 76,
+              "column": 1,
+              "offset": 1922
+            },
+            "end": {
+              "line": 76,
+              "column": 74,
+              "offset": 1995
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 75,
+          "column": 1,
+          "offset": 1820
+        },
+        "end": {
+          "line": 76,
+          "column": 74,
+          "offset": 1995
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 3,
+      "children": [
+        {
+          "type": "text",
+          "value": "Optional Query Parameters",
+          "position": {
+            "start": {
+              "line": 78,
+              "column": 5,
+              "offset": 2001
+            },
+            "end": {
+              "line": 78,
+              "column": 30,
+              "offset": 2026
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 78,
+          "column": 1,
+          "offset": 1997
+        },
+        "end": {
+          "line": 78,
+          "column": 30,
+          "offset": 2026
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "start": null,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "initial_view",
+                      "position": {
+                        "start": {
+                          "line": 80,
+                          "column": 5,
+                          "offset": 2032
+                        },
+                        "end": {
+                          "line": 80,
+                          "column": 19,
+                          "offset": 2046
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 80,
+                      "column": 3,
+                      "offset": 2030
+                    },
+                    "end": {
+                      "line": 80,
+                      "column": 21,
+                      "offset": 2048
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Determines the initial view ('design' or 'prototype')",
+                  "position": {
+                    "start": {
+                      "line": 80,
+                      "column": 21,
+                      "offset": 2048
+                    },
+                    "end": {
+                      "line": 80,
+                      "column": 76,
+                      "offset": 2103
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 80,
+                  "column": 3,
+                  "offset": 2030
+                },
+                "end": {
+                  "line": 80,
+                  "column": 76,
+                  "offset": 2103
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 80,
+              "column": 1,
+              "offset": 2028
+            },
+            "end": {
+              "line": 80,
+              "column": 76,
+              "offset": 2103
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "pageId",
+                      "position": {
+                        "start": {
+                          "line": 81,
+                          "column": 5,
+                          "offset": 2108
+                        },
+                        "end": {
+                          "line": 81,
+                          "column": 13,
+                          "offset": 2116
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 81,
+                      "column": 3,
+                      "offset": 2106
+                    },
+                    "end": {
+                      "line": 81,
+                      "column": 15,
+                      "offset": 2118
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": ID of the page to display",
+                  "position": {
+                    "start": {
+                      "line": 81,
+                      "column": 15,
+                      "offset": 2118
+                    },
+                    "end": {
+                      "line": 81,
+                      "column": 42,
+                      "offset": 2145
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 81,
+                  "column": 3,
+                  "offset": 2106
+                },
+                "end": {
+                  "line": 81,
+                  "column": 42,
+                  "offset": 2145
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 81,
+              "column": 1,
+              "offset": 2104
+            },
+            "end": {
+              "line": 81,
+              "column": 42,
+              "offset": 2145
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "nodeId",
+                      "position": {
+                        "start": {
+                          "line": 82,
+                          "column": 5,
+                          "offset": 2150
+                        },
+                        "end": {
+                          "line": 82,
+                          "column": 13,
+                          "offset": 2158
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 82,
+                      "column": 3,
+                      "offset": 2148
+                    },
+                    "end": {
+                      "line": 82,
+                      "column": 15,
+                      "offset": 2160
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": ID of the specific node to display",
+                  "position": {
+                    "start": {
+                      "line": 82,
+                      "column": 15,
+                      "offset": 2160
+                    },
+                    "end": {
+                      "line": 82,
+                      "column": 51,
+                      "offset": 2196
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 82,
+                  "column": 3,
+                  "offset": 2148
+                },
+                "end": {
+                  "line": 82,
+                  "column": 51,
+                  "offset": 2196
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 82,
+              "column": 1,
+              "offset": 2146
+            },
+            "end": {
+              "line": 82,
+              "column": 51,
+              "offset": 2196
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "hide_ui",
+                      "position": {
+                        "start": {
+                          "line": 83,
+                          "column": 5,
+                          "offset": 2201
+                        },
+                        "end": {
+                          "line": 83,
+                          "column": 14,
+                          "offset": 2210
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 83,
+                      "column": 3,
+                      "offset": 2199
+                    },
+                    "end": {
+                      "line": 83,
+                      "column": 16,
+                      "offset": 2212
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Hides Figma UI elements (true/false)",
+                  "position": {
+                    "start": {
+                      "line": 83,
+                      "column": 16,
+                      "offset": 2212
+                    },
+                    "end": {
+                      "line": 83,
+                      "column": 54,
+                      "offset": 2250
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 83,
+                  "column": 3,
+                  "offset": 2199
+                },
+                "end": {
+                  "line": 83,
+                  "column": 54,
+                  "offset": 2250
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 83,
+              "column": 1,
+              "offset": 2197
+            },
+            "end": {
+              "line": 83,
+              "column": 54,
+              "offset": 2250
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "hotspot-hints",
+                      "position": {
+                        "start": {
+                          "line": 84,
+                          "column": 5,
+                          "offset": 2255
+                        },
+                        "end": {
+                          "line": 84,
+                          "column": 20,
+                          "offset": 2270
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 84,
+                      "column": 3,
+                      "offset": 2253
+                    },
+                    "end": {
+                      "line": 84,
+                      "column": 22,
+                      "offset": 2272
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Shows prototype hotspot hints (0 or 1)",
+                  "position": {
+                    "start": {
+                      "line": 84,
+                      "column": 22,
+                      "offset": 2272
+                    },
+                    "end": {
+                      "line": 84,
+                      "column": 62,
+                      "offset": 2312
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 84,
+                  "column": 3,
+                  "offset": 2253
+                },
+                "end": {
+                  "line": 84,
+                  "column": 62,
+                  "offset": 2312
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 84,
+              "column": 1,
+              "offset": 2251
+            },
+            "end": {
+              "line": 84,
+              "column": 62,
+              "offset": 2312
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "scaling",
+                      "position": {
+                        "start": {
+                          "line": 85,
+                          "column": 5,
+                          "offset": 2317
+                        },
+                        "end": {
+                          "line": 85,
+                          "column": 14,
+                          "offset": 2326
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 85,
+                      "column": 3,
+                      "offset": 2315
+                    },
+                    "end": {
+                      "line": 85,
+                      "column": 16,
+                      "offset": 2328
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Controls how content is scaled ('min-zoom', 'contain', or 'fill')",
+                  "position": {
+                    "start": {
+                      "line": 85,
+                      "column": 16,
+                      "offset": 2328
+                    },
+                    "end": {
+                      "line": 85,
+                      "column": 83,
+                      "offset": 2395
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 85,
+                  "column": 3,
+                  "offset": 2315
+                },
+                "end": {
+                  "line": 85,
+                  "column": 83,
+                  "offset": 2395
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 85,
+              "column": 1,
+              "offset": 2313
+            },
+            "end": {
+              "line": 85,
+              "column": 83,
+              "offset": 2395
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "allow-fullscreen",
+                      "position": {
+                        "start": {
+                          "line": 86,
+                          "column": 5,
+                          "offset": 2400
+                        },
+                        "end": {
+                          "line": 86,
+                          "column": 23,
+                          "offset": 2418
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 86,
+                      "column": 3,
+                      "offset": 2398
+                    },
+                    "end": {
+                      "line": 86,
+                      "column": 25,
+                      "offset": 2420
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Allows fullscreen mode (true/false)",
+                  "position": {
+                    "start": {
+                      "line": 86,
+                      "column": 25,
+                      "offset": 2420
+                    },
+                    "end": {
+                      "line": 86,
+                      "column": 62,
+                      "offset": 2457
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 86,
+                  "column": 3,
+                  "offset": 2398
+                },
+                "end": {
+                  "line": 86,
+                  "column": 62,
+                  "offset": 2457
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 86,
+              "column": 1,
+              "offset": 2396
+            },
+            "end": {
+              "line": 86,
+              "column": 62,
+              "offset": 2457
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "inlineCode",
+                      "value": "chrome",
+                      "position": {
+                        "start": {
+                          "line": 87,
+                          "column": 5,
+                          "offset": 2462
+                        },
+                        "end": {
+                          "line": 87,
+                          "column": 13,
+                          "offset": 2470
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 87,
+                      "column": 3,
+                      "offset": 2460
+                    },
+                    "end": {
+                      "line": 87,
+                      "column": 15,
+                      "offset": 2472
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ": Controls UI chrome visibility ('DOCUMENTATION' hides most UI)",
+                  "position": {
+                    "start": {
+                      "line": 87,
+                      "column": 15,
+                      "offset": 2472
+                    },
+                    "end": {
+                      "line": 87,
+                      "column": 78,
+                      "offset": 2535
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 87,
+                  "column": 3,
+                  "offset": 2460
+                },
+                "end": {
+                  "line": 87,
+                  "column": 78,
+                  "offset": 2535
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 87,
+              "column": 1,
+              "offset": 2458
+            },
+            "end": {
+              "line": 87,
+              "column": 78,
+              "offset": 2535
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 80,
+          "column": 1,
+          "offset": 2028
+        },
+        "end": {
+          "line": 87,
+          "column": 78,
+          "offset": 2535
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Implementing in Custom Components",
+          "position": {
+            "start": {
+              "line": 89,
+              "column": 4,
+              "offset": 2540
+            },
+            "end": {
+              "line": 89,
+              "column": 37,
+              "offset": 2573
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 89,
+          "column": 1,
+          "offset": 2537
+        },
+        "end": {
+          "line": 89,
+          "column": 37,
+          "offset": 2573
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "start": 1,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": true,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Create a Figma Embed Component",
+                      "position": {
+                        "start": {
+                          "line": 91,
+                          "column": 6,
+                          "offset": 2580
+                        },
+                        "end": {
+                          "line": 91,
+                          "column": 36,
+                          "offset": 2610
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 91,
+                      "column": 4,
+                      "offset": 2578
+                    },
+                    "end": {
+                      "line": 91,
+                      "column": 38,
+                      "offset": 2612
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 91,
+                  "column": 4,
+                  "offset": 2578
+                },
+                "end": {
+                  "line": 91,
+                  "column": 38,
+                  "offset": 2612
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Develop a component in Astro that receives the Figma URL and optional parameters:",
+                  "position": {
+                    "start": {
+                      "line": 93,
+                      "column": 4,
+                      "offset": 2617
+                    },
+                    "end": {
+                      "line": 93,
+                      "column": 85,
+                      "offset": 2698
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 93,
+                  "column": 4,
+                  "offset": 2617
+                },
+                "end": {
+                  "line": 93,
+                  "column": 85,
+                  "offset": 2698
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "astro",
+              "meta": null,
+              "value": "---",
+              "position": {
+                "start": {
+                  "line": 95,
+                  "column": 4,
+                  "offset": 2706
+                },
+                "end": {
+                  "line": 96,
+                  "column": 7,
+                  "offset": 2721
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 91,
+              "column": 1,
+              "offset": 2575
+            },
+            "end": {
+              "line": 96,
+              "column": 7,
+              "offset": 2721
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 91,
+          "column": 1,
+          "offset": 2575
+        },
+        "end": {
+          "line": 96,
+          "column": 7,
+          "offset": 2721
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "// Component script\nexport let figmaUrl: string;\nexport let embedHost: string = 'your-domain.com';\nexport let initialView?: string;\nexport let pageId?: string;\nexport let nodeId?: string;\nexport let hideUi?: boolean;",
+          "position": {
+            "start": {
+              "line": 97,
+              "column": 1,
+              "offset": 2722
+            },
+            "end": {
+              "line": 103,
+              "column": 29,
+              "offset": 2938
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 97,
+          "column": 1,
+          "offset": 2722
+        },
+        "end": {
+          "line": 104,
+          "column": 6,
+          "offset": 2944
+        }
+      }
+    },
+    {
+      "type": "html",
+      "value": "<!-- Component template -->",
+      "position": {
+        "start": {
+          "line": 106,
+          "column": 1,
+          "offset": 2946
+        },
+        "end": {
+          "line": 106,
+          "column": 28,
+          "offset": 2973
+        }
+      }
+    },
+    {
+      "type": "html",
+      "value": "<iframe\n  src={\n    'https://www.figma.com/embed?embed_host=' + embedHost +\n    '&url=' + encodeURIComponent(figmaUrl) +\n    (initialView ? '&initial_view=' + initialView : '') +\n    (pageId ? '&pageId=' + pageId : '') +\n    (nodeId ? '&nodeId=' + nodeId : '') +\n    (hideUi !== undefined ? '&hide_ui=' + String(hideUi) : '')\n  }\n  allowfullscreen\n  style=\"border:none;width:100%;height:500px;\">\n</iframe>\n```",
+      "position": {
+        "start": {
+          "line": 107,
+          "column": 1,
+          "offset": 2974
+        },
+        "end": {
+          "line": 119,
+          "column": 4,
+          "offset": 3383
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "start": 2,
+      "spread": true,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": true,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Primary Usage: Remark Directive in Markdown",
+                      "position": {
+                        "start": {
+                          "line": 121,
+                          "column": 6,
+                          "offset": 3390
+                        },
+                        "end": {
+                          "line": 121,
+                          "column": 49,
+                          "offset": 3433
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 121,
+                      "column": 4,
+                      "offset": 3388
+                    },
+                    "end": {
+                      "line": 121,
+                      "column": 51,
+                      "offset": 3435
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 121,
+                  "column": 4,
+                  "offset": 3388
+                },
+                "end": {
+                  "line": 121,
+                  "column": 51,
+                  "offset": 3435
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Our primary intention is to use this component through remark-directives in Markdown files. This allows for seamless embedding without importing components:",
+                  "position": {
+                    "start": {
+                      "line": 123,
+                      "column": 4,
+                      "offset": 3440
+                    },
+                    "end": {
+                      "line": 123,
+                      "column": 160,
+                      "offset": 3596
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 123,
+                  "column": 4,
+                  "offset": 3440
+                },
+                "end": {
+                  "line": 123,
+                  "column": 160,
+                  "offset": 3596
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "markdown",
+              "meta": null,
+              "value": ":::figma-embed\nsrc=\"https://www.figma.com/file/bm4kr9lQAVhvllVk7hsDuD/Parslee?node-id=3212-21097\"\ninitial-view=\"design\"\nhide-ui=\"true\"\nwidth=\"800\"\nheight=\"600\"\n:::",
+              "position": {
+                "start": {
+                  "line": 125,
+                  "column": 4,
+                  "offset": 3601
+                },
+                "end": {
+                  "line": 133,
+                  "column": 7,
+                  "offset": 3804
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 121,
+              "column": 1,
+              "offset": 3385
+            },
+            "end": {
+              "line": 133,
+              "column": 7,
+              "offset": 3804
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": true,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Direct Raw HTML Iframe (for testing only)",
+                      "position": {
+                        "start": {
+                          "line": 135,
+                          "column": 6,
+                          "offset": 3811
+                        },
+                        "end": {
+                          "line": 135,
+                          "column": 47,
+                          "offset": 3852
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 135,
+                      "column": 4,
+                      "offset": 3809
+                    },
+                    "end": {
+                      "line": 135,
+                      "column": 49,
+                      "offset": 3854
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 135,
+                  "column": 4,
+                  "offset": 3809
+                },
+                "end": {
+                  "line": 135,
+                  "column": 49,
+                  "offset": 3854
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Avoid using backticks or extra quotes around the ",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 4,
+                      "offset": 3859
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 53,
+                      "offset": 3908
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "src",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 53,
+                      "offset": 3908
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 58,
+                      "offset": 3913
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " URL. Use the official Figma embed endpoint (",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 58,
+                      "offset": 3913
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 103,
+                      "offset": 3958
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "https://www.figma.com/embed",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 103,
+                      "offset": 3958
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 132,
+                      "offset": 3987
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ") and pass your file/design URL via the ",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 132,
+                      "offset": 3987
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 172,
+                      "offset": 4027
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "url",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 172,
+                      "offset": 4027
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 177,
+                      "offset": 4032
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " parameter.",
+                  "position": {
+                    "start": {
+                      "line": 137,
+                      "column": 177,
+                      "offset": 4032
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 188,
+                      "offset": 4043
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 137,
+                  "column": 4,
+                  "offset": 3859
+                },
+                "end": {
+                  "line": 137,
+                  "column": 188,
+                  "offset": 4043
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "html",
+              "meta": null,
+              "value": "<iframe\n  style=\"border: 1px solid rgba(0, 0, 0, 0.1);\"\n  width=\"800\"\n  height=\"450\"\n  src=\"https://www.figma.com/embed?embed_host=lossless.group&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fbm4kr9lQAVhvllVk7hsDuD%2FParslee%3Fnode-id%3D3212-21097\"\n  allowfullscreen>\n</iframe>",
+              "position": {
+                "start": {
+                  "line": 139,
+                  "column": 4,
+                  "offset": 4048
+                },
+                "end": {
+                  "line": 147,
+                  "column": 7,
+                  "offset": 4358
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Notes:",
+                  "position": {
+                    "start": {
+                      "line": 149,
+                      "column": 4,
+                      "offset": 4363
+                    },
+                    "end": {
+                      "line": 149,
+                      "column": 10,
+                      "offset": 4369
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 149,
+                  "column": 4,
+                  "offset": 4363
+                },
+                "end": {
+                  "line": 149,
+                  "column": 10,
+                  "offset": 4369
+                }
+              }
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "start": null,
+              "spread": false,
+              "children": [
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Do not use ",
+                          "position": {
+                            "start": {
+                              "line": 150,
+                              "column": 6,
+                              "offset": 4375
+                            },
+                            "end": {
+                              "line": 150,
+                              "column": 17,
+                              "offset": 4386
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": "`...`",
+                          "position": {
+                            "start": {
+                              "line": 150,
+                              "column": 17,
+                              "offset": 4386
+                            },
+                            "end": {
+                              "line": 150,
+                              "column": 28,
+                              "offset": 4397
+                            }
+                          }
+                        },
+                        {
+                          "type": "text",
+                          "value": " around URLs; those backticks break embeds and routing.",
+                          "position": {
+                            "start": {
+                              "line": 150,
+                              "column": 28,
+                              "offset": 4397
+                            },
+                            "end": {
+                              "line": 150,
+                              "column": 83,
+                              "offset": 4452
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 150,
+                          "column": 6,
+                          "offset": 4375
+                        },
+                        "end": {
+                          "line": 150,
+                          "column": 83,
+                          "offset": 4452
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 150,
+                      "column": 4,
+                      "offset": 4373
+                    },
+                    "end": {
+                      "line": 150,
+                      "column": 83,
+                      "offset": 4452
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Prefer ",
+                          "position": {
+                            "start": {
+                              "line": 151,
+                              "column": 6,
+                              "offset": 4458
+                            },
+                            "end": {
+                              "line": 151,
+                              "column": 13,
+                              "offset": 4465
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": "https://www.figma.com/embed?url=...",
+                          "position": {
+                            "start": {
+                              "line": 151,
+                              "column": 13,
+                              "offset": 4465
+                            },
+                            "end": {
+                              "line": 151,
+                              "column": 50,
+                              "offset": 4502
+                            }
+                          }
+                        },
+                        {
+                          "type": "text",
+                          "value": " over ",
+                          "position": {
+                            "start": {
+                              "line": 151,
+                              "column": 50,
+                              "offset": 4502
+                            },
+                            "end": {
+                              "line": 151,
+                              "column": 56,
+                              "offset": 4508
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": "https://embed.figma.com/design/...",
+                          "position": {
+                            "start": {
+                              "line": 151,
+                              "column": 56,
+                              "offset": 4508
+                            },
+                            "end": {
+                              "line": 151,
+                              "column": 92,
+                              "offset": 4544
+                            }
+                          }
+                        },
+                        {
+                          "type": "text",
+                          "value": " to match our pipeline and avoid CORS or parsing issues.",
+                          "position": {
+                            "start": {
+                              "line": 151,
+                              "column": 92,
+                              "offset": 4544
+                            },
+                            "end": {
+                              "line": 151,
+                              "column": 148,
+                              "offset": 4600
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 151,
+                          "column": 6,
+                          "offset": 4458
+                        },
+                        "end": {
+                          "line": 151,
+                          "column": 148,
+                          "offset": 4600
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 151,
+                      "column": 4,
+                      "offset": 4456
+                    },
+                    "end": {
+                      "line": 151,
+                      "column": 148,
+                      "offset": 4600
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 150,
+                  "column": 4,
+                  "offset": 4373
+                },
+                "end": {
+                  "line": 151,
+                  "column": 148,
+                  "offset": 4600
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Simple usage with minimal parameters:",
+                      "position": {
+                        "start": {
+                          "line": 153,
+                          "column": 6,
+                          "offset": 4607
+                        },
+                        "end": {
+                          "line": 153,
+                          "column": 43,
+                          "offset": 4644
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 153,
+                      "column": 4,
+                      "offset": 4605
+                    },
+                    "end": {
+                      "line": 153,
+                      "column": 45,
+                      "offset": 4646
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 153,
+                  "column": 4,
+                  "offset": 4605
+                },
+                "end": {
+                  "line": 153,
+                  "column": 45,
+                  "offset": 4646
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "markdown",
+              "meta": null,
+              "value": "::figma-embed{src=\"https://www.figma.com/file/abc123/Your-Figma-File\"}",
+              "position": {
+                "start": {
+                  "line": 154,
+                  "column": 4,
+                  "offset": 4650
+                },
+                "end": {
+                  "line": 156,
+                  "column": 7,
+                  "offset": 4742
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 135,
+              "column": 1,
+              "offset": 3806
+            },
+            "end": {
+              "line": 156,
+              "column": 7,
+              "offset": 4742
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": true,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Alternative Usage: Direct Component Import",
+                      "position": {
+                        "start": {
+                          "line": 158,
+                          "column": 6,
+                          "offset": 4749
+                        },
+                        "end": {
+                          "line": 158,
+                          "column": 48,
+                          "offset": 4791
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 158,
+                      "column": 4,
+                      "offset": 4747
+                    },
+                    "end": {
+                      "line": 158,
+                      "column": 50,
+                      "offset": 4793
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 158,
+                  "column": 4,
+                  "offset": 4747
+                },
+                "end": {
+                  "line": 158,
+                  "column": 50,
+                  "offset": 4793
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "You can also use the component directly in Astro files:",
+                  "position": {
+                    "start": {
+                      "line": 160,
+                      "column": 4,
+                      "offset": 4798
+                    },
+                    "end": {
+                      "line": 160,
+                      "column": 59,
+                      "offset": 4853
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 160,
+                  "column": 4,
+                  "offset": 4798
+                },
+                "end": {
+                  "line": 160,
+                  "column": 59,
+                  "offset": 4853
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "astro",
+              "meta": null,
+              "value": "---\nimport FigmaEmbed from '../components/FigmaEmbed.astro';\n---\n\n<FigmaEmbed\n  figmaUrl=\"https://www.figma.com/file/abc123/Your-Figma-File\"\n  initialView=\"design\"\n  hideUi={true}\n/>",
+              "position": {
+                "start": {
+                  "line": 162,
+                  "column": 4,
+                  "offset": 4858
+                },
+                "end": {
+                  "line": 172,
+                  "column": 7,
+                  "offset": 5080
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 158,
+              "column": 1,
+              "offset": 4744
+            },
+            "end": {
+              "line": 172,
+              "column": 7,
+              "offset": 5080
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": true,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Usage in MDX Files",
+                      "position": {
+                        "start": {
+                          "line": 174,
+                          "column": 6,
+                          "offset": 5087
+                        },
+                        "end": {
+                          "line": 174,
+                          "column": 24,
+                          "offset": 5105
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 174,
+                      "column": 4,
+                      "offset": 5085
+                    },
+                    "end": {
+                      "line": 174,
+                      "column": 26,
+                      "offset": 5107
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 174,
+                  "column": 4,
+                  "offset": 5085
+                },
+                "end": {
+                  "line": 174,
+                  "column": 26,
+                  "offset": 5107
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "For MDX files, you can either use the remark directive (preferred) or import the component:",
+                  "position": {
+                    "start": {
+                      "line": 176,
+                      "column": 4,
+                      "offset": 5112
+                    },
+                    "end": {
+                      "line": 176,
+                      "column": 95,
+                      "offset": 5203
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 176,
+                  "column": 4,
+                  "offset": 5112
+                },
+                "end": {
+                  "line": 176,
+                  "column": 95,
+                  "offset": 5203
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Preferred: Using remark directive",
+                      "position": {
+                        "start": {
+                          "line": 178,
+                          "column": 6,
+                          "offset": 5210
+                        },
+                        "end": {
+                          "line": 178,
+                          "column": 39,
+                          "offset": 5243
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 178,
+                      "column": 4,
+                      "offset": 5208
+                    },
+                    "end": {
+                      "line": 178,
+                      "column": 41,
+                      "offset": 5245
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 178,
+                  "column": 4,
+                  "offset": 5208
+                },
+                "end": {
+                  "line": 178,
+                  "column": 41,
+                  "offset": 5245
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "mdx",
+              "meta": null,
+              "value": "# My Document\n\nHere's an embedded Figma file:\n\n:::figma-embed\nsrc=\"https://www.figma.com/file/abc123/Your-Figma-File\"\ninitial-view=\"prototype\"\n:::",
+              "position": {
+                "start": {
+                  "line": 179,
+                  "column": 4,
+                  "offset": 5249
+                },
+                "end": {
+                  "line": 188,
+                  "column": 7,
+                  "offset": 5430
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Alternative: Direct import",
+                      "position": {
+                        "start": {
+                          "line": 190,
+                          "column": 6,
+                          "offset": 5437
+                        },
+                        "end": {
+                          "line": 190,
+                          "column": 32,
+                          "offset": 5463
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 190,
+                      "column": 4,
+                      "offset": 5435
+                    },
+                    "end": {
+                      "line": 190,
+                      "column": 34,
+                      "offset": 5465
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 190,
+                  "column": 4,
+                  "offset": 5435
+                },
+                "end": {
+                  "line": 190,
+                  "column": 34,
+                  "offset": 5465
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "mdx",
+              "meta": null,
+              "value": "---\nimport FigmaEmbed from '../components/FigmaEmbed.astro';\n---\n\n# My Document\n\n<FigmaEmbed figmaUrl=\"https://www.figma.com/file/abc123/Your-Figma-File\" />",
+              "position": {
+                "start": {
+                  "line": 191,
+                  "column": 4,
+                  "offset": 5469
+                },
+                "end": {
+                  "line": 199,
+                  "column": 7,
+                  "offset": 5660
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 174,
+              "column": 1,
+              "offset": 5082
+            },
+            "end": {
+              "line": 199,
+              "column": 7,
+              "offset": 5660
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 121,
+          "column": 1,
+          "offset": 3385
+        },
+        "end": {
+          "line": 199,
+          "column": 7,
+          "offset": 5660
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Security Considerations",
+          "position": {
+            "start": {
+              "line": 201,
+              "column": 4,
+              "offset": 5665
+            },
+            "end": {
+              "line": 201,
+              "column": 27,
+              "offset": 5688
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 201,
+          "column": 1,
+          "offset": 5662
+        },
+        "end": {
+          "line": 201,
+          "column": 27,
+          "offset": 5688
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "start": null,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Ensure the Figma URL is sanitized to prevent injection attacks.",
+                  "position": {
+                    "start": {
+                      "line": 203,
+                      "column": 3,
+                      "offset": 5692
+                    },
+                    "end": {
+                      "line": 203,
+                      "column": 66,
+                      "offset": 5755
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 203,
+                  "column": 3,
+                  "offset": 5692
+                },
+                "end": {
+                  "line": 203,
+                  "column": 66,
+                  "offset": 5755
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 203,
+              "column": 1,
+              "offset": 5690
+            },
+            "end": {
+              "line": 203,
+              "column": 66,
+              "offset": 5755
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Restrict embedding to trusted domains if applicable.",
+                  "position": {
+                    "start": {
+                      "line": 204,
+                      "column": 3,
+                      "offset": 5758
+                    },
+                    "end": {
+                      "line": 204,
+                      "column": 55,
+                      "offset": 5810
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 204,
+                  "column": 3,
+                  "offset": 5758
+                },
+                "end": {
+                  "line": 204,
+                  "column": 55,
+                  "offset": 5810
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 204,
+              "column": 1,
+              "offset": 5756
+            },
+            "end": {
+              "line": 204,
+              "column": 55,
+              "offset": 5810
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 203,
+          "column": 1,
+          "offset": 5690
+        },
+        "end": {
+          "line": 204,
+          "column": 55,
+          "offset": 5810
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Testing and Validation",
+          "position": {
+            "start": {
+              "line": 206,
+              "column": 4,
+              "offset": 5815
+            },
+            "end": {
+              "line": 206,
+              "column": 26,
+              "offset": 5837
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 206,
+          "column": 1,
+          "offset": 5812
+        },
+        "end": {
+          "line": 206,
+          "column": 26,
+          "offset": 5837
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "start": null,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Verify embed functionality in various browsers and devices.",
+                  "position": {
+                    "start": {
+                      "line": 208,
+                      "column": 3,
+                      "offset": 5841
+                    },
+                    "end": {
+                      "line": 208,
+                      "column": 62,
+                      "offset": 5900
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 208,
+                  "column": 3,
+                  "offset": 5841
+                },
+                "end": {
+                  "line": 208,
+                  "column": 62,
+                  "offset": 5900
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 208,
+              "column": 1,
+              "offset": 5839
+            },
+            "end": {
+              "line": 208,
+              "column": 62,
+              "offset": 5900
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Test optional parameters to ensure proper handling and fallback.",
+                  "position": {
+                    "start": {
+                      "line": 209,
+                      "column": 3,
+                      "offset": 5903
+                    },
+                    "end": {
+                      "line": 209,
+                      "column": 67,
+                      "offset": 5967
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 209,
+                  "column": 3,
+                  "offset": 5903
+                },
+                "end": {
+                  "line": 209,
+                  "column": 67,
+                  "offset": 5967
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 209,
+              "column": 1,
+              "offset": 5901
+            },
+            "end": {
+              "line": 209,
+              "column": 67,
+              "offset": 5967
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 208,
+          "column": 1,
+          "offset": 5839
+        },
+        "end": {
+          "line": 209,
+          "column": 67,
+          "offset": 5967
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Live Example",
+          "position": {
+            "start": {
+              "line": 211,
+              "column": 4,
+              "offset": 5972
+            },
+            "end": {
+              "line": 211,
+              "column": 16,
+              "offset": 5984
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 211,
+          "column": 1,
+          "offset": 5969
+        },
+        "end": {
+          "line": 211,
+          "column": 16,
+          "offset": 5984
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Here's a live example using the Go-Lossless Figma design:",
+          "position": {
+            "start": {
+              "line": 213,
+              "column": 1,
+              "offset": 5986
+            },
+            "end": {
+              "line": 213,
+              "column": 58,
+              "offset": 6043
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 213,
+          "column": 1,
+          "offset": 5986
+        },
+        "end": {
+          "line": 213,
+          "column": 58,
+          "offset": 6043
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": ":figma-embed{src=\"https://www.figma.com/design/splN6L6DgSf61khdyfpybl/Go-Lossless?node-id=2459-9610&t=u6HwEgch9WcmWQbF-4\" width=\"800\" height=\"600\" initial-view=\"design\"}",
+          "position": {
+            "start": {
+              "line": 215,
+              "column": 1,
+              "offset": 6045
+            },
+            "end": {
+              "line": 215,
+              "column": 170,
+              "offset": 6214
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 215,
+          "column": 1,
+          "offset": 6045
+        },
+        "end": {
+          "line": 215,
+          "column": 170,
+          "offset": 6214
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "This example demonstrates:",
+          "position": {
+            "start": {
+              "line": 217,
+              "column": 1,
+              "offset": 6216
+            },
+            "end": {
+              "line": 217,
+              "column": 27,
+              "offset": 6242
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 217,
+          "column": 1,
+          "offset": 6216
+        },
+        "end": {
+          "line": 217,
+          "column": 27,
+          "offset": 6242
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "start": null,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Specific node targeting",
+                      "position": {
+                        "start": {
+                          "line": 218,
+                          "column": 5,
+                          "offset": 6247
+                        },
+                        "end": {
+                          "line": 218,
+                          "column": 28,
+                          "offset": 6270
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 218,
+                      "column": 3,
+                      "offset": 6245
+                    },
+                    "end": {
+                      "line": 218,
+                      "column": 30,
+                      "offset": 6272
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " using ",
+                  "position": {
+                    "start": {
+                      "line": 218,
+                      "column": 30,
+                      "offset": 6272
+                    },
+                    "end": {
+                      "line": 218,
+                      "column": 37,
+                      "offset": 6279
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "node-id=2459-9610",
+                  "position": {
+                    "start": {
+                      "line": 218,
+                      "column": 37,
+                      "offset": 6279
+                    },
+                    "end": {
+                      "line": 218,
+                      "column": 56,
+                      "offset": 6298
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 218,
+                  "column": 3,
+                  "offset": 6245
+                },
+                "end": {
+                  "line": 218,
+                  "column": 56,
+                  "offset": 6298
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 218,
+              "column": 1,
+              "offset": 6243
+            },
+            "end": {
+              "line": 218,
+              "column": 56,
+              "offset": 6298
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Custom dimensions",
+                      "position": {
+                        "start": {
+                          "line": 219,
+                          "column": 5,
+                          "offset": 6303
+                        },
+                        "end": {
+                          "line": 219,
+                          "column": 22,
+                          "offset": 6320
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 219,
+                      "column": 3,
+                      "offset": 6301
+                    },
+                    "end": {
+                      "line": 219,
+                      "column": 24,
+                      "offset": 6322
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " with width and height parameters",
+                  "position": {
+                    "start": {
+                      "line": 219,
+                      "column": 24,
+                      "offset": 6322
+                    },
+                    "end": {
+                      "line": 219,
+                      "column": 57,
+                      "offset": 6355
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 219,
+                  "column": 3,
+                  "offset": 6301
+                },
+                "end": {
+                  "line": 219,
+                  "column": 57,
+                  "offset": 6355
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 219,
+              "column": 1,
+              "offset": 6299
+            },
+            "end": {
+              "line": 219,
+              "column": 57,
+              "offset": 6355
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Initial view",
+                      "position": {
+                        "start": {
+                          "line": 220,
+                          "column": 5,
+                          "offset": 6360
+                        },
+                        "end": {
+                          "line": 220,
+                          "column": 17,
+                          "offset": 6372
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 220,
+                      "column": 3,
+                      "offset": 6358
+                    },
+                    "end": {
+                      "line": 220,
+                      "column": 19,
+                      "offset": 6374
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " set to design mode",
+                  "position": {
+                    "start": {
+                      "line": 220,
+                      "column": 19,
+                      "offset": 6374
+                    },
+                    "end": {
+                      "line": 220,
+                      "column": 38,
+                      "offset": 6393
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 220,
+                  "column": 3,
+                  "offset": 6358
+                },
+                "end": {
+                  "line": 220,
+                  "column": 38,
+                  "offset": 6393
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 220,
+              "column": 1,
+              "offset": 6356
+            },
+            "end": {
+              "line": 220,
+              "column": 38,
+              "offset": 6393
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Clean embed URL",
+                      "position": {
+                        "start": {
+                          "line": 221,
+                          "column": 5,
+                          "offset": 6398
+                        },
+                        "end": {
+                          "line": 221,
+                          "column": 20,
+                          "offset": 6413
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 221,
+                      "column": 3,
+                      "offset": 6396
+                    },
+                    "end": {
+                      "line": 221,
+                      "column": 22,
+                      "offset": 6415
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " that will render the Go-Lossless design",
+                  "position": {
+                    "start": {
+                      "line": 221,
+                      "column": 22,
+                      "offset": 6415
+                    },
+                    "end": {
+                      "line": 221,
+                      "column": 62,
+                      "offset": 6455
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 221,
+                  "column": 3,
+                  "offset": 6396
+                },
+                "end": {
+                  "line": 221,
+                  "column": 62,
+                  "offset": 6455
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 221,
+              "column": 1,
+              "offset": 6394
+            },
+            "end": {
+              "line": 221,
+              "column": 62,
+              "offset": 6455
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 218,
+          "column": 1,
+          "offset": 6243
+        },
+        "end": {
+          "line": 221,
+          "column": 62,
+          "offset": 6455
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Implementation Findings",
+          "position": {
+            "start": {
+              "line": 223,
+              "column": 4,
+              "offset": 6460
+            },
+            "end": {
+              "line": 223,
+              "column": 27,
+              "offset": 6483
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 223,
+          "column": 1,
+          "offset": 6457
+        },
+        "end": {
+          "line": 223,
+          "column": 27,
+          "offset": 6483
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 3,
+      "children": [
+        {
+          "type": "text",
+          "value": "Directive Syntax Resolution",
+          "position": {
+            "start": {
+              "line": 225,
+              "column": 5,
+              "offset": 6489
+            },
+            "end": {
+              "line": 225,
+              "column": 32,
+              "offset": 6516
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 225,
+          "column": 1,
+          "offset": 6485
+        },
+        "end": {
+          "line": 225,
+          "column": 32,
+          "offset": 6516
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "During implementation, we discovered that ",
+          "position": {
+            "start": {
+              "line": 227,
+              "column": 1,
+              "offset": 6518
+            },
+            "end": {
+              "line": 227,
+              "column": 43,
+              "offset": 6560
+            }
+          }
+        },
+        {
+          "type": "inlineCode",
+          "value": "remark-directive",
+          "position": {
+            "start": {
+              "line": 227,
+              "column": 43,
+              "offset": 6560
+            },
+            "end": {
+              "line": 227,
+              "column": 61,
+              "offset": 6578
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": " supports three distinct syntax formats:",
+          "position": {
+            "start": {
+              "line": 227,
+              "column": 61,
+              "offset": 6578
+            },
+            "end": {
+              "line": 227,
+              "column": 101,
+              "offset": 6618
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 227,
+          "column": 1,
+          "offset": 6518
+        },
+        "end": {
+          "line": 227,
+          "column": 101,
+          "offset": 6618
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "start": 1,
+      "spread": true,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Text Directives (Single-colon - CURRENTLY WORKING):",
+                      "position": {
+                        "start": {
+                          "line": 229,
+                          "column": 6,
+                          "offset": 6625
+                        },
+                        "end": {
+                          "line": 229,
+                          "column": 57,
+                          "offset": 6676
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 229,
+                      "column": 4,
+                      "offset": 6623
+                    },
+                    "end": {
+                      "line": 229,
+                      "column": 59,
+                      "offset": 6678
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 229,
+                  "column": 4,
+                  "offset": 6623
+                },
+                "end": {
+                  "line": 229,
+                  "column": 59,
+                  "offset": 6678
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "markdown",
+              "meta": null,
+              "value": ":figma-embed{src=\"...\" width=\"800\" height=\"600\"}",
+              "position": {
+                "start": {
+                  "line": 230,
+                  "column": 4,
+                  "offset": 6682
+                },
+                "end": {
+                  "line": 232,
+                  "column": 7,
+                  "offset": 6752
+                }
+              }
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "start": null,
+              "spread": false,
+              "children": [
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Uses single colon ",
+                          "position": {
+                            "start": {
+                              "line": 233,
+                              "column": 6,
+                              "offset": 6758
+                            },
+                            "end": {
+                              "line": 233,
+                              "column": 24,
+                              "offset": 6776
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": ":",
+                          "position": {
+                            "start": {
+                              "line": 233,
+                              "column": 24,
+                              "offset": 6776
+                            },
+                            "end": {
+                              "line": 233,
+                              "column": 27,
+                              "offset": 6779
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 233,
+                          "column": 6,
+                          "offset": 6758
+                        },
+                        "end": {
+                          "line": 233,
+                          "column": 27,
+                          "offset": 6779
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 233,
+                      "column": 4,
+                      "offset": 6756
+                    },
+                    "end": {
+                      "line": 233,
+                      "column": 27,
+                      "offset": 6779
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Attributes parsed directly from ",
+                          "position": {
+                            "start": {
+                              "line": 234,
+                              "column": 6,
+                              "offset": 6785
+                            },
+                            "end": {
+                              "line": 234,
+                              "column": 38,
+                              "offset": 6817
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": "node.attributes",
+                          "position": {
+                            "start": {
+                              "line": 234,
+                              "column": 38,
+                              "offset": 6817
+                            },
+                            "end": {
+                              "line": 234,
+                              "column": 55,
+                              "offset": 6834
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 234,
+                          "column": 6,
+                          "offset": 6785
+                        },
+                        "end": {
+                          "line": 234,
+                          "column": 55,
+                          "offset": 6834
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 234,
+                      "column": 4,
+                      "offset": 6783
+                    },
+                    "end": {
+                      "line": 234,
+                      "column": 55,
+                      "offset": 6834
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Most reliable for inline embeds",
+                          "position": {
+                            "start": {
+                              "line": 235,
+                              "column": 6,
+                              "offset": 6840
+                            },
+                            "end": {
+                              "line": 235,
+                              "column": 37,
+                              "offset": 6871
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 235,
+                          "column": 6,
+                          "offset": 6840
+                        },
+                        "end": {
+                          "line": 235,
+                          "column": 37,
+                          "offset": 6871
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 235,
+                      "column": 4,
+                      "offset": 6838
+                    },
+                    "end": {
+                      "line": 235,
+                      "column": 37,
+                      "offset": 6871
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 233,
+                  "column": 4,
+                  "offset": 6756
+                },
+                "end": {
+                  "line": 235,
+                  "column": 37,
+                  "offset": 6871
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 229,
+              "column": 1,
+              "offset": 6620
+            },
+            "end": {
+              "line": 235,
+              "column": 37,
+              "offset": 6871
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Leaf Directives (Double-colon):",
+                      "position": {
+                        "start": {
+                          "line": 237,
+                          "column": 6,
+                          "offset": 6878
+                        },
+                        "end": {
+                          "line": 237,
+                          "column": 37,
+                          "offset": 6909
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 237,
+                      "column": 4,
+                      "offset": 6876
+                    },
+                    "end": {
+                      "line": 237,
+                      "column": 39,
+                      "offset": 6911
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 237,
+                  "column": 4,
+                  "offset": 6876
+                },
+                "end": {
+                  "line": 237,
+                  "column": 39,
+                  "offset": 6911
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "markdown",
+              "meta": null,
+              "value": "::figma-embed{src=\"...\" width=\"800\" height=\"600\"}",
+              "position": {
+                "start": {
+                  "line": 238,
+                  "column": 4,
+                  "offset": 6915
+                },
+                "end": {
+                  "line": 240,
+                  "column": 7,
+                  "offset": 6986
+                }
+              }
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "start": null,
+              "spread": false,
+              "children": [
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Uses double colon ",
+                          "position": {
+                            "start": {
+                              "line": 241,
+                              "column": 6,
+                              "offset": 6992
+                            },
+                            "end": {
+                              "line": 241,
+                              "column": 24,
+                              "offset": 7010
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": "::",
+                          "position": {
+                            "start": {
+                              "line": 241,
+                              "column": 24,
+                              "offset": 7010
+                            },
+                            "end": {
+                              "line": 241,
+                              "column": 28,
+                              "offset": 7014
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 241,
+                          "column": 6,
+                          "offset": 6992
+                        },
+                        "end": {
+                          "line": 241,
+                          "column": 28,
+                          "offset": 7014
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 241,
+                      "column": 4,
+                      "offset": 6990
+                    },
+                    "end": {
+                      "line": 241,
+                      "column": 28,
+                      "offset": 7014
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Self-closing directive style",
+                          "position": {
+                            "start": {
+                              "line": 242,
+                              "column": 6,
+                              "offset": 7020
+                            },
+                            "end": {
+                              "line": 242,
+                              "column": 34,
+                              "offset": 7048
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 242,
+                          "column": 6,
+                          "offset": 7020
+                        },
+                        "end": {
+                          "line": 242,
+                          "column": 34,
+                          "offset": 7048
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 242,
+                      "column": 4,
+                      "offset": 7018
+                    },
+                    "end": {
+                      "line": 242,
+                      "column": 34,
+                      "offset": 7048
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Currently functional",
+                          "position": {
+                            "start": {
+                              "line": 243,
+                              "column": 6,
+                              "offset": 7054
+                            },
+                            "end": {
+                              "line": 243,
+                              "column": 26,
+                              "offset": 7074
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 243,
+                          "column": 6,
+                          "offset": 7054
+                        },
+                        "end": {
+                          "line": 243,
+                          "column": 26,
+                          "offset": 7074
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 243,
+                      "column": 4,
+                      "offset": 7052
+                    },
+                    "end": {
+                      "line": 243,
+                      "column": 26,
+                      "offset": 7074
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 241,
+                  "column": 4,
+                  "offset": 6990
+                },
+                "end": {
+                  "line": 243,
+                  "column": 26,
+                  "offset": 7074
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 237,
+              "column": 1,
+              "offset": 6873
+            },
+            "end": {
+              "line": 243,
+              "column": 26,
+              "offset": 7074
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Container Directives (Triple-colon):",
+                      "position": {
+                        "start": {
+                          "line": 245,
+                          "column": 6,
+                          "offset": 7081
+                        },
+                        "end": {
+                          "line": 245,
+                          "column": 42,
+                          "offset": 7117
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 245,
+                      "column": 4,
+                      "offset": 7079
+                    },
+                    "end": {
+                      "line": 245,
+                      "column": 44,
+                      "offset": 7119
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 245,
+                  "column": 4,
+                  "offset": 7079
+                },
+                "end": {
+                  "line": 245,
+                  "column": 44,
+                  "offset": 7119
+                }
+              }
+            },
+            {
+              "type": "code",
+              "lang": "markdown",
+              "meta": null,
+              "value": ":::figma-embed\nsrc=\"...\"\nwidth=\"800\"\nheight=\"600\"\n:::",
+              "position": {
+                "start": {
+                  "line": 246,
+                  "column": 4,
+                  "offset": 7123
+                },
+                "end": {
+                  "line": 252,
+                  "column": 7,
+                  "offset": 7210
+                }
+              }
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "start": null,
+              "spread": false,
+              "children": [
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Uses triple colon ",
+                          "position": {
+                            "start": {
+                              "line": 253,
+                              "column": 6,
+                              "offset": 7216
+                            },
+                            "end": {
+                              "line": 253,
+                              "column": 24,
+                              "offset": 7234
+                            }
+                          }
+                        },
+                        {
+                          "type": "inlineCode",
+                          "value": ":::",
+                          "position": {
+                            "start": {
+                              "line": 253,
+                              "column": 24,
+                              "offset": 7234
+                            },
+                            "end": {
+                              "line": 253,
+                              "column": 29,
+                              "offset": 7239
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 253,
+                          "column": 6,
+                          "offset": 7216
+                        },
+                        "end": {
+                          "line": 253,
+                          "column": 29,
+                          "offset": 7239
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 253,
+                      "column": 4,
+                      "offset": 7214
+                    },
+                    "end": {
+                      "line": 253,
+                      "column": 29,
+                      "offset": 7239
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Multi-line block style",
+                          "position": {
+                            "start": {
+                              "line": 254,
+                              "column": 6,
+                              "offset": 7245
+                            },
+                            "end": {
+                              "line": 254,
+                              "column": 28,
+                              "offset": 7267
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 254,
+                          "column": 6,
+                          "offset": 7245
+                        },
+                        "end": {
+                          "line": 254,
+                          "column": 28,
+                          "offset": 7267
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 254,
+                      "column": 4,
+                      "offset": 7243
+                    },
+                    "end": {
+                      "line": 254,
+                      "column": 28,
+                      "offset": 7267
+                    }
+                  }
+                },
+                {
+                  "type": "listItem",
+                  "spread": false,
+                  "checked": null,
+                  "children": [
+                    {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Parser may need debugging for attribute extraction",
+                          "position": {
+                            "start": {
+                              "line": 255,
+                              "column": 6,
+                              "offset": 7273
+                            },
+                            "end": {
+                              "line": 255,
+                              "column": 56,
+                              "offset": 7323
+                            }
+                          }
+                        }
+                      ],
+                      "position": {
+                        "start": {
+                          "line": 255,
+                          "column": 6,
+                          "offset": 7273
+                        },
+                        "end": {
+                          "line": 255,
+                          "column": 56,
+                          "offset": 7323
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 255,
+                      "column": 4,
+                      "offset": 7271
+                    },
+                    "end": {
+                      "line": 255,
+                      "column": 56,
+                      "offset": 7323
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 253,
+                  "column": 4,
+                  "offset": 7214
+                },
+                "end": {
+                  "line": 255,
+                  "column": 56,
+                  "offset": 7323
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 245,
+              "column": 1,
+              "offset": 7076
+            },
+            "end": {
+              "line": 255,
+              "column": 56,
+              "offset": 7323
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 229,
+          "column": 1,
+          "offset": 6620
+        },
+        "end": {
+          "line": 255,
+          "column": 56,
+          "offset": 7323
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 3,
+      "children": [
+        {
+          "type": "text",
+          "value": "AstroMarkdown Integration",
+          "position": {
+            "start": {
+              "line": 257,
+              "column": 5,
+              "offset": 7329
+            },
+            "end": {
+              "line": 257,
+              "column": 30,
+              "offset": 7354
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 257,
+          "column": 1,
+          "offset": 7325
+        },
+        "end": {
+          "line": 257,
+          "column": 30,
+          "offset": 7354
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "The implementation required updating ",
+          "position": {
+            "start": {
+              "line": 259,
+              "column": 1,
+              "offset": 7356
+            },
+            "end": {
+              "line": 259,
+              "column": 38,
+              "offset": 7393
+            }
+          }
+        },
+        {
+          "type": "inlineCode",
+          "value": "AstroMarkdown.astro",
+          "position": {
+            "start": {
+              "line": 259,
+              "column": 38,
+              "offset": 7393
+            },
+            "end": {
+              "line": 259,
+              "column": 59,
+              "offset": 7414
+            }
+          }
+        },
+        {
+          "type": "text",
+          "value": " to handle all three directive node types:",
+          "position": {
+            "start": {
+              "line": 259,
+              "column": 59,
+              "offset": 7414
+            },
+            "end": {
+              "line": 259,
+              "column": 101,
+              "offset": 7456
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 259,
+          "column": 1,
+          "offset": 7356
+        },
+        "end": {
+          "line": 259,
+          "column": 101,
+          "offset": 7456
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "start": null,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Text directives",
+                      "position": {
+                        "start": {
+                          "line": 261,
+                          "column": 5,
+                          "offset": 7462
+                        },
+                        "end": {
+                          "line": 261,
+                          "column": 20,
+                          "offset": 7477
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 261,
+                      "column": 3,
+                      "offset": 7460
+                    },
+                    "end": {
+                      "line": 261,
+                      "column": 22,
+                      "offset": 7479
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " (",
+                  "position": {
+                    "start": {
+                      "line": 261,
+                      "column": 22,
+                      "offset": 7479
+                    },
+                    "end": {
+                      "line": 261,
+                      "column": 24,
+                      "offset": 7481
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "textDirective",
+                  "position": {
+                    "start": {
+                      "line": 261,
+                      "column": 24,
+                      "offset": 7481
+                    },
+                    "end": {
+                      "line": 261,
+                      "column": 39,
+                      "offset": 7496
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ") - Line 1339-1487: Attributes directly available in ",
+                  "position": {
+                    "start": {
+                      "line": 261,
+                      "column": 39,
+                      "offset": 7496
+                    },
+                    "end": {
+                      "line": 261,
+                      "column": 92,
+                      "offset": 7549
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "node.attributes",
+                  "position": {
+                    "start": {
+                      "line": 261,
+                      "column": 92,
+                      "offset": 7549
+                    },
+                    "end": {
+                      "line": 261,
+                      "column": 109,
+                      "offset": 7566
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ", renders block-level embed",
+                  "position": {
+                    "start": {
+                      "line": 261,
+                      "column": 109,
+                      "offset": 7566
+                    },
+                    "end": {
+                      "line": 261,
+                      "column": 136,
+                      "offset": 7593
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 261,
+                  "column": 3,
+                  "offset": 7460
+                },
+                "end": {
+                  "line": 261,
+                  "column": 136,
+                  "offset": 7593
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 261,
+              "column": 1,
+              "offset": 7458
+            },
+            "end": {
+              "line": 261,
+              "column": 136,
+              "offset": 7593
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Leaf directives",
+                      "position": {
+                        "start": {
+                          "line": 262,
+                          "column": 5,
+                          "offset": 7598
+                        },
+                        "end": {
+                          "line": 262,
+                          "column": 20,
+                          "offset": 7613
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 262,
+                      "column": 3,
+                      "offset": 7596
+                    },
+                    "end": {
+                      "line": 262,
+                      "column": 22,
+                      "offset": 7615
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " (",
+                  "position": {
+                    "start": {
+                      "line": 262,
+                      "column": 22,
+                      "offset": 7615
+                    },
+                    "end": {
+                      "line": 262,
+                      "column": 24,
+                      "offset": 7617
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "leafDirective",
+                  "position": {
+                    "start": {
+                      "line": 262,
+                      "column": 24,
+                      "offset": 7617
+                    },
+                    "end": {
+                      "line": 262,
+                      "column": 39,
+                      "offset": 7632
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ") - Line 1511+: Attributes in ",
+                  "position": {
+                    "start": {
+                      "line": 262,
+                      "column": 39,
+                      "offset": 7632
+                    },
+                    "end": {
+                      "line": 262,
+                      "column": 69,
+                      "offset": 7662
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "node.attributes",
+                  "position": {
+                    "start": {
+                      "line": 262,
+                      "column": 69,
+                      "offset": 7662
+                    },
+                    "end": {
+                      "line": 262,
+                      "column": 86,
+                      "offset": 7679
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ", single-line syntax",
+                  "position": {
+                    "start": {
+                      "line": 262,
+                      "column": 86,
+                      "offset": 7679
+                    },
+                    "end": {
+                      "line": 262,
+                      "column": 106,
+                      "offset": 7699
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 262,
+                  "column": 3,
+                  "offset": 7596
+                },
+                "end": {
+                  "line": 262,
+                  "column": 106,
+                  "offset": 7699
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 262,
+              "column": 1,
+              "offset": 7594
+            },
+            "end": {
+              "line": 262,
+              "column": 106,
+              "offset": 7699
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Container directives",
+                      "position": {
+                        "start": {
+                          "line": 263,
+                          "column": 5,
+                          "offset": 7704
+                        },
+                        "end": {
+                          "line": 263,
+                          "column": 25,
+                          "offset": 7724
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 263,
+                      "column": 3,
+                      "offset": 7702
+                    },
+                    "end": {
+                      "line": 263,
+                      "column": 27,
+                      "offset": 7726
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " (",
+                  "position": {
+                    "start": {
+                      "line": 263,
+                      "column": 27,
+                      "offset": 7726
+                    },
+                    "end": {
+                      "line": 263,
+                      "column": 29,
+                      "offset": 7728
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "containerDirective",
+                  "position": {
+                    "start": {
+                      "line": 263,
+                      "column": 29,
+                      "offset": 7728
+                    },
+                    "end": {
+                      "line": 263,
+                      "column": 49,
+                      "offset": 7748
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ") - Line 1511+: Require parsing child nodes to extract key-value pairs from text content",
+                  "position": {
+                    "start": {
+                      "line": 263,
+                      "column": 49,
+                      "offset": 7748
+                    },
+                    "end": {
+                      "line": 263,
+                      "column": 137,
+                      "offset": 7836
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 263,
+                  "column": 3,
+                  "offset": 7702
+                },
+                "end": {
+                  "line": 263,
+                  "column": 137,
+                  "offset": 7836
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 263,
+              "column": 1,
+              "offset": 7700
+            },
+            "end": {
+              "line": 263,
+              "column": 137,
+              "offset": 7836
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 261,
+          "column": 1,
+          "offset": 7458
+        },
+        "end": {
+          "line": 263,
+          "column": 137,
+          "offset": 7836
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "All three formats render the same full-featured Figma embed with modal expansion and accessibility features.",
+          "position": {
+            "start": {
+              "line": 265,
+              "column": 1,
+              "offset": 7838
+            },
+            "end": {
+              "line": 265,
+              "column": 109,
+              "offset": 7946
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 265,
+          "column": 1,
+          "offset": 7838
+        },
+        "end": {
+          "line": 265,
+          "column": 109,
+          "offset": 7946
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 3,
+      "children": [
+        {
+          "type": "text",
+          "value": "Enhanced Features Implemented",
+          "position": {
+            "start": {
+              "line": 267,
+              "column": 5,
+              "offset": 7952
+            },
+            "end": {
+              "line": 267,
+              "column": 34,
+              "offset": 7981
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 267,
+          "column": 1,
+          "offset": 7948
+        },
+        "end": {
+          "line": 267,
+          "column": 34,
+          "offset": 7981
+        }
+      }
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "start": 1,
+      "spread": false,
+      "children": [
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Breakout Layout:",
+                      "position": {
+                        "start": {
+                          "line": 269,
+                          "column": 6,
+                          "offset": 7988
+                        },
+                        "end": {
+                          "line": 269,
+                          "column": 22,
+                          "offset": 8004
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 269,
+                      "column": 4,
+                      "offset": 7986
+                    },
+                    "end": {
+                      "line": 269,
+                      "column": 24,
+                      "offset": 8006
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " Full-width container that breaks out of normal content padding, similar to Mermaid charts",
+                  "position": {
+                    "start": {
+                      "line": 269,
+                      "column": 24,
+                      "offset": 8006
+                    },
+                    "end": {
+                      "line": 269,
+                      "column": 114,
+                      "offset": 8096
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 269,
+                  "column": 4,
+                  "offset": 7986
+                },
+                "end": {
+                  "line": 269,
+                  "column": 114,
+                  "offset": 8096
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 269,
+              "column": 1,
+              "offset": 7983
+            },
+            "end": {
+              "line": 269,
+              "column": 114,
+              "offset": 8096
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Modal Expansion:",
+                      "position": {
+                        "start": {
+                          "line": 270,
+                          "column": 6,
+                          "offset": 8102
+                        },
+                        "end": {
+                          "line": 270,
+                          "column": 22,
+                          "offset": 8118
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 270,
+                      "column": 4,
+                      "offset": 8100
+                    },
+                    "end": {
+                      "line": 270,
+                      "column": 24,
+                      "offset": 8120
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " Click-to-expand functionality for fullscreen viewing with proper focus management",
+                  "position": {
+                    "start": {
+                      "line": 270,
+                      "column": 24,
+                      "offset": 8120
+                    },
+                    "end": {
+                      "line": 270,
+                      "column": 106,
+                      "offset": 8202
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 270,
+                  "column": 4,
+                  "offset": 8100
+                },
+                "end": {
+                  "line": 270,
+                  "column": 106,
+                  "offset": 8202
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 270,
+              "column": 1,
+              "offset": 8097
+            },
+            "end": {
+              "line": 270,
+              "column": 106,
+              "offset": 8202
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Node-Specific Embedding:",
+                      "position": {
+                        "start": {
+                          "line": 271,
+                          "column": 6,
+                          "offset": 8208
+                        },
+                        "end": {
+                          "line": 271,
+                          "column": 30,
+                          "offset": 8232
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 271,
+                      "column": 4,
+                      "offset": 8206
+                    },
+                    "end": {
+                      "line": 271,
+                      "column": 32,
+                      "offset": 8234
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " Proper URL construction to focus on specific Figma nodes using ",
+                  "position": {
+                    "start": {
+                      "line": 271,
+                      "column": 32,
+                      "offset": 8234
+                    },
+                    "end": {
+                      "line": 271,
+                      "column": 96,
+                      "offset": 8298
+                    }
+                  }
+                },
+                {
+                  "type": "inlineCode",
+                  "value": "node-id",
+                  "position": {
+                    "start": {
+                      "line": 271,
+                      "column": 96,
+                      "offset": 8298
+                    },
+                    "end": {
+                      "line": 271,
+                      "column": 105,
+                      "offset": 8307
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " parameters",
+                  "position": {
+                    "start": {
+                      "line": 271,
+                      "column": 105,
+                      "offset": 8307
+                    },
+                    "end": {
+                      "line": 271,
+                      "column": 116,
+                      "offset": 8318
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 271,
+                  "column": 4,
+                  "offset": 8206
+                },
+                "end": {
+                  "line": 271,
+                  "column": 116,
+                  "offset": 8318
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 271,
+              "column": 1,
+              "offset": 8203
+            },
+            "end": {
+              "line": 271,
+              "column": 116,
+              "offset": 8318
+            }
+          }
+        },
+        {
+          "type": "listItem",
+          "spread": false,
+          "checked": null,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Accessibility:",
+                      "position": {
+                        "start": {
+                          "line": 272,
+                          "column": 6,
+                          "offset": 8324
+                        },
+                        "end": {
+                          "line": 272,
+                          "column": 20,
+                          "offset": 8338
+                        }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": {
+                      "line": 272,
+                      "column": 4,
+                      "offset": 8322
+                    },
+                    "end": {
+                      "line": 272,
+                      "column": 22,
+                      "offset": 8340
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " ARIA labels, keyboard navigation, and focus trapping in modal view",
+                  "position": {
+                    "start": {
+                      "line": 272,
+                      "column": 22,
+                      "offset": 8340
+                    },
+                    "end": {
+                      "line": 272,
+                      "column": 89,
+                      "offset": 8407
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "start": {
+                  "line": 272,
+                  "column": 4,
+                  "offset": 8322
+                },
+                "end": {
+                  "line": 272,
+                  "column": 89,
+                  "offset": 8407
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 272,
+              "column": 1,
+              "offset": 8319
+            },
+            "end": {
+              "line": 272,
+              "column": 89,
+              "offset": 8407
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 269,
+          "column": 1,
+          "offset": 7983
+        },
+        "end": {
+          "line": 272,
+          "column": 89,
+          "offset": 8407
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 3,
+      "children": [
+        {
+          "type": "text",
+          "value": "URL Construction",
+          "position": {
+            "start": {
+              "line": 274,
+              "column": 5,
+              "offset": 8413
+            },
+            "end": {
+              "line": 274,
+              "column": 21,
+              "offset": 8429
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 274,
+          "column": 1,
+          "offset": 8409
+        },
+        "end": {
+          "line": 274,
+          "column": 21,
+          "offset": 8429
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "The final embed URL format includes:",
+          "position": {
+            "start": {
+              "line": 276,
+              "column": 1,
+              "offset": 8431
+            },
+            "end": {
+              "line": 276,
+              "column": 37,
+              "offset": 8467
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 276,
+          "column": 1,
+          "offset": 8431
+        },
+        "end": {
+          "line": 276,
+          "column": 37,
+          "offset": 8467
+        }
+      }
+    },
+    {
+      "type": "code",
+      "lang": null,
+      "meta": null,
+      "value": "https://www.figma.com/embed?embed_host=lossless.group&url=ENCODED_URL&node-id=NODE_ID&viewer=1&scaling=min-zoom",
+      "position": {
+        "start": {
+          "line": 277,
+          "column": 1,
+          "offset": 8468
+        },
+        "end": {
+          "line": 279,
+          "column": 4,
+          "offset": 8587
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "This ensures proper node focusing and optimal viewing experience.",
+          "position": {
+            "start": {
+              "line": 281,
+              "column": 1,
+              "offset": 8589
+            },
+            "end": {
+              "line": 281,
+              "column": 66,
+              "offset": 8654
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 281,
+          "column": 1,
+          "offset": 8589
+        },
+        "end": {
+          "line": 281,
+          "column": 66,
+          "offset": 8654
+        }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 2,
+      "children": [
+        {
+          "type": "text",
+          "value": "Future Work",
+          "position": {
+            "start": {
+              "line": 283,
+              "column": 4,
+              "offset": 8659
+            },
+            "end": {
+              "line": 283,
+              "column": 15,
+              "offset": 8670
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 283,
+          "column": 1,
+          "offset": 8656
+        },
+        "end": {
+          "line": 283,
+          "column": 15,
+          "offset": 8670
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Consider extending the component to handle additional parameters or support themes and other customization.",
+          "position": {
+            "start": {
+              "line": 285,
+              "column": 1,
+              "offset": 8672
+            },
+            "end": {
+              "line": 285,
+              "column": 108,
+              "offset": 8779
+            }
+          }
+        }
+      ],
+      "position": {
+        "start": {
+          "line": 285,
+          "column": 1,
+          "offset": 8672
+        },
+        "end": {
+          "line": 285,
+          "column": 108,
+          "offset": 8779
+        }
+      }
+    }
+  ],
+  "position": {
+    "start": {
+      "line": 1,
+      "column": 1,
+      "offset": 0
+    },
+    "end": {
+      "line": 285,
+      "column": 108,
+      "offset": 8779
+    }
+  }
+}
