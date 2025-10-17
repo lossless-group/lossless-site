@@ -8,6 +8,7 @@ import CopyLinkButton from '@components/markdown/CopyLinkButton.astro';
 import InfoSidebar from '@components/markdown/InfoSidebar.astro';
 import { formatDate } from '../../utils/formatDate';
 import { DEBUG_ARTICLE } from '@utils/envUtils';
+import { getReadingStats } from '@utils/wordCount';
 
 const shareIconPath = '/src/assets/Icons/share.svg';
 
@@ -184,6 +185,9 @@ const bannerImage = originalData.banner_image || "https://ik.imagekit.io/xvpgfij
 const lede = originalData.lede;
 const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
 
+// Calculate word count and reading time
+const readingStats = getReadingStats(safeContent);
+
 // Check if we have any article info to display (same logic as InfoSidebar)
 const hasArticleInfo = 
   categories.length > 0 || 
@@ -201,7 +205,7 @@ const hasArticleInfo =
 
 <div class="content-wrapper">
     {includeInfoSidebar && hasArticleInfo && (
-      <InfoSidebar 
+      <InfoSidebar
         categories={categories}
         semanticVersion={semanticVersion}
         authorForHandle={authorForHandle}
@@ -216,6 +220,8 @@ const hasArticleInfo =
         contentType={originalData.contentType}
         google_maps_url={originalData.google_maps_url}
         googleMapsUrl={originalData.googleMapsUrl}
+        wordCount={readingStats.wordCount}
+        readingTime={readingStats.readingTime}
       />
     )}
   <div class="content-inner">
