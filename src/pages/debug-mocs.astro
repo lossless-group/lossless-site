@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+
+let tagMocs;
+let error;
+
+try {
+  tagMocs = await getCollection('tag-mocs');
+} catch (e) {
+  error = e;
+}
+---
+
+<html>
+<head><title>Debug MOCs</title></head>
+<body>
+  <h1>Debug Tag MOCs Collection</h1>
+
+  {error && (
+    <div style="color: red; background: #ffe0e0; padding: 1rem; margin: 1rem 0;">
+      <h2>Error loading collection:</h2>
+      <pre>{JSON.stringify(error, null, 2)}</pre>
+    </div>
+  )}
+
+  {tagMocs && (
+    <div>
+      <p>Found {tagMocs.length} MOCs</p>
+      <ul>
+        {tagMocs.map(moc => (
+          <li>
+            <strong>Slug:</strong> {moc.slug} <br/>
+            <strong>ID:</strong> {moc.id} <br/>
+            <strong>Tag:</strong> {moc.data.tag} <br/>
+            <strong>Title:</strong> {moc.data.title}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {!tagMocs && !error && (
+    <p>No MOCs found and no error</p>
+  )}
+</body>
+</html>

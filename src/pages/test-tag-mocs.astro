@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+
+let mocsList = [];
+let error = null;
+
+try {
+  const allMocs = await getCollection('tag-mocs');
+  mocsList = allMocs.map(moc => ({
+    id: moc.id,
+    slug: moc.slug,
+    tag: moc.data.tag,
+    title: moc.data.title,
+    publish: moc.data.publish
+  }));
+} catch (e) {
+  error = e.message;
+}
+---
+
+<html>
+<head><title>Test Tag MOCs</title></head>
+<body style="font-family: monospace; padding: 2rem;">
+  <h1>Tag MOCs Collection Test</h1>
+
+  {error && (
+    <div style="color: red; background: #ffe0e0; padding: 1rem; margin-bottom: 1rem;">
+      <strong>Error:</strong> {error}
+    </div>
+  )}
+
+  <p><strong>Total MOCs found:</strong> {mocsList.length}</p>
+
+  {mocsList.length > 0 && (
+    <table style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr style="background: #f0f0f0;">
+          <th style="border: 1px solid #ccc; padding: 0.5rem; text-align: left;">ID</th>
+          <th style="border: 1px solid #ccc; padding: 0.5rem; text-align: left;">Slug</th>
+          <th style="border: 1px solid #ccc; padding: 0.5rem; text-align: left;">Tag</th>
+          <th style="border: 1px solid #ccc; padding: 0.5rem; text-align: left;">Title</th>
+          <th style="border: 1px solid #ccc; padding: 0.5rem; text-align: left;">Publish</th>
+        </tr>
+      </thead>
+      <tbody>
+        {mocsList.map(moc => (
+          <tr>
+            <td style="border: 1px solid #ccc; padding: 0.5rem;">{moc.id}</td>
+            <td style="border: 1px solid #ccc; padding: 0.5rem;"><code>{moc.slug}</code></td>
+            <td style="border: 1px solid #ccc; padding: 0.5rem;">{moc.tag}</td>
+            <td style="border: 1px solid #ccc; padding: 0.5rem;">{moc.title}</td>
+            <td style="border: 1px solid #ccc; padding: 0.5rem;">{String(moc.publish)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+
+  <hr style="margin: 2rem 0;" />
+
+  <h2>Expected URLs:</h2>
+  <ul>
+    {mocsList.map(moc => (
+      <li>
+        <a href={`/moc/tag/${moc.slug}`}>/moc/tag/{moc.slug}</a>
+      </li>
+    ))}
+  </ul>
+</body>
+</html>

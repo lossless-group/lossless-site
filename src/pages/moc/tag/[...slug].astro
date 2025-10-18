@@ -1,0 +1,531 @@
+---
+/**
+ * Tag-based Map of Content (MOC) Page
+ * Displays curated MOC content along with automatically aggregated tools and articles tagged with the same tag
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const tagMocs = await getCollection('tag-mocs', ({ data }) => data.publish !== false);
+
+  return tagMocs.map(moc => ({
+    params: { slug: moc.id },  // Use moc.id instead of moc.slug
+    props: { moc }
+  }));
+}
+
+const { moc } = Astro.props;
+const tag = moc.data.tag;
+
+// Query all relevant collections for content tagged with this tag
+const [tooling, verticalToolkits, essays, concepts, vocabulary, projects, blueprints] = await Promise.all([
+  getCollection('tooling', ({ data }) => data.tags?.includes(tag)),
+  getCollection('vertical-toolkits', ({ data }) => data.tags?.includes(tag)),
+  getCollection('essays', ({ data }) => data.tags?.includes(tag)),
+  getCollection('concepts', ({ data }) => data.tags?.includes(tag)),
+  getCollection('vocabulary', ({ data }) => data.tags?.includes(tag)),
+  getCollection('projects', ({ data }) => data.tags?.includes(tag) && data.publish !== false),
+  getCollection('blueprints', ({ data }) => data.tags?.includes(tag) && data.publish !== false),
+]);
+
+const allTools = [...tooling, ...verticalToolkits];
+const allKnowledge = [...essays, ...concepts, ...vocabulary];
+
+// Helper to get tool display name
+function getToolName(tool: any) {
+  return tool.data.title || tool.data.site_name || tool.data.og_title || (tool.id || tool.slug || 'Untitled').replace(/-/g, ' ');
+}
+
+// Helper to get tool URL
+function getToolUrl(tool: any) {
+  return tool.data.url || tool.data.github_repo_url;
+}
+
+// Separate featured tools if specified
+let featuredTools: any[] = [];
+let otherTools = allTools;
+
+if (moc.data.featured_tools && moc.data.featured_tools.length > 0) {
+  featuredTools = allTools.filter(tool => {
+    if (!tool || (!tool.id && !tool.slug)) return false;
+    const toolPath = (tool.id || tool.slug || '').toLowerCase();
+    return moc.data.featured_tools?.some((featuredSlug: string) => {
+      if (!featuredSlug) return false;
+      const featuredLower = featuredSlug.toLowerCase();
+      return toolPath.includes(featuredLower) || featuredLower.includes(toolPath);
+    });
+  });
+
+  otherTools = allTools.filter(tool => !featuredTools.includes(tool));
+}
+
+// Sort tools alphabetically by name
+otherTools.sort((a, b) => getToolName(a).localeCompare(getToolName(b)));
+
+// Group knowledge by collection type
+const knowledgeByType = {
+  essays: allKnowledge.filter(k => k.collection === 'essays'),
+  concepts: allKnowledge.filter(k => k.collection === 'concepts'),
+  vocabulary: allKnowledge.filter(k => k.collection === 'vocabulary'),
+};
+
+const totalItems = allTools.length + allKnowledge.length + projects.length + blueprints.length;
+---
+
+<Layout title={moc.data.title}>
+  <div class="moc-page">
+    <header class="moc-header">
+      <h1>{moc.data.title}</h1>
+      {moc.data.description && <p class="moc-description">{moc.data.description}</p>}
+      {moc.data.lede && <p class="moc-lede">{moc.data.lede}</p>}
+    </header>
+
+    <!-- Auto-aggregated content section -->
+    <div class="moc-auto-content">
+
+      <!-- Stats overview -->
+      <div class="moc-stats">
+        <div class="stat-card">
+          <span class="stat-number">{totalItems}</span>
+          <span class="stat-label">Total Items</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">{allTools.length}</span>
+          <span class="stat-label">Tools</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">{allKnowledge.length}</span>
+          <span class="stat-label">Articles</span>
+        </div>
+        {projects.length > 0 && (
+          <div class="stat-card">
+            <span class="stat-number">{projects.length}</span>
+            <span class="stat-label">Projects</span>
+          </div>
+        )}
+      </div>
+
+      <!-- Featured Tools Section -->
+      {featuredTools.length > 0 && (
+        <section class="moc-section featured-section">
+          <h2 class="section-heading">Featured Tools</h2>
+          <div class="featured-grid">
+            {featuredTools.map(tool => (
+              <a href={getToolUrl(tool) || `/tooling/${tool.id || tool.slug}`} class="featured-tool-card" target={getToolUrl(tool) ? "_blank" : undefined} rel={getToolUrl(tool) ? "noopener noreferrer" : undefined}>
+                <h3>{getToolName(tool)}</h3>
+                {tool.data.zinger && <p class="tool-zinger">{tool.data.zinger}</p>}
+                {tool.data.description && !tool.data.zinger && <p class="tool-description">{tool.data.description}</p>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- All Tools Section -->
+      {otherTools.length > 0 && (
+        <section class="moc-section">
+          <h2 class="section-heading">
+            {featuredTools.length > 0 ? 'All Other Tools' : 'All Tools'} ({otherTools.length})
+          </h2>
+          <div class="tool-grid">
+            {otherTools.map(tool => (
+              <a href={getToolUrl(tool) || `/tooling/${tool.id || tool.slug}`} class="tool-card" target={getToolUrl(tool) ? "_blank" : undefined} rel={getToolUrl(tool) ? "noopener noreferrer" : undefined}>
+                <span class="tool-name">{getToolName(tool)}</span>
+                {tool.data.zinger && <span class="tool-zinger-small">{tool.data.zinger}</span>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Knowledge Base Section -->
+      {allKnowledge.length > 0 && (
+        <section class="moc-section knowledge-section">
+          <h2 class="section-heading">Knowledge Base ({allKnowledge.length})</h2>
+
+          {knowledgeByType.essays.length > 0 && (
+            <div class="knowledge-subsection">
+              <h3 class="subsection-heading">Essays ({knowledgeByType.essays.length})</h3>
+              <div class="knowledge-list">
+                {knowledgeByType.essays.map(item => (
+                  <a href={`/essays/${item.id || item.slug}`} class="knowledge-item">
+                    <span class="knowledge-title">{item.data.title || item.id || item.slug}</span>
+                    {item.data.lede && <span class="knowledge-lede">{item.data.lede}</span>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {knowledgeByType.concepts.length > 0 && (
+            <div class="knowledge-subsection">
+              <h3 class="subsection-heading">Concepts ({knowledgeByType.concepts.length})</h3>
+              <div class="knowledge-list">
+                {knowledgeByType.concepts.map(item => (
+                  <a href={`/concepts/${item.id || item.slug}`} class="knowledge-item">
+                    <span class="knowledge-title">{item.data.title || item.id || item.slug}</span>
+                    {item.data.lede && <span class="knowledge-lede">{item.data.lede}</span>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {knowledgeByType.vocabulary.length > 0 && (
+            <div class="knowledge-subsection">
+              <h3 class="subsection-heading">Vocabulary ({knowledgeByType.vocabulary.length})</h3>
+              <div class="knowledge-list">
+                {knowledgeByType.vocabulary.map(item => (
+                  <a href={`/vocabulary/${item.id || item.slug}`} class="knowledge-item">
+                    <span class="knowledge-title">{item.data.title || item.id || item.slug}</span>
+                    {item.data.lede && <span class="knowledge-lede">{item.data.lede}</span>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      <!-- Projects Section -->
+      {projects.length > 0 && (
+        <section class="moc-section">
+          <h2 class="section-heading">Projects ({projects.length})</h2>
+          <div class="project-grid">
+            {projects.map(project => (
+              <a href={`/projects/${project.id || project.slug}`} class="project-card">
+                <h3>{project.data.title}</h3>
+                {project.data.description && <p>{project.data.description}</p>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Blueprints Section -->
+      {blueprints.length > 0 && (
+        <section class="moc-section">
+          <h2 class="section-heading">Blueprints & Guides ({blueprints.length})</h2>
+          <div class="blueprint-grid">
+            {blueprints.map(blueprint => (
+              <a href={`/blueprints/${blueprint.id || blueprint.slug}`} class="blueprint-card">
+                <h3>{blueprint.data.title}</h3>
+                {blueprint.data.lede && <p>{blueprint.data.lede}</p>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Related Tags Section -->
+      {moc.data.related_tags && moc.data.related_tags.length > 0 && (
+        <section class="moc-section related-tags-section">
+          <h2 class="section-heading">Related Topics</h2>
+          <div class="related-tags-grid">
+            {moc.data.related_tags.map((relatedTag: string) => (
+              <a href={`/moc/tag/${relatedTag.toLowerCase().replace(/\s+/g, '-')}`} class="related-tag-link">
+                <span class="tag-icon">🏷️</span>
+                <span class="tag-name">{relatedTag}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  </OneArticle>
+</Layout>
+
+<style>
+  /* MOC Auto Content Styles */
+  .moc-auto-content {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--clr-lossless-accent--brightest);
+  }
+
+  /* Stats Overview */
+  .moc-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(4, 229, 229, 0.05);
+    border: 1px solid rgba(4, 229, 229, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    background: rgba(4, 229, 229, 0.1);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-2px);
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--clr-lossless-primary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+  }
+
+  /* Section Styles */
+  .moc-section {
+    margin-bottom: 4rem;
+  }
+
+  .section-heading {
+    font-size: 1.875rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(4, 229, 229, 0.3);
+  }
+
+  .subsection-heading {
+    font-size: 1.25rem;
+    color: var(--clr-lossless-accent--aquamarine);
+    margin: 2rem 0 1rem 0;
+  }
+
+  /* Featured Tools Grid */
+  .featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .featured-tool-card {
+    display: block;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(4, 229, 229, 0.1) 0%, rgba(111, 255, 214, 0.05) 100%);
+    border: 2px solid var(--clr-lossless-accent--brightest);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .featured-tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(4, 229, 229, 0.3);
+    border-color: var(--clr-lossless-accent--aquamarine);
+  }
+
+  .featured-tool-card h3 {
+    font-size: 1.5rem;
+    color: var(--clr-lossless-accent--brightest);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .tool-zinger {
+    color: var(--clr-lossless-primary-light);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .tool-description {
+    color: var(--clr-lossless-primary-light);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    opacity: 0.9;
+  }
+
+  /* Tools Grid */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .tool-card:hover {
+    background: rgba(4, 229, 229, 0.08);
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateX(4px);
+  }
+
+  .tool-name {
+    color: var(--clr-lossless-accent--aquamarine);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .tool-zinger-small {
+    color: var(--clr-lossless-primary-light);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
+  }
+
+  /* Knowledge Base */
+  .knowledge-subsection {
+    margin-bottom: 2rem;
+  }
+
+  .knowledge-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .knowledge-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid rgba(4, 229, 229, 0.3);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .knowledge-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-left-color: var(--clr-lossless-accent--brightest);
+    padding-left: 2rem;
+  }
+
+  .knowledge-title {
+    color: var(--clr-lossless-accent--brightest);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .knowledge-lede {
+    color: var(--clr-lossless-primary-light);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  /* Projects & Blueprints */
+  .project-grid,
+  .blueprint-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card,
+  .blueprint-card {
+    display: block;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .project-card:hover,
+  .blueprint-card:hover {
+    background: rgba(4, 229, 229, 0.05);
+    border-color: var(--clr-lossless-accent--aquamarine);
+    transform: translateY(-2px);
+  }
+
+  .project-card h3,
+  .blueprint-card h3 {
+    color: var(--clr-lossless-accent--brightest);
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .project-card p,
+  .blueprint-card p {
+    color: var(--clr-lossless-primary-light);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Related Tags */
+  .related-tags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .related-tag-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: rgba(111, 255, 214, 0.05);
+    border: 1px solid rgba(111, 255, 214, 0.2);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .related-tag-link:hover {
+    background: rgba(111, 255, 214, 0.1);
+    border-color: var(--clr-lossless-accent--aquamarine);
+    transform: translateX(4px);
+  }
+
+  .tag-icon {
+    font-size: 1.5rem;
+  }
+
+  .tag-name {
+    color: var(--clr-lossless-accent--aquamarine);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .moc-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .featured-grid,
+    .tool-grid,
+    .project-grid,
+    .blueprint-grid,
+    .related-tags-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-heading {
+      font-size: 1.5rem;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+    }
+  }
+</style>

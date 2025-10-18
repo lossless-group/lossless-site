@@ -353,6 +353,25 @@ const mapOfContentsCollection = defineCollection({
   }).passthrough()
 });
 
+const tagMocsCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("tag-mocs") }),
+  schema: z.object({
+    tag: z.string(), // Required: the tag this MOC represents
+    title: z.string(),
+    description: z.string().optional(),
+    lede: z.string().optional(),
+    banner_image: z.string().optional(),
+    portrait_image: z.string().optional(),
+    square_image: z.string().optional(),
+    featured_tools: z.array(z.string()).optional(), // Slugs of tools to feature
+    related_tags: z.array(z.string()).optional(), // Related tag MOCs to link to
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+    publish: z.boolean().default(true).optional(),
+  }).passthrough()
+});
+
 const pathId = (entry: string) => {
   // Remove file extension and convert to lowercase
   // This should match the slugify function behavior for consistency
@@ -475,6 +494,7 @@ export const paths = {
   'client-pages': resolveContentPath('client-content'),
   'visuals': resolveContentPath('visuals'),
   'moc': resolveContentPath('moc'),
+  'tag-mocs': resolveContentPath('tag-mocs'),
   'projects': resolveContentPath('projects'),
 };
 
@@ -509,4 +529,5 @@ export const collections = {
   'client-pages': clientPagesCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,
+  'tag-mocs': tagMocsCollection,
 };
