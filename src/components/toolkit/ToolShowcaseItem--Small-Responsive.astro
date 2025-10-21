@@ -1,0 +1,185 @@
+---
+/**
+ * ToolShowcaseItem--Small-Responsive.astro
+ * Compact tool showcase component for listings and grids
+ */
+
+interface Props {
+  site_name?: string;
+  title?: string;
+  og_image?: string;
+  image?: string;
+  og_screenshot?: string;
+  og_screenshot_url?: string;
+  og_favicon?: string;
+  favicon?: string;
+  url?: string;
+  og_description?: string;
+  description?: string;
+  zinger?: string;
+  slug?: string;
+  id?: string;
+}
+
+const {
+  site_name,
+  title,
+  og_image,
+  image,
+  og_screenshot,
+  og_screenshot_url,
+  og_favicon,
+  favicon,
+  url,
+  og_description,
+  description,
+  zinger,
+  slug,
+  id
+} = Astro.props;
+
+// Use site_name as the primary display name, fallback to title or filename
+// Extract just the filename from the full path (after last /)
+const pathSegment = id || slug || 'Untitled';
+const filename = pathSegment.split('/').pop() || 'Untitled';
+const cleanFilename = filename.replace(/\.md$/i, ''); // Remove .md extension if present
+const displayName = site_name || title || cleanFilename.replace(/-/g, ' ');
+
+// Determine the best banner image to use (priority order)
+const bannerImage = og_image || image || og_screenshot_url || og_screenshot;
+
+// Determine the best icon to use
+const icon = og_favicon || favicon;
+
+// Use zinger first, then og_description, then description
+const displayDescription = zinger || og_description || description;
+
+// Determine if this should link externally or internally
+const isExternal = !!url;
+const href = url || `/tooling/${id || slug}`;
+---
+
+<a href={href} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noopener noreferrer" : undefined} class="tool-showcase-small">
+  {bannerImage && (
+    <div class="tool-image">
+      <img
+        src={bannerImage}
+        alt={`${displayName} banner`}
+        loading="lazy"
+      />
+    </div>
+  )}
+
+  <div class="tool-content">
+    <div class="tool-header">
+      {icon && (
+        <img
+          src={icon}
+          alt={`${displayName} icon`}
+          class="tool-icon"
+          loading="lazy"
+        />
+      )}
+      <h3 class="tool-name">{displayName}</h3>
+    </div>
+
+    {displayDescription && (
+      <p class="tool-description">{displayDescription}</p>
+    )}
+  </div>
+</a>
+
+<style>
+  .tool-showcase-small {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    height: 100%;
+  }
+
+  .tool-showcase-small:hover {
+    border-color: var(--clr-lossless-accent--brightest);
+    box-shadow: 0 4px 12px rgba(4, 229, 229, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .tool-image {
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .tool-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .tool-content {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  .tool-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tool-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px;
+  }
+
+  .tool-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-lossless-accent--brightest);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tool-description {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .tool-content {
+      padding: 0.5rem;
+    }
+
+    .tool-name {
+      font-size: 0.9rem;
+    }
+
+    .tool-description {
+      font-size: 0.8rem;
+      -webkit-line-clamp: 3;
+    }
+  }
+</style>

@@ -102,13 +102,16 @@ export function remarkDirectiveTransform() {
         if (componentPath) {
           // Special handling for tool-showcase directive
           if (directiveName === 'tool-showcase') {
+            // Check if there's a tag attribute
+            const tag = node.attributes?.tag;
+
             // Extract tool paths from the container content
             const toolPaths: string[] = [];
-            
+
             if (node.type === 'containerDirective' && node.children) {
               // Find list nodes in the container
               const listNodes = node.children.filter((child: any) => child.type === 'list');
-              
+
               for (const listNode of listNodes) {
                 if (listNode.children) {
                   for (const listItem of listNode.children) {
@@ -130,18 +133,23 @@ export function remarkDirectiveTransform() {
                 }
               }
             }
-            
+
             // Convert directive to Astro component import and usage
             const componentName = 'ToolShowcaseIsland';
             const importPath = `@components/toolkit/ToolShowcaseIsland.astro`;
-            
-            // Create the component JSX with tool paths
-            const toolPathsJson = JSON.stringify(toolPaths).replace(/"/g, '&quot;');
-            
+
+            // Build props - either tag or toolPaths
+            let propsString = '';
+            if (tag) {
+              propsString = `tag="${tag}"`;
+            } else if (toolPaths.length > 0) {
+              propsString = `toolPaths={${JSON.stringify(toolPaths)}}`;
+            }
+
             // Replace the directive node with an HTML node that will render the component
             node.type = 'html';
-            node.value = `<${componentName} toolPaths={${JSON.stringify(toolPaths)}} />`;
-            
+            node.value = `<${componentName} ${propsString} />`;
+
             // Store import information for later processing
             if (!tree.imports) {
               tree.imports = new Set();

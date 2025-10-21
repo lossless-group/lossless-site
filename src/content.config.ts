@@ -151,7 +151,7 @@ const vocabularyCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  })
+  }).passthrough()
 });
 
 // Concepts collection - follows same pattern as vocabulary
@@ -167,7 +167,7 @@ const conceptsCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  })
+  }).passthrough()
 });
 
 // Concepts collection - follows same pattern as vocabulary
