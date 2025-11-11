@@ -105,10 +105,11 @@ export function remarkDirectiveTransform() {
             // Check if there's a tag attribute
             const tag = node.attributes?.tag;
 
-            // Extract tool paths from the container content
+            // Extract tool paths from the container content (only for container directives)
             const toolPaths: string[] = [];
 
-            if (node.type === 'containerDirective' && node.children) {
+            // Only try to extract tool paths from children if this is a container directive
+            if (node.type === 'containerDirective' && node.children && !tag) {
               // Find list nodes in the container
               const listNodes = node.children.filter((child: any) => child.type === 'list');
 
@@ -138,7 +139,7 @@ export function remarkDirectiveTransform() {
             const componentName = 'ToolShowcaseIsland';
             const importPath = `@components/toolkit/ToolShowcaseIsland.astro`;
 
-            // Build props - either tag or toolPaths
+            // Build props - prioritize tag over toolPaths
             let propsString = '';
             if (tag) {
               propsString = `tag="${tag}"`;
@@ -146,19 +147,22 @@ export function remarkDirectiveTransform() {
               propsString = `toolPaths={${JSON.stringify(toolPaths)}}`;
             }
 
-            // Replace the directive node with an HTML node that will render the component
-            node.type = 'html';
-            node.value = `<${componentName} ${propsString} />`;
+            // Only render if we have either a tag or tool paths
+            if (propsString) {
+              // Replace the directive node with an HTML node that will render the component
+              node.type = 'html';
+              node.value = `<${componentName} ${propsString} />`;
 
-            // Store import information for later processing
-            if (!tree.imports) {
-              tree.imports = new Set();
+              // Store import information for later processing
+              if (!tree.imports) {
+                tree.imports = new Set();
+              }
+              tree.imports.add({
+                componentName,
+                importPath,
+                componentPath
+              });
             }
-            tree.imports.add({
-              componentName,
-              importPath,
-              componentPath
-            });
           } else {
             // Handle other directives normally
             // Extract props from directive attributes
