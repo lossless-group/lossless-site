@@ -48,12 +48,14 @@ const { label, items } = Astro.props;
 }
 
 .jumbo-dropdown {
-  display: block;
+  display: flex;
   position: absolute;
   top: 100%;
   left: 0;
   background-color: var(--clr-primary-bg);
   padding: 1rem;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
   gap: 1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
@@ -61,15 +63,26 @@ const { label, items } = Astro.props;
   min-width: 400px;
   flex-direction: column;
   opacity: 0;
-  transform: translateY(10px);
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  display: flex;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  will-change: opacity;
+}
+
+/* Bridge element to maintain hover state */
+.jumbo-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -0.5rem;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+  background: transparent;
 }
 
 .dropdown-wrapper:hover .jumbo-dropdown {
   opacity: 1;
-  transform: translateY(0);
+  visibility: visible;
   pointer-events: auto;
 }
 

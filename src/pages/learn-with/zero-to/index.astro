@@ -3,9 +3,9 @@
 // Collection-specific page for to-hero collection with toggle navigation
 
 import { getCollection, type CollectionEntry } from 'astro:content';
-import MagazineIndexLayout from '../../../layouts/MagazineIndexLayout.astro'; 
-import { slugify } from '../../../utils/slugify'; 
-import { collectionPublishingDefaults } from '../../../content.config'; 
+import GuideIndexLayout from '../../../layouts/GuideIndexLayout.astro';
+import { slugify } from '../../../utils/slugify';
+import { collectionPublishingDefaults } from '../../../content.config';
 import Hero from '../../../components/basics/Hero.astro';
 import AnimationWrapper from '../../../components/basics/AnimationWrapper.astro';
 
@@ -54,50 +54,64 @@ const collectionConfig = {
 };
 
 // Transform entries for to-hero collection
-const articles = allEntries.map((entry) => {
+const guides = allEntries.map((entry) => {
   const data = entry.data as any;
-  
+  console.log('Guide data:', {
+    title: data?.title,
+    og_favicon: data?.og_favicon
+  });
+
   function normalizeToArray(singularKey: string, pluralKey: string): string[] {
     const singularValue = data?.[singularKey];
     const pluralValue = data?.[pluralKey];
-    
+
     const combined = [singularValue, pluralValue].filter(Boolean).flat();
     return combined.length > 0 ? combined : [];
   }
-  
+
   const customSlug = data?.slug || slugify(data?.title || entry.id);
-  
+
   let dateValue = data?.date_of_event || data?.date;
   if (dateValue instanceof Date) {
     dateValue = dateValue.toISOString().split('T')[0];
   }
-  
+
+  // Ensure the slug includes the full path for proper routing
+  const fullSlug = `/learn-with/zero-to/with/${customSlug}`;
+
   return {
-    id: entry.id, 
+    id: entry.id,
     title: data?.title || 'Untitled',
-    slug: customSlug, 
-    collection: 'zero-to',
-    date_created: dateValue,
-    lede: data?.lede || data?.description || '', 
-    tags: normalizeToArray('tag', 'tags')
+    slug: fullSlug, // Use the full path for the slug
+    collection: 'to-hero',
+    banner_image: data?.banner_image,
+    portrait_image: data?.portrait_image,
+    imageAlt: `Image for ${data?.title || 'Untitled'}`,
+    date: dateValue,
+    date_of_event: dateValue,
+    lede: data?.lede || data?.description || '',
+    tags: normalizeToArray('tag', 'tags'),
+    participants: normalizeToArray('participant', 'participants'),
+    categories: normalizeToArray('category', 'categories'),
+    og_favicon: data?.og_favicon,
   };
 }).sort((a, b) => {
   // Sort by date descending (most recent first)
-  if (!a.date_created && !b.date_created) return 0;
-  if (!a.date_created) return 1;
-  if (!b.date_created) return -1;
-  
-  const dateA = new Date(a.date_created);
-  const dateB = new Date(b.date_created);
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+
+  const dateA = new Date(a.date);
+  const dateB = new Date(b.date);
   return dateB.getTime() - dateA.getTime();
 });
 ---
 
-<MagazineIndexLayout
-  title={collectionConfig.title} 
+<GuideIndexLayout
+  title={collectionConfig.title}
   description={collectionConfig.description}
-  articles={articles}
-  collectionDisplayName={collectionConfig.title} 
+  guides={guides}
+  collectionDisplayName={collectionConfig.title}
 >
   <div slot="hero-content" style="position: relative;">
     <AnimationWrapper>
@@ -111,7 +125,7 @@ const articles = allEntries.map((entry) => {
       />
     </AnimationWrapper>
   </div>
-</MagazineIndexLayout>
+</GuideIndexLayout>
 
 <style>
   .chevron-navigation {

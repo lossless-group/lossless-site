@@ -127,18 +127,32 @@ const toHero = items['toHero'];
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   padding: 1.5rem;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
   min-width: 800px;
   z-index: 1000;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: translate(-50%, 10px);
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  will-change: opacity;
+}
+
+/* Bridge element to maintain hover state */
+.get-lost-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -0.5rem;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+  background: transparent;
 }
 
 .dropdown-wrapper:hover .get-lost-dropdown {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
-  transform: translate(-50%, 0);
 }
 
 .dropdown-header-container {
@@ -182,7 +196,6 @@ const toHero = items['toHero'];
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.5rem;
 }
 
 .large-item {
