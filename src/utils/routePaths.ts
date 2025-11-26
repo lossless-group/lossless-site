@@ -37,7 +37,11 @@ export const ROUTE_PATHS = {
   PROJECTS: {
     BASE: '/projects',
   },
-  
+
+  SOURCES: {
+    BASE: '/sources',
+  },
+
   // Default fallback paths
   DEFAULTS: {
     LEARN: '/learn-with/issue-resolution',

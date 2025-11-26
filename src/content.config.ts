@@ -303,6 +303,39 @@ const specsCollection = defineCollection({
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 // ***
+// Open: Sources Collection Definition
+// Type: Content Collection
+// Purpose: Reference materials, books, people, media, and other sources
+// Schema: Ultra-permissive to handle varied/missing frontmatter
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const sourcesCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: resolveContentPath("sources"),
+    generateId: ({ entry }) => {
+      // Preserve directory structure in ID for nested folder routing
+      // e.g., "Books/The Pragmatic Programmer.md" -> "books/the pragmatic programmer"
+      return entry.replace(/\.md$/, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    // Ultra-permissive schema - everything optional, handles null values
+    title: z.string().nullish(), // nullish = optional + nullable
+    og_title: z.string().nullish(),
+    url: z.string().nullish(),
+    date_created: z.union([z.string(), z.date()]).nullish(),
+    date_modified: z.union([z.string(), z.date()]).nullish(),
+    tags: z.union([z.string(), z.array(z.string())]).nullish(),
+    publish: z.boolean().nullish(),
+  }).passthrough() // Allow any additional frontmatter
+});
+
+// ========================================
+// Close: Sources Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ***
 // Open: Issue Resolution Collection Definition (Ultra-Minimalist, following example)
 // Type: Content Collection
 // Purpose: For magazine-style articles detailing issue resolutions.
@@ -485,6 +518,7 @@ export const paths = {
   'blueprints': resolveContentPath('lost-in-public/blueprints'),
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'specs': resolveContentPath('specs'),
+  'sources': resolveContentPath('sources'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),
   'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
@@ -519,6 +553,7 @@ export const collections = {
   'reminders': remindersCollection,
   'blueprints': blueprintsCollection,
   'specs': specsCollection,
+  'sources': sourcesCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,
