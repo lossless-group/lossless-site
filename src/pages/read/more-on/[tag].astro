@@ -30,7 +30,7 @@ export const prerender = false;
  * to allow TypeScript-safe access. This keeps content.config.ts simple for the content team.
  */
 interface EssayFrontmatter {
-  title: string;
+  title?: string;
   slug?: string;
   lede?: string;
   summary?: string;
@@ -80,26 +80,32 @@ publishedEssays.sort((a, b) => (a.data.title || '').localeCompare(b.data.title |
 
 // Map entries to EssayItem objects for use with ArticleListColumn
 const essayItems: EssayItem[] = publishedEssays.map(entry => {
+  const data = entry.data as EssayFrontmatter;
+
   // Always generate slug using the same logic as content.config.ts (filename, lowercased, spaces to dash)
   const filename = String(entry.id).split("/").pop()?.replace(/\.md$/, "") || "";
   const generatedSlug = filename.toLowerCase().replace(/\s+/g, '-');
+
   // Use title and lede directly from frontmatter, fallback to Title Case filename if title is missing or blank
-  let { title, lede = '', banner_image = '', tags = [], summary = '' } = entry.data as EssayFrontmatter;
+  let { title, lede = '', banner_image = '', tags: rawTags = [], summary = '' } = data;
   if (!title || title.trim() === '') {
     title = filename
       .split(/[-_\s]+/)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
+
+  const tagsArray = Array.isArray(rawTags) ? rawTags : [];
+
   return {
     id: entry.id,
     slug: generatedSlug,
     title,
     lede,
     banner_image,
-    tags,
+    tags: tagsArray,
     summary,
-    data: entry.data as EssayFrontmatter,
+    data,
     url: `/read/essays/${generatedSlug}`,
     tagRoute: `read/more-on`
   };
