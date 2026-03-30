@@ -45,12 +45,18 @@ function formatWeekRange(weekStart: Date): string {
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const toolsList = allTools.map(tool => ({
-  title: tool.data.title || tool.data.og_title || tool.data.site_name || tool.id.split('/').pop()?.replace('.md', '').replace(/\./g, ' ') || 'Untitled',
-  url: tool.data.url || tool.data.github_repo_url,
-  dateCreated: parseDate(tool.data.date_created),
-  dateModified: parseDate(tool.data.date_modified)
-}));
+const toolsList = allTools.map(tool => {
+  const title = tool.data.title || tool.data.og_title || tool.data.site_name || tool.id.split('/').pop()?.replace('.md', '').replace(/\./g, ' ') || 'Untitled';
+  const siteName = tool.data.site_name;
+  // Prefix with "Site Name: " when site_name exists and isn't already part of the title
+  const displayTitle = siteName && !title.includes(siteName) ? `${siteName}: ${title}` : title;
+  return {
+    title: displayTitle,
+    url: tool.data.url || tool.data.github_repo_url,
+    dateCreated: parseDate(tool.data.date_created),
+    dateModified: parseDate(tool.data.date_modified)
+  };
+});
 
 interface ToolData { title: string; url?: string; dateCreated: Date | null; dateModified: Date | null; }
 interface WeekData { weekStart: Date; weekRange: string; created: ToolData[]; modified: ToolData[]; }
@@ -299,7 +305,7 @@ const earliestDate = toolsList.map(t => t.dateCreated).filter(d => d).sort((a, b
   .month-toggle h2 {
     flex: 1;
     margin: 0;
-    font-size: 1.75rem;
+    font-size: 1.3rem;
     color: var(--clr-lossless-accent--brightest, #04e5e5);
   }
 
@@ -327,11 +333,13 @@ const earliestDate = toolsList.map(t => t.dateCreated).filter(d => d).sort((a, b
 
   /* Weeks */
   .weeks-container {
-    padding: 0 1rem 1rem 1rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .week-section {
-    margin-bottom: 0.75rem;
     background: rgba(255, 255, 255, 0.04);
     border-radius: 8px;
     overflow: hidden;

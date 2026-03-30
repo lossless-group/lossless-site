@@ -44,8 +44,10 @@ allTools.forEach(tool => {
   const createdDate = parseDate(tool.data.date_created);
   const modifiedDate = parseDate(tool.data.date_modified);
 
+  const title = tool.data.title || tool.data.og_title || tool.data.site_name || tool.id.split('/').pop()?.replace('.md', '') || 'Untitled';
+  const siteName = tool.data.site_name;
   const toolData = {
-    title: tool.data.title || tool.data.og_title || tool.id.split('/').pop()?.replace('.md', '') || 'Untitled',
+    title: siteName && !title.includes(siteName) ? `${siteName}: ${title}` : title,
     id: tool.id,
     url: tool.data.url
   };
