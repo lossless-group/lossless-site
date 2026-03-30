@@ -59,7 +59,19 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
         <span class="filter-count" id="filter-count">{totalCount} {toolText}</span>
       </div>
     </span>
-    <span>
+    <span class="header-actions">
+      <a href="/toolkit/timeline" class="timeline-btn" title="See Timeline">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <circle cx="12" cy="6" r="2"/>
+          <circle cx="12" cy="12" r="2"/>
+          <circle cx="12" cy="18" r="2"/>
+          <line x1="14" y1="6" x2="20" y2="6"/>
+          <line x1="14" y1="12" x2="20" y2="12"/>
+          <line x1="14" y1="18" x2="20" y2="18"/>
+        </svg>
+        Timeline
+      </a>
       <button id="share-tags-btn" class="share-btn" title="Share selected tags">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -111,6 +123,39 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
     transition: font-size 0.3s ease;
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .timeline-btn {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+    padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .timeline-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+  }
+
+  .timeline-btn:active {
+    transform: scale(0.98);
+  }
+
   .share-btn {
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.3);
@@ -153,8 +198,13 @@ const toolText = totalCount === 1 ? 'tool' : 'tools';
       align-items: flex-start;
     }
 
-    .share-btn {
+    .header-actions {
       align-self: stretch;
+    }
+
+    .timeline-btn,
+    .share-btn {
+      flex: 1;
       justify-content: center;
     }
   }
