@@ -211,6 +211,7 @@
       "id": "astro-turf",
       "title": "Astro Knots",
       "subtitle": "Advanced Astro, TailwindCSS, and theme framework setup, basic components and patterns.",
+      "href": "/projects/gallery/astro-knots",
       "hasSidebar": false,
       "clients": ["laerdal", "the-water-foundation"],
       "useCases": [

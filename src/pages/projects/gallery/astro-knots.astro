@@ -1,0 +1,390 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/basics/Header.astro';
+import Footer from '../../../components/basics/Footer.astro';
+import AlternatingSideImage from '../../../components/basics/messages/AlternatingSideImage.astro';
+import ThinGradientBleedSeparator from '../../../components/basics/separators/ThinGradientBleedSeparator.astro';
+
+export const prerender = true;
+
+const sites = [
+  { name: "mpstaton-site", desc: "Personal portfolio & CV", status: "Active", url: "https://github.com/lossless-group/mpstaton-site" },
+  { name: "hypernova-site", desc: "Client site", status: "Active", url: "https://github.com/hypernova-labs/hypernova-site" },
+  { name: "cilantro-site", desc: "Client site, strong reference", status: "Active", url: "https://github.com/lossless-group/cilantro-site" },
+  { name: "twf_site", desc: "The Water Foundation", status: "Active", url: "https://github.com/lossless-group/the-water-foundation-site" },
+  { name: "dark-matter", desc: "Client site", status: "Active", url: "https://github.com/lossless-group/matter-site" },
+  { name: "banner-site", desc: "Client site", status: "Active", url: "https://github.com/lossless-group/emblem-site" },
+  { name: "cogs-site", desc: "In progress", status: "WIP" },
+  { name: "coglet-shuffle", desc: "Nested astro-site", status: "WIP" },
+];
+
+const valueProps = [
+  {
+    title: "Accelerate with Shared Patterns",
+    description: "Co-locate projects with similar features, dependencies, and needs. Abstract what works into reusable patterns -- extended markdown render pipelines, CSS token conventions, OpenGraph and SEO optimization techniques -- without forcing premature abstraction.",
+    icon: "reuse"
+  },
+  {
+    title: "Context Vigilance",
+    description: "Maintain structured, AI-friendly documentation that travels with the workspace. Specs, blueprints, prompts, and reminders give both human collaborators and AI code assistants the context they need to make informed decisions across every project.",
+    icon: "context"
+  },
+  {
+    title: "Build in Public, Ship in Private",
+    description: "Share learnings, patterns, and context openly while keeping client-specific projects private. Each site is its own git repository, independently deployable -- the pseudomonorepo is a development convenience, never a deployment requirement.",
+    icon: "ship"
+  },
+  {
+    title: "Packages from Authentic Need",
+    description: "Don't guess what should be shared. Develop true packages only when real developer needs prove the value. Our first: @lossless-group/lfm -- a shared markdown processing pipeline born from building the same render logic across six sites.",
+    icon: "package"
+  }
+];
+---
+
+<Layout title="Astro Knots - The Lossless Group">
+  <Header />
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Hero -->
+      <div class="hero-header">
+        <div class="header-content">
+          <div class="header-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="20" r="6" fill="#04e5e5" opacity="0.9"/>
+              <circle cx="20" cy="50" r="6" fill="#6FFFD6" opacity="0.9"/>
+              <circle cx="60" cy="50" r="6" fill="#BF23F7" opacity="0.9"/>
+              <circle cx="40" cy="65" r="5" fill="#04e5e5" opacity="0.6"/>
+              <circle cx="28" cy="35" r="4" fill="#6FFFD6" opacity="0.5"/>
+              <circle cx="52" cy="35" r="4" fill="#BF23F7" opacity="0.5"/>
+              <line x1="40" y1="26" x2="22" y2="45" stroke="#04e5e5" stroke-width="1.5" opacity="0.4"/>
+              <line x1="40" y1="26" x2="58" y2="45" stroke="#04e5e5" stroke-width="1.5" opacity="0.4"/>
+              <line x1="24" y1="52" x2="56" y2="52" stroke="#6FFFD6" stroke-width="1.5" opacity="0.4"/>
+              <line x1="28" y1="35" x2="52" y2="35" stroke="#BF23F7" stroke-width="1" opacity="0.3"/>
+              <line x1="40" y1="60" x2="40" y2="26" stroke="#04e5e5" stroke-width="1" opacity="0.2"/>
+            </svg>
+          </div>
+          <div class="header-text">
+            <h1 class="page-title">Astro Knots</h1>
+            <p class="page-subtitle">A <strong class="highlight">pseudomonorepo</strong> for the age of AI-assisted development. Speed up delivery by co-locating projects with shared patterns, dependencies, and documentation under one roof.</p>
+          </div>
+        </div>
+      </div>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Value Propositions -->
+      <section class="value-section">
+        <div class="value-intro">
+          <h2 class="section-title">Why a Pseudomonorepo?</h2>
+          <p class="section-lede">Not a true monorepo. Not a loose collection of repos. A <em>pseudomonorepo</em> gives you the visibility and pattern-sharing benefits of co-location without coupling deployment or forcing shared dependencies where they don't belong.</p>
+        </div>
+
+        <div class="value-grid">
+          {valueProps.map(prop => (
+            <div class="value-card">
+              <div class="value-card-accent"></div>
+              <h3 class="value-title">{prop.title}</h3>
+              <p class="value-desc">{prop.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Sites Grid -->
+      <section class="sites-overview">
+        <h2 class="section-title">Sites in the Workspace</h2>
+        <div class="sites-grid">
+          {sites.map(site => (
+            <div class="site-card">
+              <div class="site-header-row">
+                <span class="site-name">{site.name}</span>
+                <span class:list={["site-status", site.status === "Active" ? "active" : "wip"]}>
+                  {site.status}
+                </span>
+              </div>
+              <p class="site-desc">{site.desc}</p>
+              {site.url && (
+                <a href={site.url} target="_blank" class="site-link">
+                  View Repo
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+                  </svg>
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Feature Deep Dives -->
+      <div class="content-section">
+        <AlternatingSideImage
+          jsonPath="messages/projectAstroKnots.json"
+          classes="astro-knots-features"
+        />
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .main-content {
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* Hero */
+  .hero-header {
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .header-icon {
+    flex-shrink: 0;
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
+  .page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--clr-lossless-accent--brightest, #04e5e5) 0%, var(--clr-lossless-accent--aquamarine, #6FFFD6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: left;
+  }
+
+  .page-subtitle {
+    font-size: 1.25rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    text-align: left;
+    margin: 0;
+  }
+
+  .highlight {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    -webkit-text-fill-color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-weight: 700;
+  }
+
+  /* Value Propositions */
+  .value-section {
+    padding: 3rem 0;
+  }
+
+  .value-intro {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-lede {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    max-width: 800px;
+  }
+
+  .section-lede em {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .value-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .value-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.75rem 1.75rem 1.75rem 2rem;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+  }
+
+  .value-card:hover {
+    border-color: rgba(4, 229, 229, 0.35);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .value-card-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--clr-lossless-accent--brightest, #04e5e5), var(--clr-lossless-accent--aquamarine, #6FFFD6));
+    border-radius: 3px 0 0 3px;
+  }
+
+  .value-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .value-desc {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Sites Overview */
+  .sites-overview {
+    padding: 3rem 0;
+  }
+
+  .sites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .site-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .site-card:hover {
+    border-color: rgba(4, 229, 229, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .site-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .site-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .site-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .site-status.active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #86efac;
+  }
+
+  .site-status.wip {
+    background: rgba(234, 179, 8, 0.15);
+    color: #fde047;
+  }
+
+  .site-desc {
+    font-size: 0.875rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+  }
+
+  .site-link {
+    font-size: 0.8rem;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: opacity 0.2s;
+  }
+
+  .site-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+
+  /* Feature Deep Dives */
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  :global(.astro-knots-features) {
+    margin-top: 2rem;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+    }
+
+    .hero-header {
+      margin-bottom: 2rem;
+      padding: 1rem 0;
+    }
+
+    .value-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .content-section {
+      margin: 2rem 0;
+    }
+
+    .sites-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
