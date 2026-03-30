@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 import { join } from 'node:path';
 import { pathToFileURL } from 'url';
@@ -23,7 +24,7 @@ function resolveContentPath(relativePath: string): string {
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
-  type: 'data',
+  loader: glob({pattern: "**/*.json", base: "./src/content/cards"}),
   schema: z.object({
     cards: z.array(z.any())
   }).passthrough()
@@ -235,8 +236,8 @@ const changelogLaerdalCollection = defineCollection({
 });
 
 const reportCollection = defineCollection({
-  type: 'content',
-  schema: z.any() // Allow any frontmatter structure to avoid validation errors
+  loader: glob({pattern: "**/*.md", base: "./src/content/reports"}),
+  schema: z.object({}).passthrough()
 });
 
 // Pages collection for individual MDX files

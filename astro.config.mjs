@@ -8,7 +8,6 @@ import svelte from '@astrojs/svelte';
 import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from 'url';
-import rehypeMermaid from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import vercel from '@astrojs/vercel';
@@ -78,15 +77,9 @@ export default defineConfig({
           }
         }
       ],
-      // rehype-mermaid for UML/Mermaid diagrams
-      [
-        rehypeMermaid,
-        {
-          strategy: 'img-svg',
-          dark: true
-        }
-      ],
-      // rehypeModifyMermaidGraphs, // Uncomment if/when available
+      // Mermaid diagrams are rendered client-side via CDN in MermaidChart.astro
+      // rehype-mermaid (server-side) was removed - it never processed blocks anyway
+      // since AstroMarkdown.astro intercepts mermaid code blocks before rehype runs
     ]
   },
   output: "static",
