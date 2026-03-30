@@ -73,6 +73,7 @@
       "id": "context-vigilance",
       "title": "Context Vigilance",
       "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
+      "href": "/projects/gallery/context-vigilance",
       "hasSidebar": true,
       "canvas": "/projects/gallery/context-vigilance/ACE-It-Canvas.canvas",
       "clients": ["laerdal", "tonguc", "param"],
