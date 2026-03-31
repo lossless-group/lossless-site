@@ -24,7 +24,7 @@ const docTypes = [
     pairLabel: "Specs",
     cogState: "Planning",
     color: "accent",
-    description: "Carefully composed instructions that reference specs, blueprints, and reminders. Not throwaway chat messages -- reusable, iterable artifacts that encode how you want AI to approach a specific task.",
+    description: "These aren't single chat messages -- they're step-by-step, prompt-by-prompt documents. Your implementation chunked into discrete tasks that an AI assistant can handle reliably, where success at each step can be verified before moving to the next. Each prompt references specs, blueprints, and reminders. Each builds on the last.",
     insight: "A prompt without a spec is a vibe. A prompt within a spec is engineering. The difference between frustrating AI roulette and reliable, repeatable output."
   },
   {
@@ -74,11 +74,11 @@ const docTypes = [
         <div class="origin-grid">
           <div class="origin-card">
             <h3>The Problem</h3>
-            <p>Early adoption of AI code assistants was a massive productivity unlock -- and a massive source of frustration. Vibe coding produced spaghetti. Prompt engineering was ad hoc. Specs were abandoned. Every AI session started from zero, with no memory of the project's architecture, conventions, or hard-won decisions. Remote collaborators worked in isolation with no shared methodology.</p>
+            <p>Early adoption of AI code assistants was a massive productivity unlock -- and a massive source of frustration. Vibe coding produced spaghetti. AI can overwrite essential work without warning. Oversight over thousands of lines of code written in minutes is improbable. Prompt engineering was ad hoc. Every AI session started from zero, with no memory of the project's architecture, conventions, or hard-won decisions. Remote collaborators worked in isolation with no shared methodology, everyone hacking away with an AI Code Assistant and no shared context or organizational knowledge.</p>
           </div>
           <div class="origin-card">
             <h3>The Realization</h3>
-            <p>AI doesn't need less documentation -- it needs <em>more</em>, but a different kind. Living documentation that's fast to write, fast to update, modular enough to fit in context windows, and structured enough to be loaded selectively. The hacker culture instinct to "just implement" doesn't work when your co-developer has no memory and makes enormous assumptions.</p>
+            <p>AI collaboration needs <em>way more context</em>, requiring <em>an insane level of documentation</em>. But co-developed and co-managed, it leads to breakthroughs in productivity and consistency. Living documentation, co-developed and co-managed, is fast to write, fast to update, modular enough to fit in context windows, and structured enough to be loaded selectively. The hacker culture instinct to "just implement" doesn't work when your co-developer has no memory and makes enormous assumptions.</p>
           </div>
           <div class="origin-card">
             <h3>The Unlock</h3>
@@ -154,8 +154,8 @@ const docTypes = [
         <h2 class="section-title">Why It Works</h2>
         <div class="why-grid">
           <div class="why-card">
-            <h3>Specs Are Fast Again</h3>
-            <p>AI made specs obsolete in waterfall. AI makes specs essential in vibe coding. The difference: AI writes and updates specs in seconds, not sprints. A living spec that takes 10 minutes to create prevents hours of context-less flailing.</p>
+            <h3>Specs Align Everyone Again, Better</h3>
+            <p>Large teams doing spec-driven waterfall gave way to lean startups and hacker culture. AI makes specs essential in vibe coding -- great news for the veteran devs who remember when specs were the source of truth. The difference: AI writes and updates specs in seconds, not sprints. A living spec that takes 10 minutes to create prevents hours of context-less flailing.</p>
           </div>
           <div class="why-card">
             <h3>Context Windows Have Limits</h3>
@@ -182,13 +182,72 @@ const docTypes = [
 
       <ThinGradientBleedSeparator />
 
+      <!-- Take it to the Next Level -->
+      <section class="journey-section">
+        <h2 class="section-title">Take It to the Next Level</h2>
+        <p class="section-lede">The four core folders cover the cycle of planning and reflection. But real development has another mode entirely: <strong class="highlight">journey mode</strong> -- where you don't know where you're going when you start, and your goal is simply to get there.</p>
+
+        <div class="journey-grid">
+          <div class="journey-card">
+            <div class="journey-header">
+              <span class="journey-folder"><code>context-v/explorations/</code></span>
+              <span class="journey-mode">Journey Mode</span>
+            </div>
+            <h3 class="journey-title">Explorations</h3>
+            <p class="journey-desc">Some decisions can't be made from a spec. You need to research, prototype, weigh tradeoffs, and think out loud -- often with AI as a thinking partner. Explorations are documents where the destination is unclear: you're defining the parameters of a key decision, mapping an option space, or working through a technical choice that has no obvious right answer.</p>
+            <div class="journey-examples">
+              <span class="examples-label">Looks like:</span> "Should we use Svelte 5 runes or stick with stores?" "What are the real tradeoffs between SSR and static for this use case?" "How do other teams handle multi-tenant content isolation?" The exploration ends when you've learned enough to write a spec -- or enough to decide you don't need one.
+            </div>
+          </div>
+
+          <div class="journey-card">
+            <div class="journey-header">
+              <span class="journey-folder"><code>context-v/issues/</code></span>
+              <span class="journey-mode">Journey Mode</span>
+            </div>
+            <h3 class="journey-title">Issue Resolution</h3>
+            <p class="journey-desc">The word "debug" doesn't honor the half-day you just spent on it. Issue resolution documents capture the painful, winding path through complex troubleshooting -- the kind where three Stack Overflow tabs are open, the error message is misleading, and the root cause turns out to be something no one would have guessed.</p>
+            <div class="journey-examples">
+              <span class="examples-label">Looks like:</span> "CORS errors that only happen in production." "Build failing silently because a submodule was on a detached HEAD." "Mermaid rendering crashes the dev server because Playwright binaries are stale." You document the journey so no one -- human or AI -- has to retrace it.
+            </div>
+          </div>
+        </div>
+
+        <div class="journey-note">
+          <p>These don't fit neatly into the planning/reflection pairing -- and that's the point. Not every development activity is a known loop. Sometimes you're bushwhacking. The value is in capturing the trail so the next person (or the next AI session) doesn't start from scratch.</p>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
       <!-- CTA -->
       <section class="cta-section">
         <h2>Ready to Get Started?</h2>
-        <p>Create a <code>context-v/</code> directory in your project. Add four folders: <code>specs/</code>, <code>prompts/</code>, <code>blueprints/</code>, <code>reminders/</code>. Start writing. That's it.</p>
+        <p>Create a <code>context-v/</code> directory in your project. Add four folders: <code>specs/</code>, <code>prompts/</code>, <code>blueprints/</code>, <code>reminders/</code>. When you're ready, add <code>explorations/</code> and <code>issues/</code>. Start writing Markdown files. That's it.</p>
+
         <div class="cta-actions">
           <a href="/projects/gallery/context-vigilance/index" class="btn-primary">Read the Full Playbook</a>
           <a href="/learn-with/us" class="btn-secondary">Browse Our Public Documentation</a>
+        </div>
+
+        <div class="frontmatter-example">
+          <p class="frontmatter-label">Every document starts with simple YAML frontmatter:</p>
+          <pre class="frontmatter-code"><code>---
+title: "Maintain an Extended Markdown Render Pipeline"
+date_created: 2026-03-30
+date_modified: 2026-03-30
+authors:
+  - Your Name
+semantic_version: 0.0.1
+tags:
+  - markdown
+  - rendering
+  - astro
+---
+
+Your content starts here. Write in Markdown.
+Reference other documents with [[wikilinks]].
+Include Mermaid diagrams, tables, whatever helps.</code></pre>
         </div>
       </section>
 
@@ -320,7 +379,7 @@ const docTypes = [
 
   .origin-card em {
     color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
-    font-style: normal;
+    font-style: italic;
   }
 
   /* Pairing Visual */
@@ -529,9 +588,100 @@ const docTypes = [
     color: var(--clr-lossless-accent--brightest, #04e5e5);
   }
 
+  /* Journey Mode */
+  .journey-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .journey-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(191, 35, 247, 0.2);
+    border-radius: 10px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .journey-card:hover {
+    border-color: rgba(191, 35, 247, 0.4);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .journey-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .journey-folder code {
+    font-size: 0.75rem;
+    background: rgba(191, 35, 247, 0.12);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    color: #d98ff5;
+  }
+
+  .journey-mode {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(191, 35, 247, 0.12);
+    color: #d98ff5;
+  }
+
+  .journey-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #d98ff5;
+    margin: 0;
+  }
+
+  .journey-desc {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .journey-examples {
+    font-size: 0.875rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid rgba(191, 35, 247, 0.3);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .examples-label {
+    font-weight: 600;
+    color: #d98ff5;
+  }
+
+  .journey-note {
+    max-width: 800px;
+  }
+
+  .journey-note p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    line-height: 1.65;
+    font-style: italic;
+    margin: 0;
+  }
+
   /* CTA */
   .cta-section {
-    text-align: center;
+    text-align: left;
     padding: 3rem 0 4rem;
   }
 
@@ -556,6 +706,31 @@ const docTypes = [
     color: var(--clr-lossless-accent--brightest, #04e5e5);
   }
 
+  .frontmatter-example {
+    max-width: 600px;
+    margin: 2rem 0;
+    text-align: left;
+  }
+
+  .frontmatter-label {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .frontmatter-code {
+    background: #0d1117;
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+    font-family: var(--ff-monospace, monospace);
+    overflow-x: auto;
+  }
+
   .cta-actions {
     justify-content: center;
   }
@@ -563,6 +738,7 @@ const docTypes = [
   /* Mobile */
   @media (max-width: 768px) {
     .origin-grid,
+    .journey-grid,
     .pairing-visual,
     .doc-grid,
     .why-grid {
