@@ -1,0 +1,527 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Header from '@basics/Header.astro';
+import Footer from '@basics/Footer.astro';
+import AlternatingSideImage from '@basics/messages/AlternatingSideImage.astro';
+import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+
+export const prerender = true;
+
+const stats = [
+  { value: "33", label: "Specialized Agents" },
+  { value: "8+", label: "Premium Data Sources" },
+  { value: "20", label: "Memo Sections" },
+  { value: "8", label: "VC Firms Using It" },
+];
+
+const pipeline = [
+  { step: "1", name: "Deck Analysis", desc: "Extract structured data from pitch decks and dataroom documents. Classify 12+ document types with confidence scoring." },
+  { step: "2", name: "Web Research", desc: "Multi-query research via Perplexity Sonar Pro with section-specific @source targeting. Crunchbase, PitchBook, Statista, CB Insights." },
+  { step: "3", name: "Section Writing", desc: "Individual sections drafted by specialized writing agents. Each section processed independently to avoid timeouts." },
+  { step: "4", name: "Enrichment", desc: "Trademark links, social profiles, citations, competitive context. Each enrichment agent works on section files, not assembled content." },
+  { step: "5", name: "Fact-Check", desc: "Three-step extract → verify (Perplexity) → correct (Claude) pipeline. Full traceability for every claim." },
+  { step: "6", name: "Scorecard", desc: "Firm-specific evaluation criteria applied. Team velocity, market timing, defensibility -- whatever your IC actually debates." },
+  { step: "7", name: "Validation", desc: "Quality scoring against analytical standards. Threshold of 8/10 for auto-finalization. Detailed improvement suggestions below threshold." },
+  { step: "8", name: "Export", desc: "Branded HTML/PDF in light and dark modes. Firm-scoped configs for colors, fonts, logos. One-pager summaries." },
+];
+
+const supporters = [
+  { name: "Hypernova Capital", url: "https://www.hypernova.capital" },
+  { name: "Avalanche VC", url: "https://avalanche.vc" },
+  { name: "Emerge Capital", url: "https://emergecapital.vc" },
+  { name: "Humain VC", url: "https://humain.vc" },
+  { name: "DarkMatter VC", url: "https://darkmatter.vc" },
+  { name: "Banner VC", url: "https://banner.vc" },
+  { name: "Motley Fool Ventures", url: "https://ventures.fool.com" },
+  { name: "Two Magnolias", url: "https://twomagnolias.com" },
+];
+---
+
+<Layout title="MemoPop AI - The Lossless Group">
+  <Header />
+
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge">Open Source</div>
+        <h1 class="hero-title">MemoPop AI</h1>
+        <p class="hero-lede">Multi-agent investment memo orchestrator. Turn a company name into an institutional-quality investment memo with <strong class="highlight">33 specialized AI agents</strong>, premium data sources, full citation trails, and firm-specific branded exports.</p>
+        <div class="hero-actions">
+          <a href="https://github.com/lossless-group/investment-memo-orchestrator" target="_blank" class="btn-primary">View on GitHub</a>
+          <a href="#pipeline" class="btn-secondary">See the Pipeline</a>
+        </div>
+        <div class="hero-supporters">
+          <span class="supporters-label">Supported by</span>
+          {supporters.map((s, i) => (
+            <Fragment>
+              <a href={s.url} target="_blank" class="supporter-link">{s.name}</a>
+              {i < supporters.length - 1 && <span class="supporter-sep">&middot;</span>}
+            </Fragment>
+          ))}
+        </div>
+      </div>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Stats -->
+      <section class="stats-section">
+        <div class="stats-grid">
+          {stats.map(stat => (
+            <div class="stat-card">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Why This Exists -->
+      <section class="why-section">
+        <h2 class="section-title">Why This Exists</h2>
+        <div class="why-grid">
+          <div class="why-card">
+            <h3>One Prompt Isn't Enough</h3>
+            <p>Asking ChatGPT to "write an investment memo" produces generic, uncited, surface-level output. Real investment memos require structured research from authoritative sources, firm-specific evaluation criteria, and analytical rigor that no single prompt can deliver.</p>
+          </div>
+          <div class="why-card">
+            <h3>VC Analysts Spend Days</h3>
+            <p>A quality investment memo takes an analyst 2-5 days of research, writing, and revision. Most of that time is spent on tasks AI agents can do in minutes: pulling Crunchbase data, sizing TAM from Statista, cross-referencing team backgrounds on LinkedIn, formatting citations.</p>
+          </div>
+          <div class="why-card">
+            <h3>Proprietary Thinking Matters</h3>
+            <p>Every fund evaluates deals differently. Hypernova weighs technical defensibility differently than Avalanche weighs market timing. Generic AI can't reflect your IC's actual decision framework. Scorecards and firm-scoped templates make your proprietary criteria the backbone of every memo.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Pipeline -->
+      <section id="pipeline" class="pipeline-section">
+        <h2 class="section-title">The Pipeline</h2>
+        <p class="section-lede">Not a chatbot. A coordinated pipeline of specialized agents, each producing inspectable artifacts. Every step is transparent, every source is cited, every claim can be traced.</p>
+        <div class="pipeline-grid">
+          {pipeline.map(step => (
+            <div class="pipeline-card">
+              <div class="pipeline-step">{step.step}</div>
+              <div class="pipeline-content">
+                <h3 class="pipeline-name">{step.name}</h3>
+                <p class="pipeline-desc">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Feature Deep Dives -->
+      <div class="content-section">
+        <AlternatingSideImage
+          jsonPath="messages/projectMemopopAI.json"
+          classes="memopop-features"
+        />
+      </div>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- CLI Preview -->
+      <section class="cli-section">
+        <h2 class="section-title">One Command to Start</h2>
+        <div class="cli-block">
+          <div class="cli-header">
+            <span class="cli-dot red"></span>
+            <span class="cli-dot yellow"></span>
+            <span class="cli-dot green"></span>
+            <span class="cli-title">terminal</span>
+          </div>
+          <pre class="cli-code"><code>$ memopop
+
+╭─────────────────────────────────────────────────────────╮
+│                                                         │
+│   Investment Memo Orchestrator                          │
+│   v0.5.3 · 33 agents · Powered by Claude + Perplexity  │
+│                                                         │
+╰─────────────────────────────────────────────────────────╯
+
+? What would you like to do?
+  ❯ 📝  Generate a new investment memo
+    📄  Generate a one-pager summary
+    📤  Export an existing memo (HTML / PDF / Word)
+    🔧  Improve a specific section
+    🔄  Integrate content from versions
+    📊  Run a specific agent</code></pre>
+        </div>
+        <p class="cli-note">No flags, no file paths. The interactive CLI auto-discovers firms, deals, and versions.</p>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- CTA -->
+      <section class="cta-section">
+        <h2>Open Source. Bring Your Own Keys.</h2>
+        <p>MemoPop runs on your machine with your API keys. Claude for analysis and writing, Perplexity Sonar Pro for cited research, or DuckDuckGo as a free fallback. Your deal data stays yours.</p>
+        <div class="cta-actions">
+          <a href="https://github.com/lossless-group/investment-memo-orchestrator" target="_blank" class="btn-primary">Get Started on GitHub</a>
+          <a href="https://github.com/lossless-group/investment-memo-orchestrator#similar-services" target="_blank" class="btn-secondary">Compare Alternatives</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .main-content {
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 3rem 0 2.5rem;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    background: rgba(111, 255, 214, 0.1);
+    border: 1px solid rgba(111, 255, 214, 0.25);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0 0 1.25rem 0;
+    background: linear-gradient(135deg, var(--clr-lossless-accent--brightest, #04e5e5) 0%, #BF23F7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-lede {
+    font-size: 1.25rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.8;
+    max-width: 850px;
+    margin: 0 0 2rem 0;
+  }
+
+  .highlight {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    -webkit-text-fill-color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .hero-actions, .cta-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-primary {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(111, 255, 214, 0.08); }
+
+  .hero-supporters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .supporters-label {
+    font-size: 0.8rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    font-weight: 500;
+  }
+
+  .supporter-link {
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .supporter-link:hover {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .supporter-sep {
+    color: var(--clr-lossless-primary-light, #475569);
+  }
+
+  /* Sections */
+  section {
+    padding: 3rem 0;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .section-lede {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    max-width: 800px;
+    margin: 0 0 2rem 0;
+  }
+
+  /* Stats */
+  .stats-section {
+    padding: 2rem 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  /* Why */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .why-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .why-card h3 {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .why-card p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Pipeline */
+  .pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .pipeline-card {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(4, 229, 229, 0.08);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .pipeline-card:hover {
+    border-color: rgba(4, 229, 229, 0.25);
+  }
+
+  .pipeline-step {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(4, 229, 229, 0.15);
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .pipeline-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.35rem 0;
+  }
+
+  .pipeline-desc {
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* CLI Preview */
+  .cli-section {
+    text-align: center;
+  }
+
+  .cli-block {
+    max-width: 700px;
+    margin: 1.5rem auto;
+    background: #0d1117;
+    border-radius: 10px;
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    overflow: hidden;
+    text-align: left;
+  }
+
+  .cli-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cli-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .cli-dot.red { background: #ff5f57; }
+  .cli-dot.yellow { background: #febc2e; }
+  .cli-dot.green { background: #28c840; }
+
+  .cli-title {
+    font-size: 0.75rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    margin-left: 0.5rem;
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .cli-code {
+    padding: 1.25rem;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+    font-family: var(--ff-monospace, monospace);
+    overflow-x: auto;
+  }
+
+  .cli-note {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    margin-top: 1rem;
+  }
+
+  /* Feature Deep Dives */
+  .content-section {
+    margin: 2rem 0;
+  }
+
+  :global(.memopop-features) {
+    margin-top: 2rem;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    padding: 3rem 0 4rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.75rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .cta-section p {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 2rem 0;
+    line-height: 1.7;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2rem;
+  }
+
+  .cta-actions {
+    justify-content: center;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .why-grid, .pipeline-grid { grid-template-columns: 1fr; }
+    .hero { padding: 2rem 0 1.5rem; }
+    section { padding: 2rem 0; }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .why-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

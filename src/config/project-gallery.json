@@ -264,20 +264,21 @@
       ],
       "demoSteps": []
     },
-    "water-template-ce": {
-      "id": "water-template-ce",
-      "title": "Water Themed Site",
-      "subtitle": "A beautiful, modern, and responsive water-themed website.",
+    "memopop-ai": {
+      "id": "memopop-ai",
+      "title": "MemoPop AI",
+      "subtitle": "Multi-agent investment memo orchestrator powered by Claude and Perplexity.",
+      "href": "/projects/gallery/memopop-ai",
       "hasSidebar": false,
-      "clients": ["the-water-foundation"],
+      "clients": ["hypernova", "avalanche"],
       "useCases": [
         {
-          "title": "Storytelling with Data",
-          "description": "A website that puts data and content to work for fundraising and business development."
+          "title": "Investment Memo Generation",
+          "description": "Generate institutional-quality investment memos with 33 specialized AI agents, premium data sources, and full citation trails."
         },
         {
-          "title": "Built-in Design System Management",
-          "description": "Iteratively developmed Design System within the website itself."
+          "title": "Multi-Firm Deal Intelligence",
+          "description": "Firm-scoped architecture lets multiple VC firms run isolated pipelines with branded exports from a shared open-source codebase."
         }
       ],
       "demoSteps": []
