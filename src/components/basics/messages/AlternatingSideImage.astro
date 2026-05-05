@@ -27,6 +27,8 @@ interface FeatureData {
   imageSide: "left" | "right";
   ctaText: string;
   ctaUrl: string;
+  githubText?: string;
+  githubUrl?: string;
   imageUrl: string;
   imageClasses?: string; // Optional CSS classes for the image container
   maskHeight?: string;   // Optional height for the image mask (e.g., "300px", "50%")
@@ -88,6 +90,14 @@ const processedFeatures = features.map(feature => ({
     >
       <div slot="content-footer" class="cta-container">
         <TextCTA href={feature.ctaUrl} text={feature.ctaText} />
+        {feature.githubUrl && (
+          <a href={feature.githubUrl} target="_blank" rel="noopener noreferrer" class="github-cta">
+            <span>{feature.githubText || "Check it out on"}</span>
+            <span class="github-icon-wrap">
+              <img src="/visuals/appIcon__GitHub--Lightest.svg" alt="GitHub" class="github-icon" />
+            </span>
+          </a>
+        )}
       </div>
     </FeatureSideImage>
   ))}
@@ -106,6 +116,45 @@ const processedFeatures = features.map(feature => ({
   /* Maintain spacing for the CTA container */
   :global(.cta-container) {
     margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .github-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    opacity: 0.82;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .github-cta:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .github-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .github-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    max-width: 22px;
+    overflow: hidden;
   }
   /* Mobile: Reduce vertical gap for proportional spacing */
   @media (max-width: 768px) {

@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Vault-Wide Citation Consistency",
+    "title": "Unique Hex Code Generation",
+    "details": "Cite Wide transforms numeric footnotes [1] into unique hex codes [^a1b2c3] that maintain consistency across your entire Obsidian vault. The same reference always generates the same hex code, eliminating citation conflicts and enabling powerful cross-file reference tracking. Perfect for knowledge bases that span thousands of notes.",
+    "imageSide": "right",
+    "ctaText": "View on GitHub",
+    "ctaUrl": "https://github.com/lossless-group/cite-wide",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Automatic Reference Management",
+    "title": "Centralized Source Tracking",
+    "details": "Every citation is logged to an Obsidian base with complete reference information. Promote references to vault-wide sources for access through Bases integration. Automatic property extraction from URLs using Jina.ai Reader API populates metadata instantly. Your reference library builds itself.",
+    "imageSide": "left",
+    "ctaText": "Learn About Bases Integration",
+    "ctaUrl": "https://github.com/lossless-group/cite-wide",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Professional and Academic Grade",
+    "title": "Why Cite Wide Matters",
+    "details": "As AI services increasingly return footnoted content and deep research becomes the norm, managing citations at scale becomes critical. Numeric footnotes break when content is reordered or published. Cite Wide's hex code system enables citation consistency across Obsidian, publishing platforms, and diverse content tools. Rigorous citation management isn't just for academics anymore—it's for anyone building trusted knowledge.",
+    "imageSide": "right",
+    "ctaText": "Get Started",
+    "ctaUrl": "https://github.com/lossless-group/cite-wide",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
+  }
+]
