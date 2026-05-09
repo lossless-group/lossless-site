@@ -8,6 +8,7 @@ export const prerender = false;
 import fs from 'fs';
 import path from 'path';
 import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+import Analytics from '@components/Analytics.astro';
 
 // Get the slug from the URL
 const { slug } = Astro.params;
@@ -166,6 +167,7 @@ try {
       font-size: 0.9rem !important;
     }
   </style>
+  <Analytics />
 </head>
 <body>
   <div class="reveal-container embedded">

@@ -1,0 +1,551 @@
+---
+/**
+ * /more-about/timeline.astro — Reference Library Timeline
+ *
+ * Compact "show my work" timeline aggregating vocabulary, concepts, sources,
+ * and organizations by date_created and date_modified. Each entry contributes
+ * up to two events (one per date). Grouped Month → Week. Most recent month is
+ * expanded by default; older months collapsed for fast scanning.
+ *
+ * Client-side search filters by title, id, and tags (case-insensitive substring).
+ */
+import Layout from '@layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug, toProperCase } from '@utils/slugify';
+
+export const prerender = true;
+
+type CollectionId = 'vocabulary' | 'concepts' | 'sources' | 'organizations';
+
+const COLLECTION_META: Record<CollectionId, { label: string; href: string; chip: string }> = {
+  vocabulary:    { label: 'Vocab',  href: '/more-about',       chip: 'vocab' },
+  concepts:      { label: 'Concept', href: '/more-about',       chip: 'concept' },
+  sources:       { label: 'Source', href: '/sources',          chip: 'source' },
+  organizations: { label: 'Org',    href: '/organizations',    chip: 'org' },
+};
+
+const [vocab, concepts, sources, organizations] = await Promise.all([
+  getCollection('vocabulary'),
+  getCollection('concepts'),
+  getCollection('sources'),
+  getCollection('organizations'),
+]);
+
+function parseDate(v: any): Date | null {
+  if (!v) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function getTitle(entry: any): string {
+  const t = entry.data?.title;
+  if (typeof t === 'string' && t.trim()) return t.trim();
+  const og = entry.data?.og_title;
+  if (typeof og === 'string' && og.trim()) return og.trim();
+  const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
+  return toProperCase(filename);
+}
+
+function detailHref(collection: CollectionId, entry: any): string {
+  const slug = getReferenceSlug(entry.id);
+  switch (collection) {
+    case 'vocabulary':
+    case 'concepts':
+      return `/more-about/${slug}`;
+    case 'sources':
+      return `/sources/${slug}`;
+    case 'organizations':
+      return `/organizations/${slug}`;
+  }
+}
+
+function tagsToArray(t: any): string[] {
+  if (!t) return [];
+  if (Array.isArray(t)) return t.map(String);
+  if (typeof t === 'string') return t.split(/[,\s]+/).filter(Boolean);
+  return [];
+}
+
+interface TimelineEvent {
+  kind: 'created' | 'modified';
+  date: Date;
+  title: string;
+  href: string;
+  collection: CollectionId;
+  id: string;
+  tags: string[];
+  folder: string;
+  /** lowercase haystack used by client-side search */
+  search: string;
+}
+
+const events: TimelineEvent[] = [];
+
+function pushEvents(collection: CollectionId, list: any[]) {
+  for (const entry of list) {
+    const created = parseDate(entry.data?.date_created);
+    const modified = parseDate(entry.data?.date_modified);
+    const title = getTitle(entry);
+    const href = detailHref(collection, entry);
+    const tags = tagsToArray(entry.data?.tags);
+    const folder = entry.id.includes('/') ? entry.id.split('/')[0] : '';
+    const search = [title, entry.id, ...tags].join(' ').toLowerCase();
+    const base = { title, href, collection, id: entry.id, tags, folder, search };
+
+    if (created) events.push({ kind: 'created', date: created, ...base });
+    // Only count modified if it differs from created (same-day no-ops are noise)
+    if (modified && (!created || modified.getTime() !== created.getTime())) {
+      events.push({ kind: 'modified', date: modified, ...base });
+    }
+  }
+}
+
+pushEvents('vocabulary', vocab);
+pushEvents('concepts', concepts);
+pushEvents('sources', sources);
+pushEvents('organizations', organizations);
+
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function ymKey(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+function startOfWeek(d: Date) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - x.getDay());
+  return x;
+}
+function weekRangeLabel(weekStart: Date) {
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  const sm = monthNames[weekStart.getMonth()];
+  const em = monthNames[end.getMonth()];
+  if (sm === em) return `${sm} ${weekStart.getDate()}–${end.getDate()}`;
+  return `${sm} ${weekStart.getDate()} – ${em} ${end.getDate()}`;
+}
+
+interface WeekBucket { weekStart: Date; weekKey: string; label: string; events: TimelineEvent[]; }
+interface MonthBucket { ymKey: string; label: string; weeks: WeekBucket[]; created: number; modified: number; total: number; }
+
+const monthMap = new Map<string, { bucket: MonthBucket; weeks: Map<string, WeekBucket> }>();
+
+for (const ev of events) {
+  const yk = ymKey(ev.date);
+  const ws = startOfWeek(ev.date);
+  const wk = ws.toISOString();
+
+  let m = monthMap.get(yk);
+  if (!m) {
+    m = {
+      bucket: {
+        ymKey: yk,
+        label: `${monthNames[ev.date.getMonth()]} ${ev.date.getFullYear()}`,
+        weeks: [],
+        created: 0, modified: 0, total: 0,
+      },
+      weeks: new Map(),
+    };
+    monthMap.set(yk, m);
+  }
+  let w = m.weeks.get(wk);
+  if (!w) {
+    w = { weekStart: ws, weekKey: wk, label: weekRangeLabel(ws), events: [] };
+    m.weeks.set(wk, w);
+  }
+  w.events.push(ev);
+  m.bucket.total++;
+  if (ev.kind === 'created') m.bucket.created++;
+  else m.bucket.modified++;
+}
+
+const months: MonthBucket[] = Array.from(monthMap.values())
+  .map(({ bucket, weeks }) => ({
+    ...bucket,
+    weeks: Array.from(weeks.values())
+      .map(w => ({ ...w, events: w.events.sort((a, b) => b.date.getTime() - a.date.getTime()) }))
+      .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime()),
+  }))
+  .sort((a, b) => b.ymKey.localeCompare(a.ymKey));
+
+const totalEvents = events.length;
+const totalCreated = events.filter(e => e.kind === 'created').length;
+const totalModified = totalEvents - totalCreated;
+---
+
+<Layout title="Reference Timeline">
+  <div class="tl-page">
+    <header class="tl-header">
+      <a href="/more-about" class="back-link">← Reference Library</a>
+      <h1>Reference Timeline</h1>
+      <p class="subtitle">A running log of additions and updates across vocabulary, concepts, sources, and organizations.</p>
+      <div class="stats">
+        <span><strong>{totalEvents.toLocaleString()}</strong> events</span>
+        <span class="dot-sep">•</span>
+        <span><strong class="created-num">{totalCreated.toLocaleString()}</strong> added</span>
+        <span class="dot-sep">•</span>
+        <span><strong class="modified-num">{totalModified.toLocaleString()}</strong> updated</span>
+      </div>
+
+      <div class="search-row">
+        <input
+          id="tl-search"
+          type="search"
+          placeholder="Filter by title, id, or tag…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="filter-chips">
+          <label><input type="checkbox" class="kind-toggle" data-kind="created" checked /> Added</label>
+          <label><input type="checkbox" class="kind-toggle" data-kind="modified" checked /> Updated</label>
+          <label><input type="checkbox" class="coll-toggle" data-coll="vocabulary" checked /> Vocab</label>
+          <label><input type="checkbox" class="coll-toggle" data-coll="concepts" checked /> Concepts</label>
+          <label><input type="checkbox" class="coll-toggle" data-coll="sources" checked /> Sources</label>
+          <label><input type="checkbox" class="coll-toggle" data-coll="organizations" checked /> Orgs</label>
+        </div>
+      </div>
+    </header>
+
+    <div class="tl-body">
+      {months.map((month, mi) => (
+        <section class="month" data-month={mi}>
+          <button class="month-head" type="button" data-toggle="month" data-target={mi} aria-expanded={mi === 0 ? 'true' : 'false'}>
+            <span class="caret">{mi === 0 ? '▼' : '▶'}</span>
+            <span class="month-label">{month.label}</span>
+            <span class="month-counts">
+              {month.created > 0 && <span class="chip created">+{month.created}</span>}
+              {month.modified > 0 && <span class="chip modified">↻{month.modified}</span>}
+            </span>
+          </button>
+          <div class="weeks" data-month-body={mi} style={mi === 0 ? '' : 'display:none;'}>
+            {month.weeks.map((week, wi) => (
+              <div class="week" data-week={`${mi}-${wi}`}>
+                <div class="week-head">
+                  <span class="week-label">{week.label}</span>
+                  <span class="week-count">{week.events.length}</span>
+                </div>
+                <ul class="events">
+                  {week.events.map(ev => (
+                    <li
+                      class={`event ${ev.kind}`}
+                      data-search={ev.search}
+                      data-kind={ev.kind}
+                      data-coll={ev.collection}
+                    >
+                      <span class={`bar ${ev.kind}`} aria-hidden="true"></span>
+                      <span class="date">{ev.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <a class="title" href={ev.href}>{ev.title}</a>
+                      <span class={`coll coll-${COLLECTION_META[ev.collection].chip}`}>{COLLECTION_META[ev.collection].label}</span>
+                      {ev.folder && <span class="folder">{toProperCase(ev.folder)}</span>}
+                      {ev.tags.length > 0 && (
+                        <span class="tags">{ev.tags.slice(0, 3).join(' · ')}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <p class="empty" style="display:none;">No matches.</p>
+  </div>
+
+  <script>
+    type ToggleEl = HTMLInputElement;
+
+    const search = document.getElementById('tl-search') as HTMLInputElement;
+    const kindToggles = Array.from(document.querySelectorAll<ToggleEl>('.kind-toggle'));
+    const collToggles = Array.from(document.querySelectorAll<ToggleEl>('.coll-toggle'));
+    const events = Array.from(document.querySelectorAll<HTMLLIElement>('.event'));
+    const weeks = Array.from(document.querySelectorAll<HTMLDivElement>('.week'));
+    const months = Array.from(document.querySelectorAll<HTMLElement>('.month'));
+    const monthBodies = Array.from(document.querySelectorAll<HTMLElement>('[data-month-body]'));
+    const empty = document.querySelector<HTMLElement>('.empty');
+    const weekCountEls = new Map<HTMLElement, HTMLElement>();
+    weeks.forEach(w => {
+      const c = w.querySelector<HTMLElement>('.week-count');
+      if (c) weekCountEls.set(w, c);
+    });
+
+    function applyFilter() {
+      const q = search.value.trim().toLowerCase();
+      const allowedKinds = new Set(kindToggles.filter(t => t.checked).map(t => t.dataset.kind!));
+      const allowedColls = new Set(collToggles.filter(t => t.checked).map(t => t.dataset.coll!));
+
+      let totalVisible = 0;
+
+      events.forEach(ev => {
+        const haystack = ev.dataset.search || '';
+        const kind = ev.dataset.kind || '';
+        const coll = ev.dataset.coll || '';
+        const matchKind = allowedKinds.has(kind);
+        const matchColl = allowedColls.has(coll);
+        const matchQuery = q === '' || haystack.includes(q);
+        const visible = matchKind && matchColl && matchQuery;
+        ev.style.display = visible ? '' : 'none';
+        if (visible) totalVisible++;
+      });
+
+      // Hide empty weeks; update week count badge
+      weeks.forEach(w => {
+        const visEvents = w.querySelectorAll<HTMLElement>('.event:not([style*="display: none"])').length;
+        w.style.display = visEvents === 0 ? 'none' : '';
+        const c = weekCountEls.get(w);
+        if (c) c.textContent = String(visEvents);
+      });
+
+      // Hide empty months
+      months.forEach(m => {
+        const visWeeks = m.querySelectorAll<HTMLElement>('.week:not([style*="display: none"])').length;
+        m.style.display = visWeeks === 0 ? 'none' : '';
+      });
+
+      // When searching, auto-expand all months so matches are visible
+      if (q !== '') {
+        monthBodies.forEach(b => { b.style.display = ''; });
+        document.querySelectorAll<HTMLElement>('.month-head .caret').forEach(c => c.textContent = '▼');
+        document.querySelectorAll<HTMLElement>('.month-head').forEach(h => h.setAttribute('aria-expanded', 'true'));
+      }
+
+      if (empty) empty.style.display = totalVisible === 0 ? '' : 'none';
+    }
+
+    search?.addEventListener('input', applyFilter);
+    [...kindToggles, ...collToggles].forEach(t => t.addEventListener('change', applyFilter));
+
+    document.querySelectorAll<HTMLButtonElement>('[data-toggle="month"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = btn.dataset.target!;
+        const body = document.querySelector<HTMLElement>(`[data-month-body="${idx}"]`);
+        const caret = btn.querySelector<HTMLElement>('.caret');
+        if (!body || !caret) return;
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : '';
+        caret.textContent = open ? '▶' : '▼';
+        btn.setAttribute('aria-expanded', String(!open));
+      });
+    });
+  </script>
+
+  <style>
+    .tl-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      color: var(--clr-body, #e2e8f0);
+    }
+
+    .back-link {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--clr-lossless-accent--brightest, #04e5e5);
+      text-decoration: none;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .tl-header h1 {
+      font-size: 1.6rem;
+      margin: 0 0 0.25rem 0;
+      color: var(--clr-lossless-primary-light, #f1f5f9);
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--clr-lossless-primary-light, #94a3b8);
+      margin: 0 0 0.75rem 0;
+    }
+    .stats {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .stats strong { color: var(--clr-lossless-primary-light, #f1f5f9); }
+    .stats .dot-sep { opacity: 0.4; }
+    .created-num { color: #86efac; }
+    .modified-num { color: #93c5fd; }
+
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    #tl-search {
+      flex: 1 1 280px;
+      min-width: 240px;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+    #tl-search:focus {
+      outline: none;
+      border-color: var(--clr-lossless-accent--brightest, #04e5e5);
+      background: rgba(255,255,255,0.06);
+    }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.75rem;
+      font-size: 0.78rem;
+    }
+    .filter-chips label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .filter-chips input { accent-color: var(--clr-lossless-accent--brightest, #04e5e5); }
+
+    /* Month */
+    .month { margin-bottom: 0.5rem; }
+    .month-head {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(4, 229, 229, 0.18);
+      border-radius: 6px;
+      cursor: pointer;
+      color: inherit;
+      text-align: left;
+      font-family: inherit;
+    }
+    .month-head:hover { background: rgba(255,255,255,0.06); }
+    .caret {
+      color: var(--clr-lossless-accent--brightest, #04e5e5);
+      font-size: 0.7rem;
+      width: 10px;
+      flex: 0 0 auto;
+    }
+    .month-label {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--clr-lossless-accent--brightest, #04e5e5);
+    }
+    .month-counts { display: flex; gap: 0.35rem; }
+    .chip {
+      font-size: 0.72rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .chip.created { background: rgba(34,197,94,0.18); color: #86efac; }
+    .chip.modified { background: rgba(59,130,246,0.18); color: #93c5fd; }
+
+    /* Weeks */
+    .weeks { padding: 0.35rem 0 0.5rem 1.1rem; }
+    .week + .week { margin-top: 0.4rem; }
+    .week-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.15rem 0.25rem;
+      font-size: 0.75rem;
+      color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .week-count {
+      font-size: 0.68rem;
+      padding: 0.05rem 0.4rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--clr-body, #cbd5e1);
+    }
+
+    /* Events */
+    .events { list-style: none; padding: 0; margin: 0.2rem 0 0 0; }
+    .event {
+      display: grid;
+      grid-template-columns: 4px 64px 1fr auto auto auto;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.22rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.83rem;
+      line-height: 1.25;
+    }
+    .event:hover { background: rgba(255,255,255,0.04); }
+    .bar {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+    .bar.created { background: #86efac; }
+    .bar.modified { background: #93c5fd; }
+    .date {
+      font-size: 0.72rem;
+      color: var(--clr-lossless-primary-light, #94a3b8);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .title {
+      color: var(--clr-lossless-accent--brightest, #04e5e5);
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .title:hover { text-decoration: underline; }
+
+    .coll {
+      font-size: 0.66rem;
+      padding: 0.05rem 0.4rem;
+      border-radius: 3px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .coll-vocab   { background: rgba(168, 85, 247, 0.18);  color: #d8b4fe; }
+    .coll-concept { background: rgba(236, 72, 153, 0.18);  color: #f9a8d4; }
+    .coll-source  { background: rgba(245, 158, 11, 0.18);  color: #fcd34d; }
+    .coll-org     { background: rgba(20, 184, 166, 0.18);  color: #5eead4; }
+
+    .folder {
+      font-size: 0.7rem;
+      color: var(--white--pure--40p, rgba(255,255,255,0.45));
+      white-space: nowrap;
+    }
+    .tags {
+      font-size: 0.7rem;
+      color: var(--white--pure--40p, rgba(255,255,255,0.45));
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--clr-body, rgba(255,255,255,0.6));
+    }
+
+    @media (max-width: 720px) {
+      .event {
+        grid-template-columns: 3px 50px 1fr auto;
+        font-size: 0.78rem;
+      }
+      .folder, .tags { display: none; }
+      .month-label { font-size: 0.85rem; }
+    }
+  </style>
+</Layout>

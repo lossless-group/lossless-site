@@ -6,5 +6,9 @@
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "chroma"
+  ],
+  "enableAllProjectMcpServers": true
 }

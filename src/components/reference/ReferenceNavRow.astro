@@ -16,23 +16,35 @@ interface Props {
   conceptsCount: number;
   vocabularyWordCount: number;
   conceptsWordCount: number;
-  currentPage?: 'all' | 'vocabulary' | 'concepts';
+  sourcesCount?: number;
+  sourcesWordCount?: number;
+  organizationsCount?: number;
+  organizationsWordCount?: number;
+  currentPage?: 'all' | 'vocabulary' | 'concepts' | 'sources' | 'organizations';
 }
 
-const { 
-  vocabularyCount, 
-  conceptsCount, 
+const {
+  vocabularyCount,
+  conceptsCount,
   vocabularyWordCount,
   conceptsWordCount,
+  sourcesCount = 0,
+  sourcesWordCount = 0,
+  organizationsCount = 0,
+  organizationsWordCount = 0,
   currentPage = 'all'
 } = Astro.props;
 
 // Calculate total words for the current page
-const currentPageWordCount = currentPage === 'all' 
-  ? vocabularyWordCount + conceptsWordCount 
-  : currentPage === 'vocabulary' 
-    ? vocabularyWordCount 
-    : conceptsWordCount;
+const currentPageWordCount = currentPage === 'all'
+  ? vocabularyWordCount + conceptsWordCount + sourcesWordCount + organizationsWordCount
+  : currentPage === 'vocabulary'
+    ? vocabularyWordCount
+    : currentPage === 'concepts'
+      ? conceptsWordCount
+      : currentPage === 'sources'
+        ? sourcesWordCount
+        : organizationsWordCount;
 
 const getButtonClass = (page: string) => {
   const baseClass = 'px-4 py-2 rounded-md flex items-center gap-2 transition-colors';
@@ -70,14 +82,36 @@ const formatCount = (count: number): string => {
         {vocabularyCount}
       </span>
     </a>
-    <a 
-      href="/more-about/concepts" 
+    <a
+      href="/more-about/concepts"
       class={getButtonClass('concepts')}
     >
       <span class="button-text">Concepts</span>
       <span class="count-badge">
         {conceptsCount}
       </span>
+    </a>
+    <a
+      href="/more-about/sources"
+      class={getButtonClass('sources')}
+    >
+      <span class="button-text">Sources</span>
+      <span class="count-badge">
+        {sourcesCount}
+      </span>
+    </a>
+    <a
+      href="/more-about/organizations"
+      class={getButtonClass('organizations')}
+    >
+      <span class="button-text">Organizations</span>
+      <span class="count-badge">
+        {organizationsCount}
+      </span>
+    </a>
+    <a href="/more-about/timeline" class="timeline-cta" title="See additions and updates over time">
+      <span aria-hidden="true">📅</span>
+      <span class="button-text">Timeline</span>
     </a>
   </div>
   <div class="word-count">
@@ -98,6 +132,27 @@ const formatCount = (count: number): string => {
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
+  }
+
+  .timeline-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    padding: 0.5rem 0.9rem;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(4, 229, 229, 0.18), rgba(168, 85, 247, 0.18));
+    border: 1px solid rgba(4, 229, 229, 0.5);
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .timeline-cta:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, rgba(4, 229, 229, 0.32), rgba(168, 85, 247, 0.28));
+    border-color: var(--clr-lossless-accent--brightest, #04e5e5);
   }
 
   .word-count {

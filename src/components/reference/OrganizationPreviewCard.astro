@@ -1,0 +1,68 @@
+---
+import { toProperCase } from '@utils/slugify';
+
+/**
+ * OrganizationPreviewCard.astro
+ *
+ * Preview card for an organization entry. Links to /organizations/<slug>.
+ */
+
+interface Props {
+  entry: {
+    id: string;
+    slug: string;
+    displayTitle: string;
+    folder: string;
+  };
+}
+
+const { entry } = Astro.props;
+const url = `/organizations/${entry.slug}`;
+const showFolder = entry.folder && entry.folder !== 'root';
+---
+
+<div class="org-card group">
+  <h3 class="org-card__title">
+    <a href={url} class="org-card__link">{entry.displayTitle}</a>
+  </h3>
+  {showFolder && (
+    <p class="org-card__folder">{toProperCase(entry.folder)}</p>
+  )}
+</div>
+
+<style>
+  .org-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                transform 0.2s ease-in-out;
+  }
+
+  .org-card__title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.25rem;
+  }
+
+  .org-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .org-card:hover {
+    background-color: #3a3a45;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .org-card__folder {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--white--pure--40p, hsla(0, 0%, 100%, .4));
+    margin: 0;
+  }
+</style>

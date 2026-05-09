@@ -7,6 +7,7 @@ import "@styles/callouts.css";
 import "@styles/codeblocks.css";
 import "@styles/shiki-github-dark.css";
 import PageMeta from "@components/basics/PageMeta.astro";
+import Analytics from "@components/Analytics.astro";
 
 /**
  * Open Graph Meta Tags Pipeline:
@@ -110,6 +111,7 @@ if (currentPath === '/toolkit' || currentPath.startsWith('/toolkit/')) {
 
     {/* Import global avatar and author handle styles */}
     <link rel="stylesheet" href="/src/styles/avatars.css" />
+    <Analytics />
   </head>
   <body>
     <Header 

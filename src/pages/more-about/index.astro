@@ -1,16 +1,47 @@
 ---
 import ReferenceLayout from '@layouts/ReferenceLayout.astro';
 import { getCollection } from 'astro:content';
-import { processEntries } from '@utils/slugify';
+import { processEntries, getReferenceSlug, toProperCase } from '@utils/slugify';
 import { getWordCounts } from '@utils/collectionWordCount';
 import VocabularyPreviewCard from '@components/reference/VocabularyPreviewCard.astro';
 import ConceptPreviewCard from '@components/reference/ConceptPreviewCard.astro';
+import SourcePreviewCard from '@components/reference/SourcePreviewCard.astro';
+import OrganizationPreviewCard from '@components/reference/OrganizationPreviewCard.astro';
 // Import the type directly from the source file
 import type { ReferenceItem } from '../../types/reference';
 
 // Get collections and process them using the centralized function
 const vocabularyEntries = await getCollection('vocabulary');
 const conceptsEntries = await getCollection('concepts');
+const sourcesEntries = await getCollection('sources');
+const organizationsEntries = await getCollection('organizations');
+
+function getFallbackTitle(entry: any): string {
+  if (entry.data?.title && String(entry.data.title).trim()) return String(entry.data.title).trim();
+  if (entry.data?.og_title && String(entry.data.og_title).trim()) return String(entry.data.og_title).trim();
+  const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
+  return toProperCase(filename);
+}
+
+const processedSources = sourcesEntries.map(entry => {
+  const parts = entry.id.split('/');
+  return {
+    id: entry.id,
+    slug: getReferenceSlug(entry.id),
+    displayTitle: getFallbackTitle(entry),
+    folder: parts.length > 1 ? parts[0] : 'root',
+  };
+}).sort((a, b) => a.displayTitle.localeCompare(b.displayTitle));
+
+const processedOrgs = organizationsEntries.map(entry => {
+  const parts = entry.id.split('/');
+  return {
+    id: entry.id,
+    slug: getReferenceSlug(entry.id),
+    displayTitle: getFallbackTitle(entry),
+    folder: parts.length > 1 ? parts[0] : 'root',
+  };
+}).sort((a, b) => a.displayTitle.localeCompare(b.displayTitle));
 
 // Process entries using the centralized processEntries function
 const processedVocab = processEntries(vocabularyEntries).map(entry => ({
@@ -38,7 +69,7 @@ const processedConcepts = processEntries(conceptsEntries).map(entry => ({
 }));
 
 // Get word counts for each collection
-const wordCounts = await getWordCounts(['vocabulary', 'concepts'] as const);
+const wordCounts = await getWordCounts(['vocabulary', 'concepts', 'sources', 'organizations'] as const);
 
 // Format word counts for display
 const formatWordCount = (count: number): string => {
@@ -110,6 +141,50 @@ const formatWordCount = (count: number): string => {
                 slug: entry.slug
               }
             }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="border-t border-gray-200 dark:border-gray-700 my-8"></div>
+
+  <section>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {processedSources.length} sources • {formatWordCount(wordCounts.sources)} words
+      </span>
+    </div>
+    <p class="mb-6">References, books, people, media, and other sources we've gathered.</p>
+
+    <div data-searchable="true">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {processedSources.map(entry => (
+          <div data-searchable="true">
+            <SourcePreviewCard entry={entry} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="border-t border-gray-200 dark:border-gray-700 my-8"></div>
+
+  <section>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Organizations</h2>
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {processedOrgs.length} organizations • {formatWordCount(wordCounts.organizations)} words
+      </span>
+    </div>
+    <p class="mb-6">Companies, institutions, and other organizations we've gathered.</p>
+
+    <div data-searchable="true">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {processedOrgs.map(entry => (
+          <div data-searchable="true">
+            <OrganizationPreviewCard entry={entry} />
           </div>
         ))}
       </div>

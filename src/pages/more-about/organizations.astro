@@ -1,0 +1,182 @@
+---
+import ReferenceLayout from '@layouts/ReferenceLayout.astro';
+import { getCollection } from 'astro:content';
+import { toProperCase, getReferenceSlug } from '@utils/slugify';
+import OrganizationPreviewCard from '@components/reference/OrganizationPreviewCard.astro';
+
+/**
+ * /more-about/organizations — Organizations index inside the Reference Library.
+ * Mirrors /more-about/sources. Detail pages still live at /organizations/<slug>.
+ */
+
+const orgEntries = await getCollection('organizations');
+
+function getDisplayTitle(entry: any): string {
+  if (entry.data?.title && String(entry.data.title).trim()) return String(entry.data.title).trim();
+  if (entry.data?.og_title && String(entry.data.og_title).trim()) return String(entry.data.og_title).trim();
+  const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
+  return toProperCase(filename);
+}
+
+const entriesByFolder = new Map<string, typeof orgEntries>();
+entriesByFolder.set('root', []);
+for (const entry of orgEntries) {
+  const parts = entry.id.split('/');
+  const folder = parts.length > 1 ? parts[0] : 'root';
+  if (!entriesByFolder.has(folder)) entriesByFolder.set(folder, []);
+  entriesByFolder.get(folder)!.push(entry);
+}
+
+const folders = Array.from(entriesByFolder.keys()).sort((a, b) => {
+  if (a === 'root') return 1;
+  if (b === 'root') return -1;
+  return a.localeCompare(b);
+});
+
+const processedEntries = orgEntries.map(entry => {
+  const parts = entry.id.split('/');
+  return {
+    id: entry.id,
+    slug: getReferenceSlug(entry.id),
+    displayTitle: getDisplayTitle(entry),
+    folder: parts.length > 1 ? parts[0] : 'root',
+  };
+}).sort((a, b) => a.displayTitle.localeCompare(b.displayTitle));
+
+const tabConfig = folders.map(folder => ({
+  id: folder,
+  label: folder === 'root' ? 'Uncategorized' : toProperCase(folder),
+  count: entriesByFolder.get(folder)?.length || 0
+}));
+---
+
+<ReferenceLayout
+  title="Organizations"
+  description="Companies, institutions, and other organizations we've gathered."
+  currentPage="organizations"
+  showSearch={true}
+  showGrid={false}
+>
+  <nav class="tab-nav" role="tablist" aria-label="Organization categories">
+    <button
+      class="tab-btn active"
+      data-folder="all"
+      role="tab"
+      aria-selected="true"
+      aria-controls="orgs-grid"
+    >
+      All <span class="count">{orgEntries.length}</span>
+    </button>
+    {tabConfig.map(tab => (
+      <button
+        class="tab-btn"
+        data-folder={tab.id}
+        role="tab"
+        aria-selected="false"
+        aria-controls="orgs-grid"
+      >
+        {tab.label} <span class="count">{tab.count}</span>
+      </button>
+    ))}
+  </nav>
+
+  <div id="orgs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="tabpanel" data-searchable="true">
+    {processedEntries.map(entry => (
+      <div class="org-card-wrapper" data-folder={entry.folder} data-searchable="true">
+        <OrganizationPreviewCard entry={entry} />
+      </div>
+    ))}
+  </div>
+
+  <div class="empty-state" style="display: none;">
+    <p>No organizations found in this category.</p>
+  </div>
+</ReferenceLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const cards = document.querySelectorAll('.org-card-wrapper');
+    const emptyState = document.querySelector('.empty-state');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const folder = tab.getAttribute('data-folder');
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        let visibleCount = 0;
+        cards.forEach(card => {
+          const cardFolder = card.getAttribute('data-folder');
+          if (folder === 'all' || cardFolder === folder) {
+            (card as HTMLElement).style.display = '';
+            visibleCount++;
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+        if (emptyState) {
+          (emptyState as HTMLElement).style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
+  }
+
+  .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--clr-lossless-primary-dark, #19141D);
+    border: 1px solid var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
+    border-radius: 0.5rem;
+    color: var(--clr-body, rgba(255, 255, 255, 0.8));
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover {
+    background: var(--clr-lossless-primary-glass, rgba(255, 255, 255, 0.05));
+    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .tab-btn.active {
+    background: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+    color: var(--clr-lossless-primary-dark, #19141D);
+    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .tab-btn .count {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .tab-btn.active .count {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--clr-body, rgba(255, 255, 255, 0.6));
+  }
+</style>

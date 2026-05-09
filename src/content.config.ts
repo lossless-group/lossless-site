@@ -337,6 +337,36 @@ const sourcesCollection = defineCollection({
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 // ***
+// Open: Organizations Collection Definition
+// Type: Content Collection
+// Purpose: Companies, institutions, and other organizations
+// Schema: Ultra-permissive to handle varied/missing frontmatter
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const organizationsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: resolveContentPath("organizations"),
+    generateId: ({ entry }) => {
+      return entry.replace(/\.md$/, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    title: z.string().nullish(),
+    og_title: z.string().nullish(),
+    url: z.string().nullish(),
+    date_created: z.union([z.string(), z.date()]).nullish(),
+    date_modified: z.union([z.string(), z.date()]).nullish(),
+    tags: z.union([z.string(), z.array(z.string())]).nullish(),
+    publish: z.boolean().nullish(),
+  }).passthrough()
+});
+
+// ========================================
+// Close: Organizations Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ***
 // Open: Issue Resolution Collection Definition (Ultra-Minimalist, following example)
 // Type: Content Collection
 // Purpose: For magazine-style articles detailing issue resolutions.
@@ -520,6 +550,7 @@ export const paths = {
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'specs': resolveContentPath('specs'),
   'sources': resolveContentPath('sources'),
+  'organizations': resolveContentPath('organizations'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),
   'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
@@ -555,6 +586,7 @@ export const collections = {
   'blueprints': blueprintsCollection,
   'specs': specsCollection,
   'sources': sourcesCollection,
+  'organizations': organizationsCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,

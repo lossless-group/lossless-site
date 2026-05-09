@@ -1,7 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { countWordsInMarkdown } from './countWords';
 
-type CollectionName = 'vocabulary' | 'concepts';
+type CollectionName = 'vocabulary' | 'concepts' | 'sources' | 'organizations';
 type CollectionEntryType = CollectionEntry<CollectionName>;
 
 /**
