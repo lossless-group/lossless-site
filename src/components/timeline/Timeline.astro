@@ -1,0 +1,526 @@
+---
+/**
+ * <Timeline> — shared, compact "show my work" timeline component.
+ *
+ * Takes a flat list of TimelineEvent objects and renders them grouped Month → Week,
+ * with client-side search and per-kind / per-collection filter chips.
+ *
+ * Event kinds (`created` | `modified`) and the set of collection keys are driven by
+ * what the caller passes in `events` and `collections` — so this component handles
+ * tooling timelines, reference-library timelines, etc., without duplication.
+ */
+
+export interface TimelineEvent {
+  kind: 'created' | 'modified';
+  date: Date;
+  title: string;
+  href: string;
+  /** Caller-defined key, must match a key in `collections`. */
+  collection: string;
+  /** Stable identifier (e.g. content collection id). */
+  id: string;
+  tags: string[];
+  /** Optional path-prefix label (e.g. parent folder). */
+  folder?: string;
+  /** Optional secondary label rendered after the title (e.g. site name). */
+  meta?: string;
+  /** Optional URL target — opens in a new tab when set (e.g. external tool URL). */
+  externalHref?: string;
+}
+
+export interface TimelineCollectionMeta {
+  /** Short label rendered in the filter chip and the per-event chip. */
+  label: string;
+  /** Foreground color for the per-event chip. */
+  color: string;
+  /** Background color for the per-event chip. */
+  bg: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  backLink?: { label: string; href: string };
+  events: TimelineEvent[];
+  collections: Record<string, TimelineCollectionMeta>;
+  /** Override the "Added / Updated" filter chip labels. */
+  kindLabels?: { created?: string; modified?: string };
+  /** Override the "events / added / updated" stats words. */
+  statsLabels?: { events?: string; created?: string; modified?: string };
+}
+
+const {
+  title,
+  subtitle,
+  backLink,
+  events,
+  collections,
+  kindLabels = { created: 'Added', modified: 'Updated' },
+  statsLabels = { events: 'events', created: 'added', modified: 'updated' },
+} = Astro.props;
+
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function ymKey(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+function startOfWeek(d: Date) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - x.getDay());
+  return x;
+}
+function weekRangeLabel(weekStart: Date) {
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  const sm = monthNames[weekStart.getMonth()];
+  const em = monthNames[end.getMonth()];
+  if (sm === em) return `${sm} ${weekStart.getDate()}–${end.getDate()}`;
+  return `${sm} ${weekStart.getDate()} – ${em} ${end.getDate()}`;
+}
+
+interface WeekBucket { weekStart: Date; weekKey: string; label: string; events: TimelineEvent[]; }
+interface MonthBucket { ymKey: string; label: string; weeks: WeekBucket[]; created: number; modified: number; total: number; }
+
+const monthMap = new Map<string, { bucket: MonthBucket; weeks: Map<string, WeekBucket> }>();
+
+for (const ev of events) {
+  const yk = ymKey(ev.date);
+  const ws = startOfWeek(ev.date);
+  const wk = ws.toISOString();
+
+  let m = monthMap.get(yk);
+  if (!m) {
+    m = {
+      bucket: {
+        ymKey: yk,
+        label: `${monthNames[ev.date.getMonth()]} ${ev.date.getFullYear()}`,
+        weeks: [],
+        created: 0, modified: 0, total: 0,
+      },
+      weeks: new Map(),
+    };
+    monthMap.set(yk, m);
+  }
+  let w = m.weeks.get(wk);
+  if (!w) {
+    w = { weekStart: ws, weekKey: wk, label: weekRangeLabel(ws), events: [] };
+    m.weeks.set(wk, w);
+  }
+  w.events.push(ev);
+  m.bucket.total++;
+  if (ev.kind === 'created') m.bucket.created++;
+  else m.bucket.modified++;
+}
+
+const months: MonthBucket[] = Array.from(monthMap.values())
+  .map(({ bucket, weeks }) => ({
+    ...bucket,
+    weeks: Array.from(weeks.values())
+      .map(w => ({ ...w, events: w.events.sort((a, b) => b.date.getTime() - a.date.getTime()) }))
+      .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime()),
+  }))
+  .sort((a, b) => b.ymKey.localeCompare(a.ymKey));
+
+const totalEvents = events.length;
+const totalCreated = events.filter(e => e.kind === 'created').length;
+const totalModified = totalEvents - totalCreated;
+
+const collectionKeys = Object.keys(collections);
+
+function searchHaystack(ev: TimelineEvent): string {
+  return [ev.title, ev.id, ev.meta ?? '', ...ev.tags].join(' ').toLowerCase();
+}
+---
+
+<div class="tl-page">
+  <header class="tl-header">
+    {backLink && <a href={backLink.href} class="back-link">{backLink.label}</a>}
+    <h1>{title}</h1>
+    {subtitle && <p class="subtitle">{subtitle}</p>}
+    <div class="stats">
+      <span><strong>{totalEvents.toLocaleString()}</strong> {statsLabels.events}</span>
+      <span class="dot-sep">•</span>
+      <span><strong class="created-num">{totalCreated.toLocaleString()}</strong> {statsLabels.created}</span>
+      <span class="dot-sep">•</span>
+      <span><strong class="modified-num">{totalModified.toLocaleString()}</strong> {statsLabels.modified}</span>
+    </div>
+
+    <div class="search-row">
+      <input
+        class="tl-search"
+        type="search"
+        placeholder="Filter by title, id, or tag…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <div class="filter-chips">
+        <label><input type="checkbox" class="kind-toggle" data-kind="created" checked /> {kindLabels.created}</label>
+        <label><input type="checkbox" class="kind-toggle" data-kind="modified" checked /> {kindLabels.modified}</label>
+        {collectionKeys.map(key => (
+          <label><input type="checkbox" class="coll-toggle" data-coll={key} checked /> {collections[key].label}</label>
+        ))}
+      </div>
+    </div>
+  </header>
+
+  <div class="tl-body">
+    {months.map((month, mi) => (
+      <section class="tl-month" data-month={mi}>
+        <button class="month-head" type="button" data-toggle="month" data-target={mi} aria-expanded={mi === 0 ? 'true' : 'false'}>
+          <span class="caret">{mi === 0 ? '▼' : '▶'}</span>
+          <span class="month-label">{month.label}</span>
+          <span class="month-counts">
+            {month.created > 0 && <span class="chip created">+{month.created}</span>}
+            {month.modified > 0 && <span class="chip modified">↻{month.modified}</span>}
+          </span>
+        </button>
+        <div class="weeks" data-month-body={mi} style={mi === 0 ? '' : 'display:none;'}>
+          {month.weeks.map((week, wi) => (
+            <div class="week" data-week={`${mi}-${wi}`}>
+              <div class="week-head">
+                <span class="week-label">{week.label}</span>
+                <span class="week-count">{week.events.length}</span>
+              </div>
+              <ul class="events">
+                {week.events.map(ev => {
+                  const meta = collections[ev.collection];
+                  return (
+                    <li
+                      class={`event ${ev.kind}`}
+                      data-search={searchHaystack(ev)}
+                      data-kind={ev.kind}
+                      data-coll={ev.collection}
+                    >
+                      <span class={`bar ${ev.kind}`} aria-hidden="true"></span>
+                      <span class="date">{ev.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <span class={`kind kind-${ev.kind}`}>
+                        {ev.kind === 'created' ? kindLabels.created : kindLabels.modified}
+                      </span>
+                      {ev.externalHref ? (
+                        <a class="title" href={ev.externalHref} target="_blank" rel="noopener noreferrer">{ev.title}</a>
+                      ) : (
+                        <a class="title" href={ev.href}>{ev.title}</a>
+                      )}
+                      {meta && (
+                        <span class="coll" style={`color: ${meta.color}; background: ${meta.bg};`}>{meta.label}</span>
+                      )}
+                      {ev.folder && <span class="folder">{ev.folder}</span>}
+                      {ev.meta && <span class="folder">{ev.meta}</span>}
+                      {ev.tags.length > 0 && (
+                        <span class="tags">{ev.tags.slice(0, 3).join(' · ')}</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <p class="empty" style="display:none;">No matches.</p>
+</div>
+
+<script>
+  type ToggleEl = HTMLInputElement;
+
+  // Scope every query to the most-recently-rendered .tl-page so multiple instances
+  // on a page don't clash (defensive — current pages only render one).
+  document.querySelectorAll<HTMLElement>('.tl-page').forEach(root => {
+    if ((root as any).__tlBound) return;
+    (root as any).__tlBound = true;
+
+    const search = root.querySelector<HTMLInputElement>('.tl-search');
+    const kindToggles = Array.from(root.querySelectorAll<ToggleEl>('.kind-toggle'));
+    const collToggles = Array.from(root.querySelectorAll<ToggleEl>('.coll-toggle'));
+    const events = Array.from(root.querySelectorAll<HTMLLIElement>('.event'));
+    const weeks = Array.from(root.querySelectorAll<HTMLDivElement>('.week'));
+    const months = Array.from(root.querySelectorAll<HTMLElement>('.tl-month'));
+    const monthBodies = Array.from(root.querySelectorAll<HTMLElement>('[data-month-body]'));
+    const empty = root.querySelector<HTMLElement>('.empty');
+    const weekCountEls = new Map<HTMLElement, HTMLElement>();
+    weeks.forEach(w => {
+      const c = w.querySelector<HTMLElement>('.week-count');
+      if (c) weekCountEls.set(w, c);
+    });
+
+    function applyFilter() {
+      const q = search?.value.trim().toLowerCase() ?? '';
+      const allowedKinds = new Set(kindToggles.filter(t => t.checked).map(t => t.dataset.kind!));
+      const allowedColls = new Set(collToggles.filter(t => t.checked).map(t => t.dataset.coll!));
+
+      let totalVisible = 0;
+
+      events.forEach(ev => {
+        const haystack = ev.dataset.search || '';
+        const kind = ev.dataset.kind || '';
+        const coll = ev.dataset.coll || '';
+        const visible = allowedKinds.has(kind) && allowedColls.has(coll) && (q === '' || haystack.includes(q));
+        ev.style.display = visible ? '' : 'none';
+        if (visible) totalVisible++;
+      });
+
+      weeks.forEach(w => {
+        const visEvents = w.querySelectorAll<HTMLElement>('.event:not([style*="display: none"])').length;
+        w.style.display = visEvents === 0 ? 'none' : '';
+        const c = weekCountEls.get(w);
+        if (c) c.textContent = String(visEvents);
+      });
+
+      months.forEach(m => {
+        const visWeeks = m.querySelectorAll<HTMLElement>('.week:not([style*="display: none"])').length;
+        m.style.display = visWeeks === 0 ? 'none' : '';
+      });
+
+      if (q !== '') {
+        monthBodies.forEach(b => { b.style.display = ''; });
+        root.querySelectorAll<HTMLElement>('.month-head .caret').forEach(c => c.textContent = '▼');
+        root.querySelectorAll<HTMLElement>('.month-head').forEach(h => h.setAttribute('aria-expanded', 'true'));
+      }
+
+      if (empty) empty.style.display = totalVisible === 0 ? '' : 'none';
+    }
+
+    search?.addEventListener('input', applyFilter);
+    [...kindToggles, ...collToggles].forEach(t => t.addEventListener('change', applyFilter));
+
+    root.querySelectorAll<HTMLButtonElement>('[data-toggle="month"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = btn.dataset.target!;
+        const body = root.querySelector<HTMLElement>(`[data-month-body="${idx}"]`);
+        const caret = btn.querySelector<HTMLElement>('.caret');
+        if (!body || !caret) return;
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : '';
+        caret.textContent = open ? '▶' : '▼';
+        btn.setAttribute('aria-expanded', String(!open));
+      });
+    });
+  });
+</script>
+
+<style>
+  .tl-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+    color: var(--clr-body, #e2e8f0);
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  .tl-header h1 {
+    font-size: 1.6rem;
+    margin: 0 0 0.25rem 0;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 0.75rem 0;
+  }
+  .stats {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .stats strong { color: var(--clr-lossless-primary-light, #f1f5f9); }
+  .stats .dot-sep { opacity: 0.4; }
+  .created-num { color: #86efac; }
+  .modified-num { color: #93c5fd; }
+
+  .search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .tl-search {
+    flex: 1 1 280px;
+    min-width: 240px;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: inherit;
+    font-size: 0.9rem;
+  }
+  .tl-search:focus {
+    outline: none;
+    border-color: var(--clr-lossless-accent--brightest, #04e5e5);
+    background: rgba(255,255,255,0.06);
+  }
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    font-size: 0.78rem;
+  }
+  .filter-chips label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .filter-chips input { accent-color: var(--clr-lossless-accent--brightest, #04e5e5); }
+
+  .tl-month { margin-bottom: 0.5rem; }
+  .month-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 6px;
+    cursor: pointer;
+    color: inherit;
+    text-align: left;
+    font-family: inherit;
+  }
+  .month-head:hover { background: rgba(255,255,255,0.06); }
+  .caret {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-size: 0.7rem;
+    width: 10px;
+    flex: 0 0 auto;
+  }
+  .month-label {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+  .month-counts { display: flex; gap: 0.35rem; }
+  .chip {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .chip.created { background: rgba(34,197,94,0.18); color: #86efac; }
+  .chip.modified { background: rgba(59,130,246,0.18); color: #93c5fd; }
+
+  .weeks { padding: 0.35rem 0 0.5rem 1.1rem; }
+  .week + .week { margin-top: 0.4rem; }
+  .week-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.15rem 0.25rem;
+    font-size: 0.75rem;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .week-count {
+    font-size: 0.68rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--clr-body, #cbd5e1);
+  }
+
+  .events { list-style: none; padding: 0; margin: 0.2rem 0 0 0; }
+  .event {
+    display: grid;
+    grid-template-columns: 4px 64px auto 1fr auto auto auto;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.22rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.83rem;
+    line-height: 1.25;
+  }
+
+  .kind {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.08rem 0.45rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .kind.kind-created  { color: #86efac; background: rgba(34,197,94,0.18); }
+  .kind.kind-modified { color: #93c5fd; background: rgba(59,130,246,0.18); }
+  .event:hover { background: rgba(255,255,255,0.04); }
+  .bar {
+    width: 3px;
+    height: 14px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .bar.created { background: #86efac; }
+  .bar.modified { background: #93c5fd; }
+  .date {
+    font-size: 0.72rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .title {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .title:hover { text-decoration: underline; }
+
+  .coll {
+    font-size: 0.66rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .folder {
+    font-size: 0.7rem;
+    color: var(--white--pure--40p, rgba(255,255,255,0.45));
+    white-space: nowrap;
+  }
+  .tags {
+    font-size: 0.7rem;
+    color: var(--white--pure--40p, rgba(255,255,255,0.45));
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--clr-body, rgba(255,255,255,0.6));
+  }
+
+  @media (max-width: 720px) {
+    .event {
+      grid-template-columns: 3px 50px auto 1fr auto;
+      font-size: 0.78rem;
+    }
+    .folder, .tags { display: none; }
+    .month-label { font-size: 0.85rem; }
+  }
+</style>

@@ -1,11 +1,17 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import Header from '@basics/Header.astro';
-import Footer from '@basics/Footer.astro';
 import AlternatingSideImage from '@basics/messages/AlternatingSideImage.astro';
 import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
 
 export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/astro-knots/', {
+  title: 'Astro Knots',
+  description: 'A pseudomonorepo for the age of AI-assisted development.',
+  siteName: 'Astro Knots',
+});
 
 const sites = [
   { name: "mpstaton-site", desc: "Personal portfolio & CV", status: "Active", url: "https://github.com/lossless-group/mpstaton-site" },
@@ -16,6 +22,44 @@ const sites = [
   { name: "banner-site", desc: "Client site", status: "Active", url: "https://github.com/lossless-group/emblem-site" },
   { name: "cogs-site", desc: "In progress", status: "WIP" },
   { name: "coglet-shuffle", desc: "Nested astro-site", status: "WIP" },
+];
+
+const survived = [
+  "Co-located development — all sites visible in one workspace for pattern comparison",
+  "Git submodules — each site is its own repo, independently deployable",
+  "Shared `context-v/` documents (specs, blueprints, prompts, reminders) that guide development across sites",
+  "Cross-loadable context: site-specific files referenced via `@context-v/*` when they apply elsewhere",
+  "Selective package publishing when something genuinely needs to be shared as a dependency",
+];
+
+const didntWork = [
+  "`@knots/*` as imported dependencies — too much abstraction overhead for the value",
+  "“Copy when you remember” — we usually didn't remember",
+  "Style-free component patterns — sites diverge too much in design for generic components to work",
+];
+
+const patternPackages = [
+  { name: "@knots/tokens", purpose: "Design token structure (colors, scales)" },
+  { name: "@knots/icons", purpose: "SVG icon helper pattern" },
+  { name: "@knots/astro", purpose: "Astro patterns: Button, AstroMarkdown, CodeBlock, Callout" },
+  { name: "@knots/svelte", purpose: "Svelte component patterns" },
+  { name: "@knots/brand-config", purpose: "Brand configuration type and CSS var helper" },
+  { name: "@knots/tailwind", purpose: "Tailwind preset/plugin (TW4 migration pending)" },
+];
+
+const referencePages = [
+  {
+    title: "Brand Kit (/brand-kit)",
+    audience: "Stakeholders, brand reviewers, marketing",
+    scope: "Brand essentials — colors, type, marks, signature layouts",
+    cadence: "Rarely — only when brand evolves",
+  },
+  {
+    title: "Design System (/design-system)",
+    audience: "Developers, AI assistants, contributors",
+    scope: "Exhaustive component catalog with variants, props, CSS contracts",
+    cadence: "Continuously — every new component lands here",
+  },
 ];
 
 const valueProps = [
@@ -43,12 +87,10 @@ const valueProps = [
 ---
 
 <Layout title="Astro Knots - The Lossless Group">
-  <Header />
-
   <main class="main-content">
     <div class="container">
       <!-- Hero -->
-      <div class="hero-header">
+      <div class="hero-header hero-header--with-splash">
         <div class="header-content">
           <div class="header-icon">
             <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,9 +109,35 @@ const valueProps = [
           </div>
           <div class="header-text">
             <h1 class="page-title">Astro Knots</h1>
-            <p class="page-subtitle">A <strong class="highlight">pseudomonorepo</strong> for the age of AI-assisted development. Speed up delivery by co-locating projects with shared patterns, dependencies, and documentation under one roof.</p>
+            <p class="page-subtitle">A <strong class="highlight">pseudomonorepo</strong> for the age of AI-assisted development. Twelve <strong class="highlight-soft">Astro</strong> sites with dashes of <strong class="highlight-soft">Svelte</strong>, <strong class="highlight-soft">Reveal.js</strong>, and <strong class="highlight-soft">Tailwind v4</strong> — co-located so patterns, context, and design conventions can travel between them without forcing premature abstraction.</p>
+
+            <div class="hero-stats">
+              <div class="hero-stat"><span class="hero-stat__value">12</span><span class="hero-stat__label">Astro Sites</span></div>
+              <div class="hero-stat"><span class="hero-stat__value">3</span><span class="hero-stat__label">Theme Modes</span></div>
+              <div class="hero-stat"><span class="hero-stat__value">1</span><span class="hero-stat__label">Published Package</span></div>
+            </div>
+
+            <ul class="hero-capabilities">
+              <li>Slideshows &amp; Scroll Decks</li>
+              <li>Three Modes — Light, Dark, Vibrant</li>
+              <li>Design Systems &amp; Brand Kits</li>
+              <li>Agent Skills</li>
+              <li>Context Vigilance</li>
+              <li>Lossless Flavored Markdown</li>
+            </ul>
+
+            <div class="hero-actions">
+              <a href="https://github.com/lossless-group/astro-knots" target="_blank" rel="noopener noreferrer" class="btn-primary">
+                <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                View Repo on GitHub
+              </a>
+              <a href="https://jsr.io/@lossless-group/lfm" target="_blank" rel="noopener noreferrer" class="btn-secondary">@lossless-group/lfm on JSR</a>
+            </div>
           </div>
         </div>
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" />
+        </aside>
       </div>
 
       <ThinGradientBleedSeparator />
@@ -122,6 +190,154 @@ const valueProps = [
 
       <ThinGradientBleedSeparator />
 
+      <!-- Reality Check -->
+      <section class="reckoning-section">
+        <h2 class="section-title">An Honest Reckoning</h2>
+        <p class="section-lede">A pseudomonorepo is in between states. Here's what actually held up when our small team tried to maintain a workspace of ten-plus Astro sites — and what we quietly walked back.</p>
+        <div class="reckoning-grid">
+          <div class="reckoning-card reckoning-card--kept">
+            <div class="reckoning-card__header">
+              <span class="reckoning-icon" aria-hidden="true">✓</span>
+              <h3>What Survived</h3>
+            </div>
+            <ul class="reckoning-list">
+              {survived.map(item => (<li set:html={item.replace(/`([^`]+)`/g, '<code>$1</code>')}></li>))}
+            </ul>
+          </div>
+          <div class="reckoning-card reckoning-card--cut">
+            <div class="reckoning-card__header">
+              <span class="reckoning-icon" aria-hidden="true">✗</span>
+              <h3>What We Walked Back</h3>
+            </div>
+            <ul class="reckoning-list">
+              {didntWork.map(item => (<li set:html={item.replace(/`([^`]+)`/g, '<code>$1</code>')}></li>))}
+            </ul>
+          </div>
+        </div>
+        <p class="reckoning-stance"><strong>Current stance:</strong> evolving toward more sharing, but only where it's justified. Markdown processing pipelines genuinely benefit from a shared package; UI components don't.</p>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- The One True Package -->
+      <section class="package-section">
+        <div class="package-header">
+          <span class="package-eyebrow">The One True Package</span>
+          <h2 class="section-title">@lossless-group/lfm</h2>
+          <p class="section-lede"><strong>Lossless Flavored Markdown</strong> — a shared remark/rehype pipeline for extended markdown processing. The first piece of the workspace that proved it deserved to be a real, published dependency rather than a copy-paste pattern.</p>
+        </div>
+
+        <div class="package-grid">
+          <div class="package-features">
+            <div class="package-feature">
+              <h4>remark-callouts</h4>
+              <p>Normalizes Obsidian <code>&gt; [!type] Title</code> callouts into directive nodes that any renderer can consume.</p>
+            </div>
+            <div class="package-feature">
+              <h4>remark-citations</h4>
+              <p>Transforms hex-code footnote identifiers (<code>[^a1b2c3]</code>) into sequentially-numbered citations with structured metadata — so authors never renumber when reordering.</p>
+            </div>
+            <div class="package-feature">
+              <h4>One import, one tree</h4>
+              <p>Bundles unified, remark-parse, remark-gfm, remark-directive, and custom plugins behind a single <code>parseMarkdown()</code> call.</p>
+            </div>
+          </div>
+          <div class="cli-block">
+            <div class="cli-header">
+              <span class="cli-dot red"></span>
+              <span class="cli-dot yellow"></span>
+              <span class="cli-dot green"></span>
+              <span class="cli-title">parse.ts</span>
+            </div>
+            <pre class="cli-code"><code>{`import { parseMarkdown } from '@lossless-group/lfm';
+
+const tree = await parseMarkdown(content);
+
+// Citations attached to the tree after parsing
+const citations = tree.data?.citations?.ordered ?? [];
+// Each citation: index, title, url, source,
+//                publishedDate, raw`}</code></pre>
+          </div>
+        </div>
+        <div class="package-actions">
+          <a href="/projects/gallery/lossless-flavored-markdown" class="btn-primary">Explore the LFM project page</a>
+          <a href="https://jsr.io/@lossless-group/lfm" target="_blank" class="btn-secondary">View on JSR</a>
+          <a href="https://github.com/lossless-group/lfm" target="_blank" class="btn-secondary">Source on GitHub</a>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Pattern Packages -->
+      <section class="patterns-section">
+        <h2 class="section-title">Pattern Packages: <code>@knots/*</code></h2>
+        <p class="section-lede">Not published packages. Workspace-local pattern references — source code you look at, copy from, and adapt. They exist as a cookbook of conventions for sites that need a starting point.</p>
+        <div class="patterns-grid">
+          {patternPackages.map(pkg => (
+            <div class="pattern-card">
+              <code class="pattern-name">{pkg.name}</code>
+              <p class="pattern-purpose">{pkg.purpose}</p>
+            </div>
+          ))}
+        </div>
+        <p class="patterns-note"><em>The <code>@knots/astro</code> markdown components are particularly useful as a starting point — mpstaton-site copied and adapted these for its content rendering.</em></p>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Reference Pages -->
+      <section class="reference-section">
+        <h2 class="section-title">Two Internal Reference Pages, Per Site</h2>
+        <p class="section-lede">Every Astro Knots site ships with <code>/brand-kit</code> and <code>/design-system</code> pages that together replace what most teams use Storybook for. Components render in their real theme, mode, layout, and tokens — no parallel build, no drift.</p>
+        <div class="reference-grid">
+          {referencePages.map(page => (
+            <div class="reference-card">
+              <h3 class="reference-title">{page.title}</h3>
+              <dl class="reference-list">
+                <dt>Audience</dt>
+                <dd>{page.audience}</dd>
+                <dt>Scope</dt>
+                <dd>{page.scope}</dd>
+                <dt>Update cadence</dt>
+                <dd>{page.cadence}</dd>
+              </dl>
+            </div>
+          ))}
+        </div>
+        <p class="reference-note">Both pages use the standard <code>BaseThemeLayout</code> and surface the theme + mode toggle so reviewers can verify all three modes — light, dark, and vibrant — without leaving the page.</p>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Quick Start -->
+      <section class="quickstart-section">
+        <h2 class="section-title">Quick Start</h2>
+        <p class="section-lede">Always use <code>pnpm</code> — npm or yarn break workspace resolution.</p>
+        <div class="cli-block cli-block--wide">
+          <div class="cli-header">
+            <span class="cli-dot red"></span>
+            <span class="cli-dot yellow"></span>
+            <span class="cli-dot green"></span>
+            <span class="cli-title">terminal</span>
+          </div>
+          <pre class="cli-code"><code>{`# Install everything
+pnpm install
+
+# Run a site
+pnpm --filter mpstaton-site dev
+pnpm --filter hypernova-site dev
+pnpm --filter cilantro-site dev
+
+# Build a site
+pnpm --filter mpstaton-site build
+
+# If pnpm complains about GitHub Packages auth
+GITHUB_TOKEN=$(gh auth token) pnpm install`}</code></pre>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
       <!-- Feature Deep Dives -->
       <div class="content-section">
         <AlternatingSideImage
@@ -153,14 +369,39 @@ const valueProps = [
     padding: 2rem 0;
   }
 
+  .hero-header--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .hero-splash {
+    width: clamp(300px, 32vw, 460px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero-header--with-splash {
+      grid-template-columns: 1fr;
+    }
+    .hero-splash {
+      width: 100%;
+      max-width: 520px;
+      position: static;
+    }
+  }
+
   .header-content {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 2rem;
   }
 
   .header-icon {
     flex-shrink: 0;
+    margin-top: 0.5rem;
   }
 
   .header-text {
@@ -190,6 +431,77 @@ const valueProps = [
     color: var(--clr-lossless-accent--brightest, #04e5e5);
     -webkit-text-fill-color: var(--clr-lossless-accent--brightest, #04e5e5);
     font-weight: 700;
+  }
+
+  .highlight-soft {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    -webkit-text-fill-color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    font-weight: 600;
+  }
+
+  /* Hero stats row */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    margin: 1.75rem 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(4, 229, 229, 0.04);
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 10px;
+    width: fit-content;
+  }
+
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .hero-stat__value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-feature-settings: "tnum";
+  }
+
+  .hero-stat__label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  /* Capability chips */
+  .hero-capabilities {
+    list-style: none;
+    margin: 0 0 1.75rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hero-capabilities li {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(111, 255, 214, 0.22);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    line-height: 1.3;
+  }
+
+  /* Hero actions (scoped to hero — page-level .btn-* defined below) */
+  .hero-header .hero-actions {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
   }
 
   /* Value Propositions */
@@ -384,6 +696,367 @@ const valueProps = [
     }
 
     .sites-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Reckoning */
+  .reckoning-section {
+    padding: 3rem 0;
+  }
+
+  .reckoning-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0 1.5rem;
+  }
+
+  .reckoning-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .reckoning-card--kept {
+    border-color: rgba(111, 255, 214, 0.28);
+  }
+
+  .reckoning-card--cut {
+    border-color: rgba(191, 35, 247, 0.28);
+  }
+
+  .reckoning-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .reckoning-card__header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .reckoning-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .reckoning-card--kept .reckoning-icon {
+    background: rgba(111, 255, 214, 0.18);
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .reckoning-card--cut .reckoning-icon {
+    background: rgba(191, 35, 247, 0.18);
+    color: #d98ff5;
+  }
+
+  .reckoning-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .reckoning-list code {
+    background: rgba(4, 229, 229, 0.08);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    font-size: 0.9em;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .reckoning-stance {
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--clr-lossless-accent--brightest, #04e5e5);
+    background: rgba(4, 229, 229, 0.04);
+    border-radius: 0 8px 8px 0;
+  }
+
+  /* Package spotlight */
+  .package-section {
+    padding: 3rem 0;
+  }
+
+  .package-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.5rem;
+  }
+
+  .package-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin: 2rem 0 1.5rem;
+  }
+
+  .package-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .package-feature {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+  }
+
+  .package-feature h4 {
+    margin: 0 0 0.4rem 0;
+    font-size: 1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .package-feature p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+  }
+
+  .package-feature code,
+  .patterns-note code,
+  .reference-note code,
+  .quickstart-section code,
+  .section-lede code,
+  .section-title code {
+    background: rgba(4, 229, 229, 0.08);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    font-family: var(--ff-monospace, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 0.9em;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .package-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    text-decoration: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: opacity 0.2s, background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+  }
+
+  .btn-primary:hover {
+    opacity: 0.85;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(111, 255, 214, 0.08);
+  }
+
+  /* CLI block */
+  .cli-block {
+    background: #0d1117;
+    border-radius: 10px;
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    overflow: hidden;
+  }
+
+  .cli-block--wide {
+    max-width: 760px;
+    margin: 1.5rem 0;
+  }
+
+  .cli-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cli-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .cli-dot.red { background: #ff5f57; }
+  .cli-dot.yellow { background: #febc2e; }
+  .cli-dot.green { background: #28c840; }
+
+  .cli-title {
+    font-size: 0.75rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    margin-left: 0.5rem;
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .cli-code {
+    padding: 1.1rem 1.25rem;
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+    font-family: var(--ff-monospace, monospace);
+    overflow-x: auto;
+  }
+
+  /* Patterns */
+  .patterns-section {
+    padding: 3rem 0;
+  }
+
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2rem 0 1.25rem;
+  }
+
+  .pattern-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1rem 1.15rem;
+  }
+
+  .pattern-name {
+    display: inline-block;
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin-bottom: 0.5rem;
+  }
+
+  .pattern-purpose {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.55;
+  }
+
+  .patterns-note {
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  /* Reference pages */
+  .reference-section {
+    padding: 3rem 0;
+  }
+
+  .reference-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin: 2rem 0 1.25rem;
+  }
+
+  .reference-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .reference-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .reference-list {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 1rem;
+    row-gap: 0.5rem;
+  }
+
+  .reference-list dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clr-lossless-primary-light, #64748b);
+    font-weight: 600;
+  }
+
+  .reference-list dd {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    line-height: 1.5;
+  }
+
+  .reference-note {
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.65;
+  }
+
+  /* Quickstart */
+  .quickstart-section {
+    padding: 3rem 0;
+  }
+
+  @media (max-width: 900px) {
+    .reckoning-grid,
+    .package-grid,
+    .reference-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .patterns-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .patterns-grid {
       grid-template-columns: 1fr;
     }
   }

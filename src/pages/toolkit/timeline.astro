@@ -1,432 +1,104 @@
 ---
 /**
- * /toolkit/timeline.astro — Nested Collapsible Timeline
+ * /toolkit/timeline.astro — Toolkit Timeline
  *
- * Hierarchical view: Click months to see weeks, click weeks to see tools
- * Shows when tools were added (date_created) and modified (date_modified)
+ * Aggregates the `tooling` and `vertical-toolkits` collections into Month → Week
+ * timeline events. Rendering, filtering, and search live in <Timeline>.
  */
-import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
+import Timeline, { type TimelineEvent } from '@components/timeline/Timeline.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
 
 export const prerender = true;
 
-const toolingEntries = await getCollection('tooling');
-const verticalToolkitsEntries = await getCollection('vertical-toolkits');
-const allTools = [...toolingEntries, ...verticalToolkitsEntries];
+type CollectionId = 'tooling' | 'vertical-toolkits';
 
-function parseDate(dateValue: any): Date | null {
-  if (!dateValue) return null;
-  if (dateValue instanceof Date) return dateValue;
-  try { return new Date(dateValue); } catch { return null; }
+const [tooling, verticalToolkits] = await Promise.all([
+  getCollection('tooling'),
+  getCollection('vertical-toolkits'),
+]);
+
+function parseDate(v: any): Date | null {
+  if (!v) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
 }
 
-function getYearMonth(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+/**
+ * Pull the original filename (preserving case — entry.id is lowercased by Astro's
+ * default glob slug generator, so we'd lose "API", "NLP", etc.).
+ */
+function originalFilename(entry: any): string {
+  const path: string = entry.filePath || entry.id;
+  const base = path.split('/').pop() || path;
+  return base.replace(/\.(md|mdx)$/i, '').replace(/[-_]+/g, ' ');
 }
 
-function getStartOfWeek(date: Date): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() - d.getDay());
-  return d;
+function getTitle(entry: any): string {
+  const t = entry.data?.title;
+  if (typeof t === 'string' && t.trim()) return t.trim();
+  const og = entry.data?.og_title;
+  if (typeof og === 'string' && og.trim()) return og.trim();
+  const site = entry.data?.site_name;
+  if (typeof site === 'string' && site.trim()) return site.trim();
+  return originalFilename(entry);
 }
 
-function formatWeekRange(weekStart: Date): string {
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-  const startMonth = weekStart.toLocaleDateString('en-US', { month: 'short' });
-  const endMonth = weekEnd.toLocaleDateString('en-US', { month: 'short' });
-  const startDay = weekStart.getDate();
-  const endDay = weekEnd.getDate();
-  if (startMonth === endMonth) {
-    return `${startMonth} ${startDay}-${endDay}`;
-  }
-  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+function originalFolder(entry: any): string {
+  const path: string = entry.filePath || entry.id;
+  const parts = path.split('/');
+  return parts.length > 1 ? parts[0].replace(/[-_]+/g, ' ') : '';
 }
 
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function tagsToArray(t: any): string[] {
+  if (!t) return [];
+  if (Array.isArray(t)) return t.map(String);
+  if (typeof t === 'string') return t.split(/[,\s]+/).filter(Boolean);
+  return [];
+}
 
-const toolsList = allTools.map(tool => {
-  const title = tool.data.title || tool.data.og_title || tool.data.site_name || tool.id.split('/').pop()?.replace('.md', '').replace(/\./g, ' ') || 'Untitled';
-  const siteName = tool.data.site_name;
-  // Prefix with "Site Name: " when site_name exists and isn't already part of the title
-  const displayTitle = siteName && !title.includes(siteName) ? `${siteName}: ${title}` : title;
-  return {
-    title: displayTitle,
-    url: tool.data.url || tool.data.github_repo_url,
-    dateCreated: parseDate(tool.data.date_created),
-    dateModified: parseDate(tool.data.date_modified)
-  };
-});
+const events: TimelineEvent[] = [];
 
-interface ToolData { title: string; url?: string; dateCreated: Date | null; dateModified: Date | null; }
-interface WeekData { weekStart: Date; weekRange: string; created: ToolData[]; modified: ToolData[]; }
-interface MonthData { yearMonth: string; monthName: string; year: number; weeks: WeekData[]; totalCreated: number; totalModified: number; }
+function pushEvents(collection: CollectionId, list: any[]) {
+  for (const entry of list) {
+    const created = parseDate(entry.data?.date_created);
+    const modified = parseDate(entry.data?.date_modified);
+    const title = getTitle(entry);
+    const href = `/toolkit/${getReferenceSlug(entry.id)}`;
+    const externalHref: string | undefined =
+      entry.data?.url || entry.data?.github_repo_url || undefined;
+    const tags = tagsToArray(entry.data?.tags);
+    const siteName: string | undefined = entry.data?.site_name;
+    const folder = originalFolder(entry);
+    const meta = siteName && !title.toLowerCase().includes(siteName.toLowerCase())
+      ? siteName
+      : undefined;
+    const base = { title, href, collection, id: entry.id, tags, folder, meta, externalHref };
 
-const monthMap = new Map<string, { data: MonthData; weekMap: Map<string, WeekData> }>();
-
-toolsList.forEach(tool => {
-  if (tool.dateCreated) {
-    const yearMonth = getYearMonth(tool.dateCreated);
-    const weekStart = getStartOfWeek(tool.dateCreated);
-    const weekKey = weekStart.toISOString();
-
-    if (!monthMap.has(yearMonth)) {
-      monthMap.set(yearMonth, {
-        data: {
-          yearMonth,
-          monthName: `${monthNames[tool.dateCreated.getMonth()]} ${tool.dateCreated.getFullYear()}`,
-          year: tool.dateCreated.getFullYear(),
-          weeks: [],
-          totalCreated: 0,
-          totalModified: 0
-        },
-        weekMap: new Map()
-      });
-    }
-
-    const month = monthMap.get(yearMonth)!;
-    if (!month.weekMap.has(weekKey)) {
-      month.weekMap.set(weekKey, { weekStart, weekRange: formatWeekRange(weekStart), created: [], modified: [] });
-    }
-
-    month.weekMap.get(weekKey)!.created.push(tool);
-    month.data.totalCreated++;
-  }
-
-  if (tool.dateModified) {
-    const modYearMonth = getYearMonth(tool.dateModified);
-    const modWeekStart = getStartOfWeek(tool.dateModified);
-    const modWeekKey = modWeekStart.toISOString();
-
-    const createdWeekKey = tool.dateCreated ? getStartOfWeek(tool.dateCreated).toISOString() : null;
-    if (modWeekKey !== createdWeekKey) {
-      if (!monthMap.has(modYearMonth)) {
-        monthMap.set(modYearMonth, {
-          data: {
-            yearMonth: modYearMonth,
-            monthName: `${monthNames[tool.dateModified.getMonth()]} ${tool.dateModified.getFullYear()}`,
-            year: tool.dateModified.getFullYear(),
-            weeks: [],
-            totalCreated: 0,
-            totalModified: 0
-          },
-          weekMap: new Map()
-        });
-      }
-
-      const month = monthMap.get(modYearMonth)!;
-      if (!month.weekMap.has(modWeekKey)) {
-        month.weekMap.set(modWeekKey, { weekStart: modWeekStart, weekRange: formatWeekRange(modWeekStart), created: [], modified: [] });
-      }
-
-      month.weekMap.get(modWeekKey)!.modified.push(tool);
-      month.data.totalModified++;
+    if (created) events.push({ kind: 'created', date: created, ...base });
+    if (modified && (!created || modified.getTime() !== created.getTime())) {
+      events.push({ kind: 'modified', date: modified, ...base });
     }
   }
-});
+}
 
-const timeline = Array.from(monthMap.values())
-  .map(m => ({ ...m.data, weeks: Array.from(m.weekMap.values()).sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime()) }))
-  .sort((a, b) => b.yearMonth.localeCompare(a.yearMonth));
+pushEvents('tooling', tooling);
+pushEvents('vertical-toolkits', verticalToolkits);
 
-const totalTools = allTools.length;
-const earliestDate = toolsList.map(t => t.dateCreated).filter(d => d).sort((a, b) => a!.getTime() - b!.getTime())[0];
+const collections = {
+  tooling:             { label: 'Tool',     color: '#5eead4', bg: 'rgba(20, 184, 166, 0.18)' },
+  'vertical-toolkits': { label: 'Vertical', color: '#fcd34d', bg: 'rgba(245, 158, 11, 0.18)' },
+};
 ---
 
 <Layout title="Toolkit Timeline">
-  <div class="timeline-page">
-    <header class="timeline-header">
-      <h1>Toolkit Timeline</h1>
-      <p class="subtitle">Click months to see weeks, click weeks to see individual tools</p>
-      <div class="stats">
-        <span><strong>{totalTools}</strong> tools tracked</span>
-        <span>Since <strong>{earliestDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</strong></span>
-      </div>
-    </header>
-
-    <div class="timeline-content">
-      {timeline.map((month, mi) => (
-        <div class="month-section">
-          <button class="month-toggle expanded" data-month={mi}>
-            <span class="toggle-icon">▼</span>
-            <h2>{month.monthName}</h2>
-            <div class="counts">
-              {month.totalCreated > 0 && <span class="count created">{month.totalCreated} created</span>}
-              {month.totalModified > 0 && <span class="count modified">{month.totalModified} modified</span>}
-            </div>
-          </button>
-
-          <div class="weeks-container" data-month-content={mi}>
-            {month.weeks.map((week, wi) => (
-              <div class="week-section">
-                <button class="week-toggle expanded" data-week={`${mi}-${wi}`}>
-                  <span class="toggle-icon">▼</span>
-                  <h3>{week.weekRange}</h3>
-                  <div class="counts">
-                    {week.created.length > 0 && <span class="count created">{week.created.length}</span>}
-                    {week.modified.length > 0 && <span class="count modified">{week.modified.length}</span>}
-                  </div>
-                </button>
-
-                <div class="tools-container" data-week-content={`${mi}-${wi}`}>
-                  {week.created.map(tool => (
-                    <div class="tool-item created">
-                      <span class="dot">●</span>
-                      <span class="date">{tool.dateCreated!.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                      {tool.url ? <a href={tool.url} target="_blank">{tool.title}</a> : <span>{tool.title}</span>}
-                    </div>
-                  ))}
-                  {week.modified.map(tool => (
-                    <div class="tool-item modified">
-                      <span class="dot">●</span>
-                      <span class="date">{tool.dateModified!.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                      {tool.url ? <a href={tool.url} target="_blank">{tool.title}</a> : <span>{tool.title}</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-
-  <script>
-    // Toggle months
-    document.querySelectorAll('.month-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const month = btn.getAttribute('data-month');
-        const content = document.querySelector(`[data-month-content="${month}"]`) as HTMLElement;
-        const icon = btn.querySelector('.toggle-icon')!;
-
-        if (content.style.display === 'none') {
-          content.style.display = 'block';
-          icon.textContent = '▼';
-          btn.classList.add('expanded');
-        } else {
-          content.style.display = 'none';
-          icon.textContent = '▶';
-          btn.classList.remove('expanded');
-        }
-      });
-    });
-
-    // Toggle weeks
-    document.querySelectorAll('.week-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const week = btn.getAttribute('data-week');
-        const content = document.querySelector(`[data-week-content="${week}"]`) as HTMLElement;
-        const icon = btn.querySelector('.toggle-icon')!;
-
-        if (content.style.display === 'none') {
-          content.style.display = 'block';
-          icon.textContent = '▼';
-          btn.classList.add('expanded');
-        } else {
-          content.style.display = 'none';
-          icon.textContent = '▶';
-          btn.classList.remove('expanded');
-        }
-      });
-    });
-  </script>
+  <Timeline
+    title="Toolkit Timeline"
+    subtitle="When tools were added to the toolkit and when their entries were last updated."
+    backLink={{ label: '← Toolkit', href: '/toolkit' }}
+    events={events}
+    collections={collections}
+  />
 </Layout>
-
-<style>
-  .timeline-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .timeline-header {
-    margin-bottom: 2rem;
-    border-bottom: 2px solid var(--clr-lossless-accent--brightest, #04e5e5);
-    padding-bottom: 1.5rem;
-  }
-
-  .timeline-header h1 {
-    font-size: 2.5rem;
-    margin: 0 0 0.5rem 0;
-    color: var(--clr-lossless-primary-light, #f1f5f9);
-  }
-
-  .subtitle {
-    color: var(--clr-lossless-primary-light, #94a3b8);
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
-  }
-
-  .stats {
-    display: flex;
-    gap: 2rem;
-    font-size: 1rem;
-    color: var(--clr-lossless-primary-light, #cbd5e1);
-  }
-
-  /* Month Section */
-  .month-section {
-    margin-bottom: 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 2px solid rgba(4, 229, 229, 0.2);
-    overflow: hidden;
-  }
-
-  .month-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.2s;
-  }
-
-  .month-toggle:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .month-toggle.expanded {
-    background: rgba(4, 229, 229, 0.1);
-  }
-
-  .toggle-icon {
-    color: var(--clr-lossless-accent--brightest, #04e5e5);
-    font-size: 0.875rem;
-    transition: transform 0.2s;
-    min-width: 20px;
-  }
-
-  .month-toggle h2 {
-    flex: 1;
-    margin: 0;
-    font-size: 1.3rem;
-    color: var(--clr-lossless-accent--brightest, #04e5e5);
-  }
-
-  .counts {
-    display: flex;
-    gap: 1rem;
-  }
-
-  .count {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  .count.created {
-    background: rgba(34, 197, 94, 0.2);
-    color: #86efac;
-  }
-
-  .count.modified {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93c5fd;
-  }
-
-  /* Weeks */
-  .weeks-container {
-    padding: 0.75rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .week-section {
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .week-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.2s;
-  }
-
-  .week-toggle:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .week-toggle.expanded {
-    background: rgba(111, 255, 214, 0.08);
-  }
-
-  .week-toggle h3 {
-    flex: 1;
-    margin: 0;
-    font-size: 1.15rem;
-    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
-  }
-
-  /* Tools */
-  .tools-container {
-    padding: 0 1rem 0.75rem 2.5rem;
-  }
-
-  .tool-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    margin-bottom: 0.25rem;
-    border-radius: 4px;
-    font-size: 0.925rem;
-  }
-
-  .tool-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .dot {
-    font-size: 0.5rem;
-    line-height: 1;
-  }
-
-  .tool-item.created .dot {
-    color: #86efac;
-  }
-
-  .tool-item.modified .dot {
-    color: #93c5fd;
-  }
-
-  .date {
-    color: var(--clr-lossless-primary-light, #94a3b8);
-    font-size: 0.8rem;
-    min-width: 100px;
-  }
-
-  .tool-item a {
-    color: var(--clr-lossless-accent--brightest, #04e5e5);
-    text-decoration: none;
-  }
-
-  .tool-item a:hover {
-    text-decoration: underline;
-  }
-
-  @media (max-width: 768px) {
-    .timeline-page { padding: 1rem; }
-    .timeline-header h1 { font-size: 2rem; }
-    .stats { flex-direction: column; gap: 0.5rem; }
-    .month-toggle, .week-toggle { flex-wrap: wrap; }
-    .counts { width: 100%; justify-content: flex-start; }
-    .tools-container { padding-left: 1rem; }
-    .date { min-width: auto; font-size: 0.7rem; }
-  }
-</style>

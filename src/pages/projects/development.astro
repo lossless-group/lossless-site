@@ -1,15 +1,10 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/basics/Header.astro';
-import Footer from '../../components/basics/Footer.astro';
-import ThinGradientBleedSeparator from '../../components/basics/separators/ThinGradientBleedSeparator.astro';
+import Layout from '@layouts/Layout.astro';
 
 export const prerender = true;
 ---
 
 <Layout title="Project in Development - The Lossless Group">
-  <Header />
-  
   <main class="main-content">
     <div class="container">
       <div class="development-content">
@@ -54,9 +49,6 @@ export const prerender = true;
       </div>
     </div>
   </main>
-  
-  <ThinGradientBleedSeparator height="2px" color="var(--grd__primary-bg)" />
-  <Footer />
 </Layout>
 
 <style>

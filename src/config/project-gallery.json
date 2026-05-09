@@ -282,6 +282,25 @@
         }
       ],
       "demoSteps": []
+    },
+    "lossless-flavored-markdown": {
+      "id": "lossless-flavored-markdown",
+      "title": "Lossless Flavored Markdown",
+      "subtitle": "A polyglot extended-markdown pipeline. Authors keep authoring; LFM normalizes the variations.",
+      "href": "/projects/gallery/lossless-flavored-markdown",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "One AST, Many Syntaxes",
+          "description": "Obsidian callouts, remark-directive blocks, and (eventually) Markdoc all produce the same MDAST node — adopt new authoring conventions without rewriting renderers."
+        },
+        {
+          "title": "Build-time Enrichment",
+          "description": "Citations get renumbered, OG metadata gets fetched, and bare links become embeds — all before the page ships, with no runtime cost."
+        }
+      ],
+      "demoSteps": []
     }
   }
 }

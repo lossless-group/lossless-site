@@ -1,0 +1,147 @@
+---
+import type { OgMetadata } from '@utils/fetchOgMetadata';
+
+interface Props {
+  metadata: OgMetadata;
+  ctaLabel?: string;
+  badge?: string;
+  class?: string;
+  /** CSS aspect-ratio for the image crop. Override when the OG image is portrait
+   * but you want a landscape-shaped card (e.g. "16 / 9", "3 / 2"). */
+  imageAspect?: string;
+}
+
+const { metadata, ctaLabel = 'Visit splash page', badge, class: className = '', imageAspect } = Astro.props;
+const { url, title, description, siteName, image, imageAlt, imageWidth, imageHeight } = metadata;
+const aspect = imageAspect
+  ?? (imageWidth && imageHeight ? `${imageWidth} / ${imageHeight}` : '1200 / 630');
+---
+
+<a href={url} target="_blank" rel="noopener noreferrer" class:list={['splash-hero-card', className]} aria-label={`Open ${siteName || title || 'splash page'}`}>
+  {image && (
+    <div class="splash-hero-card__image-wrap" style={`aspect-ratio: ${aspect};`}>
+      <img src={image} alt={imageAlt || title || siteName || 'Splash preview'} loading="lazy" decoding="async" />
+      {badge && <span class="splash-hero-card__badge">{badge}</span>}
+    </div>
+  )}
+  <div class="splash-hero-card__body">
+    {siteName && <span class="splash-hero-card__site">{siteName}</span>}
+    {title && <h3 class="splash-hero-card__title">{title}</h3>}
+    {description && <p class="splash-hero-card__desc">{description}</p>}
+    <span class="splash-hero-card__cta">
+      {ctaLabel}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="7" y1="17" x2="17" y2="7"></line>
+        <polyline points="7 7 17 7 17 17"></polyline>
+      </svg>
+    </span>
+  </div>
+</a>
+
+<style>
+  .splash-hero-card {
+    display: flex;
+    flex-direction: column;
+    background: color-mix(in oklab, var(--clr-lossless-primary-glass), var(--clr-lossless-primary-dark) 88%);
+    border: 1px solid var(--clr-lossless-ui-btn-border);
+    border-radius: 1em;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--clr-body, aliceblue);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+    transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .splash-hero-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+    border-color: var(--cyan-aqua--brightest, #04e5e5);
+  }
+
+  .splash-hero-card__image-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--clr-lossless-primary-dark);
+  }
+
+  .splash-hero-card__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 320ms ease;
+  }
+
+  .splash-hero-card:hover .splash-hero-card__image-wrap img {
+    transform: scale(1.04);
+  }
+
+  .splash-hero-card__badge {
+    position: absolute;
+    top: 0.75em;
+    left: 0.75em;
+    background: rgba(4, 229, 229, 0.92);
+    color: #0a0a0a;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.3em 0.7em;
+    border-radius: 999px;
+  }
+
+  .splash-hero-card__body {
+    padding: 1.1em 1.25em 1.25em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .splash-hero-card__site {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cyan-aqua--brightest, #04e5e5);
+  }
+
+  .splash-hero-card__title {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.4vw, 1.35rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--clr-heading, #fff);
+  }
+
+  .splash-hero-card__desc {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--clr-body, #d8dde5);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .splash-hero-card__cta {
+    margin-top: 0.4em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cyan-aqua--brightest, #04e5e5);
+  }
+
+  .splash-hero-card__cta svg {
+    transition: transform 200ms ease;
+  }
+
+  .splash-hero-card:hover .splash-hero-card__cta svg {
+    transform: translate(2px, -2px);
+  }
+</style>

@@ -1,11 +1,17 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import Header from '@basics/Header.astro';
-import Footer from '@basics/Footer.astro';
 import AlternatingSideImage from '@basics/messages/AlternatingSideImage.astro';
 import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
 
 export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/memopop-ai/', {
+  title: 'MemoPop AI — Multi-agent investment memo orchestrator',
+  description: 'Multi-agent investment memo orchestrator. Turn a company name into an institutional-quality investment memo.',
+  siteName: 'MemoPop AI',
+});
 
 // Time comparison is handled inline below
 
@@ -40,13 +46,12 @@ const supporters = [
 ---
 
 <Layout title="MemoPop AI - The Lossless Group">
-  <Header />
-
   <main class="main-content">
     <div class="container">
 
       <!-- Hero -->
-      <div class="hero">
+      <div class="hero hero--with-splash">
+        <div class="hero-text">
         <div class="hero-badge">Open Source</div>
         <h1 class="hero-title">MemoPop AI</h1>
         <p class="hero-sublede">Multi-agent investment memo orchestrator.</p>
@@ -64,6 +69,10 @@ const supporters = [
             </Fragment>
           ))}
         </div>
+        </div>
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" />
+        </aside>
       </div>
 
       <ThinGradientBleedSeparator />
@@ -310,6 +319,34 @@ const supporters = [
   /* Hero */
   .hero {
     padding: 3rem 0 2.5rem;
+  }
+
+  .hero--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .hero-text {
+    min-width: 0;
+  }
+
+  .hero-splash {
+    width: clamp(300px, 32vw, 460px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero--with-splash {
+      grid-template-columns: 1fr;
+    }
+    .hero-splash {
+      width: 100%;
+      max-width: 520px;
+      position: static;
+    }
   }
 
   .hero-badge {
