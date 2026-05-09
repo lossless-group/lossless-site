@@ -8,6 +8,7 @@ export const prerender = false;
 import fs from 'fs';
 import path from 'path';
 import OneSlideDeck from '@layouts/OneSlideDeck.astro';
+import Analytics from '@components/Analytics.astro';
 
 // Get the slug from the URL
 const { slug } = Astro.params;
@@ -166,6 +167,7 @@ try {
       font-size: 0.9rem !important;
     }
   </style>
+  <Analytics />
 </head>
 <body>
   <div class="reveal-container embedded">
@@ -191,35 +193,39 @@ try {
           typeof RevealHighlight !== 'undefined' && 
           typeof RevealNotes !== 'undefined' && 
           typeof RevealZoom !== 'undefined') {
-        
-        Reveal.initialize({
-          controls: false,
-          progress: false,
-          slideNumber: false,
-          history: false,
-          center: true,
-          touch: true,
-          hideInactiveCursor: true,
-          transition: '{config.transition}',
-          backgroundTransition: 'fade',
+        // Guard against double initialization which can cause recursion errors
+        if (!window.__REVEAL_INITIALIZED__) {
+          window.__REVEAL_INITIALIZED__ = true;
+          Reveal.initialize({
+            controls: false,
+            progress: false,
+            slideNumber: false,
+            history: false,
+            center: true,
+            touch: true,
+            hideInactiveCursor: true,
+            transition: '{config.transition}',
+            backgroundTransition: 'fade',
           embedded: true,
           
           // Set 16:9 aspect ratio
           width: 1600,
           height: 900,
           
-          // Make it responsive
-          disableLayout: false,
-          margin: 0.04,
-          
-          // Initialize plugins
-          plugins: [
-            RevealMarkdown,
-            RevealHighlight,
-            RevealNotes,
-            RevealZoom
-          ]
-        });
+          // Layout handling
+          // Disable Reveal's internal layout to avoid potential recursion in some environments
+          disableLayout: true,
+          margin: 0,
+            
+            // Initialize plugins
+            plugins: [
+              RevealMarkdown,
+              RevealHighlight,
+              RevealNotes,
+              RevealZoom
+            ]
+          });
+        }
         
         // Add postMessage communication for embedded presentations
         Reveal.on('slidechanged', function(event) {

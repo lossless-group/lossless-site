@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Dual AI Image Generation",
+    "title": "Two Powerful AI Engines, One Interface",
+    "details": "Generate images via Recraft for custom-trained brand styles, or Ideogram v3 for per-call style controls with Layerize-Text post-processing. Configure brand-wide prompt templates with prefix, suffix, and base negative prompts. Every note gets consistent, on-brand visuals with a single frontmatter field.",
+    "imageSide": "right",
+    "ctaText": "View on GitHub",
+    "ctaUrl": "https://github.com/lossless-group/image-gin-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Stock Image Search & CDN Upload",
+    "title": "Complete Image Workflow in Obsidian",
+    "details": "Search and insert stock images via Magnific's API. Convert local image references to ImageKit CDN URLs with optional WebP conversion and local cleanup. Batch convert entire directories. Smart frontmatter management writes generated image paths back to your notes automatically. Your visual workflow, streamlined.",
+    "imageSide": "left",
+    "ctaText": "Explore Features",
+    "ctaUrl": "https://github.com/lossless-group/image-gin-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Why Image Gin Matters",
+    "title": "Visual Content Without Context Switching",
+    "details": "Great content needs great visuals. But switching between Obsidian, image generators, stock photo sites, and CDN dashboards breaks flow. Image Gin brings the entire image pipeline into your notes—generate, search, upload, and reference without leaving your workspace. For content creators, researchers, and anyone who thinks visually, this is the missing piece.",
+    "imageSide": "right",
+    "ctaText": "Get Started",
+    "ctaUrl": "https://github.com/lossless-group/image-gin-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
+  }
+]

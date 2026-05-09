@@ -85,6 +85,10 @@ const defaultRouteMappings: RouteMapping[] = [
     contentPath: 'projects',
     routePath: 'projects'
   },
+  {
+    contentPath: 'sources',
+    routePath: 'sources'
+  },
   // {
   //   contentPath: 'content/visuals',
   //   routePath: 'content/visuals'
@@ -110,6 +114,18 @@ import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 import { contentBasePath, DEBUG_BACKLINKS } from '../envUtils';
 import { getReferenceSlug, slugify } from '../slugify';
+
+// Simple in-memory caches to avoid repeated filesystem scans during dev
+const routeCache = new Map<string, string>();
+let collectedMappingPaths: RouteMapping[] | null = null;
+
+// Prioritize likely content locations for bare entity names (e.g., firms/tools)
+const PRIORITY_CONTENT_PATHS = [
+  'tooling/Portfolio',
+  'tooling',
+  'vocabulary',
+  'concepts',
+];
 
 function isValidContentFile(contentPath: string): boolean {
   // Check if the path already has a .md extension
@@ -178,6 +194,11 @@ function resolveWithMappings(normalizedPath: string): string {
 }
 
 function collectAllMappingPaths(): RouteMapping[] {
+  // Return cached result if already collected
+  if (collectedMappingPaths) {
+    return collectedMappingPaths;
+  }
+
   const all: RouteMapping[] = [];
 
   for (const mapping of [...customRouteMappings, ...defaultRouteMappings]) {
@@ -219,10 +240,11 @@ function collectAllMappingPaths(): RouteMapping[] {
     walk(root);
   }
 
-  return all;
+  collectedMappingPaths = all;
+  return collectedMappingPaths;
 }
 
-export function transformContentPathToRoute(input: string): string {
+export function transformContentPathToRoute(input: string, currentFilePath?: string): string {
   if (!input) {
     if (DEBUG_BACKLINKS) {
       console.log("[routeManager] transformContentPathToRoute called with empty input");
@@ -231,6 +253,17 @@ export function transformContentPathToRoute(input: string): string {
   }
 
   const normalizedInput = getReferenceSlug(input);
+  const clientContext = deriveClientFromFilePath(currentFilePath);
+  const cacheKey = `${normalizedInput}::${input}::${clientContext || ''}`;
+
+  // Fast path: return cached resolution if available
+  if (routeCache.has(cacheKey)) {
+    const cached = routeCache.get(cacheKey)!;
+    if (DEBUG_BACKLINKS) {
+      console.log('[routeManager] Using cached route for', input, '→', cached);
+    }
+    return cached;
+  }
   const segments = normalizedInput.split('/');
 
   // Case 1: Full path (contains slash)
@@ -238,7 +271,9 @@ export function transformContentPathToRoute(input: string): string {
     if (DEBUG_BACKLINKS) {
       console.log("[routeManager] Full path detected:", normalizedInput);
     }
-    return resolveWithMappings(normalizedInput);
+    const result = resolveWithMappings(normalizedInput);
+    routeCache.set(cacheKey, result);
+    return result;
   }
 
   // Case 2: Try fallback resolution from known mappings
@@ -246,6 +281,32 @@ export function transformContentPathToRoute(input: string): string {
   
   if (DEBUG_BACKLINKS) {
     console.log("[routeManager] No full path provided, searching mappings for:", input);
+  }
+
+  // Build dynamic priority roots (prefer current client's Portfolio when available)
+  const dynamicPriorityRoots = buildDynamicPriorityRoots(clientContext);
+
+  // 2a. Try priority locations first (raw and slug forms)
+  for (const root of dynamicPriorityRoots) {
+    const candidateRaw = `${root}/${input}`;
+    if (DEBUG_BACKLINKS) {
+      console.log('[routeManager] Priority check (raw):', candidateRaw);
+    }
+    if (isValidContentFile(candidateRaw)) {
+      const result = resolveWithMappings(candidateRaw);
+      routeCache.set(cacheKey, result);
+      return result;
+    }
+
+    const candidateSlug = `${root}/${normalizedInput}`;
+    if (DEBUG_BACKLINKS) {
+      console.log('[routeManager] Priority check (slug):', candidateSlug);
+    }
+    if (isValidContentFile(candidateSlug)) {
+      const result = resolveWithMappings(candidateSlug);
+      routeCache.set(cacheKey, result);
+      return result;
+    }
   }
 
   // First try with baseDir mappings
@@ -262,6 +323,7 @@ export function transformContentPathToRoute(input: string): string {
         if (DEBUG_BACKLINKS) {
           console.log("[routeManager] Found with baseDir, resolved to:", result);
         }
+        routeCache.set(cacheKey, result);
         return result;
       }
     }
@@ -280,6 +342,7 @@ export function transformContentPathToRoute(input: string): string {
       if (DEBUG_BACKLINKS) {
         console.log("[routeManager] Found without baseDir, resolved to:", result);
       }
+      routeCache.set(cacheKey, result);
       return result;
     }
   }
@@ -287,8 +350,40 @@ export function transformContentPathToRoute(input: string): string {
   if (DEBUG_BACKLINKS) {
     console.log("[routeManager] No path found for:", input, "\n");
   }
-  
-  return '/404';
+  const notFound = '/404';
+  routeCache.set(cacheKey, notFound);
+  return notFound;
+}
+
+/**
+ * Extract the client name from the current file path if within client-content.
+ * Examples:
+ *   /.../content/client-content/Hypernova/Portfolio/... => Hypernova
+ *   /.../generated-content/client-content/hypernova/... => hypernova (normalized)
+ */
+function deriveClientFromFilePath(filePath?: string): string | null {
+  if (!filePath) return null;
+  const normalized = filePath.replace(/\\/g, '/');
+  const match = normalized.match(/client-content\/([^/]+)/i);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}
+
+/**
+ * Build a list of priority roots for resolution.
+ * If a client context is present, prioritize that client's Portfolio folder first.
+ */
+function buildDynamicPriorityRoots(client: string | null): string[] {
+  const roots: string[] = [];
+  if (client) {
+    // Prefer the current client's Portfolio folder for bare names
+    roots.push(`client-content/${client}/Portfolio`);
+  }
+  // Then add the global priority paths
+  roots.push(...PRIORITY_CONTENT_PATHS);
+  return roots;
 }
 
 /**

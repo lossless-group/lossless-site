@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 import { join } from 'node:path';
 import { pathToFileURL } from 'url';
@@ -23,7 +24,7 @@ function resolveContentPath(relativePath: string): string {
 
 // Cards collection - respects JSON structure with cards array
 const cardCollection = defineCollection({
-  type: 'data',
+  loader: glob({pattern: "**/*.json", base: "./src/content/cards"}),
   schema: z.object({
     cards: z.array(z.any())
   }).passthrough()
@@ -68,36 +69,7 @@ const clientRecommendationsCollection = defineCollection({
 // const pathId = (entry: string) =>
 //   entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
 
-/**
-const clientProjectsCollection = defineCollection({
-  loader: glob({
-    base: resolveContentPath("client-content"),
-    generateId: ({ entry }) => {
-      return pathId(entry);
-    }
-  }),
-  schema: z.object({
-    aliases: z.union([
-      z.string().transform(str => [str]),
-      z.array(z.string()),
-      z.null(),
-      z.undefined()
-    ]).transform(val => val ?? []).default([]),
-  }).passthrough().transform((data, context) => {
-    const filename = String(context.path).split('/').pop()?.replace(/\.(md|mdx)$/, '') || '';
 
-    const displayTitle = data.title
-      ? data.title
-      : filename.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-
-    return {
-      ...data,
-      title: displayTitle,
-      slug: filename.toLowerCase().replace(/\s+/g, '-'),
-    };
-  })
-});
-*/
 
 const clientPortfoliosCollection = defineCollection({
   loader: glob({
@@ -136,6 +108,29 @@ const clientPortfoliosCollection = defineCollection({
   }).passthrough()
 });
 
+const clientPagesCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.{md,mdx}", // Include both .md and .mdx files at client level
+    base: resolveContentPath("client-content"),
+    generateId: ({ entry }) => {
+      // Remove the .md/.mdx extension and convert to lowercase
+      return entry.replace(/\.(md|mdx)$/i, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    aliases: z.union([
+      z.string().transform(str => [str]),
+      z.array(z.string()),
+      z.null(),
+      z.undefined()
+    ]).transform(val => val ?? []).default([]),
+  }).passthrough()
+});
+
 
 
 const talksCollection = defineCollection({
@@ -157,7 +152,7 @@ const vocabularyCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  })
+  }).passthrough()
 });
 
 // Concepts collection - follows same pattern as vocabulary
@@ -173,7 +168,7 @@ const conceptsCollection = defineCollection({
       if (!val) return [];              // Transform null/undefined to empty array
       return val;                       // Keep arrays and transformed strings as-is
     }).default([])                      // Default to empty array if missing
-  })
+  }).passthrough()
 });
 
 // Concepts collection - follows same pattern as vocabulary
@@ -241,8 +236,8 @@ const changelogLaerdalCollection = defineCollection({
 });
 
 const reportCollection = defineCollection({
-  type: 'content',
-  schema: z.any() // Allow any frontmatter structure to avoid validation errors
+  loader: glob({pattern: "**/*.md", base: "./src/content/reports"}),
+  schema: z.object({}).passthrough()
 });
 
 // Pages collection for individual MDX files
@@ -309,6 +304,69 @@ const specsCollection = defineCollection({
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 // ***
+// Open: Sources Collection Definition
+// Type: Content Collection
+// Purpose: Reference materials, books, people, media, and other sources
+// Schema: Ultra-permissive to handle varied/missing frontmatter
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const sourcesCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: resolveContentPath("sources"),
+    generateId: ({ entry }) => {
+      // Preserve directory structure in ID for nested folder routing
+      // e.g., "Books/The Pragmatic Programmer.md" -> "books/the pragmatic programmer"
+      return entry.replace(/\.md$/, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    // Ultra-permissive schema - everything optional, handles null values
+    title: z.string().nullish(), // nullish = optional + nullable
+    og_title: z.string().nullish(),
+    url: z.string().nullish(),
+    date_created: z.union([z.string(), z.date()]).nullish(),
+    date_modified: z.union([z.string(), z.date()]).nullish(),
+    tags: z.union([z.string(), z.array(z.string())]).nullish(),
+    publish: z.boolean().nullish(),
+  }).passthrough() // Allow any additional frontmatter
+});
+
+// ========================================
+// Close: Sources Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ***
+// Open: Organizations Collection Definition
+// Type: Content Collection
+// Purpose: Companies, institutions, and other organizations
+// Schema: Ultra-permissive to handle varied/missing frontmatter
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const organizationsCollection = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: resolveContentPath("organizations"),
+    generateId: ({ entry }) => {
+      return entry.replace(/\.md$/, '').toLowerCase();
+    }
+  }),
+  schema: z.object({
+    title: z.string().nullish(),
+    og_title: z.string().nullish(),
+    url: z.string().nullish(),
+    date_created: z.union([z.string(), z.date()]).nullish(),
+    date_modified: z.union([z.string(), z.date()]).nullish(),
+    tags: z.union([z.string(), z.array(z.string())]).nullish(),
+    publish: z.boolean().nullish(),
+  }).passthrough()
+});
+
+// ========================================
+// Close: Organizations Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ***
 // Open: Issue Resolution Collection Definition (Ultra-Minimalist, following example)
 // Type: Content Collection
 // Purpose: For magazine-style articles detailing issue resolutions.
@@ -356,6 +414,25 @@ const mapOfContentsCollection = defineCollection({
     description: z.string().optional(),
     type: z.string().optional(),
     MAX_CARDS: z.number().optional(),
+  }).passthrough()
+});
+
+const tagMocsCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("tag-mocs") }),
+  schema: z.object({
+    tag: z.string(), // Required: the tag this MOC represents
+    title: z.string(),
+    description: z.string().optional(),
+    lede: z.string().optional(),
+    banner_image: z.string().optional(),
+    portrait_image: z.string().optional(),
+    square_image: z.string().optional(),
+    featured_tools: z.array(z.string()).optional(), // Slugs of tools to feature
+    related_tags: z.array(z.string()).optional(), // Related tag MOCs to link to
+    date_created: z.union([z.string(), z.date()]).optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+    publish: z.boolean().default(true).optional(),
   }).passthrough()
 });
 
@@ -472,14 +549,18 @@ export const paths = {
   'blueprints': resolveContentPath('lost-in-public/blueprints'),
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'specs': resolveContentPath('specs'),
+  'sources': resolveContentPath('sources'),
+  'organizations': resolveContentPath('organizations'),
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),
   'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
+  'client-pages': resolveContentPath('client-content'),
   'visuals': resolveContentPath('visuals'),
   'moc': resolveContentPath('moc'),
+  'tag-mocs': resolveContentPath('tag-mocs'),
   'projects': resolveContentPath('projects'),
 };
 
@@ -504,12 +585,17 @@ export const collections = {
   'reminders': remindersCollection,
   'blueprints': blueprintsCollection,
   'specs': specsCollection,
+  'sources': sourcesCollection,
+  'organizations': organizationsCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,
   'to-hero': toHeroCollection,
+  'client-content': clientRecommendationsCollection,
   'client-recommendations': clientRecommendationsCollection,
   'client-portfolios': clientPortfoliosCollection,
+  'client-pages': clientPagesCollection,
   'portfolio': portfolioCollection,
   'moc': mapOfContentsCollection,
+  'tag-mocs': tagMocsCollection,
 };

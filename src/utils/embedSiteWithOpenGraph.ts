@@ -100,11 +100,14 @@ export async function processFileForEmbeds(filePath: string): Promise<void> {
         frontmatter.embed_height = embedData.height;
         frontmatter.embed_provider = embedData.provider_name;
         
-        // Write the updated content back to the file
+        // Prepare updated content and only write when it actually changes
         const updatedContent = matter.stringify(content, frontmatter);
-        fs.writeFileSync(filePath, updatedContent);
-        
-        console.log(`✅ Added embed to ${path.basename(filePath)}`);
+        if (updatedContent !== fileContent) {
+          fs.writeFileSync(filePath, updatedContent);
+          console.log(`✅ Added embed to ${path.basename(filePath)}`);
+        } else {
+          console.log(`ℹ️ No changes for ${path.basename(filePath)}; skipping write`);
+        }
       } else {
         console.log(`⚠️ No embed data found for ${frontmatter.url}`);
       }

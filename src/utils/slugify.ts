@@ -46,7 +46,9 @@ export function processEntries<T extends BaseCollectionEntry>(entries: T[]): (T 
       // Create a new object to avoid mutating the original
       const processedEntry = {
         ...entry,
-        slug: getReferenceSlug(entry.id),
+        slug: (typeof (entry as any)?.data?.slug === 'string' && (entry as any).data.slug.trim())
+          ? (entry as any).data.slug.trim()
+          : getReferenceSlug(entry.id),
         originalFilename: entry.filePath?.split('/').pop() || entry.id,
         data: {
           ...entry.data, // Spread all original data properties first
@@ -110,6 +112,15 @@ export function getReferenceSlug(filename: string): string {
   const parts = filename.split('/');
   const slugifiedParts = parts.map(p => slugify(p));
   return slugifiedParts.join('/');
+}
+
+// Prefer frontmatter-provided slug when available; otherwise derive from the entry id
+export function resolveEntrySlug(entry: { id: string; data?: { slug?: string } }): string {
+  const fmSlug = entry?.data?.slug;
+  if (typeof fmSlug === 'string' && fmSlug.trim().length > 0) {
+    return fmSlug.trim();
+  }
+  return getReferenceSlug(entry.id);
 }
 /**
  * Capitalizes the first letter of each word in a string.

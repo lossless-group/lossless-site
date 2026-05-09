@@ -1,0 +1,177 @@
+---
+/**
+ * <PinnedTagsRow>
+ *
+ * Renders a small row of "pinned" filter pills above the toolkit card grid.
+ * Each pin toggles its tag through the existing TagColumn / Choices.js filter
+ * — so a user who pins "Must-Have" can still add "RAG" or "Code-Generators"
+ * from the sidebar to compose a sharper filter. The pins double-filter, they
+ * don't replace the sidebar.
+ *
+ * Behavior is delegated to TagColumn's existing document-level click handler,
+ * which listens for clicks on `.tool-tag` and toggles the matching tag in the
+ * Choices.js multiselect. Each pin therefore carries `class="tool-tag"` plus
+ * `data-tag` and gets routed through that handler for free.
+ *
+ * Active state is updated by listening to the `filtersChanged` event that
+ * TagColumn dispatches whenever its filter changes.
+ */
+
+interface PinnedTag {
+  tag: string;          // exact tag value as written in tool frontmatter
+  label: string;        // display label
+  description?: string; // tooltip
+}
+
+interface Props {
+  tools: any[];
+}
+
+const { tools } = Astro.props;
+
+const pinned: PinnedTag[] = [
+  { tag: 'Check-it-Out',         label: 'Check it Out',         description: 'Worth a serious look — promising, in motion, or a sleeper hit.' },
+  { tag: 'Must-Have',             label: 'Must-Have',            description: 'Tools we keep coming back to. The shortlist.' },
+  { tag: 'Influencer-Favorites',  label: 'Influencer Favorites', description: 'What the people we follow are using and recommending.' },
+  { tag: 'Agentic-AI',            label: 'Agentic AI',           description: 'Agents, orchestrators, autonomous workflows.' },
+];
+
+// Count tools matching each pinned tag (case-insensitive, since the corpus
+// has both "Check-it-Out" and "Check-It-Out" in the wild).
+function countFor(tag: string): number {
+  const needle = tag.toLowerCase();
+  return tools.reduce((acc, t) => {
+    const tags: string[] = t.tags || [];
+    return acc + (tags.some(tt => String(tt).toLowerCase() === needle) ? 1 : 0);
+  }, 0);
+}
+
+const pinsWithCounts = pinned.map(p => ({ ...p, count: countFor(p.tag) }));
+---
+
+<section class="pinned-tags-row" aria-label="Pinned filters">
+  <span class="pinned-tags-row__label">Pinned:</span>
+  <div class="pinned-tags-row__chips">
+    {pinsWithCounts.map(p => (
+      <button
+        type="button"
+        class="tool-tag pinned-tag"
+        data-tag={p.tag}
+        data-pinned="true"
+        aria-pressed="false"
+        title={p.description}
+      >
+        <span class="pinned-tag__label">{p.label}</span>
+        <span class="pinned-tag__count">{p.count}</span>
+      </button>
+    ))}
+  </div>
+</section>
+
+<script>
+  // Track active state by listening to TagColumn's filtersChanged event.
+  document.addEventListener('filtersChanged', ((e: CustomEvent) => {
+    const selected: string[] = (e.detail?.selectedTags as string[]) || [];
+    const lower = new Set(selected.map(s => s.toLowerCase()));
+    document.querySelectorAll<HTMLButtonElement>('.pinned-tag').forEach(btn => {
+      const tag = btn.dataset.tag || '';
+      const active = lower.has(tag.toLowerCase());
+      btn.setAttribute('aria-pressed', String(active));
+      btn.classList.toggle('is-active', active);
+    });
+  }) as EventListener);
+</script>
+
+<style>
+  .pinned-tags-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.85rem;
+    padding: 0.85rem 1rem;
+    margin: 0 0 1.25rem 0;
+    background: linear-gradient(
+      135deg,
+      rgba(4, 229, 229, 0.05),
+      rgba(191, 35, 247, 0.04)
+    );
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 10px;
+  }
+
+  .pinned-tags-row__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    flex-shrink: 0;
+  }
+
+  .pinned-tags-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pinned-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(111, 255, 214, 0.32);
+    border-radius: 999px;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.15s ease;
+  }
+
+  .pinned-tag:hover {
+    background: rgba(111, 255, 214, 0.08);
+    border-color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .pinned-tag.is-active {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    border-color: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+  }
+
+  .pinned-tag.is-active .pinned-tag__count {
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--clr-primary-bg, #0a0a0f);
+  }
+
+  .pinned-tag__label {
+    white-space: nowrap;
+  }
+
+  .pinned-tag__count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  @media (max-width: 640px) {
+    .pinned-tags-row {
+      gap: 0.5rem 0.5rem;
+      padding: 0.7rem 0.85rem;
+    }
+    .pinned-tag {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.7rem;
+    }
+  }
+</style>

@@ -1,0 +1,115 @@
+---
+/**
+ * /more-about/timeline.astro — Reference Library Timeline
+ *
+ * Aggregates vocabulary, concepts, sources, and organizations into events grouped
+ * Month → Week. Rendering, search, and filter logic live in <Timeline>.
+ */
+import Layout from '@layouts/Layout.astro';
+import Timeline, { type TimelineEvent } from '@components/timeline/Timeline.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+type CollectionId = 'vocabulary' | 'concepts' | 'sources' | 'organizations';
+
+const [vocab, concepts, sources, organizations] = await Promise.all([
+  getCollection('vocabulary'),
+  getCollection('concepts'),
+  getCollection('sources'),
+  getCollection('organizations'),
+]);
+
+function parseDate(v: any): Date | null {
+  if (!v) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Use entry.filePath (preserves original case) — entry.id is lowercased by
+ * Astro's default glob slug generator, which mangles "API", "NLP", etc.
+ */
+function originalFilename(entry: any): string {
+  const path: string = entry.filePath || entry.id;
+  const base = path.split('/').pop() || path;
+  return base.replace(/\.(md|mdx)$/i, '').replace(/[-_]+/g, ' ');
+}
+
+function getTitle(entry: any): string {
+  const t = entry.data?.title;
+  if (typeof t === 'string' && t.trim()) return t.trim();
+  const og = entry.data?.og_title;
+  if (typeof og === 'string' && og.trim()) return og.trim();
+  return originalFilename(entry);
+}
+
+function originalFolder(entry: any): string {
+  const path: string = entry.filePath || entry.id;
+  const parts = path.split('/');
+  return parts.length > 1 ? parts[0].replace(/[-_]+/g, ' ') : '';
+}
+
+function detailHref(collection: CollectionId, entry: any): string {
+  const slug = getReferenceSlug(entry.id);
+  switch (collection) {
+    case 'vocabulary':
+    case 'concepts':
+      return `/more-about/${slug}`;
+    case 'sources':
+      return `/sources/${slug}`;
+    case 'organizations':
+      return `/organizations/${slug}`;
+  }
+}
+
+function tagsToArray(t: any): string[] {
+  if (!t) return [];
+  if (Array.isArray(t)) return t.map(String);
+  if (typeof t === 'string') return t.split(/[,\s]+/).filter(Boolean);
+  return [];
+}
+
+const events: TimelineEvent[] = [];
+
+function pushEvents(collection: CollectionId, list: any[]) {
+  for (const entry of list) {
+    const created = parseDate(entry.data?.date_created);
+    const modified = parseDate(entry.data?.date_modified);
+    const title = getTitle(entry);
+    const href = detailHref(collection, entry);
+    const tags = tagsToArray(entry.data?.tags);
+    const folder = originalFolder(entry);
+    const base = { title, href, collection, id: entry.id, tags, folder };
+
+    if (created) events.push({ kind: 'created', date: created, ...base });
+    if (modified && (!created || modified.getTime() !== created.getTime())) {
+      events.push({ kind: 'modified', date: modified, ...base });
+    }
+  }
+}
+
+pushEvents('vocabulary', vocab);
+pushEvents('concepts', concepts);
+pushEvents('sources', sources);
+pushEvents('organizations', organizations);
+
+const collections = {
+  vocabulary:    { label: 'Vocab',  color: '#d8b4fe', bg: 'rgba(168, 85, 247, 0.18)' },
+  concepts:      { label: 'Concept', color: '#f9a8d4', bg: 'rgba(236, 72, 153, 0.18)' },
+  sources:       { label: 'Source',  color: '#fcd34d', bg: 'rgba(245, 158, 11, 0.18)' },
+  organizations: { label: 'Org',     color: '#5eead4', bg: 'rgba(20, 184, 166, 0.18)' },
+};
+---
+
+<Layout title="Reference Timeline">
+  <Timeline
+    title="Reference Timeline"
+    subtitle="A running log of additions and updates across vocabulary, concepts, sources, and organizations."
+    backLink={{ label: '← Reference Library', href: '/more-about' }}
+    events={events}
+    collections={collections}
+  />
+</Layout>

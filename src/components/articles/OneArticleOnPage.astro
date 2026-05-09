@@ -8,6 +8,7 @@ import CopyLinkButton from '@components/markdown/CopyLinkButton.astro';
 import InfoSidebar from '@components/markdown/InfoSidebar.astro';
 import { formatDate } from '../../utils/formatDate';
 import { DEBUG_ARTICLE } from '@utils/envUtils';
+import { getReadingStats } from '@utils/wordCount';
 
 const shareIconPath = '/src/assets/Icons/share.svg';
 
@@ -15,6 +16,8 @@ interface Props {
   effectiveHeading?: string; // Renamed from title to avoid conflict
   content: Root;
   articleHeading?: string;
+  includeToC?: boolean; // Optional parameter to include/exclude Table of Contents (default: true)
+  includeInfoSidebar?: boolean; // Optional parameter to include/exclude Info Sidebar (default: true)
   data?: {
     path: string;
     id?: string;  // File ID (e.g., 'Agile.md')
@@ -34,7 +37,13 @@ interface Props {
 // =============================
 // Accepts content (mdast Root), data (optional)
 // Defensive: If content or children is missing, fallback to empty root node
-const { articleHeading, content, data: originalData = { path: Astro.url.pathname } } = Astro.props; // compiledContent removed
+const { 
+  articleHeading, 
+  content, 
+  includeToC = true, 
+  includeInfoSidebar = true, 
+  data: originalData = { path: Astro.url.pathname } 
+} = Astro.props; // compiledContent removed
 const effectiveHeading = articleHeading?.trim() || originalData.title?.trim() || '';
 
 // Debug logging
@@ -176,6 +185,9 @@ const bannerImage = originalData.banner_image || "https://ik.imagekit.io/xvpgfij
 const lede = originalData.lede;
 const url = Astro.url.href.split('#')[0]; // Strip fragment from canonical URL
 
+// Calculate word count and reading time
+const readingStats = getReadingStats(safeContent);
+
 // Check if we have any article info to display (same logic as InfoSidebar)
 const hasArticleInfo = 
   categories.length > 0 || 
@@ -192,8 +204,8 @@ const hasArticleInfo =
 ---
 
 <div class="content-wrapper">
-    {hasArticleInfo && (
-      <InfoSidebar 
+    {includeInfoSidebar && hasArticleInfo && (
+      <InfoSidebar
         categories={categories}
         semanticVersion={semanticVersion}
         authorForHandle={authorForHandle}
@@ -208,6 +220,8 @@ const hasArticleInfo =
         contentType={originalData.contentType}
         google_maps_url={originalData.google_maps_url}
         googleMapsUrl={originalData.googleMapsUrl}
+        wordCount={readingStats.wordCount}
+        readingTime={readingStats.readingTime}
       />
     )}
   <div class="content-inner">
@@ -238,7 +252,7 @@ const hasArticleInfo =
     </article>
   </div>
 
-  <TableOfContents node={tocNode?.data.map} />
+  {includeToC && <TableOfContents node={tocNode?.data.map} />}
 
 </div>
 

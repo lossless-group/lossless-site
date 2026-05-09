@@ -1,0 +1,956 @@
+---
+import Layout from '@layouts/Layout.astro';
+import AlternatingSideImage from '@basics/messages/AlternatingSideImage.astro';
+import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
+
+export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/memopop-ai/', {
+  title: 'MemoPop AI — Multi-agent investment memo orchestrator',
+  description: 'Multi-agent investment memo orchestrator. Turn a company name into an institutional-quality investment memo.',
+  siteName: 'MemoPop AI',
+});
+
+// Time comparison is handled inline below
+
+const stats = [
+  { value: "33", label: "Specialized Agents" },
+  { value: "9", label: "VC Firms Using It" },
+];
+
+const pipeline = [
+  { step: "1", name: "Deck or Dataroom Analysis", desc: "Thorough dataroom object identification and deconstruction. Pull KPI timelines, key charts, properly identify slide messages, and extract primary source information. Classify 12+ document types with confidence scoring." },
+  { step: "2", name: "Web Research", desc: "Multi-query research via Perplexity Sonar Pro with section-specific @source targeting. Crunchbase, PitchBook, Statista, CB Insights." },
+  { step: "3", name: "Outline Loading", desc: "Proprietary document structure loaded before writing begins. Guiding questions, vocabulary and phrasing, dos and don'ts -- your firm's voice and analytical framework baked into every section." },
+  { step: "4", name: "Section Writing", desc: "Individual sections drafted by specialized writing agents shaped by the loaded outline. Each section processed independently to avoid timeouts." },
+  { step: "5", name: "Multi-Agent Enrichment", desc: "Trademark links, social profiles, citations, competitive context. Each enrichment agent works on section files, not assembled content." },
+  { step: "6", name: "Fact Checkers and Source Verifiers", desc: "Three-step extract → verify (Perplexity) → correct (Claude) pipeline. Full traceability for every claim." },
+  { step: "7", name: "Scorecard Evaluation", desc: "Firm-specific evaluation criteria applied after writing. Team velocity, market timing, defensibility -- whatever your IC actually debates. Scores and flags feed back into revision." },
+  { step: "8", name: "Validation for Iteration and Quality Assurance", desc: "Quality scoring against analytical standards. Threshold of 8/10 for auto-finalization. Detailed improvement suggestions below threshold." },
+  { step: "9", name: "Branded, Multi-Format Exports", desc: "Branded HTML/PDF in light and dark modes. Firm-scoped configs for colors, fonts, logos. One-pager summaries." },
+];
+
+const supporters = [
+  { name: "Hypernova Capital", url: "https://www.hypernova.capital" },
+  { name: "Avalanche VC", url: "https://avalanche.vc" },
+  { name: "Emerge Capital", url: "https://emergecapital.vc" },
+  { name: "Humain VC", url: "https://humain.vc" },
+  { name: "DarkMatter VC", url: "https://darkmatter.vc" },
+  { name: "Banner VC", url: "https://banner.vc" },
+  { name: "Motley Fool Ventures", url: "https://foolventures.com/" },
+  { name: "Two Magnolias", url: "https://www.twomagnolias.co.uk/" },
+  { name: "Alpha Partners", url: "https://alphapartners.com/" },
+];
+---
+
+<Layout title="MemoPop AI - The Lossless Group">
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="hero hero--with-splash">
+        <div class="hero-text">
+        <div class="hero-badge">Open Source</div>
+        <h1 class="hero-title">MemoPop AI</h1>
+        <p class="hero-sublede">Multi-agent investment memo orchestrator.</p>
+        <p class="hero-lede">Turn a company name into an institutional-quality investment memo with <strong class="highlight">33 specialized AI agents</strong>, premium data sources, full citation trails, and firm-specific branded exports.</p>
+        <div class="hero-actions">
+          <a href="https://github.com/lossless-group/investment-memo-orchestrator" target="_blank" class="btn-primary"><svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub</a>
+          <a href="#pipeline" class="btn-secondary">See the Pipeline</a>
+        </div>
+        <div class="hero-supporters">
+          <span class="supporters-label">Supported by</span>
+          {supporters.map((s, i) => (
+            <Fragment>
+              <a href={s.url} target="_blank" class="supporter-link">{s.name}</a>
+              {i < supporters.length - 1 && <span class="supporter-sep">&middot;</span>}
+            </Fragment>
+          ))}
+        </div>
+        </div>
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" />
+        </aside>
+      </div>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Stats -->
+      <section class="time-section">
+        <div class="time-comparison">
+          <div class="time-before">
+            <span class="time-value-strike">1–2 days</span>
+            <span class="time-label">per memo</span>
+          </div>
+          <span class="time-arrow">→</span>
+          <div class="time-after">
+            <span class="time-value-pop">10–15 min</span>
+            <span class="time-label">to a first draft</span>
+          </div>
+        </div>
+        <div class="time-combined">
+          <span class="time-value-combined">Analyst + MemoPop = 1–2 hours</span>
+          <span class="time-label-combined">to a polished, cited, firm-branded investment memo</span>
+        </div>
+        <div class="time-outcomes">
+          <span class="outcome">Cover more opportunities</span>
+          <span class="outcome-sep">&middot;</span>
+          <span class="outcome">Create materials in time to syndicate</span>
+          <span class="outcome-sep">&middot;</span>
+          <span class="outcome">Create great artifacts and datasets for LP reporting and fundraising</span>
+        </div>
+      </section>
+
+      <section class="stats-section">
+        <div class="stats-grid">
+          {stats.map(stat => (
+            <div class="stat-card">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Why This Exists -->
+      <section class="why-section">
+        <h2 class="section-title">Why This Exists</h2>
+        <div class="why-grid">
+          <div class="why-card">
+            <h3>Chats with Prompts Won't Make You Great</h3>
+            <p>Asking ChatGPT to "write an investment memo" produces generic, uncited, surface-level output. Real investment memos require structured research from authoritative sources, firm-specific evaluation criteria, and analytical rigor that no single prompt can deliver.</p>
+          </div>
+          <div class="why-card">
+            <h3>VC Analysis Takes Days</h3>
+            <p>A quality investment memo takes 2-5 days of research, writing, and revision -- time most emerging managers don't have. Most of that work is pulling Crunchbase data, sizing TAM from Statista, cross-referencing team backgrounds, finding relevant charts, sourcing content from experts... tasks AI agents can do in minutes.</p>
+          </div>
+          <div class="why-card">
+            <h3>Proprietary Thinking Matters</h3>
+            <p>Every fund evaluates deals differently. Hypernova weighs technical defensibility differently than Avalanche weighs market timing. Generic AI can't reflect your IC's actual decision framework. Scorecards and firm-scoped templates make your proprietary criteria the backbone of every memo.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Pipeline -->
+      <section id="pipeline" class="pipeline-section">
+        <h2 class="section-title">The Pipeline</h2>
+        <p class="section-lede">Not a chatbot. A coordinated pipeline of specialized agents, each producing research analyst artifacts that serve as a source of truth, provide full retraceability, and act as a fallback for future iterations.</p>
+
+        <!-- Cast of Characters -->
+        <div class="cast">
+          <div class="cast-card cast-extractor">
+            <span class="cast-icon">&#9881;</span>
+            <div class="cast-info">
+              <span class="cast-name">Extractor</span>
+              <span class="cast-detail">Deck parsing, dataroom analysis, KPI extraction</span>
+            </div>
+          </div>
+          <div class="cast-arrow">&#8594;</div>
+          <div class="cast-card cast-researcher">
+            <span class="cast-icon">&#9906;</span>
+            <div class="cast-info">
+              <span class="cast-name">Researcher</span>
+              <span class="cast-detail">Perplexity Sonar Pro with premium @source targeting</span>
+            </div>
+          </div>
+          <div class="cast-arrow">&#8594;</div>
+          <div class="cast-card cast-writer">
+            <span class="cast-icon">&#9997;</span>
+            <div class="cast-info">
+              <span class="cast-name">Writer</span>
+              <span class="cast-detail">GPT drafts sections from research artifacts</span>
+            </div>
+          </div>
+          <div class="cast-arrow">&#8594;</div>
+          <div class="cast-card cast-validator">
+            <span class="cast-icon">&#9888;</span>
+            <div class="cast-info">
+              <span class="cast-name">Validator</span>
+              <span class="cast-detail">Fact-checks claims, verifies sources, scores quality</span>
+            </div>
+          </div>
+          <div class="cast-arrow">&#8594;</div>
+          <div class="cast-card cast-editor">
+            <span class="cast-icon">&#9998;</span>
+            <div class="cast-info">
+              <span class="cast-name">Editor</span>
+              <span class="cast-detail">Claude refines, enforces quality, polishes output</span>
+            </div>
+          </div>
+          <div class="cast-arrow">&#8594;</div>
+          <div class="cast-card cast-output">
+            <span class="cast-icon">&#10022;</span>
+            <div class="cast-info">
+              <span class="cast-name">Versioned Output</span>
+              <span class="cast-detail">Artifacts in versioned folders. Easy to iterate, with "best of versions" out of the box.</span>
+            </div>
+          </div>
+        </div>
+        <div class="cast-human">
+          <span class="cast-human-icon">&#9673;</span>
+          <span class="cast-human-text"><strong>You</strong> have oversight at every step. Review artifacts, re-run agents, improve sections, integrate across versions. The pipeline produces drafts -- you make decisions.</span>
+        </div>
+
+        <!-- Orchestrator + Steps -->
+        <div class="pipeline-flow">
+          <div class="pipeline-orchestrator">
+            <div class="orchestrator-label">
+              <span class="orch-icon">&#9678;</span> Orchestrator
+              <span class="orch-sub">LangGraph supervisor coordinates all agents, manages state, handles retries</span>
+            </div>
+
+            <div class="pipeline-steps">
+              {pipeline.map((step, i) => (
+                <Fragment>
+                  <div class="flow-step">
+                    <div class="flow-number">{step.step}</div>
+                    <div class="flow-content">
+                      <h3 class="flow-name">{step.name}</h3>
+                      <p class="flow-desc">{step.desc}</p>
+                    </div>
+                  </div>
+                  {i < pipeline.length - 1 && (
+                    <div class="flow-connector">
+                      <div class="flow-line"></div>
+                      <div class="flow-arrow">&#9662;</div>
+                    </div>
+                  )}
+                </Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Feature Deep Dives -->
+      <div class="content-section">
+        <AlternatingSideImage
+          jsonPath="messages/projectMemopopAI.json"
+          classes="memopop-features"
+        />
+      </div>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- CLI Preview -->
+      <section class="cli-section">
+        <h2 class="section-title">One Command to Start</h2>
+        <div class="cli-block">
+          <div class="cli-header">
+            <span class="cli-dot red"></span>
+            <span class="cli-dot yellow"></span>
+            <span class="cli-dot green"></span>
+            <span class="cli-title">terminal</span>
+          </div>
+          <pre class="cli-code"><code>$ memopop
+
+╭─────────────────────────────────────────────────────────╮
+│                                                         │
+│   Investment Memo Orchestrator                          │
+│   v0.5.3 · 33 agents · Powered by Claude + Perplexity  │
+│                                                         │
+╰─────────────────────────────────────────────────────────╯
+
+? What would you like to do?
+  ❯ 📝  Generate a new investment memo
+    📄  Generate a one-pager summary
+    📤  Export an existing memo (HTML / PDF / Word)
+    🔧  Improve a specific section
+    🔄  Integrate content from versions
+    📊  Run a specific agent</code></pre>
+        </div>
+        <p class="cli-note">No flags, no file paths. The interactive CLI auto-discovers firms, deals, and versions.</p>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- CTA -->
+      <section class="cta-dual">
+        <div class="cta-card cta-opensource">
+          <h2>Open Source. Bring Your Own Keys.</h2>
+          <p>MemoPop runs on your machine with your API keys. Claude for analysis and writing, Perplexity Sonar Pro for cited research, or DuckDuckGo as a free fallback. Your deal data stays yours.</p>
+          <div class="cta-actions">
+            <a href="https://github.com/lossless-group/investment-memo-orchestrator" target="_blank" class="btn-primary"><svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>Get Started on GitHub</a>
+            <a href="https://github.com/lossless-group/investment-memo-orchestrator#similar-services" target="_blank" class="btn-secondary">Compare Alternatives</a>
+          </div>
+        </div>
+        <div class="cta-card cta-human">
+          <h2>Not a GitHub Vibe Coder?</h2>
+          <p>Hit us up. We can turn around a draft same day, sometimes in 10-15 minutes.</p>
+          <div class="cta-contacts">
+            <a href="https://x.com/losslessgroup" target="_blank" class="contact-link">
+              <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              @losslessgroup
+            </a>
+            <a href="https://x.com/mpstaton" target="_blank" class="contact-link">
+              <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              @mpstaton
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+
+</Layout>
+
+<style>
+  .main-content {
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 3rem 0 2.5rem;
+  }
+
+  .hero--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .hero-text {
+    min-width: 0;
+  }
+
+  .hero-splash {
+    width: clamp(300px, 32vw, 460px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero--with-splash {
+      grid-template-columns: 1fr;
+    }
+    .hero-splash {
+      width: 100%;
+      max-width: 520px;
+      position: static;
+    }
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    background: rgba(111, 255, 214, 0.1);
+    border: 1px solid rgba(111, 255, 214, 0.25);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0 0 1.25rem 0;
+    background: linear-gradient(135deg, var(--clr-lossless-accent--brightest, #04e5e5) 0%, #BF23F7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sublede {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .hero-lede {
+    font-size: 1.25rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.8;
+    max-width: 850px;
+    margin: 0 0 2rem 0;
+  }
+
+  .highlight {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    -webkit-text-fill-color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .hero-actions, .cta-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-primary {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-icon { flex-shrink: 0; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(111, 255, 214, 0.08); }
+
+  .hero-supporters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .supporters-label {
+    font-size: 0.8rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    font-weight: 500;
+  }
+
+  .supporter-link {
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .supporter-link:hover {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .supporter-sep {
+    color: var(--clr-lossless-primary-light, #475569);
+  }
+
+  /* Sections */
+  section {
+    padding: 3rem 0;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .section-lede {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    max-width: 800px;
+    margin: 0 0 2rem 0;
+  }
+
+  /* Time Comparison */
+  .time-section {
+    padding: 2.5rem 0;
+    text-align: center;
+  }
+
+  .time-comparison {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .time-before, .time-after {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .time-value-strike {
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: var(--clr-lossless-primary-light, #64748b);
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  .time-arrow {
+    font-size: 2rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-weight: 700;
+  }
+
+  .time-value-pop {
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .time-label {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+  }
+
+  .time-combined {
+    margin-bottom: 1.5rem;
+  }
+
+  .time-value-combined {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.35rem;
+  }
+
+  .time-label-combined {
+    font-size: 1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+  }
+
+  .time-outcomes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .outcome {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+  }
+
+  .outcome-sep {
+    color: var(--clr-lossless-primary-light, #475569);
+  }
+
+  /* Stats */
+  .stats-section {
+    padding: 2rem 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  /* Why */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .why-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .why-card h3 {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .why-card p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Cast of Characters */
+  .cast {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cast-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .cast-extractor { border-color: rgba(234, 179, 8, 0.3); }
+  .cast-researcher { border-color: rgba(59, 130, 246, 0.3); }
+  .cast-writer { border-color: rgba(191, 35, 247, 0.3); }
+  .cast-validator { border-color: rgba(251, 146, 60, 0.3); }
+  .cast-editor { border-color: rgba(4, 229, 229, 0.3); }
+  .cast-output { border-color: rgba(111, 255, 214, 0.3); background: rgba(111, 255, 214, 0.04); }
+
+  .cast-icon {
+    font-size: 1.2rem;
+  }
+
+  .cast-extractor .cast-icon { color: #fde047; }
+  .cast-researcher .cast-icon { color: #60a5fa; }
+  .cast-writer .cast-icon { color: #d98ff5; }
+  .cast-validator .cast-icon { color: #ffdd57; }
+  .cast-editor .cast-icon { color: var(--clr-lossless-accent--brightest, #04e5e5); }
+  .cast-output .cast-icon { color: var(--clr-lossless-accent--aquamarine, #6FFFD6); }
+
+  .cast-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cast-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .cast-detail {
+    font-size: 0.7rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    max-width: 180px;
+  }
+
+  .cast-arrow {
+    color: var(--clr-lossless-primary-light, #475569);
+    font-size: 1.25rem;
+  }
+
+  .cast-human {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: rgba(111, 255, 214, 0.04);
+    border: 1px solid rgba(111, 255, 214, 0.2);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .cast-human-icon {
+    font-size: 1.3rem;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    flex-shrink: 0;
+  }
+
+  .cast-human-text {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.55;
+  }
+
+  .cast-human-text strong {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  /* Pipeline Flow */
+  .pipeline-flow {
+    display: block;
+  }
+
+  .pipeline-orchestrator {
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid rgba(4, 229, 229, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .orchestrator-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .orch-icon {
+    font-size: 1.1rem;
+  }
+
+  .orch-sub {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--clr-lossless-primary-light, #64748b);
+  }
+
+  .pipeline-steps {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(4, 229, 229, 0.08);
+    border-radius: 8px;
+    transition: border-color 0.2s;
+  }
+
+  .flow-step:hover {
+    border-color: rgba(4, 229, 229, 0.25);
+  }
+
+  .flow-number {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(4, 229, 229, 0.15);
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .flow-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.35rem 0;
+  }
+
+  .flow-desc {
+    font-size: 0.85rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .flow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.25rem 0;
+  }
+
+  .flow-line {
+    width: 2px;
+    height: 12px;
+    background: rgba(4, 229, 229, 0.25);
+  }
+
+  .flow-arrow {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-size: 0.7rem;
+    line-height: 1;
+    opacity: 0.6;
+  }
+
+
+  /* CLI Preview */
+  .cli-section {
+    text-align: center;
+  }
+
+  .cli-block {
+    max-width: 700px;
+    margin: 1.5rem auto;
+    background: #0d1117;
+    border-radius: 10px;
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    overflow: hidden;
+    text-align: left;
+  }
+
+  .cli-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cli-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .cli-dot.red { background: #ff5f57; }
+  .cli-dot.yellow { background: #febc2e; }
+  .cli-dot.green { background: #28c840; }
+
+  .cli-title {
+    font-size: 0.75rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    margin-left: 0.5rem;
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .cli-code {
+    padding: 1.25rem;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+    font-family: var(--ff-monospace, monospace);
+    overflow-x: auto;
+  }
+
+  .cli-note {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    margin-top: 1rem;
+  }
+
+  /* Feature Deep Dives */
+  .content-section {
+    margin: 2rem 0;
+  }
+
+  :global(.memopop-features) {
+    margin-top: 2rem;
+  }
+
+  /* CTA Dual */
+  .cta-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 3rem 0 4rem;
+  }
+
+  .cta-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 2rem;
+  }
+
+  .cta-opensource {
+    border: 1px solid rgba(4, 229, 229, 0.2);
+  }
+
+  .cta-human {
+    border: 1px solid rgba(111, 255, 214, 0.2);
+  }
+
+  .cta-card h2 {
+    font-size: 1.4rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .cta-card p {
+    font-size: 1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.65;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .cta-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    text-decoration: none;
+    font-size: 1.05rem;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .contact-link:hover {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .time-comparison { flex-direction: column; gap: 1rem; }
+    .time-arrow { transform: rotate(90deg); }
+    .time-outcomes { flex-direction: column; gap: 0.5rem; }
+    .outcome-sep { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .why-grid { grid-template-columns: 1fr; }
+    .cta-dual { grid-template-columns: 1fr; }
+    .cast { flex-direction: column; }
+    .cast-arrow { transform: rotate(90deg); }
+    .cast-detail { max-width: none; }
+    .hero { padding: 2rem 0 1.5rem; }
+    section { padding: 2rem 0; }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .why-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

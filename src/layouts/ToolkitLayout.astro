@@ -5,6 +5,7 @@ import { getCollection } from "astro:content";
 import CardGrid from "@basics/CardGrid.astro";
 import TagColumn from "@components/tool-components/TagColumn.astro";
 import TagShareHeader from "@components/toolkit/TagShareHeader.astro";
+import PinnedTagsRow from "@components/toolkit/PinnedTagsRow.astro";
 
 // Props
 export interface Props {
@@ -58,6 +59,7 @@ const filteredTools = filterTag
         <TagColumn tools={tools} />
       </aside>
       <section class="main-content">
+        <PinnedTagsRow tools={tools} />
         <CardGrid tools={tools} filterTag={filterTag} />
       </section>
     </div>

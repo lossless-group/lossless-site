@@ -22,6 +22,7 @@ export const ROUTE_PATHS = {
     BASE: '/client',
     PORTFOLIO: '/client/[client]/portfolio',
     RECOMMENDATIONS: '/client/[client]/recommendations',
+    READ: '/client/[client]/read',
   },
   
   VIBE_WITH: {
@@ -36,7 +37,11 @@ export const ROUTE_PATHS = {
   PROJECTS: {
     BASE: '/projects',
   },
-  
+
+  SOURCES: {
+    BASE: '/sources',
+  },
+
   // Default fallback paths
   DEFAULTS: {
     LEARN: '/learn-with/issue-resolution',

@@ -21,7 +21,7 @@ export async function getStaticPaths() {
   // Excluding 'tooling' collection as it causes infinite loops
   const allCollections = await Promise.all([
     getCollection('concepts'),
-    getCollection('essays'), 
+    getCollection('essays'),
     getCollection('vocabulary'),
     getCollection('changelog--content'),
     getCollection('changelog--code'),
@@ -31,12 +31,12 @@ export async function getStaticPaths() {
     getCollection('slides'),
     getCollection('prompts'),
     getCollection('reminders'),
+    getCollection('blueprints'),
     getCollection('specs'),
     getCollection('talks'),
     getCollection('issue-resolution'),
     getCollection('client-content'),
     getCollection('client-recommendations'),
-    getCollection('client-projects'),
   ]);
   
   // Flatten all entries and create paths based on their file structure

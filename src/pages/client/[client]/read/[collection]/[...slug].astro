@@ -1,0 +1,256 @@
+---
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+import Layout from '@layouts/Layout.astro';
+import ClientReaderLayout from '@layouts/ClientReaderLayout.astro';
+import { getCollection, getEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
+import { extractBacklinkPaths } from '@utils/backlink-parser';
+import { contentBasePath } from '@utils/envUtils';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Function to get client-specific content paths from Map of Content
+async function getClientContentPaths(clientName: string): Promise<string[]> {
+  try {
+    const clientMdPath = path.resolve(contentBasePath, 'moc', `${clientName}.md`);
+    const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+    
+    const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
+    if (!readerBlockMatch) return [];
+    
+    const block = readerBlockMatch[1] || '';
+    return extractBacklinkPaths(block);
+  } catch (err) {
+    console.warn(`Error loading Map of Content for client ${clientName}:`, err);
+    return [];
+  }
+}
+
+// Function to filter collections based on Map of Content paths
+function filterContentByMOC(
+  allContent: (CollectionEntry<'essays'> | CollectionEntry<'market-maps'>)[], 
+  mocPaths: string[]
+): (CollectionEntry<'essays'> | CollectionEntry<'market-maps'>)[] {
+  if (mocPaths.length === 0) return allContent;
+  
+  return allContent.filter(entry => {
+    const entryTitle = entry.data.title as string;
+    const entryId = entry.id;
+    const entryCollection = entry.collection;
+    
+    return mocPaths.some(mocPath => {
+      // Split the MOC path into collection and filename
+      const pathParts = mocPath.split('/');
+      
+      // Handle paths like "lost-in-public/market-maps/..." or "essays/..."
+      let mocCollection, mocFilename;
+      if (pathParts.length >= 2 && pathParts[1] === 'market-maps') {
+        // Path like "lost-in-public/market-maps/The Future of CPG"
+        mocCollection = 'market-maps';
+        mocFilename = pathParts.slice(2).join('/');
+      } else {
+        // Path like "essays/Partnering with Startups when they Scale Up"
+        mocCollection = pathParts[0];
+        mocFilename = pathParts.slice(1).join('/');
+      }
+      
+      // Check if collections match
+      if (entryCollection !== mocCollection) return false;
+      
+      // Extract key words from MOC filename for fuzzy matching
+      const mocWords = mocFilename.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 2); // Only words longer than 2 chars
+      
+      // Extract key words from entry ID and title
+      const entryWords = [
+        ...entryId.toLowerCase().split(/[-\s]+/),
+        ...(entryTitle || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+      ].filter(word => word.length > 2);
+      
+      // Check if most MOC words are found in entry words
+      const matchingWords = mocWords.filter(mocWord => 
+        entryWords.some(entryWord => 
+          entryWord.includes(mocWord) || mocWord.includes(entryWord)
+        )
+      );
+      
+      const matchRatio = matchingWords.length / mocWords.length;
+      return matchRatio >= 0.6; // At least 60% of words match
+    });
+  });
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = [];
+
+  try {
+    // Handle essays collection
+    const essaysEntries = await getCollection('essays');
+    const publishedEssays = essaysEntries.filter(
+      entry => entry.data.publish !== false 
+    );
+
+    for (const entry of publishedEssays) {
+      const filename = path.basename(entry.id);
+      const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
+
+      paths.push({
+        params: { 
+          client: 'hypernova', 
+          collection: 'essays', 
+          slug: derivedSlug 
+        },
+        props: { 
+          client: 'hypernova',
+          actualClientName: 'Hypernova',
+          entry: entry,
+          essays: publishedEssays,
+          collection: 'essays'
+        }
+      });
+    }
+
+    // Handle market-maps collection
+    const marketMapsEntries = await getCollection('market-maps');
+    const publishedMarketMaps = marketMapsEntries.filter(
+      entry => entry.data.publish !== false 
+    );
+
+    for (const entry of publishedMarketMaps) {
+      const filename = path.basename(entry.id);
+      const derivedSlug = filename.replace(/\.(md|mdx)$/, '');
+
+      paths.push({
+        params: { 
+          client: 'hypernova', 
+          collection: 'market-maps', 
+          slug: derivedSlug 
+        },
+        props: { 
+          client: 'hypernova',
+          actualClientName: 'hypernova',
+          entry: entry,
+          essays: publishedMarketMaps,
+          collection: 'market-maps'
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Error loading collections:', err);
+  }
+
+  return paths;
+}
+
+interface Props {
+  client: string;
+  actualClientName: string;
+  entry: CollectionEntry<'essays'> | CollectionEntry<'market-maps'>;
+  essays: (CollectionEntry<'essays'> | CollectionEntry<'market-maps'>)[];
+  collection: string;
+}
+
+const { client, actualClientName, entry, essays, collection } = Astro.props;
+
+// Use the entry directly from props
+const currentEssay = entry;
+
+// Get all content from both collections
+const allEssays = await getCollection('essays');
+const allMarketMaps = await getCollection('market-maps');
+const allContent = [...allEssays, ...allMarketMaps].filter(entry => entry.data.publish !== false);
+
+// Get client-specific content paths and filter content
+const clientContentPaths = await getClientContentPaths(actualClientName as string);
+const clientContent = filterContentByMOC(allContent, clientContentPaths);
+
+// Filter content based on MOC paths
+
+// Define frontmatter data for the client reader page
+const frontmatter = {
+  title: `${toProperCase(client as string)} - ${(currentEssay as any).data.title || 'Reader'}`,
+  description: `Strategic insights and recommendations for ${toProperCase(client as string)}`,
+  lede: `Strategic insights and recommendations for ${toProperCase(client as string)}`,
+  banner_image: ((currentEssay as any).data.banner_image || (currentEssay as any).data.portrait_image) as string | undefined
+};
+
+---
+
+<Layout frontmatter={frontmatter}>
+  <AnimationWrapper>
+
+  <div class="reader-wrapper">
+    <ClientReaderLayout 
+      entry={currentEssay} 
+      allContent={clientContent} 
+      mode="client"
+      client={client as string}
+      collections={['essays', 'market-maps']}
+    />
+  </div>
+
+  <Hero
+      title={`${toProperCase(client as string)} Reader`}
+      subtitle="Strategic insights and recommendations"
+      description="Access curated content, strategic recommendations, and case studies tailored specifically for your organization."
+      ctaText="Back to Portal"
+      ctaUrl={`/client/${(client as string).toLowerCase()}`}
+      image={{
+        src: "https://www.news-medical.net/image-handler/picture/2016/3/Laerdal2.jpg",
+        alt: `${toProperCase(client as string)} Logo`
+      }}
+      alignment="left"
+      fullBleed={true}
+      animate={true}
+      classes="mb-0"
+      style="margin-bottom: 0; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; margin-top: 10rem;"
+  />
+  </AnimationWrapper>
+</Layout>
+
+<script>
+  // Scroll to reader-wrapper if viewing a specific essay (slug is provided)
+  const pathSegments = window.location.pathname.split('/');
+  const hasContentSlug = pathSegments.length > 4; // /client/[client]/read/[content-slug]
+    
+    if (hasContentSlug) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const readerWrapper = document.querySelector('.reader-wrapper');
+      if (readerWrapper) {
+        readerWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Add a small offset to account for any fixed headers
+      }
+    });
+  }
+</script>
+
+<style>
+.reader-wrapper {
+  padding: 2rem 0rem;
+  margin: 0 auto;
+}
+
+.no-content {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--clr-lossless-primary);
+}
+
+.no-content h2 {
+  font-size: var(--fs-700);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .reader-wrapper {
+    padding: 1rem;
+  }
+}
+</style>

@@ -1,30 +1,57 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import Header from '../../../components/basics/Header.astro';
-import Footer from '../../../components/basics/Footer.astro';
-import AlternatingSideImage from '../../../components/basics/messages/AlternatingSideImage.astro';
-import ThinGradientBleedSeparator from '../../../components/basics/separators/ThinGradientBleedSeparator.astro';
+import Layout from '@layouts/Layout.astro';
+import AlternatingSideImage from '@basics/messages/AlternatingSideImage.astro';
+import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
 
 export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/content-farm/', {
+  title: 'A small farm of writing tools — content-farm',
+  description: 'Nine Obsidian plugins, one vault, working in chorus. AI-assisted drafting, citations, image generation, search-augmented enhancement.',
+  siteName: 'content-farm',
+});
 ---
 
-<Layout title="Content Farm - The Lossless Group">
-  <Header />
-  
+<Layout title="Content Farm - a suite of Obsidian Plugins by The Lossless Group">
   <main class="main-content">
-    <div class="container">
-      <div class="content-farm-header">
+
+    <!-- Hero (full-bleed wrapper — escapes the body container) -->
+    <div class="hero-bleed">
+      <div class="content-farm-header content-farm-header--with-splash">
         <div class="header-content">
-          <div class="header-icon">
-            <img src="/visuals/Tooling-Trademarks/app-icons/appIcon__Obsidian.svg" alt="Obsidian Icon" class="obsidian-icon" />
+          <div class="header-main">
+            <div class="header-icon">
+              <img src="/visuals/Tooling-Trademarks/app-icons/appIcon__Obsidian.svg" alt="Obsidian Icon" class="obsidian-icon" />
+              <img src="/visuals/appIcon__Content-Farm.svg" alt="Content Farm Icon" class="content-farm-icon" />
+            </div>
+            <div class="header-text">
+              <h1 class="page-title">Content Farm: a Suite of Plugins for Obsidian</h1>
+              <p class="page-subtitle">Streamlined content creation and data preparation for AI-powered workflows</p>
+            </div>
           </div>
-          <div class="header-text">
-            <h1 class="page-title">Content Farm: a Suite of Plugins for Obsidian</h1>
-            <p class="page-subtitle">Streamlined content creation and data preparation for AI-powered workflows</p>
+          <div class="header-actions">
+            <a href="https://github.com/lossless-group/content-farm" target="_blank" rel="noopener noreferrer" class="gh-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              View Repo on GitHub
+            </a>
+            <a href="https://buymeacoffee.com/losslessgroup" target="_blank" rel="noopener noreferrer" class="coffee-cta" aria-label="Support Lossless Group on Buy Me a Coffee">
+              <span class="coffee-link">
+                <img src="/visuals/favicon__BuyMeACoffee.svg" alt="" class="coffee-icon" />
+              </span>
+              <span class="coffee-text">Support our work on Buy Me a Coffee. Even $5 gives good signal.</span>
+            </a>
           </div>
         </div>
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" />
+        </aside>
       </div>
-      
+    </div>
+
+    <div class="container">
+
       <ThinGradientBleedSeparator />
       
       <div class="content-section">
@@ -35,8 +62,6 @@ export const prerender = true;
       </div>
     </div>
   </main>
-  
-  <Footer />
 </Layout>
 
 <style>
@@ -52,28 +77,224 @@ export const prerender = true;
   }
   
   .content-farm-header {
-    margin-bottom: 3rem;
-    padding: 2rem 0;
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+  }
+
+  /* Hero wrapper — matches the body container width so content stays centered. */
+  .hero-bleed {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .content-farm-header--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* Stack title + CTAs vertically inside the left grid column so they don't
+     fight for horizontal space. */
+  .content-farm-header--with-splash .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .content-farm-header--with-splash .header-main {
+    flex: 0 0 auto;
+    width: 100%;
+    gap: 1.25rem;
+  }
+
+  .content-farm-header--with-splash .header-actions {
+    /* Original `.header-actions` rule sets `flex: 0 0 440px; max-width: 440px;`
+       which in column mode becomes 440px of vertical space. Reset. */
+    flex: 0 0 auto;
+    max-width: none;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .hero-splash {
+    width: clamp(280px, 30vw, 440px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  /* GitHub repo button (matches the LFM page convention). */
+  .gh-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .gh-cta:hover { background: rgba(111, 255, 214, 0.08); }
+  .gh-cta svg { flex-shrink: 0; }
+
+  @media (max-width: 900px) {
+    .content-farm-header--with-splash {
+      grid-template-columns: 1fr;
+    }
+    .hero-splash {
+      width: 100%;
+      max-width: 460px;
+      position: static;
+    }
   }
   
   .header-content {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+  }
+
+  .header-main {
+    display: flex;
+    align-items: center;
     gap: 2rem;
+    flex: 1 1 auto;
+    min-width: 0;
   }
   
   .header-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
-  
+
   .obsidian-icon {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+  }
+  
+  .content-farm-icon {
+    width: 96px;
+    height: 96px;
     object-fit: contain;
   }
   
   .header-text {
     flex: 1;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    flex: 0 0 440px;
+    max-width: 440px;
+  }
+
+  .splash-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: rgba(4, 229, 229, 0.035);
+    border: 1px solid rgba(4, 229, 229, 0.16);
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .splash-cta:hover {
+    transform: translateY(-2px);
+    background: rgba(4, 229, 229, 0.07);
+    border-color: rgba(4, 229, 229, 0.28);
+  }
+
+  .splash-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.74;
+  }
+
+  .splash-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .coffee-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    max-width: 440px;
+    color: #d1d5db;
+    text-decoration: none;
+  }
+
+  .coffee-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    background: rgba(255, 221, 0, 0.12);
+    border: 1px solid rgba(255, 221, 0, 0.35);
+    color: #ffdd00;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .coffee-cta:hover .coffee-link {
+    transform: translateY(-2px) scale(1.06);
+    background: rgba(255, 221, 0, 0.18);
+    border-color: rgba(255, 221, 0, 0.55);
+  }
+
+  .coffee-icon {
+    display: block;
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+  }
+
+  .coffee-text {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: #9ca3af;
+    max-width: 270px;
+    text-wrap: balance;
+  }
+
+  .coffee-cta:hover .coffee-text {
+    color: #d1d5db;
   }
   
   .page-title {
@@ -106,10 +327,44 @@ export const prerender = true;
       align-items: flex-start;
       gap: 1.5rem;
     }
+
+    .header-main {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .header-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .splash-cta {
+      max-width: 100%;
+    }
+
+    .coffee-cta {
+      max-width: 100%;
+    }
+
+    .coffee-link {
+      width: 56px;
+      height: 56px;
+    }
+
+    .coffee-icon {
+      width: 36px;
+      height: 36px;
+    }
     
     .obsidian-icon {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
+    }
+    
+    .content-farm-icon {
+      width: 72px;
+      height: 72px;
     }
     
     .page-title {

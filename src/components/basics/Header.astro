@@ -50,9 +50,9 @@ const navLinks = [
         description: "Explore our collection of explorations."
       },
       toHero: {
-        href: "/learn-with/to-hero",
+        href: "/learn-with/zero-to",
         title: "Zero to...",
-        description: "See us fumble with things we supposely know."
+        description: "See us fumble with things we supposedly know."
       },
       talks: {
         href: "/learn-with/our-talks",
@@ -92,7 +92,8 @@ const socialIcons = [
   { label: "Youtube", icon: "https://ik.imagekit.io/xvpgfijuw/lossless-content-embeds/appIcon__Youtube--Lightest.svg", url: "https://www.youtube.com/@losslessgroup/" },
   { label: "X", icon: "/visuals/appIcon__X-Twitter--Lightest.svg", url: "https://x.com/losslessgroup" },
   { label: "GitHub", icon: "/visuals/appIcon__GitHub--Lighter.svg", url: "https://github.com/lossless-group" },
-  { label: "LinkedIn", icon: "/visuals/appIcon__LinkedIn.svg", url: "https://www.linkedin.com/company/thelosslessgroup" }
+  { label: "LinkedIn", icon: "/visuals/appIcon__LinkedIn.svg", url: "https://www.linkedin.com/company/thelosslessgroup" },
+  { label: "Buy Me a Coffee", icon: "/visuals/favicon__BuyMeACoffee.svg", url: "https://buymeacoffee.com/losslessgroup", className: "buy-me-a-coffee-icon" }
 ];
 ---
 
@@ -134,7 +135,7 @@ const socialIcons = [
     <div class="social-icons desktop-only">
       {socialIcons.map(icon => (
         <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
-          <img src={icon.icon} alt={icon.label} />
+          <img src={icon.icon} alt={icon.label} class={icon.className} />
         </a>
       ))}
     </div>
@@ -220,7 +221,7 @@ const socialIcons = [
     <div class="mobile-social-icons">
       {socialIcons.map(icon => (
         <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
-          <img src={icon.icon} alt={icon.label} />
+          <img src={icon.icon} alt={icon.label} class={icon.className} />
         </a>
       ))}
     </div>
@@ -329,6 +330,11 @@ const socialIcons = [
       object-fit: contain;
       aspect-ratio: 1 / 1;
       transition: width 0.3s ease, height 0.3s ease; /* Smooth transitions */
+    }
+
+    & img.buy-me-a-coffee-icon {
+      filter: brightness(0) invert(1);
+      opacity: 0.92;
     }
   }
   
@@ -501,6 +507,11 @@ const socialIcons = [
     & img {
       width: 24px;
       height: 24px;
+    }
+
+    & img.buy-me-a-coffee-icon {
+      filter: brightness(0) invert(1);
+      opacity: 0.92;
     }
   }
   

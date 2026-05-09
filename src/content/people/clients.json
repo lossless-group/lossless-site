@@ -81,13 +81,13 @@
     {
       "id": "colearn",
       "name": "Colearn",
-      "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Colearn.svg",
+      "logo": "/visuals/appIcon__Colearn--Darker.png",
       "description": "AI-powered personalized learning platform",
       "industry": "Education Technology",
       "engagement": "2023-Present",
       "website": "https://colearn.com",
       "stealth-name": "Personalized Learning Platform",
-      "stealth-logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Colearn.svg",
+      "stealth-logo": "/visuals/appIcon__Colearn--Darker.png",
       "stealth-description": "AI-powered personalized learning experiences for students.",
       "stealth-passcode": "colearn-2025"
     },

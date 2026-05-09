@@ -1,0 +1,277 @@
+---
+import Hero from "@components/basics/Hero.astro";
+import AnimationWrapper from "@components/basics/AnimationWrapper.astro";
+import Layout from '@layouts/Layout.astro';
+import DirectClientReaderLayout from '@layouts/DirectClientReaderLayout.astro';
+import { getCollection, getEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import { toProperCase, getReferenceSlug, slugify } from '@utils/slugify';
+import { processEntries } from '@utils/slugify';
+import { extractBacklinkPaths } from '@utils/backlink-parser';
+import { contentBasePath } from '@utils/envUtils';
+import { transformContentPathToRoute } from '@utils/routing/routeManager';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Generate static paths for all available clients
+export async function getStaticPaths() {
+  const mocPath = path.resolve(contentBasePath, 'moc');
+  
+  try {
+    const files = await fs.readdir(mocPath);
+    const clientFiles = files.filter(file => 
+      file.endsWith('.md') && 
+      !['Home.md', 'Param.md'].includes(file) // Exclude non-client files
+    );
+    
+    return clientFiles.map(file => {
+      const clientName = path.basename(file, '.md');
+      return {
+        params: { 
+          client: clientName.toLowerCase().replace(/\s+/g, '-') 
+        }
+      };
+    });
+  } catch (error) {
+    console.error('Error reading MOC directory:', error);
+    return [];
+  }
+}
+
+// Get the client parameter from the URL
+const { client } = Astro.params;
+
+if (!client) {
+  return Astro.redirect('/404');
+}
+
+// Function to find entry by searching through collections
+async function findEntryByPath(contentPath: string): Promise<CollectionEntry<'essays'> | CollectionEntry<'market-maps'> | null> {
+  // Remove leading slash if present
+  const cleanPath = contentPath.startsWith('/') ? contentPath.slice(1) : contentPath;
+  
+  // Split the path to get collection and filename
+  const pathParts = cleanPath.split('/');
+  
+  if (pathParts.length < 2) {
+    return null;
+  }
+  
+  // Determine collection based on the path
+  let collection: string;
+  let filename: string;
+  
+  if (pathParts[0] === 'lost-in-public' && pathParts[1] === 'market-maps') {
+    collection = 'market-maps';
+    filename = pathParts.slice(2).join('/');
+  } else if (pathParts[0] === 'essays') {
+    collection = 'essays';
+    filename = pathParts.slice(1).join('/');
+  } else {
+    // Handle other collections as needed
+    return null;
+  }
+  
+  // Remove .md extension if present
+  const baseFilename = filename.replace(/\.md$/, '');
+  
+  try {
+    // Get all entries from the collection
+    if (collection === 'essays') {
+      const entries = await getCollection('essays');
+      
+      const matchingEntry = entries.find(entry => {
+        // Try exact slug match first
+        if (entry.data?.slug === baseFilename) {
+          return true;
+        }
+        
+        // Try filename converted to slug format
+        const filenameAsSlug = baseFilename
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        
+        if (entry.id === filenameAsSlug) {
+          return true;
+        }
+        
+        // Try matching the original filename (case-insensitive)
+        if (entry.id.toLowerCase() === baseFilename.toLowerCase()) {
+          return true;
+        }
+        
+        // Try fuzzy matching - check if the entry ID contains key words from filename
+        const filenameWords = baseFilename.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+        const entryWords = entry.id.toLowerCase().split('-');
+        
+        // Look for exact word matches (not just partial)
+        const exactMatches = filenameWords.filter(word => entryWords.includes(word));
+        
+        // For this to be a match, we need at least 2 exact word matches including key identifying words
+        const hasKeyWords = exactMatches.includes('partnering') && exactMatches.includes('startups');
+        
+        if (hasKeyWords && exactMatches.length >= 2) {
+          return true;
+        }
+        
+        return false;
+      });
+      return matchingEntry || null;
+    } else if (collection === 'market-maps') {
+      const entries = await getCollection('market-maps');
+      const matchingEntry = entries.find(entry => {
+        // Try exact slug match first
+        if (entry.data?.slug === baseFilename) return true;
+        
+        // Try filename converted to slug format
+        const filenameAsSlug = baseFilename
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        
+        if (entry.id === filenameAsSlug) return true;
+        
+        // Try matching the original filename (case-insensitive)
+        if (entry.id.toLowerCase() === baseFilename.toLowerCase()) return true;
+        
+        return false;
+      });
+      return matchingEntry || null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error searching for entry in collection ${collection}:`, error);
+    return null;
+  }
+}
+
+// Load client content based on the client parameter
+async function loadClientContent(clientParam: string) {
+  try {
+    // Debug: Log available collections and their sample IDs
+    console.log(`🔍 Debug: Loading content for client parameter: ${clientParam}`);
+    
+    // Sample a few entries from each collection to see their ID format
+    try {
+      // Debug: Sample a few entries from each collection to verify they're working
+  const essaysCollection = await getCollection('essays');
+  const marketMapsCollection = await getCollection('market-maps');
+  
+  console.log('📚 Essays collection sample IDs:', essaysCollection.slice(0, 3).map(entry => entry.id));
+  console.log('🗺️ Market-maps collection sample IDs:', marketMapsCollection.slice(0, 3).map(entry => entry.id));
+    } catch (error) {
+      console.error('Error sampling collections:', error);
+    }
+    
+    // Convert URL parameter back to actual file name
+    const mocPath = path.resolve(contentBasePath, 'moc');
+    const files = await fs.readdir(mocPath);
+    
+    // Find the matching client file
+    const clientFile = files.find(file => {
+      const fileName = path.basename(file, '.md');
+      const urlParam = fileName.toLowerCase().replace(/\s+/g, '-');
+      return urlParam === clientParam;
+    });
+    
+    if (!clientFile) {
+      console.warn(`No client file found for parameter: ${clientParam}`);
+      return [];
+    }
+    
+    const clientMdPath = path.resolve(mocPath, clientFile);
+    const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
+    
+    const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
+    if (!readerBlockMatch) {
+      return [];
+    }
+    
+    const block = readerBlockMatch[1] || '';
+    const contentPaths = extractBacklinkPaths(block);
+    const clientContent = [];
+    
+    for (const contentPath of contentPaths) {
+      console.log(`🔍 Attempting to find entry for path:`, contentPath);
+      
+      try {
+        const entry = await findEntryByPath(contentPath);
+        if (entry) {
+          console.log(`✅ Successfully found entry:`, entry.id);
+          clientContent.push(entry);
+        } else {
+          console.log(`❌ Entry not found for path: ${contentPath}`);
+        }
+      } catch (error) {
+        console.error(`Error finding entry for ${contentPath}:`, error);
+      }
+    }
+    
+    return clientContent;
+  } catch (err) {
+    console.warn(`Error loading content for client ${clientParam}:`, err);
+    return [];
+  }
+}
+
+// Load the client's content using the URL parameter
+const clientContent = await loadClientContent(client!);
+
+// Process content for display - cast to BaseCollectionEntry type
+const allContent = processEntries(clientContent as any);
+
+// Get the first content item as the default
+const currentContent = allContent[0];
+
+// Get unique collection names for the collections prop
+const collections: string[] = [...new Set(clientContent.map((entry: any) => String(entry.collection)))];
+
+// Define frontmatter data for the client reader page
+const frontmatter = {
+  title: `${toProperCase(client)} - Reader`,
+  description: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  lede: `Strategic insights and recommendations for ${toProperCase(client)}`,
+  banner_image: (currentContent?.data?.banner_image || currentContent?.data?.portrait_image) as string | undefined
+};
+
+---
+
+<Layout frontmatter={frontmatter}>
+  <AnimationWrapper>
+
+  <div class="reader-wrapper">
+    {allContent.length > 0 ? (
+      <DirectClientReaderLayout 
+        allContent={allContent}
+        client={client}
+        collections={collections}
+      />
+    ) : (
+      <div class="no-content">
+        <Hero 
+          title={`${toProperCase(client)} Reader`}
+          subtitle="No content available for this client"
+        />
+      </div>
+    )}
+  </div>
+
+  </AnimationWrapper>
+</Layout>
+
+<style>
+  .reader-wrapper {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .no-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+  }
+</style>

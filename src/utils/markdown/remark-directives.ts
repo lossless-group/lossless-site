@@ -102,13 +102,17 @@ export function remarkDirectiveTransform() {
         if (componentPath) {
           // Special handling for tool-showcase directive
           if (directiveName === 'tool-showcase') {
-            // Extract tool paths from the container content
+            // Check if there's a tag attribute
+            const tag = node.attributes?.tag;
+
+            // Extract tool paths from the container content (only for container directives)
             const toolPaths: string[] = [];
-            
-            if (node.type === 'containerDirective' && node.children) {
+
+            // Only try to extract tool paths from children if this is a container directive
+            if (node.type === 'containerDirective' && node.children && !tag) {
               // Find list nodes in the container
               const listNodes = node.children.filter((child: any) => child.type === 'list');
-              
+
               for (const listNode of listNodes) {
                 if (listNode.children) {
                   for (const listItem of listNode.children) {
@@ -130,27 +134,35 @@ export function remarkDirectiveTransform() {
                 }
               }
             }
-            
+
             // Convert directive to Astro component import and usage
             const componentName = 'ToolShowcaseIsland';
             const importPath = `@components/toolkit/ToolShowcaseIsland.astro`;
-            
-            // Create the component JSX with tool paths
-            const toolPathsJson = JSON.stringify(toolPaths).replace(/"/g, '&quot;');
-            
-            // Replace the directive node with an HTML node that will render the component
-            node.type = 'html';
-            node.value = `<${componentName} toolPaths={${JSON.stringify(toolPaths)}} />`;
-            
-            // Store import information for later processing
-            if (!tree.imports) {
-              tree.imports = new Set();
+
+            // Build props - prioritize tag over toolPaths
+            let propsString = '';
+            if (tag) {
+              propsString = `tag="${tag}"`;
+            } else if (toolPaths.length > 0) {
+              propsString = `toolPaths={${JSON.stringify(toolPaths)}}`;
             }
-            tree.imports.add({
-              componentName,
-              importPath,
-              componentPath
-            });
+
+            // Only render if we have either a tag or tool paths
+            if (propsString) {
+              // Replace the directive node with an HTML node that will render the component
+              node.type = 'html';
+              node.value = `<${componentName} ${propsString} />`;
+
+              // Store import information for later processing
+              if (!tree.imports) {
+                tree.imports = new Set();
+              }
+              tree.imports.add({
+                componentName,
+                importPath,
+                componentPath
+              });
+            }
           } else {
             // Handle other directives normally
             // Extract props from directive attributes

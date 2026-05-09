@@ -1,0 +1,104 @@
+---
+/**
+ * /toolkit/timeline.astro — Toolkit Timeline
+ *
+ * Aggregates the `tooling` and `vertical-toolkits` collections into Month → Week
+ * timeline events. Rendering, filtering, and search live in <Timeline>.
+ */
+import Layout from '@layouts/Layout.astro';
+import Timeline, { type TimelineEvent } from '@components/timeline/Timeline.astro';
+import { getCollection } from 'astro:content';
+import { getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+type CollectionId = 'tooling' | 'vertical-toolkits';
+
+const [tooling, verticalToolkits] = await Promise.all([
+  getCollection('tooling'),
+  getCollection('vertical-toolkits'),
+]);
+
+function parseDate(v: any): Date | null {
+  if (!v) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Pull the original filename (preserving case — entry.id is lowercased by Astro's
+ * default glob slug generator, so we'd lose "API", "NLP", etc.).
+ */
+function originalFilename(entry: any): string {
+  const path: string = entry.filePath || entry.id;
+  const base = path.split('/').pop() || path;
+  return base.replace(/\.(md|mdx)$/i, '').replace(/[-_]+/g, ' ');
+}
+
+function getTitle(entry: any): string {
+  const t = entry.data?.title;
+  if (typeof t === 'string' && t.trim()) return t.trim();
+  const og = entry.data?.og_title;
+  if (typeof og === 'string' && og.trim()) return og.trim();
+  const site = entry.data?.site_name;
+  if (typeof site === 'string' && site.trim()) return site.trim();
+  return originalFilename(entry);
+}
+
+function originalFolder(entry: any): string {
+  const path: string = entry.filePath || entry.id;
+  const parts = path.split('/');
+  return parts.length > 1 ? parts[0].replace(/[-_]+/g, ' ') : '';
+}
+
+function tagsToArray(t: any): string[] {
+  if (!t) return [];
+  if (Array.isArray(t)) return t.map(String);
+  if (typeof t === 'string') return t.split(/[,\s]+/).filter(Boolean);
+  return [];
+}
+
+const events: TimelineEvent[] = [];
+
+function pushEvents(collection: CollectionId, list: any[]) {
+  for (const entry of list) {
+    const created = parseDate(entry.data?.date_created);
+    const modified = parseDate(entry.data?.date_modified);
+    const title = getTitle(entry);
+    const href = `/toolkit/${getReferenceSlug(entry.id)}`;
+    const externalHref: string | undefined =
+      entry.data?.url || entry.data?.github_repo_url || undefined;
+    const tags = tagsToArray(entry.data?.tags);
+    const siteName: string | undefined = entry.data?.site_name;
+    const folder = originalFolder(entry);
+    const meta = siteName && !title.toLowerCase().includes(siteName.toLowerCase())
+      ? siteName
+      : undefined;
+    const base = { title, href, collection, id: entry.id, tags, folder, meta, externalHref };
+
+    if (created) events.push({ kind: 'created', date: created, ...base });
+    if (modified && (!created || modified.getTime() !== created.getTime())) {
+      events.push({ kind: 'modified', date: modified, ...base });
+    }
+  }
+}
+
+pushEvents('tooling', tooling);
+pushEvents('vertical-toolkits', verticalToolkits);
+
+const collections = {
+  tooling:             { label: 'Tool',     color: '#5eead4', bg: 'rgba(20, 184, 166, 0.18)' },
+  'vertical-toolkits': { label: 'Vertical', color: '#fcd34d', bg: 'rgba(245, 158, 11, 0.18)' },
+};
+---
+
+<Layout title="Toolkit Timeline">
+  <Timeline
+    title="Toolkit Timeline"
+    subtitle="When tools were added to the toolkit and when their entries were last updated."
+    backLink={{ label: '← Toolkit', href: '/toolkit' }}
+    events={events}
+    collections={collections}
+  />
+</Layout>

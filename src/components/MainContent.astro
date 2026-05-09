@@ -13,6 +13,7 @@ import Section__VibeCodeWithUs from "@components/basics/messages/Section__VibeCo
 import ClientListHorizontalScrollerStealth from "@components/basics/messages/ClientListHorizontalScroller--stealth.astro";
 import clientsData from "../content/people/clients.json";
 import { loadToolsFromMoc } from "@utils/toolUtils";
+import ProjectsShowcaseSection from "@layouts/content-sections/ProjectsShowcaseSection.astro";
 
 
 interface Tool {
@@ -83,6 +84,12 @@ const clients = clientsData.clients;
     <AlternatingSideImageComponent jsonPath="messages/featureSideImage.json" />
   </section>
 </div>
+
+<!-- Projects Showcase Section -->
+<section class="content-wrapper">
+  <ProjectsShowcaseSection title="Projects Showcase" />
+  
+</section>
 
 <!-- Full-bleed separator with standard styling -->
 <ThinGradientBleedSeparator 

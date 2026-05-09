@@ -109,10 +109,13 @@ function filterCards() {
   const selectedTags = getSelectedTags();
   const allCards = Array.from(document.querySelectorAll('.tool-card'));
 
-  // Compute matching cards in DOM order
+  // Compute matching cards in DOM order. Tag comparison is case-insensitive so
+  // the corpus's `Check-it-Out` vs `Check-It-Out` (and similar drift) all
+  // resolve to the same filter — no script-driven normalization required.
+  const lowerSelected = selectedTags.map(t => String(t).toLowerCase());
   const matchingCards = allCards.filter(card => {
-    const tags = JSON.parse(card.dataset.tags || '[]');
-    return selectedTags.every(tag => tags.includes(tag)) || selectedTags.length === 0;
+    const tags = JSON.parse(card.dataset.tags || '[]').map(t => String(t).toLowerCase());
+    return lowerSelected.every(tag => tags.includes(tag)) || selectedTags.length === 0;
   });
 
   // Show first currentPage * itemsPerPage matching cards
@@ -123,8 +126,7 @@ function filterCards() {
     const tagChips = card.querySelectorAll('.tool-tag');
     tagChips.forEach(chip => {
         const tag = chip.dataset.tag;
-        if (selectedTags.includes(tag)) {
-          console.log("Added selected")
+        if (tag && lowerSelected.includes(String(tag).toLowerCase())) {
           chip.classList.add('selected');
         } else {
           chip.classList.remove('selected');
@@ -411,20 +413,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Handle .tool-tag clicks in ToolCards
+  // Handle .tool-tag clicks in ToolCards. Tag comparison is case-insensitive
+  // so a chip labeled "Check-It-Out" toggles off a previously-selected
+  // "Check-it-Out" (and vice versa) — matches the case-insensitive filter.
     document.addEventListener('click', (e) => {
       const chip = e.target.closest('.tool-tag');
       if (chip && chip.dataset && chip.dataset.tag) {
         const clickedTag = chip.dataset.tag;
+        const clickedLower = String(clickedTag).toLowerCase();
         const selectedTags = getSelectedTags();
+        const existingMatch = selectedTags.find(t => String(t).toLowerCase() === clickedLower);
 
-        if (selectedTags.includes(clickedTag)) {
-          // ❌ Remove tag
-          const item = choices.getValue().find(val => val.value === clickedTag);
-          if (item) choices.removeActiveItemsByValue(clickedTag);
+        if (existingMatch) {
+          // ❌ Remove the matching variant (whatever case it was selected with)
+          choices.removeActiveItemsByValue(existingMatch);
         } else {
-          // ✅ Add tag
-          choices.setChoiceByValue(clickedTag);
+          // ✅ Add tag — try the clicked value first, then fall back to any
+          // available choice whose value matches case-insensitively.
+          const availableChoices = choices._store.state.choices.map(c => c.value);
+          if (availableChoices.includes(clickedTag)) {
+            choices.setChoiceByValue(clickedTag);
+          } else {
+            const ciMatch = availableChoices.find(v => String(v).toLowerCase() === clickedLower);
+            if (ciMatch) choices.setChoiceByValue(ciMatch);
+          }
         }
 
         currentPage = 1;

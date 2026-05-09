@@ -1,0 +1,53 @@
+name: Weekly pnpm audit
+
+# A quiet replacement for Dependabot alerts. Runs once a week, prints the full
+# audit table to the run log, and fails ONLY when there's a critical vulnerability
+# in production dependencies. One workflow-failure notification per week, max,
+# instead of a constant per-vulnerability banner on the repo.
+#
+# - Scoped to --prod, so transitive build-tooling vulns (the bulk of the 148-alert
+#   noise that triggered this workflow) don't page anyone.
+# - --audit-level=critical means the run is green for high/moderate/low; tweak
+#   that one knob if the policy ever needs to change.
+# - workflow_dispatch lets a maintainer trigger the audit on demand from the
+#   Actions tab without waiting for the cron to fire.
+
+on:
+  schedule:
+    # Mondays 09:00 UTC — start of the working week, low CI contention.
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit production dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install (lockfile only — no build, no scripts)
+        # We don't need a full install to audit; --frozen-lockfile + --ignore-scripts
+        # keeps the audit run fast and avoids running any postinstall hooks from
+        # dependencies we're explicitly auditing.
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Print full audit table (informational, never fails)
+        run: pnpm audit --prod || true
+
+      - name: Fail only on critical
+        run: pnpm audit --prod --audit-level=critical

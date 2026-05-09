@@ -69,12 +69,13 @@
         }
       ]
     },
-    "ace-it": {
-      "id": "ace-it",
+    "context-vigilance": {
+      "id": "context-vigilance",
       "title": "Context Vigilance",
       "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
+      "href": "/projects/gallery/context-vigilance",
       "hasSidebar": true,
-      "canvas": "/projects/gallery/ace-it/ACE-It-Canvas.canvas",
+      "canvas": "/projects/gallery/context-vigilance/ACE-It-Canvas.canvas",
       "clients": ["laerdal", "tonguc", "param"],
       "useCases": [
         {
@@ -89,10 +90,10 @@
       "demoSteps": [
         {
           "title": "Context Vigilance: AI-Augmented Development",
-          "href": "/projects/gallery/ace-it/index",
+          "href": "/projects/gallery/context-vigilance/index",
           "type": "orientation",
           "description": "Overview and introduction to the Context Vigilance workflow",
-          "contentPath": "ACE-It/Index.mdx"
+          "contentPath": "Context-Vigilance/Index.mdx"
         },
         {
           "title": "Context Vigilance Canvas",
@@ -102,106 +103,106 @@
         },
         {
           "title": "Philosophy & Approach",
-          "href": "/projects/gallery/ace-it/philosophy/our-approach",
+          "href": "/projects/gallery/context-vigilance/philosophy/our-approach",
           "type": "sequential",
           "step": 1,
-          "contentPath": "ACE-It/Philosophy/Our-Approach.md",
+          "contentPath": "Context-Vigilance/Philosophy/Our-Approach.md",
           "children": [
             {
               "title": "Best Practices",
-              "href": "/projects/gallery/ace-it/philosophy/best-practices",
+              "href": "/projects/gallery/context-vigilance/philosophy/best-practices",
               "type": "child",
-              "contentPath": "ACE-It/Philosophy/Best-Practices.md"
+              "contentPath": "Context-Vigilance/Philosophy/Best-Practices.md"
             },
             {
               "title": "Context Vigilance",
-              "href": "/projects/gallery/ace-it/philosophy/context-vigilance",
+              "href": "/projects/gallery/context-vigilance/philosophy/context-vigilance",
               "type": "child",
-              "contentPath": "ACE-It/Philosophy/Context-Vigilance.md"
+              "contentPath": "Context-Vigilance/Philosophy/Context-Vigilance.md"
             },
             {
               "title": "Iterative Approach",
-              "href": "/projects/gallery/ace-it/philosophy/iterative-approach",
+              "href": "/projects/gallery/context-vigilance/philosophy/iterative-approach",
               "type": "child",
-              "contentPath": "ACE-It/Philosophy/Iterative-Approach.md"
+              "contentPath": "Context-Vigilance/Philosophy/Iterative-Approach.md"
             }
         ]
       },
       {
         "title": "Documentation Kit",
-        "href": "/projects/gallery/ace-it/docs-kit/living-specifications",
+        "href": "/projects/gallery/context-vigilance/docs-kit/living-specifications",
         "type": "sequential",
         "step": 2,
-          "contentPath": "ACE-It/Docs-Kit/Living-Specifications.md",
+          "contentPath": "Context-Vigilance/Docs-Kit/Living-Specifications.md",
           "children": [
             {
               "title": "Blueprints",
-              "href": "/projects/gallery/ace-it/docs-kit/blueprints",
+              "href": "/projects/gallery/context-vigilance/docs-kit/blueprints",
               "type": "child",
               "step": 1,
-              "contentPath": "ACE-It/Docs-Kit/Blueprints.md"
+              "contentPath": "Context-Vigilance/Docs-Kit/Blueprints.md"
             },
             {
               "title": "Reminders",
-              "href": "/projects/gallery/ace-it/docs-kit/reminders",
+              "href": "/projects/gallery/context-vigilance/docs-kit/reminders",
               "type": "child",
               "step": 2,
-              "contentPath": "ACE-It/Docs-Kit/Reminders.md"
+              "contentPath": "Context-Vigilance/Docs-Kit/Reminders.md"
             },
             {
               "title": "Prompts",
-              "href": "/projects/gallery/ace-it/docs-kit/prompts",
+              "href": "/projects/gallery/context-vigilance/docs-kit/prompts",
               "type": "child",
               "step": 3,
-              "contentPath": "ACE-It/Docs-Kit/Prompts.md"
+              "contentPath": "Context-Vigilance/Docs-Kit/Prompts.md"
             }
           ]
         },
         {
           "title": "Models & AI Integration",
-          "href": "/projects/gallery/ace-it/models/thinking-models",
+          "href": "/projects/gallery/context-vigilance/models/thinking-models",
           "type": "sequential",
           "step": 3,
-          "contentPath": "ACE-It/Models/Thinking-Models.md",
+          "contentPath": "Context-Vigilance/Models/Thinking-Models.md",
             "children": [
               {
                 "title": "Modalities",
-                "href": "/projects/gallery/ace-it/models/modalities",
+                "href": "/projects/gallery/context-vigilance/models/modalities",
                 "type": "child",
-                "contentPath": "ACE-It/Models/Modalities.md"
+                "contentPath": "Context-Vigilance/Models/Modalities.md"
               },
               {
                 "title": "Function Calling",
-                "href": "/projects/gallery/ace-it/models/function-calling",
+                "href": "/projects/gallery/context-vigilance/models/function-calling",
                 "type": "child",
-                "contentPath": "ACE-It/Models/Function-Calling.md"
+                "contentPath": "Context-Vigilance/Models/Function-Calling.md"
               },
               {
                 "title": "Tokens",
-                "href": "/projects/gallery/ace-it/models/tokens",
+                "href": "/projects/gallery/context-vigilance/models/tokens",
                 "type": "child",
-                "contentPath": "ACE-It/Models/Tokens.md"
+                "contentPath": "Context-Vigilance/Models/Tokens.md"
               }
             ]
         },
         {
           "title": "Safety & Best Practices",
-          "href": "/projects/gallery/ace-it/safety/security-foundations",
+          "href": "/projects/gallery/context-vigilance/safety/security-foundations",
           "type": "sequential",
           "step": 4,
-          "contentPath": "ACE-It/Safety/Security-Foundations.md",
+          "contentPath": "Context-Vigilance/Safety/Security-Foundations.md",
           "children": [
             {
               "title": "Test-Driven Development",
-              "href": "/projects/gallery/ace-it/safety/tdd",
+              "href": "/projects/gallery/context-vigilance/safety/tdd",
               "type": "child",
-              "contentPath": "ACE-It/Safety/TDD.md"
+              "contentPath": "Context-Vigilance/Safety/TDD.md"
             },
             {
               "title": "Audits",
-              "href": "/projects/gallery/ace-it/safety/audits",
+              "href": "/projects/gallery/context-vigilance/safety/audits",
               "type": "child",
-              "contentPath": "ACE-It/Safety/Audits.md"
+              "contentPath": "Context-Vigilance/Safety/Audits.md"
             }
           ]
         }
@@ -211,6 +212,7 @@
       "id": "astro-turf",
       "title": "Astro Knots",
       "subtitle": "Advanced Astro, TailwindCSS, and theme framework setup, basic components and patterns.",
+      "href": "/projects/gallery/astro-knots",
       "hasSidebar": false,
       "clients": ["laerdal", "the-water-foundation"],
       "useCases": [
@@ -262,20 +264,40 @@
       ],
       "demoSteps": []
     },
-    "water-template-ce": {
-      "id": "water-template-ce",
-      "title": "Water Themed Site",
-      "subtitle": "A beautiful, modern, and responsive water-themed website.",
+    "memopop-ai": {
+      "id": "memopop-ai",
+      "title": "MemoPop AI",
+      "subtitle": "Multi-agent investment memo orchestrator powered by Claude and Perplexity.",
+      "href": "/projects/gallery/memopop-ai",
       "hasSidebar": false,
-      "clients": ["the-water-foundation"],
+      "clients": ["hypernova", "avalanche"],
       "useCases": [
         {
-          "title": "Storytelling with Data",
-          "description": "A website that puts data and content to work for fundraising and business development."
+          "title": "Investment Memo Generation",
+          "description": "Generate institutional-quality investment memos with 33 specialized AI agents, premium data sources, and full citation trails."
         },
         {
-          "title": "Built-in Design System Management",
-          "description": "Iteratively developmed Design System within the website itself."
+          "title": "Multi-Firm Deal Intelligence",
+          "description": "Firm-scoped architecture lets multiple VC firms run isolated pipelines with branded exports from a shared open-source codebase."
+        }
+      ],
+      "demoSteps": []
+    },
+    "lossless-flavored-markdown": {
+      "id": "lossless-flavored-markdown",
+      "title": "Lossless Flavored Markdown",
+      "subtitle": "A polyglot extended-markdown pipeline. Authors keep authoring; LFM normalizes the variations.",
+      "href": "/projects/gallery/lossless-flavored-markdown",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "One AST, Many Syntaxes",
+          "description": "Obsidian callouts, remark-directive blocks, and (eventually) Markdoc all produce the same MDAST node — adopt new authoring conventions without rewriting renderers."
+        },
+        {
+          "title": "Build-time Enrichment",
+          "description": "Citations get renumbered, OG metadata gets fetched, and bare links become embeds — all before the page ships, with no runtime cost."
         }
       ],
       "demoSteps": []

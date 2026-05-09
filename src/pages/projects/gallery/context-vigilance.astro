@@ -1,0 +1,884 @@
+---
+import Layout from '@layouts/Layout.astro';
+import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
+
+export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/context-vigilance-kit/', {
+  title: 'Context Vigilance',
+  description: 'Treat context with the same vigilance as code — versioned, reviewed, cross-linked. A live catalog of context-v files across our projects, plus the open spec, schema, and kit.',
+  siteName: 'Context Vigilance',
+});
+
+const docTypes = [
+  {
+    name: "Specs",
+    folder: "specs/",
+    pair: "prompts",
+    pairLabel: "Prompts",
+    cogState: "Planning",
+    color: "accent",
+    description: "Detailed, living specifications that define what you're building and why. Constantly updated as understanding evolves. The spec is your single source of truth -- every prompt you write fits in the context of working through a spec.",
+    insight: "Before AI, specs were written once and immediately outdated. With AI collaboration, specs are fast to write and even faster to keep current. They become the living document that prevents every prompt from being a roll of the dice."
+  },
+  {
+    name: "Prompts",
+    folder: "prompts/",
+    pair: "specs",
+    pairLabel: "Specs",
+    cogState: "Planning",
+    color: "accent",
+    description: "These aren't single chat messages -- they're step-by-step, prompt-by-prompt documents. Your implementation chunked into discrete tasks that an AI assistant can handle reliably, where success at each step can be verified before moving to the next. Each prompt references specs, blueprints, and reminders. Each builds on the last.",
+    insight: "A prompt without a spec is a vibe. A prompt within a spec is engineering. The difference between frustrating AI roulette and reliable, repeatable output."
+  },
+  {
+    name: "Blueprints",
+    folder: "blueprints/",
+    pair: "reminders",
+    pairLabel: "Reminders",
+    cogState: "Reflective",
+    color: "aquamarine",
+    description: "Codified patterns, architectural decisions, and proprietary thinking. How your extended markdown flavor works. How your components are organized. Why your naming conventions exist. The institutional knowledge that AI needs to respect your system.",
+    insight: "Blueprints are the context that makes reminders make sense. Without them, reminders are disconnected rules. With them, AI understands the pattern it's being asked to follow."
+  },
+  {
+    name: "Reminders",
+    folder: "reminders/",
+    pair: "blueprints",
+    pairLabel: "Blueprints",
+    cogState: "Reflective",
+    color: "aquamarine",
+    description: "Born from repeated frustration. We don't use React. We don't want JSX patterns. We use Astro, and Svelte for interactivity. We don't hard-validate frontmatter. Short, sharp corrections that you load into context when the AI starts drifting.",
+    insight: "Every reminder exists because an AI assistant made the same mistake three times. They're battle scars turned into guardrails."
+  }
+];
+---
+
+<Layout title="Context Vigilance - The Lossless Group">
+  <main class="main-content">
+
+    <!-- Hero (full-bleed, escapes the body container) -->
+    <div class="hero-bleed">
+      <div class="hero hero--with-splash">
+        <div class="hero-text">
+          <span class="hero-eyebrow">Open Spec · Schema · Kit</span>
+          <h1 class="hero-title">Context Vigilance</h1>
+          <p class="hero-sublede">A neurotic model of Human + AI Product Development.</p>
+          <p class="hero-lede">A deceptively simple framework for Human + AI collaboration that unlocks profound workflow improvements. Four directories. Two conceptual pairings. One principle: <strong class="highlight">manage the context available to AI and collaborators with the same rigor you manage code.</strong></p>
+
+          <div class="hero-stats">
+            <div class="hero-stat"><span class="hero-stat__value">583</span><span class="hero-stat__label">context-v Files</span></div>
+            <div class="hero-stat"><span class="hero-stat__value">28</span><span class="hero-stat__label">Projects Cataloged</span></div>
+            <div class="hero-stat"><span class="hero-stat__value">4</span><span class="hero-stat__label">Directory Roles</span></div>
+          </div>
+
+          <ul class="hero-capabilities">
+            <li>Specs</li>
+            <li>Prompts</li>
+            <li>Blueprints</li>
+            <li>Reminders</li>
+            <li>Versioned Schema</li>
+            <li>Cross-linked</li>
+          </ul>
+
+          <div class="hero-actions">
+            <a href="/projects/gallery/context-vigilance/index" class="btn-primary">Read the Full Documentation</a>
+            <a href="https://github.com/lossless-group/lossless-content" target="_blank" rel="noopener noreferrer" class="btn-secondary">Browse Our Public Context</a>
+          </div>
+        </div>
+
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" imageAspect="4 / 3" />
+        </aside>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Origin Story -->
+      <section class="origin">
+        <h2 class="section-title">Where This Came From</h2>
+        <div class="origin-grid">
+          <div class="origin-card">
+            <h3>The Problem</h3>
+            <p>Early adoption of AI code assistants was a massive productivity unlock -- and a massive source of frustration. Vibe coding produced spaghetti. AI can overwrite essential work without warning. Oversight over thousands of lines of code written in minutes is improbable. Prompt engineering was ad hoc. Every AI session started from zero, with no memory of the project's architecture, conventions, or hard-won decisions. Remote collaborators worked in isolation with no shared methodology, everyone hacking away with an AI Code Assistant and no shared context or organizational knowledge.</p>
+          </div>
+          <div class="origin-card">
+            <h3>The Realization</h3>
+            <p>AI collaboration needs <em>way more context</em>, requiring <em>an insane level of documentation</em>. But co-developed and co-managed, it leads to breakthroughs in productivity and consistency. Living documentation, co-developed and co-managed, is fast to write, fast to update, modular enough to fit in context windows, and structured enough to be loaded selectively. The hacker culture instinct to "just implement" doesn't work when your co-developer has no memory and makes enormous assumptions.</p>
+          </div>
+          <div class="origin-card">
+            <h3>The Unlock</h3>
+            <p>A directory called <code>context-v/</code> in every project. Four subdirectories with clear roles. Two conceptual pairings that mirror how development actually works: <strong>planning</strong> (specs + prompts) and <strong>reflection</strong> (blueprints + reminders). Simple enough to explain in 30 seconds. Profound enough to change how your team ships.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- The Dual Pairing -->
+      <section class="pairings">
+        <h2 class="section-title">Two Pairings. Two Cognitive Modes.</h2>
+        <p class="section-lede">The breakthrough is almost too simple to promote: prompts need specs, and reminders need blueprints. Each pair serves a different cognitive mode -- planning vs. reflection -- and together they cover the full cycle of AI-augmented development.</p>
+
+        <div class="pairing-visual">
+          <div class="pairing-block planning">
+            <div class="pairing-label">Planning Mode</div>
+            <div class="pairing-items">
+              <div class="pairing-item spec">
+                <span class="item-name">Specs</span>
+                <span class="item-arrow">&#8644;</span>
+                <span class="item-name">Prompts</span>
+              </div>
+            </div>
+            <p class="pairing-desc">Specs define the what and why. Prompts execute the how. Every prompt references a spec. Every spec evolves from prompt results.</p>
+          </div>
+          <div class="pairing-block reflective">
+            <div class="pairing-label">Reflective Mode</div>
+            <div class="pairing-items">
+              <div class="pairing-item blueprint">
+                <span class="item-name">Blueprints</span>
+                <span class="item-arrow">&#8644;</span>
+                <span class="item-name">Reminders</span>
+              </div>
+            </div>
+            <p class="pairing-desc">Blueprints codify patterns and proprietary thinking. Reminders enforce them in-session. Born from repeat frustration, made useful by wider context.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Four Doc Types -->
+      <section class="doc-types">
+        <h2 class="section-title">The Four Document Types</h2>
+        <div class="doc-grid">
+          {docTypes.map(doc => (
+            <div class="doc-card" data-color={doc.color}>
+              <div class="doc-card-header">
+                <h3 class="doc-name">{doc.name}</h3>
+                <div class="doc-meta">
+                  <span class="doc-folder"><code>context-v/{doc.folder}</code></span>
+                  <span class="doc-cog">{doc.cogState}</span>
+                </div>
+              </div>
+              <p class="doc-desc">{doc.description}</p>
+              <div class="doc-insight">
+                <span class="insight-label">The insight:</span> {doc.insight}
+              </div>
+              <div class="doc-pair">
+                Pairs with <strong>{doc.pairLabel}</strong>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Why It Works -->
+      <section class="why-works">
+        <h2 class="section-title">Why It Works</h2>
+        <div class="why-grid">
+          <div class="why-card">
+            <h3>Specs Align Everyone Again, Better</h3>
+            <p>Large teams doing spec-driven waterfall gave way to lean startups and hacker culture. AI makes specs essential in vibe coding -- great news for the veteran devs who remember when specs were the source of truth. The difference: AI writes and updates specs in seconds, not sprints. A living spec that takes 10 minutes to create prevents hours of context-less flailing.</p>
+          </div>
+          <div class="why-card">
+            <h3>Context Windows Have Limits</h3>
+            <p>You can't feed an AI your entire codebase. But you can feed it a spec, two blueprints, and a reminder. Modular documentation designed for selective loading is the only way to give AI the right context at the right time.</p>
+          </div>
+          <div class="why-card">
+            <h3>AI Doesn't Learn</h3>
+            <p>Every session starts from zero. The only fix is externalized memory -- documentation that can be reloaded. Context Vigilance turns your project's institutional knowledge into loadable artifacts that survive session boundaries.</p>
+          </div>
+          <div class="why-card">
+            <h3>It Scales to Teams</h3>
+            <p>Remote collaborators, part-time contributors, and new AI sessions all face the same problem: where's the context? A <code>context-v/</code> directory in every repo answers that question before it's asked.</p>
+          </div>
+          <div class="why-card">
+            <h3>It Composes with Tooling</h3>
+            <p>The directory structure enables GitHub API rendering on websites, symlinks into Obsidian vaults for direct editing, and cross-repo content aggregation. Simple filesystem conventions unlock surprising integrations.</p>
+          </div>
+          <div class="why-card">
+            <h3>It's Honest About the Hype</h3>
+            <p>We watched Vibe Coding → Prompt Engineering → Context Engineering. Each step was useful but incomplete. Context Vigilance is the next step: not just engineering context, but <em>maintaining vigilance</em> over it as a first-class concern.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Take it to the Next Level -->
+      <section class="journey-section">
+        <h2 class="section-title">Take It to the Next Level</h2>
+        <p class="section-lede">The four core folders cover the cycle of planning and reflection. But real development has another mode entirely: <strong class="highlight">journey mode</strong> -- where you don't know where you're going when you start, and your goal is simply to get there.</p>
+
+        <div class="journey-grid">
+          <div class="journey-card">
+            <div class="journey-header">
+              <span class="journey-folder"><code>context-v/explorations/</code></span>
+              <span class="journey-mode">Journey Mode</span>
+            </div>
+            <h3 class="journey-title">Explorations</h3>
+            <p class="journey-desc">Some decisions can't be made from a spec. You need to research, prototype, weigh tradeoffs, and think out loud -- often with AI as a thinking partner. Explorations are documents where the destination is unclear: you're defining the parameters of a key decision, mapping an option space, or working through a technical choice that has no obvious right answer.</p>
+            <div class="journey-examples">
+              <span class="examples-label">Looks like:</span> "Should we use Svelte 5 runes or stick with stores?" "What are the real tradeoffs between SSR and static for this use case?" "How do other teams handle multi-tenant content isolation?" The exploration ends when you've learned enough to write a spec -- or enough to decide you don't need one.
+            </div>
+          </div>
+
+          <div class="journey-card">
+            <div class="journey-header">
+              <span class="journey-folder"><code>context-v/issues/</code></span>
+              <span class="journey-mode">Journey Mode</span>
+            </div>
+            <h3 class="journey-title">Issue Resolution</h3>
+            <p class="journey-desc">The word "debug" doesn't honor the half-day you just spent on it. Issue resolution documents capture the painful, winding path through complex troubleshooting -- the kind where three Stack Overflow tabs are open, the error message is misleading, and the root cause turns out to be something no one would have guessed.</p>
+            <div class="journey-examples">
+              <span class="examples-label">Looks like:</span> "CORS errors that only happen in production." "Build failing silently because a submodule was on a detached HEAD." "Mermaid rendering crashes the dev server because Playwright binaries are stale." You document the journey so no one -- human or AI -- has to retrace it.
+            </div>
+          </div>
+        </div>
+
+        <div class="journey-note">
+          <p>These don't fit neatly into the planning/reflection pairing -- and that's the point. Not every development activity is a known loop. Sometimes you're bushwhacking. The value is in capturing the trail so the next person (or the next AI session) doesn't start from scratch.</p>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- CTA -->
+      <section class="cta-section">
+        <h2>Ready to Get Started?</h2>
+        <p>Create a <code>context-v/</code> directory in your project. Add four folders: <code>specs/</code>, <code>prompts/</code>, <code>blueprints/</code>, <code>reminders/</code>. When you're ready, add <code>explorations/</code> and <code>issues/</code>. Start writing Markdown files. That's it.</p>
+
+        <div class="cta-actions">
+          <a href="/projects/gallery/context-vigilance/index" class="btn-primary">Read the Full Playbook</a>
+          <a href="/learn-with/us" class="btn-secondary">Browse Our Public Documentation</a>
+        </div>
+
+        <div class="frontmatter-example">
+          <p class="frontmatter-label">Every document starts with simple YAML frontmatter:</p>
+          <pre class="frontmatter-code"><code>---
+title: "Maintain an Extended Markdown Render Pipeline"
+date_created: 2026-03-30
+date_modified: 2026-03-30
+authors:
+  - Your Name
+semantic_version: 0.0.1
+tags:
+  - markdown
+  - rendering
+  - astro
+---
+
+Your content starts here. Write in Markdown.
+Reference other documents with [[wikilinks]].
+Include Mermaid diagrams, tables, whatever helps.</code></pre>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+
+</Layout>
+
+<style>
+  .main-content {
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Hero (full-bleed wrapper — wider than .container) */
+  .hero-bleed {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 4vw, 3rem);
+  }
+
+  /* Hero */
+  .hero {
+    padding: 3rem 0 2.5rem;
+  }
+
+  .hero--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .hero-text { min-width: 0; }
+
+  .hero-splash {
+    width: clamp(360px, 40vw, 620px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0 0 1.25rem 0;
+    background: linear-gradient(135deg, var(--clr-lossless-accent--brightest, #04e5e5) 0%, var(--clr-lossless-accent--aquamarine, #6FFFD6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sublede {
+    font-size: 1.4rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+    letter-spacing: 0.005em;
+  }
+
+  .hero-lede {
+    font-size: 1.2rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    margin: 1.25rem 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(4, 229, 229, 0.04);
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 10px;
+    width: fit-content;
+  }
+
+  .hero-stat { display: flex; flex-direction: column; gap: 0.15rem; }
+
+  .hero-stat__value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-feature-settings: "tnum";
+  }
+
+  .hero-stat__label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  .hero-capabilities {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hero-capabilities li {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(111, 255, 214, 0.22);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+  }
+
+  @media (max-width: 900px) {
+    .hero--with-splash { grid-template-columns: 1fr; }
+    .hero-splash { width: 100%; max-width: 520px; position: static; }
+  }
+
+  .highlight {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    -webkit-text-fill-color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .hero-actions, .cta-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(111, 255, 214, 0.08); }
+
+  /* Sections */
+  section {
+    padding: 3rem 0;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .section-lede {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    max-width: 800px;
+    margin: 0 0 2.5rem 0;
+  }
+
+  /* Origin Story */
+  .origin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .origin-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .origin-card h3 {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .origin-card p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .origin-card em {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    font-style: italic;
+  }
+
+  /* Pairing Visual */
+  .pairing-visual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .pairing-block {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .pairing-block.planning {
+    border: 2px solid rgba(4, 229, 229, 0.3);
+  }
+
+  .pairing-block.reflective {
+    border: 2px solid rgba(111, 255, 214, 0.3);
+  }
+
+  .pairing-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.25rem;
+  }
+
+  .planning .pairing-label {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .reflective .pairing-label {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .pairing-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .item-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .item-arrow {
+    font-size: 1.5rem;
+    opacity: 0.4;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .pairing-desc {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Doc Types */
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .doc-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .doc-card:hover {
+    border-color: rgba(4, 229, 229, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .doc-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .doc-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .doc-card[data-color="accent"] .doc-name {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .doc-card[data-color="aquamarine"] .doc-name {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .doc-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .doc-folder code {
+    font-size: 0.75rem;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .doc-cog {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--clr-lossless-primary-light, #94a3b8);
+  }
+
+  .doc-desc {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .doc-insight {
+    font-size: 0.875rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid rgba(4, 229, 229, 0.3);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .insight-label {
+    font-weight: 600;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .doc-pair {
+    font-size: 0.8rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+  }
+
+  .doc-pair strong {
+    color: var(--clr-lossless-primary-light, #94a3b8);
+  }
+
+  /* Why It Works */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .why-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .why-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .why-card p {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .why-card em {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-style: italic;
+  }
+
+  .why-card code {
+    font-size: 0.8rem;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* Journey Mode */
+  .journey-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .journey-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(191, 35, 247, 0.2);
+    border-radius: 10px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .journey-card:hover {
+    border-color: rgba(191, 35, 247, 0.4);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .journey-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .journey-folder code {
+    font-size: 0.75rem;
+    background: rgba(191, 35, 247, 0.12);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    color: #d98ff5;
+  }
+
+  .journey-mode {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(191, 35, 247, 0.12);
+    color: #d98ff5;
+  }
+
+  .journey-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #d98ff5;
+    margin: 0;
+  }
+
+  .journey-desc {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .journey-examples {
+    font-size: 0.875rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid rgba(191, 35, 247, 0.3);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .examples-label {
+    font-weight: 600;
+    color: #d98ff5;
+  }
+
+  .journey-note {
+    max-width: 800px;
+  }
+
+  .journey-note p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    line-height: 1.65;
+    font-style: italic;
+    margin: 0;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: left;
+    padding: 3rem 0 4rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.75rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .cta-section p {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 2rem 0;
+    line-height: 1.7;
+  }
+
+  .cta-section code {
+    font-size: 0.95rem;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .frontmatter-example {
+    max-width: 600px;
+    margin: 2rem 0;
+    text-align: left;
+  }
+
+  .frontmatter-label {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .frontmatter-code {
+    background: #0d1117;
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+    font-family: var(--ff-monospace, monospace);
+    overflow-x: auto;
+  }
+
+  .cta-actions {
+    justify-content: center;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .origin-grid,
+    .journey-grid,
+    .pairing-visual,
+    .doc-grid,
+    .why-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero { padding: 2rem 0 1.5rem; }
+    section { padding: 2rem 0; }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .why-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

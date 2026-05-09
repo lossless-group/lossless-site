@@ -1,0 +1,493 @@
+---
+/**
+ * Tag-based Map of Content (MOC) Page
+ * Displays curated MOC content along with automatically aggregated tools and articles tagged with the same tag
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import ToolShowcaseItem from '@components/toolkit/ToolShowcaseItem--Small-Responsive.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const tagMocs = await getCollection('tag-mocs', ({ data }) => (data as any).publish !== false);
+
+  return tagMocs.map(moc => ({
+    params: { slug: moc.slug || moc.id },
+    props: { moc }
+  }));
+}
+
+const { moc } = Astro.props;
+const tag = moc.data.tag;
+
+// Query all relevant collections for content tagged with this tag
+const [tooling, verticalToolkits, essays, concepts, vocabulary, projects, blueprints] = await Promise.all([
+  getCollection('tooling', ({ data }) => (data as any).tags?.includes(tag)),
+  getCollection('vertical-toolkits', ({ data }) => (data as any).tags?.includes(tag)),
+  getCollection('essays', ({ data }) => (data as any).tags?.includes(tag)),
+  getCollection('concepts', ({ data }) => (data as any).tags?.includes(tag)),
+  getCollection('vocabulary', ({ data }) => (data as any).tags?.includes(tag)),
+  getCollection('projects', ({ data }) => (data as any).tags?.includes(tag) && (data as any).publish !== false),
+  getCollection('blueprints', ({ data }) => (data as any).tags?.includes(tag) && (data as any).publish !== false),
+]);
+
+const allTools = [...tooling, ...verticalToolkits];
+const allKnowledge = [...essays, ...concepts, ...vocabulary];
+
+// Separate featured tools if specified
+let featuredTools: any[] = [];
+let otherTools = allTools;
+
+if (moc.data.featured_tools && moc.data.featured_tools.length > 0) {
+  featuredTools = allTools.filter(tool => {
+    if (!tool || (!tool.id && !tool.slug)) return false;
+    const toolPath = (tool.id || tool.slug || '').toLowerCase();
+    return moc.data.featured_tools?.some((featuredSlug: string) => {
+      if (!featuredSlug) return false;
+      const featuredLower = featuredSlug.toLowerCase();
+      return toolPath.includes(featuredLower) || featuredLower.includes(toolPath);
+    });
+  });
+
+  otherTools = allTools.filter(tool => !featuredTools.includes(tool));
+}
+
+// Sort tools alphabetically by name
+otherTools.sort((a, b) => {
+  const nameA = (a.data as any).site_name || (a.data as any).title || a.id || a.slug || '';
+  const nameB = (b.data as any).site_name || (b.data as any).title || b.id || b.slug || '';
+  return nameA.localeCompare(nameB);
+});
+
+// Group knowledge by collection type
+const knowledgeByType = {
+  essays: allKnowledge.filter(k => k.collection === 'essays'),
+  concepts: allKnowledge.filter(k => k.collection === 'concepts'),
+  vocabulary: allKnowledge.filter(k => k.collection === 'vocabulary'),
+};
+
+const totalItems = allTools.length + allKnowledge.length + projects.length + blueprints.length;
+---
+
+<Layout title={moc.data.title}>
+  <div class="moc-page">
+    <header class="moc-header">
+      <h1>{moc.data.title}</h1>
+      {moc.data.description && <p class="moc-description">{moc.data.description}</p>}
+      {moc.data.lede && <p class="moc-lede">{moc.data.lede}</p>}
+    </header>
+
+    <!-- Auto-aggregated content section -->
+    <div id="all-content" class="moc-auto-content">
+
+      <!-- Stats overview -->
+      <div class="moc-stats">
+        <a href="#all-content" class="stat-card">
+          <span class="stat-number">{totalItems}</span>
+          <span class="stat-label">Total Items</span>
+        </a>
+        <a href="#tools-section" class="stat-card">
+          <span class="stat-number">{allTools.length}</span>
+          <span class="stat-label">Tools</span>
+        </a>
+        <a href="#knowledge-section" class="stat-card">
+          <span class="stat-number">{allKnowledge.length}</span>
+          <span class="stat-label">Articles</span>
+        </a>
+        {projects.length > 0 && (
+          <a href="#projects-section" class="stat-card">
+            <span class="stat-number">{projects.length}</span>
+            <span class="stat-label">Projects</span>
+          </a>
+        )}
+      </div>
+
+      <!-- Featured Tools Section -->
+      {featuredTools.length > 0 && (
+        <section id="tools-section" class="moc-section featured-section">
+          <h2 class="section-heading">Featured Tools</h2>
+          <div class="tools-grid">
+            {featuredTools.map((tool: any) => (
+              <ToolShowcaseItem
+                site_name={tool.data?.site_name}
+                title={tool.data?.title}
+                og_image={tool.data?.og_image}
+                image={tool.data?.image}
+                og_screenshot={tool.data?.og_screenshot}
+                og_screenshot_url={tool.data?.og_screenshot_url}
+                og_favicon={tool.data?.og_favicon}
+                favicon={tool.data?.favicon}
+                url={tool.data?.url}
+                og_description={tool.data?.og_description}
+                description={tool.data?.description}
+                zinger={tool.data?.zinger}
+                id={tool.id}
+                slug={tool.slug}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- All Tools Section -->
+      {otherTools.length > 0 && (
+        <section id={featuredTools.length === 0 ? "tools-section" : undefined} class="moc-section">
+          <h2 class="section-heading">
+            {featuredTools.length > 0 ? 'All Other Tools' : 'All Tools'} ({otherTools.length})
+          </h2>
+          <div class="tools-grid">
+            {otherTools.map((tool: any) => (
+              <ToolShowcaseItem
+                site_name={tool.data?.site_name}
+                title={tool.data?.title}
+                og_image={tool.data?.og_image}
+                image={tool.data?.image}
+                og_screenshot={tool.data?.og_screenshot}
+                og_screenshot_url={tool.data?.og_screenshot_url}
+                og_favicon={tool.data?.og_favicon}
+                favicon={tool.data?.favicon}
+                url={tool.data?.url}
+                og_description={tool.data?.og_description}
+                description={tool.data?.description}
+                zinger={tool.data?.zinger}
+                id={tool.id}
+                slug={tool.slug}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Knowledge Base Section -->
+      {allKnowledge.length > 0 && (
+        <section id="knowledge-section" class="moc-section knowledge-section">
+          <h2 class="section-heading">Knowledge Base ({allKnowledge.length})</h2>
+
+          {knowledgeByType.essays.length > 0 && (
+            <div class="knowledge-subsection">
+              <h3 class="subsection-heading">Essays ({knowledgeByType.essays.length})</h3>
+              <div class="knowledge-list">
+                {knowledgeByType.essays.map((item: any) => (
+                  <a href={`/essays/${item.id}`} class="knowledge-item">
+                    <span class="knowledge-title">{item.data?.title || item.id}</span>
+                    {item.data?.lede && <span class="knowledge-lede">{item.data.lede}</span>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {knowledgeByType.concepts.length > 0 && (
+            <div class="knowledge-subsection">
+              <h3 class="subsection-heading">Concepts ({knowledgeByType.concepts.length})</h3>
+              <div class="knowledge-list">
+                {knowledgeByType.concepts.map((item: any) => (
+                  <a href={`/concepts/${item.id}`} class="knowledge-item">
+                    <span class="knowledge-title">{item.data?.title || item.id}</span>
+                    {item.data?.lede && <span class="knowledge-lede">{item.data.lede}</span>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {knowledgeByType.vocabulary.length > 0 && (
+            <div class="knowledge-subsection">
+              <h3 class="subsection-heading">Vocabulary ({knowledgeByType.vocabulary.length})</h3>
+              <div class="knowledge-list">
+                {knowledgeByType.vocabulary.map((item: any) => (
+                  <a href={`/vocabulary/${item.id}`} class="knowledge-item">
+                    <span class="knowledge-title">{item.data?.title || item.id}</span>
+                    {item.data?.lede && <span class="knowledge-lede">{item.data.lede}</span>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      <!-- Projects Section -->
+      {projects.length > 0 && (
+        <section id="projects-section" class="moc-section">
+          <h2 class="section-heading">Projects ({projects.length})</h2>
+          <div class="project-grid">
+            {projects.map((project: any) => (
+              <a href={`/projects/${project.id}`} class="project-card">
+                <h3>{project.data?.title || project.id}</h3>
+                {project.data?.description && <p>{project.data.description}</p>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Blueprints Section -->
+      {blueprints.length > 0 && (
+        <section class="moc-section">
+          <h2 class="section-heading">Blueprints & Guides ({blueprints.length})</h2>
+          <div class="blueprint-grid">
+            {blueprints.map((blueprint: any) => (
+              <a href={`/blueprints/${blueprint.id}`} class="blueprint-card">
+                <h3>{blueprint.data?.title || blueprint.id}</h3>
+                {blueprint.data?.lede && <p>{blueprint.data.lede}</p>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Related Tags Section -->
+      {moc.data.related_tags && moc.data.related_tags.length > 0 && (
+        <section class="moc-section related-tags-section">
+          <h2 class="section-heading">Related Topics</h2>
+          <div class="related-tags-grid">
+            {moc.data.related_tags.map((relatedTag: string) => (
+              <a href={`/moc/tag/${relatedTag.toLowerCase().replace(/\s+/g, '-')}`} class="related-tag-link">
+                <span class="tag-icon">🏷️</span>
+                <span class="tag-name">{relatedTag}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Curated MOC Content Section -->
+      <section class="moc-section curated-section">
+        <h2 class="section-heading">Curated Content</h2>
+        <div class="curated-content">
+          <slot name="curated" />
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .moc-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .moc-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .moc-header h1 {
+    color: rgb(4, 229, 229);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  .moc-description {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0.5rem 0;
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .moc-lede {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .moc-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .stat-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-image: var(--grd-lossless-primary) 1;
+    border-width: 2.5px;
+    border-style: solid;
+    transform: translateY(-2px);
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgb(4, 229, 229);
+  }
+
+  .stat-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+  }
+
+  .moc-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    margin-bottom: 1rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    color: rgb(4, 229, 229);
+    font-weight: 600;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .knowledge-section {
+    margin-top: 2rem;
+  }
+
+  .knowledge-subsection {
+    margin-bottom: 1.5rem;
+  }
+
+  .subsection-heading {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    color: hsla(198, 72%, 51%, 1.00);
+    font-weight: 600;
+  }
+
+  .knowledge-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .knowledge-item {
+    display: block;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .knowledge-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-image: var(--grd-lossless-primary) 1;
+    border-width: 2.5px;
+    border-style: solid;
+    transform: translateY(-2px);
+  }
+
+  .knowledge-title {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgb(4, 229, 229);
+  }
+
+  .knowledge-lede {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .project-grid, .blueprint-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .project-card, .blueprint-card {
+    display: block;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .project-card:hover, .blueprint-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-image: var(--grd-lossless-primary) 1;
+    border-width: 2.5px;
+    border-style: solid;
+    transform: translateY(-2px);
+  }
+
+  .project-card h3, .blueprint-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .project-card p, .blueprint-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .related-tags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .related-tag-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .related-tag-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-image: var(--grd-lossless-primary) 1;
+    border-width: 2.5px;
+    border-style: solid;
+    transform: translateY(-2px);
+  }
+
+  .tag-icon {
+    font-size: 1.25rem;
+  }
+
+  .tag-name {
+    color: rgb(4, 229, 229);
+    font-weight: 500;
+  }
+</style>

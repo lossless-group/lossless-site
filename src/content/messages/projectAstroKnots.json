@@ -1,0 +1,50 @@
+[
+  {
+    "label": "Selective Package Sharing.",
+    "title": "Lossless Flavored Markdown: A Shared Processing Pipeline",
+    "details": "When code genuinely needs to be shared -- not just copied -- we publish it. @lossless-group/lfm bundles unified, remark-parse, remark-gfm, remark-directive, and custom plugins into a single import. Sites install it as a real dependency from GitHub Packages or JSR.",
+    "imageSide": "right",
+    "ctaText": "View LFM on JSR",
+    "ctaUrl": "https://jsr.io/@lossless-group/lfm",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Patterns Over Dependencies.",
+    "title": "Copy, Adapt, Own: A Practical Component Strategy",
+    "details": "Not everything should be a shared package. UI components, layouts, and styles are better copied and adapted per site. @knots/* pattern packages serve as a cookbook -- reference implementations you browse, copy into your site, and make your own. No runtime coupling, no abstraction overhead.",
+    "imageSide": "left",
+    "ctaText": "Browse Pattern Packages",
+    "ctaUrl": "https://github.com/lossless-group/astro-knots/tree/main/packages",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Independent Deployment.",
+    "title": "Each Site Ships on Its Own Terms",
+    "details": "Every project deploys directly from its own repository via Vercel -- no knowledge of the pseudomonorepo required. Published packages are installed from registries, not workspace links. The workspace is a development accelerator, never a deployment dependency.",
+    "imageSide": "right",
+    "ctaText": "View on GitHub",
+    "ctaUrl": "https://github.com/lossless-group/astro-knots",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Context-Driven Development.",
+    "title": "Specs, Blueprints, and Prompts Guide Every Decision",
+    "details": "The context-v/ directory holds living documentation -- formal specs, architecture blueprints, implementation prompts, and reminders -- that travels with the workspace. AI assistants and human collaborators alike can reference these documents to understand the why behind every pattern.",
+    "imageSide": "left",
+    "ctaText": "Explore Context-V",
+    "ctaUrl": "https://github.com/lossless-group/astro-knots/tree/main/context-v",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  }
+]

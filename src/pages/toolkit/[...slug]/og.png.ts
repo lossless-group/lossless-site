@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { ImageResponse } from '@vercel/og';
-import { getReferenceSlug } from '@utils/slugify';
+import { getReferenceSlug, resolveEntrySlug } from '@utils/slugify';
 
 export const prerender = false;
 
@@ -16,7 +16,7 @@ export async function GET({ params }: Props) {
   
   // Find the entry that matches the slug
   const entry = toolingEntries.find(entry => {
-    const generatedSlug = getReferenceSlug(entry.id);
+    const generatedSlug = resolveEntrySlug(entry);
     const cleanSlug = generatedSlug.replace(/^tooling\//, '');
     return cleanSlug === slug;
   });
@@ -296,7 +296,7 @@ export async function getStaticPaths() {
   console.log(`🔗 Generating ${toolingEntries.length} OG image paths for tooling entries`);
   
   const paths = toolingEntries.map(entry => {
-    const generatedSlug = getReferenceSlug(entry.id);
+    const generatedSlug = resolveEntrySlug(entry);
     // Remove the 'tooling/' prefix from the slug since we're already in the /toolkit/ route
     const cleanSlug = generatedSlug.replace(/^tooling\//, '');
     

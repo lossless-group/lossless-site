@@ -1,0 +1,50 @@
+[
+  {
+    "label": "33 Specialized Agents.",
+    "title": "A Pipeline, Not a Prompt",
+    "details": "One prompt can't write an investment memo. MemoPop orchestrates 33 specialized agents -- deck analyzers, web researchers, section writers, citation enrichers, fact-checkers, scorecard evaluators -- coordinated by LangGraph into a transparent, section-by-section pipeline. Every step produces inspectable artifacts.",
+    "imageSide": "right",
+    "ctaText": "View on GitHub",
+    "ctaUrl": "https://github.com/lossless-group/investment-memo-orchestrator",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Premium Source Targeting.",
+    "title": "Perplexity Sonar Pro with @source Intelligence",
+    "details": "Every memo section targets the right authoritative sources: @crunchbase for funding data, @pitchbook for valuations, @statista for market sizing, @cbinsights for competitive intel, @linkedin for team profiles. 80-90% authoritative sources, zero SEO spam. Citations are inline, globally renumbered, and consolidated.",
+    "imageSide": "left",
+    "ctaText": "See Citation System",
+    "ctaUrl": "https://github.com/lossless-group/investment-memo-orchestrator#citation-system-perplexity-sonar-pro-with-premium-sources",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Multi-Tenant by Design.",
+    "title": "Firm-Scoped Architecture for Private Deal Intelligence",
+    "details": "Each VC firm gets isolated configs, branded templates, scorecard criteria, and deal data -- all within a shared open-source codebase. Hypernova's evaluation framework stays separate from Avalanche's. Private data stays private. Branded exports in light and dark modes, HTML and PDF.",
+    "imageSide": "right",
+    "ctaText": "Explore Firm-Scoped IO",
+    "ctaUrl": "https://github.com/lossless-group/investment-memo-orchestrator#2025-12-03-firm-scoped-io-system-v030",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Your Criteria, Not Generic AI.",
+    "title": "Scorecards That Codify How You Actually Evaluate Deals",
+    "details": "Generic AI output lacks firm-specific perspective. Scorecards turn your implicit evaluation criteria into structured YAML templates -- team velocity, market timing, defensibility, capital efficiency -- whatever your partners actually debate in IC meetings. The AI generates analysis that reflects your investment thinking, not boilerplate.",
+    "imageSide": "left",
+    "ctaText": "See Scorecard System",
+    "ctaUrl": "https://github.com/lossless-group/investment-memo-orchestrator#scorecard-template-system",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  }
+]

@@ -1,0 +1,70 @@
+---
+import { toProperCase } from '@utils/slugify';
+
+/**
+ * SourcePreviewCard.astro
+ *
+ * Preview card for a source entry. Mirrors the look of VocabularyPreviewCard /
+ * ConceptPreviewCard but links to /sources/<slug>, where the existing
+ * /sources/[...slug].astro route renders the detail view.
+ */
+
+interface Props {
+  entry: {
+    id: string;
+    slug: string;
+    displayTitle: string;
+    folder: string;
+  };
+}
+
+const { entry } = Astro.props;
+const url = `/sources/${entry.slug}`;
+const showFolder = entry.folder && entry.folder !== 'root';
+---
+
+<div class="source-card group">
+  <h3 class="source-card__title">
+    <a href={url} class="source-card__link">{entry.displayTitle}</a>
+  </h3>
+  {showFolder && (
+    <p class="source-card__folder">{toProperCase(entry.folder)}</p>
+  )}
+</div>
+
+<style>
+  .source-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                transform 0.2s ease-in-out;
+  }
+
+  .source-card__title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.25rem;
+  }
+
+  .source-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .source-card:hover {
+    background-color: #3a3a45;
+    border-color: var(--clr-lossless-accent--brightest);
+    color: var(--clr-lossless-primary-glass--lighter);
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .source-card__folder {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--white--pure--40p, hsla(0, 0%, 100%, .4));
+    margin: 0;
+  }
+</style>

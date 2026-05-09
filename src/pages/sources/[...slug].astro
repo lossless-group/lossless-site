@@ -1,0 +1,126 @@
+---
+/**
+ * /sources/[...slug].astro — Dynamic Route for Sources Collection Content
+ *
+ * Renders markdown files from the 'sources' content collection with:
+ * - Radically flexible frontmatter handling (files may have minimal or no frontmatter)
+ * - Graceful error handling that logs but doesn't fail the build
+ * - Title fallback chain: title → og_title → filename
+ * - Preserved directory structure in URLs (e.g., /sources/books/the-pragmatic-programmer)
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { getReferenceSlug, toProperCase } from '@utils/slugify';
+
+// Ensure page is prerendered as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  /**
+   * Get display title with fallback chain: title → og_title → filename
+   * Defined inside getStaticPaths to ensure it's available during static generation
+   */
+  function getDisplayTitle(entry: any): string {
+    // Priority 1: frontmatter title
+    if (entry.data?.title && String(entry.data.title).trim()) {
+      return String(entry.data.title).trim();
+    }
+    // Priority 2: og_title (common in sources with URL metadata)
+    if (entry.data?.og_title && String(entry.data.og_title).trim()) {
+      return String(entry.data.og_title).trim();
+    }
+    // Priority 3: derive from filename with proper casing
+    const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
+    return toProperCase(filename);
+  }
+  const sourcesEntries = await getCollection('sources');
+  const paths: any[] = [];
+  const errors: { id: string; error: string }[] = [];
+
+  console.log(`[SOURCES] Found ${sourcesEntries.length} entries in the sources collection`);
+
+  for (const entry of sourcesEntries) {
+    try {
+      // Generate slug from entry ID (preserves folder structure, already lowercased by generateId)
+      const slug = getReferenceSlug(entry.id);
+
+      // Get display title with fallback chain
+      const title = getDisplayTitle(entry);
+
+      // Determine top-level folder for categorization
+      const folder = entry.id.includes('/') ? entry.id.split('/')[0] : 'root';
+
+      paths.push({
+        params: { slug },
+        props: {
+          entry: {
+            ...entry,
+            data: {
+              ...entry.data,
+              title, // Ensure title is always present
+            }
+          },
+          folder
+        }
+      });
+
+      console.log(`[SOURCES] ${entry.id} → /sources/${slug}`);
+    } catch (error) {
+      // Log error but don't fail the build
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`[SOURCES] Skipping ${entry.id}: ${errorMessage}`);
+      errors.push({ id: entry.id, error: errorMessage });
+    }
+  }
+
+  if (errors.length > 0) {
+    console.warn(`[SOURCES] ${errors.length} entries skipped due to errors:`);
+    errors.forEach(e => console.warn(`  - ${e.id}: ${e.error}`));
+  }
+
+  console.log(`[SOURCES] Generated ${paths.length} source paths`);
+  return paths;
+}
+
+// Define the props interface
+interface Props {
+  entry: {
+    id: string;
+    body?: string;
+    data: {
+      title: string;
+      og_title?: string;
+      url?: string;
+      tags?: string | string[];
+      [key: string]: any;
+    };
+  };
+  folder: string;
+}
+
+const { entry, folder } = Astro.props;
+
+// Build content data for downstream components
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data.title,
+  contentType: 'sources',
+  folder
+};
+---
+
+<Layout
+  title={entry.data.title}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    title={entry.data.title}
+    content={entry.body || ''}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

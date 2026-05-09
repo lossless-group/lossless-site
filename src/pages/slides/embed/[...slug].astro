@@ -7,6 +7,7 @@
 export const prerender = false;
 
 import MarkdownSlideDeck from '@layouts/MarkdownSlideDeck.astro';
+import Analytics from '@components/Analytics.astro';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
@@ -119,6 +120,7 @@ if (!combinedMarkdown) {
     
     /* Theme override will be handled via JavaScript */
   </style>
+  <Analytics />
 </head>
 <body>
   <!-- Use the MarkdownSlideDeck component -->

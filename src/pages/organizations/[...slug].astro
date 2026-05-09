@@ -1,0 +1,102 @@
+---
+/**
+ * /organizations/[...slug].astro — Dynamic route for the organizations collection.
+ * Mirrors /sources/[...slug].astro behavior: permissive frontmatter, title fallback chain,
+ * preserved folder structure in URLs.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { getReferenceSlug, toProperCase } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  function getDisplayTitle(entry: any): string {
+    if (entry.data?.title && String(entry.data.title).trim()) {
+      return String(entry.data.title).trim();
+    }
+    if (entry.data?.og_title && String(entry.data.og_title).trim()) {
+      return String(entry.data.og_title).trim();
+    }
+    const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
+    return toProperCase(filename);
+  }
+  const orgEntries = await getCollection('organizations');
+  const paths: any[] = [];
+  const errors: { id: string; error: string }[] = [];
+
+  console.log(`[ORGANIZATIONS] Found ${orgEntries.length} entries in the organizations collection`);
+
+  for (const entry of orgEntries) {
+    try {
+      const slug = getReferenceSlug(entry.id);
+      const title = getDisplayTitle(entry);
+      const folder = entry.id.includes('/') ? entry.id.split('/')[0] : 'root';
+
+      paths.push({
+        params: { slug },
+        props: {
+          entry: {
+            ...entry,
+            data: {
+              ...entry.data,
+              title,
+            }
+          },
+          folder
+        }
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`[ORGANIZATIONS] Skipping ${entry.id}: ${errorMessage}`);
+      errors.push({ id: entry.id, error: errorMessage });
+    }
+  }
+
+  if (errors.length > 0) {
+    console.warn(`[ORGANIZATIONS] ${errors.length} entries skipped due to errors`);
+  }
+  console.log(`[ORGANIZATIONS] Generated ${paths.length} organization paths`);
+  return paths;
+}
+
+interface Props {
+  entry: {
+    id: string;
+    body?: string;
+    data: {
+      title: string;
+      og_title?: string;
+      url?: string;
+      tags?: string | string[];
+      [key: string]: any;
+    };
+  };
+  folder: string;
+}
+
+const { entry, folder } = Astro.props;
+
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data.title,
+  contentType: 'organizations',
+  folder
+};
+---
+
+<Layout
+  title={entry.data.title}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    title={entry.data.title}
+    content={entry.body || ''}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

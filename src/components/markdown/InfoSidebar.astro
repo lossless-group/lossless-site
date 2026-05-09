@@ -75,6 +75,8 @@ interface Props {
   contentType?: string;
   google_maps_url?: string;
   googleMapsUrl?: string;
+  wordCount?: number;
+  readingTime?: string;
 }
 
 // Process component props
@@ -92,6 +94,8 @@ const {
   contentType,
   google_maps_url,
   googleMapsUrl,
+  wordCount,
+  readingTime,
   ...restProps
 } = Astro.props as Props;
 
@@ -113,17 +117,18 @@ const mapsUrl = google_maps_url || googleMapsUrl;
 const hasLocationInfo = Boolean(mapsUrl);
 
 // Check if we have any article info to display
-const hasArticleInfo = 
-  categories.length > 0 || 
-  semanticVersion || 
-  authorForHandle || 
-  participants || 
-  formattedDateModified || 
-  formattedDateCreated || 
-  formattedDateOfEvent || 
-  tags.length > 0 || 
-  augmentedWithData || 
-  hasLocationInfo;
+const hasArticleInfo =
+  categories.length > 0 ||
+  semanticVersion ||
+  authorForHandle ||
+  participants ||
+  formattedDateModified ||
+  formattedDateCreated ||
+  formattedDateOfEvent ||
+  tags.length > 0 ||
+  augmentedWithData ||
+  hasLocationInfo ||
+  wordCount;
 ---
 
 <aside class="info-sidebar" id="info-sidebar">
@@ -185,6 +190,24 @@ const hasArticleInfo =
             </div>
           )}
         </div>
+
+        {wordCount && wordCount > 0 && (
+          <div class="reading-stats">
+            <div class="stats-separator"></div>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">Words</span>
+                <div class="stat-value">{wordCount.toLocaleString()}</div>
+              </div>
+              {readingTime && (
+                <div class="stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <div class="stat-value">{readingTime}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {hasLocationInfo && (
           <div class="location-info">
@@ -448,6 +471,51 @@ const hasArticleInfo =
 .augmented-with-content {
   text-align: right;
   margin-top: 0.1rem;
+}
+
+/* Reading stats section */
+.reading-stats {
+  margin: 1.25rem 0;
+  padding: 0.75rem 0 0;
+  position: relative;
+}
+
+.stats-separator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--clr-lossless-accent--brightest);
+  opacity: 0.2;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stat-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+
+.stat-value {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--clr-lossless-accent--aquamarine);
 }
 
 /* Location info section */

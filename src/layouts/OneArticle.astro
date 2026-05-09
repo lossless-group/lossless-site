@@ -24,9 +24,11 @@ interface Props {
   data: Record<string, any>;
   content: string;
   markdownFile?: string;
+  includeToC?: boolean; // Optional parameter to include/exclude Table of Contents (default: true)
+  includeInfoSidebar?: boolean; // Optional parameter to include/exclude Info Sidebar (default: true)
 }
 
-const { Component, title, data, content, markdownFile } = Astro.props; // Added title
+const { Component, title, data, content, markdownFile, includeToC, includeInfoSidebar } = Astro.props; // Added title
 
 // Process with our custom remark plugins to get MDAST
 const processor = unified()
@@ -84,6 +86,8 @@ const normalizedData = normalizeDataWithAuthors(data);
     content={transformedMdast}
     data={normalizedData}
     articleHeading={title} // Renamed prop to avoid conflict
+    includeToC={includeToC}
+    includeInfoSidebar={includeInfoSidebar}
   >
     <slot />
   </Component>

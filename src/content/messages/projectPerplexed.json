@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Research-Grade AI, Right in Your Notes",
+    "title": "Source-Cited Content Generation",
+    "details": "Generate AI-powered content with proper citations and references directly in Obsidian. Perplexed brings Perplexity and Perplexica capabilities to your workspace, ensuring every claim is backed by verifiable sources. No more switching between tabs or losing track of where information came from.",
+    "imageSide": "right",
+    "ctaText": "View on GitHub",
+    "ctaUrl": "https://github.com/lossless-group/perplexed-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Multiple AI Engines, One Interface",
+    "title": "Flexible AI Integration",
+    "details": "Choose between Perplexity's powerful remote API for cutting-edge research, or Perplexica's self-hosted local API for privacy and control. Configure parameters for source recency, quality thresholds, and citation formats to match your research needs. The choice is yours.",
+    "imageSide": "left",
+    "ctaText": "Explore Configuration Options",
+    "ctaUrl": "https://github.com/lossless-group/perplexed-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Built for Reference-Driven Workflows",
+    "title": "Why This Matters",
+    "details": "In an era of AI hallucinations and uncited claims, Perplexed ensures your content is grounded in reality. Whether you're writing research papers, building knowledge bases, or creating content that demands credibility, source citations aren't optional—they're essential. Perplexed makes rigorous research effortless.",
+    "imageSide": "right",
+    "ctaText": "Get Started",
+    "ctaUrl": "https://github.com/lossless-group/perplexed-plugin",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
+  }
+]

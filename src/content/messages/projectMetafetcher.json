@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Open Graph Data, Right Where You Write",
+    "title": "Turn Any URL into Structured Metadata",
+    "details": "Metafetcher fetches Open Graph data from a URL using OpenGraph.io and writes the results directly into your Obsidian frontmatter. Titles, descriptions, preview images, site names, and metadata become durable Markdown properties you can use across notes, toolkit entries, review pages, and publishing workflows.",
+    "imageSide": "right",
+    "ctaText": "View on GitHub",
+    "ctaUrl": "https://github.com/lossless-group/open-graph-fetcher",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Control What Gets Written",
+    "title": "Safe Metadata Updates for Living Vaults",
+    "details": "Configure whether Metafetcher overwrites existing Open Graph data, creates missing fields, writes fetch errors to frontmatter, or updates the fetch date for processed files. Progress and status feedback keep the workflow clear, while graceful error handling makes metadata enrichment safe for real content collections.",
+    "imageSide": "left",
+    "ctaText": "Explore the README",
+    "ctaUrl": "https://github.com/lossless-group/open-graph-fetcher",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
+    "imageClasses": "image-mask",
+    "maskHeight": "96%",
+    "maskWidth": "100%"
+  },
+  {
+    "label": "Why Metafetcher Matters",
+    "title": "Make Markdown Collections More Visual and Discoverable",
+    "details": "Content-heavy teams use Markdown for speed, ownership, and portability. But URLs alone do not make compelling pages. Metafetcher helps transform link collections into rich, visual, searchable content by pulling the metadata needed for cards, previews, filters, and review galleries — without leaving Obsidian.",
+    "imageSide": "right",
+    "ctaText": "Get Started",
+    "ctaUrl": "https://github.com/lossless-group/open-graph-fetcher",
+    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__Pitfalls__12_jo5fKYNv7.webp"
+  }
+]

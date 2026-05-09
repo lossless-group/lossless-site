@@ -1,0 +1,825 @@
+---
+import Layout from '@layouts/Layout.astro';
+import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
+
+export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/lossless-flavored-markdown-package/', {
+  title: 'Lossless Flavored Markdown — LFM',
+  description: 'Roll your own flavor. A polyglot extended-markdown pipeline. Authors keep writing — LFM normalizes the variations.',
+  siteName: 'Lossless Flavored Markdown',
+});
+
+const stcSteps = [
+  {
+    n: '01',
+    name: 'Declare Syntax',
+    desc: 'Add the syntax you want rendered as a component, plus the params or props it should carry.',
+  },
+  {
+    n: '02',
+    name: 'Parse Trigger',
+    desc: 'Wire the parser to recognize it — a peer remark plugin file that emits one canonical AST node.',
+  },
+  {
+    n: '03',
+    name: 'Component Pipeline',
+    desc: 'Map the AST node to a component, or a chain of them. Authors keep authoring; the renderer takes over.',
+  },
+];
+
+const plugins = [
+  {
+    title: 'Polyglot pipeline',
+    status: 'Stable',
+    summary: 'Many authoring conventions, one canonical AST.',
+    detail: 'Obsidian callouts, remark-directive blocks, and (eventually) Markdoc all produce the same MDAST node. Adding a new authoring syntax means a new normalizer plugin — no consumer changes, no renderer rewrites.',
+    tags: ['Core', 'AST', 'Normalization'],
+  },
+  {
+    title: 'remark-gfm',
+    status: 'Stable',
+    summary: 'Tables, task lists, strikethrough, autolinks — GitHub-flavored markdown enabled by default.',
+    detail: 'GFM is the floor, not the ceiling. Tables and task lists come for free; they are also the substrate for the bare-link auto-unfurl detector.',
+    tags: ['GFM', 'Tables'],
+  },
+  {
+    title: 'remark-directive',
+    status: 'Stable',
+    summary: 'Block, leaf, and inline directives — :::box, ::badge, :abbr — for naming regions of content.',
+    detail: 'Directive nodes are the lingua franca your renderer dispatches on. LFM normalizers emit directive nodes from many input syntaxes so one downstream component handles them all.',
+    tags: ['Directives', 'Syntax'],
+  },
+  {
+    title: 'remark-callouts',
+    status: 'Stable',
+    summary: 'Obsidian “> [!type] Title” blocks normalized into directive nodes — same downstream shape, two upstream syntaxes.',
+    detail: 'Authors writing in Obsidian get callout previews in their editor. Authors writing in plain markdown can use :::callout{type="warning"}. Both end up as the same :::callout directive node.',
+    tags: ['Callouts', 'Obsidian'],
+  },
+  {
+    title: 'remark-citations',
+    status: 'Stable',
+    summary: 'Hex-code footnotes get renumbered to display indices and lifted into a structured citation dataset.',
+    detail: 'Author with stable hex IDs ([^a1b2c3]); LFM renumbers them to readable indices at parse time and assembles the full dataset on tree.data.citations.ordered — parsed dates, source domains, raw text — so a Sources component can render the canonical bibliography.',
+    tags: ['Citations', 'Footnotes'],
+  },
+  {
+    title: 'link-preview · og-fetcher',
+    status: 'Stable',
+    summary: 'Build-time OpenGraph enrichment. Cards and rollups carry full metadata before the page ships.',
+    detail: 'remarkOgFetcher walks the tree, finds external links and :::link-preview directives, fetches OG metadata, and annotates the AST with LinkPreviewData. Configurable cache, separate TTLs for hits and failures.',
+    tags: ['OpenGraph', 'Build-time', 'Cards'],
+  },
+  {
+    title: 'Bare-link provider catalog',
+    status: 'Beta',
+    summary: 'A URL on its own line becomes the embedded player or rich card the author meant.',
+    detail: 'Strict matching: the paragraph must have exactly one child that is a link whose visible text equals its URL. v0.2.2 ships YouTube video / shorts / playlist and Vimeo as stable, with Loom, Spotify, and SoundCloud planned.',
+    tags: ['Embeds', 'YouTube', 'Vimeo'],
+  },
+  {
+    title: 'remarkLosslessWikilinks',
+    status: 'New in 0.3.0',
+    summary: 'Site-resolved Obsidian wikilinks for the LFM pipeline.',
+    detail: 'Turns [[Page|Display]] into proper hyperlinks with one design constraint: LFM never decides where a wikilink points. Sites supply a resolver function; LFM owns the syntax. Internal vs external routing, anchors, alias displays, and graceful plain-text fallback for unresolved links.',
+    tags: ['Wikilinks', 'Obsidian', 'Resolver'],
+  },
+];
+
+const releases = [
+  {
+    date: 'May 8, 2026',
+    version: '0.3.0',
+    title: 'remarkLosslessWikilinks ships in 0.3.0',
+    body: 'Site-resolved Obsidian wikilinks for the LFM pipeline. LFM owns the syntax; sites supply the resolver. Internal vs external routing, anchors, alias displays, and graceful plain-text fallback — all behind one new option on parseMarkdown.',
+  },
+  {
+    date: 'May 8, 2026',
+    version: 'callouts',
+    title: 'New callout features in @lossless-group/lfm',
+    body: 'Multi-line callouts no longer silently fall through. Hyphenated type names like [!llm-response] now parse. Obsidian foldable [!type]- syntax is supported. The pipeline doc codifies that callout bodies must support every LFM feature — directives, citations, embeds, even nested callouts.',
+  },
+  {
+    date: 'May 7, 2026',
+    version: 'splash',
+    title: 'Initial pass at a Lossless Flavored Markdown splash page',
+    body: 'LFM gets its own GitHub Pages landing page — three-stage STC diagram, asymmetric hero, manuscript-flavored type, and a package boundary that will not let the splash bleed into JSR.',
+  },
+];
+---
+
+<Layout
+  title="Lossless Flavored Markdown — The Lossless Group"
+  description="A polyglot extended-markdown pipeline. Authors keep writing — LFM normalizes the variations. Ready for any framework without lock-in to someone else's flavor."
+>
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="hero hero--with-splash">
+        <div class="hero-text">
+          <span class="hero-eyebrow">Open Source · MIT · A Lossless Group package</span>
+          <h1 class="hero-title">Lossless Flavored Markdown</h1>
+          <p class="hero-sublede">MDX power without MDX's opinions.</p>
+          <p class="hero-lede">A <strong class="highlight">polyglot extended-markdown pipeline</strong> — authors keep authoring, LFM normalizes the variations. Identify the syntaxes worth supporting (and the variations on intent inside each one), then parse and render beautifully. Ready for any framework, no lock-in to someone else's flavor.</p>
+
+          <div class="hero-stats">
+            <div class="hero-stat"><span class="hero-stat__value">8+</span><span class="hero-stat__label">Plugins</span></div>
+            <div class="hero-stat"><span class="hero-stat__value">1</span><span class="hero-stat__label">Canonical AST</span></div>
+            <div class="hero-stat"><span class="hero-stat__value">v0.3</span><span class="hero-stat__label">Latest Release</span></div>
+          </div>
+
+          <ul class="hero-capabilities">
+            <li>Directives</li>
+            <li>Callouts</li>
+            <li>Citations</li>
+            <li>Wikilinks</li>
+            <li>Bare-link Embeds</li>
+            <li>OG Enrichment</li>
+            <li>GFM Tables</li>
+          </ul>
+
+          <div class="cli-block cli-block--inline">
+            <div class="cli-header">
+              <span class="cli-dot red"></span>
+              <span class="cli-dot yellow"></span>
+              <span class="cli-dot green"></span>
+              <span class="cli-title">install</span>
+            </div>
+            <pre class="cli-code"><code>{`$ pnpm add jsr:@lossless-group/lfm`}</code></pre>
+          </div>
+
+          <div class="hero-actions">
+            <a href="https://jsr.io/@lossless-group/lfm" target="_blank" rel="noopener noreferrer" class="btn-primary">Install from JSR</a>
+            <a href="https://github.com/lossless-group/lfm" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" />
+        </aside>
+      </div>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- STC Framework -->
+      <section class="stc-section">
+        <div class="stc-intro">
+          <span class="section-eyebrow">STC — Syntax · Trigger · Component</span>
+          <h2 class="section-title">Three steps from your markdown to your renderer.</h2>
+          <p class="section-lede">LFM owns the <em>trigger → tokenize → normalize</em> path. Your framework owns rendering. The shape between them is one canonical AST.</p>
+        </div>
+        <div class="stc-steps">
+          {stcSteps.map((step, i) => (
+            <div class="stc-step">
+              <div class="stc-step__head">
+                <span class="stc-step__number">{step.n}</span>
+                <h3 class="stc-step__name">{step.name}</h3>
+              </div>
+              <p class="stc-step__desc">{step.desc}</p>
+              {i < stcSteps.length - 1 && <div class="stc-step__connector" aria-hidden="true">→</div>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Live Example -->
+      <section class="example-section">
+        <span class="section-eyebrow">Live Example</span>
+        <h2 class="section-title">Video Embeds, end to end.</h2>
+        <p class="section-lede">A bare URL on its own line becomes the embedded player. The same content can also be authored as a directive — both end up as the same node, rendered by the same component.</p>
+        <div class="example-grid">
+          <div class="example-card">
+            <span class="example-step">Syntax</span>
+            <h4>Bare URL</h4>
+            <pre class="cli-code"><code>https://youtu.be/jCe2wg1ulus</code></pre>
+            <h4>Directive</h4>
+            <pre class="cli-code"><code>:::youtube-share[https://youtu.be/jCe2wg1ulus]</code></pre>
+          </div>
+          <div class="example-card">
+            <span class="example-step">Parse</span>
+            <h4>remark-link-preview.ts</h4>
+            <p>The plugin recognizes the trigger and emits one canonical AST node — regardless of whether it came from a bare URL or a directive.</p>
+          </div>
+          <div class="example-card">
+            <span class="example-step">Component</span>
+            <h4>YoutubeShareEmbed--Base.astro</h4>
+            <p>Your renderer maps the AST node to a component (or a chain of them). Authors keep authoring; the renderer takes over.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Plugin Grid -->
+      <section class="plugins-section">
+        <span class="section-eyebrow">What's in the box</span>
+        <h2 class="section-title">Triggers, normalizers, and build-time enrichment.</h2>
+        <p class="section-lede">All wired together by <code>remarkLfm</code>; cherry-pick what you need.</p>
+        <div class="plugins-grid">
+          {plugins.map(plugin => (
+            <article class="plugin-card">
+              <header class="plugin-card__header">
+                <h3 class="plugin-card__title">{plugin.title}</h3>
+                <span class:list={['plugin-status', plugin.status === 'Stable' ? 'stable' : plugin.status === 'Beta' ? 'beta' : 'new']}>{plugin.status}</span>
+              </header>
+              <p class="plugin-card__summary">{plugin.summary}</p>
+              <p class="plugin-card__detail">{plugin.detail}</p>
+              <div class="plugin-card__tags">
+                {plugin.tags.map(tag => <span class="plugin-tag">{tag}</span>)}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Recent Releases -->
+      <section class="releases-section">
+        <span class="section-eyebrow">Recent</span>
+        <h2 class="section-title">What shipped lately.</h2>
+        <div class="releases-list">
+          {releases.map(release => (
+            <article class="release-card">
+              <div class="release-meta">
+                <span class="release-date">{release.date}</span>
+                <span class="release-version">{release.version}</span>
+              </div>
+              <h3 class="release-title">{release.title}</h3>
+              <p class="release-body">{release.body}</p>
+            </article>
+          ))}
+        </div>
+        <a href="https://github.com/lossless-group/lfm/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer" class="releases-link">
+          Read the full changelog
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="7" y1="17" x2="17" y2="7"/>
+            <polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </a>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Footer CTA -->
+      <section class="footer-cta">
+        <div class="footer-cta__card">
+          <h2>Roll your own flavor.</h2>
+          <p>Start with the syntaxes you want. Add normalizers as your authors find new conventions worth honoring. LFM gives you one canonical AST to dispatch on, and a pluggable pipeline that does not paint you into a corner.</p>
+          <div class="hero-actions">
+            <a href="https://jsr.io/@lossless-group/lfm" target="_blank" rel="noopener noreferrer" class="btn-primary">Install from JSR</a>
+            <a href="https://github.com/lossless-group/lfm" target="_blank" rel="noopener noreferrer" class="btn-secondary">View Source</a>
+            <a href="https://lossless-group.github.io/lossless-flavored-markdown-package/" target="_blank" rel="noopener noreferrer" class="btn-secondary">Read the spec</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .main-content { min-height: 100vh; padding: 2rem 0; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* Hero */
+  .hero { padding: 3rem 0 2.5rem; }
+
+  .hero--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .hero-text { min-width: 0; }
+
+  .hero-splash {
+    width: clamp(300px, 32vw, 460px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--clr-lossless-accent--brightest, #04e5e5) 0%, #BF23F7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sublede {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .hero-lede {
+    font-size: 1.15rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .highlight {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-weight: 700;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    margin: 1.25rem 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(4, 229, 229, 0.04);
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 10px;
+    width: fit-content;
+  }
+
+  .hero-stat { display: flex; flex-direction: column; gap: 0.15rem; }
+
+  .hero-stat__value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-feature-settings: "tnum";
+  }
+
+  .hero-stat__label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  .hero-capabilities {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hero-capabilities li {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(111, 255, 214, 0.22);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+  }
+
+  .hero-actions, .footer-cta .hero-actions {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    text-decoration: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: opacity 0.2s, background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .btn-secondary:hover { background: rgba(111, 255, 214, 0.08); }
+
+  .btn-icon { flex-shrink: 0; }
+
+  /* CLI block */
+  .cli-block {
+    background: #0d1117;
+    border-radius: 10px;
+    border: 1px solid rgba(4, 229, 229, 0.15);
+    overflow: hidden;
+  }
+
+  .cli-block--inline {
+    margin: 0 0 1.5rem;
+    max-width: 460px;
+  }
+
+  .cli-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cli-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cli-dot.red { background: #ff5f57; }
+  .cli-dot.yellow { background: #febc2e; }
+  .cli-dot.green { background: #28c840; }
+
+  .cli-title {
+    font-size: 0.75rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    margin-left: 0.5rem;
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .cli-code {
+    padding: 1rem 1.25rem;
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--clr-lossless-primary-light, #e2e8f0);
+    font-family: var(--ff-monospace, monospace);
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+
+  /* Section common */
+  section { padding: 3rem 0; }
+
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.6rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.6rem, 2.4vw, 2rem);
+    font-weight: 700;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.25;
+  }
+
+  .section-lede {
+    font-size: 1.05rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    max-width: 760px;
+    margin: 0 0 2rem 0;
+  }
+
+  .section-lede em { color: var(--clr-lossless-accent--brightest, #04e5e5); font-style: normal; }
+  .section-lede code, .plugin-card code, .release-body code, .example-card code {
+    background: rgba(4, 229, 229, 0.08);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.9em;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* STC */
+  .stc-intro { margin-bottom: 1.5rem; }
+
+  .stc-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    align-items: stretch;
+    position: relative;
+  }
+
+  .stc-step {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .stc-step__head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .stc-step__number {
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    letter-spacing: 0.08em;
+    background: rgba(4, 229, 229, 0.12);
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+  }
+
+  .stc-step__name {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .stc-step__desc {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+  }
+
+  .stc-step__connector {
+    position: absolute;
+    right: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-size: 1.4rem;
+    font-weight: 700;
+    z-index: 2;
+    background: var(--clr-primary-bg, #0a0a0f);
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+  }
+
+  /* Example */
+  .example-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .example-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .example-step {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.5rem;
+  }
+
+  .example-card h4 {
+    margin: 0.75rem 0 0.5rem;
+    font-size: 0.95rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .example-card p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+  }
+
+  .example-card .cli-code {
+    background: #0d1117;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  /* Plugin grid */
+  .plugins-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .plugin-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .plugin-card:hover { border-color: rgba(4, 229, 229, 0.35); }
+
+  .plugin-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .plugin-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .plugin-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25em 0.6em;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .plugin-status.stable {
+    background: rgba(111, 255, 214, 0.14);
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .plugin-status.beta {
+    background: rgba(254, 188, 46, 0.16);
+    color: #fde047;
+  }
+
+  .plugin-status.new {
+    background: rgba(191, 35, 247, 0.18);
+    color: #d98ff5;
+  }
+
+  .plugin-card__summary {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  .plugin-card__detail {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+  }
+
+  .plugin-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .plugin-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #64748b);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Releases */
+  .releases-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .release-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--clr-lossless-accent--brightest, #04e5e5);
+    border-radius: 0 10px 10px 0;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .release-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .release-date {
+    font-size: 0.78rem;
+    color: var(--clr-lossless-primary-light, #64748b);
+    font-weight: 500;
+  }
+
+  .release-version {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    background: rgba(111, 255, 214, 0.1);
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    font-family: var(--ff-monospace, monospace);
+  }
+
+  .release-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    line-height: 1.35;
+  }
+
+  .release-body {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+  }
+
+  .releases-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .releases-link:hover { text-decoration: underline; }
+
+  /* Footer CTA */
+  .footer-cta__card {
+    background: linear-gradient(135deg, rgba(4, 229, 229, 0.06), rgba(191, 35, 247, 0.05));
+    border: 1px solid rgba(4, 229, 229, 0.2);
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+  }
+
+  .footer-cta__card h2 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+  }
+
+  .footer-cta__card p {
+    margin: 0 auto 1.5rem;
+    max-width: 640px;
+    font-size: 1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+  }
+
+  .footer-cta .hero-actions { justify-content: center; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .hero--with-splash { grid-template-columns: 1fr; }
+    .hero-splash { width: 100%; max-width: 520px; position: static; }
+    .stc-steps, .example-grid, .plugins-grid { grid-template-columns: 1fr; }
+    .stc-step__connector { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .hero-stats { grid-template-columns: repeat(3, 1fr); width: 100%; }
+  }
+</style>
