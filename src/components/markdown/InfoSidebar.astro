@@ -18,6 +18,11 @@ const trademarks: AugmenterTrademarks = trademarksData;
 // Helper function to find trademark image URL with flexible matching
 function findTrademarkImage(augmenterName: string | undefined): string | null {
   if (!augmenterName) return null;
+  // Some content has augmented_with as an array/object — defensively coerce
+  // to a string so the .toLowerCase() calls below don't crash the build.
+  if (typeof augmenterName !== 'string') {
+    augmenterName = String(augmenterName);
+  }
   
   // Try exact match first
   let augmenterData = trademarks[augmenterName];

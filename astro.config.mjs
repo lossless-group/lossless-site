@@ -90,7 +90,13 @@ export default defineConfig({
       iconDir: "src/assets/Icons"
     }),
     svelte({ extensions: ['.svelte'] }),
-    sitemap()
+    sitemap({
+      filter: (page) =>
+        !page.includes('/llms.txt') &&
+        !page.includes('/llms-full.txt') &&
+        !page.endsWith('/404/') &&
+        !page.endsWith('/404'),
+    })
   ], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
