@@ -1,0 +1,73 @@
+---
+// site/src/pages/keeping-up/[slug].astro
+// Renders individual "Keeping Up" briefings.
+// Modeled on site/src/pages/log/[slug].astro — same Layout + OneArticle shape.
+//
+// Frontmatter is intentionally NOT hard-validated: content generation for this
+// collection is sloppy by design. If an entry's frontmatter is malformed, we want
+// the build to skip it gracefully rather than fail — every field access below is
+// guarded with optional chaining and fallbacks.
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { processEntries } from '@utils/slugify';
+
+// Prerender keeping-up entries as static HTML
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const entries = await getCollection('keeping-up');
+  const processed = processEntries(entries);
+
+  return processed
+    .map((entry) => {
+      // Defensive: skip entries we can't safely route.
+      // processEntries already guarantees a slug, but be paranoid for the sloppy-frontmatter case.
+      if (!entry?.slug) return null;
+
+      return {
+        params: { slug: entry.slug },
+        props: {
+          entry,
+          contentType: 'keeping-up'
+        }
+      };
+    })
+    .filter((p): p is NonNullable<typeof p> => p !== null);
+}
+
+interface Props {
+  entry: CollectionEntry<'keeping-up'> & { slug: string };
+  contentType: 'keeping-up';
+}
+
+const { entry, contentType } = Astro.props;
+
+// Permissive contentData — spread whatever frontmatter exists, fall back gracefully
+// for the fields the layout/sidebar tries to read.
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data?.title,
+  contentType,
+  // Spread all frontmatter so InfoSidebar / Layout can access authors, tags, dates, etc.
+  ...entry.data
+};
+
+const pageTitle = entry.data?.title || 'Keeping Up';
+---
+
+<Layout
+  title={pageTitle}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    title={pageTitle}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>

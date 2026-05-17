@@ -1,0 +1,843 @@
+---
+import Layout from '@layouts/Layout.astro';
+import ThinGradientBleedSeparator from '@basics/separators/ThinGradientBleedSeparator.astro';
+import SplashHeroCard from '@components/tool-components/SplashHeroCard.astro';
+import { fetchOgMetadata } from '@utils/fetchOgMetadata';
+
+export const prerender = true;
+
+const splashMetadata = await fetchOgMetadata('https://lossless-group.github.io/augment-it/', {
+  title: 'Augment It',
+  description: 'A microfrontend workshop for augmenting data with AI. Module-federated apps for prompts, requests, responses, highlights, and insights — composed by a single shell.',
+  siteName: 'Augment It',
+});
+
+const microfrontends = [
+  {
+    step: "01",
+    name: "record-collector",
+    role: "Ingest",
+    description: "Pulls records in from anywhere — files, APIs, CSVs, scraped pages, manual entry — and stages them in a canonical shape for the rest of the pipeline. The upstream constraint everything else inherits from.",
+    insight: "Get the data contract right here, or pay for it in every downstream microfrontend."
+  },
+  {
+    step: "02",
+    name: "prompt-template-manager",
+    role: "Authoring",
+    description: "Author, version, and pick prompt templates outside the application code. Templates ship with the run, not buried inside it — so a prompt change isn't a code change, and 'what prompt did this response come from' is always answerable.",
+    insight: "Templates are first-class objects. They get versioned, named, and reviewed the same way schemas do."
+  },
+  {
+    step: "03",
+    name: "request-reviewer",
+    role: "Review",
+    description: "Render the fully-interpolated request — model, parameters, the prompt with every variable filled in — exactly as the provider will see it. A human signs off (or batch-approves) before tokens are spent.",
+    insight: "The cheapest place to catch a bad prompt is before it leaves your tab."
+  },
+  {
+    step: "04",
+    name: "response-reviewer",
+    role: "Review",
+    description: "Inspect what came back. Side-by-side request, raw response, and parsed structured output. Accept moves the record forward; reject flags the template or the source record for another pass.",
+    insight: "LLMs are non-deterministic. The reviewer is where the human stays in the loop without slowing the loop down."
+  },
+  {
+    step: "05",
+    name: "highlight-collector",
+    role: "Curation",
+    description: "Pull excerpts, quotes, and salient fragments out of records or responses. Keep what's worth keeping with provenance back to the source; drop the rest. Not every augmented record needs to survive in full.",
+    insight: "Curation is a first-class step, not a side effect. Highlights are the layer where 'what mattered' is captured explicitly."
+  },
+  {
+    step: "06",
+    name: "insight-manager",
+    role: "Aggregation",
+    description: "Aggregate highlights into themed views. The layer above individual records, where patterns earn their keep. Records are atoms; highlights are excerpts; insights are the patterns that emerge across many of both.",
+    insight: "The long-running view state for the workshop — what we've found, why it matters, what to do next."
+  },
+];
+
+const eras = [
+  {
+    period: "Jan 2025",
+    label: "Bolt-era monolith",
+    color: "amber",
+    body: "Two weeks of vibe-coding on Bolt.new produced a single React app with Supabase + three LLM providers and ~25 components covering every stage of the workshop. Working demo on Jan 27. Never going to be the production system, but the spec-by-running-code that proved what shape the workshop wanted to be. Archived to <code>mpstaton/augment-bolt-code</code>; design memory preserved as analysis files."
+  },
+  {
+    period: "Mar 2025",
+    label: "First extraction attempt",
+    color: "amber",
+    body: "Two months later: try to peel record-collection off into its own frontend repo. Three commits over two days, one DB swap (Turso out, Supabase in), then stop. The question shifted from 'can we extract this?' to 'what's the shell this gets extracted into?' — and that question would steer the next four months."
+  },
+  {
+    period: "Jul–Aug 2025",
+    label: "Federated rebuild",
+    color: "accent",
+    body: "Tanuj brings up a module-federation starter — Vite host shell + two microfrontends + shared UI package — in late July. The same day, three of the six microfrontends become real git submodules. The day after, <code>RecordCard</code> gets promoted into shared UI. By mid-August the specs folder is real, the bolt era is formally archived, and the first analysis spec is written."
+  },
+  {
+    period: "May 2026",
+    label: "Public splash + history",
+    color: "accent",
+    body: "GitHub Pages splash ships at <a href='https://lossless-group.github.io/augment-it/' target='_blank' rel='noopener'>lossless-group.github.io/augment-it</a>. The full changelog — backfilled from git history and the GH issues list — captures the three-era arc and lands on the splash and in the rolled-up Lossless feed."
+  }
+];
+
+const principles = [
+  {
+    title: "Each Surface, Its Own Repo",
+    body: "Six microfrontends, six independent git histories, six contributor circles, six deploy cadences. The host shell loads them at runtime by name — no shared release train, no monorepo build coupling beyond the shared UI package."
+  },
+  {
+    title: "Federation Across Submodule Boundaries",
+    body: "Module federation isn't just sibling workspaces. The host resolves remotes that live in git submodules — proving the contract holds across the boundary that actually matters: independent repositories, not sibling folders."
+  },
+  {
+    title: "Shared UI Lives in packages/ui",
+    body: "Visual primitives that show up in more than one microfrontend get promoted into the shared package early. <code>RecordCard</code> was first; <code>ErrorBoundary</code> rode along. The rule: any component likely to be reused gets considered for shared/ui before being authored inside an app."
+  },
+  {
+    title: "Pipeline Order Matches Pipeline Concerns",
+    body: "record → prompt → request → response → highlight → insight. Six microfrontends in flow order, each owning one bench in the workshop. The shell composes them; provenance carries through from ingest to insight."
+  },
+  {
+    title: "Human Always In The Loop, Just Not In The Way",
+    body: "Request review before tokens are spent. Response review before downstream stages consume. Highlight curation before insights aggregate. The pattern: humans gate the transitions, machines do the work between."
+  },
+  {
+    title: "Provenance Is A Feature",
+    body: "Every highlight links back to a source record. Every response links back to a prompt template + a request. Every prompt template carries a version. 'Where did this come from' is always answerable — by design, not by reconstruction."
+  }
+];
+---
+
+<Layout title="Augment It - The Lossless Group">
+  <main class="main-content">
+
+    <!-- Hero (full-bleed, escapes the body container) -->
+    <div class="hero-bleed">
+      <div class="hero hero--with-splash">
+        <div class="hero-text">
+          <span class="hero-eyebrow">Microfrontend Workshop · Module Federation · MIT</span>
+          <h1 class="hero-title">Augment It</h1>
+          <p class="hero-sublede">A federated workshop for augmenting data with AI.</p>
+          <p class="hero-lede">One shell. Six microfrontends. A small set of disciplined surfaces for the work of <strong class="highlight">collect → prompt → request → review → highlight → insight</strong>. Each surface owned by its own repo; all composed by a single host at runtime.</p>
+
+          <div class="hero-stats">
+            <div class="hero-stat"><span class="hero-stat__value">6</span><span class="hero-stat__label">Microfrontends</span></div>
+            <div class="hero-stat"><span class="hero-stat__value">3</span><span class="hero-stat__label">Eras of Learning</span></div>
+            <div class="hero-stat"><span class="hero-stat__value">1</span><span class="hero-stat__label">Host Shell</span></div>
+          </div>
+
+          <ul class="hero-capabilities">
+            <li>Module Federation</li>
+            <li>Turborepo</li>
+            <li>Rsbuild</li>
+            <li>Docker</li>
+            <li>Submodules</li>
+            <li>Shared UI</li>
+          </ul>
+
+          <div class="hero-actions">
+            <a href="https://lossless-group.github.io/augment-it/" target="_blank" rel="noopener noreferrer" class="btn-primary">Open the Splash</a>
+            <a href="https://github.com/lossless-group/augment-it" target="_blank" rel="noopener noreferrer" class="btn-secondary">View on GitHub</a>
+          </div>
+        </div>
+
+        <aside class="hero-splash">
+          <SplashHeroCard metadata={splashMetadata} ctaLabel="Open the splash page" badge="Splash" imageAspect="4 / 3" />
+        </aside>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Origin Story -->
+      <section class="origin">
+        <h2 class="section-title">Where This Came From</h2>
+        <div class="origin-grid">
+          <div class="origin-card">
+            <h3>The Problem</h3>
+            <p>AI-assisted data augmentation has a lot of moving parts — sources, prompts, requests, responses, highlights, insights — and the obvious approach is one big app that does it all. But each surface wants its <em>own owners</em>, its <em>own deploy cadence</em>, its <em>own scale</em>. A monolith chokes when six teams want to ship at six different rhythms. A backend-only microservices approach doesn't surface the UI handoff cleanly.</p>
+          </div>
+          <div class="origin-card">
+            <h3>The Realization</h3>
+            <p>Each stage of data-augmentation work is its own <em>workshop bench</em>. Owning the UI of each bench as an <em>independently-deployable microfrontend</em>, composed by a shell at runtime — that's the shape that fits the work. Module federation, browser-side, with a shared UI package for the primitives that have to look the same everywhere.</p>
+          </div>
+          <div class="origin-card">
+            <h3>The Unlock</h3>
+            <p>Six microfrontends. One shell. One shared <code>packages/ui</code>. Pipeline order: <code>record → prompt → request → response → highlight → insight</code>. Each microfrontend owned by its <strong>own repo</strong>, wired into the host as a git submodule, loaded at runtime as a federated remote. <strong class="highlight">The shell composes them; provenance carries through.</strong></p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- The Six Microfrontends -->
+      <section class="mfes">
+        <h2 class="section-title">The Six Microfrontends</h2>
+        <p class="section-lede">Each owns one bench in the workshop. The shell loads them in flow order; the data contract between them is the canonical record shape that record-collector commits to producing.</p>
+
+        <div class="mfe-grid">
+          {microfrontends.map(mfe => (
+            <div class="mfe-card">
+              <div class="mfe-card-header">
+                <span class="mfe-step">{mfe.step}</span>
+                <div class="mfe-meta">
+                  <span class="mfe-name"><code>{mfe.name}</code></span>
+                  <span class="mfe-role">{mfe.role}</span>
+                </div>
+              </div>
+              <p class="mfe-desc">{mfe.description}</p>
+              <div class="mfe-insight">
+                <span class="insight-label">The insight:</span> {mfe.insight}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="pipeline-rail" aria-label="Augmentation flow">
+          <span class="pipeline-step">record-collector</span>
+          <span class="pipeline-arrow" aria-hidden="true">→</span>
+          <span class="pipeline-step">prompt-template-manager</span>
+          <span class="pipeline-arrow" aria-hidden="true">→</span>
+          <span class="pipeline-step">request-reviewer</span>
+          <span class="pipeline-arrow" aria-hidden="true">→</span>
+          <span class="pipeline-step">response-reviewer</span>
+          <span class="pipeline-arrow" aria-hidden="true">→</span>
+          <span class="pipeline-step">highlight-collector</span>
+          <span class="pipeline-arrow" aria-hidden="true">→</span>
+          <span class="pipeline-step">insight-manager</span>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Architectural Principles -->
+      <section class="principles">
+        <h2 class="section-title">The Architectural Bets</h2>
+        <p class="section-lede">Module federation is the central bet. Each of the principles below falls out of taking that bet seriously — and refusing to soften it into a more familiar shape.</p>
+
+        <div class="principle-grid">
+          {principles.map(p => (
+            <div class="principle-card">
+              <h3>{p.title}</h3>
+              <p set:html={p.body} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Three Eras -->
+      <section class="eras">
+        <h2 class="section-title">Three Eras of Getting It Right</h2>
+        <p class="section-lede">The current architecture is the <em>third</em> attempt. The first two are documented in the changelog, not hidden — because the journey is the spec.</p>
+
+        <div class="era-timeline">
+          {eras.map((era, i) => (
+            <div class="era-card" data-color={era.color}>
+              <div class="era-marker">
+                <span class="era-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="era-period">{era.period}</span>
+              </div>
+              <h3 class="era-label">{era.label}</h3>
+              <p class="era-body" set:html={era.body} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- Contributors -->
+      <section class="contributors">
+        <h2 class="section-title">The People Behind It</h2>
+        <div class="contributor-grid">
+          <div class="contributor-card">
+            <h3>Michael Staton</h3>
+            <p class="contributor-role">Architecture · Specs · Brand</p>
+            <p class="contributor-body">Drove the Jan 2025 Bolt-era exploration, the March 2025 extraction attempt, the July repo restart, and the documentation discipline (vision spec, workflow doc, record-collector analysis) that made it possible for other contributors to onboard.</p>
+          </div>
+          <div class="contributor-card">
+            <h3>Tanuj Siripurapu</h3>
+            <p class="contributor-role">Module Federation · Shared UI</p>
+            <p class="contributor-body">Brought up the working federation starter in late July 2025 — host shell, two microfrontends, shared <code>packages/ui</code> — answering the question that had been blocking the project since March. Wired the first three microfrontends as real submodules the same day; promoted <code>RecordCard</code> into shared/ui the day after.</p>
+          </div>
+        </div>
+      </section>
+
+      <ThinGradientBleedSeparator />
+
+      <!-- CTA -->
+      <section class="cta-section">
+        <h2>Watch the Workshop Take Shape</h2>
+        <p>The splash carries the full changelog — including the Bolt-era and extraction-attempt entries — alongside curated context. The GitHub repo carries the actual code, the submodule wiring, and the open issues for the specs still being written.</p>
+
+        <div class="cta-actions">
+          <a href="https://lossless-group.github.io/augment-it/" target="_blank" rel="noopener noreferrer" class="btn-primary">Open the Splash</a>
+          <a href="https://github.com/lossless-group/augment-it" target="_blank" rel="noopener noreferrer" class="btn-secondary">View the Code on GitHub</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+
+</Layout>
+
+<style>
+  .main-content {
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Hero (full-bleed wrapper — wider than .container) */
+  .hero-bleed {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .hero {
+    padding: 3rem 0 2.5rem;
+  }
+
+  .hero--with-splash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .hero-text { min-width: 0; }
+
+  .hero-splash {
+    width: clamp(360px, 40vw, 620px);
+    position: sticky;
+    top: 6rem;
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0 0 1.25rem 0;
+    background: linear-gradient(135deg, var(--clr-lossless-accent--brightest, #04e5e5) 0%, var(--clr-lossless-accent--aquamarine, #6FFFD6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sublede {
+    font-size: 1.4rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+    letter-spacing: 0.005em;
+  }
+
+  .hero-lede {
+    font-size: 1.2rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    margin: 1.25rem 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(4, 229, 229, 0.04);
+    border: 1px solid rgba(4, 229, 229, 0.18);
+    border-radius: 10px;
+    width: fit-content;
+  }
+
+  .hero-stat { display: flex; flex-direction: column; gap: 0.15rem; }
+
+  .hero-stat__value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    font-feature-settings: "tnum";
+  }
+
+  .hero-stat__label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  .hero-capabilities {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hero-capabilities li {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(111, 255, 214, 0.22);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+  }
+
+  @media (max-width: 900px) {
+    .hero--with-splash { grid-template-columns: 1fr; }
+    .hero-splash { width: 100%; max-width: 520px; position: static; }
+  }
+
+  .highlight {
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    -webkit-text-fill-color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .hero-actions, .cta-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--clr-lossless-accent--brightest, #04e5e5);
+    color: var(--clr-primary-bg, #0a0a0f);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    border: 1px solid var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(111, 255, 214, 0.08); }
+
+  /* Sections */
+  section {
+    padding: 3rem 0;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .section-lede {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.7;
+    max-width: 800px;
+    margin: 0 0 2.5rem 0;
+  }
+
+  /* Origin Story */
+  .origin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .origin-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .origin-card h3 {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .origin-card p {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .origin-card em {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    font-style: italic;
+  }
+
+  .origin-card code {
+    font-size: 0.85em;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* Microfrontends */
+  .mfe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .mfe-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .mfe-card:hover {
+    border-color: rgba(4, 229, 229, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .mfe-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .mfe-step {
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    padding: 0.35rem 0.6rem;
+    border: 1px solid rgba(4, 229, 229, 0.3);
+    border-radius: 4px;
+    background: rgba(4, 229, 229, 0.08);
+    line-height: 1;
+    align-self: center;
+  }
+
+  .mfe-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .mfe-name code {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    background: transparent;
+    padding: 0;
+  }
+
+  .mfe-role {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+  }
+
+  .mfe-desc {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .mfe-insight {
+    font-size: 0.875rem;
+    color: var(--clr-lossless-primary-light, #cbd5e1);
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid rgba(4, 229, 229, 0.3);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .insight-label {
+    font-weight: 600;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* Pipeline rail (under the MFE grid) */
+  .pipeline-rail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(111, 255, 214, 0.25);
+    border-radius: 8px;
+    background: rgba(111, 255, 214, 0.04);
+    font-family: var(--ff-monospace, monospace);
+    font-size: 0.82rem;
+  }
+
+  .pipeline-step {
+    padding: 0.3rem 0.7rem;
+    background: rgba(4, 229, 229, 0.1);
+    border: 1px solid rgba(4, 229, 229, 0.25);
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    border-radius: 4px;
+  }
+
+  .pipeline-arrow {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    font-weight: 600;
+  }
+
+  /* Principles */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .principle-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .principle-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .principle-card p {
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .principle-card code {
+    font-size: 0.8rem;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* Eras timeline */
+  .era-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .era-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .era-card[data-color="amber"] {
+    border-color: rgba(255, 181, 71, 0.22);
+  }
+  .era-card[data-color="amber"]:hover {
+    border-color: rgba(255, 181, 71, 0.4);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .era-card[data-color="accent"]:hover {
+    border-color: rgba(4, 229, 229, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .era-marker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .era-num {
+    font-family: var(--ff-monospace, monospace);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    line-height: 1;
+  }
+
+  .era-card[data-color="amber"] .era-num {
+    color: #ffb547;
+  }
+
+  .era-period {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    font-weight: 500;
+  }
+
+  .era-label {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .era-body {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .era-body code {
+    font-size: 0.85em;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  .era-body a {
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Contributors */
+  .contributor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .contributor-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 229, 229, 0.12);
+    border-radius: 10px;
+    padding: 1.75rem;
+  }
+
+  .contributor-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+    margin: 0 0 0.25rem 0;
+  }
+
+  .contributor-role {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clr-lossless-accent--aquamarine, #6FFFD6);
+    margin: 0 0 1rem 0;
+  }
+
+  .contributor-body {
+    font-size: 0.95rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .contributor-body code {
+    font-size: 0.85em;
+    background: rgba(4, 229, 229, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    color: var(--clr-lossless-accent--brightest, #04e5e5);
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: left;
+    padding: 3rem 0 4rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.75rem;
+    color: var(--clr-lossless-primary-light, #f1f5f9);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .cta-section p {
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light, #94a3b8);
+    margin: 0 0 2rem 0;
+    line-height: 1.7;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .origin-grid,
+    .mfe-grid,
+    .principle-grid,
+    .contributor-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .era-card {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .hero { padding: 2rem 0 1.5rem; }
+    section { padding: 2rem 0; }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .principle-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

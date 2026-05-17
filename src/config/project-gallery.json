@@ -4,6 +4,7 @@
       "id": "augment-it",
       "title": "Augment It",
       "subtitle": "Augment any data with AI by importing records or connecting to data sources.",
+      "href": "/projects/gallery/augment-it",
       "hasSidebar": true,
       "hasLandingPage": true,
       "canvas": "/projects/gallery/augment-it/specs/Augment-It.canvas",

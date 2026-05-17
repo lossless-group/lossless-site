@@ -407,6 +407,14 @@ const upAndRunningCollection = defineCollection({
   }))
 });
 
+// Keeping Up: short briefings on recently-released tools, models, packages, standards.
+// Schema is intentionally ultra-permissive — content generation is "sloppy" by design;
+// any entry with malformed frontmatter should simply not render rather than break the build.
+const keepingUpCollection = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/keeping-up") }),
+  schema: z.object({}).passthrough()
+});
+
 const mapOfContentsCollection = defineCollection({
   loader: glob({ pattern: "**/*.md", base: resolveContentPath("moc") }),
   schema: z.object({
@@ -554,6 +562,7 @@ export const paths = {
   'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),
   'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
+  'keeping-up': resolveContentPath('lost-in-public/keeping-up'),
   'client-content': resolveContentPath('client-content'),
   'client-recommendations': resolveContentPath('client-content'),
   'client-portfolios': resolveContentPath('client-content'),
@@ -590,6 +599,7 @@ export const collections = {
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,
+  'keeping-up': keepingUpCollection,
   'to-hero': toHeroCollection,
   'client-content': clientRecommendationsCollection,
   'client-recommendations': clientRecommendationsCollection,
