@@ -73,6 +73,66 @@
         "createdAt": "2025-03-12T20:32:45-07:00",
         "updatedAt": "2025-04-20T20:32:45-07:00"
       }
+    },
+    {
+      "id": "andreacapera",
+      "name": "Andrea Capera Patino",
+      "role": "Collaborator — Backend & DevOps",
+      "bio": "Supports global entrepreneurs in foundational process, technology stacks, and fundraising. Advanced degree in Machine Learning. Lover of backend development and devops.",
+      "headshotOf": "/images/headshotOf__Andrea-Capera-Patino.png",
+      "socialLinks": {
+        "github": "https://github.com/phoenixrisingcapera",
+        "linkedin": "https://www.linkedin.com/in/andrea-capera/"
+      },
+      "metadata": {
+        "createdAt": "2026-06-03T00:00:00-07:00",
+        "updatedAt": "2026-06-03T00:00:00-07:00"
+      }
+    },
+    {
+      "id": "mattholmes",
+      "name": "Matt Holmes",
+      "role": "CEO, Cobuy.io",
+      "bio": "Planned a career in rock & roll but ended up working in finance in London. Lived with buddies for twelve years and lined a lot of landlords' pockets. Also close to a small dog known as Francis.",
+      "headshotOf": "/images/headshotOf__Matt-Holmes.jpeg",
+      "socialLinks": {
+        "github": "https://github.com/mattholmescobuy",
+        "linkedin": "https://www.linkedin.com/in/mattallenholmes/"
+      },
+      "metadata": {
+        "createdAt": "2026-06-03T00:00:00-07:00",
+        "updatedAt": "2026-06-03T00:00:00-07:00"
+      }
+    },
+    {
+      "id": "katelyndonnelly",
+      "name": "Katelyn Donnelly",
+      "role": "Managing Partner, Avalanche VC",
+      "bio": "Katelyn is the Managing Partner of Avalanche VC, and a recovering McKinsey consultant. Avalanche is an early-stage venture firm backing founders pursuing their life's work in massive market shifts.",
+      "headshotOf": "/images/headshotOf__Katelyn-Donnelly.jpeg",
+      "socialLinks": {
+        "linkedin": "https://www.linkedin.com/in/katelyndonnelly/",
+        "personal_site": "https://katelyndonnelly.com/"
+      },
+      "metadata": {
+        "createdAt": "2026-06-03T00:00:00-07:00",
+        "updatedAt": "2026-06-03T00:00:00-07:00"
+      }
+    },
+    {
+      "id": "harjyotsahni",
+      "name": "Harjyot Sahni",
+      "role": "Collaborator — HealthTech",
+      "bio": "Research on Traumatic Brain Injury (TBI) in the emergency department. Developing AI tools to assist with patient care.",
+      "headshotOf": "/images/headshotOf__Harjyot-Sanhi.jpeg",
+      "socialLinks": {
+        "linkedin": "https://www.linkedin.com/in/harjyotsahni/",
+        "personal_site": "https://robertsonscholars.org/profiles/harjyot-singh-sahni/sahni-harjyot/"
+      },
+      "metadata": {
+        "createdAt": "2026-06-03T00:00:00-07:00",
+        "updatedAt": "2026-06-03T00:00:00-07:00"
+      }
     }
   ]
 }

@@ -105,6 +105,32 @@
       "stealth-passcode": "the-water-foundation-2025"
     },
     {
+      "id": "reach",
+      "name": "Reach",
+      "logo": "/visuals/appIcon__Reach.png",
+      "description": "Workforce-development university offering apprenticeship-based degrees for working adults.",
+      "industry": "Higher Education",
+      "engagement": "2025-Present",
+      "website": "https://reach.edu",
+      "stealth-name": "Apprenticeship University",
+      "stealth-logo": "/visuals/appIcon__Reach.png",
+      "stealth-description": "Re-imagining the bachelor's degree as paid apprenticeship.",
+      "stealth-passcode": "reach-2025"
+    },
+    {
+      "id": "humain",
+      "name": "HUMAIN",
+      "logo": "/visuals/appIcon__HUMAIN.png",
+      "description": "Emerging VC manager focused on longevity, healthspan, biotech, and consumer health.",
+      "industry": "Venture Capital",
+      "engagement": "2025-Present",
+      "website": "https://humain.vc",
+      "stealth-name": "Longevity & Healthspan Venture",
+      "stealth-logo": "/visuals/appIcon__HUMAIN.png",
+      "stealth-description": "Emerging manager backing longevity, healthspan, biotech, and consumer health.",
+      "stealth-passcode": "humain-2025"
+    },
+    {
       "id": "obsidian-plugin-community",
       "name": "Obsidian Plugin Community",
       "logo": "/visuals/Tooling-Trademarks/app-icons/appIcon__Obsidian.svg",

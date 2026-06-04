@@ -1,85 +1,97 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import TeamBios from '../components/TeamBios.svelte';
-import ClientListHorizontalScroller from '../components/basics/messages/ClientListHorizontalScroller.astro';
-import ProjectGrid from '../components/content/ProjectGrid.astro';
-import BaseCodeblock from '../components/codeblocks/BaseCodeblock.astro';
-import clientsData from '../content/people/clients.json';
+import Layout from '@layouts/Layout.astro';
+import TeamBios from '@components/TeamBios.svelte';
+import ClientListHorizontalScrollerStealth from '@components/basics/messages/ClientListHorizontalScroller--stealth.astro';
+import BaseCodeblock from '@components/codeblocks/BaseCodeblock.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
-import FeatureSideImage from '@components/basics/FeatureSideImage.astro';
-import AlternatingSideImage from '@components/basics/messages/AlternatingSideImage.astro';
 
-// Load clients data
+import clientsData from '@content/people/clients.json';
+
 const clients = clientsData.clients;
 
-// Define projects data
-const projects = [
+// Curated taxonomy of what we ship — mirrors how the work is actually organized.
+const foundations = [
   {
-    icon: "🌐",
-    title: "Extended Markdown Website",
-    description: "Making Extended Markdown a first-class citizen for beautiful, content-rich websites using Astro.",
-    link: "https://github.com/lossless-group/lossless-site"
+    title: "Context Vigilance Kit",
+    blurb: "Conventions, ingestion scripts, and a local Chroma corpus so agents work from our actual prior work, not training data.",
+    href: "/projects/gallery/context-vigilance"
   },
   {
-    icon: "🌾",
-    title: "Content Farm",
-    description: "A universe of Obsidian plugins that give deep thinkers superpowers to put out content.",
-    link: "https://github.com/lossless-group/content-farm"
+    title: "Lossless Flavored Markdown",
+    blurb: "Our extended-markdown flavor: directives, wikilinks, callouts, citations — normalized across every site we run.",
+    href: "/projects/gallery/lossless-flavored-markdown"
   },
   {
-    icon: "🏠",
-    title: "Augment-It",
-    description: "An AI-powered workflow to augment basic data sets with AI data capture, analysis, and inputs.",
-    link: "https://github.com/lossless-group/augment-it"
-  },
-  {
-    icon: "🧠",
-    title: "Context Engineering, Shared",
-    description: "A set of reminders, blueprints, specifications, and prompts used with tempestuous code generating AI models.",
-    link: "/vibe-with/us"
-  },
-
+    title: "Lossless Agent Skills",
+    blurb: "The Claude skills that encode how we work: study-repos-first, changelog-conventions, generate-consistent-og-images, and more.",
+    href: "https://github.com/lossless-group/lossless-agent-skills"
+  }
 ];
 
-const featureSideImageEntries = [
+const aiLabsChildren = [
   {
-    "label": "Less of a Company, More of a Learning Community.",
-    "title": "Collaboration is a Journey, Not a Destination.",
-    "details": "We are not looking for employees, we are looking for collaborators.",
-    "imageSide": "right",
-    "ctaText": "Learn More",
-    "ctaUrl": "#",
-    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/imageRep__North-Sea-of-Data_eueEtdpFG.webp",
-    "imageClasses": "image-mask",
-    "maskHeight": "96%",
-    "maskWidth": "100%"
+    title: "MemoPop AI",
+    blurb: "Investment memo workflow for venture firms.",
+    href: "/projects/gallery/memopop-ai"
   },
   {
-    "label": "Friends First, Humanity Always",
-    "details": `When we are not investing through VC funds, advising tiny startup companies, or eating tacos, we sometimes get asked to consult for large companies. This is the pseudo-brand under which we do that work.`,
-    "imageSide": "left",
-    "ctaText": "Explore Library",
-    "ctaUrl": "/vibe-with/us",
-    "imageUrl": "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/repImages/repImage__Vibe-Coding-Tightrope_0R3nDMvkv.webp",
-    "imageClasses": "image-mask",
-    "maskHeight": "96%",
-    "maskWidth": "100%"
+    title: "DDDecks AI",
+    blurb: "Due-diligence decks generated from primary sources.",
+    href: "https://github.com/lossless-group/dddecks-ai"
   },
-]
+  {
+    title: "Augment-It",
+    blurb: "AI-powered workflow to enrich basic data sets — sales, R&D, anything that benefits from richer record context.",
+    href: "/projects/gallery/augment-it"
+  }
+];
 
+const advisoryChildren = [
+  {
+    title: "Emergent Innovation",
+    blurb: "Frameworks for spotting what's actually new in a market vs. what's just rebranded.",
+    href: "/projects/gallery/emergent-innovation"
+  },
+  {
+    title: "Essays",
+    blurb: "Long-form thinking on AI transformation, org design, and how innovation actually compounds.",
+    href: "/read/through"
+  },
+  {
+    title: "Presentations",
+    blurb: "Decks and talks from conferences, client workshops, and internal sessions.",
+    href: "/learn-with/our-talks"
+  }
+];
+
+// Social icons — mirrored from Header.astro so the About page reflects the same channels.
+const socialIcons = [
+  { label: "Youtube", icon: "https://ik.imagekit.io/xvpgfijuw/lossless-content-embeds/appIcon__Youtube--Lightest.svg", url: "https://www.youtube.com/@losslessgroup/" },
+  { label: "X", icon: "/visuals/appIcon__X-Twitter--Lightest.svg", url: "https://x.com/losslessgroup" },
+  { label: "GitHub", icon: "/visuals/appIcon__GitHub--Lighter.svg", url: "https://github.com/lossless-group" },
+  { label: "LinkedIn", icon: "/visuals/appIcon__LinkedIn.svg", url: "https://www.linkedin.com/company/thelosslessgroup" },
+  { label: "Buy Me a Coffee", icon: "/visuals/favicon__BuyMeACoffee.svg", url: "https://buymeacoffee.com/losslessgroup", className: "buy-me-a-coffee-icon" }
+];
+
+// Collaborators — folks we work with often who aren't formally on the team page.
+const collaborators = [
+  { name: "Nicholas Cooper" },
+  { name: "Tugce Ergul" }
+];
 ---
 
 <Layout title="About The Lossless Group">
   <div class="about-page">
-    <!-- Hero Section -->
-    <div slot="hero-content" style="position: relative;">
+
+    <!-- Hero -->
+    <section class="hero-wrapper">
       <AnimationWrapper>
         <Hero
           alignment="center"
           fullBleed={false}
           title=""
-          subtitle="A loose collection of innovators finding winning formulae for the Age of AI"
+          subtitle="An umbrella brand for innovators finding winning formulae in the Age of AI"
           subtitleVariant="minimal"
           imagePosition="top"
           image={{
@@ -89,88 +101,191 @@ const featureSideImageEntries = [
           animate={true}
         />
       </AnimationWrapper>
-    </div>
-    </section>
 
-    <!-- Purpose Section -->
-    <section class="content-section">
-      <h2>Less of a Company, More of a Social Club</h2>
-      <div class="prose-content">
-        <p>
-          The Lossless Group is not an actual company. It is a social club for innovators.
-        </p>
-        <p>
-          When we are not investing through VC funds, advising tiny startup companies, or eating tacos, 
-          we sometimes get asked to consult for large companies. This is the pseudo-brand under which 
-          we do that work.
-        </p>
+      <!-- Social row, directly under the wordmark -->
+      <div class="hero-socials">
+        {socialIcons.map(icon => (
+          <a href={icon.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${icon.label} page`}>
+            <img src={icon.icon} alt={icon.label} class={icon.className} />
+          </a>
+        ))}
       </div>
     </section>
 
-    <section class="content-section">
-      <FeatureSideImage
-        image={{
-          src: "/visuals/aigen_aisomething-diagram.jpeg",
-          alt: "The Lossless Group wordmark with brand Eastern Crimson gradient"
-        }}
-        title=""
-        label="Less of a Company, More of a Learning Community"
-        details="We are not looking for employees, we are looking for collaborators."
-      />
+    <!-- What we are / aren't -->
+    <section class="content-section manifesto">
+      <h2>Less of a Company. More of a Cooperative.</h2>
+      <div class="prose-content">
+        <p>
+          <strong>The Lossless Group is not a company.</strong> It is not a consulting firm.
+          It does not have employees. It does not chase logos.
+        </p>
+        <p>
+          It is an <strong>umbrella brand</strong> — a place under which innovators house
+          the consulting, advisory, and building they would otherwise do alone.
+          Think of it as a cooperative: shared identity, shared craft, shared
+          context, but each collaborator keeps their own work and their own voice.
+        </p>
+        <p>
+          When we are not investing through VC funds, advising tiny startup companies,
+          or eating tacos, we sometimes get asked to consult for large companies.
+          That is the work that ships under this brand.
+        </p>
+      </div>
+
+      <div class="manifesto-pillars">
+        <div class="pillar">
+          <h3>Friends First</h3>
+          <p>We don't take work from people we don't like. The only constraint to joining is that we have to become friends.</p>
+        </div>
+        <div class="pillar">
+          <h3>Open by Default</h3>
+          <p>Tools, prompts, blueprints, and explorations live in public repos. The corpus is the product.</p>
+        </div>
+        <div class="pillar">
+          <h3>Lossless, Not Lossy</h3>
+          <p>We try to encode what we learn so the next person — or the next AI agent — doesn't have to re-derive it.</p>
+        </div>
+      </div>
     </section>
 
-    
-
-    
-
-    <!-- Current Projects Section -->
-    <ProjectGrid projects={projects} />
-
-    <!-- Our Team Section -->
+    <!-- What We Build (curated taxonomy) -->
     <section class="content-section">
-      <h2>Our Team</h2>
+      <div class="section-heading-row">
+        <h2>What We Build</h2>
+        <a href="/projects" class="section-link">Full gallery →</a>
+      </div>
+
+      <!-- Tier 1: Foundations -->
+      <div class="tier">
+        <div class="tier-label">
+          <span class="tier-eyebrow">Foundations</span>
+          <p class="tier-note">Packages that underpin everything else we ship.</p>
+        </div>
+        <div class="foundations-grid">
+          {foundations.map(item => (
+            <a href={item.href} class="package-card" target={item.href.startsWith('http') ? '_blank' : undefined} rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+              <h3>{item.title}</h3>
+              <p>{item.blurb}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Tier 2: Astro Knots -->
+      <div class="tier">
+        <div class="tier-label">
+          <span class="tier-eyebrow">Astro Knots</span>
+          <p class="tier-note">Web development on steroids — specialized for venture capital.</p>
+        </div>
+        <a href="/projects/gallery/astro-knots" class="feature-card">
+          <div class="feature-card-body">
+            <h3>Astro Knots</h3>
+            <p>A family of ~10+ Astro sites built on the same conventions — splash pages, fundraise decks, portfolio sites, plugin landings. The platform under most of our client work.</p>
+            <span class="feature-card-tag">Spawns client sites</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Tier 3: AI Labs -->
+      <div class="tier">
+        <div class="tier-label">
+          <span class="tier-eyebrow">AI Labs</span>
+          <p class="tier-note">VC Ops and Consulting Ops at the core.</p>
+        </div>
+        <div class="ailabs-grid">
+          {aiLabsChildren.map(item => (
+            <a href={item.href} class="package-card ailabs-child" target={item.href.startsWith('http') ? '_blank' : undefined} rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+              <h3>{item.title}</h3>
+              <p>{item.blurb}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Tier 4: AI Transformation Advisory -->
+      <div class="tier">
+        <div class="tier-label">
+          <span class="tier-eyebrow">AI Transformation Advisory</span>
+          <p class="tier-note">Thought leadership and frameworks we use with leaders navigating the shift.</p>
+        </div>
+        <div class="ailabs-grid">
+          {advisoryChildren.map(item => (
+            <a href={item.href} class="package-card ailabs-child" target={item.href.startsWith('http') ? '_blank' : undefined} rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+              <h3>{item.title}</h3>
+              <p>{item.blurb}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Tier 5: Everything Else -->
+      <div class="tier tier-everything-else">
+        <div class="tier-label">
+          <span class="tier-eyebrow">Everything Else</span>
+          <p class="tier-note">Experiments, forks, nascent ideas, beautifully abandoned projects.</p>
+        </div>
+        <a href="https://github.com/lossless-group" target="_blank" rel="noopener noreferrer" class="everything-else-cta">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <span>Wander through it all on GitHub →</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section class="content-section">
+      <h2>The People Under the Umbrella</h2>
+      <p class="prose-content section-lede">
+        Each person here runs their own practice. The Lossless Group is what we
+        share — context, conventions, code, and the occasional taco.
+      </p>
       <TeamBios client:load />
     </section>
 
-    <!-- Clients Section -->
-    <ClientListHorizontalScroller clients={clients} />
+    <!-- Clients (anonymized — pulls stealth-name / stealth-logo / stealth-description) -->
+    <ClientListHorizontalScrollerStealth clients={clients} title="Who We're Working With" />
 
-    <!-- Open Source Section -->
+    <!-- Open Source CTA -->
     <section class="content-section">
-      <h2>Join Our Open Source Community</h2>
+      <h2>Build With Us</h2>
       <div class="open-source-cta">
         <p>
-          We're always looking for contributors to help us build out our content and open source projects. 
-          If you're interested in contributing, please reach out!
+          Most of what we make is open source. If you want to contribute — or
+          just want to swap notes on how you're working with AI — reach out.
         </p>
-        
+
         <div class="cta-buttons">
           <a href="https://github.com/lossless-group" target="_blank" rel="noopener noreferrer" class="cta-button primary">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             View on GitHub
           </a>
           <a href="mailto:a-bit-lost@lossless.group" class="cta-button secondary">
-            Contact Michael Staton
+            Email Michael
           </a>
         </div>
-        
+
         <div class="contribution-note">
           <BaseCodeblock code={`# The only constraint
-We need to become friends. 
-We are not looking for employees, we are looking for collaborators.`} lang="markdown" />
+We need to become friends.
+We are not looking for employees — we are looking for collaborators.`} lang="markdown" />
         </div>
       </div>
     </section>
 
-    <!-- Collaborators Section -->
+    <!-- Collaborators -->
     <section class="content-section">
-      <h2>Collaborators</h2>
+      <h2>Recurring Collaborators</h2>
+      <p class="prose-content section-lede">
+        People we keep ending up in rooms with.
+      </p>
       <div class="collaborators-list">
-        <div class="collaborator">Nicholas Cooper</div>
-        <div class="collaborator">Tugce Ergul</div>
-        <div class="collaborator">Katelyn Donnelly</div>
+        {collaborators.map(c => (
+          <div class="collaborator">{c.name}</div>
+        ))}
       </div>
     </section>
   </div>
@@ -182,77 +297,387 @@ We are not looking for employees, we are looking for collaborators.`} lang="mark
     margin: 0 auto;
     padding: 2rem 1rem;
   }
-  
-  /* Hero Section */
-  .hero-section {
-    text-align: center;
-    padding: 4rem 0;
+
+  /* Hero wrapper */
+  .hero-wrapper {
     margin-bottom: 4rem;
-    position: relative;
+    text-align: center;
   }
 
-  .hero-section img {
-    max-width: 70%;
-    height: auto;
-    margin: 0 auto;
+  .hero-socials {
+    display: flex;
+    gap: 1.25rem;
     justify-content: center;
     align-items: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
   }
-  
-  .hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    background: var(--grd--lossless-eastern-crimson);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
+
+  .hero-socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
   }
-  
-  .hero-subtitle {
-    font-size: 1.5rem;
-    color: #94a3b8;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.5;
+
+  .hero-socials a:hover {
+    transform: scale(1.15);
   }
-  
-  /* Content Sections */
+
+  .hero-socials img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    aspect-ratio: 1 / 1;
+  }
+
+  .hero-socials img.buy-me-a-coffee-icon {
+    filter: brightness(0) invert(1);
+    opacity: 0.92;
+  }
+
+  /* Content sections */
   .content-section {
     margin-bottom: 5rem;
-    margin-left: 4em;
   }
-  
+
   .content-section h2 {
     font-size: 2rem;
     font-weight: 700;
     color: #f1f5f9;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
-  
+
+  .section-heading-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-heading-row h2 {
+    margin-bottom: 0;
+  }
+
+  .section-link {
+    color: var(--clr-lossless-primary-light, #60a5fa);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .section-link:hover {
+    text-decoration: underline;
+  }
+
   .prose-content {
     max-width: 65ch;
     color: #cbd5e1;
     line-height: 1.8;
   }
-  
+
   .prose-content p {
     margin-bottom: 1rem;
   }
-  
-  
-  
+
+  .section-lede {
+    margin-bottom: 2rem;
+    font-size: 1.05rem;
+    opacity: 0.9;
+  }
+
+  /* Manifesto */
+  .manifesto-pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .pillar {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+  }
+
+  .pillar h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .pillar p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* Tiered project taxonomy */
+  .tier {
+    margin-bottom: 3rem;
+  }
+
+  .tier-label {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tier-eyebrow {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--clr-lossless-primary-light, #60a5fa);
+    white-space: nowrap;
+  }
+
+  .tier-note {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .foundations-grid,
+  .ailabs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .package-card {
+    display: block;
+    padding: 1.25rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 200ms ease, border-color 200ms ease, background 200ms ease;
+  }
+
+  .package-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--clr-lossless-primary, #3b82f6), transparent 50%);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .package-card h3 {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .package-card p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .feature-card {
+    display: block;
+    padding: 2rem;
+    background: linear-gradient(135deg,
+      rgba(59, 130, 246, 0.10) 0%,
+      rgba(168, 85, 247, 0.05) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 200ms ease, border-color 200ms ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  .feature-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .feature-card p {
+    margin: 0 0 1rem 0;
+    color: #cbd5e1;
+    line-height: 1.6;
+    max-width: 65ch;
+  }
+
+  .feature-card-tag {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--clr-lossless-primary-light, #60a5fa);
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 999px;
+  }
+
+  .everything-else-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: #cbd5e1;
+    font-weight: 500;
+    transition: all 200ms ease;
+  }
+
+  .everything-else-cta:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #f1f5f9;
+  }
+
+  .everything-else-cta svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Project gallery (compact variant of /projects layout) */
+  .covers-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  }
+
+  .project-cover {
+    padding: 1.5rem;
+    background: linear-gradient(135deg,
+      color-mix(in oklab, var(--clr-lossless-primary-glass, rgba(59,130,246,0.08)), transparent 95%) 0%,
+      color-mix(in oklab, var(--clr-lossless-primary-glass, rgba(59,130,246,0.08)), transparent 98%) 100%
+    );
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light, #60a5fa), transparent 80%);
+    border-radius: 16px;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .project-cover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .project-cover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      var(--clr-lossless-primary-light, #60a5fa) 0%,
+      var(--clr-lossless-primary, #3b82f6) 50%,
+      var(--clr-lossless-primary-light, #60a5fa) 100%
+    );
+    opacity: 0.6;
+  }
+
+  .cover-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .cover-titles {
+    display: grid;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .cover-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--clr-heading, #f1f5f9);
+    flex: 1;
+  }
+
+  .cover-subtitle {
+    margin: 0;
+    color: var(--clr-body, #cbd5e1);
+    opacity: 0.85;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .client-icons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .cover-expand {
+    margin-top: auto;
+    border-top: 1px solid color-mix(in oklab, var(--clr-lossless-primary-light, #60a5fa), transparent 85%);
+    padding-top: 1rem;
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid color-mix(in oklab, var(--clr-lossless-ui-btn-border, #60a5fa), transparent 60%);
+    background: var(--surface-2, rgba(255,255,255,0.05));
+    color: var(--clr-body, #cbd5e1);
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 200ms ease;
+  }
+
+  .toggle:hover {
+    border-color: color-mix(in oklab, var(--clr-lossless-primary, #3b82f6), transparent 50%);
+    transform: translateY(-1px);
+  }
+
   /* Open Source CTA */
   .open-source-cta {
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.08) 0%, 
+    background: linear-gradient(135deg,
+      rgba(59, 130, 246, 0.08) 0%,
       rgba(168, 85, 247, 0.04) 100%);
     border: 1.5px solid rgba(59, 130, 246, 0.2);
     border-radius: 1rem;
     padding: 3rem;
     text-align: center;
   }
-  
+
   .open-source-cta p {
     font-size: 1.125rem;
     color: #cbd5e1;
@@ -261,7 +686,7 @@ We are not looking for employees, we are looking for collaborators.`} lang="mark
     margin-left: auto;
     margin-right: auto;
   }
-  
+
   .cta-buttons {
     display: flex;
     gap: 1rem;
@@ -269,7 +694,7 @@ We are not looking for employees, we are looking for collaborators.`} lang="mark
     flex-wrap: wrap;
     margin-bottom: 2rem;
   }
-  
+
   .cta-button {
     display: inline-flex;
     align-items: center;
@@ -280,66 +705,67 @@ We are not looking for employees, we are looking for collaborators.`} lang="mark
     text-decoration: none;
     transition: all 0.2s;
   }
-  
+
   .cta-button.primary {
     background: #3b82f6;
     color: white;
   }
-  
+
   .cta-button.primary:hover {
     background: #2563eb;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   }
-  
+
   .cta-button.secondary {
     background: rgba(255, 255, 255, 0.1);
     color: #60a5fa;
     border: 1px solid rgba(96, 165, 250, 0.3);
   }
-  
+
   .cta-button.secondary:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(96, 165, 250, 0.5);
   }
-  
+
   .cta-button .icon {
     width: 20px;
     height: 20px;
   }
-  
+
   .contribution-note {
     margin-top: 2rem;
   }
-  
+
   /* Collaborators */
   .collaborators-list {
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
     flex-wrap: wrap;
   }
-  
+
   .collaborator {
-    font-size: 1.125rem;
-    color: #94a3b8;
+    font-size: 1.05rem;
+    color: #cbd5e1;
     padding: 0.5rem 1rem;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 0.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
   /* Responsive */
   @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.5rem;
-    }
-    
-    .hero-subtitle {
-      font-size: 1.25rem;
-    }
-    
     .open-source-cta {
       padding: 2rem 1.5rem;
+    }
+
+    .hero-socials img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .covers-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
