@@ -14,15 +14,25 @@ import { transformContentPathToRoute } from '@utils/routing/routeManager';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-// Function to get client-specific content paths from Map of Content
+// Function to get client-specific content paths from Map of Content.
+// Looks up the MOC file case-insensitively so any casing of clientName
+// resolves to the right file on case-sensitive filesystems (e.g. Linux/Vercel).
 async function getClientContentPaths(clientName: string): Promise<string[]> {
   try {
-    const clientMdPath = path.resolve(contentBasePath, 'moc', `${clientName}.md`);
-    const rawClientMd = await fs.readFile(clientMdPath, 'utf-8');
-    
+    const mocDir = path.resolve(contentBasePath, 'moc');
+    const target = `${clientName.toLowerCase()}.md`;
+    const dirEntries = await fs.readdir(mocDir);
+    const match = dirEntries.find(name => name.toLowerCase() === target);
+    if (!match) {
+      console.warn(`No Map of Content file found for client "${clientName}" in ${mocDir}`);
+      return [];
+    }
+
+    const rawClientMd = await fs.readFile(path.join(mocDir, match), 'utf-8');
+
     const readerBlockMatch = rawClientMd.match(/:::reader([\s\S]*?):::/i);
     if (!readerBlockMatch) return [];
-    
+
     const block = readerBlockMatch[1] || '';
     return extractBacklinkPaths(block);
   } catch (err) {
@@ -133,9 +143,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
           collection: 'market-maps', 
           slug: derivedSlug 
         },
-        props: { 
+        props: {
           client: 'hypernova',
-          actualClientName: 'hypernova',
+          actualClientName: 'Hypernova',
           entry: entry,
           essays: publishedMarketMaps,
           collection: 'market-maps'
