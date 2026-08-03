@@ -1,0 +1,14 @@
+# Scope the knowledge graph to the app source only.
+# Syntax = .gitignore (later patterns override earlier ones).
+
+# Ignore everything, then re-include src/
+*
+!src/
+!src/**
+
+# ...but drop the content submodule (huge, resolved from ../content) and build noise
+src/generated-content/
+node_modules/
+dist/
+.astro/
+graphify-out/

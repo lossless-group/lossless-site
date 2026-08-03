@@ -28,3 +28,7 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 nulbuild_output*.log
+
+# graphify knowledge-graph outputs
+graphify-out/manifest.json
+graphify-out/cost.json
