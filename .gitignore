@@ -29,6 +29,8 @@ pnpm-debug.log*
 .idea/
 nulbuild_output*.log
 
-# graphify knowledge-graph outputs
-graphify-out/manifest.json
-graphify-out/cost.json
+# graphify knowledge-graph outputs — all regenerable, so none of it is tracked.
+# The viewer is published instead as public/graph.html (committed); re-copy it
+# there after a regen rather than committing graphify-out/graph.html twice.
+graphify-out/*
+!graphify-out/GRAPH_REPORT.md

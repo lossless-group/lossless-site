@@ -82,6 +82,12 @@ const navLinks = [
         href: "/workflow/laerdal",
         title: "Laerdal Changelog",
         description: "Track updates specific to the Laerdal integration.",
+      },
+      {
+        href: "/graph.html",
+        title: "Codebase Graph",
+        description: "Explore how the site fits together — an interactive knowledge graph.",
+        external: true,
       }
     ]
   }
@@ -191,10 +197,12 @@ const socialIcons = [
                 const title = 'title' in item ? item.title : item.label;
                 
                 return (
-                  <a 
-                    href={item.href} 
+                  <a
+                    href={item.href}
                     class="mobile-nav-item"
                     data-key={itemKey}
+                    target={'external' in item && item.external ? "_blank" : undefined}
+                    rel={'external' in item && item.external ? "noopener noreferrer" : undefined}
                   >
                     <div class="mobile-nav-item-title">{title}</div>
                     {'description' in item && item.description && (

@@ -3,6 +3,9 @@ interface Item {
   href: string;
   title: string;
   description: string;
+  // Opens in a new tab. Used for standalone static pages (e.g. the graphify
+  // viewer at /graph.html) that aren't part of the Astro route tree.
+  external?: boolean;
 }
 
 interface Props {
@@ -17,7 +20,12 @@ const { label, items } = Astro.props;
   <button class="dropdown-trigger">{label}</button>
   <div class="jumbo-dropdown">
     {items.map(item => (
-      <a href={item.href} class="jumbo-dropdown-item">
+      <a
+        href={item.href}
+        class="jumbo-dropdown-item"
+        target={item.external ? "_blank" : undefined}
+        rel={item.external ? "noopener noreferrer" : undefined}
+      >
         <div class="item-title">{item.title}</div>
         <div class="item-description">{item.description}</div>
       </a>
