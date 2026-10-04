@@ -367,6 +367,32 @@ const organizationsCollection = defineCollection({
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 // ***
+// Open: Content Areas Collection Definition
+// Type: Content Collection
+// Purpose: Domain content areas (AI-Factories-Datacenters, Blue-Economy, Finance, Health, general)
+//   from the content-areas submodule nested inside generated-content.
+// Schema: No validation at all — stub pages with empty or missing frontmatter must still build.
+//   If the nested submodule isn't checked out, the collection is simply empty.
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const contentAreasCollection = defineCollection({
+  loader: glob({
+    // Repo-level docs (contributor README, FILEMAP, changelog) are not area content
+    pattern: ["**/*.md", "!README.md", "!FILEMAP.md", "!changelog/**"],
+    base: resolveContentPath("content-areas"),
+    generateId: ({ entry }) => {
+      // e.g., "AI-Factories-Datacenters/Organizations/Equinix.md" -> "ai-factories-datacenters/organizations/equinix"
+      return entry.replace(/\.md$/, '').toLowerCase();
+    }
+  }),
+  schema: z.object({}).passthrough()
+});
+
+// ========================================
+// Close: Content Areas Collection Definition
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// ***
 // Open: Issue Resolution Collection Definition (Ultra-Minimalist, following example)
 // Type: Content Collection
 // Purpose: For magazine-style articles detailing issue resolutions.
@@ -596,6 +622,7 @@ export const collections = {
   'specs': specsCollection,
   'sources': sourcesCollection,
   'organizations': organizationsCollection,
+  'content-areas': contentAreasCollection,
   'talks': talksCollection,
   'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,

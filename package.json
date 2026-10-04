@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro preview",
-    "prebuild": "node -e \"const { execSync } = require('child_process'); try { execSync('git remote get-url origin', { stdio: 'ignore' }); } catch { execSync('git remote add origin https://github.com/lossless-group/lossless-site.git'); } execSync('git lfs install'); execSync('git lfs pull');\"",
+    "prebuild": "node -e \"const { execSync } = require('child_process'); try { execSync('git remote get-url origin', { stdio: 'ignore' }); } catch { execSync('git remote add origin https://github.com/lossless-group/lossless-site.git'); } execSync('git lfs install'); execSync('git lfs pull'); try { execSync('git -C src/generated-content submodule update --init content-areas', { stdio: 'inherit' }); } catch { console.warn('prebuild: could not init content-areas submodule; /content-areas will be empty'); }\"",
     "build": "node -e \"require('dotenv').config({ path: '.env' }); require('child_process').execSync('astro build --remote', { stdio: 'inherit' });\"",
     "preview": "astro preview",
     "astro": "astro",

@@ -1,0 +1,116 @@
+---
+/**
+ * /content-areas/[...slug].astro — Dynamic route for the content-areas collection.
+ * Mirrors /organizations/[...slug].astro: no frontmatter requirements, title fallback chain,
+ * preserved folder structure in URLs (/content-areas/<area>/<type>/<entry>).
+ */
+import { getCollection } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import { getReferenceSlug } from '@utils/slugify';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Recover original casing from the file path ("AI-Factories-Datacenters/Organizations/ABB Group"),
+  // since entry ids are lowercased. Falls back to the id if filePath isn't available.
+  function originalSegments(entry: any): string[] {
+    const fp = String(entry.filePath || '').replace(/\\/g, '/');
+    const marker = 'content-areas/';
+    const i = fp.lastIndexOf(marker);
+    const rel = i >= 0 ? fp.slice(i + marker.length) : entry.id;
+    return rel.replace(/\.md$/i, '').split('/');
+  }
+  function getDisplayTitle(entry: any): string {
+    if (entry.data?.title && String(entry.data.title).trim()) {
+      return String(entry.data.title).trim();
+    }
+    if (entry.data?.og_title && String(entry.data.og_title).trim()) {
+      return String(entry.data.og_title).trim();
+    }
+    const parts = originalSegments(entry);
+    const filename = parts.pop() || entry.id;
+    // An area's README is its landing page
+    if (filename.toLowerCase() === 'readme' && parts.length > 0) {
+      return `${parts[parts.length - 1].replace(/-/g, ' ')} Overview`;
+    }
+    return filename;
+  }
+  const areaEntries = await getCollection('content-areas');
+  const paths: any[] = [];
+  const errors: { id: string; error: string }[] = [];
+
+  console.log(`[CONTENT-AREAS] Found ${areaEntries.length} entries in the content-areas collection`);
+
+  for (const entry of areaEntries) {
+    try {
+      const slug = getReferenceSlug(entry.id);
+      const title = getDisplayTitle(entry);
+      const folder = entry.id.includes('/') ? entry.id.split('/')[0] : 'root';
+
+      paths.push({
+        params: { slug },
+        props: {
+          entry: {
+            ...entry,
+            data: {
+              ...entry.data,
+              title,
+            }
+          },
+          folder
+        }
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`[CONTENT-AREAS] Skipping ${entry.id}: ${errorMessage}`);
+      errors.push({ id: entry.id, error: errorMessage });
+    }
+  }
+
+  if (errors.length > 0) {
+    console.warn(`[CONTENT-AREAS] ${errors.length} entries skipped due to errors`);
+  }
+  console.log(`[CONTENT-AREAS] Generated ${paths.length} content-area paths`);
+  return paths;
+}
+
+interface Props {
+  entry: {
+    id: string;
+    body?: string;
+    data: {
+      title: string;
+      og_title?: string;
+      url?: string;
+      tags?: string | string[];
+      [key: string]: any;
+    };
+  };
+  folder: string;
+}
+
+const { entry, folder } = Astro.props;
+
+const contentData = {
+  path: Astro.url.pathname,
+  id: entry.id,
+  title: entry.data.title,
+  contentType: 'content-areas',
+  folder
+};
+---
+
+<Layout
+  title={entry.data.title}
+  frontmatter={entry.data}
+>
+  <OneArticle
+    Component={OneArticleOnPage}
+    title={entry.data.title}
+    content={entry.body || ''}
+    markdownFile={entry.id}
+    data={contentData}
+  />
+</Layout>
