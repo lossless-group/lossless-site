@@ -1,6 +1,6 @@
 ---
 import Layout from './Layout.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 
 interface Props {
   pageName: string;
@@ -16,7 +16,7 @@ if (!pageContent) {
   throw new Error(`Page ${pageName} not found in pages collection`);
 }
 
-const { Content } = await pageContent.render();
+const { Content } = await render(pageContent);
 ---
 
 <Layout>

@@ -83,13 +83,13 @@ const {
   <div class="flex items-start gap-2 w-full">
     <!-- Icon rendering logic: SVG-only version. All icons must be SVGs. -->
     {icon ? (
-      <!-- 
+      /*
         Use IconSVGWrapper for SVG icons to ensure native rendering.
         Pass icon prop as src, title as alt text, and set width/height for consistent sizing.
         This project now only supports SVG icons. All icon props must be SVG file paths.
         If icon is not provided, fallback to slot for custom icon content.
-      -->
-      <IconSVGWrapper 
+      */
+      <IconSVGWrapper
         src={icon} 
         alt={title} 
         width="32" 
@@ -97,9 +97,7 @@ const {
         class={iconClass} 
       />
     ) : (
-      <!-- 
-        If no icon is provided, render the slot for custom icon content.
-      -->
+      /* If no icon is provided, render the slot for custom icon content. */
       <slot name="icon" />
     )}
     <!-- Header/title -->

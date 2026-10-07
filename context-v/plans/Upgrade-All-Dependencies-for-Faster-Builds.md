@@ -130,10 +130,23 @@ All builds run locally with `CONTENT_BASE_PATH=src/generated-content ./node_modu
 |---|---|---|---|---|---|---|---|
 | Baseline (Astro 6.1.2) | 2026-10-06 | 114 s | 30.7 s | 64.2 s | 112.2 s | 7,528 | 331 |
 | Tier 1 (patch/minor) | 2026-10-06 | 109 s | 28.0 s | 62.2 s | 107.0 s | 7,528 | 1,162 |
+| Tier 3 (Astro 7.3.5, unified processor, compressHTML: true) | 2026-10-06 | 82 s | 15.4 s | 51.7 s | 81 s | 7,540 | not re-run |
 
 **Prerendering is the bottleneck** (~57% of build time). That's the phase Astro 7's queued rendering targets. Content sync is 3 s warm but ~30 s cold, and Vercel may build cold.
 
 **The `astro check` jump in tier 1 is a checker change, not a regression.** 990 of the 1,162 errors are parse errors (`ts(1382)`, `ts(1003)`) in `src/assets/visuals-as-components/` (23 inline-SVG trademark components, 6 of which embed `<?xml ?>` / `<!DOCTYPE>`). The newer `@astrojs/check` rejects them. Their only importer, `src/components/basics/ContrastingTrademarkRibbons.astro`, is already on the ledger's DROP list ([[Abandoned-Intentions-Trademark-Ribbons]]). The build doesn't reach them, so output is unchanged. **Before tier 3:** delete that component and the 23 SVG files (the Rust compiler is also stricter). Confirm the abandoned intention is captured first, per the ledger's rule.
+
+Tier 3 is **~28% faster** than baseline: Vite bundling halved (Vite 8 / Rolldown), prerendering dropped 20%. The page count rose by 12 because `generated-content` moved to `1e44c220` between runs. Visible text of `/content-areas/.../phaidra`, `/more-about`, and `/toolkit` is identical to production (Astro 6) after whitespace normalization.
+
+### What tier 3 needed
+
+- `markdown.processor: unified({...})` with the existing `remarkRehype` and `rehypePlugins` moved inside; `compressHTML: true`.
+- Removed the misplaced (and ignored) `vite.rollupOptions` block; removed the unused `@astrojs/node`.
+- `entry.render()` → `render(entry)` in `src/layouts/Information.astro` and `src/pages/slides/[collection]/[...slug].astro`.
+- **Rust compiler:** HTML comments inside a `{cond ? ( … ) : …}` branch are rejected. Converted to JS comments in `src/components/basics/messages/IconHeaderMessage.astro`. Literal `{{ }}` in markup moved into a string in `src/components/Figma-Object--Display.astro`.
+- **Vite 8 / lightningcss:** rejects invalid CSS that esbuild passed through. Fixed a declaration split across lines (`border-` / `radius:`) in `src/components/tool-components/TagRow.astro`. The dropdown now gets the rounded corners the author intended (the only visual change).
+- **Vercel adapter 11:** its `/_astro/(.*)` header failed validation because the global `path-to-regexp: '>=8.4.0'` override forced v8 onto `@vercel/routing-utils`, which needs v6. Added a scoped override, `'@vercel/routing-utils>path-to-regexp': 6.3.0` (in both `pnpm-workspace.yaml` and `package.json`).
+- Still failing to compile but unreachable (nothing imports them), so the build skips them: 86 trademark SVG components under `src/assets/visuals-as-components/` and the unused `src/components/CompareCardRow.astro` (`<styl>` typo). Delete them once the trademark-ribbons intention is captured.
 
 ## pnpm 12 note
 

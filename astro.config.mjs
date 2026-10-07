@@ -15,6 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
+import { unified } from '@astrojs/markdown-remark';
 
 // Debug log environment
 console.log('Environment in astro.config.mjs:', {
@@ -40,47 +41,50 @@ if (!fs.existsSync(contentBasePath)) {
 
 export default defineConfig({
   site: 'https://lossless.group', // Add your production URL here
+  // Astro 7: keep v6 whitespace handling (the new 'jsx' default strips whitespace between inline elements)
+  compressHTML: true,
   markdown: {
     syntaxHighlight: false, // Disable Astro's built-in Shiki - use our singleton utility instead
-    // Custom syntax highlighting handled by our singleton utility
-    // NOTE: Remark plugins have been moved to layout-level processing for better control
-    // Global remark plugins are no longer used - processing happens in OneArticle.astro, etc.
-    remarkPlugins: [
-      // Removed: All remark plugins moved to layout-level processing
-    ],
-    remarkRehype: {
-      allowDangerousHtml: true,
-      // If you have custom handlers, add them here (e.g., defListHastHandlers)
-      // handlers: defListHastHandlers,
-    },
-    // rehypePlugins array added to enable HTML transformations on Markdown
-    rehypePlugins: [
-      // rehypeRaw must come first to process raw HTML nodes in markdown
-      rehypeRaw,
-      // Add IDs to headings (Astro might do this by default via rehype-slug)
-      // If not, uncomment: import rehypeSlug from 'rehype-slug'; and add rehypeSlug here.
-      // Add anchor links to headings
-      [
-        rehypeAutolinkHeadings,
-        {
-          behavior: 'append', // append the link after the heading text
-          properties: {
-            className: ['header-anchor'], // for styling
-            'aria-hidden': 'true',
-            tabIndex: -1
-          },
-          content: { // Display a '#' as the link content
-            type: 'element',
-            tagName: 'span',
-            properties: { className: ['header-anchor-symbol'] },
-            children: [{ type: 'text', value: '#' }]
-          }
-        }
+    // Astro 7: stay on the unified (remark/rehype) pipeline instead of the new default, Sätteri,
+    // so the rehype plugins below keep working and rendered output doesn't change.
+    processor: unified({
+      remarkPlugins: [
+        // Removed: All remark plugins moved to layout-level processing
       ],
-      // Mermaid diagrams are rendered client-side via CDN in MermaidChart.astro
-      // rehype-mermaid (server-side) was removed - it never processed blocks anyway
-      // since AstroMarkdown.astro intercepts mermaid code blocks before rehype runs
-    ]
+      remarkRehype: {
+        allowDangerousHtml: true,
+        // If you have custom handlers, add them here (e.g., defListHastHandlers)
+        // handlers: defListHastHandlers,
+      },
+      // rehypePlugins array added to enable HTML transformations on Markdown
+      rehypePlugins: [
+        // rehypeRaw must come first to process raw HTML nodes in markdown
+        rehypeRaw,
+        // Add IDs to headings (Astro might do this by default via rehype-slug)
+        // If not, uncomment: import rehypeSlug from 'rehype-slug'; and add rehypeSlug here.
+        // Add anchor links to headings
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: 'append', // append the link after the heading text
+            properties: {
+              className: ['header-anchor'], // for styling
+              'aria-hidden': 'true',
+              tabIndex: -1
+            },
+            content: { // Display a '#' as the link content
+              type: 'element',
+              tagName: 'span',
+              properties: { className: ['header-anchor-symbol'] },
+              children: [{ type: 'text', value: '#' }]
+            }
+          }
+        ],
+        // Mermaid diagrams are rendered client-side via CDN in MermaidChart.astro
+        // rehype-mermaid (server-side) was removed - it never processed blocks anyway
+        // since AstroMarkdown.astro intercepts mermaid code blocks before rehype runs
+      ]
+    }),
   },
   output: "static",
   adapter: vercel(),
@@ -100,9 +104,6 @@ export default defineConfig({
   ], // Shiki is the default highlighter for markdown/code blocks
   vite: {
     plugins: [tailwindcss()],
-    rollupOptions: {
-      external: ['astro:content/loaders']
-    },
     resolve: {
       alias: {
         '@basics': fileURLToPath(new URL('./src/components/basics', import.meta.url)),

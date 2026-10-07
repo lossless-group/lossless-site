@@ -10,7 +10,7 @@
 // Import content collection utilities
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Analytics from '@components/Analytics.astro';
 
 // Get the collection and slug from the URL parameters
@@ -43,7 +43,7 @@ try {
   
   if (entry) {
     // Get the rendered content if entry exists
-    const { Content } = await entry.render();
+    const { Content } = await render(entry);
     presentationContent = Content;
     
     // If the entry has a title in its data, use that
