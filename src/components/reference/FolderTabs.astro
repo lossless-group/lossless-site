@@ -1,0 +1,229 @@
+---
+/**
+ * FolderTabs.astro
+ *
+ * Two-level folder filter for a grid of collection entries.
+ *   Level 1: top-level folder (e.g. a content area), plus "All".
+ *   Level 2: sub-folders of the active level-1 tab (Organizations, Concepts, …), each with a count.
+ *
+ * Filters any element inside #{gridId} that carries data-area / data-type / data-words, and
+ * keeps a live "N pages · X words" total for whatever is visible. One applyFilter() owns all
+ * visibility (the pattern from Timeline.astro), so nothing else should toggle card display.
+ * Selections are mirrored to ?area=…&type=… so filtered views are linkable.
+ */
+
+export interface FolderTab {
+  id: string;
+  label: string;
+  count: number;
+}
+
+interface Props {
+  gridId: string;
+  levelOne: FolderTab[];                       // excludes "All"; added here
+  levelTwo: Record<string, FolderTab[]>;       // keyed by level-1 id, plus "all" for cross-folder types
+  totalCount: number;
+  totalWords: number;
+  itemNoun?: string;                           // "pages"
+}
+
+const { gridId, levelOne, levelTwo, totalCount, totalWords, itemNoun = 'pages' } = Astro.props;
+
+const formatWords = (n: number) =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+---
+
+<div class="folder-tabs" data-folder-tabs data-grid-id={gridId}>
+  <p class="folder-tabs__total" aria-live="polite">
+    <span data-total-count>{totalCount.toLocaleString()}</span> {itemNoun} ·
+    <span data-total-words>{formatWords(totalWords)}</span> words
+  </p>
+
+  <nav class="tab-nav" role="tablist" aria-label="Folders">
+    <button class="tab-btn active" data-level="1" data-id="all" role="tab" aria-selected="true">
+      All <span class="count">{totalCount}</span>
+    </button>
+    {levelOne.map(tab => (
+      <button class="tab-btn" data-level="1" data-id={tab.id} role="tab" aria-selected="false">
+        {tab.label} <span class="count">{tab.count}</span>
+      </button>
+    ))}
+  </nav>
+
+  {Object.entries(levelTwo).map(([parentId, tabs]) => (
+    tabs.length > 0 && (
+      <nav
+        class="tab-nav tab-nav--sub"
+        role="tablist"
+        aria-label="Sub-folders"
+        data-parent={parentId}
+        hidden={parentId !== 'all'}
+      >
+        <button class="tab-btn tab-btn--sub active" data-level="2" data-id="all" role="tab" aria-selected="true">
+          Everything
+        </button>
+        {tabs.map(tab => (
+          <button class="tab-btn tab-btn--sub" data-level="2" data-id={tab.id} role="tab" aria-selected="false">
+            {tab.label} <span class="count">{tab.count}</span>
+          </button>
+        ))}
+      </nav>
+    )
+  ))}
+</div>
+
+<script>
+  const formatWords = (n: number) =>
+    n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+
+  function init(root: HTMLElement) {
+    const grid = document.getElementById(root.dataset.gridId || '');
+    if (!grid) return;
+    const items = Array.from(grid.querySelectorAll<HTMLElement>('[data-area]'));
+    const emptyState = grid.parentElement?.querySelector<HTMLElement>('[data-empty-state]');
+    const countEl = root.querySelector<HTMLElement>('[data-total-count]');
+    const wordsEl = root.querySelector<HTMLElement>('[data-total-words]');
+    const subNavs = Array.from(root.querySelectorAll<HTMLElement>('nav[data-parent]'));
+
+    const state = { area: 'all', type: 'all' };
+
+    function setActive(buttons: HTMLElement[], id: string) {
+      buttons.forEach(b => {
+        const on = b.dataset.id === id;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', String(on));
+      });
+    }
+
+    function applyFilter() {
+      let count = 0;
+      let words = 0;
+      for (const el of items) {
+        const show =
+          (state.area === 'all' || el.dataset.area === state.area) &&
+          (state.type === 'all' || el.dataset.type === state.type);
+        el.hidden = !show;
+        if (show) {
+          count++;
+          words += Number(el.dataset.words || 0);
+        }
+      }
+      if (countEl) countEl.textContent = count.toLocaleString();
+      if (wordsEl) wordsEl.textContent = formatWords(words);
+      if (emptyState) emptyState.hidden = count !== 0;
+
+      // Level-1 buttons
+      setActive(Array.from(root.querySelectorAll<HTMLElement>('.tab-btn[data-level="1"]')), state.area);
+      // Show only the sub-row for the active level-1 tab
+      subNavs.forEach(nav => {
+        const visible = nav.dataset.parent === state.area;
+        nav.hidden = !visible;
+        if (visible) setActive(Array.from(nav.querySelectorAll<HTMLElement>('.tab-btn')), state.type);
+      });
+
+      const url = new URL(window.location.href);
+      state.area === 'all' ? url.searchParams.delete('area') : url.searchParams.set('area', state.area);
+      state.type === 'all' ? url.searchParams.delete('type') : url.searchParams.set('type', state.type);
+      history.replaceState(null, '', url);
+    }
+
+    root.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('.tab-btn');
+      if (!btn) return;
+      if (btn.dataset.level === '1') {
+        state.area = btn.dataset.id || 'all';
+        state.type = 'all';
+      } else {
+        state.type = btn.dataset.id || 'all';
+      }
+      applyFilter();
+    });
+
+    // Restore from the URL, ignoring values that don't match a tab
+    const params = new URLSearchParams(window.location.search);
+    const area = params.get('area');
+    const type = params.get('type');
+    if (area && root.querySelector(`.tab-btn[data-level="1"][data-id="${CSS.escape(area)}"]`)) state.area = area;
+    const subNav = subNavs.find(n => n.dataset.parent === state.area);
+    if (type && subNav?.querySelector(`.tab-btn[data-id="${CSS.escape(type)}"]`)) state.type = type;
+    applyFilter();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-folder-tabs]').forEach(init);
+</script>
+
+<style>
+  .folder-tabs {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
+  }
+
+  .folder-tabs__total {
+    font-size: 0.95rem;
+    color: var(--clr-body, rgba(255, 255, 255, 0.8));
+    margin: 0 0 1rem 0;
+  }
+
+  .tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tab-nav--sub {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
+  }
+
+  .tab-nav[hidden] {
+    display: none;
+  }
+
+  .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--clr-lossless-primary-dark, #19141D);
+    border: 1px solid var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
+    border-radius: 0.5rem;
+    color: var(--clr-body, rgba(255, 255, 255, 0.8));
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn--sub {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .tab-btn:hover {
+    background: var(--clr-lossless-primary-glass, rgba(255, 255, 255, 0.05));
+    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .tab-btn.active {
+    background: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+    color: var(--clr-lossless-primary-dark, #19141D);
+    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+
+  .tab-btn .count {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .tab-btn.active .count {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 480px) {
+    .tab-btn { padding: 0.375rem 0.75rem; font-size: 0.8rem; }
+  }
+</style>

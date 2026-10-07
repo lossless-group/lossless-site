@@ -234,10 +234,15 @@ const hasArticleInfo =
       {typeof effectiveHeading === 'string' && effectiveHeading.trim() !== '' && (() => {
         const titleId = slugify(effectiveHeading);
         return (
+          <>
           <h1 id={titleId} class="page-main-title-display">
               <span class="title-text">{effectiveHeading}</span>
               <CopyLinkButton id={titleId} label={effectiveHeading} />
           </h1>
+          {typeof originalData.subtitle === 'string' && originalData.subtitle.trim() !== '' && (
+            <p class="page-main-subtitle">{originalData.subtitle}</p>
+          )}
+          </>
         );
       })()}
 
@@ -599,6 +604,13 @@ const hasArticleInfo =
 
   
 
+
+.page-main-subtitle {
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.15rem;
+  color: var(--white--pure--70p, hsla(0, 0%, 100%, .7));
+}
 
 .page-main-title-display {
   display: inline-flex;

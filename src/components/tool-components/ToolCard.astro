@@ -48,6 +48,8 @@ interface Props {
   filePath?: string; // Allow filePath to be passed as a prop
   small?: boolean;
   slug?: string;
+  detailHref?: string; // Where "Our Thoughts" links; defaults to /toolkit/<slug>
+  keepNameCase?: boolean; // Show site_name as given instead of proper-casing it ("ABB Group", not "Abb Group")
 }
 
 
@@ -72,6 +74,8 @@ const {
   filePath,
   small = false,
   slug: directSlug,
+  detailHref,
+  keepNameCase = false,
   // Allow all other HTML attributes like class, data-*, aria-*
   ...rest
 } = Astro.props;
@@ -117,7 +121,8 @@ const safeTags = tags || [];
 const effectiveFilename = filename || (filePath ? filePath.split('/').pop()?.replace(/\.md$/, '') : undefined);
 
 // Get the effective site name using the utility function
-const effectiveSiteName = toProperCase(getEffectiveSiteName(site_name, effectiveFilename, url));
+const rawSiteName = getEffectiveSiteName(site_name, effectiveFilename, url);
+const effectiveSiteName = keepNameCase ? rawSiteName : toProperCase(rawSiteName);
 
 // Get the effective title with fallback order: zinger → title → og_title
 const effectiveTitle = zinger || title || og_title || "";
@@ -170,7 +175,7 @@ function generateToolkitPath(): string {
 }
 
 // Get the toolkit path for this tool
-const toolkitPath = generateToolkitPath();
+const toolkitPath = detailHref || generateToolkitPath();
 
 ---
 

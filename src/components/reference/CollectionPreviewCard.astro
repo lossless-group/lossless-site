@@ -1,0 +1,78 @@
+---
+/**
+ * CollectionPreviewCard.astro
+ *
+ * Generic preview card for any collection entry: title link, an optional meta line,
+ * word count (shown above the same 90-word threshold as Concept/Vocabulary cards),
+ * and version (at_semantic_version). Generalized from ConceptPreviewCard so new index
+ * pages don't hand-roll another card.
+ */
+import WordCountDisplay from '@components/basics/WordCountDisplay.astro';
+
+interface Props {
+  href: string;
+  title: string;
+  subtitle?: string;    // e.g. an organization's og_title tagline, shown under the name
+  meta?: string;        // e.g. "AI Factories Datacenters · Concepts"
+  wordCount?: number;
+  version?: string;     // at_semantic_version
+}
+
+const { href, title, subtitle, meta, wordCount = 0, version } = Astro.props;
+---
+
+<div class="collection-card group">
+  <div class="flex justify-between items-start gap-3">
+    <h3 class="collection-card__title">
+      <a href={href} class="collection-card__link">{title}</a>
+    </h3>
+    <div class="flex flex-col items-end space-y-0.5 shrink-0">
+      {wordCount > 90 && (
+        <div class="text-xs text-gray-400">
+          <WordCountDisplay count={wordCount} className="text-gray-400" showIcon={false} />
+        </div>
+      )}
+      {version && (
+        <div class="text-[0.7rem] text-gray-500 opacity-80">{version}</div>
+      )}
+    </div>
+  </div>
+  {subtitle && <div class="collection-card__subtitle">{subtitle}</div>}
+  {meta && <div class="collection-card__meta">{meta}</div>}
+</div>
+
+<style>
+  .collection-card {
+    background-color: var(--clr-lossless-primary-dark, #19141D);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    height: 100%;
+    transition: background-color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out,
+                transform 0.2s ease-in-out;
+  }
+  .collection-card__title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+  }
+  .collection-card__link {
+    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
+  }
+  .collection-card__subtitle {
+    font-size: 0.8rem;
+    color: var(--white--pure--70p, hsla(0, 0%, 100%, .7));
+    margin-bottom: 0.25rem;
+  }
+  .collection-card__meta {
+    font-size: 0.75rem;
+    color: var(--white--pure--40p, rgba(255, 255, 255, 0.4));
+  }
+  .collection-card:hover {
+    background-color: #2d2730;
+    border-color: var(--clr-lossless-accent--brightest);
+    transform: translateY(-2px);
+  }
+</style>

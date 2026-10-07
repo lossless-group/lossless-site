@@ -1,42 +1,20 @@
 ---
 /**
  * /content-areas/[...slug].astro — Dynamic route for the content-areas collection.
- * Mirrors /organizations/[...slug].astro: no frontmatter requirements, title fallback chain,
- * preserved folder structure in URLs (/content-areas/<area>/<type>/<entry>).
+ * No frontmatter requirements; preserved folder structure in URLs (/content-areas/<area>/<type>/<entry>).
+ * Title is title → filename. og_title is never the title: on organizations it renders as a
+ * subtitle under the name.
  */
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
 import { getReferenceSlug } from '@utils/slugify';
+import { originalSegments, getDisplayTitle } from '@utils/collectionEntryDisplay';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  // Recover original casing from the file path ("AI-Factories-Datacenters/Organizations/ABB Group"),
-  // since entry ids are lowercased. Falls back to the id if filePath isn't available.
-  function originalSegments(entry: any): string[] {
-    const fp = String(entry.filePath || '').replace(/\\/g, '/');
-    const marker = 'content-areas/';
-    const i = fp.lastIndexOf(marker);
-    const rel = i >= 0 ? fp.slice(i + marker.length) : entry.id;
-    return rel.replace(/\.md$/i, '').split('/');
-  }
-  function getDisplayTitle(entry: any): string {
-    if (entry.data?.title && String(entry.data.title).trim()) {
-      return String(entry.data.title).trim();
-    }
-    if (entry.data?.og_title && String(entry.data.og_title).trim()) {
-      return String(entry.data.og_title).trim();
-    }
-    const parts = originalSegments(entry);
-    const filename = parts.pop() || entry.id;
-    // An area's README is its landing page
-    if (filename.toLowerCase() === 'readme' && parts.length > 0) {
-      return `${parts[parts.length - 1].replace(/-/g, ' ')} Overview`;
-    }
-    return filename;
-  }
   const areaEntries = await getCollection('content-areas');
   const paths: any[] = [];
   const errors: { id: string; error: string }[] = [];
@@ -46,8 +24,13 @@ export async function getStaticPaths() {
   for (const entry of areaEntries) {
     try {
       const slug = getReferenceSlug(entry.id);
-      const title = getDisplayTitle(entry);
+      // og_title is a tagline, not a name: drop it from the title chain
+      const title = getDisplayTitle({ ...entry, data: { ...entry.data, og_title: undefined } }, 'content-areas');
       const folder = entry.id.includes('/') ? entry.id.split('/')[0] : 'root';
+      const segs = originalSegments(entry, 'content-areas');
+      const isOrganization = segs.length > 2 && segs[1].toLowerCase() === 'organizations';
+      const ogTitle = typeof entry.data?.og_title === 'string' ? entry.data.og_title.trim() : '';
+      const subtitle = isOrganization && ogTitle && ogTitle !== title ? ogTitle : undefined;
 
       paths.push({
         params: { slug },
@@ -59,7 +42,8 @@ export async function getStaticPaths() {
               title,
             }
           },
-          folder
+          folder,
+          subtitle
         }
       });
     } catch (error) {
@@ -89,16 +73,18 @@ interface Props {
     };
   };
   folder: string;
+  subtitle?: string;
 }
 
-const { entry, folder } = Astro.props;
+const { entry, folder, subtitle } = Astro.props;
 
 const contentData = {
   path: Astro.url.pathname,
   id: entry.id,
   title: entry.data.title,
   contentType: 'content-areas',
-  folder
+  folder,
+  subtitle
 };
 ---
 
