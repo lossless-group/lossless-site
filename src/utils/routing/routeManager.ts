@@ -10,6 +10,9 @@ interface RouteMapping {
   routePath: string;    // The corresponding web route
   baseDir?: string;     // Optional base directory for content resolution
   collectionName?: string; // Optional explicit collection name
+  // The collection defines its own generateId, so a frontmatter `slug:` does NOT become the URL.
+  // (Collections without generateId get Astro's default: frontmatter slug → entry id → URL.)
+  ignoresFrontmatterSlug?: boolean;
 }
 
 // Define the default route mappings
@@ -67,7 +70,8 @@ const defaultRouteMappings: RouteMapping[] = [
   },
   {
     contentPath: 'vertical-toolkits',
-    routePath: 'toolkit/vertical'
+    routePath: 'toolkit/vertical',
+    ignoresFrontmatterSlug: true
   },
   {
     contentPath: 'essays',
@@ -75,7 +79,8 @@ const defaultRouteMappings: RouteMapping[] = [
   },
   {
     contentPath: 'client-content',
-    routePath: 'client'
+    routePath: 'client',
+    ignoresFrontmatterSlug: true
   },
   {
     contentPath: 'slides',
@@ -83,11 +88,23 @@ const defaultRouteMappings: RouteMapping[] = [
   },
   {
     contentPath: 'projects',
-    routePath: 'projects'
+    routePath: 'projects',
+    ignoresFrontmatterSlug: true
   },
   {
     contentPath: 'sources',
-    routePath: 'sources'
+    routePath: 'sources',
+    ignoresFrontmatterSlug: true
+  },
+  {
+    contentPath: 'organizations',
+    routePath: 'organizations',
+    ignoresFrontmatterSlug: true
+  },
+  {
+    contentPath: 'content-areas',
+    routePath: 'content-areas',
+    ignoresFrontmatterSlug: true
   },
   // {
   //   contentPath: 'content/visuals',
@@ -110,7 +127,7 @@ let customRouteMappings: RouteMapping[] = [];
  * @returns The transformed web route (e.g., "/more-about/software-development")
  */
 
-import { existsSync, readdirSync, statSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import path from 'path';
 import { contentBasePath, DEBUG_BACKLINKS } from '../envUtils';
 import { getReferenceSlug, slugify } from '../slugify';
@@ -148,7 +165,57 @@ function isValidContentFile(contentPath: string): boolean {
   return exists;
 }
 
-function resolveWithMappings(normalizedPath: string): string {
+// ---------------------------------------------------------------------------
+// Locate the actual file behind a wikilink target, ignoring case and slug differences
+// ("Tooling/AI-Toolkit/AI Infrastructure/Vertiv" → tooling/AI-Toolkit/AI Infrastructure/Vertiv.md).
+// existsSync alone is case-insensitive on macOS but case-sensitive on Vercel's Linux builds.
+// ---------------------------------------------------------------------------
+const dirListingCache = new Map<string, string[]>();
+function listDir(dir: string): string[] {
+  if (!dirListingCache.has(dir)) {
+    let entries: string[] = [];
+    try { entries = readdirSync(dir); } catch { entries = []; }
+    dirListingCache.set(dir, entries);
+  }
+  return dirListingCache.get(dir)!;
+}
+
+function findContentFile(relPath: string): string | null {
+  const segments = relPath.replace(/\\+$/, '').replace(/\.md$/i, '').split('/').filter(Boolean);
+  if (segments.length === 0) return null;
+  let current = contentBasePath;
+  for (let i = 0; i < segments.length; i++) {
+    const isLast = i === segments.length - 1;
+    const wanted = segments[i];
+    const entries = listDir(current);
+    const match = entries.find(e => {
+      const name = isLast ? e.replace(/\.md$/i, '') : e;
+      if (isLast && !e.toLowerCase().endsWith('.md')) return false;
+      return name === wanted || name.toLowerCase() === wanted.toLowerCase() || slugify(name) === slugify(wanted);
+    });
+    if (!match) return null;
+    current = path.join(current, match);
+  }
+  return current;
+}
+
+const frontmatterSlugCache = new Map<string, string | null>();
+function readFrontmatterSlug(fullPath: string | null): string | null {
+  if (!fullPath) return null;
+  if (!frontmatterSlugCache.has(fullPath)) {
+    let slug: string | null = null;
+    try {
+      const head = readFileSync(fullPath, 'utf8').slice(0, 4000);
+      const fm = head.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      const m = fm?.[1].match(/^slug:\s*["']?([^"'\r\n]+?)["']?\s*$/m);
+      slug = m ? m[1].trim() : null;
+    } catch { slug = null; }
+    frontmatterSlugCache.set(fullPath, slug);
+  }
+  return frontmatterSlugCache.get(fullPath)!;
+}
+
+function resolveWithMappings(normalizedPath: string, fileSlug?: string | null): string {
   if (DEBUG_BACKLINKS) {
     console.log("[routeManager] Found path", normalizedPath)
   }
@@ -186,7 +253,12 @@ function resolveWithMappings(normalizedPath: string): string {
         : '';
     }
     
-    return `/${mapping.routePath}${relativePath ? `/${relativePath}` : ''}`;
+    // Collections without a custom generateId publish at their frontmatter slug
+    if (fileSlug && !mapping.ignoresFrontmatterSlug) {
+      return `/${mapping.routePath}/${slugify(fileSlug)}`;
+    }
+    const routeRelative = relativePath ? getReferenceSlug(relativePath) : '';
+    return `/${mapping.routePath}${routeRelative ? `/${routeRelative}` : ''}`;
   }
 
   // Return 404 page with the attempted path
@@ -271,7 +343,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
     if (DEBUG_BACKLINKS) {
       console.log("[routeManager] Full path detected:", normalizedInput);
     }
-    const result = resolveWithMappings(normalizedInput);
+    const result = resolveWithMappings(normalizedInput, readFrontmatterSlug(findContentFile(input)));
     routeCache.set(cacheKey, result);
     return result;
   }
@@ -293,7 +365,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
       console.log('[routeManager] Priority check (raw):', candidateRaw);
     }
     if (isValidContentFile(candidateRaw)) {
-      const result = resolveWithMappings(candidateRaw);
+      const result = resolveWithMappings(candidateRaw, readFrontmatterSlug(findContentFile(candidateRaw)));
       routeCache.set(cacheKey, result);
       return result;
     }
@@ -303,7 +375,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
       console.log('[routeManager] Priority check (slug):', candidateSlug);
     }
     if (isValidContentFile(candidateSlug)) {
-      const result = resolveWithMappings(candidateSlug);
+      const result = resolveWithMappings(candidateSlug, readFrontmatterSlug(findContentFile(candidateSlug)));
       routeCache.set(cacheKey, result);
       return result;
     }
@@ -319,7 +391,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
       }
 
       if (isValidContentFile(candidate)) {
-        const result = resolveWithMappings(candidate);
+        const result = resolveWithMappings(candidate, readFrontmatterSlug(findContentFile(candidate)));
         if (DEBUG_BACKLINKS) {
           console.log("[routeManager] Found with baseDir, resolved to:", result);
         }
@@ -338,7 +410,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
     }
 
     if (isValidContentFile(candidate)) {
-      const result = resolveWithMappings(candidate);
+      const result = resolveWithMappings(candidate, readFrontmatterSlug(findContentFile(candidate)));
       if (DEBUG_BACKLINKS) {
         console.log("[routeManager] Found without baseDir, resolved to:", result);
       }

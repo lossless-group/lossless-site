@@ -84,7 +84,8 @@ cmd_promote() {
       exit 1
     fi
   done
-  git -C "$repo" push origin development:main development:master
+  # Push exactly what was checked (origin/development), never the local branch, which may hold unpushed commits
+  git -C "$repo" push origin refs/remotes/origin/development:refs/heads/main refs/remotes/origin/development:refs/heads/master
 }
 
 case "${1:-status}" in

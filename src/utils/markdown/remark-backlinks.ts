@@ -63,6 +63,13 @@ export default function remarkBacklinks() {
             console.log(`  ↳ Converting to link: [[${path}]] → ${transformedPath} → ${slugifiedUrl}`);
           }
           
+          // No page exists for this target yet (an unwritten note): render the words, not a link to /404
+          if (transformedPath === '/404') {
+            newNodes.push({ type: 'text', value: finalDisplayText });
+            lastIndex = startIndex + fullMatch.length;
+            return;
+          }
+
           // Create a standard MDAST link node instead of a custom backLink node
           newNodes.push({
             type: 'link',
