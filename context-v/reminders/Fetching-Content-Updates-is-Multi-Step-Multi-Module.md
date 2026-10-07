@@ -10,7 +10,7 @@ authors:
   - Michael Staton
 augmented_with:
   - Claude Code on Claude Opus 5.5
-at_semantic_version: 0.0.0.2
+at_semantic_version: 0.0.0.3
 status: Active
 site_uuid: 84163924-018b-4ae8-b5d9-047a827e73c8
 hex_code: o62vdd
@@ -53,7 +53,20 @@ The mechanical steps are scripted. Commits stay manual, because the script never
 cd lossless-monorepo/site
 scripts/content-sync.sh                    # status: every repo in the chain (branch, dirty, ahead/behind, dev==main==master)
 scripts/content-sync.sh pull               # step 4: fast-forward src/generated-content + content-areas
-scripts/content-sync.sh promote <repo>     # step 3: FF origin/main + origin/master to origin/development, refuses otherwise
+scripts/content-sync.sh promote <path>     # step 3: FF origin/main + origin/master to origin/development, refuses otherwise
+```
+
+`promote` takes a **filesystem path**, not a repo name. From `site/`, the whole chain is:
+
+```bash
+scripts/content-sync.sh                                   # status
+# 1–2. commit + push by hand: content/content-areas, then content/
+scripts/content-sync.sh promote ../content/content-areas  # 3.
+scripts/content-sync.sh promote ../content                # 3.
+scripts/content-sync.sh pull                              # 4.
+git add src/generated-content && git commit && git push origin development   # 5.
+# wait for the Vercel preview of that commit to pass, then:
+scripts/content-sync.sh promote .                         # 5. → production
 ```
 
 Start and finish with `status`. Every line should read `clean` and `in parity`.
