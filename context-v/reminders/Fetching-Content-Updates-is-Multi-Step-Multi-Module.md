@@ -10,7 +10,7 @@ authors:
   - Michael Staton
 augmented_with:
   - Claude Code on Claude Opus 5.5
-at_semantic_version: 0.0.0.1
+at_semantic_version: 0.0.0.2
 status: Active
 site_uuid: 84163924-018b-4ae8-b5d9-047a827e73c8
 hex_code: o62vdd
@@ -44,6 +44,19 @@ lossless-monorepo/site/                    lossless-site repo
 ```
 
 A commit only reaches the website once every level above it has recorded the new pointer and `master` has it.
+
+## Shortcut: `scripts/content-sync.sh`
+
+The mechanical steps are scripted. Commits stay manual, because the script never runs `git commit`.
+
+```bash
+cd lossless-monorepo/site
+scripts/content-sync.sh                    # status: every repo in the chain (branch, dirty, ahead/behind, dev==main==master)
+scripts/content-sync.sh pull               # step 4: fast-forward src/generated-content + content-areas
+scripts/content-sync.sh promote <repo>     # step 3: FF origin/main + origin/master to origin/development, refuses otherwise
+```
+
+Start and finish with `status`. Every line should read `clean` and `in parity`.
 
 ## The flow
 
