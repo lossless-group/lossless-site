@@ -17,6 +17,7 @@ interface Props {
   content: Root;
   articleHeading?: string;
   includeToC?: boolean; // Optional parameter to include/exclude Table of Contents (default: true)
+  showTitle?: boolean; // Render the page title (default: true)
   includeInfoSidebar?: boolean; // Optional parameter to include/exclude Info Sidebar (default: true)
   data?: {
     path: string;
@@ -42,6 +43,7 @@ const {
   content, 
   includeToC = true, 
   includeInfoSidebar = true, 
+  showTitle = true, // false when the layout already renders the name (e.g. OneToolArticle's CompanyShowcase)
   data: originalData = { path: Astro.url.pathname } 
 } = Astro.props; // compiledContent removed
 const effectiveHeading = articleHeading?.trim() || originalData.title?.trim() || '';
@@ -152,6 +154,19 @@ const hProperties: Record<string, any> =
 
 const tocNode = children.find(child => child?.type === 'tableOfContents');
 
+// Drop the body's first H1 when it just repeats the page title (many files open with "# <Name>").
+// The page title above already renders it, with the same anchor id, so ToC links still resolve.
+const nodeText = (node: any): string =>
+  typeof node?.value === 'string' ? node.value
+  : Array.isArray(node?.children) ? node.children.map(nodeText).join('')
+  : '';
+const normalizeHeading = (text: string) => text.toLowerCase().replace(/\s+/g, ' ').trim();
+const firstH1 = children.find(child => child?.type === 'heading' && child?.depth === 1);
+const repeatsTitle =
+  !!firstH1 && effectiveHeading.trim() !== '' &&
+  normalizeHeading(nodeText(firstH1)) === normalizeHeading(effectiveHeading);
+const bodyChildren = children.filter(child => child?.type !== 'tableOfContents' && !(repeatsTitle && child === firstH1));
+
 
 // =============================
 // Comprehensive comments for content rendering
@@ -231,7 +246,7 @@ const hasArticleInfo =
     <article class="prose main-content">
       {/* Render the main page title if provided (not as an H1 to avoid ToC issues) */}
       {/* Render the main page title with share icon if effectiveHeading is provided */}
-      {typeof effectiveHeading === 'string' && effectiveHeading.trim() !== '' && (() => {
+      {showTitle && typeof effectiveHeading === 'string' && effectiveHeading.trim() !== '' && (() => {
         const titleId = slugify(effectiveHeading);
         return (
           <>
@@ -249,7 +264,7 @@ const hasArticleInfo =
       <AstroMarkdown 
         node={{
           type: 'root',
-          children: children.filter(child => child?.type !== 'tableOfContents'),
+          children: bodyChildren,
           data: { hProperties }
         }}         
         data={dataForMarkdown} 

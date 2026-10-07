@@ -91,6 +91,7 @@ const normalizedData = normalizeDataWithAuthors(data, markdownFile);
     content={transformedMdast}
     data={normalizedData}
     articleHeading={title} // Renamed prop to avoid conflict
+    showTitle={false} // CompanyShowcase above already renders the name
   >
     <slot />
   </Component>
