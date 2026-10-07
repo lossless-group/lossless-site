@@ -8,21 +8,12 @@ import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { getReferenceSlug, toProperCase } from '@utils/slugify';
+import { getReferenceSlug } from '@utils/slugify';
+import { getDisplayTitle } from '@utils/collectionEntryDisplay';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  function getDisplayTitle(entry: any): string {
-    if (entry.data?.title && String(entry.data.title).trim()) {
-      return String(entry.data.title).trim();
-    }
-    if (entry.data?.og_title && String(entry.data.og_title).trim()) {
-      return String(entry.data.og_title).trim();
-    }
-    const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
-    return toProperCase(filename);
-  }
   const orgEntries = await getCollection('organizations');
   const paths: any[] = [];
   const errors: { id: string; error: string }[] = [];
@@ -32,8 +23,11 @@ export async function getStaticPaths() {
   for (const entry of orgEntries) {
     try {
       const slug = getReferenceSlug(entry.id);
-      const title = getDisplayTitle(entry);
+      // Name is title → filename; og_title is a tagline and renders as the subtitle
+      const title = getDisplayTitle({ ...entry, data: { ...entry.data, og_title: undefined } }, 'organizations');
       const folder = entry.id.includes('/') ? entry.id.split('/')[0] : 'root';
+      const ogTitle = typeof entry.data?.og_title === 'string' ? entry.data.og_title.trim() : '';
+      const subtitle = ogTitle && ogTitle !== title ? ogTitle : undefined;
 
       paths.push({
         params: { slug },
@@ -45,7 +39,8 @@ export async function getStaticPaths() {
               title,
             }
           },
-          folder
+          folder,
+          subtitle
         }
       });
     } catch (error) {
@@ -75,16 +70,18 @@ interface Props {
     };
   };
   folder: string;
+  subtitle?: string;
 }
 
-const { entry, folder } = Astro.props;
+const { entry, folder, subtitle } = Astro.props;
 
 const contentData = {
   path: Astro.url.pathname,
   id: entry.id,
   title: entry.data.title,
   contentType: 'organizations',
-  folder
+  folder,
+  subtitle
 };
 ---
 

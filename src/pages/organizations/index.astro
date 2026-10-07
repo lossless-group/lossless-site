@@ -1,57 +1,65 @@
 ---
 /**
  * /organizations/index.astro — Index page for the organizations collection.
- * Mirrors /sources/index.astro: tabbed by top-level folder with client-side filtering.
+ *
+ * Same building blocks as /content-areas: FolderTabs for folder filtering with live counts and
+ * a word total; organizations with an og_image render as ToolCards (listed first, as in CardGrid),
+ * the rest as CollectionPreviewCard with word count and version.
+ * Name is title → filename; og_title is a tagline shown under the name, never the title.
  */
 import Layout from '@layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import { toProperCase, getReferenceSlug } from '@utils/slugify';
+import { getReferenceSlug } from '@utils/slugify';
+import { countWordsInMarkdown } from '@utils/fileWordCount';
+import { originalSegments, getDisplayTitle, folderLabel } from '@utils/collectionEntryDisplay';
+import FolderTabs, { type FolderTab } from '@components/reference/FolderTabs.astro';
+import CollectionPreviewCard from '@components/reference/CollectionPreviewCard.astro';
+import ToolCard from '@components/tool-components/ToolCard.astro';
+import WordCountDisplay from '@components/basics/WordCountDisplay.astro';
+
+const BASE = 'organizations';
 
 const orgEntries = await getCollection('organizations');
 
-function getDisplayTitle(entry: any): string {
-  if (entry.data?.title && String(entry.data.title).trim()) {
-    return String(entry.data.title).trim();
-  }
-  if (entry.data?.og_title && String(entry.data.og_title).trim()) {
-    return String(entry.data.og_title).trim();
-  }
-  const filename = entry.id.split('/').pop()?.replace(/\.md$/, '') || entry.id;
-  return toProperCase(filename);
-}
+const asString = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+const asTags = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((t): t is string => typeof t === 'string') : typeof v === 'string' ? [v] : [];
 
-const entriesByFolder = new Map<string, typeof orgEntries>();
-entriesByFolder.set('root', []);
-for (const entry of orgEntries) {
-  const parts = entry.id.split('/');
-  const folder = parts.length > 1 ? parts[0] : 'root';
-  if (!entriesByFolder.has(folder)) entriesByFolder.set(folder, []);
-  entriesByFolder.get(folder)!.push(entry);
-}
-
-const folders = Array.from(entriesByFolder.keys()).sort((a, b) => {
-  if (a === 'root') return 1;
-  if (b === 'root') return -1;
-  return a.localeCompare(b);
+const items = orgEntries.map(entry => {
+  const segs = originalSegments(entry, BASE);
+  const nested = segs.length > 1;
+  const title = getDisplayTitle({ ...entry, data: { ...entry.data, og_title: undefined } }, BASE);
+  const ogTitle = asString(entry.data?.og_title);
+  const ogImage = asString(entry.data?.og_image);
+  const rawVersion = entry.data?.at_semantic_version;
+  return {
+    entry,
+    folder: nested ? entry.id.split('/')[0] : 'root',
+    folderLabel: nested ? folderLabel(segs[0]) : '',
+    title,
+    subtitle: ogTitle && ogTitle !== title ? ogTitle : undefined,
+    href: `/organizations/${getReferenceSlug(entry.id)}`,
+    words: countWordsInMarkdown(entry.body || ''),
+    version: rawVersion != null && String(rawVersion).trim() ? String(rawVersion).trim() : undefined,
+    image: ogImage && /^https?:\/\//.test(ogImage) ? ogImage : undefined,
+  };
 });
 
-const processedEntries = orgEntries.map(entry => {
-  const parts = entry.id.split('/');
-  return {
-    id: entry.id,
-    slug: getReferenceSlug(entry.id),
-    displayTitle: getDisplayTitle(entry),
-    folder: parts.length > 1 ? parts[0] : 'root',
-    url: entry.data?.url,
-    tags: entry.data?.tags,
-  };
-}).sort((a, b) => a.displayTitle.localeCompare(b.displayTitle));
+// Image cards first (as in CardGrid), then by name
+items.sort((a, b) => Number(!!b.image) - Number(!!a.image) || a.title.localeCompare(b.title));
 
-const tabConfig = folders.map(folder => ({
-  id: folder,
-  label: folder === 'root' ? 'Uncategorized' : toProperCase(folder),
-  count: entriesByFolder.get(folder)?.length || 0
-}));
+const totalWords = items.reduce((sum, i) => sum + i.words, 0);
+
+// Folder tabs; files at the root get "Uncategorized", listed last
+const folderMap = new Map<string, FolderTab>();
+for (const i of items) {
+  const t = folderMap.get(i.folder) ?? { id: i.folder, label: i.folder === 'root' ? 'Uncategorized' : i.folderLabel, count: 0 };
+  t.count++;
+  folderMap.set(i.folder, t);
+}
+const levelOne = [...folderMap.values()].sort((a, b) =>
+  Number(a.id === 'root') - Number(b.id === 'root') || a.label.localeCompare(b.label)
+);
 ---
 
 <Layout
@@ -66,85 +74,66 @@ const tabConfig = folders.map(folder => ({
     <header class="orgs-header">
       <h1>Organizations</h1>
       <p class="description">
-        A collection of {orgEntries.length} companies, institutions, and other organizations we've gathered.
+        Companies, institutions, and other organizations we've gathered.
       </p>
     </header>
 
-    <nav class="tab-nav" role="tablist" aria-label="Organization categories">
-      <button
-        class="tab-btn active"
-        data-folder="all"
-        role="tab"
-        aria-selected="true"
-        aria-controls="orgs-grid"
-      >
-        All <span class="count">{orgEntries.length}</span>
-      </button>
-      {tabConfig.map(tab => (
-        <button
-          class="tab-btn"
-          data-folder={tab.id}
-          role="tab"
-          aria-selected="false"
-          aria-controls="orgs-grid"
-        >
-          {tab.label} <span class="count">{tab.count}</span>
-        </button>
-      ))}
-    </nav>
+    <FolderTabs
+      gridId="orgs-grid"
+      levelOne={levelOne}
+      levelTwo={{}}
+      totalCount={items.length}
+      totalWords={totalWords}
+      itemNoun="organizations"
+    />
 
-    <div id="orgs-grid" class="orgs-grid" role="tabpanel">
-      {processedEntries.map(entry => (
-        <article class="org-card" data-folder={entry.folder}>
-          <a href={`/organizations/${entry.slug}`} class="org-link">
-            <h3 class="org-title">{entry.displayTitle}</h3>
-            {entry.folder !== 'root' && (
-              <span class="org-folder">{toProperCase(entry.folder)}</span>
-            )}
-          </a>
-        </article>
+    <div id="orgs-grid" class="orgs-grid">
+      {items.map(item => (
+        <div class="orgs-item" data-area={item.folder} data-type="_root" data-words={item.words}>
+          {item.image ? (
+            <>
+              <ToolCard
+                id={item.entry.id}
+                url={asString(item.entry.data?.url)}
+                og_image={item.image}
+                site_name={item.title}
+                title={item.subtitle}
+                description={asString(item.entry.data?.description)}
+                og_description={asString(item.entry.data?.og_description)}
+                tags={asTags(item.entry.data?.tags)}
+                filename={item.title}
+                detailHref={item.href}
+                keepNameCase
+              />
+              {(item.words > 90 || item.version) && (
+                <div class="orgs-item__badges">
+                  <span>{item.folderLabel}</span>
+                  <span class="orgs-item__stats">
+                    {item.words > 90 && <WordCountDisplay count={item.words} className="text-gray-400" showIcon={false} />}
+                    {item.version && <span class="orgs-item__version">{item.version}</span>}
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <CollectionPreviewCard
+              href={item.href}
+              title={item.title}
+              subtitle={item.subtitle}
+              meta={item.folderLabel || undefined}
+              wordCount={item.words}
+              version={item.version}
+            />
+          )}
+        </div>
       ))}
     </div>
 
-    <div class="empty-state" style="display: none;">
+    <div class="empty-state" data-empty-state hidden>
       <p>No organizations found in this category.</p>
     </div>
   </div>
 </Layout>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const tabs = document.querySelectorAll('.tab-btn');
-    const cards = document.querySelectorAll('.org-card');
-    const emptyState = document.querySelector('.empty-state');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const folder = tab.getAttribute('data-folder');
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
-        });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-
-        let visibleCount = 0;
-        cards.forEach(card => {
-          const cardFolder = card.getAttribute('data-folder');
-          if (folder === 'all' || cardFolder === folder) {
-            (card as HTMLElement).style.display = '';
-            visibleCount++;
-          } else {
-            (card as HTMLElement).style.display = 'none';
-          }
-        });
-        if (emptyState) {
-          (emptyState as HTMLElement).style.display = visibleCount === 0 ? 'block' : 'none';
-        }
-      });
-    });
-  });
-</script>
 
 <style>
   .orgs-container {
@@ -154,7 +143,7 @@ const tabConfig = folders.map(folder => ({
   }
 
   .orgs-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .orgs-header h1 {
@@ -170,89 +159,37 @@ const tabConfig = folders.map(folder => ({
     margin: 0;
   }
 
-  .tab-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
-  }
-
-  .tab-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--clr-lossless-primary-dark, #19141D);
-    border: 1px solid var(--clr-lossless-ui-btn-border, rgba(255, 255, 255, 0.1));
-    border-radius: 0.5rem;
-    color: var(--clr-body, rgba(255, 255, 255, 0.8));
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .tab-btn:hover {
-    background: var(--clr-lossless-primary-glass, rgba(255, 255, 255, 0.05));
-    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
-  }
-
-  .tab-btn.active {
-    background: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
-    color: var(--clr-lossless-primary-dark, #19141D);
-    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
-  }
-
-  .tab-btn .count {
-    font-size: 0.75rem;
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  .tab-btn.active .count {
-    background: rgba(0, 0, 0, 0.2);
-  }
-
   .orgs-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
+    align-items: start;
   }
 
-  .org-card {
-    background: var(--clr-lossless-primary-dark, #19141D);
-    border: 1px solid transparent;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
+  .orgs-item[hidden],
+  .empty-state[hidden] {
+    display: none;
   }
 
-  .org-card:hover {
-    background: #3a3a45;
-    border-color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
-    transform: translateY(-2px);
-  }
-
-  .org-link {
-    display: block;
-    padding: 1rem;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .org-title {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--clr-lossless-accent--brightest, rgb(4, 229, 229));
-    margin: 0 0 0.25rem 0;
-    line-height: 1.4;
-  }
-
-  .org-folder {
+  .orgs-item__badges {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    padding: 0 0.25rem;
     font-size: 0.75rem;
     color: var(--white--pure--40p, rgba(255, 255, 255, 0.4));
+  }
+
+  .orgs-item__stats {
+    display: inline-flex;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .orgs-item__version {
+    font-size: 0.7rem;
+    opacity: 0.8;
   }
 
   .empty-state {
@@ -264,13 +201,6 @@ const tabConfig = folders.map(folder => ({
   @media (max-width: 768px) {
     .orgs-container { padding: 1rem; }
     .orgs-header h1 { font-size: 2rem; }
-    .tab-nav { gap: 0.375rem; }
-    .tab-btn { padding: 0.375rem 0.75rem; font-size: 0.8rem; }
     .orgs-grid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 480px) {
-    .tab-nav { flex-direction: column; }
-    .tab-btn { width: 100%; justify-content: space-between; }
   }
 </style>
