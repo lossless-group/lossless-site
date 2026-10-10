@@ -23,6 +23,7 @@ MONO="$(cd "$SITE/.." && pwd)"
 CHAIN=(
   "$MONO/content/content-areas"
   "$MONO/content/projects/Water-Template-CE"
+  "$MONO/content/client-content"
   "$MONO/content"
   "$SITE/src/generated-content/content-areas"
   "$SITE/src/generated-content"
@@ -58,7 +59,9 @@ pull_one() {
   if [ "$(git -C "$repo" branch --show-current)" != "development" ]; then
     git -C "$repo" switch development
   fi
-  git -C "$repo" pull --ff-only origin development
+  # No submodule recursion: the site leaves private submodules (client-content)
+  # uninitialized, and on-demand fetch into them aborts the pull.
+  git -C "$repo" pull --ff-only --no-recurse-submodules origin development
 }
 
 cmd_pull() {

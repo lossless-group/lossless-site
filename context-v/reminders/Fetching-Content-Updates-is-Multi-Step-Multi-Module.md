@@ -3,14 +3,14 @@ title: "Fetching Content Updates is Multi-Step, Multi-Module"
 lede: "New content reaches lossless.group only after it moves through three repo levels and three branches. Skip a step and the site serves stale content."
 publish: true
 date_created: 2026-10-06
-date_modified: 2026-10-06
+date_modified: 2026-10-09
 date_authored_initial_draft: 2026-10-06
 date_authored_current_draft: 2026-10-06
 authors:
   - Michael Staton
 augmented_with:
   - Claude Code on Claude Opus 5.5
-at_semantic_version: 0.0.0.3
+at_semantic_version: 0.0.0.4
 status: Active
 site_uuid: 84163924-018b-4ae8-b5d9-047a827e73c8
 hex_code: o62vdd
@@ -35,11 +35,13 @@ Content is authored in one place and rendered from another, and each hop is a se
 ```
 lossless-monorepo/content/                 lossless-content repo (authoring copy)
 ├── content-areas/                         submodule → content-areas repo
+├── client-content/                        submodule → lossless-client-content repo (PRIVATE)
 └── projects/Water-Template-CE/            submodule → water-foundation-ce repo
 
 lossless-monorepo/site/                    lossless-site repo
 └── src/generated-content/                 submodule → lossless-content repo (the SAME repo as content/)
     ├── content-areas/                     nested submodule → content-areas repo
+    ├── client-content/                    nested submodule (private; never initialized in the site copy)
     └── projects/Water-Template-CE/        nested submodule (not initialized in the site copy)
 ```
 
@@ -136,6 +138,7 @@ git push origin development
 - **Production builds from `master`.** A push to `development` produces a Vercel **preview** only. lossless.group doesn't change until `site/master` moves.
 - **Vercel clones the site's submodules from their remotes.** Anything unpushed at any level can't be fetched at build time. The `prebuild` script also runs a non-fatal `submodule update --init content-areas` inside `generated-content`. If that fails, `/content-areas` builds empty rather than failing.
 - **`site/src/generated-content` is a separate clone of `lossless-content`.** Pushing from `content/` does nothing to it until it's pulled.
+- **`client-content` is private and stays uninitialized in the site's copy.** Moved out of the public repo on 2026-10-09, so `/client/*` builds empty. `content-sync.sh pull` uses `--no-recurse-submodules`, because an on-demand fetch into this submodule aborts the pull.
 - **`projects/Water-Template-CE` is not initialized in the site's copy.** The `projects` collection globs `projects/**`, so initializing it would start rendering that repo's markdown. Make that a deliberate decision, not a side effect of this flow.
 
 ## Checks before calling it done
