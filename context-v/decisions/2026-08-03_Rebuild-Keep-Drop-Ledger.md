@@ -16,6 +16,7 @@ tags:
   - Knowledge-Graph
   - LFM
 status: Open
+type: Decisions
 ---
 
 # Rebuild Keep/Drop Ledger — `site` → `site-next/`

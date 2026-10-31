@@ -27,6 +27,7 @@ summary: >-
   preview, because production builds from `master`. Applies whenever content,
   content-areas, or any other content submodule changes and the website should
   reflect it.
+type: Reminders
 ---
 # Fetching Content Updates is Multi-Step, Multi-Module
 

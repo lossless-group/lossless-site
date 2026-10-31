@@ -25,6 +25,7 @@ summary: >-
   Astro 6 → 7, are now allowed on the current site under a "rendering-neutral"
   constraint. The ground-up rebuild into site-next/ is not cancelled, only
   not scheduled. Governs the work in the Upgrade-All-Dependencies-for-Faster-Builds plan.
+type: Decisions
 ---
 # Amend "Untouched": Allow a Scoped Dependency Refresh of the Current Site
 

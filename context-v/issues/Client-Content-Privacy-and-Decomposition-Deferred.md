@@ -30,6 +30,7 @@ summary: >-
   while the rest of the tree is decomposed into small sites. Read alongside
   the Rebuild Keep/Drop Ledger and the Rethink on Client-Focused Landing Pages
   exploration before starting any of this work.
+type: Issues
 ---
 # Client Content Privacy and Site Decomposition, Deferred
 

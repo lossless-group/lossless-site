@@ -15,6 +15,7 @@ tags:
   - Design-System
   - Brand
 status: Retired
+type: Explorations
 ---
 
 # Abandoned Intention — The Tube Visual

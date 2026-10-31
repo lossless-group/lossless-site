@@ -15,6 +15,7 @@ tags:
   - Personalization
   - Auth
 status: Open
+type: Explorations
 ---
 
 # Rethink on Client-Focused Landing Pages

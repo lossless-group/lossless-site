@@ -15,6 +15,7 @@ tags:
   - LFM
   - Knowledge-Graph
 status: Active
+type: Handoffs
 ---
 
 # Handoff — `site` → `site-next/` rebuild kickoff

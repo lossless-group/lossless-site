@@ -29,6 +29,7 @@ summary: >-
   more-about/organizations can adopt later, not a fourth hand-rolled copy.
   Mind the rebuild ledger: anything extracted here should be shaped so it can
   survive into site-next.
+type: Plans
 ---
 # Content Areas Index: Nested Filters, Word Counts, and Shared Cards
 

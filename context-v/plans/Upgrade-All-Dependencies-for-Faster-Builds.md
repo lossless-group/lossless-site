@@ -27,6 +27,7 @@ summary: >-
   (patch/minor) is low-risk either way; tiers 2–3 need that decision amended.
   Sets a measured build-time baseline so the speed claim can be checked rather
   than assumed.
+type: Plans
 ---
 # Upgrade All Dependencies for Faster Builds
 
