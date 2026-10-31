@@ -15,6 +15,8 @@ tags:
   - Personalization
   - Auth
 status: Open
+site_uuid: 06e83a8f-9220-4268-9edb-3e58c396cc05
+hex_code: 104ddf
 type: Explorations
 ---
 

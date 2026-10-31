@@ -16,6 +16,8 @@ tags:
   - Knowledge-Graph
   - LFM
 status: Open
+site_uuid: 1e308562-c688-4168-9134-c7c6b946a330
+hex_code: tl9e33
 type: Decisions
 ---
 
