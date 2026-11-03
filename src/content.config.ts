@@ -1,11 +1,12 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
-import { glob } from 'astro/loaders';
+import { glob as globAll } from 'astro/loaders';
 import { join } from 'node:path';
 import { pathToFileURL } from 'url';
 
 // Import environment utilities
 import { contentBasePath } from './utils/envUtils.js';
+import { publishedGlob as glob } from './utils/publishedGlob';
 
 
 
@@ -52,7 +53,7 @@ const slidesCollection = defineCollection({
 });
 
 const clientRecommendationsCollection = defineCollection({
-  loader: glob({
+  loader: globAll({ // client portals decide their own visibility
     pattern: "**/Recommendations/**/*.{md,mdx}", // Include both .md and .mdx files
     base: resolveContentPath("client-content")
   }),
@@ -72,7 +73,7 @@ const clientRecommendationsCollection = defineCollection({
 
 
 const clientPortfoliosCollection = defineCollection({
-  loader: glob({
+  loader: globAll({ // client portals decide their own visibility
     pattern: "**/Portfolio/**/*.{md,mdx}", // Match any Portfolio directory at any depth
     base: resolveContentPath("client-content"),
     generateId: ({ entry }) => {
@@ -109,7 +110,7 @@ const clientPortfoliosCollection = defineCollection({
 });
 
 const clientPagesCollection = defineCollection({
-  loader: glob({
+  loader: globAll({ // client portals decide their own visibility
     pattern: "**/*.{md,mdx}", // Include both .md and .mdx files at client level
     base: resolveContentPath("client-content"),
     generateId: ({ entry }) => {

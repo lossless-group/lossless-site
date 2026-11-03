@@ -1,5 +1,6 @@
 // Load environment variables
 import { NODE_ENV, isProduction, isDevelopment, contentBasePath } from './src/utils/envUtils.js';
+import { redirects, matchTrailingSlashOnRedirects } from './src/utils/routing/redirects.mjs';
 
 
 // Now import other dependencies
@@ -41,6 +42,7 @@ if (!fs.existsSync(contentBasePath)) {
 
 export default defineConfig({
   site: 'https://lossless.group', // Add your production URL here
+  redirects,
   // Astro 7: keep v6 whitespace handling (the new 'jsx' default strips whitespace between inline elements)
   compressHTML: true,
   markdown: {
@@ -87,7 +89,7 @@ export default defineConfig({
     }),
   },
   output: "static",
-  adapter: vercel(),
+  adapter: matchTrailingSlashOnRedirects(vercel()),
   integrations: [
     mdx(),
     icon({

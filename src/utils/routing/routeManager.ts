@@ -215,6 +215,26 @@ function readFrontmatterSlug(fullPath: string | null): string | null {
   return frontmatterSlugCache.get(fullPath)!;
 }
 
+const unpublishedCache = new Map<string, boolean>();
+function isUnpublished(fullPath: string | null): boolean {
+  if (!fullPath || /[\\/]client-content[\\/]/.test(fullPath)) return false;
+  if (!unpublishedCache.has(fullPath)) {
+    let unpublished = false;
+    try {
+      const fm = readFileSync(fullPath, 'utf8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      unpublished = /^publish:\s*false\s*$/m.test(fm?.[1] ?? '');
+    } catch { unpublished = false; }
+    unpublishedCache.set(fullPath, unpublished);
+  }
+  return unpublishedCache.get(fullPath)!;
+}
+
+// An unpublished target has no page (see publishedGlob), so it resolves like an unwritten note.
+function routeForFile(normalizedPath: string, lookupPath: string = normalizedPath): string {
+  const file = findContentFile(lookupPath);
+  return isUnpublished(file) ? '/404' : resolveWithMappings(normalizedPath, readFrontmatterSlug(file));
+}
+
 function resolveWithMappings(normalizedPath: string, fileSlug?: string | null): string {
   if (DEBUG_BACKLINKS) {
     console.log("[routeManager] Found path", normalizedPath)
@@ -343,7 +363,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
     if (DEBUG_BACKLINKS) {
       console.log("[routeManager] Full path detected:", normalizedInput);
     }
-    const result = resolveWithMappings(normalizedInput, readFrontmatterSlug(findContentFile(input)));
+    const result = routeForFile(normalizedInput, input);
     routeCache.set(cacheKey, result);
     return result;
   }
@@ -365,7 +385,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
       console.log('[routeManager] Priority check (raw):', candidateRaw);
     }
     if (isValidContentFile(candidateRaw)) {
-      const result = resolveWithMappings(candidateRaw, readFrontmatterSlug(findContentFile(candidateRaw)));
+      const result = routeForFile(candidateRaw);
       routeCache.set(cacheKey, result);
       return result;
     }
@@ -375,7 +395,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
       console.log('[routeManager] Priority check (slug):', candidateSlug);
     }
     if (isValidContentFile(candidateSlug)) {
-      const result = resolveWithMappings(candidateSlug, readFrontmatterSlug(findContentFile(candidateSlug)));
+      const result = routeForFile(candidateSlug);
       routeCache.set(cacheKey, result);
       return result;
     }
@@ -391,7 +411,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
       }
 
       if (isValidContentFile(candidate)) {
-        const result = resolveWithMappings(candidate, readFrontmatterSlug(findContentFile(candidate)));
+        const result = routeForFile(candidate);
         if (DEBUG_BACKLINKS) {
           console.log("[routeManager] Found with baseDir, resolved to:", result);
         }
@@ -410,7 +430,7 @@ export function transformContentPathToRoute(input: string, currentFilePath?: str
     }
 
     if (isValidContentFile(candidate)) {
-      const result = resolveWithMappings(candidate, readFrontmatterSlug(findContentFile(candidate)));
+      const result = routeForFile(candidate);
       if (DEBUG_BACKLINKS) {
         console.log("[routeManager] Found without baseDir, resolved to:", result);
       }
