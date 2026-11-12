@@ -17,6 +17,10 @@ export const ROUTE_PATHS = {
     BASE: '/market-map',
     FOR: '/market-map/for',
   },
+
+  MARKET_CATEGORY: {
+    BASE: '/market-categories',
+  },
   
   CLIENT: {
     BASE: '/client',
@@ -54,6 +58,8 @@ export function getCollectionBasePath(collectionName: string): string {
   switch (collectionName) {
     case 'market-maps':
       return ROUTE_PATHS.MARKET_MAP.FOR;
+    case 'market-categories':
+      return ROUTE_PATHS.MARKET_CATEGORY.BASE;
     case 'issue-resolution':
       return ROUTE_PATHS.LEARN_WITH.ISSUE_RESOLUTION;
     case 'talks':

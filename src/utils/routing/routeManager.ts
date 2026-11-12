@@ -27,6 +27,9 @@ export const ROUTE_PATHS = {
     BASE: '/market-map',
     FOR: '/market-map/for',
   },
+  MARKET_CATEGORY: {
+    BASE: '/market-categories',
+  },
   UP_AND_RUNNING: {
     BASE: '/learn-with/up-and-running',
     WITH: '/learn-with/up-and-running/with',
@@ -41,6 +44,12 @@ const defaultRouteMappings: RouteMapping[] = [
   {
     contentPath: 'vocabulary',
     routePath: 'more-about'
+  },
+  {
+    contentPath: 'Market-Categories',
+    routePath: 'market-categories',
+    baseDir: 'concepts',
+    collectionName: 'market-categories'
   },
   {
     contentPath: 'concepts',
@@ -245,10 +254,12 @@ function resolveWithMappings(normalizedPath: string, fileSlug?: string | null): 
 
   const allMappings = [...customRouteMappings, ...defaultRouteMappings];
   
-  // First try to find a mapping that matches the full path with baseDir
+  // First try to find a mapping that matches the full path with baseDir.
+  // Case-insensitive, since the path arrives either slugified or with the folder's own casing.
+  const lowerPath = normalizedPath.toLowerCase();
   const mappingWithBaseDir = allMappings.find(m => 
-    m.baseDir && normalizedPath === `${m.baseDir}/${m.contentPath}` ||
-    m.baseDir && normalizedPath.startsWith(`${m.baseDir}/${m.contentPath}/`)
+    m.baseDir && lowerPath === `${m.baseDir}/${m.contentPath}`.toLowerCase() ||
+    m.baseDir && lowerPath.startsWith(`${m.baseDir}/${m.contentPath}/`.toLowerCase())
   );
 
   // If no match with baseDir, try without baseDir
@@ -263,7 +274,7 @@ function resolveWithMappings(normalizedPath: string, fileSlug?: string | null): 
     if (mapping.baseDir) {
       // For mappings with baseDir, strip both baseDir and contentPath
       const prefixToRemove = `${mapping.baseDir}/${mapping.contentPath}`;
-      relativePath = normalizedPath.startsWith(prefixToRemove + '/') 
+      relativePath = lowerPath.startsWith(prefixToRemove.toLowerCase() + '/') 
         ? normalizedPath.substring(prefixToRemove.length + 1)
         : '';
     } else {

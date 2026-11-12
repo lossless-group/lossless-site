@@ -1,0 +1,80 @@
+---
+// Market Categories collection page
+// Mirrors /market-map/it, over the profiles in concepts/Market-Categories
+
+import { getCollection } from 'astro:content';
+import MagazineIndexLayout from '@layouts/MagazineIndexLayout.astro';
+import { ROUTE_PATHS } from '../../utils/routing/routeManager';
+import {
+  isPublishedMarketCategory,
+  marketCategoryLede,
+  marketCategorySlug,
+  marketCategoryTitle,
+} from '../../utils/marketCategories';
+import Hero from '../../components/basics/Hero.astro';
+import AnimationWrapper from '../../components/basics/AnimationWrapper.astro';
+
+const collectionConfig = {
+  title: 'Market Categories',
+  subtitle: 'Category Profiles & Snapshots',
+  description: 'What each market category is, why now, who plays in it, and where it is heading.'
+};
+
+const allEntries = (await getCollection('market-categories')).filter(isPublishedMarketCategory);
+
+const articles = allEntries.map((entry) => {
+  const data = entry.data as any;
+
+  function normalizeToArray(singularKey: string, pluralKey: string): string[] {
+    const combined = [data?.[singularKey], data?.[pluralKey]].filter(Boolean).flat();
+    return combined.length > 0 ? combined : [];
+  }
+
+  let dateValue = data?.date_modified;
+  if (dateValue instanceof Date) {
+    dateValue = dateValue.toISOString().split('T')[0];
+  }
+
+  const title = marketCategoryTitle(entry);
+
+  return {
+    id: entry.id,
+    title,
+    slug: `${ROUTE_PATHS.MARKET_CATEGORY.BASE}/${marketCategorySlug(entry)}`,
+    banner_image: data?.banner_image,
+    portrait_image: data?.portrait_image,
+    imageAlt: `Image for ${title}`,
+    date: dateValue,
+    lede: marketCategoryLede(entry),
+    tags: normalizeToArray('tag', 'tags'),
+    authors: normalizeToArray('author', 'authors'),
+    categories: normalizeToArray('category', 'categories'),
+  };
+}).sort((a, b) => {
+  // Most recently modified first
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+  return new Date(b.date).getTime() - new Date(a.date).getTime();
+});
+---
+
+<MagazineIndexLayout
+  title={collectionConfig.title}
+  description={collectionConfig.description}
+  articles={articles}
+  collectionDisplayName={collectionConfig.title}
+>
+  <div slot="hero-content" style="position: relative;">
+    <AnimationWrapper>
+      <Hero
+        title={collectionConfig.title}
+        subtitle={collectionConfig.subtitle}
+        description={collectionConfig.description}
+        alignment="center"
+        fullBleed={false}
+        animate={true}
+      />
+    </AnimationWrapper>
+  </div>
+</MagazineIndexLayout>

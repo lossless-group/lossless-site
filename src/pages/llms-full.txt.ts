@@ -14,6 +14,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { AppConfig } from '@utils/appConfig';
 import { slugify, getReferenceSlug } from '@utils/slugify';
+import { marketCategorySlug } from '@utils/marketCategories';
 import template from '../llms/llms-full.md?raw';
 
 const isPublished = (e: any) =>
@@ -88,6 +89,7 @@ export const GET: APIRoute = async () => {
       (e.data as any).slug || slugify((e.data as any).title || 'Untitled Market Map');
     return `${root}/market-map/for/${slug}/`;
   };
+  const marketCategoryUrl = (e: any) => `${root}/market-categories/${marketCategorySlug(e)}/`;
   const changelogUrl = (prefix: string) => (e: any) => {
     const slug =
       (typeof (e.data as any)?.slug === 'string' && (e.data as any).slug.trim()) ||
@@ -123,7 +125,8 @@ export const GET: APIRoute = async () => {
     {
       key: 'concepts',
       label: 'Concepts',
-      fetch: () => getCollection('concepts').then((es) => es.filter(isPublished)),
+      // Market Categories are listed in their own section
+      fetch: () => getCollection('concepts').then((es) => es.filter((e: any) => isPublished(e) && !/[\\/]Market-Categories[\\/]/.test(e.filePath ?? ''))),
       url: moreAboutUrl,
     },
     {
@@ -191,6 +194,12 @@ export const GET: APIRoute = async () => {
       label: 'Market Maps',
       fetch: () => getCollection('market-maps').then((es) => es.filter(isPublished)),
       url: marketMapUrl,
+    },
+    {
+      key: 'market-categories',
+      label: 'Market Categories',
+      fetch: () => getCollection('market-categories').then((es) => es.filter(isPublished)),
+      url: marketCategoryUrl,
     },
     {
       key: 'changelog--content',

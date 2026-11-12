@@ -15,6 +15,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { AppConfig } from '@utils/appConfig';
 import { slugify, getReferenceSlug } from '@utils/slugify';
+import { marketCategorySlug } from '@utils/marketCategories';
 import template from '../llms/llms.md?raw';
 
 // Same publish/private gate the page templates use. Most page templates use
@@ -64,6 +65,7 @@ export const GET: APIRoute = async () => {
     upAndRunning,
     toHero,
     marketMaps,
+    marketCategories,
     changelogContent,
     changelogCode,
   ] = await Promise.all([
@@ -71,7 +73,8 @@ export const GET: APIRoute = async () => {
     getCollection('tooling').then((es) => es.filter(isPublished)),
     getCollection('vertical-toolkits').then((es) => es.filter(isPublished)),
     getCollection('essays').then((es) => es.filter(isPublished)),
-    getCollection('concepts').then((es) => es.filter(isPublished)),
+    // Market Categories are listed in their own section
+    getCollection('concepts').then((es) => es.filter((e: any) => isPublished(e) && !/[\\/]Market-Categories[\\/]/.test(e.filePath ?? ''))),
     getCollection('vocabulary').then((es) => es.filter(isPublished)),
     getCollection('explorations').then((es) => es.filter(isPublished)),
     getCollection('blueprints').then((es) => es.filter(isPublished)),
@@ -83,6 +86,7 @@ export const GET: APIRoute = async () => {
     getCollection('up-and-running').then((es) => es.filter(isPublished)),
     getCollection('to-hero').then((es) => es.filter(isPublished)),
     getCollection('market-maps').then((es) => es.filter(isPublished)),
+    getCollection('market-categories').then((es) => es.filter(isPublished)),
     getCollection('changelog--content').then((es) => es.filter(isPublished)),
     getCollection('changelog--code').then((es) => es.filter(isPublished)),
   ]);
@@ -179,6 +183,9 @@ export const GET: APIRoute = async () => {
     return `${root}/market-map/for/${slug}/`;
   };
 
+  // /market-categories/${slug}/
+  const marketCategoryUrl = (e: any) => `${root}/market-categories/${marketCategorySlug(e)}/`;
+
   // /log/${prefix}-${slug}/ — prefix is content-, code-, or laerdal-
   const changelogUrl = (e: any, prefix: string) => {
     const slug =
@@ -249,7 +256,7 @@ export const GET: APIRoute = async () => {
     ...sectionLines('Issue Resolution', buildLines(issueResolution, issueResolutionUrl)),
   );
 
-  // Talks, Guides, Market Maps
+  // Talks, Guides, Market Maps, Market Categories
   const guidesLines: string[] = [];
   guidesLines.push(...sectionLines('Talks', buildLines(talks, talkUrl)));
   guidesLines.push(
@@ -257,6 +264,9 @@ export const GET: APIRoute = async () => {
   );
   guidesLines.push(...sectionLines('Zero to Hero', buildLines(toHero, toHeroUrl)));
   guidesLines.push(...sectionLines('Market Maps', buildLines(marketMaps, marketMapUrl)));
+  guidesLines.push(
+    ...sectionLines('Market Categories', buildLines(marketCategories, marketCategoryUrl)),
+  );
 
   // Changelog: content + code (oldest-first within each subsection)
   const changelogLines: string[] = [];
@@ -285,7 +295,7 @@ export const GET: APIRoute = async () => {
     reminders.length +
     issueResolution.length;
   const guidesCount =
-    talks.length + upAndRunning.length + toHero.length + marketMaps.length;
+    talks.length + upAndRunning.length + toHero.length + marketMaps.length + marketCategories.length;
   const changelogCount = changelogContent.length + changelogCode.length;
   const entryCount =
     projectsCount + toolingCount + writingCount + principlesCount + guidesCount + changelogCount;

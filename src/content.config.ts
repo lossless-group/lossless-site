@@ -289,6 +289,24 @@ const marketMapsCollection = defineCollection({
   }).passthrough()
 });
 
+// Market Categories live under concepts/ (so they also stay reachable as concepts),
+// but publish under their own route like Market Maps.
+const marketCategoriesCollection = defineCollection({
+  loader: glob({pattern: "**/*.md", base: resolveContentPath("concepts/Market-Categories")}),
+  schema: z.object({
+    title: z.string().optional(),
+    slug: z.string().optional(),
+    banner_image: z.string().optional(),
+    portrait_image: z.string().optional(),
+    date_modified: z.union([z.string(), z.date()]).optional(),
+    date_created: z.union([z.string(), z.date()]).optional(),
+    lede: z.string().optional(),
+    publish: z.boolean().default(true).optional(),
+    tags: z.union([z.string(), z.array(z.string())]).optional(),
+    authors: z.union([z.string(), z.array(z.string())]).optional(),
+  }).passthrough()
+});
+
 const specsCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("specs")}),
   schema: z.object({}).passthrough()
@@ -583,6 +601,7 @@ export const paths = {
   'reminders': resolveContentPath('lost-in-public/reminders'),
   'blueprints': resolveContentPath('lost-in-public/blueprints'),
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
+  'market-categories': resolveContentPath('concepts/Market-Categories'),
   'specs': resolveContentPath('specs'),
   'sources': resolveContentPath('sources'),
   'organizations': resolveContentPath('organizations'),
@@ -607,6 +626,7 @@ export const collections = {
   'projects': projectsCollection,
   'concepts': conceptsCollection,
   'market-maps': marketMapsCollection,
+  'market-categories': marketCategoriesCollection,
   'essays': essaysCollection,
   'vocabulary': vocabularyCollection,
   'changelog--content': changelogContentCollection,

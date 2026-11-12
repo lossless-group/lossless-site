@@ -1,0 +1,58 @@
+---
+// site/src/pages/market-categories/[...slug].astro
+// Renders individual market category profiles, like /market-map/for/[...slug].
+
+export const prerender = true;
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import OneArticle from '@layouts/OneArticle.astro';
+import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
+import {
+  isPublishedMarketCategory,
+  marketCategoryLede,
+  marketCategorySlug,
+  marketCategoryTitle,
+} from '@utils/marketCategories';
+
+export async function getStaticPaths() {
+  const collectionName = 'market-categories';
+  const entries = (await getCollection(collectionName)).filter(isPublishedMarketCategory);
+
+  return entries.map(entry => ({
+    params: { slug: marketCategorySlug(entry) },
+    props: { entry, collection: collectionName },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'market-categories'> & { body: string };
+  collection: string;
+}
+
+const { entry, collection } = Astro.props as Props;
+
+const title = marketCategoryTitle(entry);
+const lede = marketCategoryLede(entry) || 'Market category profile.';
+const pageTitle = `${title} | The Lossless Group`;
+
+// Data for the OneArticle component - include all entry data
+const contentDataForOneArticle = {
+  ...entry.data,
+  title,
+  lede,
+  path: Astro.url.pathname,
+  id: entry.id,
+  collection: collection,
+};
+---
+
+<Layout title={pageTitle} description={lede} frontmatter={entry.data}>
+  <OneArticle
+    Component={OneArticleOnPage}
+    content={entry.body}
+    markdownFile={entry.id}
+    data={contentDataForOneArticle}
+    title={title}
+  />
+</Layout>

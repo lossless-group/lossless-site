@@ -39,8 +39,11 @@ export async function getStaticPaths() {
     getCollection('client-recommendations'),
   ]);
   
-  // Flatten all entries and create paths based on their file structure
-  const allEntries = allCollections.flat();
+  // Flatten all entries and create paths based on their file structure.
+  // Market Categories have their own route at /market-categories/[...slug].
+  const allEntries = allCollections.flat().filter(entry =>
+    !(entry.collection === 'concepts' && /[\\/]Market-Categories[\\/]/.test(entry.filePath ?? ''))
+  );
   
   const paths = allEntries.map(entry => {
     // Get the native file path (e.g., "essays/ai-is-first-a-trojan-horse")

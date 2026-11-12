@@ -3,7 +3,8 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import OneArticle from '@layouts/OneArticle.astro';
 import OneArticleOnPage from '@components/articles/OneArticleOnPage.astro';
-import { processEntries } from '@utils/slugify';
+import { processEntries, slugify } from '@utils/slugify';
+import { ROUTE_PATHS } from '@utils/routing/routeManager';
 
 // Ensure page is prerendered as static HTML
 export const prerender = true;
@@ -49,6 +50,12 @@ interface Props {
 }
 
 const { entry, contentType } = Astro.props;
+
+// Market Categories moved to their own route; keep the old /more-about/ URL working.
+if (contentType === 'concepts' && /[\\/]Market-Categories[\\/]/.test(entry.filePath ?? '')) {
+  const fileName = entry.filePath.split(/[\\/]/).pop().replace(/\.(md|mdx)$/, '');
+  return Astro.redirect(`${ROUTE_PATHS.MARKET_CATEGORY.BASE}/${slugify(entry.data.slug || fileName)}`, 301);
+}
 
 // Add content type to the data object for potential use in components
 const contentData = {
