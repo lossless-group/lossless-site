@@ -298,7 +298,7 @@ const socialIcons = [
     gap: clamp(1vw, 2vw, 2.5vw); /* Responsive spacing */
     margin-right: 2vw;
 
-    & a {
+    & > a { /* direct links only; nested & a leaks into dropdown cards */
       text-decoration: none;
       color: var(--clr-lossless-primary-light);
       font-size: clamp(0.9em, 1.1vw, 1.25em); /* Increased max font size */
@@ -320,7 +320,7 @@ const socialIcons = [
     justify-content: flex-end;
     gap: clamp(0.5vw, 1vw, 1.5vw); /* Responsive spacing */
 
-    & a {
+    & > a {
       display: flex;
       align-items: center;
       justify-content: center;
