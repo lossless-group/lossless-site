@@ -12,6 +12,7 @@ import remarkDirective from 'remark-directive';
 import remarkImages from '@utils/markdown/remark-images'; 
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkCitations from '@utils/markdown/remark-citations';
+import remarkFootnoteNumbers from '@utils/markdown/remark-footnote-numbers';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
 import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 import type { Root } from 'mdast';
@@ -48,6 +49,7 @@ async function processMarkdown(mdContent: string, id: string, title: string) {
     .use(remarkImages) 
     .use(remarkBacklinks)
     .use(remarkCitations)
+    .use(remarkFootnoteNumbers)
     .use(remarkTableOfContents);
 
   const mdast = processor.parse(cleanedContent);

@@ -250,7 +250,7 @@ const hasArticleInfo =
         const titleId = slugify(effectiveHeading);
         return (
           <>
-          <h1 id={titleId} class="page-main-title-display">
+          <h1 id={titleId} class="page-main-title-display reader-title">
               <span class="title-text">{effectiveHeading}</span>
               <CopyLinkButton id={titleId} label={effectiveHeading} />
           </h1>
@@ -261,14 +261,16 @@ const hasArticleInfo =
         );
       })()}
 
-      <AstroMarkdown 
-        node={{
-          type: 'root',
-          children: bodyChildren,
-          data: { hProperties }
-        }}         
-        data={dataForMarkdown} 
-        />
+      <div class="reader">
+        <AstroMarkdown
+          node={{
+            type: 'root',
+            children: bodyChildren,
+            data: { hProperties }
+          }}
+          data={dataForMarkdown}
+          />
+      </div>
     </article>
   </div>
 
@@ -288,66 +290,19 @@ const hasArticleInfo =
     box-sizing: border-box;
   }
 
-  .prose > :global(h1:first-child) {  
-    font-size: 2.75rem;
-    margin-bottom: 2rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .prose :global(h1) {
-    font-size: 2.75rem;
-    margin-bottom: 1.5rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .prose :global(h2) {
-    font-size: 2.25rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .prose :global(h3) {
-    font-size: 1.875rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .prose :global(h4) {
-    font-size: 1.5rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
-  .prose :global(h5) {
-    font-size: 1.25rem;
-    margin-top: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: var(--clr-lossless-accent--brightest);
-  }
-
+  /* Sizes and spacing come from reader.css (.reader, .reader-title); only color here,
+     since a scoped font-size would outrank the scale. */
+  .prose :global(h1),
+  .prose :global(h2),
+  .prose :global(h3),
+  .prose :global(h4),
+  .prose :global(h5),
   .prose :global(h6) {
-    font-size: 1.125rem;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
     color: var(--clr-lossless-accent--brightest);
-  }
-
-  /* Add responsive styles for headings */
-  @media (max-width: 768px) {
-    .prose :global(h1), .prose > :global(h1:first-child) { font-size: 2.25rem; }
-    .prose :global(h2) { font-size: 1.875rem; }
-    .prose :global(h3) { font-size: 1.5rem; }
-    .prose :global(h4) { font-size: 1.25rem; }
-    .prose :global(h5) { font-size: 1.125rem; }
-    .prose :global(h6) { font-size: 1rem; }
   }
 
   .prose :global(p), .prose :global(.paragraph) {
     margin-bottom: 1.2rem;
-    line-height: 1.3;
   }
 
   /* Add citation specific styles */
@@ -631,7 +586,6 @@ const hasArticleInfo =
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 2.25rem;
   font-weight: 700;
   color: var(--clr-lossless-accent--brightest);
   line-height: 1.2;

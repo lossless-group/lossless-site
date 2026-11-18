@@ -1117,7 +1117,7 @@ if (DEBUG_AST) {
 {node.type === 'footnoteReference' && (
   <sup class="footnote-ref" id={`ref-${node.label}`}>
     <a href={`#${node.label}`}>
-      [{node.label}]
+      [{node.data?.citationIndex ?? node.label}]
     </a>
   </sup>
   <style>
@@ -1129,6 +1129,12 @@ if (DEBUG_AST) {
     display: inline-block; /* Ensure proper scroll positioning */
     position: relative; /* Ensure proper scroll positioning */
     transition: all 0.3s ease;
+  }
+
+  /* Reference with no definition: present but quiet, and not a link */
+  .footnote-ref--missing {
+    opacity: 0.35;
+    cursor: default;
   }
 
   /* Block wrapper used when a textDirective contains block-level HTML (e.g., iframe) */
@@ -1303,14 +1309,14 @@ if (DEBUG_AST) {
   <div id={node.label} class="footnote-definition" data-debug-label={node.label}>
     {node.children.length === 1 && node.children[0].type === 'paragraph' ? (
       <p>
-        <strong><a href={`#ref-${node.label}`}>[{node.label}]</a></strong>{' '}
+        <strong><a href={`#ref-${node.label}`}>[{node.data?.citationIndex ?? node.label}]</a></strong>{' '}
         {node.children[0].children.map(child => (
           <Astro.self node={child} data={data} />
         ))}{' '}
       </p>
     ) : (
       <>
-        <strong>[{node.label}]</strong>
+        <strong>[{node.data?.citationIndex ?? node.label}]</strong>
         {node.children.map(child => (
           <Astro.self node={child} data={data} />
         ))}
@@ -1332,9 +1338,19 @@ if (DEBUG_AST) {
     <hr />
 }
 
-{(node.type === "text") && 
-    <span>{node.value}</span>
-}
+{(node.type === "text") && (() => {
+    // A `[^label]` with no matching definition never becomes a footnoteReference and
+    // would print raw; show it as a muted, unlinked marker instead.
+    const parts = String(node.value ?? '').split(/(\[\^[A-Za-z0-9_-]+\])/);
+    if (parts.length === 1) return <span>{node.value}</span>;
+    return (
+      <span>
+        {parts.map((part, i) => i % 2 === 1
+          ? <sup class="footnote-ref footnote-ref--missing" title={`Source not listed (${part.slice(2, -1)})`}>[?]</sup>
+          : part)}
+      </span>
+    );
+})()}
 
 {(node.type === "textDirective") && (() => {
     // If an author used a single-colon text directive for figma-embed,

@@ -2,6 +2,7 @@
 @import url("fonts--google.css");
 @import url("animations.css");
 @import url("lossless-theme.css");
+@import url("reader.css");
 
 :root {
     --elephant: hsl(191, 75%, 17%);
@@ -68,6 +69,10 @@
 
     --ff-base: 'Poppins', sans-serif;
     --ff-legible: 'Krub', sans-serif;
+
+    /* reader.css faces: headings and long-form copy */
+    --font-display: var(--ff-base);
+    --font-reader: var(--ff-base);
 
     --fw-regular: 200; 
     --fw-semi-bold: 400; 

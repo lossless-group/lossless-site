@@ -7,6 +7,7 @@ import remarkDirective from 'remark-directive';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCitations from '@utils/markdown/remark-citations';
+import remarkFootnoteNumbers from '@utils/markdown/remark-footnote-numbers';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
 import { remarkDirectiveToComponent } from '@utils/markdown/remark-directives';
 
@@ -37,6 +38,7 @@ export async function renderSimpleMarkdown(markdown: string): Promise<RenderResu
       .use(remarkDirective)
       .use(remarkDirectiveToComponent)
       .use(remarkCitations)
+      .use(remarkFootnoteNumbers)
       .use(remarkTableOfContents)
       .use(remarkRehype)
       .use(rehypeStringify);
