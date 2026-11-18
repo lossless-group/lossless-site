@@ -11,6 +11,15 @@ import { Image } from "astro:assets";
 import Layout from "@layouts/Layout.astro";
 import IconHeaderMessageOvalProcess from "@components/basics/messages/IconHeaderMessageOvalProcess.astro";
 import Einstein from "@assets/visuals/imageOf/imageOf__Albert-Einstein.png";
+import SplashHeroCard from "@components/tool-components/SplashHeroCard.astro";
+import { fetchOgMetadata } from "@utils/fetchOgMetadata";
+
+// The method now lives at context-v.dev; show its share card beside the pitch
+const contextVMetadata = await fetchOgMetadata("https://context-v.dev/", {
+  title: "Context Vigilance",
+  description: "Treat context with the same vigilance as code: versioned, reviewed, cross-linked. A plugin that gives your coding agent a context-v/ folder and the habits to keep it true.",
+  siteName: "context-v.dev",
+});
 
 // Define frontmatter data for the vibe with us page
 const frontmatter = {
@@ -46,6 +55,9 @@ const frontmatter = {
   <!-- Inline, page-specific Hero for /vibe-with/us.astro -->
   <section class="hero vibe-hero--local">
     <div class="hero-content">
+      <aside class="vibe-splash">
+        <SplashHeroCard metadata={contextVMetadata} ctaLabel="Open context-v.dev" badge="Splash" imageAspect="4 / 3" />
+      </aside>
       <div class="hero-text">
         <p class="hero-subtitle">Our Systems have come a long way.</p>
         <h1 class="hero-title">Vibe Code with Us</h1>
@@ -139,12 +151,25 @@ const frontmatter = {
   border: 1px solid rgba(255,255,255,0.05);
 }
 .hero.vibe-hero--local .hero-content {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 1.5rem;
-  max-width: 900px;
+  gap: 2.5rem;
+  max-width: 1200px;
   margin: 0 auto;
+}
+.vibe-splash {
+  width: clamp(240px, 24vw, 320px);
+}
+@media (max-width: 900px) {
+  .hero.vibe-hero--local .hero-content {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .vibe-splash {
+    width: 100%;
+    max-width: 360px;
+  }
 }
 .hero.vibe-hero--local .hero-text {
   text-align: center;
