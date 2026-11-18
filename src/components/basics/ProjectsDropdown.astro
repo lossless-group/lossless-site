@@ -61,7 +61,8 @@ const sortedProjects = [...projects].sort((a, b) =>
     <div class="dropdown-grid">
       {sortedProjects.map((project, index) => (
         <a 
-          href={resolveProjectUrl(project)} 
+          href={resolveProjectUrl(project)}
+          {...(/^https?:\/\//.test(resolveProjectUrl(project)) ? { target: '_blank', rel: 'noopener' } : {})}
           class="dropdown-item"
           data-project={project.id}
         >

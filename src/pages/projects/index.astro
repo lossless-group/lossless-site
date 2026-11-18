@@ -15,6 +15,13 @@ import clientsData from '../../content/people/clients.json';
 const galleryConfig = loadGalleryConfig();
 const projectCovers = Object.values(galleryConfig.projects);
 
+// External projects (their own sites) link as-is; internal hrefs get slugified
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+const projectLink = (project) => {
+  const href = resolveProjectUrl(project);
+  return isExternal(href) ? href : getReferenceSlug(href);
+};
+
 // Helper function to get client data by ID
 function getClientById(clientId: string) {
   return clientsData.clients.find(client => client.id === clientId);
@@ -79,7 +86,8 @@ function getClientById(clientId: string) {
           
           <div class="cover-expand">
             <a 
-              href={getReferenceSlug(resolveProjectUrl(project))}
+              href={projectLink(project)}
+              {...(isExternal(projectLink(project)) ? { target: '_blank', rel: 'noopener' } : {})}
               class="toggle"
               aria-label="View Project"
             >

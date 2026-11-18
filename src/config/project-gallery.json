@@ -1,5 +1,46 @@
 {
   "projects": {
+    "didi-sh": {
+      "id": "didi-sh",
+      "title": "didi.sh",
+      "subtitle": "A VC operations stack behind one sign-in: investment memos, diligence-ready decks, and data research for deal teams.",
+      "href": "https://didi.sh",
+      "hasSidebar": false,
+      "clients": [
+        "hypernova",
+        "avalanche"
+      ],
+      "useCases": [
+        {
+          "title": "One Login for the Deal Team",
+          "description": "id.didi.sh signs a team in once, with no passwords, across MemoPop memos, DidiDecks decks and Augment-It research."
+        },
+        {
+          "title": "Memos and Decks That Survive Diligence",
+          "description": "MemoPop drafts investment memos whose claims cite their sources; DidiDecks builds decks as code from the same material."
+        }
+      ],
+      "demoSteps": []
+    },
+    "vc-self-host-stack": {
+      "id": "vc-self-host-stack",
+      "title": "VC Self-Host Stack",
+      "subtitle": "An open-source stack a venture firm can run itself instead of paying $85k–$280k a year in SaaS: Twenty CRM, Papermark, Cal.diy, Plane and more.",
+      "href": "https://lossless.at",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "Own Your CRM and Data Room",
+          "description": "Twenty CRM and Papermark replace Affinity and per-deal VDRs, each in its own project with weekly backups that have been restored, not just taken."
+        },
+        {
+          "title": "AI That Works Your CRM",
+          "description": "Paste one URL into Claude as a connector, sign into your CRM, and your assistant reads and writes it as you, with no API key."
+        }
+      ],
+      "demoSteps": []
+    },
     "augment-it": {
       "id": "augment-it",
       "title": "Augment It",
@@ -8,7 +49,9 @@
       "hasSidebar": true,
       "hasLandingPage": true,
       "canvas": "/projects/gallery/augment-it/specs/Augment-It.canvas",
-      "clients": ["laerdal"],
+      "clients": [
+        "laerdal"
+      ],
       "useCases": [
         {
           "title": "Product Insights for R&D",
@@ -73,19 +116,23 @@
     "context-vigilance": {
       "id": "context-vigilance",
       "title": "Context Vigilance",
-      "subtitle": "AI-Augmented Product Development Workflow playbook and toolkit.",
+      "subtitle": "A Claude plugin and playbook for building with AI: living specs, plans and handoffs that people and agents share.",
       "href": "/projects/gallery/context-vigilance",
       "hasSidebar": true,
       "canvas": "/projects/gallery/context-vigilance/ACE-It-Canvas.canvas",
-      "clients": ["laerdal", "tonguc", "param"],
+      "clients": [
+        "laerdal",
+        "tonguc",
+        "param"
+      ],
       "useCases": [
         {
           "title": "AI Co-Development Playbook",
           "description": "Practical playbook for building real products with AI as a co-developer."
         },
         {
-          "title": "Battle-Tested Kit",
-          "description": "Accelerate Context Engineering with our Context Vigilance kit for seamless AI workflow success."
+          "title": "Install It as a Claude Plugin",
+          "description": "Add the cv plugin from the context-vigilance-kit marketplace to get /cv:init, /cv:new and /cv:implement in Claude Code."
         }
       ],
       "demoSteps": [
@@ -127,13 +174,13 @@
               "type": "child",
               "contentPath": "Context-Vigilance/Philosophy/Iterative-Approach.md"
             }
-        ]
-      },
-      {
-        "title": "Documentation Kit",
-        "href": "/projects/gallery/context-vigilance/docs-kit/living-specifications",
-        "type": "sequential",
-        "step": 2,
+          ]
+        },
+        {
+          "title": "Documentation Kit",
+          "href": "/projects/gallery/context-vigilance/docs-kit/living-specifications",
+          "type": "sequential",
+          "step": 2,
           "contentPath": "Context-Vigilance/Docs-Kit/Living-Specifications.md",
           "children": [
             {
@@ -165,26 +212,26 @@
           "type": "sequential",
           "step": 3,
           "contentPath": "Context-Vigilance/Models/Thinking-Models.md",
-            "children": [
-              {
-                "title": "Modalities",
-                "href": "/projects/gallery/context-vigilance/models/modalities",
-                "type": "child",
-                "contentPath": "Context-Vigilance/Models/Modalities.md"
-              },
-              {
-                "title": "Function Calling",
-                "href": "/projects/gallery/context-vigilance/models/function-calling",
-                "type": "child",
-                "contentPath": "Context-Vigilance/Models/Function-Calling.md"
-              },
-              {
-                "title": "Tokens",
-                "href": "/projects/gallery/context-vigilance/models/tokens",
-                "type": "child",
-                "contentPath": "Context-Vigilance/Models/Tokens.md"
-              }
-            ]
+          "children": [
+            {
+              "title": "Modalities",
+              "href": "/projects/gallery/context-vigilance/models/modalities",
+              "type": "child",
+              "contentPath": "Context-Vigilance/Models/Modalities.md"
+            },
+            {
+              "title": "Function Calling",
+              "href": "/projects/gallery/context-vigilance/models/function-calling",
+              "type": "child",
+              "contentPath": "Context-Vigilance/Models/Function-Calling.md"
+            },
+            {
+              "title": "Tokens",
+              "href": "/projects/gallery/context-vigilance/models/tokens",
+              "type": "child",
+              "contentPath": "Context-Vigilance/Models/Tokens.md"
+            }
+          ]
         },
         {
           "title": "Safety & Best Practices",
@@ -209,77 +256,43 @@
         }
       ]
     },
+    "event-hog": {
+      "id": "event-hog",
+      "title": "Event Hog",
+      "subtitle": "A live Claude connector that gives a team one shared workspace for a conference: prep before, contacts and slides during, follow-ups after.",
+      "href": "https://eventhog.cc",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "Log People in the Room",
+          "description": "Snap a badge and say \"log this person\"; the whole team sees who was met and what was said."
+        },
+        {
+          "title": "Slides to Notes to Posts",
+          "description": "Photographed slides become written-up notes and draft posts, and contacts go to the CRM only once approved."
+        }
+      ],
+      "demoSteps": []
+    },
     "astro-turf": {
       "id": "astro-turf",
       "title": "Astro Knots",
-      "subtitle": "Advanced Astro, TailwindCSS, and theme framework setup, basic components and patterns.",
-      "href": "/projects/gallery/astro-knots",
+      "subtitle": "21 Astro sites and 14 repo splash pages built one way, now teachable to coding agents as a Claude connector and plugin.",
+      "href": "https://lossless-group.github.io/astro-knots/",
       "hasSidebar": false,
-      "clients": ["laerdal", "the-water-foundation"],
-      "useCases": [
-        {
-          "title": "Killer Setup",
-          "description": "Well architected theme setup and starter kit. Reusable Astro components for modern web development."
-        },
-        {
-          "title": "Framework Patterns",
-          "description": "Best practices and architectural patterns for Astro projects."
-        }
+      "clients": [
+        "laerdal",
+        "the-water-foundation"
       ],
-      "demoSteps": []
-    },
-    "content-farm": {
-      "id": "content-farm",
-      "title": "Content Farm",
-      "subtitle": "Automated content generation and management system.",
-      "href": "/projects/gallery/content-farm",
-      "hasSidebar": false,
-      "clients": ["laerdal", "avalanche", "hypernova"],
       "useCases": [
         {
-          "title": "Content Automation",
-          "description": "Streamlined workflows for content creation and publishing with Extended Markdown as a first-class citizen."
+          "title": "See It in Production",
+          "description": "Browse all 21 sites and 14 splash pages, each splash showing its repo's changelog and docs."
         },
         {
-          "title": "Publishing Pipeline",
-          "description": "Automated content distribution and management tools."
-        }
-      ],
-      "demoSteps": []
-    },
-    "emergent-innovation": {
-      "id": "emergent-innovation",
-      "title": "Emergent Innovation",
-      "subtitle": "Open source innovation projects and collaborative initiatives.",
-      "hasSidebar": false,
-      "clients": ["laerdal", "tonguc"],
-      "useCases": [
-        {
-          "title": "Examples and Case Studies",
-          "description": "Community-driven innovation in healthcare and technology."
-        },
-        {
-          "title": "Best Practices & Playbooks",
-          "description": "Contribute to or get inspired by our best practices."
-        }
-      ],
-      "demoSteps": []
-    },
-    "memopop-ai": {
-      "id": "memopop-ai",
-      "title": "MemoPop AI",
-      "subtitle": "Multi-agent investment memo orchestrator powered by Claude and Perplexity.",
-      "href": "/projects/gallery/memopop-ai",
-      "hasSidebar": false,
-      "clients": ["hypernova", "avalanche"],
-      "useCases": [
-        {
-          "title": "Investment Memo Generation",
-          "description": "Generate institutional-quality investment memos with 33 specialized AI agents, premium data sources, and full citation trails."
-        },
-        {
-          "title": "Multi-Firm Deal Intelligence",
-          "description": "Firm-scoped architecture lets multiple VC firms run isolated pipelines with branded exports from a shared open-source codebase."
+          "title": "Agents Build It Right",
+          "description": "The astro-knots plugin teaches Claude Code and Codex the house patterns (Svelte over React, LFM, three color modes, share images) and checks every edit."
         }
       ],
       "demoSteps": []
@@ -299,6 +312,106 @@
         {
           "title": "Build-time Enrichment",
           "description": "Citations get renumbered, OG metadata gets fetched, and bare links become embeds — all before the page ships, with no runtime cost."
+        }
+      ],
+      "demoSteps": []
+    },
+    "content-farm": {
+      "id": "content-farm",
+      "title": "Content Farm",
+      "subtitle": "Obsidian plugins that write, illustrate, cite and transcribe inside your vault.",
+      "href": "/projects/gallery/content-farm",
+      "hasSidebar": false,
+      "clients": [
+        "laerdal",
+        "avalanche",
+        "hypernova"
+      ],
+      "useCases": [
+        {
+          "title": "Stenographer: Transcripts as Notes",
+          "description": "Paste a YouTube, TikTok or podcast link and get a note with a speaker-labeled, timestamped transcript."
+        },
+        {
+          "title": "Images and Citations in Place",
+          "description": "Image-Gin generates on-brand banners from a prompt in frontmatter; Cite Wide turns pasted sources into numbered citations."
+        }
+      ],
+      "demoSteps": []
+    },
+    "flave": {
+      "id": "flave",
+      "title": "Flave",
+      "subtitle": "An editor for documents that keep their workings: the evidence, sources and reasoning travel with the file. Early build.",
+      "href": "https://lossless-group.github.io/flave/",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "One Document, Many Audiences",
+          "description": "Clearance levels turn one file into private notes, an LP version and a public one-pager that stay consistent."
+        },
+        {
+          "title": "New Components on Demand",
+          "description": "An agent writes a component and a new block like :::metric-card renders right away."
+        }
+      ],
+      "demoSteps": []
+    },
+    "fantasy-gm": {
+      "id": "fantasy-gm",
+      "title": "FantasyGM",
+      "subtitle": "Fantasy football run like a front office: a keeper league app with a real salary cap, multi-year contracts and expiring deals.",
+      "href": "https://scowanlv.github.io/FantasyGM/",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "Manage the Cap, Not Just the Roster",
+          "description": "Every roster spot ties up cap space and every player signs for a term, so GMs decide who to keep and who to let walk."
+        },
+        {
+          "title": "A League With Real History",
+          "description": "Built for the Durham keeper league, with its actual 2023–2025 standings and brackets, dual-format scoring and live score entry by the commissioner."
+        }
+      ],
+      "demoSteps": []
+    },
+    "kay-os": {
+      "id": "kay-os",
+      "title": "Kay OS",
+      "subtitle": "A colony of personal assistant agents for ADHD and twice-exceptional all-stars. In early exploration.",
+      "hasSidebar": false,
+      "clients": [],
+      "useCases": [
+        {
+          "title": "An Assistant That Knows Your Accounts",
+          "description": "A hosted agent wired to your mail, calendar, CRMs and repos, using the same skills the Lossless team works with."
+        },
+        {
+          "title": "Memory You Can Read and Roll Back",
+          "description": "Each agent's memory and self-written skills live in git, so you can inspect, edit or revert them."
+        }
+      ],
+      "demoSteps": []
+    },
+    "emergent-innovation": {
+      "id": "emergent-innovation",
+      "title": "Emergent Innovation",
+      "subtitle": "Open source innovation projects and collaborative initiatives.",
+      "hasSidebar": false,
+      "clients": [
+        "laerdal",
+        "tonguc"
+      ],
+      "useCases": [
+        {
+          "title": "Examples and Case Studies",
+          "description": "Community-driven innovation in healthcare and technology."
+        },
+        {
+          "title": "Best Practices & Playbooks",
+          "description": "Contribute to or get inspired by our best practices."
         }
       ],
       "demoSteps": []
