@@ -17,26 +17,44 @@ const { id, label, title, bannerImage, articleTitle } = Astro.props;
   </svg>
 </button>
 
-<script is:inline>
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".copy-btn");
+<script>
+  // Bundled once per page (not is:inline), so a page with 35 headings gets one
+  // listener, not 35 racing clipboard writes that browsers reject.
+  // Links use the canonical origin from astro.config `site` (https://lossless.group),
+  // not whichever host served the page.
+  const origin = (import.meta.env.SITE || window.location.origin).replace(/\/$/, "");
+
+  // Fallback for browsers that refuse the async clipboard (focus or permission rules)
+  function legacyCopy(text: string): boolean {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    area.remove();
+    return ok;
+  }
+
+  function flash(btn: HTMLElement, state: "copied" | "failed") {
+    btn.classList.add(state);
+    setTimeout(() => btn.classList.remove(state), state === "copied" ? 800 : 1600);
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = (e.target as HTMLElement | null)?.closest<HTMLElement>(".copy-btn");
     if (!btn) return;
 
-    const headingId = btn.dataset.copyId;
-    
-    // Create URL with just the hash fragment for direct heading navigation
-    const baseUrl = window.location.origin + window.location.pathname;
-    const url = `${baseUrl}#${headingId}`;
-
-    navigator.clipboard.writeText(url)
-      .then(() => {
-        btn.classList.add("copied");
-        setTimeout(() => btn.classList.remove("copied"), 800);
-      })
-      .catch((err) => {
-        console.error("Clipboard error:", err);
-        alert("Copy failed");
-      });
+    const url = `${origin}${window.location.pathname}#${btn.dataset.copyId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      flash(btn, "copied");
+    } catch {
+      flash(btn, legacyCopy(url) ? "copied" : "failed");
+    }
   });
 </script>
 
@@ -72,6 +90,10 @@ const { id, label, title, bannerImage, articleTitle } = Astro.props;
 
   .copy-btn.copied {
     color: rgb(0, 233, 233);
+  }
+
+  .copy-btn.failed {
+    color: #e5484d;
   }
 
   .copy-btn.copied .icon {
