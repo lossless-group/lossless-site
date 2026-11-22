@@ -10,6 +10,7 @@ import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import Hero from '@components/basics/Hero.astro';
 import AnimationWrapper from '@components/basics/AnimationWrapper.astro';
+import TagChip from '@components/tool-components/TagChip.astro';
 import { processEntries } from '@utils/slugify';
 
 const entriesRaw = await getCollection('keeping-up');
@@ -52,6 +53,7 @@ const items = entries
       href: `/keeping-up/${entry.slug}`,
       title: (data.title as string) || entry.data?.title || entry.id,
       lede: (data.lede as string) || (data.description as string) || '',
+      favicon: typeof data.og_favicon === 'string' ? data.og_favicon : '',
       dateIso,
       dateDisplay,
       tags
@@ -91,21 +93,28 @@ const frontmatter = {
         {items.map((item) => (
           <li class="keeping-up-item">
             <a href={item.href} class="keeping-up-link">
-              <div class="keeping-up-row">
-                {item.dateDisplay && (
-                  <time class="keeping-up-date" datetime={item.dateIso}>{item.dateDisplay}</time>
+              <div class="keeping-up-icon" aria-hidden="true">
+                {item.favicon ? (
+                  <img src={item.favicon} alt="" width="40" height="40" loading="lazy" decoding="async" />
+                ) : (
+                  <span class="keeping-up-icon-fallback">{item.title.charAt(0)}</span>
                 )}
-                <h3 class="keeping-up-title">{item.title}</h3>
               </div>
-              {item.lede && <p class="keeping-up-lede">{item.lede}</p>}
-              {item.tags.length > 0 && (
-                <ul class="keeping-up-tags">
-                  {item.tags.map((tag) => (
-                    <li class="keeping-up-tag">{tag}</li>
-                  ))}
-                </ul>
-              )}
+              <div class="keeping-up-body">
+                <div class="keeping-up-row">
+                  {item.dateDisplay && (
+                    <time class="keeping-up-date" datetime={item.dateIso}>{item.dateDisplay}</time>
+                  )}
+                  <h3 class="keeping-up-title">{item.title}</h3>
+                </div>
+                {item.lede && <p class="keeping-up-lede">{item.lede}</p>}
+              </div>
             </a>
+            {item.tags.length > 0 && (
+              <div class="keeping-up-tags">
+                {item.tags.map((tag) => <TagChip tagString={tag} />)}
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -151,10 +160,41 @@ const frontmatter = {
   }
 
   .keeping-up-link {
-    display: block;
-    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 0.5rem;
     text-decoration: none;
     color: inherit;
+  }
+
+  .keeping-up-body {
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* Logo tile, matching the icon tile on Up and Running cards */
+  .keeping-up-icon {
+    flex-shrink: 0;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 0.6rem;
+    display: grid;
+    place-items: center;
+    background: color-mix(in oklab, var(--clr-lossless-accent--brightest), transparent 88%);
+    overflow: hidden;
+  }
+
+  .keeping-up-icon img {
+    width: 2.25rem;
+    height: 2.25rem;
+    object-fit: contain;
+  }
+
+  .keeping-up-icon-fallback {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--clr-lossless-accent--brightest);
   }
 
   .keeping-up-row {
@@ -187,21 +227,12 @@ const frontmatter = {
     line-height: 1.5;
   }
 
+  /* Tags sit outside the link: TagChip is a button and its click handler would
+     otherwise cancel navigation. Indented to line up with the text column. */
   .keeping-up-tags {
-    list-style: none;
-    padding: 0;
-    margin: 0.75rem 0 0 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .keeping-up-tag {
-    font-size: 0.75rem;
-    padding: 0.15rem 0.55rem;
-    border-radius: 1rem;
-    background: color-mix(in oklab, var(--clr-lossless-primary-light), transparent 85%);
-    color: var(--clr-lossless-primary-light);
+    padding: 0 1.5rem 1rem calc(1.5rem + 3.25rem + 1rem - 3px);
   }
 
   @media (max-width: 640px) {
@@ -209,7 +240,10 @@ const frontmatter = {
       padding: 0 1rem;
     }
     .keeping-up-link {
-      padding: 1rem 1.25rem;
+      padding: 1rem 1.25rem 0.5rem;
+    }
+    .keeping-up-tags {
+      padding: 0 1.25rem 1rem;
     }
   }
 </style>
