@@ -6,7 +6,8 @@
     {"Projects": "/projects"}
   ],
   "Vibe Coding Resources": [
-    {"Reminders": "/thread/reminders"},
+    {"context-v.dev": "https://context-v.dev"},
+    {"Context-V Corpus": "https://lossless-group.github.io/context-v-corpus/"},
     {"Prompts": "/thread/prompts"},
     {"Specifications": "/thread/specs"}
   ]

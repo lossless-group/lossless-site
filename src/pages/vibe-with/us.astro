@@ -9,7 +9,7 @@
  */
 import { Image } from "astro:assets";
 import Layout from "@layouts/Layout.astro";
-import IconHeaderMessageOvalProcess from "@components/basics/messages/IconHeaderMessageOvalProcess.astro";
+import ContextVFlow from "@components/basics/ContextVFlow.astro";
 import Einstein from "@assets/visuals/imageOf/imageOf__Albert-Einstein.png";
 import SplashHeroCard from "@components/tool-components/SplashHeroCard.astro";
 import { fetchOgMetadata } from "@utils/fetchOgMetadata";
@@ -69,10 +69,7 @@ const frontmatter = {
 
   <section class="vibe-with-us-section" style="--vibe-section-top-margin: 2.5rem;">
     <div class="vibe-container">
-       <IconHeaderMessageOvalProcess 
-          jsonPath="messages/vibeCodingIconHeaderMessages.json"
-          style="margin: 0 auto;"
-       />
+       <ContextVFlow />
     </div>
  </section>
 </Layout>

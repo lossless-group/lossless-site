@@ -1,0 +1,196 @@
+<svg class="cvflow" viewBox="6 46 1059 548" data-reader-fit="intrinsic-height" data-layout-contract="readable-v2" role="img" lang="en" aria-labelledby="cvflow-archify-diagram-title cvflow-archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="cvflow-archify-diagram-title">The flow, in files</title>
+        <desc id="cvflow-archify-diagram-description">The context-v cycle as folders. Explorations lead to specs, directly or down through decisions; one spec leads to many plans, then loops (as a team) or prompts (solo). Each working session ends in a handoff the next session picks up from, and all of it leads to reflection. Reflection leads to issues, which become reminders, blueprints, and agent skills; those converge into the next cycle, which feeds back into explorations, specs, and plans. Explorations open the cycle; issues close it.</desc>
+        <!-- Definitions -->
+        <defs>
+          <marker id="cvflow-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="cvflow-arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="cvflow-arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="cvflow-arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <marker id="cvflow-cyclehead" markerWidth="8" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" class="m-emphasis"/></marker></defs>
+
+        <!-- Background Grid -->
+        <!-- Swimlanes -->
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="cvflow-lane-0" x="40" y="52" width="1019" height="278" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / Build: decide, then make</text>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="cvflow-lane-1" x="40" y="350" width="1019" height="238" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="372" class="t-dim" font-size="10" font-weight="600">02 / Learn: what the cycle taught us</text>
+
+        <!-- Phase headers -->
+
+
+        <!-- Workflow groups -->
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="group" data-composition-frame-id="cvflow-group-0" x="169.8" y="90" width="132" height="236" rx="9" class="c-lane" stroke-width="1"/>
+        <text x="179.8" y="88" class="t-messagebus" font-size="7" font-weight="600">Before the spec</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="group" data-composition-frame-id="cvflow-group-1" x="658.2" y="90" width="132" height="236" rx="9" class="c-lane" stroke-width="1"/>
+        <text x="668.2" y="88" class="t-backend" font-size="7" font-weight="600">Build it</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="group" data-composition-frame-id="cvflow-group-2" x="506.20000000000005" y="388" width="132" height="196" rx="9" class="c-lane" stroke-width="1"/>
+        <text x="516.2" y="386" class="t-messagebus" font-size="7" font-weight="600">Lasting know-how</text>
+
+        <!-- Edge paths -->
+        <path data-edge-from="decide" data-edge-to="spec" data-edge-key="0" data-edge-id="cvflow-decide-spec" data-edge-role="main" data-composition-points="297.8,249;313.8,249;313.8,209;329.8,209" d="M 297.8 249 L 313.8 249 L 313.8 209 L 329.8 209" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="explore" data-edge-to="decide" data-edge-key="1" data-edge-id="cvflow-explore-decide" data-edge-role="main" data-composition-points="235.8,195;235.8,223" d="M 235.8 195 L 235.8 223" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="explore" data-edge-to="spec" data-edge-key="2" data-edge-id="cvflow-explore-spec" data-edge-role="branch" data-composition-points="297.8,169;391.8,169;391.8,183" d="M 297.8 169 L 391.8 169 L 391.8 183" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="handoffs" data-edge-to="reflect" data-edge-key="3" data-edge-id="cvflow-handoffs-reflect" data-edge-role="branch" data-composition-points="786.2,299;802.2,299;802.2,219;818.2,219" d="M 786.2 299 L 802.2 299 L 802.2 219 L 818.2 219" class="a-dashed" stroke-width="1.4" marker-end="url(#cvflow-arrowhead-dashed)"/>
+        <path data-edge-from="implement" data-edge-to="handoffs" data-edge-label="next session" data-edge-key="4" data-edge-id="cvflow-implement-handoffs" data-edge-role="branch" data-composition-points="724.2,235;724.2,273" d="M 724.2 235 L 724.2 273" class="a-dashed" stroke-width="1.4" marker-end="url(#cvflow-arrowhead-dashed)"/>
+        <path data-edge-from="implement" data-edge-to="reflect" data-edge-key="5" data-edge-id="cvflow-implement-reflect" data-edge-role="branch" data-composition-points="786.2,209;818.2,209" d="M 786.2 209 L 818.2 209" class="a-dashed" stroke-width="1.4" marker-end="url(#cvflow-arrowhead-dashed)"/>
+        <path data-edge-from="issues" data-edge-to="blueprints" data-edge-key="6" data-edge-id="cvflow-issues-blueprints" data-edge-role="branch" data-composition-points="818.2,487;634.2,487" d="M 818.2 487 L 634.2 487" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="issues" data-edge-to="reminders" data-edge-key="7" data-edge-id="cvflow-issues-reminders" data-edge-role="branch" data-composition-points="818.2,477;726.2,477;726.2,417;634.2,417" d="M 818.2 477 L 726.2 477 L 726.2 417 L 634.2 417" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="issues" data-edge-to="skills" data-edge-key="8" data-edge-id="cvflow-issues-skills" data-edge-role="branch" data-composition-points="818.2,497;726.2,497;726.2,557;634.2,557" d="M 818.2 497 L 726.2 497 L 726.2 557 L 634.2 557" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="loop" data-edge-to="reflect" data-edge-key="9" data-edge-id="cvflow-loop-reflect" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="786.2,119;880.2,119;880.2,183" d="M 786.2 119 L 880.2 119 L 880.2 183" class="a-emphasis" stroke-width="1.8" marker-end="url(#cvflow-arrowhead-emphasis)"/>
+        <path data-edge-from="plan" data-edge-to="implement" data-edge-key="10" data-edge-id="cvflow-plan-implement" data-composition-routing="workflow-v2-auto" data-edge-role="branch" data-composition-points="634.2,209;662.2,209" d="M 634.2 209 L 662.2 209" class="a-dashed" stroke-width="1.4" marker-end="url(#cvflow-arrowhead-dashed)"/>
+        <path data-edge-from="plan" data-edge-to="loop" data-edge-key="11" data-edge-id="cvflow-plan-loop" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="572.2,183;572.2,119;662.2,119" d="M 572.2 183 L 572.2 119 L 662.2 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#cvflow-arrowhead-emphasis)"/>
+        <path data-edge-from="reflect" data-edge-to="issues" data-edge-key="12" data-edge-id="cvflow-reflect-issues" data-edge-role="branch" data-composition-points="880.2,235;880.2,461" d="M 880.2 235 L 880.2 461" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+        <path data-edge-from="spec" data-edge-to="plan" data-edge-label="1 → many" data-edge-key="13" data-edge-id="cvflow-spec-plan" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="453.8,209;510.20000000000005,209" d="M 453.8 209 L 510.20000000000005 209" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+
+        <!-- Nodes -->
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/decisions/" aria-label="decisions/: 18 files"><g id="cvflow-node-decide" data-node-id="cvflow-decide" data-node-label="decisions/" data-node-kind="frontend" data-node-sublabel="decide · 18" data-node-context="Build: decide, then make › Before the spec">
+          <title>decisions/ · decide · 18 · Build: decide, then make › Before the spec</title>
+          <rect x="173.8" y="223" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="173.8" y="223" width="124" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="235.8" y="244" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">decisions/</text>
+          <text data-detail="context" x="235.8" y="261" class="t-muted" font-size="8" text-anchor="middle">decide · 18</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/explorations/" aria-label="explorations/: 133 files"><path d="M 510.2 417.0 L 484.2 417.0" class="a-default" stroke-width="1.4"/><path d="M 510.2 487.0 L 484.2 487.0" class="a-default" stroke-width="1.4"/><path d="M 510.2 557.0 L 484.2 557.0" class="a-default" stroke-width="1.4"/><path d="M 484.2 417.0 L 484.2 557.0" class="a-default" stroke-width="1.4"/><path d="M 484.2 487.0 L 435.8 487.0" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/><path d="M 391.8 445.0 L 391.8 235.0" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/><path d="M 424.0 460.0 L 424.0 340.0 L 540.2 340.0 L 540.2 245.0" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/><path d="M 349.8 487.0 L 22.0 487.0 L 22.0 169.0 L 173.8 169.0" class="a-default" stroke-width="1.4" marker-end="url(#cvflow-arrowhead)"/>
+<g id="cvflow-node-explore" data-node-id="cvflow-explore" data-node-label="explorations/" data-node-kind="external" data-node-sublabel="explore · 133" data-node-context="Build: decide, then make › Before the spec">
+          <title>explorations/ · explore · 133 · Build: decide, then make › Before the spec</title>
+          <rect x="173.8" y="143" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="173.8" y="143" width="124" height="52" rx="6" class="c-external" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="235.8" y="164" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">explorations/</text>
+          <text data-detail="context" x="235.8" y="181" class="t-muted" font-size="8" text-anchor="middle">explore · 133</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/specs/" aria-label="specs/: 144 files"><g id="cvflow-node-spec" data-node-id="cvflow-spec" data-node-label="specs/" data-node-kind="frontend" data-node-sublabel="spec it · 144" data-node-context="Build: decide, then make">
+          <title>specs/ · spec it · 144 · Build: decide, then make</title>
+          <rect x="329.8" y="183" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="329.8" y="183" width="124" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="391.8" y="204" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">specs/</text>
+          <text data-detail="context" x="391.8" y="221" class="t-muted" font-size="8" text-anchor="middle">spec it · 144</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/plans/" aria-label="plans/: 125 files"><g id="cvflow-node-plan" data-node-id="cvflow-plan" data-node-label="plans/" data-node-kind="frontend" data-node-sublabel="plan it · 125" data-node-context="Build: decide, then make">
+          <title>plans/ · plan it · 125 · Build: decide, then make</title><rect x="518.2" y="193.0" width="108.0" height="52.0" rx="6" class="c-frontend cvflow-stack" stroke-width="1.2"/><rect x="514.2" y="188.0" width="116.0" height="52.0" rx="6" class="c-frontend cvflow-stack" stroke-width="1.2"/>
+          <rect x="510.20000000000005" y="183" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="510.20000000000005" y="183" width="124" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="572.2" y="204" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">plans/</text>
+          <text data-detail="context" x="572.2" y="221" class="t-muted" font-size="8" text-anchor="middle">plan it · 125</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/handoffs/" aria-label="handoffs/: 14 files"><g id="cvflow-node-handoffs" data-node-id="cvflow-handoffs" data-node-label="handoffs/" data-node-kind="backend" data-node-sublabel="pick it back up · 14" data-node-context="Build: decide, then make › Build it">
+          <title>handoffs/ · pick it back up · 14 · Build: decide, then make › Build it</title>
+          <rect x="662.2" y="273" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="662.2" y="273" width="124" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="724.2" y="294" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">handoffs/</text>
+          <text data-detail="context" x="724.2" y="311" class="t-muted" font-size="8" text-anchor="middle">pick it back up · 14</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/prompts/" aria-label="prompts/: 122 files"><g id="cvflow-node-implement" data-node-id="cvflow-implement" data-node-label="prompts/" data-node-kind="backend" data-node-sublabel="solo · 122" data-node-context="Build: decide, then make › Build it">
+          <title>prompts/ · solo · 122 · Build: decide, then make › Build it</title>
+          <rect x="662.2" y="183" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="662.2" y="183" width="124" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="724.2" y="204" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">prompts/</text>
+          <text data-detail="context" x="724.2" y="221" class="t-muted" font-size="8" text-anchor="middle">solo · 122</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/loops/" aria-label="loops/: 23 files"><g id="cvflow-node-loop" data-node-id="cvflow-loop" data-node-label="loops/" data-node-kind="backend" data-node-sublabel="as a team · 23" data-node-context="Build: decide, then make › Build it">
+          <title>loops/ · as a team · 23 · Build: decide, then make › Build it</title>
+          <rect x="662.2" y="93" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="662.2" y="93" width="124" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="724.2" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">loops/</text>
+          <text data-detail="context" x="724.2" y="131" class="t-muted" font-size="8" text-anchor="middle">as a team · 23</text>
+        </g></a>
+
+        <g id="cvflow-node-reflect" data-node-id="cvflow-reflect" data-node-label="Reflect" tabindex="0" role="button" aria-label="Focus Reflect, what did we learn?, Build: decide, then make" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="what did we learn?" data-node-context="Build: decide, then make">
+          <title>Reflect · what did we learn? · Build: decide, then make</title>
+          <rect x="818.2" y="183" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="818.2" y="183" width="124" height="52" rx="6" class="c-messagebus" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="880.2" y="204" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Reflect</text>
+          <text data-detail="context" x="880.2" y="221" class="t-muted" font-size="8" text-anchor="middle">what did we learn?</text>
+        </g>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/blueprints/" aria-label="blueprints/: 77 files"><g id="cvflow-node-blueprints" data-node-id="cvflow-blueprints" data-node-label="blueprints/" data-node-kind="database" data-node-sublabel="the pattern · 77" data-node-context="Learn: what the cycle taught us › Lasting know-how">
+          <title>blueprints/ · the pattern · 77 · Learn: what the cycle taught us › Lasting know-how</title>
+          <rect x="510.20000000000005" y="461" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="510.20000000000005" y="461" width="124" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="572.2" y="482" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">blueprints/</text>
+          <text data-detail="context" x="572.2" y="499" class="t-muted" font-size="8" text-anchor="middle">the pattern · 77</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/reminders/" aria-label="reminders/: 103 files"><g id="cvflow-node-reminders" data-node-id="cvflow-reminders" data-node-label="reminders/" data-node-kind="database" data-node-sublabel="don't repeat it · 103" data-node-context="Learn: what the cycle taught us › Lasting know-how">
+          <title>reminders/ · don't repeat it · 103 · Learn: what the cycle taught us › Lasting know-how</title>
+          <rect x="510.20000000000005" y="391" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="510.20000000000005" y="391" width="124" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="572.2" y="412" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">reminders/</text>
+          <text data-detail="context" x="572.2" y="429" class="t-muted" font-size="8" text-anchor="middle">don't repeat it · 103</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/agent-skills/" aria-label="agent-skills/: 165 files"><g id="cvflow-node-skills" data-node-id="cvflow-skills" data-node-label="agent-skills/" data-node-kind="database" data-node-sublabel="know-how to load · 165" data-node-context="Learn: what the cycle taught us › Lasting know-how">
+          <title>agent-skills/ · know-how to load · 165 · Learn: what the cycle taught us › Lasting know-how</title>
+          <rect x="510.20000000000005" y="531" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="510.20000000000005" y="531" width="124" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="572.2" y="552" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">agent-skills/</text>
+          <text data-detail="context" x="572.2" y="569" class="t-muted" font-size="8" text-anchor="middle">know-how to load · 165</text>
+        </g></a>
+
+        <a class="cvflow-link" href="https://lossless-group.github.io/context-v-corpus/kind/issues/" aria-label="issues/: 124 files"><g id="cvflow-node-issues" data-node-id="cvflow-issues" data-node-label="issues/" data-node-kind="external" data-node-sublabel="what broke · 124" data-node-context="Learn: what the cycle taught us">
+          <title>issues/ · what broke · 124 · Learn: what the cycle taught us</title>
+          <rect x="818.2" y="461" width="124" height="52" rx="6" class="c-mask"/>
+          <rect x="818.2" y="461" width="124" height="52" rx="6" class="c-external" stroke-width="1.5"/>
+          
+          <text data-node-label="" data-detail-anchor="" x="880.2" y="482" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">issues/</text>
+          <text data-detail="context" x="880.2" y="499" class="t-muted" font-size="8" text-anchor="middle">what broke · 124</text>
+        </g></a>
+
+        <!-- Edge labels -->
+
+
+
+
+        <g data-detail="context" data-edge-from="implement" data-edge-to="handoffs" data-edge-label="next session" data-edge-key="4" data-edge-id="cvflow-implement-handoffs">
+          <rect x="690.4000000000001" y="244" width="67.6" height="14" rx="3" class="c-mask"/>
+          <text x="724.2" y="254" class="t-edge-dashed" font-size="8" text-anchor="middle">next session</text>
+        </g>
+
+
+
+
+
+
+
+
+        <g data-detail="context" data-edge-from="spec" data-edge-to="plan" data-edge-label="1 → many" data-edge-key="13" data-edge-id="cvflow-spec-plan">
+          <rect x="457.8" y="189" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="482" y="199" class="t-edge-default" font-size="8" text-anchor="middle">1 → many</text>
+        </g>
+
+        <!-- Legend -->
+
+      
+    <g class="cvflow-next" aria-label="The next cycle: reminders, blueprints, and agent skills feed back into explorations, specs, and plans">
+      <circle cx="391.8" cy="487.0" r="42" class="c-mask"/>
+      <path d="M 411.5 449.9 A 42 42 0 0 1 411.5 524.1" class="cvflow-cycle" marker-end="url(#cvflow-cyclehead)"/>
+      <path d="M 372.1 524.1 A 42 42 0 0 1 372.1 449.9" class="cvflow-cycle" marker-end="url(#cvflow-cyclehead)"/>
+      <text x="391.8" y="486.0" class="t-primary" font-size="10.5" font-weight="600" text-anchor="middle">next cycle</text>
+      <text x="391.8" y="499.0" class="t-muted" font-size="8" text-anchor="middle">starts here</text>
+    </g></svg>

@@ -1,0 +1,120 @@
+---
+/**
+ * The context-v cycle as folders: the Archify diagram from the context-v corpus
+ * splash (context-v-corpus/splash/src/components/corpus/CorpusFlow.astro), shown
+ * on /vibe-with/us. Each folder links to its kind page on the corpus splash.
+ *
+ * The SVG is a SNAPSHOT of the splash's rendered diagram, counts included
+ * (taken 2026-11-21). The site doesn't read the corpus, so the counts don't
+ * update on their own. To refresh: build the corpus splash, copy the
+ * <svg class="cvflow"> element out of dist/index.html, and rewrite its
+ * href="/context-v-corpus/ prefix to https://lossless-group.github.io/context-v-corpus/.
+ *
+ * Colors map Archify's classes to the same roles the splash uses: frontend =
+ * prep, external = journey, backend = build, messagebus/database = reflection.
+ */
+import flowSvg from '../../assets/diagrams/context-v-flow.svg?raw';
+
+const CORPUS_URL = 'https://lossless-group.github.io/context-v-corpus/';
+---
+
+<figure class="cvflow-wrap">
+  <div class="cvflow-scroll" set:html={flowSvg} />
+  <figcaption class="cvflow-cap">
+    <span><span class="cvflow-key cvflow-key--prep"></span>prep</span>
+    <span><span class="cvflow-key cvflow-key--journey"></span>journey</span>
+    <span><span class="cvflow-key cvflow-key--build"></span>build</span>
+    <span><span class="cvflow-key cvflow-key--reflect"></span>reflection</span>
+    <a class="cvflow-cap__note" href={CORPUS_URL}>Click a folder to read every file of that kind in the corpus</a>
+  </figcaption>
+</figure>
+
+<style>
+  .cvflow-wrap {
+    /* The splash's dark palette, kept local so the diagram reads the same here. */
+    --cvf-bg: #161a23;
+    --cvf-text: #e8eaef;
+    --cvf-text-soft: #d4d8e0;
+    --cvf-text-dim: #8b91a3;
+    --cvf-border: rgba(232, 234, 239, 0.08);
+    --cvf-border-strong: rgba(232, 234, 239, 0.18);
+    --cvf-prep: #fbbf24;
+    --cvf-journey: #a3e635;
+    --cvf-reflect: #f97316;
+
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--cvf-border);
+    border-radius: 0.75rem;
+    background: var(--cvf-bg);
+  }
+  .cvflow-scroll { overflow-x: auto; }
+
+  .cvflow-scroll :global(svg.cvflow) {
+    display: block; width: 100%; min-width: 760px; height: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --mask: var(--cvf-bg);
+    --lane-fill: color-mix(in oklab, var(--cvf-text) 2%, transparent);
+    --lane-stroke: var(--cvf-border-strong);
+    --text: var(--cvf-text);
+    --text-muted: var(--cvf-text-soft);
+    --text-dim: var(--cvf-text-dim);
+    --arrow: var(--cvf-text-dim);
+    --arrow-emphasis: var(--cvf-prep);
+    --frontend-stroke: var(--cvf-prep);
+    --frontend-fill: color-mix(in oklab, var(--cvf-prep) 12%, var(--cvf-bg));
+    --external-stroke: var(--cvf-journey);
+    --external-fill: color-mix(in oklab, var(--cvf-journey) 10%, var(--cvf-bg));
+    --backend-stroke: var(--cvf-text-soft);
+    --backend-fill: color-mix(in oklab, var(--cvf-text) 6%, var(--cvf-bg));
+    --messagebus-stroke: var(--cvf-reflect);
+    --messagebus-fill: color-mix(in oklab, var(--cvf-reflect) 18%, var(--cvf-bg));
+    --database-stroke: var(--cvf-reflect);
+    --database-fill: color-mix(in oklab, var(--cvf-reflect) 8%, var(--cvf-bg));
+  }
+  .cvflow-scroll :global(.cvflow .c-mask) { fill: var(--mask); stroke: none; }
+  .cvflow-scroll :global(.cvflow .c-lane) { fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6, 6; }
+  .cvflow-scroll :global(.cvflow .c-lane-rule) { stroke: var(--lane-stroke); fill: none; opacity: 0.7; }
+  .cvflow-scroll :global(.cvflow .c-lane-wash) { fill: var(--lane-fill); stroke: none; }
+  .cvflow-scroll :global(.cvflow .c-frontend) { fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
+  .cvflow-scroll :global(.cvflow .c-backend) { fill: var(--backend-fill); stroke: var(--backend-stroke); }
+  .cvflow-scroll :global(.cvflow .c-database) { fill: var(--database-fill); stroke: var(--database-stroke); }
+  .cvflow-scroll :global(.cvflow .c-messagebus) { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
+  .cvflow-scroll :global(.cvflow .c-external) { fill: var(--external-fill); stroke: var(--external-stroke); }
+  .cvflow-scroll :global(.cvflow .t-primary) { fill: var(--text); }
+  .cvflow-scroll :global(.cvflow .t-muted) { fill: var(--text-muted); }
+  .cvflow-scroll :global(.cvflow .t-dim) { fill: var(--text-dim); }
+  .cvflow-scroll :global(.cvflow .t-backend) { fill: var(--cvf-text-soft); }
+  .cvflow-scroll :global(.cvflow .t-messagebus) { fill: var(--cvf-reflect); }
+  /* Edge labels ("1 → many", "next session"): Archify classes the splash never
+     styled, so they fell back to black on the dark background. */
+  .cvflow-scroll :global(.cvflow .t-edge-default),
+  .cvflow-scroll :global(.cvflow .t-edge-dashed) { fill: var(--cvf-text-soft); font-weight: 600; letter-spacing: 0.02em; }
+  .cvflow-scroll :global(.cvflow .t-edge-emphasis) { fill: var(--cvf-prep); font-weight: 600; }
+  .cvflow-scroll :global(.cvflow .a-default) { stroke: var(--arrow); fill: none; }
+  .cvflow-scroll :global(.cvflow .a-emphasis) { stroke: var(--arrow-emphasis); fill: none; }
+  .cvflow-scroll :global(.cvflow .a-dashed) { stroke: var(--arrow); fill: none; stroke-dasharray: 4, 4; }
+  .cvflow-scroll :global(.cvflow .m-default),
+  .cvflow-scroll :global(.cvflow .m-dashed) { fill: var(--arrow); }
+  .cvflow-scroll :global(.cvflow .m-emphasis) { fill: var(--arrow-emphasis); }
+  .cvflow-scroll :global(.cvflow .cvflow-cycle) { fill: none; stroke: var(--arrow-emphasis); stroke-width: 2; }
+  .cvflow-scroll :global(.cvflow .cvflow-stack) { opacity: 0.7; }
+  .cvflow-scroll :global(.cvflow .cvflow-link) { cursor: pointer; }
+  .cvflow-scroll :global(.cvflow .cvflow-link rect:not(.c-mask)) { transition: stroke-width 0.15s ease; }
+  .cvflow-scroll :global(.cvflow .cvflow-link:hover rect:not(.c-mask)),
+  .cvflow-scroll :global(.cvflow .cvflow-link:focus-visible rect:not(.c-mask)) { stroke-width: 2.6; }
+
+  .cvflow-cap {
+    display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.75rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem; letter-spacing: 0.06em; color: var(--cvf-text-dim);
+  }
+  .cvflow-cap > span { display: inline-flex; align-items: center; gap: 6px; }
+  .cvflow-key { width: 10px; height: 10px; border-radius: 2px; border: 1.5px solid; display: inline-block; }
+  .cvflow-key--prep { border-color: var(--cvf-prep); }
+  .cvflow-key--journey { border-color: var(--cvf-journey); }
+  .cvflow-key--build { border-color: var(--cvf-text-soft); }
+  .cvflow-key--reflect { border-color: var(--cvf-reflect); }
+  .cvflow-cap__note { margin-left: auto; color: var(--cvf-text-dim); text-decoration: none; }
+  .cvflow-cap__note:hover { color: var(--cvf-text); text-decoration: underline; }
+</style>
