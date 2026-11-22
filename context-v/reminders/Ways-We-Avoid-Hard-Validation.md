@@ -8,7 +8,8 @@ date_first_published:
 date_last_updated: 
 at_semantic_version: 0.0.0.1
 status: Draft
-augmented_with: Windsurf Cascade on GPT 4.1
+augmented_with:
+  - Windsurf Cascade on GPT 4.1
 category: Prompts
 image_prompt: "A limousine convertable with a group of young office workers is driving along a road. The road is layed out traveling from the bottom to the top of the image. The road is several lanes.  The limousine is actively moving to the left to avoid an 'Errors' sign in the right lane. The sign is very prominant and colored red and yellow."
 date_created: 2025-05-10
@@ -18,6 +19,9 @@ authors:
   - Michael Staton
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-14_banner_image_Ways-We-Avoid-Hard-Validation_41144485-5d75-4d1d-8ed7-2744c12c4118_Nyo-YvNoM.webp
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-14_portrait_image_Ways-We-Avoid-Hard-Validation_94a115d4-e86c-483d-a096-55ba0a292e06_z13j0PbQP.webp
+site_uuid: 71ce200f-d1f4-4757-9146-25831c00447c
+hex_code: ga2yt2
+type: Reminders
 ---
 
 # Slugs

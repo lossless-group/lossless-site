@@ -8,8 +8,9 @@ date_first_published: null
 date_last_updated: 2025-05-25
 date_first_run: 2025-05-25
 at_semantic_version: 1.0.0
-status: In-Progress
-augmented_with: 'Windsurf Cascade on Claude 3.5 Sonnet'
+status: Implementing
+augmented_with:
+  - 'Windsurf Cascade on Claude 3.5 Sonnet'
 user_name: 'Michael Staton'
 category: Development
 date_created: 2025-05-25
@@ -25,6 +26,8 @@ authors:
   - Michael Staton
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-25_banner_image_Maintain-Conditional-Client-Specific-Content-Paths_e443e9a8-285f-4e34-885b-277b36116fbc_Uz4GZZZhQ.webp
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-25_portrait_image_Maintain-Conditional-Client-Specific-Content-Paths_5125448e-b5fb-4b25-9cfa-0b9000251d3d_tRCYIx58N.webp
+hex_code: sip5qp
+type: Plans
 ---
 
 # Client-Specific Content Routing Implementation

@@ -9,11 +9,14 @@ slug: maintain-directives-in-extended-markdown-render-pipeline
 at_semantic_version: 0.0.0.1
 authors:
   - Michael Staton
-augmented_with: "Claude Code on Claude Sonnet 4"
+augmented_with:
+  - "Claude Code on Claude Sonnet 4"
 image_prompt: "A robot representing AI is in an intersection directing traffic at a busy intersection.  Instead of cars there are flying web components with various UI patterns."
 banner_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Maintain-Directives-in-Extended-Markdown-Render-Pipeline_banner_image_1755814211355_AEvMbqrBg.webp"
 portrait_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Maintain-Directives-in-Extended-Markdown-Render-Pipeline_portrait_image_1755814218739_6ysZM_lpX.webp"
 square_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Maintain-Directives-in-Extended-Markdown-Render-Pipeline_square_image_1755814233744_VhZPczidH.webp"
+hex_code: u0fwz3
+type: Blueprints
 ---
 # Maintain Directives as part of our Extended Markdown
 

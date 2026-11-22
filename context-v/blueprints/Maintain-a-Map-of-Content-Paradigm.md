@@ -1,6 +1,6 @@
 ---
 title: "Maintain a Map of Content Paradigm"
-date: 2025-01-25
+date_authored_initial_draft: 2025-01-25
 date_created: 2025-01-25
 date_modified: 2025-09-25
 authors:
@@ -11,12 +11,16 @@ lede: "Implement MOC directive-driven content capacity management for centralize
 slug: maintain-map-of-content
 at_semantic_version: 1.0.0
 usageCount: "1"
-augmented_with: "Claude 4 Sonnet"
+augmented_with:
+  - "Claude 4 Sonnet"
 publish: true
 image_prompt: "A robot and a software engineering are in a military command center and they are looking at all kind of maps on big screens.  One of the biggest maps is a data model visualization with data tables all over the place."
 banner_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-a-Map-of-Content-Paradigm_banner_image_1758826675892_ivLpEoPaq.webp"
 portrait_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-a-Map-of-Content-Paradigm_portrait_image_1758826680248_4kPBTSoUi.webp"
 square_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-a-Map-of-Content-Paradigm_square_image_1758826721101_ll3OgqJ8o.webp"
+site_uuid: cb864e11-3ad3-4e92-beaf-a2e9163a7a8e
+hex_code: f6lc7g
+type: Blueprints
 ---
 
 

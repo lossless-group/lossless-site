@@ -7,7 +7,8 @@ date_authored_final_draft: null
 date_first_published: null
 at_semantic_version: 0.0.0.1
 status: Routine
-augmented_with: 'Windsurf Cascade on Claude 3.5 Sonnet'
+augmented_with:
+  - 'Windsurf Cascade on Claude 3.5 Sonnet'
 category: Prompts
 image_prompt: 'A digital map connecting software dependencies, YAML files, and project modules with glowing lines—highlighting constraint rules and error prevention.'
 date_created: 2025-03-17
@@ -18,6 +19,8 @@ tags: [Workflow, YAML, YAML-Handling, YAML-Conventions, Bug-Prevention]
 authors:
   - Michael Staton
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-05_banner_image_Map-of-Dependencies_0b78c3ff-e88c-41d6-88ff-792df62cc9b2_FIzptYWsM.webp
+hex_code: uu6tny
+type: Reminders
 ---
 [[Tooling/Software Development/Programming Languages/Libraries/PrismJS]]
 

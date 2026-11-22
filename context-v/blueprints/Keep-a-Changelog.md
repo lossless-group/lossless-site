@@ -7,9 +7,10 @@ date_authored_final_draft:
 date_first_published: 2025-03-18
 date_last_updated: 2025-01-17
 at_semantic_version: 0.0.0.2
-status: Implemented
+status: Shipped
 publish: true
-augmented_with: Windsurf Cascade on Claude 3.5 Sonnet
+augmented_with:
+  - Windsurf Cascade on Claude 3.5 Sonnet
 category: Specification
 date_created: 2025-03-16
 date_modified: 2025-01-17
@@ -20,6 +21,8 @@ authors:
 image_prompt: A classic ledger or digital timeline, with entries being added in sequence. The visual theme is history and transparency, underscoring the importance of tracking changes over time.
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/specs/2025-05-05_banner_image_Keep-a-Changelog_b591b9c8-71ba-40d4-90b1-863f9ac9112d_C0TI_Ka5B.webp
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/specs/2025-05-05_portrait_image_Keep-a-Changelog_54d982e1-ca3c-42d0-b828-b5021db219f1_9dy21XO7dl.webp
+hex_code: 42qi3a
+type: Blueprints
 ---
 
 # Keep a Changelog: A Comprehensive Blueprint

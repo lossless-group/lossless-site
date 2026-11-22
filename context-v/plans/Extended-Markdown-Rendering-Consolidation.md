@@ -2,12 +2,16 @@
 title: 'Refactor Plan: Consolidate Callout Processing to Pipeline Architecture'
 date_created: '2025-04-03'
 date_modified: '2025-05-26'
-type: refactor-plan
-status: proposed
+type: Plans
+status: Proposed
 affects:
   - site/src/utils/markdown/plugins/remark-callout.ts
   - site/src/types/remark-callout-handler.d.ts
   - site/src/utils/markdown/callouts/*
+authors:
+  - Michael Staton
+site_uuid: bb0d5d9f-5988-42d0-919f-29858df1c189
+hex_code: 4yxonj
 ---
 
 # Non-Destructive Refactor Plan: Callout Processing Consolidation

@@ -9,7 +9,8 @@ date_first_published: null
 date_last_updated: null
 at_semantic_version: 0.0.1.0
 status: To-Do
-augmented_with: 'Windsurf Cascade on Claude 3.5 Sonnet'
+augmented_with:
+  - 'Windsurf Cascade on Claude 3.5 Sonnet'
 category: Prompts
 image_prompt: 'A detailed checklist and rulebook beside a prompt engineering workspace, with highlighted constraints, best-practice icons, and a glowing AI assistant. Visuals include sticky notes, error warnings, and a sense of meticulous order.'
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-05_portrait_image_Meticulous-Constraints-for-Every-Prompt_2e10e623-adc2-41c0-bcc7-adb765134103_1AwRLcVFu.webp
@@ -20,6 +21,8 @@ tags: [Prompt-Engineering, Code-Standards, Best-Practices, Error-Handling]
 authors:
   - Michael Staton
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-05_banner_image_Meticulous-Constraints-for-Every-Prompt_60ed0b4e-14ea-4606-bff4-d5f3d4e1a69f_ad-N8LWMu.webp
+hex_code: 1wbzel
+type: Reminders
 ---
 ## Before starting:
 

@@ -12,11 +12,14 @@ slug: maintain-figma-object-embeds-using-embed-kit
 at_semantic_version: 0.0.0.1
 authors:
   - Michael Staton
-augmented_with: Warp on Claude Sonnet 4.0
+augmented_with:
+  - Warp on Claude Sonnet 4.0
 image_prompt: A team of tiny robots is on a desk, taking a set of web UI components, and carrying them to the back of a computer monitor.  On the computer monitor, you can see beautiful UI mockups.
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Maintain-Figma-Object-Embeds-using-Embed-Kit_banner_image_1755815941823_YvitG--88.webp
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Maintain-Figma-Object-Embeds-using-Embed-Kit_portrait_image_1755815950469_UsSm3cibW.webp
 square_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Maintain-Figma-Object-Embeds-using-Embed-Kit_square_image_1755815958668_1lRXdMK02.webp
+hex_code: gtarch
+type: Blueprints
 ---
 
 

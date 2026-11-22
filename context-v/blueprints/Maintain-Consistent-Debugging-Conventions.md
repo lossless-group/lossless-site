@@ -10,7 +10,8 @@ date_first_published: null
 date_last_updated: null
 at_semantic_version: 0.0.0.1
 status: Draft
-augmented_with: Windsurf Cascade on Claude 3.7 Sonnet
+augmented_with:
+  - Windsurf Cascade on Claude 3.7 Sonnet
 category: Reminders
 tags: [Workflow]
 authors:
@@ -18,6 +19,9 @@ authors:
 image_prompt: "A human and a robot representing the concept of AI are on a factory floor. They are standing behind a conveyor belt. The conveyor belt is moving and is moving large ladybugs down the line. The human and the robot are in the exact same posture, holding a large hammer and swinging it down to squash the bugs. On the side of the conveyor belt down the line, the bugs are squashed or flattened. On the end of the conveyor belt, the flattened bugs are being collected in a nice box, but you can see the flattened bugs popping out of the top of the box. The mood is industrial and the conveyor belt is moving at a fast pace. The human and the robot are sweating but confident."
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-14_banner_image_Maintain-Consistent-Debugging-Conventions_1d7dfe25-4e01-4326-9375-07f18c5ac872_I_ScwOf-M.webp
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-14_portrait_image_Maintain-Consistent-Debugging-Conventions_1df44251-e46f-46f4-88c2-ad4e2f357f61_nq-qGWnFZ.webp
+site_uuid: 494778ed-8572-491b-b4e0-35efd5230fc3
+hex_code: utqhxi
+type: Blueprints
 ---
 
 # Markdown and AST Debugging System

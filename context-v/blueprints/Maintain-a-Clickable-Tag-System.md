@@ -9,11 +9,15 @@ at_semantic_version: 0.0.0.1
 usageCount: "0"
 authors:
   - Michael Staton
-augmented_with: "Trae AI"
+augmented_with:
+  - "Trae AI"
 image_prompt: "A set of robots is driving in a convertible down a highway, starting from the bottom and driving into the distance. The sides of the road have signs pointing to different exits and directions, each sign has a different tag.  Some tags that should be there are `AI Toolkit`, `Content Management System`, `Web Development`, `Agentic AI`, `DevOps`, `Container Orchestrators`, `Python Libraries`, `Accounts-Based Marketing`, and other related tags.  There should be so many signs it seems confusing."
 banner_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-a-Clickable-Tag-System_banner_image_1758466209085_ydyxWUHjp.webp"
 portrait_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-a-Clickable-Tag-System_portrait_image_1758466211193_qjCjxOU7S.webp"
 square_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-a-Clickable-Tag-System_square_image_1758466213127_DRF21RcYq.webp"
+site_uuid: 312d4c99-0aac-4851-8f65-82bf7a28ce01
+hex_code: 78lq60
+type: Blueprints
 ---
 
 # Recent Updates (2025-09-22)

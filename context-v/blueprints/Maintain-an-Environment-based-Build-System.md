@@ -9,8 +9,9 @@ date_last_updated: 2025-05-25
 date_first_run: 2025-05-25
 date_last_run: 2025-05-25
 at_semantic_version: 0.0.0.1
-status: Implemented
-augmented_with: 'Windsurf Cascade on SWE-1'
+status: Shipped
+augmented_with:
+  - 'Windsurf Cascade on SWE-1'
 category: Prompts
 date_created: 2025-05-25
 date_modified: 2025-07-22
@@ -21,6 +22,8 @@ tags: [Build-Systems, Configuration]
 authors:
   - Michael Staton
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-25_banner_image_Maintain-an-Environment-based-Build-System_5cf0d6a9-2ee4-469a-a3a3-fe5745d4b2d8_Qg5urXFe-.webp
+hex_code: nayad2
+type: Blueprints
 ---
 
 ## TLDR

@@ -9,11 +9,15 @@ at_semantic_version: 0.0.0.1
 usageCount: 0
 authors:
   - Michael Staton
-augmented_with: Trae AI
+augmented_with:
+  - Trae AI
 image_prompt: "A set of robots is working on a large roadside banner advertisement. They are rubbing the banner on with glue and those glue brooms. The banner is mostly up, and says Projects: and then there is a gallery of project images that look like websites."
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-an-Elegant-Project-Portfolio_banner_image_1758373911366_c6OhBb4U2.webp
 portrait_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-an-Elegant-Project-Portfolio_portrait_image_1758373913271_zPYm-lUiq.webp
 square_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-an-Elegant-Project-Portfolio_square_image_1758373915167_VQwNFo2vYM.webp
+site_uuid: 5bfa77f0-a0e8-4c88-b3f9-4ec111b0bb20
+hex_code: ih608h
+type: Blueprints
 ---
 
 

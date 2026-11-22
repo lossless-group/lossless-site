@@ -8,7 +8,8 @@ date_first_published: null
 date_last_updated: null
 at_semantic_version: 0.0.0.1
 status: Routine
-augmented_with: 'Windsurf Cascade on Claude 3.5 Sonnet'
+augmented_with:
+  - 'Windsurf Cascade on Claude 3.5 Sonnet'
 category: Prompts
 image_prompt: 'A robot in a library, pouring over a giant stack of books, surrounded by glowing documentation and reference icons—symbolizing careful research before coding.'
 date_created: 2025-04-09
@@ -19,6 +20,8 @@ tags: [Prompt-Engineering, Code-Standards, Best-Practices]
 authors:
   - Michael Staton
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-05_banner_image_Read-Relevant-Documentation-before-major-edits_526759f4-57e6-4dff-9250-1c4beab0bb80_U4ysQa1Dq.webp
+hex_code: w6z280
+type: Reminders
 ---
 # Essential Documentation References
 

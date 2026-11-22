@@ -7,9 +7,10 @@ date_authored_final_draft: null
 date_first_published: 2025-03-01
 date_last_updated: null
 at_semantic_version: 0.0.0.1
-status: Implemented
+status: Shipped
 publish: true
-augmented_with: "Windsurf Cascade on GPT5 Reasoning"
+augmented_with:
+  - "Windsurf Cascade on GPT5 Reasoning"
 category: Specification
 date_created: 2025-03-01
 date_modified: 2025-08-21
@@ -22,6 +23,8 @@ portrait_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Improvis
 square_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/july/Improvise-a-few-Creative-Component-Variants_square_image_1755814518704_8YNX4i9vh.webp"
 site_uuid: d57aa0dc-0ec5-46cb-b435-5ae7cf4eac66
 slug: improvise-a-few-creative-component-variants
+hex_code: 2vh3an
+type: Prompts
 ---
 
 

@@ -1,6 +1,6 @@
 ---
 title: "Conditional Component Rendering in Layout Pipelines"
-date: 2025-09-26
+date_authored_initial_draft: 2025-09-26
 date_created: 2025-09-26
 date_modified: 2025-09-26
 authors:
@@ -11,12 +11,16 @@ lede: "Implement flexible layout component rendering with optional parameter con
 slug: conditional-component-rendering-layout-pipelines
 at_semantic_version: 0.0.1.0
 usageCount: "1"
-augmented_with: "Claude 4 Sonnet on Trae IDE"
+augmented_with:
+  - "Claude 4 Sonnet on Trae IDE"
 publish: true
 image_prompt: "A set of UI Components are going through a pipeline diagrammed as a conditional workflow."
 banner_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-Conditional-Components-on-Render.md_banner_image_1758919404148_K8_4JLgGX.webp"
 portrait_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-Conditional-Components-on-Render.md_portrait_image_1758919405950_UdwSB8E76.webp"
 square_image: "https://ik.imagekit.io/xvpgfijuw/uploads/lossless/2025-sept/Maintain-Conditional-Components-on-Render.md_square_image_1758919407434_rdi7V6hNS.webp"
+site_uuid: f8b79438-c8ba-4465-8e4f-c9ba8a6a325e
+hex_code: vh84yu
+type: Blueprints
 ---
 
 # Task at Hand

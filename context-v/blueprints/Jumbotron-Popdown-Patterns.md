@@ -9,7 +9,8 @@ date_last_updated: null
 at_semantic_version: 1.0.0
 status: Draft
 publish: true
-augmented_with: "Windsurf Cascade on SWE-1"
+augmented_with:
+  - "Windsurf Cascade on SWE-1"
 category: UI-Design
 date_created: 2025-08-26
 date_modified: 2025-08-26
@@ -17,6 +18,9 @@ tags: [Component-based-Architecture, Navigation-Menus, UI-Design, UX-Design, Fro
 authors:
   - Michael Staton
 image_prompt: "A modern web interface with a navigation bar at the top. As the user hovers over a navigation item, a large, elegant dropdown menu appears with a grid of content cards, each with an icon, title, and description. The dropdown has a subtle shadow and smooth animation."
+site_uuid: b7aa170b-c8ed-4183-8c12-f1e1f92e9e04
+hex_code: 84nhq5
+type: Blueprints
 ---
 
 # Jumbotron Popdown Patterns

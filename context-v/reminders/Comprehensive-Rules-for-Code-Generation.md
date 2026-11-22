@@ -4,7 +4,8 @@ date_authored_initial_draft: 2025-03-17
 date_authored_final_draft: 2025-03-17
 date_first_published: 2025-03-17
 at_semantic_version: 0.0.0.1
-augmented_with: Windsurf Cascade on Claude 3.7 Sonnet
+augmented_with:
+  - Windsurf Cascade on Claude 3.7 Sonnet
 category: Code-Generators
 date_created: 2025-03-21
 date_modified: 2025-04-22
@@ -18,6 +19,8 @@ authors:
   - Michael Staton
 tags: [Code-Generators, Context-Windows, Model-Context-Protocols]
 banner_image: https://ik.imagekit.io/xvpgfijuw/uploads/lossless/reminders/2025-05-05_banner_image_Comprehensive-Rules-for-Code-Generation_d7d8742a-811b-4d69-ad8f-1c90392aa9f0_XXk6iT8Uy.webp
+hex_code: ozljan
+type: Reminders
 ---
 # Stack, Libraries, Dependencies
 

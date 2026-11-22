@@ -7,8 +7,9 @@ date_authored_final_draft: null
 date_first_published: null
 date_last_updated: null
 at_semantic_version: 0.0.0.1
-status: In-Progress
-augmented_with: Windsurf Cascade on Gemini 2.5 Pro
+status: Implementing
+augmented_with:
+  - Windsurf Cascade on Gemini 2.5 Pro
 category: Refactoring
 date_created: 2025-05-10
 date_modified: 2025-05-10
@@ -18,4 +19,7 @@ tags:
 - Content-Display
 authors:
   - Michael Staton
+site_uuid: 7d001b87-61e6-4df6-8f4d-3febe6b6004d
+hex_code: i9zm6v
+type: Plans
 ---

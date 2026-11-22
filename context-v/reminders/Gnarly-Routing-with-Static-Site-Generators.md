@@ -9,13 +9,16 @@ date_created: 2025-06-14
 date_modified: 2025-07-22
 at_semantic_version: 0.0.0.2
 status: To-Do
-augmented_with: Windsurf Cascade on SWE-1
+augmented_with:
+  - Windsurf Cascade on SWE-1
 category: Guidelines
 site_uuid: e341a7e3-5bc5-9bdc-accb-a475b6a70e4b
 tags: [Dynamic-Routing, Route-Mapping, Static-Site-Generators]
 authors:
   - Michael Staton
 image_prompt:
+hex_code: 4458pc
+type: Reminders
 ---
 
 Pseudo-code for route resolution  

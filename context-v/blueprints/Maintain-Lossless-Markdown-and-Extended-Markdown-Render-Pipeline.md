@@ -7,8 +7,12 @@ slug: maintain-extended-markdown-render-pipeline
 at_semantic_version: 0.0.0.1
 authors:
   - Michael Staton
-augmented_with: "Windsurf Cascade on GPT 5.1"
+augmented_with:
+  - "Windsurf Cascade on GPT 5.1"
 tags: [Markdown, Extended-Markdown, Render-Pipeline]
+site_uuid: e3d78b38-da53-454e-b9d1-725bfb4478ab
+hex_code: ibawms
+type: Blueprints
 ---
 
 # Blueprint: How Lossless Renders Markdown and Extended Markdown
