@@ -12,3 +12,4 @@ okf_version: "0.2"
 * [Plans](plans/) - Ordered, scoped steps toward a goal
 * [Prompts](prompts/) - Reusable instructions handed to an agent
 * [Reminders](reminders/) - Things that are easy to forget and costly to skip
+* [Specs](specs/) - What we're building and why
