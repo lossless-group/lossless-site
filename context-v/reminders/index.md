@@ -7,3 +7,5 @@
 * [Meticulous Constraints for Every Prompt](Meticulous-Constraints-for-Every-Prompt.md) - Master prompt engineering with essential, actionable constraints—ensuring every code generation task is robust, DRY, and error-resilient.
 * [Read the relevant documentation before guessing.](Read-Relevant-Documentation-before-major-edits.md) - Illuminate your coding journey by diving into relevant documentation, and transform assumptions into accurate, well-informed decisions.
 * [Ways We Avoid Hard Validation](Ways-We-Avoid-Hard-Validation.md) - Prevent build failures and gracefully handle frontmatter inconsistencies.
+* [Cursor and Claude 3.7 go Overkill with Regex & Validation](Cursor%20and%20Claude%203.7%20went%20overboard%20on%20Regex%20&%20Validation.md) - Diagnosing the pitfalls of excessive regex and validation logic in collaborative AI-powered workflows.
+* [Tame Generative AI with Rule Sets](Tame%20Generative%20AI%20with%20rule%20sets.md) - Canonical rules and technical conventions for controlling, documenting, and collaborating with code-generating LLMs in complex TypeScript/Astro projects.
