@@ -1,6 +1,8 @@
 # Blueprints
 
+* [Comprehensive AST Transformation Pipeline](Render-Markdown-Deliberately-from-Inspiration.md) - A robust approach to AST transformations inspired by astro-big-doc and content-structure patterns
 * [Conditional Component Rendering in Layout Pipelines](Maintain-Conditional-Components-on-Render.md) - Implement flexible layout component rendering with optional parameter controls for InfoSidebar and TableOfContents suppression
+* [Dynamic Information Page Rendering in Astro](Support-Dynamic-Information-Pages.md) - Empower developers to focus on layout and let MDX do the content and interaction
 * [Jumbotron Popdown Patterns](Jumbotron-Popdown-Patterns.md) - Design and implementation patterns for consistent jumbotron popdown menus in the Lossless UI.
 * [Keep a Changelog](Keep-a-Changelog.md) - Standardized approach to maintaining comprehensive changelogs for code and content changes
 * [Maintain a Clickable Tag System](Maintain-a-Clickable-Tag-System.md) - Make a website and its content more dynamic with clickable tags
