@@ -21,7 +21,9 @@ const items = entries
     const data = (entry.data ?? {}) as Record<string, unknown>;
 
     // Date for sorting/display — accept either string or Date, fall back gracefully.
-    const rawDate = (data.date_modified ?? data.date_created ?? data.release_date) as
+    // Posts are backdated to the release they cover, so the release/created date wins.
+    // date_modified changes on every touch-up and would bubble old posts to the top.
+    const rawDate = (data.release_date ?? data.date_created ?? data.date_modified) as
       | string
       | Date
       | undefined;
