@@ -142,12 +142,6 @@ export const GET: APIRoute = async () => {
       url: explorationsUrl,
     },
     {
-      key: 'prompts',
-      label: 'Prompts',
-      fetch: () => getCollection('prompts').then((es) => es.filter(isPublished)),
-      url: vibeWithUrl('prompts', true),
-    },
-    {
       key: 'specs',
       label: 'Specs',
       fetch: () => getCollection('specs').then((es) => es.filter(isPublished)),

@@ -13,7 +13,6 @@ import { getReferenceSlug } from '@utils/slugify';
 
 export async function getStaticPaths() {
   const collections = [
-    { name: 'prompts', collection: await getCollection('prompts') },
     { name: 'specs', collection: await getCollection('specs') }
   ];
 

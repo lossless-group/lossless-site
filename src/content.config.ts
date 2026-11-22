@@ -188,10 +188,8 @@ const essaysCollection = defineCollection({
   }).passthrough()
 });
 
-const promptsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/prompts")}),
-  schema: z.object({}).passthrough()
-});
+// The `prompts` collection was removed on 2026-11-22: every legacy prompt in
+// lost-in-public/prompts/ moved to the context-v/ of the repo it describes.
 
 // The `reminders` and `blueprints` collections were removed on 2026-11-21: their
 // legacy docs in lost-in-public/ moved to each repo's context-v/ (most to site/context-v/).
@@ -561,7 +559,6 @@ export const paths = {
   'tooling': resolveContentPath('tooling'),
   'vertical-toolkits': resolveContentPath('vertical-toolkits'),
   'vocabulary': resolveContentPath('vocabulary'),
-  'prompts': resolveContentPath('lost-in-public/prompts'),
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'market-categories': resolveContentPath('concepts/Market-Categories'),
   'specs': resolveContentPath('specs'),
@@ -598,7 +595,6 @@ export const collections = {
   'tooling': toolCollection,
   'vertical-toolkits': verticalToolkitsCollection,
   'slides': slidesCollection,
-  'prompts': promptsCollection,
   'specs': specsCollection,
   'sources': sourcesCollection,
   'organizations': organizationsCollection,

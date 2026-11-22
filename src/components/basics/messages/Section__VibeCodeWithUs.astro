@@ -1,6 +1,6 @@
 ---
 import TextCTA from "@basics/cta/TextCTA.astro";
-import IconHeaderMessageOvalProcess from "./IconHeaderMessageOvalProcess.astro";
+import ContextVFlow from "@components/basics/ContextVFlow.astro";
 import SplashHeroCard from "@components/tool-components/SplashHeroCard.astro";
 import { fetchOgMetadata } from "@utils/fetchOgMetadata";
 
@@ -32,10 +32,7 @@ const contextVMetadata = await fetchOgMetadata("https://context-v.dev/", {
    </div>
    <section class="vibe-with-us-section" style="--vibe-section-top-margin: 2.5rem;">
       <div class="vibe-container">
-         <IconHeaderMessageOvalProcess 
-            jsonPath="messages/vibeCodingIconHeaderMessages.json"
-            style="margin: 0 auto;"
-         />
+         <ContextVFlow />
       </div>
    </section>
 

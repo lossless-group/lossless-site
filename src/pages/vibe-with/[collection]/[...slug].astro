@@ -8,7 +8,7 @@
  * Follows comprehensive, parallel commenting rules as outlined in:
  *   /content/lost-in-public/reminders/Comprehensive-Rules-for-Code-Generation.md
  *
- * - Fetches content from the 'prompts' and 'specs' collections (see content.config.ts for exact keys).
+ * - Fetches content from the 'specs' collection (see content.config.ts for exact keys).
  * - Generates static paths for all entries, supporting dynamic tag navigation.
  * - Renders content using Layout, OneArticle, and OneArticleOnPage components.
  * - All logic is thoroughly commented and DRY.
@@ -25,31 +25,17 @@ export const prerender = true;
 /**
  * getStaticPaths — Generates all static paths for the /vibe-with/[collection]/[slug] dynamic route.
  *
- * - Fetches all entries from the 'prompts' and 'specs' collections.
+ * - Fetches all entries from the 'specs' collection.
  * - For each entry, generates a path with collection and slug params.
  * - Uses processEntries utility for consistent entry processing.
  * - Returns array of { params, props } objects for Astro static generation.
  */
 export async function getStaticPaths() {
   // Fetch all entries from the collections
-  const promptsEntries = await getCollection('prompts');
   const specsEntries = await getCollection('specs');
 
   // Process entries using the same pipeline as client recommendations
-  const processedPrompts = processEntries(promptsEntries as any);
   const processedSpecs = processEntries(specsEntries as any);
-
-  // Generate paths for each collection
-  const promptsPaths = processedPrompts.map(entry => {
-    
-    return {
-      params: { collection: 'prompts', slug: entry.slug },
-      props: {
-        entry,
-        collection: 'prompts'
-      }
-    };
-  });
 
   const specsPaths = processedSpecs.map(entry => {
     const slugParts = entry.slug.split('/');
@@ -65,17 +51,17 @@ export async function getStaticPaths() {
   });
 
   // Combine all path arrays
-  return [...promptsPaths, ...specsPaths];
+  return [...specsPaths];
 }
 
 /**
  * Props interface for page rendering.
  * Mirrors /more-about/[...slug].astro for consistency.
- * Supports 'prompts' and 'specs'. ('reminders' and 'blueprints' moved to context-v/ on 2026-11-21.)
+ * Supports 'specs'. ('reminders' and 'blueprints' moved to context-v/ on 2026-11-21, 'prompts' on 2026-11-22.)
  */
 interface Props {
   entry: any;
-  collection: 'prompts' | 'specs';
+  collection: 'specs';
 }
 
 const { entry, collection } = Astro.props;

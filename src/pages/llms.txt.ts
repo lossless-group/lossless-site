@@ -56,7 +56,6 @@ export const GET: APIRoute = async () => {
     concepts,
     vocabulary,
     explorations,
-    prompts,
     specs,
     talks,
     upAndRunning,
@@ -74,7 +73,6 @@ export const GET: APIRoute = async () => {
     getCollection('concepts').then((es) => es.filter((e: any) => isPublished(e) && !/[\\/]Market-Categories[\\/]/.test(e.filePath ?? ''))),
     getCollection('vocabulary').then((es) => es.filter(isPublished)),
     getCollection('explorations').then((es) => es.filter(isPublished)),
-    getCollection('prompts').then((es) => es.filter(isPublished)),
     getCollection('specs').then((es) => es.filter(isPublished)),
     getCollection('talks').then((es) => es.filter(isPublished)),
     getCollection('up-and-running').then((es) => es.filter(isPublished)),
@@ -213,14 +211,8 @@ export const GET: APIRoute = async () => {
     ...sectionLines('Explorations', buildLines(explorations, explorationsUrl)),
   );
 
-  // Principles: prompts, specs
+  // Principles: specs
   const principlesLines: string[] = [];
-  principlesLines.push(
-    ...sectionLines(
-      'Prompts',
-      buildLines(prompts, (e) => vibeWithUrl('prompts', e, true)),
-    ),
-  );
   principlesLines.push(
     ...sectionLines(
       'Specs',
@@ -260,9 +252,7 @@ export const GET: APIRoute = async () => {
   const toolingCount = tooling.length + verticalToolkits.length;
   const writingCount =
     essays.length + concepts.length + vocabulary.length + explorations.length;
-  const principlesCount =
-    prompts.length +
-    specs.length;
+  const principlesCount = specs.length;
   const guidesCount =
     talks.length + upAndRunning.length + toHero.length + marketMaps.length + marketCategories.length;
   const changelogCount = changelogContent.length + changelogCode.length;
