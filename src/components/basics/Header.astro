@@ -39,11 +39,6 @@ const navLinks = [
         title: "Up and Running",
         description: "Step by step instructions to get up and running with Lossless toolkit libraries."
       },
-      issueResolution: {
-        href: "/learn-with/issue-resolution",
-        title: "Issue Resolution",
-        description: "Find solutions to common problems and issues."
-      },
       explorations: {
         href: "/learn-with/explorations",
         title: "Explorations",
@@ -72,7 +67,16 @@ const navLinks = [
   },
   {
     label: "Changelog",
+    // The changelog site is the primary button; the rest are small links.
+    compact: true,
     items: [
+      {
+        href: "https://changelog.lossless.group/",
+        title: "Lossless Changelog",
+        description: "Everything we've shipped, across every Lossless project, in one place.",
+        primary: true,
+        icon: "https://changelog.lossless.group/favicon.svg",
+      },
       {
         href: "/workflow/changelog",
         title: "Internal Changelog",
@@ -109,7 +113,7 @@ const socialIcons = [
     <a href="/" class="logo-link" aria-label="Return to homepage">
       <img
         class="logo-box"
-        src="/visuals/trademark__Lossless.svg"
+        src="/visuals/trademark__Lossless--v3-icon.svg"
         alt="The Lossless Group"
       />
     </a>
@@ -130,7 +134,13 @@ const socialIcons = [
           const itemsArray = Array.isArray(link.items) 
             ? link.items 
             : Object.values(link.items);
-          return <JumboDropdown label={link.label} items={itemsArray} />;
+          return (
+            <JumboDropdown
+              label={link.label}
+              items={itemsArray}
+              compact={'compact' in link ? link.compact : false}
+            />
+          );
         } else {
           return <a href={link.href}>{link.label}</a>;
         }

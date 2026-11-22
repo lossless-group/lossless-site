@@ -6,30 +6,50 @@ interface Item {
   // Opens in a new tab. Used for standalone static pages (e.g. the graphify
   // viewer at /graph.html) that aren't part of the Astro route tree.
   external?: boolean;
+  // Renders as a solid button at the top of the dropdown.
+  primary?: boolean;
+  // Optional logo shown on the primary button.
+  icon?: string;
 }
 
 interface Props {
   label: string;
   items: Item[];
+  // Render non-primary items as small title-only links instead of large cards.
+  compact?: boolean;
 }
 
-const { label, items } = Astro.props;
+const { label, items, compact = false } = Astro.props;
+
+const linkAttrs = (item: Item) => ({
+  target: item.external ? "_blank" : undefined,
+  rel: item.external ? "noopener noreferrer" : undefined,
+});
 ---
 
 <div class="dropdown-wrapper">
   <button class="dropdown-trigger">{label}</button>
-  <div class="jumbo-dropdown">
-    {items.map(item => (
-      <a
-        href={item.href}
-        class="jumbo-dropdown-item"
-        target={item.external ? "_blank" : undefined}
-        rel={item.external ? "noopener noreferrer" : undefined}
-      >
-        <div class="item-title">{item.title}</div>
-        <div class="item-description">{item.description}</div>
-      </a>
-    ))}
+  <div class={`jumbo-dropdown${compact ? " jumbo-dropdown--compact" : ""}`}>
+    {items.map((item) =>
+      item.primary ? (
+        <a href={item.href} class="jumbo-dropdown-primary" {...linkAttrs(item)}>
+          {item.icon && <img class="primary-icon" src={item.icon} alt="" width="40" height="40" />}
+          <span class="primary-text">
+            <span class="primary-title">{item.title} <span aria-hidden="true">→</span></span>
+            <span class="primary-description">{item.description}</span>
+          </span>
+        </a>
+      ) : compact ? (
+        <a href={item.href} class="jumbo-dropdown-compact" title={item.description} {...linkAttrs(item)}>
+          {item.title}
+        </a>
+      ) : (
+        <a href={item.href} class="jumbo-dropdown-item" {...linkAttrs(item)}>
+          <div class="item-title">{item.title}</div>
+          <div class="item-description">{item.description}</div>
+        </a>
+      )
+    )}
   </div>
 </div>
 
@@ -120,4 +140,71 @@ const { label, items } = Astro.props;
   color: var(--clr-lossless-primary-light-alt, #ccc);
 }
 
+/* Primary item: a solid button */
+.jumbo-dropdown-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  text-decoration: none;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.6rem;
+  background-color: var(--clr-lossless-accent--brightest, #3fe0d0);
+  color: var(--clr-primary-bg, #111);
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.primary-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.35rem;
+  border-radius: 0.5rem;
+  background-color: var(--clr-primary-bg, #111);
+}
+
+.primary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.primary-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  white-space: nowrap;
+}
+
+.primary-description {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  opacity: 0.85;
+}
+
+.jumbo-dropdown-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* Compact variant: a short list of small links */
+.jumbo-dropdown--compact {
+  min-width: 320px;
+  gap: 0.1rem;
+  padding: 0.5rem;
+}
+
+.jumbo-dropdown-compact {
+  font-size: 0.85rem;
+  color: var(--clr-lossless-primary-light-alt, #ccc);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.35rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.jumbo-dropdown-compact:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--clr-lossless-primary-light);
+}
 </style>
