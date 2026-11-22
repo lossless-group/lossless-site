@@ -12,3 +12,7 @@ overrides:
   path-to-regexp: '>=8.4.0'
   '@vercel/routing-utils>path-to-regexp': 6.3.0
   picomatch: '>=4.0.4'
+publicHoistPattern:
+  # Needed by the @astrojs/vercel adapter (moved from .npmrc, which pnpm 12 ignores)
+  - cookie
+  - smol-toml

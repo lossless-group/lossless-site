@@ -81,12 +81,5 @@
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "uuid": "^13.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "path-to-regexp": ">=8.4.0",
-      "picomatch": ">=4.0.4",
-      "@vercel/routing-utils>path-to-regexp": "6.3.0"
-    }
   }
 }
