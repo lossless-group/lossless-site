@@ -193,32 +193,8 @@ const promptsCollection = defineCollection({
   schema: z.object({}).passthrough()
 });
 
-const remindersCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/reminders")}),
-  schema: z.object({}).passthrough()
-});
-
-const blueprintsCollection = defineCollection({
-  loader: glob({pattern: "**/*.md", base: resolveContentPath("lost-in-public/blueprints")}),
-  schema: z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    lede: z.string().optional(),
-    slug: z.string().optional(),
-    date_created: z.union([z.string(), z.date()]).optional(),
-    date_modified: z.union([z.string(), z.date()]).optional(),
-    authors: z.union([z.string(), z.array(z.string())]).optional(),
-    tags: z.union([z.string(), z.array(z.string())]).optional(),
-    status: z.string().optional(),
-    publish: z.boolean().default(true).optional(),
-    difficulty: z.string().optional(),
-    estimated_time: z.string().optional(),
-    prerequisites: z.array(z.string()).optional(),
-    tools_required: z.array(z.string()).optional(),
-    category: z.string().optional(),
-    version: z.string().optional(),
-  }).passthrough()
-});
+// The `reminders` and `blueprints` collections were removed on 2026-11-21: their
+// legacy docs in lost-in-public/ moved to each repo's context-v/ (most to site/context-v/).
 
 const changelogContentCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("changelog--content")}),
@@ -419,16 +395,8 @@ const contentAreasCollection = defineCollection({
 // Transform: Passes data through. Astro will auto-generate id and slug.
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-const issueResolutionCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/issue-resolution") }),
-  schema: z.object({
-    publish: z.boolean().optional(), // Allows individual entries to override collection default
-  }).passthrough().transform((data) => ({
-    ...data // Pass through all original frontmatter fields.
-            // Astro will automatically create 'id' and 'slug' properties for the entry.
-            // All frontmatter, including 'site_uuid', 'title', etc., will be under entry.data.
-  }))
-});
+// The `issue-resolution` collection was removed on 2026-11-21: its legacy docs in
+// lost-in-public/issue-resolution/ moved to each repo's context-v/issues/ (most to site/).
 
 const toHeroCollection = defineCollection({
   loader: glob({ pattern: "**/*.md", base: resolveContentPath("lost-in-public/to-hero") }),
@@ -572,10 +540,6 @@ const portfolioCollection = defineCollection({
 
 // ---- NEW: Configuration for Publishing Defaults ----
 export const collectionPublishingDefaults = {
-  'issue-resolution': {
-    publishByDefault: true, // true = publish all EXCEPT items with publish: false
-                            // false = publish none EXCEPT items with publish: true
-  },
   'talks': {
     publishByDefault: true, // true = publish all EXCEPT items with publish: false
                             // false = publish none EXCEPT items with publish: true
@@ -598,14 +562,11 @@ export const paths = {
   'vertical-toolkits': resolveContentPath('vertical-toolkits'),
   'vocabulary': resolveContentPath('vocabulary'),
   'prompts': resolveContentPath('lost-in-public/prompts'),
-  'reminders': resolveContentPath('lost-in-public/reminders'),
-  'blueprints': resolveContentPath('lost-in-public/blueprints'),
   'market-maps': resolveContentPath('lost-in-public/market-maps'),
   'market-categories': resolveContentPath('concepts/Market-Categories'),
   'specs': resolveContentPath('specs'),
   'sources': resolveContentPath('sources'),
   'organizations': resolveContentPath('organizations'),
-  'issue-resolution': resolveContentPath('lost-in-public/issue-resolution'),
   'to-hero': resolveContentPath('lost-in-public/to-hero'),
   'up-and-running': resolveContentPath('lost-in-public/up-and-running'),
   'keeping-up': resolveContentPath('lost-in-public/keeping-up'),
@@ -638,14 +599,11 @@ export const collections = {
   'vertical-toolkits': verticalToolkitsCollection,
   'slides': slidesCollection,
   'prompts': promptsCollection,
-  'reminders': remindersCollection,
-  'blueprints': blueprintsCollection,
   'specs': specsCollection,
   'sources': sourcesCollection,
   'organizations': organizationsCollection,
   'content-areas': contentAreasCollection,
   'talks': talksCollection,
-  'issue-resolution': issueResolutionCollection,
   'up-and-running': upAndRunningCollection,
   'keeping-up': keepingUpCollection,
   'to-hero': toHeroCollection,

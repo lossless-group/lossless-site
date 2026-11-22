@@ -22,14 +22,13 @@ const { moc } = Astro.props;
 const tag = moc.data.tag;
 
 // Query all relevant collections for content tagged with this tag
-const [tooling, verticalToolkits, essays, concepts, vocabulary, projects, blueprints] = await Promise.all([
+const [tooling, verticalToolkits, essays, concepts, vocabulary, projects] = await Promise.all([
   getCollection('tooling', ({ data }) => (data as any).tags?.includes(tag)),
   getCollection('vertical-toolkits', ({ data }) => (data as any).tags?.includes(tag)),
   getCollection('essays', ({ data }) => (data as any).tags?.includes(tag)),
   getCollection('concepts', ({ data }) => (data as any).tags?.includes(tag)),
   getCollection('vocabulary', ({ data }) => (data as any).tags?.includes(tag)),
   getCollection('projects', ({ data }) => (data as any).tags?.includes(tag) && (data as any).publish !== false),
-  getCollection('blueprints', ({ data }) => (data as any).tags?.includes(tag) && (data as any).publish !== false),
 ]);
 
 const allTools = [...tooling, ...verticalToolkits];
@@ -67,7 +66,7 @@ const knowledgeByType = {
   vocabulary: allKnowledge.filter(k => k.collection === 'vocabulary'),
 };
 
-const totalItems = allTools.length + allKnowledge.length + projects.length + blueprints.length;
+const totalItems = allTools.length + allKnowledge.length + projects.length;
 ---
 
 <Layout title={moc.data.title}>
@@ -217,21 +216,6 @@ const totalItems = allTools.length + allKnowledge.length + projects.length + blu
               <a href={`/projects/${project.id}`} class="project-card">
                 <h3>{project.data?.title || project.id}</h3>
                 {project.data?.description && <p>{project.data.description}</p>}
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <!-- Blueprints Section -->
-      {blueprints.length > 0 && (
-        <section class="moc-section">
-          <h2 class="section-heading">Blueprints & Guides ({blueprints.length})</h2>
-          <div class="blueprint-grid">
-            {blueprints.map((blueprint: any) => (
-              <a href={`/blueprints/${blueprint.id}`} class="blueprint-card">
-                <h3>{blueprint.data?.title || blueprint.id}</h3>
-                {blueprint.data?.lede && <p>{blueprint.data.lede}</p>}
               </a>
             ))}
           </div>

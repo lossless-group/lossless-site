@@ -56,11 +56,8 @@ export const GET: APIRoute = async () => {
     concepts,
     vocabulary,
     explorations,
-    blueprints,
     prompts,
     specs,
-    reminders,
-    issueResolution,
     talks,
     upAndRunning,
     toHero,
@@ -77,11 +74,8 @@ export const GET: APIRoute = async () => {
     getCollection('concepts').then((es) => es.filter((e: any) => isPublished(e) && !/[\\/]Market-Categories[\\/]/.test(e.filePath ?? ''))),
     getCollection('vocabulary').then((es) => es.filter(isPublished)),
     getCollection('explorations').then((es) => es.filter(isPublished)),
-    getCollection('blueprints').then((es) => es.filter(isPublished)),
     getCollection('prompts').then((es) => es.filter(isPublished)),
     getCollection('specs').then((es) => es.filter(isPublished)),
-    getCollection('reminders').then((es) => es.filter(isPublished)),
-    getCollection('issue-resolution').then((es) => es.filter(isPublished)),
     getCollection('talks').then((es) => es.filter(isPublished)),
     getCollection('up-and-running').then((es) => es.filter(isPublished)),
     getCollection('to-hero').then((es) => es.filter(isPublished)),
@@ -155,13 +149,6 @@ export const GET: APIRoute = async () => {
     return `${root}/learn-with/our-talks/${slug}/`;
   };
 
-  const issueResolutionUrl = (e: any) => {
-    let slug =
-      (e.data as any).slug || slugify((e.data as any).title || 'untitled-article');
-    slug = slug.toLowerCase().replace(/\s+/g, '-');
-    return `${root}/learn-with/issue-resolution/${slug}/`;
-  };
-
   // /learn-with/up-and-running/with/${slug}/
   const upAndRunningUrl = (e: any) => {
     const slug =
@@ -226,14 +213,8 @@ export const GET: APIRoute = async () => {
     ...sectionLines('Explorations', buildLines(explorations, explorationsUrl)),
   );
 
-  // Principles: blueprints, prompts, specs, reminders, issue-resolution
+  // Principles: prompts, specs
   const principlesLines: string[] = [];
-  principlesLines.push(
-    ...sectionLines(
-      'Blueprints',
-      buildLines(blueprints, (e) => vibeWithUrl('blueprints', e, false)),
-    ),
-  );
   principlesLines.push(
     ...sectionLines(
       'Prompts',
@@ -245,15 +226,6 @@ export const GET: APIRoute = async () => {
       'Specs',
       buildLines(specs, (e) => vibeWithUrl('specs', e, false)),
     ),
-  );
-  principlesLines.push(
-    ...sectionLines(
-      'Reminders',
-      buildLines(reminders, (e) => vibeWithUrl('reminders', e, false)),
-    ),
-  );
-  principlesLines.push(
-    ...sectionLines('Issue Resolution', buildLines(issueResolution, issueResolutionUrl)),
   );
 
   // Talks, Guides, Market Maps, Market Categories
@@ -289,11 +261,8 @@ export const GET: APIRoute = async () => {
   const writingCount =
     essays.length + concepts.length + vocabulary.length + explorations.length;
   const principlesCount =
-    blueprints.length +
     prompts.length +
-    specs.length +
-    reminders.length +
-    issueResolution.length;
+    specs.length;
   const guidesCount =
     talks.length + upAndRunning.length + toHero.length + marketMaps.length + marketCategories.length;
   const changelogCount = changelogContent.length + changelogCode.length;

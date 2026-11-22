@@ -142,12 +142,6 @@ export const GET: APIRoute = async () => {
       url: explorationsUrl,
     },
     {
-      key: 'blueprints',
-      label: 'Blueprints',
-      fetch: () => getCollection('blueprints').then((es) => es.filter(isPublished)),
-      url: vibeWithUrl('blueprints', false),
-    },
-    {
       key: 'prompts',
       label: 'Prompts',
       fetch: () => getCollection('prompts').then((es) => es.filter(isPublished)),
@@ -158,18 +152,6 @@ export const GET: APIRoute = async () => {
       label: 'Specs',
       fetch: () => getCollection('specs').then((es) => es.filter(isPublished)),
       url: vibeWithUrl('specs', false),
-    },
-    {
-      key: 'reminders',
-      label: 'Reminders',
-      fetch: () => getCollection('reminders').then((es) => es.filter(isPublished)),
-      url: vibeWithUrl('reminders', false),
-    },
-    {
-      key: 'issue-resolution',
-      label: 'Issue Resolution',
-      fetch: () => getCollection('issue-resolution').then((es) => es.filter(isPublished)),
-      url: learnWithCollectionUrl('issue-resolution'),
     },
     {
       key: 'talks',
