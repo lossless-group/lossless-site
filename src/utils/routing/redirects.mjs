@@ -123,7 +123,6 @@ const moved = {
 // The page is `publish: false` or was removed, so send readers to the nearest section.
 const unpublished = {
   '/adhd-agent-skills': '/vibe-with/us',
-  '/agentic-email-superpowers': '/vibe-with/us',
   '/bounty-an-influencer-conversion-link': '/vibe-with/us',
   '/cleaner-magazine-layouts': '/lost-in-public',
   '/create-a-cellular-based-content-system': '/vibe-with/us',
@@ -242,7 +241,6 @@ const unpublished = {
   '/vibe-with/reminders/ways-we-avoid-hard-validation': '/vibe-with/us',
   '/vibe-with/reminders/yaml-patterns--exhaustive-cases': '/vibe-with/us',
   '/vibe-with/specs/adhd-agent-skills': '/vibe-with/us',
-  '/vibe-with/specs/agentic-email-superpowers': '/vibe-with/us',
   '/vibe-with/specs/bounty-an-influencer-conversion-link': '/vibe-with/us',
   '/vibe-with/specs/create-a-cellular-based-content-system': '/vibe-with/us',
   '/vibe-with/specs/event-hog-realtime-event-backchannel--data-generation': '/vibe-with/us',
