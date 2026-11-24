@@ -14,6 +14,7 @@ import ClientListHorizontalScrollerStealth from "@components/basics/messages/Cli
 import clientsData from "../content/people/clients.json";
 import { loadToolsFromMoc } from "@utils/toolUtils";
 import ProjectsShowcaseSection from "@layouts/content-sections/ProjectsShowcaseSection.astro";
+import OpenSpecsSection from "@layouts/content-sections/OpenSpecsSection.astro";
 
 
 interface Tool {
@@ -89,6 +90,11 @@ const clients = clientsData.clients;
 <section class="content-wrapper">
   <ProjectsShowcaseSection title="Projects Showcase" />
   
+</section>
+
+<!-- Open Specs Section -->
+<section class="content-wrapper">
+  <OpenSpecsSection />
 </section>
 
 <!-- Full-bleed separator with standard styling -->

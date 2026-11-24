@@ -1,0 +1,120 @@
+---
+/**
+ * /vibe-with/specs — the Open Specs list.
+ *
+ * Published specs link to /vibe-with/specs/<slug>. Unpublished ones (the
+ * `spec-ideas` collection) show as dimmed cards that raise a toast instead.
+ */
+import Layout from "@layouts/Layout.astro";
+import SpecCard from "@components/specs/SpecCard.astro";
+import SpecToast from "@components/specs/SpecToast.astro";
+import { getOpenSpecs } from "@utils/openSpecs";
+
+const specs = await getOpenSpecs();
+const publishedCount = specs.filter((s) => s.published).length;
+const statuses = [...new Set(specs.map((s) => s.status))].sort();
+
+const frontmatter = {
+  title: "Open Specs",
+  description: "Specifications for tools we think should exist. Some are written up in full; the rest are ideas in the works.",
+  lede: "Specifications for tools we think should exist. Some are written up in full; the rest are ideas in the works.",
+};
+---
+
+<Layout frontmatter={frontmatter}>
+  <main class="open-specs">
+    <header class="open-specs__header">
+      <h1>Open Specs</h1>
+      <p class="open-specs__lede">{frontmatter.lede}</p>
+      <p class="open-specs__count">
+        {publishedCount} written up · {specs.length - publishedCount} in the works
+      </p>
+    </header>
+
+    <div class="open-specs__filters" role="group" aria-label="Filter specs">
+      <button type="button" class="chip is-active" data-filter="all">All</button>
+      <button type="button" class="chip" data-filter="published">Written up</button>
+      <button type="button" class="chip" data-filter="teaser">In the works</button>
+      {statuses.map((status) => (
+        <button type="button" class="chip" data-filter={`status:${status}`}>{status}</button>
+      ))}
+    </div>
+
+    <div class="open-specs__grid">
+      {specs.map((spec) => <SpecCard spec={spec} />)}
+    </div>
+  </main>
+  <SpecToast />
+</Layout>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>('.open-specs__filters .chip');
+  const cards = document.querySelectorAll<HTMLElement>('.open-specs__grid .spec-card');
+
+  chips.forEach((chip) =>
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+      const filter = chip.dataset.filter ?? 'all';
+      cards.forEach((card) => {
+        const show =
+          filter === 'all' ||
+          (filter === 'published' && card.dataset.published === 'true') ||
+          (filter === 'teaser' && card.dataset.published === 'false') ||
+          filter === `status:${card.dataset.status}`;
+        card.hidden = !show;
+      });
+    })
+  );
+</script>
+
+<style>
+  .open-specs {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem 1rem 4rem;
+  }
+  .open-specs__header h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--clr-lossless-accent--brightest, #7df9ff);
+  }
+  .open-specs__lede {
+    max-width: 48rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: var(--clr-lossless-primary-light-alt, #bbb);
+  }
+  .open-specs__count {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--clr-lossless-primary-light-alt, #999);
+  }
+  .open-specs__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.75rem 0 1.5rem;
+  }
+  .chip {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: transparent;
+    color: var(--clr-lossless-primary-light, #ddd);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--clr-lossless-accent--brightest, #7df9ff); }
+  .chip.is-active {
+    background: var(--clr-lossless-accent--brightest, #7df9ff);
+    border-color: var(--clr-lossless-accent--brightest, #7df9ff);
+    color: #0b0d14;
+  }
+  .open-specs__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1.25rem;
+  }
+  .open-specs__grid :global(.spec-card[hidden]) { display: none; }
+</style>

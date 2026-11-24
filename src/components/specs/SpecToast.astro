@@ -1,0 +1,55 @@
+---
+/**
+ * One toast for the page. Any element with `data-spec-teaser` shows it on click.
+ * Include once per page that renders unpublished SpecCards.
+ */
+---
+
+<div class="spec-toast" role="status" aria-live="polite" data-spec-toast hidden>
+  Not yet developed, thanks for showing interest.
+</div>
+
+<script>
+  const toast = document.querySelector<HTMLElement>('[data-spec-toast]');
+  let timer: number | undefined;
+
+  document.addEventListener('click', (event) => {
+    const card = (event.target as HTMLElement).closest<HTMLElement>('[data-spec-teaser]');
+    if (!card || !toast) return;
+    toast.hidden = false;
+    toast.classList.remove('is-visible');
+    void toast.offsetWidth; // restart the animation on repeat clicks
+    toast.classList.add('is-visible');
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      toast.classList.remove('is-visible');
+      window.setTimeout(() => (toast.hidden = true), 250);
+    }, 3000);
+    (window as any).op?.('track', 'spec_interest', { spec: card.dataset.specTeaser });
+  });
+</script>
+
+<style>
+  .spec-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 2rem;
+    z-index: 1000;
+    max-width: calc(100vw - 2rem);
+    padding: 0.85rem 1.25rem;
+    border-radius: 0.6rem;
+    border: 1px solid var(--clr-lossless-accent--brightest, #7df9ff);
+    background: rgba(15, 18, 30, 0.95);
+    color: #fff;
+    font-size: 0.95rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translate(-50%, 1rem);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+  }
+  .spec-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+</style>

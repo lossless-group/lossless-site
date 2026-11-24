@@ -1,0 +1,70 @@
+---
+/**
+ * Homepage teaser for /vibe-with/specs: published specs first, then a few
+ * unpublished ones as "in the works" cards.
+ */
+import TextCTA from "@components/basics/cta/TextCTA.astro";
+import SpecCard from "@components/specs/SpecCard.astro";
+import SpecToast from "@components/specs/SpecToast.astro";
+import { getOpenSpecs } from "@utils/openSpecs";
+
+interface Props {
+  title?: string;
+  limit?: number;
+}
+
+const { title = "Open Specs", limit = 8 } = Astro.props as Props;
+
+const specs = await getOpenSpecs();
+const published = specs.filter((s) => s.published && s.image);
+const ideas = specs.filter((s) => !s.published && s.image);
+const teaserCount = Math.min(ideas.length, Math.max(2, limit - published.length));
+const shown = [...published.slice(0, limit - teaserCount), ...ideas.slice(0, teaserCount)];
+---
+
+<section class="open-specs-section">
+  <div class="showcase-header">
+    <h2 class="section-title">{title}</h2>
+    <TextCTA href="/vibe-with/specs" text="See All" class="see-all-link" />
+  </div>
+  <p class="section-description">Tools we think should exist, written up as open specifications.</p>
+  <div class="open-specs-section__grid">
+    {shown.map((spec) => <SpecCard spec={spec} />)}
+  </div>
+  <SpecToast />
+</section>
+
+<style>
+  .open-specs-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 var(--spacing-4, 1rem);
+  }
+  .showcase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.75rem;
+  }
+  .section-title {
+    font-weight: 700;
+    font-size: clamp(1.2rem, 2vw, 1.75rem);
+    color: var(--clr-lossless-accent--brightest);
+  }
+  .section-description {
+    color: var(--clr-lossless-primary-light-alt);
+    margin-bottom: 1rem;
+  }
+  .see-all-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .open-specs-section__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1.25rem;
+  }
+</style>

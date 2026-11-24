@@ -285,6 +285,31 @@ const specsCollection = defineCollection({
   loader: glob({pattern: "**/*.md", base: resolveContentPath("specs")}),
   schema: z.object({}).passthrough()
 });
+
+// Unpublished specs, card fields only. Rendered as non-clickable teaser cards on
+// /vibe-with/specs and the homepage; no route builds pages from this collection.
+const specIdeasLoader = globAll({pattern: "**/*.md", base: resolveContentPath("specs")});
+const specIdeasCollection = defineCollection({
+  loader: {
+    ...specIdeasLoader,
+    name: 'spec-ideas-loader',
+    load: async (context) => {
+      await specIdeasLoader.load(context);
+      for (const [id, entry] of context.store.entries()) {
+        if ((entry.data as { publish?: unknown })?.publish !== false) context.store.delete(id);
+      }
+    },
+  },
+  schema: z.object({
+    title: z.string().optional(),
+    lede: z.string().optional(),
+    status: z.string().optional(),
+    tags: z.union([z.string(), z.array(z.string())]).optional(),
+    portrait_image: z.string().optional(),
+    banner_image: z.string().optional(),
+    publish: z.boolean().optional(),
+  }),
+});
 // Includes:
 //   - specsCollection (defineCollection)
 //   - glob loader for ../content/specs
@@ -596,6 +621,7 @@ export const collections = {
   'vertical-toolkits': verticalToolkitsCollection,
   'slides': slidesCollection,
   'specs': specsCollection,
+  'spec-ideas': specIdeasCollection,
   'sources': sourcesCollection,
   'organizations': organizationsCollection,
   'content-areas': contentAreasCollection,
