@@ -9,7 +9,8 @@
     "build": "node -e \"require('dotenv').config({ path: '.env' }); require('child_process').execSync('astro build --remote', { stdio: 'inherit' });\"",
     "preview": "astro preview",
     "astro": "astro",
-    "export-pdf": "node scripts/export-slides-to-pdf.js"
+    "export-pdf": "node scripts/export-slides-to-pdf.js",
+    "links:monorepo": "node scripts/build-monorepo-link-map.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

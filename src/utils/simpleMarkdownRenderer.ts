@@ -5,6 +5,7 @@ import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkMonorepoLinks from '@utils/markdown/remark-monorepo-links';
 import remarkImages from '@utils/markdown/remark-images';
 import remarkCitations from '@utils/markdown/remark-citations';
 import remarkFootnoteNumbers from '@utils/markdown/remark-footnote-numbers';
@@ -34,6 +35,7 @@ export async function renderSimpleMarkdown(markdown: string): Promise<RenderResu
       .use(remarkParse)
       .use(remarkGfm)
       .use(remarkBacklinks)
+      .use(remarkMonorepoLinks)
       .use(remarkImages)
       .use(remarkDirective)
       .use(remarkDirectiveToComponent)

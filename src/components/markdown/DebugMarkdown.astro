@@ -6,6 +6,7 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkAsf from '@utils/markdown/remark-asf';
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkMonorepoLinks from '@utils/markdown/remark-monorepo-links';
 import remarkImages from '@utils/markdown/remark-images';
 import { markdownDebugger } from '@utils/markdown/markdownDebugger';
 
@@ -48,6 +49,7 @@ if (enabled) {
   backlinksAst = await unified()
     .use(remarkParse)
     .use(remarkBacklinks)
+    .use(remarkMonorepoLinks)
     .parse(content);
   markdownDebugger.writeDebugFile('4-backlinks-ast', backlinksAst);
 

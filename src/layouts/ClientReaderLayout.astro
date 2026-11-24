@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import remarkDirective from 'remark-directive';
 import remarkImages from '@utils/markdown/remark-images'; 
 import remarkBacklinks from '@utils/markdown/remark-backlinks';
+import remarkMonorepoLinks from '@utils/markdown/remark-monorepo-links';
 import remarkCitations from '@utils/markdown/remark-citations';
 import remarkFootnoteNumbers from '@utils/markdown/remark-footnote-numbers';
 import remarkTableOfContents from '@utils/markdown/remark-toc';
@@ -43,6 +44,7 @@ if (effectiveEntry) {
     .use(remarkDirectiveToComponent) // Preserve directives for AstroMarkdown
     .use(remarkImages) 
     .use(remarkBacklinks)
+    .use(remarkMonorepoLinks)
     .use(remarkCitations)
     .use(remarkFootnoteNumbers)
     .use(remarkTableOfContents);

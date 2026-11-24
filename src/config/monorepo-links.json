@@ -1,0 +1,13 @@
+{
+  "$comment": "Where relative links in content (../../ai-labs/…/context-v/…) resolve on the web. Read by scripts/build-monorepo-link-map.mjs, which writes src/config/monorepo-link-map.json. Re-run it after adding such links or re-collating the corpus.",
+  "monorepoRoot": "..",
+  "contentDir": "../content",
+  "corpus": {
+    "dir": "../context-v-corpus/corpus",
+    "siteUrl": "https://lossless-group.github.io/context-v-corpus/corpus/",
+    "sitemapUrl": "https://lossless-group.github.io/context-v-corpus/sitemap-0.xml"
+  },
+  "githubFallback": {
+    "defaultBranch": "main"
+  }
+}
